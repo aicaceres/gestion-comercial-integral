@@ -12,6 +12,8 @@ use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\Factura;
 use VentasBundle\Form\FacturaType;
 use VentasBundle\Entity\FacturaElectronica;
+//PUNTO VENTA
+use VentasBundle\Form\PuntoVentaType;
 
 /**
  * @Route("/facturaVentas")
@@ -275,6 +277,28 @@ class FacturaController extends Controller {
         $hoy = new \DateTime();
         return new Response($content, 200, array('content-type' => 'application/pdf',
             'Content-Disposition' => 'filename=listado_ventas_facturas_' . $hoy->format('dmY_Hi') . '.pdf'));
+    }
+
+    /*
+     *  FACTURACION RAPIDA PUNTO DE VENTA
+     */
+
+    /**
+     * @Route("/newPuntoVenta", name="ventas_puntoventa_new")
+     * @Method("GET")
+     * @Template()
+     */
+    public function newPuntoVentaAction() {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura_new');
+        $entity = new Factura();
+        $form = $this->createForm(new PuntoVentaType(), $entity, array(
+            'action' => $this->generateUrl('ventas_factura_create'),
+            'method' => 'POST',
+        ));
+        return $this->render('VentasBundle:Factura:puntoventa.html.twig', array(
+                    'entity' => $entity,
+                    'form' => $form->createView(),
+        ));
     }
 
 }
