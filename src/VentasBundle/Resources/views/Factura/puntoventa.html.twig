@@ -1,0 +1,341 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Punto de Venta</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+{% include "AppBundle::notificacion.html.twig" %}
+<div id="form-punto-venta">
+   {{ form_start(form, {'attr': {'class': 'stdform'}}) }}     
+        <fieldset >
+           <div class="formrows">
+               <div class="two_fields">
+                {{ form_row(form.afipComprobante) }} 
+                {{ form_row(form.fechaFactura, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+            </div> 
+            <div class="two_fields nrofactura">                 
+                {{ form_row(form.afipPuntoVenta, { 'attr': {'class' : 'width50', 'maxlength':'5', 'title':'Punto de venta'} }) }} 
+                {{ form_widget(form.afipNroComprobante, { 'attr': {'class' : 'mininput','tabindex':'0','maxlength':'20', 'title':'N° de comprobante'} }) }}  
+            </div> 
+                      
+            {{ form_label(form.cliente) }}
+            {{ form_widget(form.cliente) }} 
+            
+             <div class="three_fields datoscliente" style="margin:0">
+                 <div style="width:28%"><label>CUIT:</label><span id="cuitcliente"></span></div>
+                 <div style="width:25%"><label style="float:none;">Condicion IVA:</label><span id="ivacliente"></span></div>
+                 <div><label style="float:none;">Domicilio:</label><span id="domcliente"></span></div>
+             </div>       
+             <div class="two_fields">
+                {{ form_row(form.condicionPago) }}  
+                {{ form_row(form.precioLista) }}  
+            </div>   
+             <div class="two_fields">
+                 {{ form_row(form.cae, { 'attr': {'class' : 'smallinput' } })  }}
+                 {{ form_row(form.caeVto, { 'attr': {'class' : 'datepicker' } })  }}
+            </div>   
+             <div class="three_fields">
+                 {{ form_row(form.facturadoDesde, { 'attr': {'class' : 'datepicker' } })  }}
+                 <div>
+                     {{ form_label(form.facturadoHasta,null, {'label_attr': {'style': 'float:none'} }) }}
+                    {{ form_widget(form.facturadoHasta, { 'attr': {'class' : 'datepicker' } })  }}
+                 </div>
+                 {{ form_row(form.pagoVto, { 'attr': {'class' : 'datepicker' } })  }}
+            </div>   
+            <input id="exento" type="hidden" value="0" />
+            </div>
+            <div style="padding-top: 20px; margin:auto; width: 100%;" id="divItems">
+                {{ form_errors(form.detalles) }}
+                <table cellpadding="0" cellspacing="0" border="0" class="factura stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="width:3%;">Nº</th>
+                            <th>Producto</th>
+                            <th style="width:8%;">Alícuota</th>
+                            <th style="width:12%;">Cant.</th>
+                            <th style="width:10%;" colspan="2">Bulto</th>
+                            <th style="width:10%;">Precio Unit.</th>
+                            <th style="width:10%;">IVA</th>                            
+                            <th style="width:10%;">SubTotal</th>                            
+                            <th style="width:3%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'VentasBundle:Factura:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                    {% for det in form.detalles %}
+                        <tr class="item" divdata="item_{{loop.index-1}}">
+                            <td class="ordTd"></td>
+                            <td class="prodTd">{{ form_widget(det.producto) }}</td>
+                             <td class="ivaTd"><span class="alicuota">{{det.vars.data.afipAlicuota}}</span><span class="hidden">{{ form_widget(det.afipAlicuota) }}</span></td>
+                            <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
+                              <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
+                            </td>
+                            <td class="bulto">{{ form_widget(det.bulto) }}</td>
+                            <td class="cantxBulto">{{ form_widget(det.cantidadxBulto) }}</td>
+                            <td class="precTd  alignright">
+                                <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
+                            </td>
+                            <td class="ivaTd alignright">{{ det.vars.data.getIva|number_format(2,'.','') }}</td>
+                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(2,'.','') }}</td>
+                            <td class="delTd" style="text-align:center;"></td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="7" style="text-align:right"> Totales</th>                            
+                            <th class="alignright" id="totaliva">{{ entity.iva}}</th>
+                            <th class="cktotal red alignright" id="total">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</th>
+                            <th style="text-align:center;">
+                                <a href="#" id="linkAdd" tabindex="0"  title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                            </th>
+                        </tr>                        
+                    </tfoot>
+                </table>   
+                       
+            </div>
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar " type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('ventas_factura')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
+  {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {    
+    //$slct = $('.select2').select2();
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+    $("#ventasbundle_factura_afipComprobante").change(function(){
+        $.getJSON( "{{path('get_afip_letra_comprobante')}}" ,{id: $(this).val() } , function( data ) {       
+            $('#ventasbundle_factura_tipoFactura').val(data.letra);             
+        });
+    });
+        
+   // $('#ventasbundle_factura_cliente_chzn').after('<span style="padding-left: 10px;top: -10px;position: relative;" id="cuitcliente"></span>');
+    $('[name*="cliente"]').change(function(){
+      if( $(this).val() ){
+        iva_old = $('#ivacliente').html();
+        $.get( "{{ path('get_datos_factura_cliente') }}",{id: $(this).val() } , function( data ) {
+            $('#cuitcliente').html(data.cuit);
+            if(data.valido){
+                    color = '#666';
+                }else{
+                    color = 'orangered';
+                    alert('EL CUIT NO ES VÁLIDO!!');
+                }
+            $('#cuitcliente').css('color',color);
+            $('#ivacliente').html(data.iva);
+            iva_new = $('#ivacliente').html();
+            $('#exento').val(data.exento);
+            $('#domcliente').html(data.domicilio);
+            $('[name*="condicionVenta"]').val(data.condvta);
+            // cambiar en afipcomprobante            
+            $('#ventasbundle_factura_afipComprobante option').filter(function(){
+                  return this.textContent.endsWith(data.tipofact)
+            }).prop('selected',true).trigger("liszt:updated");  
+            $('#ventasbundle_factura_afipComprobante').change();
+                                
+            if( ($('tbody tr.item').length > 0) && (iva_old!=iva_new) ){
+                actualizaTotales();
+            }                        
+        }, "json");
+      }
+    });    
+    $('[name*="cliente"]').change();
+    {% if not entity.id  %}
+        $('.nrofactura > div:first-of-type').css('width','22%');
+        $('.nrofactura > div:first-of-type > div').css('width','22%');
+    {% endif %}
+    $('.nrofactura > input').css('height','20px');
+    $('.nrofactura input').change(function(){ 
+            ptovta = $('#ventasbundle_factura_afipPuntoVenta');
+            ptovta.val( ptovta.val().padStart( 5 , '0')) ;            
+            nro = $('#ventasbundle_factura_afipPuntoVenta').val() + '-' + $('#ventasbundle_factura_afipNroComprobante').val();
+            $('#ventasbundle_factura_nroFactura').val(nro);            
+        });
+    $('.formrows input[type="text"]').css('height','20px');
+   
+    
+// Get the container who holds the collection
+    $collectionHolder = $('table.factura tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });
+    $collectionHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });    
+    $('#linkAdd').on('click', function(e) {
+        if( $('[name*="cliente"]').val()){
+            e.preventDefault();    
+            addNewItem();
+            e.stopPropagation();
+            $collectionHolder.find('.chzn-container').last().trigger('mousedown');
+        }else{
+            alert('Debe seleccionar un cliente para la facturación!');
+            return false;
+        }    
+    });    
+   $('[name*="producto"]').change(function(){ changeProducto( $(this) ); }); 
+   $('.cantTd input, .precTd input[type=text]').change(function(){ 
+       if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
+    $('#ventasbundle_factura_total').change( function(){
+        checknumero( $(this) );
+    });
+   $(document).keypress(function(e) {
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+    });
+    
+    $('.guardar').click(function() {
+        if( !$('#ventasbundle_factura_cliente').val() ){
+            alert('Debe seleccionar un Cliente');
+            return false;  
+        };        
+        if( $('tbody tr.item').length > 0 ){
+            if (!confirm('Confirma la registración?')) {
+               return false;
+            }                                   
+        }else{  alert('Debe ingresar items a la factura'); return false;}
+     
+    });
+   
+    $(".bulto input").change(function(){ changeBulto( $(this) );  });
+    $(".bulto input").each(function() {
+        changeBulto( $(this) );
+    });
+    
+    formPuntoVenta = document.querySelector('#form-punto-venta')
+    formItems = formPuntoVenta.querySelectorAll('a[href]:not([disabled]), button:not([disabled]), textarea:not([disabled]), input[type="text"]:not([disabled]), input[type="radio"]:not([disabled]), input[type="checkbox"]:not([disabled]), select:not([disabled])')
+    formItems.forEach(function (element) {        
+        $(element).addClass('myfocusable');            
+  });
+    
+    actualizaTotales();
+});    
+ // funciones personalizas para el formulario
+ function addNewItem() {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
+    jQuery('[name*="producto"]').last().chosen({no_results_text: "Sin resultados",search_contains: true});
+    jQuery('input').on('focus',function(){ jQuery(this).select(); });
+    jQuery('[name*="producto"]').last().change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery(".bulto input").last().uniform();
+    jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
+    jQuery('.cantTd input, .precTd input[type=text], .ivaTd input[type=text]').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            actualizaTotales();
+        }
+    });
+}
+function changeProducto(producto){    
+    var lista = jQuery('#ventasbundle_factura_precioLista').val();
+    jQuery.ajax({
+               url: "{{ path("get_data_producto_venta") }}",
+               //async:false,
+               dataType:"json",
+               data: 'prod='+ producto.val()+'&lista='+lista,
+               success: function(data) { 
+                   trIndex = producto.parent().parent();
+                   trIndex.find('.cantTd input').val('');
+                   trIndex.find('span.unidmed').html(data.unidmed);
+                   if(data.bulto){
+                       trIndex.find('span.unidmed').hide();
+                       trIndex.find('.cantxBulto input').val(data.cantxBulto);
+                   }else{
+                       trIndex.find('span.unidmed').show();
+                       trIndex.find('.cantxBulto input').val('');
+                   }
+                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   jQuery.uniform.update();
+                   trIndex.find('.precTd input').val(data.precio);
+                 //  var iva = ( parseFloat(data.precio) * parseFloat(data.iva))/100 ;
+                 //  trIndex.find('.ivaTd input').val(  (jQuery('#exento').val()==1)? 0 : iva.toFixed(2)  );                   
+                   trIndex.find('.ivaTd').find('.porciva').text( data.iva ) ;
+                   trIndex.find('.iva2Td [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);
+                   trIndex.find('.iva2Td .alicuota').text( trIndex.find('.iva2Td [name*="afipAlicuota"] option:selected').text() );
+                   actualizaTotales();
+                   trIndex.find('.cantTd input').select();
+               }
+           });
+}
+function changeBulto(item){ 
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+        var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
+        if( item.is(':checked') ){
+            unidmed.hide();
+            cantxbulto.prop('readonly',false);     
+            cantxbulto.css('color','#666');
+            cantxbulto.focus();
+        }else{
+           unidmed.show(); 
+           cantxbulto.prop('readonly',true);
+           cantxbulto.css('color','#fff');           
+        }   
+}
+function actualizaTotales(){
+        var Total=0, TotalIva=0;
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+           // cant = parseFloat(item.find('.cantTd input').val());
+           // prec = parseFloat(item.find('.precTd input[type=text]').val());
+            var cant =  checknumero( item.find('.cantTd input') ) ;
+            var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
+            //iva  = parseFloat(item.find('.ivaTd input').val());
+            if(jQuery('#exento').val()==1){
+                porciva = 0;
+                item.find('.iva2Td [name*="afipAlicuota"] option:contains(0.00)').prop('selected', true);                
+            }else{
+                porciva = parseFloat(item.find('.porciva').html());
+                item.find('.iva2Td [name*="afipAlicuota"] option:contains('+ item.find('.porciva').html() +')').prop('selected', true);
+            }
+            item.find('.iva2Td .alicuota').text( item.find('.iva2Td [name*="afipAlicuota"] option:selected').text() );
+            
+            //var porciva = (jQuery('#exento').val()==1) ? 0 : parseFloat(item.find('.porciva').html()); 
+            iva = ( prec * porciva)/100 ;
+           // if(cant && prec){
+                //calcular
+            //    band=1;
+                sbtotItm = (prec + iva) * cant;
+                sbtotIva = iva * cant;
+                Total += sbtotItm;
+                TotalIva += sbtotIva;
+                item.find('.totalTd').text( sbtotItm.toFixed(2));                
+                item.find('.ivaTd input').val( sbtotIva.toFixed(2));                
+            //}
+        });
+       // if( band ){
+           jQuery('#totaliva').text(TotalIva.toFixed(2));
+           jQuery('#total input').val(Total.toFixed(2));
+
+            $collectionHolder.find('.ordTd').each(function(index) {
+               jQuery(this).html(index+1);
+           }); 
+       // }
+    }  
+</script>{% endblock %}
