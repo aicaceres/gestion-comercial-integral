@@ -1,0 +1,543 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block page_stylesheets %}
+<style>
+    div.embarque > div{ display: inline-table; font-size: 0.9em; }
+    div.embarque > div:first-child{
+        width: 35%;
+    }    
+    div.embarque > div:last-child{
+        width: 60%; margin: 0 0 0 2%;
+    }    
+    div.embarque h4{
+        color: #32415A;
+        font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+        padding: 9px 10px;
+        font-size: 1.5em;
+    }
+    .carga{width:30px; }
+    .arrow{ font-weight:bold; text-align:center; color:#FF4500 !important; cursor: pointer; }
+    #pedidos tbody td.sorting_asc { 
+	background-image: url({{ asset('assets/images/sort_asc.png') }} ); background-repeat: no-repeat; background-position: center 3px; }
+    #pedidos tbody td.sorting_desc { 
+	background-image: url({{ asset('assets/images/sort_desc.png') }}); background-repeat: no-repeat; background-position: center 3px; }
+    #detemb table tr td select{ font-size:inherit; }
+        
+</style>{% endblock %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Despachos</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Nuevo Despacho de Mercaderías</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div style="padding-top: 10px; ">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        {{ form_errors(form) }}
+        <fieldset >            
+            <div class="three_fields">
+                <div><label>Nº despacho:</label>
+                    <input type="text" value="{{entity.nroDespacho}}" disabled="disabled" class="width100">
+                </div>
+                {{ form_row(form.despachoNro) }}  
+                {{ form_row(form.fechaDespacho, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+                {{ form_row(form.despachoEnviado,{'label': 'Registrar el envío ','label_attr':{'class':'infoicon' ,'style':'width:130px','title':'Hasta que no se marque el despacho no será visible por el Depósito Destino'},'attr': {'title':'Hasta que no se marque el despacho no será visible por el Depósito Destino'}  }) }}
+            </div>            
+            <div>
+                 {{ form_label(form.depositoOrigen,'Origen del despacho:') }}
+                 {{ form_widget(form.depositoOrigen, { 'attr': {'class' : 'mininput'} }) }}
+            </div>
+            <div class="three_fields">
+                <div>{{ form_label(form.unidadNegocio,'Destino del despacho:') }}   
+                {{ form_widget(form.unidadNegocio) }}   </div>
+                {{ form_row(form.depositoDestino) }} 
+                <div><a href="javascript:void(0)" class="btn btn2 btn_black btn_search radius50" style="margin-left: 20px;"><span>Buscar Pedidos</span></a></div>
+            </div>    
+              <div>
+                 {{ form_label(form.observDespacho,'Observaciones:') }}
+                 {{ form_widget(form.observDespacho, { 'attr': {'class' : 'mediuminput'} }) }}
+            </div>  
+            <div class="two_fields embarque">
+                <!-- Pedidos pendientes  -->
+                <div id="pedpend">
+                    
+                    {% include "AppBundle:Despacho:_partial-pendientes.html.twig" %}
+
+                </div>
+                <!-- Embarque -->    
+                <div id="detemb">
+                    <h4>DETALLE DE LA ORDEN DE DESPACHO</h4>
+                    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="detalle">
+                        <thead>
+                            <tr>
+                                <th class="head0" style="width:3%;">#</th>
+                                <th class="head0" style="width:38%">Producto</th>
+                                <th class="head0" style="width:10%">Stock</th>
+                                <th class="head0" style="width:18%">Cant.</th>
+                                <th class="head0" style="width:18%" colspan="2">Bulto</th>
+                                <th style="width:10%;">TOTAL</th>
+                                <th style="width:3%;">
+                                    <a href="javascript:void(0)" id="linkAdd" tabindex="0"  title="Agregar Items"><img src="{{asset('assets/images/icons/add.png')}}" /></a>                                    
+                                </th>
+                            </tr>
+                        </thead>                        
+                            
+                        <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Despacho:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                            {% for item in form.detalles %}
+                                <tr class="item" id="{% if item.vars.data.pedidoDetalle %}{{item.vars.data.pedidoDetalle.id}}{%endif%}" divdata="item_{{loop.index-1}}">
+                                    <td class="ordTd"></td>
+                                    <td class="prodTd">
+                                        <span class="prodSpan" > {{item.vars.data.producto}} </span>
+                                        {{form_widget(item.producto, { 'attr': {'style' : 'display:none'} })}}        
+                                        <a href="javascript:void(0)" style="display:block;" class="btnlote btn btn_info" title="Ver/Ocultar Lote"></a>
+                                        <div class="lote" style="display:none;">
+                                            {{ form_widget(item.lotes, { 'attr': {'class' : 'select2Lote' } }) }}      
+                                        </div>
+                                        <div style="display:none"> {{form_widget(item.pedidoDetalle)}} 
+                                            {{form_widget(item.orden)}}  {{form_widget(item.entregado)}}                                        
+                                        </div>      
+                                    </td>
+                                    <td class="stockTd alignright" {% if item.vars.data.stock<=0 %} style="color:red" {% endif %}> 
+                                        <span class="cantstk">{{item.vars.data.stock}}</span> <span class="unidmedstk">{{ item.vars.data.producto.unidadmedida.nombre}}</span> </td>
+                                    <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : ' width50 floatleft'} }) }} 
+                                        <span class="unidmed floatleft" style="padding-left: 5px; {% if item.vars.data.bulto %} display:none; {% endif %} ">{{ item.vars.data.producto.unidadmedida.nombre}}</span> </td>
+                                    <td class="bulto">{{ form_widget(item.bulto) }}</td>
+                                    <td class="cantxBulto">{{ form_widget(item.cantidadxBulto, { 'attr': {'class' : ' width50 floatleft'} }) }}</td>
+                                    <td class="totalTd alignright">{{item.vars.data.cantidadTxt}}</td>
+                                    <td class="delTd" style="text-align:center;"></td>
+                                </tr>
+                            {% endfor %}           
+                        </tbody>                            
+                         
+                    </table>     
+
+                </div>
+            </div>            
+
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('stock_despacho')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+      {{ form_end(form) }}
+</div>    
+
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {% include "AppBundle::block-deposito-js.html.twig" %} 
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($){
+
+    $('.togglemenu').click();
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    
+    // elimina los depósitos no autorizados
+    depositos = "[{{ app.session.get('depositos')|join(', ') }}]";
+    $('#appbundle_despacho_depositoOrigen option').each(function() {
+        
+        if ( depositos.search(  $(this).val() ) == -1 )  {
+            $(this).remove();
+        }
+    });    
+    // Previene submit al enter
+    $(document).on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+    });
+    
+    // Logica para manejo de detalle
+    $collectionHolder = $('#detalle tbody');
+    $collectionHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });
+    $collectionHolder.find('.delTd').each(function(i) {
+        if( !$(this).parent().attr('id') )
+          addItemFormDeleteLink($(this));  
+    });   
+        $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewItem();
+        e.stopPropagation();
+        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
+    }); 
+
+    // busca items con lote para mostrar el div
+    $collectionHolder.find('.lote').each(function(i) {
+        var div = $(this);
+        div.css('width','100%');
+        if( div.find('select').val() ){
+            div.show();
+        }
+    });
+    // logica para lotes
+    $(".btnlote").click(function(){ lotes( $(this) );  });
+    $('.select2Lote').select2({
+        placeholder: 'Seleccione un lote',
+        ajax: {
+          url: function (params) {
+            return  getUrlLotes( jQuery(this) );
+          },                  
+          dataType: 'json',
+          processResults: function (data) {
+            return {
+              results: data
+            };
+          },
+          cache: false
+        }
+      }
+    );
+    $('.select2.select2-container').css('width','100%');
+    
+    // funcionalidad buscar pendientes por depósito
+    $('.btn_search').on('click',function(){
+        form = 'appbundle_despacho[depositoOrigen]='+$('#appbundle_despacho_depositoOrigen').val()+
+                '&appbundle_despacho[depositoDestino]='+$('#appbundle_despacho_depositoDestino').val();
+        window.location.href= "{{ path('stock_despacho_new') }}?"+form ;
+    });
+    
+    // icono para abrir y cerrar pedidos pendientes
+    $('.arrow').toggle(
+      function(){
+        id=$(this).parent().data('pedid');        
+          $('.det_'+id).addClass('hiderow');
+          $(this).addClass('sorting_desc');
+          $(this).removeClass('sorting_asc');
+      },
+      function(){
+          id=$(this).parent().data('pedid');
+          $('.det_'+id).removeClass('hiderow');
+          $(this).removeClass('sorting_desc');
+          $(this).addClass('sorting_asc');
+      }      
+    );    
+    // check de pedidos pendientes
+    $(".cargar").change(function(){ 
+        var id = $(this).data('id');        
+        if( $(this).is(':checked') ){               
+            addNewItem(id);
+        }else{
+            if( confirm('Desea quitar este artículo del despacho?') ){
+                $('#'+id).remove();
+            }
+        }
+    });
+    //Select de productos
+   $(".chzn-select").change(function(){ changeProducto( $(this) ); }); 
+   // actualizar totales al cambiar cantidades
+   $('.cantTd input, .cantxBulto input').change(function(){ 
+       if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
+   
+    // cambio de depósito
+    $('[id^="appbundle_despacho_deposito"]').on('change',function(e){ 
+        if( $('#appbundle_despacho_depositoDestino').val() &&  $('#appbundle_despacho_depositoOrigen').val() ){
+            if( $('#appbundle_despacho_depositoOrigen').val() == $('#appbundle_despacho_depositoDestino').val() ){
+                alert('El depósito de origen no puede ser el mismo que el de destino');
+                return false;  
+            }else{
+                $('.btn_search').click();
+            }            
+    }            
+        /*if(confirm('Si modifica el depósito se volverán a buscar los pedidos y se perderá lo cargado!!!')){
+            $('.btn_search').click();
+        }else{ 
+            e.preventDefault();
+            return false; 
+        }*/
+    });
+    
+    // Submit de formulario
+    $('.guardar').click(function() {  
+        if( !$('#appbundle_despacho_depositoOrigen').val() ){
+            alert('Debe seleccionar un Depósito de origen para el despacho');
+            return false;  
+        };
+        if( !$('#appbundle_despacho_depositoDestino').val() ){
+            alert('Debe seleccionar un Depósito destino para el despacho');
+            return false;  
+        };
+        if( $('#appbundle_despacho_depositoOrigen').val() == $('#appbundle_despacho_depositoDestino').val() ){
+            alert('El depósito de origen no puede ser el mismo que el de destino');
+            return false;  
+        };        
+        if($('table td').hasClass('red')){
+            alert('Alguno de los productos exede el stock actual');
+            return false;
+        }
+        if (!confirm('Confirma la registración?')) {
+            return false;
+        }
+    });
+    // cambio de la opción bulto
+    $(".bulto input").change(function(){ changeBulto( $(this) );  });
+    $(".bulto input").each(function() {
+        changeBulto( $(this) );
+    });
+    
+    actualizaTotales();
+});
+function addNewItem(id) {    
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    $collectionHolder.find('.lote').last().css('width','100%');
+    $collectionHolder.find('.lote [id$="_lotes"]').last().html('<option></option>');   
+    if(id){
+        $collectionHolder.find('tr').last().attr('id',id);              
+        jQuery('#'+id).find('.prodTd [id$="_pedidoDetalle"]').val(id);
+        // obtener datos para cargar
+        jQuery.getJSON( "{{path("get_pedido_data")}}?id="+id, function( data ) {                
+            jQuery('#'+id).find(".prodTd .chzn-select").val(data.productoId).trigger("liszt:updated"); 
+            jQuery('#'+id).find('.prodTd [id$="_producto_chzn"]').hide();            
+            jQuery('#'+id).find(".prodSpan").html(data.nombre);
+            jQuery('#'+id).find(".stockTd .cantstk").html(data.stock);
+            if(data.stock<=0){
+               jQuery('#'+id).find(".stockTd").css('color','red'); 
+            }
+            jQuery('#'+id).find(".stockTd .unidmedstk").html(data.unidmed);
+            jQuery('#'+id).find(".unidmed").html(data.unidmed);
+            jQuery('#'+id).find(".cantTd input").val(data.cantidad);
+            jQuery('#'+id).find(".cantTd input").val(data.cantidad);            
+            if(data.bulto){
+                jQuery('#'+id).find(".unidmed").hide();
+                jQuery('#'+id).find(".cantxBulto input").val(data.cantidadxBulto);
+            }else{
+                jQuery('#'+id).find(".unidmed").show();
+                jQuery('#'+id).find(".cantxBulto input").val('');
+            }
+            jQuery('#'+id).find(".bulto input").prop('checked', data.bulto);   
+            jQuery.uniform.update();
+            
+           /* var lote_selector = jQuery('#'+id).find('.lote [id$="_lotes"]');
+                lote_selector.html('<option></option>');
+                var lotes = data.lotes;
+                if(lotes.length>0){
+                    for (var i = 0, total = lotes.length; i < total; i++) {
+                     lote_selector.append('<option value="' + lotes[i].id + '">' + lotes[i].name + '</option>');
+                    }
+                    jQuery('#'+id).find('.btnlote').show();                       
+                }else{
+                    jQuery('#'+id).find('.btnlote').hide();
+                    jQuery('#'+id).find('.lote').hide();
+                }
+            */
+            actualizaTotales();
+          });
+    }else{
+        addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    }
+    $collectionHolder.find(".btnlote").last().click(function(){ lotes( jQuery(this) );  });
+    //$collectionHolder.find('.select2').last().select2();
+    $collectionHolder.find('.select2Lote').last().select2({
+        placeholder: 'Seleccione un lote',
+        ajax: {
+          url: function (params) {
+            return  getUrlLotes( jQuery(this) );
+          },                  
+          dataType: 'json',
+          processResults: function (data) {
+            return {
+              results: data
+            };
+          },
+          cache: false
+        }
+      }
+    );
+    
+    $collectionHolder.find('.select2.select2-container').last().css('width','100%');
+    
+    jQuery(".chzn-select").last().chosen({no_results_text: "Sin resultados",search_contains: true});
+    jQuery('.chzn-container-single').css({minWidth: '90%', width: 'auto'});
+    
+    jQuery('input').on('focus',function(){ jQuery(this).select(); });
+    jQuery(".chzn-select").last().change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery(".bulto input").last().uniform();
+    jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
+    jQuery('.cantTd input, .cantxBulto input  ').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });   
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            actualizaTotales();
+        }
+    });
+}
+
+
+function changeProducto(producto){
+    jQuery.ajax({
+               url: "{{ path("get_data_producto") }}",
+               async:false,
+               dataType:"json",
+               data: 'prod='+ producto.val()+'&dep='+jQuery('#appbundle_despacho_depositoOrigen').val(),
+               success: function(data) { 
+                   trIndex = producto.parent().parent();
+                   //limpiar lotes
+                   var lote_selector = trIndex.find('.lote [id$="_lotes"]');
+                   lote_selector.val("-1").trigger("change");  
+                   
+                   trIndex.find(".stockTd .cantstk").html(data.stock);
+                   if(data.stock<=0){
+                       trIndex.find(".stockTd").css('color','red'); 
+                    }else{
+                        trIndex.find(".stockTd").css('color','inherit'); 
+                    }
+                   trIndex.find(".stockTd .unidmedstk").html(data.unidmed);                   
+                   trIndex.find('.cantTd input').val(1);
+                   trIndex.find('span.unidmed').html(data.unidmed);
+                   if(data.bulto){
+                       trIndex.find('span.unidmed').hide();
+                       trIndex.find('.cantxBulto input').val(data.cantxBulto);
+                   }else{
+                       trIndex.find('span.unidmed').show();
+                       trIndex.find('.cantxBulto input').val('');
+                   }
+                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   jQuery.uniform.update();
+                   trIndex.find('.cantTd input').focus();
+                   /*
+                   var lote_selector = trIndex.find('.lote [id$="_lotes"]');
+                   lote_selector.html('<option></option>');
+                   var lotes = data.lotes;
+                    if(lotes.length>0){
+                        for (var i = 0, total = lotes.length; i < total; i++) {
+                         lote_selector.append('<option value="' + lotes[i].id + '">' + lotes[i].name + '</option>');
+                        }
+                        trIndex.find('.btnlote').show();                       
+                    }else{
+                        trIndex.find('.btnlote').hide();
+                        trIndex.find('.lote').hide();
+                    }
+                   */
+               }
+           });
+    actualizaTotales();       
+}
+
+function actualizaTotales(){
+        var cantTot=0;
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+            cant = parseFloat(item.find('.cantTd input').val());
+            if( item.find('.bulto input').prop('checked') )
+                cant = cant *  parseFloat(item.find('.cantxBulto input').val());            
+            //actualizar total
+            item.find('.totalTd').text( cant.toFixed(3) +' '+ item.find('span.unidmed').html() );
+        });
+        
+         $collectionHolder.find('.ordTd').each(function(index) {
+            jQuery(this).html(index+1);
+        });
+    }
+
+function changeBulto(item){    
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+    var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
+    if( item.is(':checked') ){
+        unidmed.hide();
+        cantxbulto.prop('readonly',false);     
+        cantxbulto.css('color','#666');
+        if( cantxbulto.val()=='' )
+            cantxbulto.val(1);
+        cantxbulto.focus();
+    }else{
+       unidmed.show(); 
+       cantxbulto.prop('readonly',true);
+       cantxbulto.css('color','#fff');           
+    }
+    actualizaTotales();    
+}
+
+function  updateArrayDespacho(id, prod, cant) {
+    alert('a');
+    console.log($arrayEmbarque);
+    len = $arrayEmbarque.length;
+    pos = -1;
+    i = 0;
+    while (i < len ){
+            pos = ( $arrayEmbarque[i].prodId == id ) ? i : -1 ;
+            if(pos>-1) break;
+            i++;
+    }
+    if(pos == -1 && cant>0){
+       //no existe todavia
+       $arrayEmbarque.push({ prodId: id, prodTxt: prod, cant: cant });  
+    }else{
+       // contar cuantos hay del producto y actualizar
+       tot = 0;
+       band = false;
+       jQuery('.items').each(function() {
+           prodId = jQuery(this).find('.prod').val();
+           if( prodId == id ){
+               tot += parseFloat( jQuery(this).find('.carga').val() );
+               band = true;
+           }                
+       });
+       if(tot==0 && band ){ $arrayEmbarque.splice(pos, 1); }
+       else{ 
+           $arrayEmbarque[pos].cant = tot; 
+       }
+    }
+    jQuery('#detalle tbody tr').remove();
+    total=0;
+     res = $arrayEmbarque.every(function(element) {
+        // obtener stock del producto 
+        td = '<td  class="con0">'+element.prodTxt+'</td>';
+        stock='';
+        jQuery.ajax({
+                    url: "{{ path('get_stock_producto_deposito') }}",
+                    data: 'id='+element.prodId+'&dep='+jQuery('[name*="depositoOrigen"]').val(),
+                    async:false,
+                    success: function(data) {
+                        if (data) {
+                            if(data<element.cant) stock='red';
+                            td += '<td>'+data+'</td>';
+                        }else td += '<td>0</td>';
+                    }, error: function() {
+                        td += '<td>0</td>';
+                    }
+                });
+        td += '<td class=" '+stock+'">'+element.cant+'</td>';
+        tr = '<tr>'+ td +'</tr>';
+        jQuery('#detalle tbody').append(tr);
+        total += parseFloat(element.cant);
+        return true;
+    });
+    jQuery('#total').html(total);    
+}
+
+function lotes( item ){
+    var lote = item.next('.lote');
+    if(item.parent().find('[name*="producto"]').val()){
+      lote.toggle();  
+      if( !lote.is(":visible")){
+          lote.find('[name*="lotes"]').val("-1").trigger("change");
+          lote.find('[name*="lotes"]').attr('required',false);
+    //  }else{
+    //      lote.find('[name*="lotes"]').attr('required',true);
+      }
+    }
+}
+function getUrlLotes(item){
+    var prod = item.parent().parent().find('[name*="producto"]').val();
+    return '{{ path('select_lotes') }}?prodid='+prod;
+}
+</script>
+{% endblock %}

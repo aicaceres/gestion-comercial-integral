@@ -1,0 +1,49 @@
+<style>
+    #tableNotif{ font-size: 10px;}
+    #tableNotif thead th,#tableNotif tfoot th { padding: 4px 10px;}
+    #tableNotif img.ver { margin:8px 0 4px; }
+    .closeNotif{ margin: 10px; float: right;}
+</style>
+<button class="stdbtn closeNotif" type="button">X</button>
+<div class="contenttitle2" style="margin:10px;">
+    <h3>Compras - Pedidos Pendientes</h3>
+</div>
+<div style="padding: 10px; text-align: center;">
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="tableNotif">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Entrega Estimada</th>
+                <th>Proveedor</th>
+                <th>Monto</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set monto = 0 %}
+    {% for ped in pedidos %}
+        <tr>
+            <td>{{ped.fechaPedido|date('d-m-Y')}}</td>
+            <td>{{ped.fechaEntrega|date('d-m-Y')}}</td>
+            <td class="alignleft" >{{ped.proveedor}}</td>
+            <td class="alignright">$ {{ ped.getCostoTotal|number_format(3,'.',',') }}</td>
+            <td><a href="{{ path('compras_pedido_edit', { 'id': ped.id }) }}" title="Ver Pedido" >
+                    <img class="ver" src="{{ asset('assets/images/icons/add.png') }}" />
+                </a>
+            </td>
+        </tr>
+        {% set monto = monto + ped.getCostoTotal %}
+    {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" class="alignright" >Total</th>
+                <th class="alignright"> $ {{ monto|number_format(3,'.',',') }} </th>
+                <th class="aligncenter"><a href="{{ path('compras_pedido') }}" title="Ver Todos" >
+                    <img style="margin-top:4px;" src="{{ asset('assets/images/icons/folder.png') }}" />
+                </a></th>
+            </tr>
+        </tfoot>
+    </table>
+    <br>
+</div>

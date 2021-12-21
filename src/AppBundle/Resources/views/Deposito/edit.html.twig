@@ -1,0 +1,72 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Depósitos</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nuevo Depósito' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+                <p>
+        {{ form_label(form.nombre) }}
+        {{ form_widget(form.nombre, { 'attr': {'class' : 'smallinput capitalize' } }) }}
+        {{ form_errors(form.nombre) }}
+                </p>
+                <p>
+        {{ form_label(form.direccion) }}
+        {{ form_widget(form.direccion, { 'attr': {'class' : 'mediuminput capitalize' } })  }}
+        {{ form_errors(form.direccion) }}    
+                </p>
+                <p>
+        {{ form_label(form.telefono) }}
+        {{ form_widget(form.telefono, { 'attr': {'class' : 'mininput' } })  }}
+        {{ form_errors(form.telefono) }}    
+                </p>
+                            
+                <div class="locate">
+        {{ form_row(form.pais, { 'attr': {'class' : 'uniformselect'  } }) }}   
+        {{ form_row(form.provincia, { 'attr': {'class' : 'uniformselect'  } }) }}   
+        {{ form_row(form.localidad, { 'attr': {'class' : 'uniformselect'  } }) }}   
+                </div>           
+                <div class="two_fields">
+            {{ form_row(form.central) }}                                         
+            <div class="pordefecto">{{ form_row(form.pordefecto) }}   </div>
+            </div>
+                <div class="two_fields">
+            {{ form_row(form.activo) }}
+            </div>
+
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('sistema_deposito')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+    </form>
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %} 
+{% include "AppBundle::block-locate-js.html.twig" %} 
+<script type="text/javascript">
+jQuery(document).ready(function($) { 
+    $('#appbundle_deposito_central').change(function(){
+        if( $(this).prop('checked') ){
+            $('.pordefecto').show();
+         }else{  
+           $('#appbundle_deposito_pordefecto').prop('checked',false);  
+           $.uniform.update();
+           $('.pordefecto').hide();  
+         }
+    });
+    $('#appbundle_deposito_central').change();
+});
+</script>  
+{% endblock %}

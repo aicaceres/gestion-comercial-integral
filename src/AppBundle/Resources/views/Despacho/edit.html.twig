@@ -1,0 +1,490 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block page_stylesheets %}
+<style>            
+    #detemb table tr td select{ font-size:inherit; }       
+</style>{% endblock %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Despachos</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Nuevo Despacho de Mercaderías</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div style="padding-top: 10px; ">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        {{ form_errors(form) }}
+        <fieldset > 
+            <div class="three_fields">
+                <div><label for="nroDespacho">Nº despacho:</label>
+                    <input type="text" value="{{entity.nroDespacho}}" disabled="disabled" class="width100">
+                </div>
+               {{ form_row(form.fechaDespacho, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+                {{ form_row(form.despachoEnviado,{'label': 'Registrar el envío ','label_attr':{'class':'infoicon' ,'style':'width:130px','title':'Hasta que no se marque el despacho no será visible para el Depósito Destino'},'attr': {'title':'Hasta que no se marque el despacho no será visible por el Depósito Destino'}  }) }}
+            </div>                      
+            <div>
+                 {{ form_label(form.depositoOrigen,'Origen del despacho:') }}
+                 {% if entity.desdePedido %}
+                     <input type="text" value="{{entity.depositoOrigen.empresaUnidadDeposito}}" disabled="disabled" class="smallinput">
+                 {% else %}    
+                 {{ form_widget(form.depositoOrigen, { 'attr': {'class' : 'mininput'} }) }}
+                 {%endif%}
+            </div>
+            <div class="two_fields">
+                <div>{{ form_label(form.unidadNegocio,'Destino del despacho:') }}   
+                 {% if entity.desdePedido %}
+                     <input type="text" value="{{entity.unidadNegocio.empresaUnidad}}" disabled="disabled" class="smallinput">
+                 {% else %}    
+                    {{ form_widget(form.unidadNegocio) }} 
+                 {%endif%}                  
+                </div>
+                <div>
+                {{ form_label(form.depositoDestino) }} 
+                 {% if entity.desdePedido %}
+                     <input type="text" value="{{entity.depositoDestino.nombre}}" disabled="disabled" class="smallinput">
+                 {% else %}    
+                    {{ form_widget(form.depositoDestino) }} 
+                 {%endif%}     
+                
+                </div>
+            </div>    
+              <div>
+                 {{ form_label(form.observDespacho,'Observaciones:') }}
+                 {{ form_widget(form.observDespacho, { 'attr': {'class' : 'mediuminput'} }) }}
+            </div>  
+            <a href="javascript:void(0)" class="btn btn2 btn_black btn_search radius50" style="float:right;margin-left: 20px;"><span>Pedidos Pendientes</span></a>
+                <!-- Detalle -->    
+                <div id="detemb">
+                    <h4 style="margin:10px">DETALLE DE LA ORDEN DE DESPACHO</h4>
+                    <table style="width:90%;margin: 0 auto;" cellpadding="0" cellspacing="0" border="0" class="stdtable" id="detalle">
+                        <thead>
+                            <tr>
+                                <th class="head0" style="width:3%;">#</th>
+                                <th class="head0">Producto</th>
+                                <th style="width:12%;">Solicitado</th>
+                                <th style="width:12%;">Cantidad</th>
+                                <th style="width:12%;">TOTAL</th>
+                                <th style="width:1%;" colspan="2"></th>
+                            </tr>
+                        </thead> 
+                        <tbody>
+                            {% for item in entity.detalles %}
+                                {% include "AppBundle:Despacho:tr_item_despacho.html.twig" %}                                
+                            {% endfor %}           
+                        </tbody>                            
+                        <tfoot>
+                            <tr>
+                                <th colspan="5"></th>
+                                <th colspan="2" style="text-align:center;">
+                                    <a href="javascript:void(0)" id="linkAdd" data-url="{{path('stock_render_item_despacho')}}" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                                </th>
+                            </tr>
+                        </tfoot>
+                    </table>     
+
+                </div>
+           
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('stock_despacho')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+      {{ form_end(form) }}
+</div>    
+
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {% include "AppBundle::block-deposito-js.html.twig" %} 
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.16/datatables.min.js"></script>
+<link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/css/dataTables.checkboxes.css" rel="stylesheet" />
+<script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($){
+
+  //  $('.togglemenu').click();
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('#detalle').find('.ordTd').each(function(index) {
+        $(this).html(index+1);
+    });
+    // elimina los depósitos no autorizados
+    depositos = "[{{ app.session.get('depositos')|join(', ') }}]";
+    $('#appbundle_despacho_depositoOrigen option').each(function() {        
+        if ( depositos.search(  $(this).val() ) == -1 )  {
+            $(this).remove();
+        }
+    });    
+    // Previene submit al enter y evento en el +
+    $(document).keypress(function(e) {
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+        if(e.which == 13){
+            $('.additem').click();
+        }
+    });
+    // quitar items al detalle
+    $(document).on('click','.delTd', function(e) {
+        var res = true;
+        res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            id = $(this).data('id');
+            tr = $(this).parent().parent();
+          // Eliminar item
+          $.post( "{{path('stock_item_despacho_delete')}}" , {'id':id},function(data){
+            if(data==='OK'){
+                // eliminar de la tabla
+                tr.remove();
+                //reordenar nros
+                $('#detalle').find('.ordTd').each(function(index) {
+                  $(this).html(index+1);
+                });
+            }else{
+                alert( 'error '+data.msg );
+            }
+        } ).fail(function() {
+           alert( "No se ha podido eliminar el item. Intente nuevamente." );
+         });
+        }
+    });    
+ // EDITAR ITEM    
+    $(document).on('click','.editTd',function(){
+        var partialurl =  $(this).data('url'); 
+        var actionurl = $(this).data('actionurl'); 
+        var tr = $(this).parent().parent();
+        $('#popup').dialog('open');
+        $('#popup')
+            .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
+            .load(partialurl, function() {
+                var form = $("[name='appbundle_despachodetalle']");
+                var prod = form.find("#appbundle_despachodetalle_producto");
+                prod.chosen({no_results_text: "Sin resultados", search_contains: true});               
+                prod.prop('disabled', true).trigger("liszt:updated");
+                
+                form.find("#appbundle_despachodetalle_bulto").uniform();
+                form.find("#appbundle_despachodetalle_bulto").change(function () {
+                    changeBulto($(this));
+                });
+                form.find("#appbundle_despachodetalle_bulto").change();
+                var lote_selector = form.find('#appbundle_despachodetalle_lotes');
+                lote_selector.chosen({no_results_text: "Sin resultados",placeholder_text_multiple:"Seleccionar..",search_contains: true});
+                form.find('#appbundle_despachodetalle_lotes_chzn,#appbundle_despachodetalle_producto_chzn').css('width','400px');
+              })
+            .dialog({
+            modal: true, autoOpen: true, title: 'Editar item del despacho',width: '50%', minHeight: 200,
+            buttons: [{text: "Modificar", class: 'closePopup additem',
+                    click: function() { 
+                        var form = $("[name='appbundle_despachodetalle']");  
+                        if(!form.find("#appbundle_despachodetalle_cantidad").val()){
+                            alert('Debe ingresar una cantidad!');
+                            form.find("#appbundle_despachodetalle_cantidad").focus();
+                            return false;
+                        }
+                        if(form.find("#appbundle_despachodetalle_bulto").is(':checked') && !form.find("#appbundle_despachodetalle_cantidadxBulto").val()){
+                            alert('Si indica por bulto debe ingresar una cantidad!');
+                            form.find("#appbundle_despachodetalle_cantidadxBulto").focus();
+                            return false;
+                        }
+                        // quitar disable antes de enviar
+                        form.find("#appbundle_despachodetalle_producto").prop('disabled', false).trigger("liszt:updated");
+                        // guardar item en detalle 
+                         $.post( actionurl , form.serialize(),function(data){
+                             if(data.msg==='OK'){
+                                 // reemplazar en la tabla
+                                 tr.replaceWith(data.tr);
+                                //reordenar nros
+                                $('#detalle').find('.ordTd').each(function(index) {
+                                  $(this).html(index+1);
+                                });
+                            } else {
+                                alert('error ' + data.msg);
+                            }
+                            }).fail(function () {
+                                alert("No se ha podido guardar el item. Intente nuevamente.");
+                            }, "json");
+
+                            $(this).dialog("destroy");
+                        }}]
+            });
+        });  
+ // AGREGAR NUEVO ITEM   
+    $('#linkAdd').on('click',function(){
+        var partialurl =  $(this).data('url');    
+        $('#popup').dialog('open');
+        $('#popup')
+            .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
+            .load(partialurl, function() {
+                var form = $("[name='appbundle_despachodetalle']");
+                form.find('#despachoid').val('{{entity.id}}');
+                var prod = form.find("#appbundle_despachodetalle_producto");
+                prod.chosen({no_results_text: "Sin resultados", search_contains: true});
+                prod.change(function () {
+                    changeProducto($(this));
+                });
+                form.find("#appbundle_despachodetalle_bulto").uniform();
+                form.find("#appbundle_despachodetalle_bulto").change(function () {
+                    changeBulto($(this));
+                });
+                var lote_selector = form.find('#appbundle_despachodetalle_lotes');
+                //lote_selector.html('<option></option>');
+                lote_selector.chosen({no_results_text: "Sin resultados",placeholder_text_multiple:"Seleccionar..",search_contains: true});
+                form.find('#appbundle_despachodetalle_lotes_chzn').css('width','400px');
+                form.find('#appbundle_despachodetalle_producto_chzn').trigger('mousedown');
+              })
+            .dialog({
+            modal: true, autoOpen: true, title: 'Agregar item al despacho',width: '50%', minHeight: 200,
+            buttons: [{text: "Agregar", class: 'closePopup additem',
+                    click: function() { 
+                        var form = $("[name='appbundle_despachodetalle']");  
+                        if(!form.find("#appbundle_despachodetalle_producto").val()){
+                            alert('Debe ingresar un producto!');
+                            form.find('.chzn-container').last().trigger('mousedown');
+                            return false;
+                        }
+                        if(!form.find("#appbundle_despachodetalle_cantidad").val()){
+                            alert('Debe ingresar una cantidad!');
+                            form.find("#appbundle_despachodetalle_cantidad").focus();
+                            return false;
+                        }
+                        if(form.find("#appbundle_despachodetalle_bulto").is(':checked') && !form.find("#appbundle_despachodetalle_cantidadxBulto").val()){
+                            alert('Si indica por bulto debe ingresar una cantidad!');
+                            form.find("#appbundle_despachodetalle_cantidadxBulto").focus();
+                            return false;
+                        }
+                        // guardar item en detalle 
+                         $.post( "{{path('stock_item_despacho_create')}}" , form.serialize(),function(data){
+                             if(data.msg==='OK'){
+                                 // insertar en la tabla
+                                $('#detalle tbody').append(data.tr); 
+                                //reordenar nros
+                                $('#detalle').find('.ordTd').each(function(index) {
+                                  $(this).html(index+1);
+                                });
+                            } else {
+                                alert('error ' + data.msg);
+                            }
+                            }).fail(function () {
+                                alert("No se ha podido guardar el item. Intente nuevamente.");
+                            }, "json");
+
+                            $(this).dialog("destroy");
+                        }}]
+            });
+        });    
+ 
+    
+    // funcionalidad buscar pendientes por depósito
+    $('.btn_search').on('click',function(){
+        var origen = $('#appbundle_despacho_depositoOrigen').val();        
+        var destino = $('#appbundle_despacho_depositoDestino').val();        
+        if(destino){
+            var url = "{{path('stock_render_pedidos_pendientes')}}?origen="+origen+"&destino="+destino ;    
+            $('#popup').dialog('open');
+            $('#popup')
+                .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
+                .load(url , function() { 
+                        var oTable = $('#dyntable2').dataTable({
+                            'columnDefs': [
+                                {
+                                    'targets': 'nosort',
+                                    'orderable': false
+                                 },
+                                {
+                                   'targets': 0,
+                                   'checkboxes': {
+                                        'selectRow': true
+                                     }
+                                   }
+                             ],
+                             'select': 'multi',
+                             'order': [[2, 'asc']],
+                             "sPaginationType": "full_numbers",
+                             "bRetrieve" : true,
+                             "oLanguage": {
+                                "oPaginate": {
+                                    "sFirst": "<<",
+                                    "sNext": ">",
+                                    "sLast": ">>",
+                                    "sPrevious": "<"
+                                },
+                                "sLengthMenu": "Mostrar _MENU_ registros ",
+                                "sZeroRecords": "Sin datos",
+                                "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                                "sInfoEmpty": "Sin coincidencias",
+                                "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                                "sSearch": "Buscar:",
+                                select: {
+                                    rows: "%d seleccionados"
+                                }
+                            }
+                        });
+            
+                      })
+                .dialog({
+                    autoOpen: true, title: 'Pedidos Pendientes de Entrega',width: '80%',modal: true,  
+            position: ['middle',50],
+                    buttons: [{text: "Agregar Items", class: 'closePopup',
+                            click: function() { 
+                                var oTable = $('#dyntable2').dataTable();
+                                var rows_selected = oTable.api().column(0).checkboxes.selected();
+                                if( confirm( 'Confirma agregar '+rows_selected.length+' artículos al pedido?' )  ){  
+                                    formped = $('#selecteds');
+                                    formped.append(
+                                            $('<input>').attr('type', 'hidden').attr('name', 'cantitems')
+                                               .val(rows_selected.length)
+                                    );
+                                    formped.append(
+                                            $('<input>').attr('type', 'hidden').attr('name', 'despachoid')
+                                               .val('{{entity.id}}')
+                                    );
+                                    $.each(rows_selected, function(index, rowId){
+                                        formped.append(
+                                            $('<input>')
+                                               .attr('type', 'hidden')
+                                               .attr('name', 'items[]')
+                                               .val(rowId)
+                                        );
+                                    });
+                                    
+                                    // guardar item en detalle 
+                                    $.post( "{{path('stock_item_despacho_addpedidos')}}" , formped.serialize(),function(data){
+                                        if(data.msg==='OK'){
+                                            // insertar en la tabla                                       
+                                           $('#detalle tbody').append(data.tr); 
+                                           //reordenar nros
+                                           $('#detalle').find('.ordTd').each(function(index) {
+                                             $(this).html(index+1);
+                                           });
+                                       } else {
+                                           alert('error ' + data.msg);
+                                       }
+                                       }).fail(function () {
+                                           alert("No se han podido cargar los items. Intente nuevamente.");
+                                       }, "json");                                                                        
+                                       $(this).dialog("destroy");
+                                }
+                                 
+                            }}]
+            });               
+            $('#popup').dialog( "option", "modal", true );
+
+        }else{ alert('Debe indicar un depósito destino.'); }        
+    });
+    
+    // icono para abrir y cerrar pedidos pendientes
+ /*   
+    // check de pedidos pendientes
+    $(".cargar").change(function(){ 
+        var id = $(this).data('id');        
+        if( $(this).is(':checked') ){               
+            addNewItem(id);
+        }else{
+            if( confirm('Desea quitar este artículo del despacho?') ){
+                $('#'+id).remove();
+            }
+        }
+    });
+   */
+  
+    // cambio de depósito
+  $('[id^="appbundle_despacho_deposito"]').on('change',function(e){        
+        if( $('#appbundle_despacho_depositoDestino').val() &&  $('#appbundle_despacho_depositoOrigen').val() ){
+            if( $('#appbundle_despacho_depositoOrigen').val() == $('#appbundle_despacho_depositoDestino').val() ){
+                alert('El depósito de origen no puede ser el mismo que el de destino');
+                return false;  
+            }           
+        }            
+    });
+    
+    // Submit de formulario
+    $('.guardar').click(function() {  
+        if( !$('#appbundle_despacho_depositoOrigen').val() ){
+            alert('Debe seleccionar un Depósito de origen para el despacho');
+            return false;  
+        };
+        if( !$('#appbundle_despacho_depositoDestino').val() ){
+            alert('Debe seleccionar un Depósito destino para el despacho');
+            return false;  
+        };
+        if( $('#appbundle_despacho_depositoOrigen').val() == $('#appbundle_despacho_depositoDestino').val() ){
+            alert('El depósito de origen no puede ser el mismo que el de destino');
+            return false;  
+        };        
+        if( $('#appbundle_despacho_despachoEnviado').is(':checked')){
+            if( $('tbody tr.item').length > 0 ){
+                if (!confirm('Confirma el envío del despacho y la salida de la mercadería del stock?')) {
+                    return false;
+                }
+            }else{
+                alert('Debe ingresar items al despacho para enviar!'); return false;
+            }
+        }
+    });
+});
+
+function changeProducto(producto) {
+    var form = jQuery("[name='appbundle_despachodetalle']");
+    form.find('.loaders').show();
+    form.find('#appbundle_despachodetalle_cantidad').val('');
+    form.find('#appbundle_despachodetalle_bulto').prop('checked', 0);
+    jQuery.uniform.update();
+    form.find('#appbundle_despachodetalle_cantidadxBulto').val('');
+    form.find(".unidmed").hide();        
+    jQuery.ajax({
+        url: "{{ path("get_data_producto") }}",
+        //async:false,
+        dataType: "json",
+        data: 'prod=' + producto.val() + '&dep=' + jQuery('#appbundle_despacho_depositoOrigen').val(),
+        success: function (data) {
+            form.find('#appbundle_despachodetalle_cantidad').val(1);
+            form.find('.unidmed').text(data.unidmed);
+            if (data.bulto) {
+                form.find('#unidmed_bulto').show();
+                form.find('#appbundle_despachodetalle_cantidadxBulto').val(data.cantxBulto);
+            } else {
+                form.find('#unidmed_unidad').show();
+                form.find('#appbundle_despachodetalle_cantidadxBulto').val('');
+            }
+            form.find('#appbundle_despachodetalle_bulto').prop('checked', data.bulto);
+            jQuery.uniform.update();
+          // cargar lotes
+            var lote_selector = form.find('#appbundle_despachodetalle_lotes');
+            lote_selector.html('<option></option>');
+            var lotes = data.lotes;
+            if(lotes.length>0){
+                for (var i = 0, total = lotes.length; i < total; i++) {                        
+                 lote_selector.append('<option value="' + lotes[i].id + '">' + lotes[i].name + '</option>');
+                }                
+           }
+           lote_selector.trigger("liszt:updated");
+            form.find('.loaders').hide();
+            form.find('#appbundle_despachodetalle_cantidad').focus();                
+        }
+    });
+}
+function changeBulto(item) {
+    var form = jQuery("[name='appbundle_despachodetalle']");
+    form.find(".unidmed").hide();
+    var cantxbulto = form.find('#appbundle_despachodetalle_cantidadxBulto');
+    if (item.is(':checked')) {
+        form.find('#unidmed_bulto').show();
+        cantxbulto.prop('readonly', false);
+        cantxbulto.css('color', '#666');
+        if (cantxbulto.val() == '')
+            cantxbulto.val(1);
+        cantxbulto.focus();
+    } else {
+        form.find('#unidmed_unidad').show();
+        cantxbulto.prop('readonly', true);
+        cantxbulto.css('color', '#fff');
+    }
+}
+</script>
+{% endblock %}

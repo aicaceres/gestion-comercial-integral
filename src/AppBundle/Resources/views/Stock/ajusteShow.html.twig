@@ -1,0 +1,58 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Ajustes de Stock</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    <form action="#" method="post" class="stdform">
+        <fieldset >
+            <div class="two_fields">
+                <div><label for="fecha">Fecha Ajuste:</label>
+                    <input type="text" value="{{entity.fecha|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+                <div><label for="deposito">Depósito:</label>
+                    <input type="text" value="{{entity.deposito}}" disabled="disabled" class="width100">
+                </div>
+            </div> 
+            <p><div><label for="detalle">Observaciones:</label>
+                <textarea class="mediuminput" disabled="disabled">{{entity.observaciones}}</textarea>
+                </div></p> 
+            <div style="padding-top: 20px; margin-left: 50px; width: 90%;" id="divItems">
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="width:3%;"></th>
+                            <th style="width:40%;">Producto</th>
+                            <th style="width:7%; font-size:1.3em;">+ / -</th>
+                            <th style="width:15%;">Cantidad</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in entity.detalles %}
+                        <tr class="item">
+                            <td class="aligncenter">{{loop.index}}</td>
+                            <td>{{item.producto}} 
+                                {{item.lotesTxt|raw}}   
+                            </td>
+                            <td class="alignright ">{{item.signo}}</td>
+                            <td class="alignright">{{item.cantidadTxt }}</td>
+                            <td>{{ item.motivo }}</td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                </table>    
+            </div>                
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <a class="cancelar" type="button" href="{{ path('stock_ajuste')}}">Volver</a>
+            </div>
+        </fieldset>
+    </form>
+</div>    
+</div>
+{% endblock %}

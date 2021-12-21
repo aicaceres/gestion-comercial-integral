@@ -1,0 +1,76 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pedidos Interdepósitos</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Pedido Nº: {{ entity.nroPedido}}</h1>
+<div class="divEdicion">
+    <form action="#" method="post" class="stdform">
+        <fieldset >
+            <div>
+                 <div><label for="depositoOrigen">Origen del Pedido:</label>
+                    <input type="text" value="{{entity.depositoOrigen}}" disabled="disabled" class="mininput">
+                </div>
+            </div>
+            <div class="two_fields">
+                <div><label for="unidadNegocio">Destino del Pedido:</label>
+                    <input type="text" value="{{entity.depositoDestino.unidadNegocio.empresaUnidad}}" disabled="disabled" class="width200">
+                </div>
+                <div><label for="depositoDestino">Depósito:</label>
+                    <input type="text" value="{{entity.depositoDestino}}" disabled="disabled" class="smallinput">
+                </div>
+            </div>     
+            <div class="two_fields">
+                <div><label for="nroPedido">Nº pedido:</label>
+                    <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
+                </div>
+                <div><label for="fechaPedido">Fecha Pedido:</label>
+                    <input type="text" value="{{entity.fechaPedido|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div> 
+            <div class="two_fields">
+                <div><label for="nroPedido">Fecha Entrega:</label>
+                    <input type="text" value="{% if entity.fechaEntrega %}{{entity.fechaEntrega|date('d/m/Y')}}{% endif %}" disabled="disabled" class="width100">
+                </div>
+                <div><label for="appbundle_pedido_estado">Estado:</label>
+                <input value="{{entity.estado}}" disabled="disabled" class="width100" type="text">
+                </div>
+            </div> 
+            <div style="padding-top: 20px; margin-left: 50px; width: 90%;">
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th class="head1" style="width:5%;">Nº</th>
+                            <th class="head1">Producto</th>
+                            <th style="width:10%;cursor:pointer" title="Stock al momento de realizar el pedido">Stock <sup style="color:red;font-weight:bold;">*</sup></th>
+                            <th style="width:15%;">Cantidad</th>
+                            <th style="width:15%;">Despachado</th>
+                            <th style="width:15%;">Entregado</th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="" >
+                    {% for det in entity.detalles %}
+                        <tr>
+                            <td>{{loop.index}}</td>
+                            <td>{{det.producto.codigoNombre}}</td>
+                            <td style="cursor:pointer" class="alignright" title="Stock al momento de realizar el pedido"> {% if det.cantidadStock %} {{det.cantidadStock~' '~det.producto.unidadMedida}} {% endif %}</td>
+                            <td class="alignright">{{det.cantidadTxt}}</td>
+                            <td class="alignright">{{det.despachadoTxt}}</td>
+                            <td class="alignright">{{det.entregadoTxt}}</td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                </table>    
+            </div>                
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <a class="cancelar" type="button" href="{{ path('stock_pedido')}}">Volver</a>
+            </div>
+        </fieldset>
+    </form>
+</div>    
+</div>
+{% endblock %}

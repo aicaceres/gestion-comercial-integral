@@ -1,0 +1,129 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Productos</h1>
+    <span class="pagedesc">Gestión de los productos del sistema.</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+<div>  
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_productos") }}" method="post">
+        <input type="hidden" id="proveedorid" name="proveedorid"/>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn print floatright" type="submit" >Imprimir</button>
+    </form>    
+    <form id="searchform" action="{{ path('stock_producto') }}" method="get">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Proveedor:</strong></label>
+            <select class="uniformselect" id="selectProveedor" name="provId">
+                <option value="0">Todos</option>
+            {% for prov in proveedores %}
+                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
+            {% endfor %}
+            </select>  
+        </div>        
+    </form>
+</div><!-- button -->     
+    
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">        
+        <thead>
+            <tr>
+                <th>Rubro</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Proveedor</th>
+                <th class="nosort">Unid.Med.</th>
+                <th class="nosort">Bulto</th>
+                <th class="nosort">Costo</th>
+                <th style="width:5%;" class="nosort">Activo</th>
+                <th class="nosort actionbutton addbutton">
+                   {% if app.user.access(app.session.get('unidneg_id'),'stock_producto_new') %}
+                    <a class="editar create" href="{{ path('stock_producto_new') }}">Agregar Producto</a>
+                    {% else %} &nbsp; {% endif %} 
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+            <tr>
+             <!--   <td><span class="rubro">{% if entity.rubro %}{{ entity.rubro.rubroSubrubroTxt }}</span><span class="descrubro" style="display:none;"> - {{ entity.rubro.descripcion }}</span>{% endif %}</td> -->
+                <td>{% if entity.rubro %}{{ entity.rubro.rubroSubrubroTxt }}{% endif %}</td>
+                <td>{{ entity.codigo |upper }}</td>
+                <td>{{ entity.nombre }}</td>
+                <td>{{ entity.proveedor }}</td>
+                <td>{{ entity.unidadMedida }}</td>
+                <td>{%if entity.bulto%}{{ entity.cantidadxBulto }}{%endif%}</td>
+                <td class="alignright" style="width:5%;">{{entity.costo| number_format(3,'.',',')}}</td>
+                <td style="width:5%;"><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /></td>
+                <td>
+                    <a href="{{ path('stock_producto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver" ></a>&nbsp;
+                     {% if app.user.access(app.session.get('unidneg_id'),'stock_producto_edit') %}
+                    <a href="{{ path('stock_producto_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar" ></a>&nbsp;
+                    {% endif %}
+                    {% if app.user.access(app.session.get('unidneg_id'),'stock_producto_delete') %}
+                        <a href url="{{ path('stock_producto_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
+                    {% endif %}
+                    
+                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+ <script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('#selectProveedor').change(function(){ 
+        $('#searchform').submit();
+    });   
+    var oTable = $('#dyntable2').dataTable();
+    
+    $('#printform').on('submit',function(){
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });
+    
+    //oTable.fnSort( [ [1,'desc'] ] );     
+   /* $(".print").click(function() {
+        var orden = oTable.fnSettings().aaSorting;
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            datos[index] = value;
+        }); 
+        var search = $('#dyntable2_filter input').val();  
+        $.ajax({
+            type: 'POST',
+            url: '{{ path("print_productos") }}',
+            data: { orden: orden[0], search:search, datos:JSON.stringify(datos) ,provId: $('#selectProveedor').val() },
+            success: function(data) {
+
+                
+            //    window.open("data:application/octet-stream;charset=utf-16le;base64,"+encodeURIComponent(data));
+              //  window.open("data:application/pdf," + encodeURIComponent(data));
+               // window.open("data:application/pdf," + encodeURIComponent(data),'nombre.pdf');
+            }
+        }); 
+    });*/
+    
+  /*  $('.rubro').on('mouseover',function(){
+        $(this).siblings('.descrubro').show();
+    });
+    $('.rubro').on('mouseleave',function(){
+        $(this).siblings('.descrubro').hide();
+    });*/
+});    
+</script>  
+{% endblock %}

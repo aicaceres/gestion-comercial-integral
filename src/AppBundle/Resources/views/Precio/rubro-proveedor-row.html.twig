@@ -1,0 +1,15 @@
+<p>
+    <label for="appbundle_precioactualizacion_valores">Valores:</label>
+    <select name="appbundle_precioactualizacion[valores]" id="appbundle_precioactualizacion_precioLista"
+            class="chzn-select smallinput valores" multiple="multiple" data-placeholder="Seleccionar {{tipo}}...">
+        <option value=""></option>
+        {% for dato in datos %}
+        <option value="{{dato.id}}">{{dato.text}}</option>
+        {% endfor %}
+    </select> 
+</p>
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+    });
+</script>

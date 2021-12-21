@@ -1,0 +1,134 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Inventario</h1>
+    <span class="pagedesc">Stock Valorizado de Productos</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+<div>  
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_inventario_valorizado") }}" method="post">
+        <input type="hidden" id="depositoid" name="depositoid" value=""/>
+        <input type="hidden" id="proveedorid" name="proveedorid" value=""/>
+        <input type="hidden" id="searchterm" name="searchterm" value=""/>
+        <input type="hidden" id="datalist" name="datalist" value=""/>
+        <input type="hidden" id="option" name="option" value="I"/>
+        <button class="stdbtn print floatright" type="submit" >Imprimir</button>
+        <button class="stdbtn export floatright" type="submit" >Exportar</button>
+    </form>       
+    <form id="searchform" action="{{ path('stock_inventario_valorizado') }}" method="post">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Depósito:</strong></label>
+            <select class="uniformselect" id="selectDeposito" name="depId">
+                <option value="0">Todos</option>
+            {% for dep in depositos %}
+                <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
+            {% endfor %}
+            </select>  
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Proveedor:</strong></label>
+            <select class="uniformselect" id="selectProveedor" name="provId">
+                <option value="0">Todos</option>
+            {% for prov in proveedores %}
+                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
+            {% endfor %}
+            </select>  
+        </div>
+    </form>
+</div><!-- button -->        
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="stockvalorizado">        
+        <thead>
+            <tr>
+                <th>Depósito</th>
+                <th>Rubro</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Proveedor</th>
+                <th class="nosort">Mínimo</th>
+                <th class="nosort">Actual</th>
+                <th class="nosort">Valorizado</th>
+                <th class="nosort">Activo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set total=0 %}
+           {% for entity in entities if entity.deposito.id in app.session.get('depositos') %}
+            <tr>
+                {% set total = total + entity.getValorizado %}
+                <td>{{ entity.deposito.nombre|upper }}</td>
+                <td>{% if entity.producto.rubro %}{{ entity.producto.rubro.nombre }}{% endif %}</td>
+                <td style="width:8%;">{{ entity.producto.codigo |upper }}</td>
+                <td>{{ entity.producto.nombre }}</td>
+                <td>{{ entity.producto.proveedor }}</td>
+                <td class="alignright" style="width:5%;">{{ entity.producto.stockminimo|number_format(0) }}</td>
+                <td class="alignright" style="width:10%;">{{ entity.cantidad ~ ' ' ~ entity.producto.unidadmedida }}</td>
+                <td class="alignright" style="width:10%;">{%if entity.cantidad<0%}0.00 {%else%} {{entity.getValorizado| number_format(3,'.','')}} {%endif%}</td>
+                <td style="width:5%;"><input type="checkbox" disabled="disabled" {% if entity.producto.activo %}checked="checked"{% endif %} />                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+        <tfoot>
+             <th class="aligncenter" colspan="9" style="font-size:14px" >VALORIZADO TOTAL: $ <span id="totalsum"></span>.-</th>
+        </tfoot>
+    </table> 
+</div>
+
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    
+      $('#selectProveedor,#selectDeposito').change(function(){ 
+        form = $('#searchform').serialize();
+        window.location.href= "{{ path('stock_inventario_valorizado') }}?"+form ;
+    });
+
+     var valoriz=0;
+    var valorizado = $('#stockvalorizado').dataTable({
+        "sPaginationType": "full_numbers",
+        "oLanguage": {
+            "oPaginate": {
+                "sFirst": "<<",
+                "sNext": ">",
+                "sLast": ">>",
+                "sPrevious": "<"
+            },
+                "sLengthMenu": "Mostrar _MENU_ registros ",
+                "sZeroRecords": "Sin datos",
+                "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                "sInfoEmpty": "Sin coincidencias",
+                "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                "sSearch": "Buscar:"
+        },
+        "drawCallback": function () {
+            var api = this.api();
+            total = api.column( 7, {search:'applied'} ).data().sum();
+            $('#totalsum').html( Number(total.toFixed(3)).toLocaleString('en')  );
+
+          }
+    });
+    totalsum = valorizado.api().column( 7 ).data().sum();
+    $('#totalsum').html(Number(totalsum.toFixed(3)).toLocaleString('en') );
+    
+     //var oTable = $('#dyntable2').dataTable();
+    $('#printform').on('submit',function(e){
+        if( e.originalEvent.submitter.textContent ==='Exportar' ){
+            $('#option').val('E');
+        }
+        $('#depositoid').val($('#selectDeposito').val());
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#searchterm').val( $('#stockvalorizado_filter input').val() );
+        var datos = [];
+        valorizado.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });   
+});    
+</script>    
+
+{% endblock %}

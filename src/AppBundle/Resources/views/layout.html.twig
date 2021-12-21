@@ -1,0 +1,47 @@
+{% extends "::base.html.twig" %}
+{% block head_page_javascripts %}
+<link rel="stylesheet" href="{{ asset('assets/css/style.default.css') }}" type="text/css" media="all" />
+{% if app.session.get('theme') =='contrast'%}
+<link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.contrast.css') }}" type="text/css">
+{% elseif app.session.get('theme') =='blueline' %}
+<link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.blueline.css') }}" type="text/css">    
+{% elseif app.session.get('theme') =='greenline' %}
+<link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.greenline.css') }}" type="text/css">    
+{% endif %} 
+<script type="text/javascript">
+///// VALORES DE VENTAS Y COMPRAS EN HEADER
+        jQuery.get("{{ path('datos_header') }}",function(data){
+        	jQuery('.compra span').html(data.pedcompra);
+        	jQuery('.enviado span').html(data.pedenviados);
+        	jQuery('.recibido span').html(data.pedrecibidos);
+        	/*jQuery('#venc30dias').html('$'+data.venc30dias.toLocaleString());
+        	jQuery('#porcobrar').html('$'+data.porcobrar.toLocaleString());
+        	jQuery('#porpagar').html('$'+data.porpagar.toLocaleString());*/
+	});
+</script> 
+{% endblock %} 
+{% block body %}
+<div id="popup"></div>
+<body class="withvernav">
+    <div class="bodywrapper">
+        {% include "AppBundle::header.html.twig" %}
+        <div class="centercontent">
+            {% block pageheader %}
+           
+            {% endblock %}
+            {% block contentwrapper %}  
+            
+            {% endblock %}
+        </div>
+    </div>
+</body>        
+{% endblock %}
+{% block page_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.slimscroll.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/custom/dashboard.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.alerts.js') }}"></script>
+<script type="text/javascript">
+window.link = "{{asset('assets/css/style.default.css')}}";
+</script>
+{% block extra_javascripts %}{% endblock %}
+{% endblock %}

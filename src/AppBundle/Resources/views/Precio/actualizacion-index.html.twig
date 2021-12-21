@@ -1,0 +1,51 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Actualizaciones de Precios</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+    <div class="actionbutton addbutton">
+        <button class="guardar" id="actualizacion_new" >Nueva Actualización</button>
+    </div><!-- button --> 
+<div id="contentwrapper" class="contentwrapper">
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th style="width: 5%" >Nro</th>
+                <th style="width: 6%">Lista</th>
+                <th class="nosort" style="width: 50%">Actualizado</th>
+                <th class="nosort" style="width: 10%">Aplicado</th>
+                <th style="width: 15%">Fecha</th>
+                <th class="nosort" style="width: 13%">Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+            <tr>
+                <td style="text-align: center">{{ entity.id}}</td>
+                <td style="text-align: center">{{ entity.precioLista.nombre }}</td>
+                <td>{{entity.valores|raw}}</td>
+                <td style="text-align: center">{%if entity.tipoActualizacion=='M'%}$ {{entity.valor|number_format(3,'.',',')}}{% else %}{{entity.valor|number_format(0)}}%{% endif %}</td>
+                <td><span class="hidden">{{ entity.created|date('Ymd') }}</span> {{ entity.created|date('d-m-Y H:i:s') }}</td>
+                <td>{{ entity.createdBy }}</td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+    jQuery(document).ready(function($){ 
+        $('#actualizacion_new').on('click',
+                function(){
+                    window.location.href= "{{ path('stock_precio_actualizacion_new') }}" ;
+                });
+        var oTable = $('#dyntable2').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );
+    });
+</script>    
+{% endblock %}

@@ -1,0 +1,68 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#F5C98F" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> Informe de Productos Despachados</h2>                   
+        <h4><strong>Depósito:</strong> {{ filtro[0] }}  </h4>
+        {% if filtro[1] or filtro[2] %}
+        <h4><strong>Período:</strong> {{ filtro[1] }} al {{ filtro[2] }} </h4>
+        {% endif %}
+        <div height="10px"></div>
+        {% if search %}
+            <h4> Término de Búsqueda: "{{search}}" </h4>
+            <div height="10px"></div>
+        {%endif%}
+        <table font-size="9px">
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1 cm"><strong>#</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Producto</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>Precio Últ. Compra</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Cantidad</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm"><strong>Total</strong></td>               
+            </tr>        
+            {% set total = 0%}
+            {% if items|length>0   %}
+                {% for item in items %}
+                    {% set total = total+item[4]|replace({',': ''})%}
+                    <tr>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[0]}} - {{item[1]}}</td>                        
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[2]}}</td>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[3]}}</td>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[4]}}</td>                        
+                    </tr>                
+                {% endfor %}  
+            {% else %}  
+                <tr>
+                    <td colspan="5" height="30px" vertical-align="middle" padding-left="10px">
+                        <strong>No hay productos coincidentes con el criterio de búsqueda</strong></td>
+                </tr>
+            {% endif %}              
+            <tr>
+                <td colspan="4" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
+                    <strong>Cantidad de Items: {{items|length}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
+                    <strong>$ {{total|number_format(3,'.','')}}</strong></td>               
+            </tr>
+        </table>         
+    </dynamic-page>
+</pdf>

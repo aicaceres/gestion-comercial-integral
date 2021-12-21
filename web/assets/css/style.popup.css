@@ -1,0 +1,21 @@
+.ui-dialog-titlebar {
+    color: #32415A;
+    font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+    font-size: 1.5em;
+}
+.ui-dialog-buttonset{
+    background: #FFFFFF;
+    text-align: center;
+}
+.closePopup{
+    background: #FB9337;
+    border: 1px solid #F0882C;
+    border-radius: 2px;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-weight: bold;
+    line-height: 21px;
+    margin: 10px;
+    padding: 7px 20px;
+}    

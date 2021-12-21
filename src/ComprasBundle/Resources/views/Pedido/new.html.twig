@@ -1,0 +1,55 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pedidos a Proveedor</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Alta de Nuevo Pedido</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="two_fields">
+                <div><label for="nroPedido">Nº pedido:</label>
+                    <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
+                </div>
+                {{ form_row(form.fechaPedido, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+               {{ form_row(form.estado) }}
+            </div> 
+            <div class="two_fields">
+                {{ form_row(form.proveedor, { 'attr': {'class' : 'select2'} }) }}  
+                <div><label for="estado" style="width: 100px;">Estado:</label>
+                    <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
+                </div>
+            </div>  
+            <div class="two_fields">
+                {{ form_row(form.deposito) }}
+            </div> 
+                        
+            <br clear="all" /> 
+            <div class="actionbutton">              
+                <button class="guardar" type="submit" >Guardar y agregar items </button>
+                <a class="cancelar" type="button" href="{{ path('compras_pedido')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+    {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('.select2.select2-container').css('width','60%');
+    $('.guardar').click(function() {
+        if( !$('#comprasbundle_pedido_proveedor').val() ){
+            alert('Debe seleccionar un Proveedor');
+            return false;  
+        };        
+    });
+});    
+</script>{% endblock %}

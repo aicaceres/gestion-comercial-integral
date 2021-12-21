@@ -1,0 +1,18 @@
+<tr class="item" divdata="item_items">
+    <td class="ordTd"></td>
+    <td class="prodTd">{{ form_widget(item.producto) }}
+         <span class="hidden">{{ form_widget(item.entregado) }}</span>
+    </td>
+    <td class="stockTd alignright"> 
+        <span class="cantstk"></span> <span class="unidmedstk"></span> 
+    </td>
+    <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'width50 floatleft'} }) }} 
+        <span class="unidmed floatleft" style="padding-left: 5px"></span>        
+    </td>
+    <td class="bulto">{{ form_widget(item.bulto) }} </td>
+    <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }} </td>
+    <td class="totalTd alignright">
+        <span class="canttot"></span> <span class="unidmedtot"></span>         
+    </td>
+    <td class="delTd" style="text-align:center;"></td>
+</tr>

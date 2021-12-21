@@ -1,0 +1,82 @@
+<style>
+    @page { size : A4; }
+    .align-center{text-align: center}
+    .break {page-break-after:always}
+    .sincerrar{ background-color: #FFDDDD; }
+    /*h5{float:right; font-weight: lighter; margin-bottom: 0;}*/
+    h5 {
+        display: inline-block;
+        font-weight: lighter;
+        margin: 0;
+        text-align: right;
+        vertical-align: top;
+        width: 80%;
+    }
+    .pageheader .pagetitle {
+        color: #666666;
+        font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+        font-size: 28px;
+        font-weight: normal;
+        margin: 0 10px;
+    }
+    .pageheader .pagedesc {
+        color: #666666;
+        margin: 0 10px;
+    }
+    table {
+        font-family: 'Verdana' ;
+        font-size: 10px;
+        width: 100%;
+        border-collapse:collapse;
+    }
+    table tr th{
+        border: 1px solid gray;
+        /*  background: #E5E5E5;*/
+        padding: 5px;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+    }
+    table tr td{    border: 1px solid gray;  padding:3px 15px;}
+
+</style>
+<img style="width: 18%;" src="{{asset('assets/images/logo_small.png')}}" />
+<h5> <small>Fecha: {{date('now')|date('d / m / Y H:i')}}</small><br><br>
+    <small>Usuario: {{app.user.nombre}} </small></h5>
+<hr>
+<div style="display:block; clear: both">
+    <div class="pageheader notab">
+        <h1 class="pagetitle">Listado de Precios</h1>
+        <span class="pagedesc"><strong>Lista:  {{listado[0].precioLista}} </strong>- <small>Vigencia: {{listado[0].precioLista.vigenciaDesde|date('d-m-Y')}} al {{listado[0].precioLista.vigenciaHasta|date('d-m-Y')}}</small></span>
+    </div>
+</div>
+<hr>
+<table class="lista_precios" cellspacing="0" cellpadding="0">
+    <thead>
+    <tr>
+        <th>Código</th>
+        <th>Producto</th>
+        <th>Precio</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% set rubro='' %}
+        {% for item in listado %}
+        {% if rubro != item.producto.rubro %} 
+            {% set rubro=item.producto.rubro %} 
+            <tr>
+                <th colspan='5'>{{item.producto.rubro}}</th>
+            </tr>
+        {% endif %}
+        <tr>
+            <td>{{item.producto.codigo}}</td>
+            <td>{{item.producto.nombre}}</td>
+            <td>{{item.precio}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script type="text/javascript">    
+        window.print(); 
+      // window.close(); 
+      window.setTimeout('window.close()', 1000);
+</script>   

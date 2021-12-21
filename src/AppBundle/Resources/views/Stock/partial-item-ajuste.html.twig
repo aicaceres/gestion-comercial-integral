@@ -1,0 +1,77 @@
+<style>
+    .loaders{
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+        display:none;
+    }
+    .chzn-disabled{
+        opacity:1 !important;
+    }
+    .chzn-container-single.chzn-disabled .chzn-single div b{
+        display:none;
+    }
+</style>    
+{{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+<fieldset>  
+<div style="margin-bottom: 10px;display:inline-block; width:60%;">
+        {{ form_label(form.signo) }}
+        {{ form_widget(form.signo, { 'attr': {'class' : 'radionumerac' } }) }}
+</div>     
+<div>
+    {{ form_row(form.producto) }}
+</div>
+</fieldset>
+<fieldset style="margin-bottom:7px">
+<div>
+    {{ form_row(form.cantidad, { 'attr': {'class' : 'width50 floatleft'} }) }}
+    <span id="unidmed_unidad" class="unidmed floatleft" style="padding-left: 5px">{%if entity.producto%}{{entity.producto.unidadMedida}}{%endif%}</span>
+   &nbsp;&nbsp; {{ form_widget(form.bulto, { 'attr': {'class' : 'bulto'} }) }}
+   &nbsp;&nbsp;  {{ form_widget(form.cantidadxBulto) }}
+   <span id="unidmed_bulto" class="unidmed" style="padding-left: 5px;display: inline-block;">{%if entity.producto%}{{entity.producto.unidadMedida}}{%endif%}</span>
+    <span class="loaders">
+    <img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" />
+</span>
+</div>
+<input id="ajusteid" value="{%if entity.id%}{{entity.stockAjuste.id}}{%endif%}" name="ajusteid" type="hidden"/>   
+</fieldset>
+<fieldset style="margin-bottom:7px">
+<div>
+    {{ form_row(form.motivo, { 'attr': {'class' : 'mediuminput', 'rows':'1' } }) }}
+</div>
+</fieldset>
+
+<fieldset>
+    <div class="lote" style="padding-bottom: 7px;">
+        {{ form_label(form.lotes) }}  
+            {{ form_widget(form.lotes, { 'attr': {'class' : 'select2Lote' } }) }}      
+            <a href="javascript:void(0)" class="addloteAjuste" title="Cargar Lote">
+                <img src="{{ asset('assets/images/icons/add.png') }}" style="margin-top: 5px"/>
+            </a>
+        </div>
+</fieldset>         
+{{ form_end(form) }} 
+<div id="popuplote" style="display:none;width: 80%;margin: 0px auto;border: 3px lightgray double;">
+  <form id="formlote" class="stdform"> 
+    <h5 style="text-align:center;padding-top:5px;">- - -  Agregar Lote  - - -</h5>
+    <input type="hidden" name="productoid" id="productoid" value=""/>
+      <fieldset style="padding-bottom:10px;">
+          <div style="display:inline-block;">
+              <label class="required" style="width:70px">N° lote:</label>
+              <input id="nroLote" name="nroLote" class="width100" title="N° Lote" value="" required="required" type="text"> 
+          </div>
+          <div style="display:inline-block;">
+              <label class="required" style="width:90px">Fecha Vto:</label>
+              <input id="fechaVencimiento" name="fechaVencimiento" class="datepicker width100" required="required" value="" title="Fecha Vencimiento" type="text">  
+          </div>   
+          <div style="margin: 0 6px;display:inline-block;">
+              <a href="javascript:void(0)" id="okAddLote" title="Aceptar">
+                <img src="{{ asset('assets/images/icons/tick_circle.png') }}" style="margin-top: 5px"/>
+            </a>
+            <a href="javascript:void(0)" id="cancelAddLote" title="Cancelar">
+                <img src="{{ asset('assets/images/icons/cross_circle.png') }}" style="margin-top: 5px"/>
+            </a>
+          </div>   
+      </fieldset>      
+  </form>   
+</div>        

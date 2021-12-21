@@ -1,0 +1,18 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Gestión de Ventas</h1>
+    <span class="pagedesc">Control de Ventas, Clientes y Cuenta Corriente</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+    <div class="two_third dashboard_left">              
+        <ul class="shortcuts">         
+          <!--<li><a href="path('compras_pagoproveedor')" class="pago"><span>Registrar Pago</span></a></li> -->
+        </ul>
+        <br clear="all" />
+    </div><!--two_third dashboard_left -->
+</div>
+{% endblock %}

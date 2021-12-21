@@ -1,0 +1,79 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pedidos a Proveedor</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Pedido Nº: {{ entity.nroPedido}}</h1>
+<div class="divEdicion">
+    <form action="#" method="post" class="stdform">
+        <fieldset >
+            <div class="two_fields">
+                <div><label for="nroPedido">Nº pedido:</label>
+                    <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
+                </div>
+                <div><label for="nroPedido">Fecha Pedido:</label>
+                    <input type="text" value="{{entity.fechaPedido|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div> 
+            <div class="two_fields">
+                <div><label for="nroPedido">Proveedor:</label>
+                    <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="smallinput">
+                </div>
+                <div><label for="nroPedido" style="width: 100px;">Estado:</label>
+                    <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
+                </div>
+            </div> 
+            <div class="two_fields">
+                <div><label for="nroPedido">Depósito:</label>
+                    <input type="text" value="{{entity.deposito}}" disabled="disabled" class="smallinput">
+                </div>
+                <div><label for="nroPedido">Fecha Entrega:</label>
+                    <input type="text" value="{%if entity.fechaEntrega%} {{entity.fechaEntrega|date('d/m/Y')}} {%endif%}" disabled="disabled" class="width100">
+                </div>
+            </div>     
+            <div class="two_fields">
+                <div style="vertical-align:top; "><label for="nroPedido">Clasificación:</label>
+                    <input type="text" value="{{entity.calificacionProveedor}}" disabled="disabled" class="smallinput">
+                </div>
+                <div><label for="nroPedido">Observaciones:</label>
+                    <textarea disabled="disabled" class="mediuminput">{{entity.obsRecepcion}}</textarea>
+                </div>
+            </div>     
+            <div style="padding-top: 20px; margin-left: 50px; width: 80%;">
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th class="head1" style="width:5%;">Nº</th>
+                            <th class="head1">Producto</th>
+                            <th colspan="2" style="width:25%" class="aligncenter">Solicitado</th>
+                            <th colspan="2" style="width:25%" class="aligncenter">Recibido</th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="" >
+                    {% for det in entity.detalles if det.producto %}
+                        <tr {% if entity.estado=='RECIBIDO' and det.entregado == 0 %}style="text-decoration:line-through; " {% endif %}>
+                            <td>{{loop.index}}</td>
+                            <td>{{det.producto.codigoNombre}}
+                                 {{det.lotesTxt|raw}}
+                            </td>
+                            <td class="alignright">{%if 'x' in det.cantidadTxt %} {{det.cantidadTxt}} {%endif%}</td>
+                            <td class="alignright">{{det.cantidadTotal|number_format(3,'.',',')~' '~ det.producto.unidadMedida}}</td>
+                            <td class="alignright">{%if entity.estado=='RECIBIDO' and ('x' in det.entregadoItemTxt) and det.entregado>0 %} {{det.entregadoItemTxt}}{%endif%}</td>
+                            <td class="alignright" {% if det.hayDiferencia %} style="color:red" {% endif %} >{%if entity.estado=='RECIBIDO' %} {{ det.entregadoItemTotalTxt }}{%endif%}</td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                </table>    
+            </div>                
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
+            </div>
+        </fieldset>
+    </form>
+</div>    
+</div>
+{% endblock %}

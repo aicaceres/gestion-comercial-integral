@@ -1,0 +1,82 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Productos</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{entity.nombre|upper}}</h1>
+<div class="divEdicion">
+    <form action="#" method="post" class="stdform">
+        <fieldset>                    
+            <p>
+                <label>Código</label>
+                <input class="width100" value="{{entity.codigo}}" type="text" disabled="disabled">        
+            </p>
+            <p>
+                <label>Nombre</label>
+                <input class="smallinput" value="{{entity.nombre}}" type="text" disabled="disabled">            
+            </p>
+            <p>
+                <label>Descripción</label>
+                <input class="smallinput" value="{{entity.descripcion}}" type="text" disabled="disabled">            
+            </p>
+            <p>
+                <label>Código de Barra</label>
+                <input class="mininput" value="{{entity.codigoBarra}}" type="text" disabled="disabled">        
+            </p>   
+            <p>
+                <label>Unidad Medida</label>
+                <input class="mininput" value="{{entity.unidadMedida}}" type="text" disabled="disabled">        
+            </p>   
+            <div class="locate">
+                <div>
+                    <label>Stock Mínimo</label>
+                    <input class="number" value="{{entity.stockMinimo}}" type="text" disabled="disabled">             
+                </div>
+                <div>
+                    <div><label>Costo</label>
+                        <input class="number" value="{{entity.costo}}" type="text"></div>                           
+                </div>
+                <div>
+                    <label>IVA</label>
+                    <input class="number" value="{{entity.iva}}" type="text">
+                    %                            
+                </div>
+            </div>                                            
+             <p>
+                <label>Rubro</label>
+                <input class="smallinput" value="{{entity.rubro}}" type="text" disabled="disabled">            
+            </p>   
+             <p>
+                <label>Proveedor</label>
+                <input class="smallinput" value="{{entity.proveedor}}" type="text" disabled="disabled">            
+            </p>   
+             <p>
+                <label>Observaciones</label>
+                <input class="mediuminput" value="{{entity.observaciones}}" type="text" disabled="disabled">            
+            </p>   
+
+            <div class="two_fields">
+                <div><label>Por bulto: {%if entity.bulto%}Si{%else%}No{%endif%}</label></div> 
+                <div><label>Cantidad por bulto</label>
+                    <input class="mininput" type="text" value="{%if entity.bulto%}{{entity.cantidadxBulto}}{%endif%}"></div>   
+            </div>            
+
+            <div class="two_fields">
+                <div><label>Facturable: {%if entity.facturable%}Si{%else%}No{%endif%}</label></div> 
+                <div><label>Activo: {%if entity.activo%}Si{%else%}No{%endif%}</label></div> 
+            </div>            
+        
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <a class="cancelar" type="button" href="{{ path('stock_producto')}}">Volver</a>
+            </div>
+        </fieldset>
+    </form> 
+</div>    
+</div>
+{% endblock %}

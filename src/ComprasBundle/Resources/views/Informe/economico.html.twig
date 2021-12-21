@@ -1,0 +1,122 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Informes Económicos</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+<style>
+    thead tr th{
+        background-color: lightgray !important;
+    }
+   
+    thead tr th span.padre{
+        font-size: 16px;
+    }
+    thead tr th span.hijo{
+        font-size: 14px;
+    }
+    .tr-padre td{
+        background-color: lightblue ;
+        font-weight: bold ;
+        color:black !important;
+        font-size: 12px;
+    }  
+    .tr-total th{
+       background-color: khaki; 
+       font-size: 12px;
+    }
+     .tr-padre td.total{
+         background-color: darkkhaki;
+     }
+    .total{
+        background-color: khaki;
+        font-weight: bold ;
+    }
+</style>
+<div id="contentwrapper" class="contentwrapper">
+    <form id="printform" name="printform" target="_blank"  action="{{ path("compras_informe_economico") }}" method="post">
+        <input type="hidden" id="tipo" name="tipo"/>
+        <input type="hidden" id="fdesde" name="fdesde"/>
+        <input type="hidden" id="fhasta" name="fhasta"/>
+        <button class="stdbtn floatright hidden" type="submit" >Imprimir</button>
+    </form> 
+    <form class="deposito_selector " id="searchform" action="{{ path('compras_informe_economico') }}" method="get">        
+
+        <div>
+            <div style="display: inline-block; margin:10px;">
+          
+                <label style="width:130px;display: inline-block;"><strong>AGRUPAMIENTO:</strong></label>
+                <select class="select2" id="selectTipo" name="tipo">
+                    <option value="CC" {% if tipo=='CC' %} selected="selected" {% endif %} >CENTRO DE COSTO / PROVEEDOR</option>
+                    <option value="PROV" {% if tipo=='PROV' %} selected="selected" {% endif %} >PROVEEDOR / CENTRO DE COSTO</option>                    
+                </select>  
+            </div>    
+            <div style="display: inline-block; margin:10px;">     
+                &nbsp;&nbsp;&nbsp;
+                <label><strong>Período: </strong></label>
+                <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
+                <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+                <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+            </div>
+        </div>
+
+    </form>     
+    {% if reporte %}    
+        {% if tipo=='CC' %}             
+           {% set title = '<span class="padre">CENTRO DE COSTO  >  </span><span class="hijo">PROVEEDOR</span>' %}
+        {% else %}       
+            {% set title = '<span class="padre">PROVEEDOR  >  </span><span class="hijo">CENTRO DE COSTO</span>' %}
+        {% endif %}  
+        
+        {% include "ComprasBundle:Informe:_partial-economico.html.twig" %}
+
+    {% else %}
+      <div class="aligncenter margin20">
+      <h4>Sin datos registrados en este período.</h4>
+      </div>
+    {% endif %}
+    
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{{ parent() }}
+    <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">    
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($){    
+    $('.togglemenu').click();
+    $('#selectTipo').change(function(){ 
+        $('#searchform').submit();
+    }); 
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'}); 
+    $('#printform').on('submit',function(){
+        $('#tipo').val($('#selectTipo').val());        
+        $('#fdesde').val($('#desde').val());
+        $('#fhasta').val($('#hasta').val());        
+    }); 
+    var tipo = ($('#selectTipo').val() == 'CC') ? 'CENTROCOSTO-PROVEEDOR' : 'PROVEEDOR-CENTROCOSTO';
+    var filename = tipo+"_{{'now'|date('mY')}}";
+    
+    tableExporter = $("#table-economico").tableExport(
+            {headers: true,
+            footers: true,
+            formats: ['xlsx'],
+            filename: filename,
+            bootstrap: false,
+            exportButtons: true,
+            position: 'top',
+            ignoreRows: null,
+            ignoreCols: null,
+            trimWhitespace: true}                   
+                    );        
+    tableExporter.types.date.assert = function(v){return false;};       
+       $('.tableexport-caption').addClass('alignright');     
+    
+    
+});
+</script>   
+{% endblock %}

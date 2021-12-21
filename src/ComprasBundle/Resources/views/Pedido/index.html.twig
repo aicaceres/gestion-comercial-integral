@@ -1,0 +1,149 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">{{title}}</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}   
+<div id="contentwrapper" class="contentwrapper">
+<div>  
+        {% set urlprint=path("print_compras_pedido") %}
+    {% if tipo=='P'%}
+        {% set url=path('compras_pedido') %}
+    {% else %}    
+        {% set url=path("compras_pedido_recepcion") %}
+    {% endif %}    
+    <form id="printform" name="printform" target="_blank"  action="{{ urlprint }}" method="post">
+        <input type="hidden" id="tipo" name="tipo" value="{{tipo}}"/>
+        <input type="hidden" id="proveedorid" name="proveedorid"/>
+        <input type="hidden" id="fdesde" name="fdesde"/>
+        <input type="hidden" id="fhasta" name="fhasta"/>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    </form>    
+    <form id="searchform" action="{{ url }}" method="get">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Proveedor:</strong></label>
+            <select class="select2" id="selectProveedor" name="provId">
+                <option value="0">Todos</option>
+            {% for prov in proveedores %}
+                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
+            {% endfor %}
+            </select>  
+        </div>    
+        <div style="display: inline-block; margin-right: 30px;">     
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Fecha Pedido: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>        
+    </form>
+</div><!-- button -->      
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Fecha Pedido</th>
+                <th>Nro</th>
+                <th>Proveedor</th>
+                <th>Depósito</th>
+                <th>Fecha Entrega</th>
+                <th class="nosort">Estado</th>
+                <th class="nosort actionbutton addbutton">
+                   {% if app.user.access(app.session.get('unidneg_id'),'compras_pedido_new') and tipo=='P' %}
+                    <a class="editar create" href="{{ path('compras_pedido_new') }}">Nuevo Pedido</a>
+                    {% else %} &nbsp; {% endif %} 
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+        {% if (tipo == 'R' and entity.estado=='PENDIENTE') or ( tipo == 'P' ) %}   
+            <tr>
+                <td><span class="hidden">{{ entity.fechaPedido|date('Ymd') }}</span>{{ entity.fechaPedido|date('d-m-Y') }}</td>
+                <td>{{ entity.nroPedido}}</td>
+                <td>{{ entity.proveedor }}</td>
+                <td>{{ entity.deposito}}</td>
+                <td>{%if entity.fechaEntrega %} <span class="hidden">{{ entity.fechaEntrega|date('Ymd') }}</span>{{ entity.fechaEntrega|date('d-m-Y') }}{% endif %}</td>
+                <td class=" estado">{{ entity.estado }}</td>
+                <td class="buttons">
+                    <a href="{{ path('compras_pedido_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a>                     
+                    {% if tipo == 'P' %}
+                        {% if app.user.access(app.session.get('unidneg_id'),'compras_pedido_edit') and entity.estado=='NUEVO' %}
+                        <a href="{{ path('compras_pedido_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Modificar"></a>&nbsp;
+                        {% endif %}
+                        {% if app.user.access(app.session.get('unidneg_id'),'compras_pedido_delete') and entity.estado in ['NUEVO','PENDIENTE'] %}
+                        <a href url="{{ path('compras_pedido_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a>                                                               
+                        {% endif %}
+                        {% if app.user.access(app.session.get('unidneg_id'),'compras_factura_new') and entity.estado=='RECIBIDO' %}
+                        <a href="{{ path('compras_factura_facturarpedido', { 'id': entity.id }) }}" class="editar btn btnaction btn_book" title="Facturar Pedido" ></a>&nbsp;
+                        {% endif %}  
+                    {% else %}    
+                         {% if app.user.access(app.session.get('unidneg_id'),'compras_pedido_recepcion') %}
+                        <a href="{{ path('compras_pedido_recepcion_new', { 'id': entity.id }) }}" class="editar btn btnaction btn_truck" title="Recepción de Mercaderías"></a>                    
+                        {% endif %}                         
+                    {% endif %}    
+                    <a href="javascript:void(0)" url="{{ path('compras_pedido_print', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Pedido"></a>                    
+                </td>
+            </tr>
+            {% endif %}
+           {% endfor %}
+        </tbody>
+    </table>     
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+var $tipo = '{{tipo}}';    
+jQuery(document).ready(function($){
+    $('#selectProveedor').change(function(){ 
+        $('#searchform').submit();
+    }); 
+    $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    var oTable = $('#dyntable2').dataTable();
+     oTable.fnSort( [[0,'desc'],[1,'desc'] ] );
+
+     $('#printform').on('submit',function(){
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#fdesde').val($('#desde').val());
+        $('#fhasta').val($('#hasta').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+            var i = value[0].indexOf('</span>');
+            if( i >-1 ){
+                var fecha = value[0].substr(i+7);
+                value[0]=fecha;
+            }
+            var j = value[4].indexOf('</span>');
+            if( j >-1 ){
+                var entrega = value[4].substr(j+7);
+                value[4]=entrega;
+            }
+            value.splice(6);
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });
+
+});
+function checkButtons(estado){
+      txt = estado.html();
+      buttons = estado.parent().find('.buttons');
+      buttons.children('.btnaction').hide();
+    if($tipo=='R')   jQuery('.btn_truck').show();
+    else{
+        if(txt=='FACTURADO' || txt=='RECIBIDO'){ buttons.find('.btn_folder').show();   }
+        if(txt=='RECIBIDO'){ buttons.find('.btn_book').show();   }
+        if(txt=='PENDIENTE' || txt=='NUEVO'){ buttons.find('.btn_pencil, .btn_trash').show();}
+        if(txt!='FACTURADO' && txt!='CANCELADO'){ buttons.find('.btn_print').show();}
+    }
+};
+</script>    
+{% endblock %}

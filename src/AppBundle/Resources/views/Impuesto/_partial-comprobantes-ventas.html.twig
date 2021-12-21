@@ -1,0 +1,99 @@
+<div style="overflow-x: scroll">
+    <style>
+        table.comprobantes tbody, table.comprobantes thead,table.comprobantes tfoot{
+            display: block;
+        }
+        table.comprobantes tbody {
+            overflow-y: scroll;
+            height: 240px;
+        }            
+        table.comprobantes thead tr th {
+            font-weight: normal;
+            background-color: gainsboro;
+            color: #666;
+            border-right: 1px solid #eee;
+            padding: 0px 10px;
+        }            
+    </style>    
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable datosafip comprobantes" id="afip-comprobante">                    
+        <thead>
+            <tr style="background-color: gainsboro">
+                <th><span style="width:60px;display: block;">Fecha de Comprobante</span></th>
+                <th><span style="width:60px;display: block;">Tipo de Comprobante</span></th>
+                <th><span style="width:28px;display: block;">Punto Venta</span></th>
+                <th><span style="width:125px;display: block;">N° de Comprobante</span></th>
+                <th><span style="width:125px;display: block;">N° de Comprobante Hasta</span></th>
+                <th><span style="width:50px;display: block;">Código Documento Comprador</span></th>
+                <th><span style="width:75px;display: block;">Identificación del Comprador</span></th>
+                <th><span style="width:200px;display: block;">Apellido y nombre o denominación del comprador</span></th>
+                <th><span style="width:90px;display: block;">Importe total de la operación</span></th>
+                <th><span style="width:90px;display: block;">Importe total de conceptos que no integran el precio neto gravado</span></th>
+                <th><span style="width:90px;display: block;">Percepción a no categorizados</span></th>                    
+                <th><span style="width:90px;display: block;">Importe de operaciones exentas</span></th>                                    
+                <th><span style="width:90px;display: block;">Importe de perc. o pagos a cuenta de otros impuestos nac.</span></th>                    
+                <th><span style="width:90px;display: block;">Importe de percepciones de Ingresos Brutos</span></th>
+                <th><span style="width:90px;display: block;">Importe de percepciones de Impuestos Municipales</span></th>                    
+                <th><span style="width:90px;display: block;">Importe de Impuestos Internos</span></th>                    
+                <th><span style="width:35px;display: block;">Código de Moneda</span></th>
+                <th><span style="width:55px;display: block;">Tipo de cambio</span></th>
+                <th><span style="width:40px;display: block;">Cantidad de alícuotas de IVA</span></th>
+                <th><span style="width:45px;display: block;">Código de operación</span></th>                
+                <th><span style="width:90px;display: block;">Otros Tributos</span></th>
+                <th><span style="width:60px;display: block;">Fecha de Vencimiento de Pago</span></th>
+            </tr>
+            </thead>    
+        <tbody>    
+            {% for item in resultado.comprobantes %}                    
+                <tr {% if item.error|length>0 %} style="background-color:mistyrose"{% endif %} >                            
+                    <td><span style="width:60px;display: block; ">{{item.fecha}}</span></td>
+                    <td><span style="width:60px;display: block;">{{item.tipoComprobante}}</span></td>
+                    {% if 'COMPROBANTE' in item.error %} 
+                    <td colspan="2">                        
+                        <input value="{{ item.puntoVenta~'-'~item.nroComprobante }}" class="nrocomp inputerror" data-comp="{{ item.id }}" style="width:160px;font-size:11px;background-color:darkseagreen"
+                               data-url="{{ path('update_nrocomprobante',{'id':item.id,'bundle':'Ventas','tipocomp': item.tipoComprobante}) }}" />                        
+                    </td>    
+                {% else %}
+                    <td>
+                        <span style="width:28px;display: block;">{{item.puntoVenta}}</span>
+                    </td>     
+                    <td>
+                        <span style="width:125px;display: block;">{{item.nroComprobante}}</span>
+                    </td>     
+                {% endif %}                    
+                    <td><span style="width:125px;display: block;">{{ item.nroComprobanteHasta }}</span></td>
+                    <td><span style="width:50px;display: block;">80</span></td>
+                    <td>
+                        {% if 'CUIT' in item.error %} 
+                       <input value="{{ item.cuit }}" class="cuit inputerror" data-prov="{{ item.clienteId }}" data-url="{{ path('update_cuit_cliente',{'id':item.clienteId}) }}" style="font-size:11px;width:82px;display:block;font-size:11px;background-color:darkseagreen" />
+                        {% else %}
+                             <span style="width:82px;display:block;">{{ item.cuit }}</span> 
+                        {% endif %}
+                    </td>
+                                        
+                    <td><span style="width:200px;display: block;">{{ item.cliente }}</span></td>
+                    <td><span style="width:90px;display: block;">{{item.total}}</span></td>
+                    <td><span style="width:90px;display: block;">{{item.nograv}}</span></td>
+                    <td><span style="width:90px;display: block;">{{item.nocateg}}</span></td>
+                    <td><span style="width:90px;display: block;">{{item.exe}}</span></td>                    
+                    <td><span style="width:90px;display: block;">{{item.percImpNac}}</span></td>
+                    <td><span style="width:90px;display: block;">{{item.percIIBB}}</span></td>
+                    <td><span style="width:90px;display: block;">{{item.percMuni}}</span></td>
+                    <td><span style="width:90px;display: block;">{{item.impInterno}}</span></td>
+                    <td><span style="width:35px;display: block;">{{ item.moneda }}</span></td>
+                    <td><span style="width:55px;display: block;">{{ item.tipoCambio }}</span></td>
+                    <td><span style="width:40px;display: block;">{{ item.cantAlicuotas }}</span></td>
+                    <td><span style="width:45px;display: block;">{{ item.codOperacion }}</span></td>                                               
+                    <td><span style="width:90px;display: block;">{{item.otrosTributos}}</span></td>                            
+                    <td><span style="width:60px;display: block;">{{item.pagoVto}}</span></td>                            
+                </tr>
+            {% endfor %}
+        </tbody> 
+        
+    </table>   
+       
+</div>    
+<div>
+    <h5 style="text-align:center; margin:10px;"> {{ resultado.comprobantes|length }} comprobantes en REGINFO_CV_VENTAS_CBTE.txt         
+        <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=CBTE" > <span>Descargar</span> </a></h5>            
+</div>        
+           

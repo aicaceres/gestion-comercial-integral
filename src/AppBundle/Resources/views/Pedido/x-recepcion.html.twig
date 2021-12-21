@@ -1,0 +1,217 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pedidos a Proveedor</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Recepción de Pedidos</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="two_fields">
+                <div> <label for="nroPedido">Nº pedido:</label>
+                <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
+                </div>
+                {{ form_row(form.fechaPedido, { 'attr': {'readonly' : 'readonly','class':'width100'} }) }}
+            </div> 
+            <div class="two_fields">
+                {{ form_row(form.proveedor) }}  
+                <div> <label for="deposito">Depósito:</label>
+                <input type="text" value="{{deposito}}" disabled="disabled" class="smallinput">
+                <input type="hidden" value="{%if deposito%} {{deposito.id}} {%endif%}" name="deposito">
+                </div>
+            </div>  
+            <div class="two_fields">
+                {{ form_row(form.fechaEntrega, { 'attr': {'class' : 'datepicker','required':'required'} }) }}
+            </div> 
+            <div style="padding-top: 20px; margin-left: 50px;" id="divItems">
+                {{ form_errors(form.detalles) }}
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th class="head1" style="width:3%;">Nº</th>
+                            <th class="head1">Producto</th>
+                            <th class="head1" style="width:5%;">Costo</th>
+                            <th class="head1" style="width:12%;">Cantidad</th>
+                            <th class="head1" style="width:15%;">Recibido</th>
+                            <th style="width:10%;" colspan="2">Bulto</th>
+                            <th class="head1" style="width:5%;">TOTAL</th>
+                            <th class="head1" style="width:3%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'ComprasBundle:Pedido:prototype_recepcion.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                    {% for item in form.detalles %}
+                        <tr class="item" divdata="item_{{loop.index-1}}">
+                            <td class="ordTd"></td>
+                            <td class="prodTd">{{ item.vars.data.producto }}</td>
+                            <td class="precTd">                                
+                                <span tabIndex="-1">{{ form_widget(item.precio, { 'attr': {'class' : 'width50 alignright'} }) }} </span>
+                            </td>
+                            <td class="cantTd">{{ item.vars.data.cantidadTxt }}</td>
+                            <td class="recTd">{{ form_widget(item.entregado, { 'attr': {'class' : 'number floatleft alignright','required':'required'} }) }}
+                                <span class="unidmed floatleft" style="padding-left: 5px; {% if item.vars.data.bulto %} display:none; {% endif %} ">{{ item.vars.data.producto.unidadmedida.nombre}}</span></td>
+                            <td class="bulto">{{ form_widget(item.bulto) }}</td>
+                            <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }}</td>
+                            <td class="totalTd alignright"></td>
+                            <td class="delTd" style="text-align:center;"></td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="head1 alignright" colspan="7" ></th>                            
+                            <th class="head1 alignright red" id="Total" style="padding-right: 10px;"></th>
+                            <th class="head1" style="text-align:center;">
+                                <a href="#" id="linkAdd" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>    
+
+            </div>                
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('compras_pedido_recepcion')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+  {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+var $collectionHolder;
+jQuery(document).ready(function($) {
+    $('#comprasbundle_pedido_fechaPedido').attr('required',false);
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $(".chzn-select").chosen({no_results_text: "Sin resultados"});
+// Get the container who holds the collection
+    $collectionHolder = $('table.stdtable tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });
+    $collectionHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });    
+    $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewItem();
+        e.stopPropagation();
+        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
+    });    
+   $(".chzn-select").change(function(){ changeProducto( $(this) ) }); 
+   $('.recTd input, .precTd input[type=text]').change(function(){ actualizaTotales(); });
+   $(document).keypress(function(e) {
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+    });
+    $(".bulto input").change(function(){ changeBulto( $(this) );  });
+    $(".bulto input").each(function() {
+        changeBulto( $(this) );
+    });
+    actualizaTotales();
+});    
+function addNewItem() {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
+    jQuery(".chzn-select").chosen({no_results_text: "Sin resultados"});
+    jQuery('input').on('focus',function(){ jQuery(this).select(); });
+    jQuery(".bulto input").last().uniform();
+    jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
+    jQuery(".chzn-select").change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery('.recTd input, .precTd input[type=text]').change(function(){ actualizaTotales(); });
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            actualizaTotales();
+        }
+    });
+}
+function changeProducto(producto){
+    jQuery.ajax({
+               url: "{{ path("get_data_producto") }}",
+               async:false,
+               dataType:"json",
+               data: 'prod='+ producto.val(),
+               success: function(data) { 
+                   trIndex = producto.parent().parent();
+                   var costo = (parseFloat(data.costo)>0) ? parseFloat(data.costo) : 0;
+                   trIndex.find('.precTd input[type=text]').val( costo );
+                   trIndex.find('span.unidmed').html(data.unidmed);
+                   if(data.bulto){
+                       trIndex.find('span.unidmed').hide();
+                       trIndex.find('.cantxBulto input').val(data.cantxBulto);
+                   }else{
+                       trIndex.find('span.unidmed').show();
+                       trIndex.find('.cantxBulto input').val('');
+                   }
+                   console.log( trIndex.find('.bulto input') );
+                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   jQuery.uniform.update();
+                   jQuery('.precTd input[type=text]').change();
+                   if(costo>0)  trIndex.find('.cantTd input').focus();
+                   else         trIndex.find('.precTd input[type=text]').focus();
+               }
+           });
+}
+
+    function actualizaTotales(){
+        var cantTot=0, costoTot=0;
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+            cant = parseFloat(item.find('.recTd input').val());
+            costo = parseFloat(item.find('.precTd input[type=text]').val());
+            if(cant>0 && costo>0){
+                // incrementar totales               
+                cantTot += cant;
+                costoTot += (costo * cant);
+                //actualizar total
+                item.find('.totalTd').text(costo * cant);
+            }else{
+                item.find('.totalTd').text(0);
+            }
+        });
+        //jQuery('#recTotal').text(cantTot);
+        jQuery('#Total').text(costoTot.toFixed(2));
+        
+         $collectionHolder.find('.ordTd').each(function(index) {
+            jQuery(this).html(index+1);
+        });
+    }
+    
+function changeBulto(item){ 
+    var unidmed = item.parent().parent().parent().siblings('.recTd').find('.unidmed'); 
+        var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
+        if( item.is(':checked') ){
+            unidmed.hide();
+            cantxbulto.prop('readonly',false);     
+            cantxbulto.css('color','#666');
+            cantxbulto.focus();
+        }else{
+           unidmed.show(); 
+           cantxbulto.prop('readonly',true);
+           cantxbulto.css('color','#fff');           
+        }   
+}    
+</script>{% endblock %}

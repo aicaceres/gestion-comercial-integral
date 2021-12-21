@@ -1,0 +1,57 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Usuarios</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Perfil de Usuario</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'quickform'}}) }}
+
+        <fieldset >
+            <div class="one_half">
+                <p>
+        {{ form_label(form.username) }}
+        {{ form_widget(form.username, { 'attr': {'class' : 'smallinput uppercase' } }) }}
+        {{ form_errors(form.username) }}
+                </p>
+                <p>
+        {{ form_label(form.nombre) }}
+        {{ form_widget(form.nombre, { 'attr': {'class' : 'mediuminput capitalize' } })  }}
+        {{ form_errors(form.nombre) }}    
+                </p>
+                <p>
+        {{ form_label(form.dni) }}
+        {{ form_widget(form.dni, { 'attr': {'class' : 'mininput'} }) }}
+        {{ form_errors(form.dni) }}    
+                </p>
+
+            </div> <!--one_half -->
+            <div class="one_half last">
+                <p>
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email, { 'attr': {'class' : 'smallinput' ,'autocomplete':'off' } }) }}
+        {{ form_errors(form.email) }}    
+                </p>        
+        {{ form_widget(form.password) }}
+        {% if entity.id %}
+                <div style="margin-left: 20%;">
+                    <span class="information"></span>
+                    <small class="input-notification desc">Dejar en blanco si no desea cambiar su contraseña</small>
+                </div>
+        {%endif%}
+            </div> <!--one_half last -->
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('homepage')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}

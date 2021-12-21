@@ -1,0 +1,8 @@
+{% for tipo, mensajes in app.session.flashbag.all() %}
+{% for mensaje in mensajes %}
+<div class="notibar msg{{ tipo }}">
+    <a class="close"></a>
+    <p>{{ mensaje }}</p>
+</div><!-- notification msgerror -->
+{% endfor %}
+{% endfor %}

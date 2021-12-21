@@ -1,0 +1,108 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader">
+    <h1 class="pagetitle">Pedidos Interdepósitos</h1> 
+    <form class="deposito_selector" id="searchform" action="{{ path('stock_pedido') }}" method="get">
+        <div style="display: inline-block; margin:10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Depósito:</strong></label>
+            <select class="uniformselect" id="selectDeposito" name="depId">
+            {% for dep in depositos %}
+                <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.empresaUnidadDeposito}}</option>
+            {% endfor %}
+            </select>  
+        </div>    
+        <div style="display: inline-block; margin:10px;">     
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Período: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{periodo.desde}}" name="desde" id="desde" /> 
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{periodo.hasta}}" name="hasta" id="hasta" /> 
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>        
+    </form>
+
+    <ul class="hornav" style="margin-top:0">
+        <li class="current" ><a id="linkEnviado" href="#tabEnviado">Solicitados</a></li>
+        <li><a id="linkRecibido" href="#tabRecibido">Demandados</a></li>
+    </ul>    
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <div id="tabEnviado" class="subcontent" >
+        <h4>Pedidos enviados a otros Depósitos</h4>
+        <br>
+        {% include "AppBundle:Pedido:_partial-pedidos.html.twig"  with {'entities': enviados, 'propio':1} %}  
+    </div><!--#enviados--> 
+    
+    <div id="tabRecibido" class="subcontent" style="display: none">
+        <h4>Pedidos recibidos desde otros Depósitos</h4>
+        <br> 
+        {% include "AppBundle:Pedido:_partial-pedidos.html.twig"  with {'entities': recibidos, 'propio':0} %}     
+    </div><!--#recibidos--> 
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}        
+<script type="text/javascript">
+
+jQuery(document).ready(function($){
+    var ruta = window.location.toString();
+    if ('{{central}}' && '{{pordefecto}}') {
+        $('#linkRecibido').click();
+    }
+   /* if (ruta.indexOf('#tabEnviado')!=-1) {
+        $('#linkEnviado').click();
+    }
+    if (ruta.indexOf('#tabRecibido')!=-1) {
+        $('#linkRecibido').click();
+    }*/
+    // definir orden en datatables
+     var oTable = $('#pedintdep0,#pedintdep1').dataTable({
+                "bAutoWidth": false,
+                "bRetrieve" : true,
+                "aaSorting":  [[0,'desc'],[1,'desc'] ],
+                "columnDefs": [ {
+                    "targets"  : 'nosort',
+                    "orderable": false
+                  }],
+		"sPaginationType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": "<<",
+                        "sNext": ">",
+                        "sLast": ">>",
+                        "sPrevious": "<"
+                    },
+			"sLengthMenu": "Mostrar _MENU_ registros ",
+			"sZeroRecords": "Sin datos",
+			"sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+			"sInfoEmpty": "Sin coincidencias",
+			"sInfoFiltered": "(filtrado de _MAX_ registros)",
+                        "sSearch": "Buscar:"
+		}
+	});
+     
+   $('#selectDeposito').change(function(){ 
+        $('#searchform').submit();
+    }); 
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+   $('#newPedido').on('click',function(){
+       var url = "{{ path('stock_pedido_new') }}?" + "depId=" + $('#selectDeposito').val() ;
+       window.location.href = url;
+   }); 
+    
+   $('.print').click(function(){
+        cant = $('table tbody tr').length;
+        if(  cant>0 ){
+            url = '{{ path('stock_pedido_listado') }}';
+            myWindow=window.open(url,"","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=yes, titlebar=no,copyhistory=no, width=800, height=450")
+            myWindow.focus();
+        }
+     });
+
+});
+</script>    
+{% endblock %}

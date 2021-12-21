@@ -1,0 +1,108 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Inventario</h1>
+    <span class="pagedesc">Listado de Productos en Stock por Depósito y Proveedor</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+<div>  
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_inventario_enstock") }}" method="post">
+        <input type="hidden" id="depositoid" name="depositoid" value=""/>
+        <input type="hidden" id="proveedorid" name="proveedorid" value=""/>
+        <input type="hidden" id="searchterm" name="searchterm" value=""/>
+        <input type="hidden" id="datalist" name="datalist" value=""/>
+        <button class="stdbtn floatright" data-url="{{ path('export_inventario_enstock') }}" type="button" >Exportar</button>        
+        <button class="stdbtn floatright" data-url="{{ path('print_inventario_enstock') }}" type="button" >Imprimir</button>
+    </form>   
+    <form id="searchform" action="{{ path('stock_inventario_enstock') }}" method="post">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Depósito:</strong></label>
+            <select class="uniformselect" id="selectDeposito" name="depId">
+                <option value="0">Todos</option>
+            {% for dep in depositos %}
+                <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
+            {% endfor %}
+            </select>  
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Proveedor:</strong></label>
+            <select class="uniformselect" id="selectProveedor" name="provId">
+                <option value="0">Todos</option>
+            {% for prov in proveedores %}
+                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
+            {% endfor %}
+            </select>  
+        </div>
+    </form>
+</div><!-- button -->      
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Depósito</th>
+                <th>Rubro</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Proveedor</th>
+                <th style="width: 90px;display: inline-block;" class="nosort">Stock Actual</th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities if entity.deposito.id in app.session.get('depositos') %}
+            <tr>
+                <td>{{ entity.deposito.nombre|upper}}</td>
+                <td>{% if entity.producto.rubro %}{{ entity.producto.rubro.nombre }}{% endif %}</td>
+                <td style="width:8%;">{{ entity.producto.codigo |upper }}</td>
+                <td>{{ entity.producto.nombre }}</td>
+                <td>{{ entity.producto.proveedor }}</td>
+                <td class="alignright" style="font-weight:bold; width:10%;{% if entity.cantidad<0 %} color:red;{%endif%}">{{ entity.cantidad| number_format(3,'.',',') }}
+                    {{ entity.producto.unidadMedida }}</td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}    
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('#selectProveedor,#selectDeposito').change(function(){ 
+        form = $('#searchform').serialize();
+        window.location.href= "{{ path('stock_inventario_enstock') }}?"+form ;
+    });    
+
+    var oTable = $('#dyntable2').dataTable();
+    oTable.fnSort( [ [0,'asc'],[1,'asc'],[2,'asc'] ] );   
+    $('#printform button').on('click',function(){
+        let form = $('#printform');
+        let url = $(this).data('url');
+        form.attr('action',url);
+        $('#depositoid').val($('#selectDeposito').val());
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+        form.submit();
+    });
+    /*$('#printform').on('submit',function(){
+        console.log( $(this).attr('action'));
+        return false;
+        $('#depositoid').val($('#selectDeposito').val());
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });     */
+       
+});    
+</script>   
+{% endblock %}

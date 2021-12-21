@@ -1,0 +1,50 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Precios</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar Precio' : 'Alta de Nuevo Precio' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+     {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <p><h4>Lista {{entity.precioLista}}</h4></p>
+            {{ form_widget(form.precioLista, { 'attr': {'style' : 'display:none' } })  }}
+                <p>
+              {%if entity.id %}
+                    <h4>Producto {{entity.producto}}</h4>
+                    {{ form_widget(form.producto, { 'attr': {'style' : 'display:none' } })  }}
+              {% else %}      
+            {{ form_label(form.producto) }}
+            {{ form_widget(form.producto, { 'attr': {'class' : 'chzn-select' ,'data-placeholder':'Seleccionar Producto...' } }) }}
+            {{ form_errors(form.producto) }}
+              {% endif %}      
+                </p>
+                <p>
+        {{ form_label(form.precio) }}
+        {{ form_widget(form.precio, { 'attr': {'class' : 'width100' } })  }}
+        {{ form_errors(form.precio) }}    
+                </p>                                 
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('stock_precio_listado')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function($){ 
+        id = "{{entity.id}}"; 
+        if(!id) $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+    });</script>
+{% endblock %}

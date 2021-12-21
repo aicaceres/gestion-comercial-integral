@@ -1,0 +1,130 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Datos de la Empresa</h1>
+    <span class="pagedesc"> Información de la Empresa que se utiliza en el sistema </span>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+    <fieldset >
+        <div class="one_half">
+            <p>
+                {{ form_label(form.nombre_corto) }}
+                {{ form_widget(form.nombre_corto, { 'attr': {'class' : 'mininput upper' } }) }}
+                {{ form_errors(form.nombre_corto) }}
+            </p>
+            <p>
+                {{ form_label(form.nombre) }}
+                {{ form_widget(form.nombre, { 'attr': {'class' : 'mediuminput' } }) }}
+                {{ form_errors(form.nombre) }}
+            </p>
+            <p>
+                {{ form_label(form.cuit) }}
+                {{ form_widget(form.cuit, { 'attr': {'class' : 'smallinput' } }) }}
+                {{ form_errors(form.cuit) }}
+            </p>
+            <p>
+                {{ form_label(form.direccion) }}
+                {{ form_widget(form.direccion, { 'attr': {'class' : 'mediuminput' } })  }}
+                {{ form_errors(form.direccion) }}    
+            </p>
+            <p>
+                {{ form_label(form.telefono) }}
+                {{ form_widget(form.telefono, { 'attr': {'class' : 'smallinput' } })  }}
+                {{ form_errors(form.telefono) }}    
+            </p>
+            <p>
+                {{ form_label(form.responsable) }}
+                {{ form_widget(form.responsable, { 'attr': {'class' : 'smallinput'  } }) }}
+                {{ form_errors(form.responsable) }}    
+            </p>   
+        </div>    
+        <div class="one_half last">    
+            <h4 style="padding-bottom:5px">Unidades de Negocio </h4>
+            <table cellpadding="0" cellspacing="0" border="0" class="stdtable" >
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th style="width:15%;"> Activo</th>
+                        <th style="width:15%; text-align: center"> <a href="#" id="linkAdd" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a> </th>
+                    </tr>
+                </thead>
+                <tbody data-index="{{form.unidades | length }}" 
+                       data-prototype="{% filter escape %}{% include 'ConfigBundle:Empresa:prototype.html.twig' with {'item':form.unidades.vars.prototype} %}{% endfilter %}">                                                       
+                    {% for unidad in form.unidades %}
+                        <tr class="item">
+                            <td>{{form_widget(unidad.nombre, { 'attr': {'class' : 'uppercase' } })}}</td>
+                            <td>{{form_widget(unidad.activo)}}</td>
+                            <td class="delTd" style="text-align:center;"></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>    
+        </div>  
+    </fieldset>            
+    <fieldset >            
+        <p>
+            {{ form_row(form.leyenda, { 'attr': {'class' : 'mediuminput'  } }) }} 
+        </p>                             
+        <p>
+            {{ form_row(form.leyendaFactura, { 'attr': {'class' : 'mediuminput'  } }) }} 
+        </p>  
+
+
+
+        <br clear="all" /> 
+        <div class="actionbutton">
+            <button class="guardar" type="submit" >Guardar</button>
+            <a class="cancelar" type="button" href="{{ path('sistema_seguridad_empresa')}}">Cancelar</a>
+        </div>
+    </fieldset>
+{{ form_end(form) }}
+</div>    
+</div> 
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {    
+    $collectionHolder = $('table.stdtable tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });    
+    $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewItem();
+        e.stopPropagation();
+    });        
+});
+
+// funciones personalizas para el formulario
+ function addNewItem() {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    var chk = $collectionHolder.find('input:checkbox').last();
+    chk.prop('checked',true);
+    chk.uniform();
+    $collectionHolder.find('input:text').last().focus();
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1" class="delete btn btnaction btn_trash"></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+        }
+    });
+} 
+</script>    
+{% endblock %}

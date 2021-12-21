@@ -1,0 +1,24 @@
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    jQuery('[id^="appbundle"][id$="_unidadNegocio"]').change(function() {
+        var data = {
+            unidneg_id: jQuery(this).val()
+        };
+        jQuery.ajax({
+            type: 'post',
+            url: '{{ path("select_depositos") }}',
+            data: data,
+            success: function(data) {
+                //var deposito_selector = jQuery('[id^="appbundle"][id$="_depositoDestino"]');
+                var deposito_selector = jQuery('.deposito_selector');
+                deposito_selector.html('<option></option>');
+                //jQuery('[id^="uniform-appbundle"][id$="_depositoDestino"] span').html('Seleccione Depósito');
+
+                for (var i = 0, total = data.length; i < total; i++) {
+                    deposito_selector.append('<option value="' + data[i].id + '">' + data[i].nombre + '</option>');
+                }
+            }
+        });
+    });
+});
+</script>

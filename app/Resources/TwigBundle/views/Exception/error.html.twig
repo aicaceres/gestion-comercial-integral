@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}  
+
+{% block body %}
+    <body class="withvernav">
+        <div class="bodywrapper">
+            {% include "AppBundle::header.html.twig" %}
+            <div class="centercontent">
+                
+                {% block contentwrapper %}  
+                    <div class="errorwrapper error403">
+                        <div class="errorcontent">
+                            <h1>Algo ha salido mal!</h1>
+                            {% if app.user.name %}
+                                <h3>{{ exception.message }}</h3>
+                                 <br />
+                                <button class="stdbtn btn_black" onclick="history.back();">Volver a la página anterior</button> 
+                            {% else %}
+                                <h3>Su sesión ha expirado. Debe volver a loguearse.</h3>
+                                <br />
+                                <button class="stdbtn btn_black" onclick="location.href='{{path('homepage')}}';">Iniciar Sesión</button> 
+                            {% endif %}
+                           
+                        </div><!--errorcontent-->
+                    </div><!--errorwrapper-->                
+                {% endblock %}
+                
+            </div>
+        </div>
+    </body>          
+{% endblock %}

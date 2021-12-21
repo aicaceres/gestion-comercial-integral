@@ -1,0 +1,8 @@
+{% for tipo, mensajes in app.session.flashbag.all() %}
+    {% for mensaje in mensajes %}
+    <div class="notifmsg {{ tipo }} png_bg">
+        <a href="#" class="close"></a>
+        <div> {{ mensaje }} </div>
+    </div>
+    {% endfor %}
+{% endfor %}

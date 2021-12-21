@@ -1,0 +1,70 @@
+<?php
+
+namespace ComprasBundle\Entity;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ComprasBundle\Entity\CentroCosto
+ *
+ * @ORM\Table(name="centro_costo")
+ * @ORM\Entity(repositoryClass="ComprasBundle\Entity\FacturaRepository")
+ */
+class CentroCosto {
+    /**
+     * @var integer $id
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    protected $id;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ComprasBundle\Entity\FacturaDetalle", inversedBy="centroCostoDetalle")
+     * @ORM\JoinColumn(name="factura_detalle_id", referencedColumnName="id")
+     */
+    protected $facturaDetalle;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio", inversedBy="costoUnidadNegocio")
+     * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
+     */
+    protected $unidadNegocio;
+
+    /**
+     * @var integer $costo
+     * @ORM\Column(name="costo", type="decimal", scale=3 )
+     */
+    protected $costo;
+
+    /**
+     * @var datetime $created
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $created;
+
+    /**
+     * @var datetime $updated
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
+
+    /**
+     * @var User $createdBy
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
+     * @var User $updatedBy
+     * @Gedmo\Blameable(on="update")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
+     * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
+     */
+    private $updatedBy;
+
+}

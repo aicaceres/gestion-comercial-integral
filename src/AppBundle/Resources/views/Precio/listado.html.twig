@@ -1,0 +1,94 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Listado de Precios</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <div>  
+<form id="printform" name="printform" target="_blank"  action="{{ path("print_lista_precios") }}" method="post">
+        <input type="hidden" id="listaid" name="listaid"/>
+        <input type="hidden" id="rubroid" name="rubroid"/>
+        <input type="hidden" id="proveedorid" name="proveedorid"/>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn print floatright" type="submit" >Imprimir Lista</button>
+    </form>          
+        <form id="searchform" action="{{ path('stock_precio_new') }}" method="post">
+            <div style="display: inline-block;">
+                <label><strong>Seleccionar Lista:</strong></label>
+                <select class="uniformselect" id="selectLista" name="listaId">
+                {% for lista in listas%}
+                    <option value="{{lista.id}}" {% if lista.id==listaId %} selected="selected" {% endif %}>
+                    {{lista}}</option>
+                {% endfor %}
+                </select>  
+            </div>
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Rubro:</strong></label>
+            <select class="uniformselect" id="selectRubro" name="rubroId">
+                <option value="0">Todos</option>
+            {% for rubro in rubros %}
+                <option value="{{rubro.id}}" {% if rubro.id==rubroId %} selected="selected" {% endif %}> {{rubro.codigo}}</option>
+            {% endfor %}
+            </select>  
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Proveedor:</strong></label>
+            <select class="uniformselect" id="selectProveedor" name="provId">
+                <option value="0">Todos</option>
+            {% for prov in proveedores %}
+                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
+            {% endfor %}
+            </select>     
+        </form>
+    </div><!-- button --> 
+     <br clear="all" /> 
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Rubro</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Costo</th>
+                <th>Precio</th>
+                <th class="nosort">Últ. Modif.</th>
+                <th class="nosort actionbutton addbutton">
+                   {% if app.user.access(app.session.get('unidneg_id'),'stock_precio_new') %}
+                    <button onclick="jQuery('form').submit();" class="guardar create" >Agregar Precio</button>
+                    {% else %} &nbsp; {% endif %} 
+                </th>
+                
+            </tr>
+        </thead>
+        <tbody>
+           {% include "AppBundle:Precio:listado-row.html.twig" %}
+        </tbody>
+    </table> 
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('#selectLista,#selectRubro,#selectProveedor').change(function(){ 
+        form = $('form').serialize();
+        window.location.href= "{{ path('stock_precio_listado') }}?"+form ;
+    });
+    var oTable = $('#dyntable2').dataTable();
+    $('#printform').on('submit',function(){
+        $('#listaid').val($('#selectLista').val());
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#rubroid').val($('#selectRubro').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });
+});    
+</script>    
+{% endblock %}

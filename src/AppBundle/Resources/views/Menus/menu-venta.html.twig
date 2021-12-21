@@ -1,0 +1,36 @@
+<div class="vernav2 iconmenu">
+    <ul>
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura') %}        
+        <li><a href="#item_facturacion" class="elements">Facturación</a>        
+            <span class="arrow"></span>
+            <ul id="item_facturacion">
+                <li id="factura"><a href="{{path('ventas_factura')}}">Facturas de Venta</a></li>
+                <li id="notadebcred"><a href="{{path('ventas_notadebcred')}}">Notas de Debito/Crédito</a></li>
+            </ul>
+        </li>    
+        {% endif %}        
+        
+     {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente') %}
+        <li><a href="#item_cliente" class="elements">Clientes</a>
+            <span class="arrow"></span>
+            <ul id="item_cliente">
+                <li id="cliente"><a href="{{path('ventas_cliente')}}">Administración</a></li>
+                <li id="ctacte"><a href="{{path('ventas_cliente_ctacte')}}">Cuenta Coriente</a></li>
+                <li id="pagos"><a href="{{path('ventas_cliente_pagos')}}">Pagos de Clientes</a></li>
+            </ul>
+        </li>
+        {% endif %}            
+        {% if app.user.access(app.session.get('unidneg_id'),'compras_libroiva') %}
+        <li><a href="#impuestos" class="elements">Impuestos AFIP</a>
+            <span class="arrow"></span>
+            <ul id="impuestos">                
+                <li id="libroiva"><a href="{{path('ventas_libroiva')}}">Libro de IVA</a></li>                                 
+                <li id="informeafip"><a href="{{path('ventas_informeafip')}}">Régimen de Información</a></li>                                  
+                <li id="afip"><a href="{{path('ventas_afip_importacion')}}">Exportación Iva Ventas</a></li>                                
+            </ul>
+        </li>        
+    {% endif %} 
+    </ul>
+    <a class="togglemenu"></a>
+    <br /><br />
+</div><!--leftmenu-->

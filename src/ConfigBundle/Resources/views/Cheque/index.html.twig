@@ -1,0 +1,73 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Cheques</h1>
+    <span class="pagedesc">Listado de cheques del sistema</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>N° Cheque</th>
+                <th>Tomado el</th>
+                <th>Dador</th>
+                <th>Banco</th>
+                <th>Localidad</th>
+                <th>Fecha</th>
+                <th>Importe</th>
+                <th class="nosort actionbutton addbutton">
+                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_banco') %}
+                    <a class="editar create" href="{{ path('sistema_cheque_new') }}">Agregar Cheque</a>
+                    {% else %} &nbsp; {% endif %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            {% if entity.devuelto %} {% set estado='cheque-rechazado' %}
+            {% elseif entity.usado %} {% set estado='cheque-usado' %}
+            {% elseif entity.fecha > date() %} {% set estado='cheque-futuro' %}
+            {% else %} {% set estado='cheque-enfecha' %} {% endif %}
+            <tr class="{{ estado }}">
+                <td>{{ entity.nroCheque }}</td>
+                <td><span class="hidden">{{ entity.tomado|date('Ymd') }}</span>{{ entity.tomado|date('d-m-Y') }}</td>
+                <td>{{ entity.dador }}</td>
+                <td>{{ entity.banco }}</td>
+                <td>{{ entity.localidad }}</td>
+                <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
+                <td>{{ entity.valor|number_format(2,',','.') }}</td>
+                <td>
+                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_banco') %}
+                    <a href="{{ path('sistema_cheque_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                    {% if entity.pagoCliente.id is defined %}    
+                            <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.pagoCliente.id }) }}" class="editar btn btnaction btn_inboxi" title="Ver Pago"></a>
+                    {% endif %}
+                    {% if entity.usado and entity.pagoProveedor.id is defined %}
+                       <a href="{{ path('compras_proveedor_pagos_show', { 'id': entity.pagoProveedor.id }) }}" class="editar btn btnaction btn_inboxo" title="Ver Pago"></a>
+                    {% endif %}
+                    <a href url="{{ path('sistema_cheque_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
+                    {% endif %}
+                </td>
+            </tr>
+           {% endfor %}                   
+        </tbody>         
+    </table> 
+    <table>
+        <tr>
+            <td colspan="9">   
+                <span class="cheque-futuro" style="padding:5px" >Cheque Futuro</span>
+                <span class="cheque-enfecha" style="padding:5px" >En fecha</span>
+                <span class="cheque-rechazado" style="padding:5px">Rechazado</span>
+                <span class="cheque-usado" style="padding:5px">Usado</span>
+            </td>
+        </tr>
+    </table>        
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+{% endblock %}

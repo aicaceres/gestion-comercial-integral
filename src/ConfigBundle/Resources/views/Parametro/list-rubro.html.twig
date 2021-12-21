@@ -1,0 +1,59 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Rubros</h1>
+    <span class="pagedesc">Listado de Rubros y Subrubros</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th class="nosort">Rubro/SubRubro</th>
+                <th class="nosort">Descripción</th>
+                <th class="nosort">Activo</th>
+                <th class="nosort actionbutton addbutton">
+                    <a class="editar create" href="{{ path('sistema_parametro_new', { 'slug': 'rubro' }) }}">Agregar Rubro</a>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for rubro in rubros %}
+            <tr>
+                <td><span style="display:none">{{rubro.id}}-00</span><strong>{{ rubro.nombre |upper}}</strong></td>           
+                <td>{{ rubro.descripcion}}</td>
+                <td><input type="checkbox" disabled="disabled" {% if rubro.activo %}checked="checked"{% endif %}/></td>
+                <td>
+                    <a href="{{path('sistema_parametro_edit', { 'slug': 'rubro', 'id': rubro.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                    <a href url="{{ path('sistema_parametro_delete', { 'id': rubro.id }) }}" class="delete rubro btn btnaction btn_trash" title="Borrar"></a>
+                </td>
+            </tr>
+                {% for subrubro in subrubros if subrubro.padre==rubro.id %}
+                    <tr>
+                        <td><span style="display:none">{{rubro.id}}-{{subrubro.id}}</span> &nbsp;&nbsp;&nbsp;{{ subrubro.codigo |upper}}</td>           
+                        <td>{{ subrubro.subrubro}}</td>
+                        <td><input type="checkbox" disabled="disabled" {% if subrubro.activo %}checked="checked"{% endif %}/></td>
+                        <td>
+                            <a href="{{path('sistema_parametro_edit', { 'slug': 'rubro', 'id': subrubro.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                            <a href url="{{ path('sistema_parametro_delete', { 'id': subrubro.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
+                        </td>
+                    </tr>                   
+                {% endfor %}
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+{% endblock %}    
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.rubro').on('click', function(){
+       alert('Si elimina un rubro se eliminarán todos los subrubros asociados!!!');
+    });
+});  
+</script>
+{% endblock %}

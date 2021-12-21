@@ -1,0 +1,153 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Cuenta Corriente: {{cliente}}</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+<div class="deposito_selector" style="margin-bottom: 15px;">  
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_cliente_ctacte") }}" method="post">
+        <input type="hidden" id="clienteid" name="clienteid"/>
+        <input type="hidden" id="fdesde" name="fdesde"/>
+        <input type="hidden" id="fhasta" name="fhasta"/>        
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    </form>    
+    <form id="searchform" action="{{ path('ventas_cliente_ctacte') }}" method="GET">
+        <div style="display: inline-block; margin-right: 30px;">
+            <label><strong>Cliente:</strong></label>
+            <select class="uniformselect" id="selectClienteCtacte" name="clienteId">
+            {% for cli in clientes %}
+                <option value="{{cli.id}}" {% if cli.id== cliente.id%} selected="selected" {% endif %}
+                        >{{cli.nombre}}</option>
+            {% endfor %}
+            </select>  
+         </div>    
+        <div style="display: inline-block; margin-right: 30px;">    
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Período: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>            
+        </div>
+    </form>    
+                        
+    </div>
+    <div class="deposito_selector" style="float:right; padding:0 10px 10px 0"><label>Saldo: $&nbsp;<span id="span_saldo_ctacte"></span></label></div>        
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="ctactetable">
+        <thead>
+            <tr>
+                <th class="nosort" style="width:15px"></th>
+                <th class="nosort">Fecha</th>
+                <th class="nosort">Comprobante</th>
+                <th class="nosort">Concepto</th>
+                <th class="nosort">Debe</th>
+                <th class="nosort">Haber</th>
+                <th class="nosort">Saldo</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set saldo,debe,haber=0,0,0 %}
+           {% for entity in entities %}
+                {%if entity.id==0%}
+                <tr>
+                    {% set saldo= saldo+entity.importe%}
+                    {% set debe= debe+entity.importe%}
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td class="alignright">{{entity.concepto}}</td>
+                    <td class="alignright debe">{{entity.importe}}</td>
+                    <td class="alignright haber"></td>
+                    <td class="alignright">{{saldo|number_format(2,'.',',')}}</td>
+                </tr>
+                {%else%}
+            <tr id="{{loop.index}}">
+                <td class="con0"> 
+                    {% if entity.tipo in ['0','1','4'] %} 
+                        {% set saldo= saldo+entity.importe%}
+                        {% set debe= debe+entity.importe%}
+                        <img src="{{ asset('assets/images/icons/in.png') }}" style="margin-top: 5px"/>
+                    {% else %}
+                        {% set saldo= saldo-entity.importe%}
+                        {% set haber= haber+entity.importe%}
+                        <img src="{{ asset('assets/images/icons/out.png') }}" style="margin-top: 5px"/>
+                    {% endif %}
+                </td>
+                <td class="con0">{{ entity.fecha|date('d-m-Y') }}</td>
+                <td class="con0">{{entity.comprobante }}
+                {% if entity.tipo=='1' %} 
+                    <a href="{{path('ventas_factura_show', { 'id': entity.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
+                {% elseif entity.tipo in ['2','4'] %} 
+                    <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" style="float:right"><img src="{{asset('assets/images/icons/folder.png')}}"></a>
+                {% else %} 
+                    <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.id }) }}" style="float:right"><img src="{{asset('assets/images/icons/folder.png')}}"></a>
+                {% endif %}
+                </td>
+                <td>{{entity.concepto|raw }}</td>
+                <td class="alignright debe">{% if entity.tipo in ['0','1','4'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
+                <td class="alignright haber">{% if entity.tipo in ['3','2'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
+                <td class="alignright">{{saldo|number_format(2,'.',',')}}</td>
+            </tr>
+            {%endif%}
+           {% endfor %}
+        </tbody>
+        <tfoot>
+            <th colspan="4"></th>
+            <th class="alignright" >{{debe|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{haber|number_format(2,'.',',')}}</th>
+            <th class="alignright saldo_ctacte" >{{saldo|number_format(2,'.',',')}}</th>
+        </tfoot>
+    </table> 
+</div>
+
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('#span_saldo_ctacte').html( $('.saldo_ctacte').html() );
+    $('#selectClienteCtacte').change(function(){ 
+        $('#searchform').submit();
+    }); 
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    // var debe=0, haber=0;
+    //$('#selectClienteCtacte').change(function(){ $('form').submit(); });
+    var ctacte = $('#ctactetable').dataTable({
+        "bSort":false,
+        "bPaginate":false,
+        "bFilter":false,
+        "bInfo" : false
+        });
+    $('#printform').on('submit',function(){
+        $('#clienteid').val($('#selectClienteCtacte').val());
+        $('#fdesde').val($('#desde').val());
+        $('#fhasta').val($('#hasta').val());
+        //$('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        ctacte.api().rows( { search:'applied' } ).data().each(function(value, index) {  
+            // signo
+            if( value[0]!=='' ){
+                if( value[0].indexOf('out.png')>-1 ) value[0]='-';                
+                if( value[0].indexOf('in.png')>-1 )  value[0]='+';
+            }
+            // nro comp
+            var i = value[2].indexOf('\n');
+            if(i > -1){
+                var nro = value[2].substr(0,i);
+                value[2]=nro;                
+            }
+            datos[index] = value;
+        });         
+        $('#datalist').val(JSON.stringify(datos));
+    });        
+        
+        
+        
+   
+});    
+</script>    
+{% endblock %}

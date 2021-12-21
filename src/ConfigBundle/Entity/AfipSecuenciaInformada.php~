@@ -1,0 +1,43 @@
+<?php
+
+namespace ConfigBundle\Entity;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ConfigBundle\Entity\AfipSecuenciaInformada
+ * @ORM\Table(name="afip_secuencia_informada")
+ * @ORM\Entity()
+ */
+class AfipSecuenciaInformada {
+    /**
+     * @var integer $id
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+    /**
+     * @var string $periodo
+     * @ORM\Column(name="periodo", type="string", nullable=false)
+     */
+    protected $periodo;
+
+    /**
+     * @var string $secuencia
+     * @ORM\Column(name="secuencia", type="string", nullable=false)
+     */
+    protected $secuencia;
+
+    /**
+     * @var string $enviado
+     * @ORM\Column(name="enviado", type="boolean", nullable=true)
+     */
+    protected $activo = true;
+
+    public function __toString() {
+        return $this->periodo;
+    }
+
+}

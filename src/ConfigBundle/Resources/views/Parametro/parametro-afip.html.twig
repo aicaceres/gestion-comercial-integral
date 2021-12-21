@@ -1,0 +1,59 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Parámetros Afip</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper" >
+    <h1 id="popup_title" >Tabla de {{ slug|upper }}</h1>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2" style="width: 60%; margin:0 auto">
+        <thead>
+            <tr>
+                <th style="width:10%">Código</th>
+                <th>Descripción</th>
+                <th style="width:10%" class="nosort">Activo</th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+            <tr>
+                <td>{{ entity.codigo |upper}}</td>
+                <td>{{ entity.nombre |upper}}</td>                
+                <td><input class="activo" data-id="{{ entity.id }}" type="checkbox" {% if entity.activo %}checked="checked"{% endif %} /></td>                
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+{% endblock %}
+    
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($) { 
+    $(".activo").click(function(e) {         
+      var checkbox = $(this);
+      id = checkbox.data('id');
+      valor =  checkbox.is(":checked");
+     $.ajax({
+               url: "{{ path("set_paramafip_activo") }}",  
+               dataType:"json",
+               data: {id: id, valor: valor, slug: '{{slug}}' },
+               success: function(data) { 
+                   if(data==='OK'){
+                       console.log('ok');
+                   }else{
+                       alert(data);
+                       checkbox.prop('checked',!valor);
+                        $.uniform.update(checkbox);
+                   }
+               }
+           });
+   });            
+});
+</script>  
+
+{% endblock %}

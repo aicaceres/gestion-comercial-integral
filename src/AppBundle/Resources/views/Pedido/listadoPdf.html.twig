@@ -1,0 +1,85 @@
+<style>
+    @page { size : A4 landscape; }
+    .align-center{text-align: center}
+    .alignright{text-align:right;}
+    .alignleft {
+        padding-left: 20px;
+        text-align: left;
+    }
+    .break {page-break-after:always}
+    body{ font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+          margin: 10px 20px;}
+    h5 {
+        font-weight: lighter;
+        margin: 0;
+        position: absolute;
+        right: 20px;
+        text-align: right;
+        top: 10px;
+    }
+    .pageheader .pagetitle {
+        color: #666666;
+        font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+        font-size: 28px;
+        font-weight: normal;
+        margin: 0 10px;
+    }
+    .pageheader .pagedesc {
+        color: #666666;
+        margin: 0 10px;
+    }
+    table {
+        font-family: 'Verdana' ;
+        font-size: 10px;
+        width: 100%;
+        border-collapse:collapse;
+    }
+    table tr th{
+        border: 1px solid gray;
+        /*  background: #E5E5E5;*/
+        padding: 5px;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+    }
+    table tr td{    border: 1px solid gray;  padding:3px 15px;}
+
+</style>
+<img style="width: 15%;position:absolute;" src="{{asset('assets/images/logo_small.png')}}" />
+<div class="align-center" style="height:32px;">
+    <span style="display: block;padding-top: 10px;">PEDIDOS INTERDEPÓSITOS</span>
+</div>
+<h5> 
+    <small style="display: block;margin-bottom: 5px;">Fecha: {{date('now')|date('d / m / Y H:i')}}</small>
+    <small>Usuario: {{app.user.nombre}} </small>
+</h5>
+
+<hr>
+<table class="lista_precios" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th>Nro</th>
+            <th>Origen</th>
+            <th>Destino</th>
+            <th>Fecha Pedido</th>
+            <th>Fecha Entrega</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in listado %}
+        <tr>
+            <td>{{item.nroPedido}}</td>
+            <td>{{item.depositoOrigen.empresaUnidadDeposito}}</td>
+            <td>{{item.depositoDestino.empresaUnidadDeposito}}</td>
+            <td>{{item.fechaPedido|date('d-m-Y')}}</td>
+            <td>{%if item.fechaEntrega %}{{ item.fechaEntrega|date('d-m-Y') }}{% endif %}</td>
+            <td>{{ item.estado }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script type="text/javascript">    
+        window.print(); 
+      // window.close(); 
+      window.setTimeout('window.close()', 1000);
+</script>   

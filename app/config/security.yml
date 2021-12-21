@@ -1,0 +1,49 @@
+# To get started with security, check out the documentation:
+# http://symfony.com/doc/current/security.html
+security:
+
+    role_hierarchy:
+        ROLE_SUPER_ADMIN: [ROLE_OPERATOR, ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+        
+    # http://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    providers:
+        usuarios:
+            entity: { class: ConfigBundle\Entity\Usuario, property: username }
+            
+    encoders:
+        ConfigBundle\Entity\Usuario: { algorithm: 'bcrypt' }
+        
+    firewalls:
+        # disables authentication for assets and the profiler, adapt it according to your needs
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+            
+        secured_area:
+            pattern: ^/
+            provider: usuarios
+            anonymous: ~
+            form_login:
+                login_path: usuario_login
+                check_path: usuario_login_check
+                use_referer: true
+            logout:
+                path:   usuario_logout
+                target: /
+                invalidate_session: false
+            remember_me:
+                key: dm3600
+                lifetime: 604800 
+                # 7 * 24 * 3600 = 604.800 = 1 semana
+            # activate different ways to authenticate
+
+            # http://symfony.com/doc/current/security.html#a-configuring-how-your-users-will-authenticate
+            #http_basic: ~
+
+            # http://symfony.com/doc/current/cookbook/security/form_login_setup.html
+            #form_login: ~
+
+    access_control:
+        - { path: ^/usuario/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        #- { path: ^/, roles: ROLE_USER }
+        #- { path: ^/usuario/*, roles: ROLE_INTERNO }

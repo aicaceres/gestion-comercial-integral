@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+    <head>
+        <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+        <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{% block title %}Sistema de Gestión{% endblock %}</title>
+        {% block head %}{% endblock %}  
+        {% block stylesheets %}            
+            <link rel="stylesheet" href="{{ asset('assets/css/style.default.css') }}" type="text/css" media="all" />
+            <link rel="stylesheet" href="{{ asset('assets/css/style.blueline.css') }}" type="text/css" media="all" />
+            <link href="{{ asset('assets/js/plugins/select2/select2.min.css') }}" rel="stylesheet" type="text/css">
+            <link rel="stylesheet" href="{{ asset('assets/fancybox/jquery.fancybox.css?v=2.1.5') }}" type="text/css" media="screen" />
+            {% block page_stylesheets %}{% endblock %}
+                      
+        {% endblock %}
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.png') }}" />
+        <!--[if IE 9]>
+            <link rel="stylesheet" media="screen" href="css/style.ie9.css"/>
+        <![endif]-->
+        <!--[if IE 8]>
+            <link rel="stylesheet" media="screen" href="css/style.ie8.css"/>
+        <![endif]-->
+        <!--[if lt IE 9]>
+            <script src="http://css3-mediaqueries-js.googlecode.com/svn/trunk/css3-mediaqueries.js"></script>
+        <![endif]-->
+
+        {% block head_javascripts %}
+            <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery-1.7.min.js') }}"></script>
+            <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery-ui-1.8.16.custom.min.js') }}"></script>                       
+            {% block head_page_javascripts %}{% endblock %} 
+        {% endblock %}        
+        
+    </head>
+    <body>
+        <!--<span id="loading"></span>-->
+        {% block body %}{% endblock %}
+
+        {% block javascripts %}
+            <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.cookie.js') }}"></script>
+            <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.uniform.min.js') }}"></script>
+             <script type="text/javascript" src="{{ asset('assets/fancybox/jquery.fancybox.pack.js?v=2.1.5') }}"></script>                              
+            <script type="text/javascript" src="{{ asset('assets/js/custom/general.js') }}"></script>            
+            <script type="text/javascript" src="{{ asset('assets/js/plugins/select2/select2.js') }}"></script>            
+            <script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+            {% block page_javascripts %}{% endblock %} 
+        {% endblock %}        
+    </body>
+</html>
+

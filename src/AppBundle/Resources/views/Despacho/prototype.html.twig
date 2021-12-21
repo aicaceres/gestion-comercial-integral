@@ -1,0 +1,25 @@
+<tr class="item" id="" divdata="item_items">
+    <td class="ordTd">         
+    <div class="loaders">
+        <img src="{{asset('assets/images/loaders/loader2.gif')}}" alt="" />
+    </div>
+    </td>
+    <td class="prodTd">
+        <span class="prodSpan">  </span>
+        {{form_widget(item.producto)}}        
+        <a href="javascript:void(0)" class="btnlote btn btn_info" title="Ver/Ocultar Lote"></a>
+        <div class="lote" style="display:none;">
+            {{ form_widget(item.lotes, { 'attr': {'class' : 'select2Lote' } }) }}      
+        </div>
+        <div style="display:none"> {{form_widget(item.pedidoDetalle)}} 
+           {{form_widget(item.orden)}}  {{form_widget(item.entregado)}}
+        </div>         
+    </td>
+    <td class="stockTd alignright"> <span class="cantstk"></span> <span class="unidmedstk"></span> </td>
+    <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : ' width50 floatleft'} }) }} 
+        <span class="unidmed floatleft" style="padding-left: 5px;" </span> </td>
+    <td class="bulto">{{ form_widget(item.bulto) }}</td>
+    <td class="cantxBulto">{{ form_widget(item.cantidadxBulto, { 'attr': {'class' : 'width50 floatleft'} }) }}</td>
+    <td class="totalTd alignright"></td>
+    <td class="delTd" style="text-align:center;"></td>
+</tr>

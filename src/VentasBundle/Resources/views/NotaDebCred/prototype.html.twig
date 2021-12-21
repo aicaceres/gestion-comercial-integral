@@ -1,0 +1,22 @@
+<tr class="item" divdata="item_items">
+    <td class="ordTd"></td>
+    <td class="prodTd">
+        {{ form_widget(item.producto) }}
+        {{ form_widget(item.textoProducto) }}
+    </td>
+    <td class="iva2Td"><span class="alicuota"></span>
+       <span class="hidden"> {{ form_widget(item.afipAlicuota) }}</span> </td> 
+    <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
+        <span class="unidmed floatleft" style="padding-left: 5px"></span>
+    </td>
+    <td class="bulto">{{ form_widget(item.bulto) }} </td>
+    <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }} </td>
+    <td class="precTd  alignright">        
+        <span tabIndex="-1">{{ form_widget(item.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
+    </td>
+    <td class="ivaTd alignright">{{ form_widget(item.iva, { 'attr': {'style':'text-align:right;'} }) }}
+        <span class="porciva hidden" > </span>
+    </td>    
+    <td class="totalTd alignright"></td>
+    <td class="delTd" style="text-align:center;"></td>
+</tr>

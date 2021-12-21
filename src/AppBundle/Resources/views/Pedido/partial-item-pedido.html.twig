@@ -1,0 +1,42 @@
+<style>
+    .prodPedPendiente {
+	margin: 5px auto;
+	display: block;
+	width: 100%;
+	text-align: center;
+	color: orangered;
+    }
+    .loaders{
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+        display:none;
+    }
+    .chzn-disabled{
+        opacity:1 !important;
+    }
+    .chzn-container-single.chzn-disabled .chzn-single div b{
+        display:none;
+    }    
+</style>    
+{{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+<fieldset>
+<div>
+    {{ form_row(form.producto) }}     
+</div>
+</fieldset>
+<fieldset>
+<div>
+    {{ form_row(form.cantidad, { 'attr': {'class' : 'width50 floatleft'} }) }}
+    <span id="unidmed_unidad" class="unidmed floatleft" style="padding-left: 5px"></span>
+   &nbsp;&nbsp; {{ form_widget(form.bulto, { 'attr': {'class' : 'bulto'} }) }}
+   &nbsp;&nbsp;  {{ form_widget(form.cantidadxBulto) }}
+   <span id="unidmed_bulto" class="unidmed" style="padding-left: 5px;display: inline-block;"></span>
+</div>
+<input id="pedidoid" value="" name="pedidoid" type="hidden"/>   
+</fieldset>
+<span class="prodPedPendiente"></span>
+ <div class="loaders">
+    <img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" />
+</div>
+ {{ form_end(form) }} 

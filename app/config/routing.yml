@@ -1,0 +1,19 @@
+app:
+    resource: "@AppBundle/Controller/"
+    type:     annotation
+    prefix:   /    
+    
+ventas:
+    resource: "@VentasBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+compras:
+    resource: "@ComprasBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
+config:
+    resource: "@ConfigBundle/Controller/"
+    type:     annotation
+    prefix:   /

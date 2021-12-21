@@ -1,0 +1,393 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Notas de Débito y Crédito</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar Nota ' : 'Alta de Nueva Nota' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="formrows">                              
+                <div class="two_fields">
+                    {{ form_row(form.afipComprobante) }} 
+                    {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+                </div>
+                <div class="two_fields nrofactura">                 
+                    {{ form_row(form.afipPuntoVenta, { 'attr': {'class' : 'width50', 'maxlength':'5', 'title':'Punto de venta'} }) }} 
+                    {{ form_widget(form.afipNroComprobante, { 'attr': {'class' : 'mininput','tabindex':'0','maxlength':'20', 'title':'N° de comprobante'} }) }}  
+                </div>                                                                
+
+                <div class="two_fields">
+                {{ form_row(form.proveedor, { 'attr': {'tabindex':'0'} }) }}          
+                    <div style="font-weight:bold; vertical-align: middle">
+                        <span style="padding-right:10px">CUIT:</span><span id="nrocuit"> {% if form.vars.data.proveedor %} {{ form.vars.data.proveedor.cuit }} {% endif %}<span>
+                     </div>                            
+                    <div style="color:red">
+                        {{ form_errors(form.nroComprobante) }}  
+                    </div>                
+                </div>
+
+                <div  class="credito" style="display:none">
+                    {{ form_label(form.facturas)  }}   
+                    {{ form_widget(form.facturas, { 'attr': { 'class' : 'select2', 'tabindex':'0'} }) }}    
+                </div>
+                <div  class="credito" style="margin-top:10px;display:none">
+                    {{ form_row(form.modificaStock, { 'attr': {'style' : 'min-width:50px'} }) }}  
+                </div>
+            </div>
+            <div style="padding-top: 20px; margin:auto; width: 100%;" id="divItems">
+                {{ form_errors(form.detalles) }}
+                <table cellpadding="0" cellspacing="0" border="0" class="factura stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="width:3%;">#</th>
+                            <th>Producto</th>
+                            <th style="width:8%;">Alícuota</th>                            
+                            <th style="width:12%;">Cant.</th>
+                            <th style="width:10%;" colspan="2">Bulto</th>
+                            <th style="width:10%;">Precio Unit.</th>
+                            <th style="width:10%;">SubTotal</th>                            
+                            <th style="width:3%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'ComprasBundle:NotaDebCred:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                    {% for det in form.detalles %}
+                        <tr class="item" divdata="item_{{loop.index-1}}">
+                            <td class="ordTd"></td>
+                            <td class="prodTd" data-iva="{{det.vars.data.producto.iva}}">{{ form_widget(det.producto) }}</td>
+                            <td class="ivaTd"><span class="alicuota">{{det.vars.data.afipAlicuota}}</span><span class="hidden">{{ form_widget(det.afipAlicuota) }}</span></td>
+                            <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
+                              <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
+                            </td>
+                            <td class="bulto">{{ form_widget(det.bulto) }}</td>
+                            <td class="cantxBulto">{{ form_widget(det.cantidadxBulto) }}</td>
+                            <td class="precTd  alignright">
+                                <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
+                            </td>
+                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(3,'.','') }}</td>
+                            <td class="delTd" style="text-align:center;"></td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="7" style="text-align:right"> SubTotal</th>                            
+                            <th class="cktotal red" id="Total">{{ form_widget(form.subtotal, { 'attr': {'style':'text-align:right;'} }) }}</th>
+                            <th style="text-align:center;">
+                                <a href="#" id="linkAdd" tabindex="0"  title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                            </th>
+                        </tr>                        
+                    </tfoot>
+                </table> 
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">   
+                    <thead>
+                        <tr>
+                            <th>Subtotal Neto </th>                                                       
+                            <th>Impuesto Interno </th>                                                       
+                            <th>IVA </th>                                                       
+                            <th>Percep. IVA </th>                                                       
+                            <th>Percep. DGR </th>                                                       
+                            <th>Percep. Muni </th>                                                       
+                            <th>Total Bonif. </th>                                                       
+                            <th>No Grav.</th> 
+                            <th>TOTAL</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'readonly':'readonly', 'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                        </tr> 
+                    </tbody>
+                </table>              
+            </div>             
+             
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('compras_notadebcred')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
+ {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {           
+        
+    $("#comprasbundle_notadebcred_afipComprobante").change(function(){
+        $.getJSON( "{{path('get_afip_letra_comprobante')}}" ,{id: $(this).val() } , function( data ) {
+            $('#comprasbundle_notadebcred_signo').val(data.signo); 
+            if( data.signo == '-'){
+            // mostrar factura y modificaStock
+                $('.credito').show();
+                $('#comprasbundle_notadebcred_facturas').parent().find('.select2-container').css('width','449px')
+            }else{
+                // ocultar
+                $('.credito').hide();
+            } 
+            
+            $('#comprasbundle_notadebcred_tipoNota').val(data.letra); 
+            actualizaTotales();
+            //$('#comprasbundle_notadebcred_tipoNota').change();                                               
+        });
+    });    
+    $("#comprasbundle_notadebcred_afipComprobante").change();    
+    
+    $(document).on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+    });    
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+        
+    $collectionHolder = $('table.factura tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });
+    $collectionHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });    
+    $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewItem();
+        e.stopPropagation();
+        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
+    });    
+   
+    $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+   $(".chzn-select").change(function(){ changeProducto( $(this) ) }); 
+   $('.cantTd input, .precTd input[type=text]').change(function(){ 
+       if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
+    /*$('.cktotal input').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) 
+            jQuery(this).val(0);  
+        totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 ); 
+    });*/
+    $('.cktotal input').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) 
+            jQuery(this).val(0);  
+        totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 ); 
+    });       
+   $(document).keypress(function(e) {
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+    });
+   /* $('#comprasbundle_notadebcred_tipoNota').on('change',function(){
+        actualizaTotales();
+    });*/
+    $('#comprasbundle_notadebcred_totalBonificado').on('focus',function(){
+        $(this).data('old', $(this).val());
+    });
+    $('#comprasbundle_notadebcred_totalBonificado').on('change',function(){
+        var old = $(this).data('old'); 
+        var now = $(this).val(); 
+        var subtot = $('#comprasbundle_notadebcred_subtotal').val() - (now-old);
+        $('#comprasbundle_notadebcred_subtotal').val( subtot.toFixed(3) );
+        $('#comprasbundle_notadebcred_subtotalNeto').val( subtot.toFixed(3) );
+    });
+    $('.guardar').click(function() {
+        if( !$('#comprasbundle_notadebcred_proveedor').val() ){
+            alert('Debe seleccionar un Proveedor');
+            return false;  
+        };        
+        if( $('tbody tr.item').length > 0 ){
+            if (!confirm('Confirma la registración?')) {
+               return false;
+            }                                   
+        }else{  alert('Debe ingresar items a la nota'); return false;}
+     
+    });
+    
+    $('[name*="proveedor"]').change(function(){
+        $('#nrocuit').text(''); 
+        if($(this).val()){
+            $.getJSON( "{{path('get_cuit_proveedor')}}" ,{id: $(this).val() } , function( data ) {            
+                $('#nrocuit').text( data.cuit);    
+                if(data.valido){
+                    color = '#666';
+                }else{
+                    color = 'orangered';
+                    alert('EL CUIT NO ES VÁLIDO!!');
+                }
+                $('#nrocuit').css('color',color);
+            });
+            if($('[name*="signo"]').val()=='-'){
+                var factura_selector = jQuery('[id^="comprasbundle"][id$="_facturas"]');
+                factura_selector.html('<option></option>');
+                $.get( "{{ path('select_facturas') }}",{id: $(this).val() } , function( data ) {
+                    for (var i = 0, total = data.length; i < total; i++) {
+                        txt = data[i].nroComprobante + ' ($' + data[i].saldo + ')';
+                        factura_selector.append('<option value="' + data[i].id + '">' + txt + '</option>');
+                    }
+                });
+            }
+        }
+    });   
+    
+    $('[name*="proveedor"]').change();
+       
+    $(".bulto input").change(function(){ changeBulto( $(this) );  });
+    $(".bulto input").each(function() {
+        changeBulto( $(this) );
+    });
+ 
+    
+       $('.nrofactura > div:first-of-type').css('width','22%');
+        $('.nrofactura > div:first-of-type > div').css('width','22%');        
+        $('.nrofactura input').change(function(){ 
+            ptovta = $('#comprasbundle_notadebcred_afipPuntoVenta');
+            ptovta.val( ptovta.val().padStart( 5 , '0')) ;            
+            nro = $('#comprasbundle_notadebcred_afipPuntoVenta').val() + '-' + $('#comprasbundle_notadebcred_afipNroComprobante').val();
+            $('#comprasbundle_notadebcred_nroComprobante').val(nro);            
+        });
+        
+    $('.formrows input[type="text"]').css('height','20px');
+    
+    
+    actualizaTotales();
+  
+});    
+ // funciones personalizas para el formulario
+ function addNewItem() {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
+    
+    jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+    jQuery('input').on('focus',function(){ jQuery(this).select(); });
+    jQuery(".chzn-select").change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery(".bulto input").last().uniform();
+    jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
+    jQuery('.cantTd input, .precTd input[type=text]').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
+    jQuery('.cktotal').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  totales(); });
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            actualizaTotales();
+        }
+    });
+}
+function changeProducto(producto){
+    if(producto.val()){
+        jQuery.ajax({
+               url: "{{ path("get_data_producto") }}",
+               dataType:"json",
+               data: 'prod='+ producto.val(),
+               success: function(data) { 
+                   trIndex = producto.parent().parent();
+                   var prodTd = trIndex.find('.prodTd'); 
+                   prodTd.data('iva',data.iva);
+                   trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);
+                   trIndex.find('.ivaTd .alicuota').text( trIndex.find('.ivaTd [name*="afipAlicuota"] option:selected').text() );
+                   trIndex.find('.cantTd input').val(1);
+                   trIndex.find('span.unidmed').html(data.unidmed);
+                   if(data.bulto){
+                       trIndex.find('span.unidmed').hide();
+                       trIndex.find('.cantxBulto input').val(data.cantxBulto);
+                   }else{
+                       trIndex.find('span.unidmed').show();
+                       trIndex.find('.cantxBulto input').val('');
+                   }
+                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   jQuery.uniform.update();
+                   trIndex.find('.cantTd input').focus();
+                   actualizaTotales();
+               }
+           });
+      }
+}
+function changeBulto(item){ 
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+        var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
+        if( item.is(':checked') ){
+            unidmed.hide();
+            cantxbulto.prop('readonly',false);     
+            cantxbulto.css('color','#666');
+            cantxbulto.focus();
+        }else{
+           unidmed.show(); 
+           cantxbulto.prop('readonly',true);
+           cantxbulto.css('color','#fff');           
+        }   
+}
+
+function actualizaTotales(){
+        var Total=0;
+        var IvaTotal=0;
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+            var cant =  checknumero( item.find('.cantTd input') ) ;
+            var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
+            var arr = ['A','M'];
+            if(  jQuery.inArray(jQuery('#comprasbundle_notadebcred_tipoNota').val(),arr )!== -1 ){
+                var iva =  parseFloat( item.find('.prodTd').data('iva') )/100 ;
+                item.find('.ivaTd [name*="afipAlicuota"] option:contains('+ item.find('.prodTd').data('iva') +')').prop('selected', true);
+            }else{ 
+                iva= 0; 
+                item.find('.ivaTd [name*="afipAlicuota"] option:contains(0.00)').prop('selected', true);
+            }
+            item.find('.ivaTd .alicuota').text( item.find('.ivaTd [name*="afipAlicuota"] option:selected').text() );
+            sbtotItm = prec * cant;
+            Total += sbtotItm;
+            IvaTotal += (sbtotItm * iva);
+            item.find('.totalTd').text( sbtotItm.toFixed(3));                
+        });
+        jQuery('#Total input[type=text]').val(Total.toFixed(3));
+        //var iva = Total * 0.21;
+        jQuery('#comprasbundle_notadebcred_iva').val(  IvaTotal.toFixed(3)  ); 
+        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));      
+        totales(1);
+        $collectionHolder.find('.ordTd').each(function(index) {
+            jQuery(this).html(index+1);
+        }); 
+    }
+function totales(suma){
+    var neto = checknumero(jQuery('#comprasbundle_notadebcred_subtotal'));    
+    jQuery('#comprasbundle_notadebcred_subtotalNeto').val(  neto.toFixed(3)  ); 
+  //  var subtotalneto = checknumero( jQuery('#comprasbundle_factura_subtotalNeto') );
+    var impuesto = checknumero( jQuery('#comprasbundle_notadebcred_impuestoInterno') );
+    var iva = checknumero( jQuery('#comprasbundle_notadebcred_iva') );
+    var perciva = checknumero( jQuery('#comprasbundle_notadebcred_percepcionIva') );
+    var percdgr = checknumero( jQuery('#comprasbundle_notadebcred_percepcionDgr') );
+    var percmun = checknumero( jQuery('#comprasbundle_notadebcred_percepcionMunicipal') );
+    var totbon = checknumero( jQuery('#comprasbundle_notadebcred_totalBonificado') );
+    var tmc = checknumero( jQuery('#comprasbundle_notadebcred_tmc') ); 
+    if(suma){    
+        var subtot = neto - totbon;
+        var totales = subtot  +  impuesto + iva + perciva + percdgr + percmun +  tmc ;  
+         jQuery('#comprasbundle_notadebcred_total').val( totales.toFixed(3) );   
+     }else{
+         checknumero( jQuery('#comprasbundle_notadebcred_total') ); 
+     }
+}
+</script>{% endblock %}

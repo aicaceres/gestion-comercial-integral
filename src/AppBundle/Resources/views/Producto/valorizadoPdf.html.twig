@@ -1,0 +1,94 @@
+<style>
+    @page { size : A4; }
+    .align-center{text-align: center}
+    .align-right{text-align: right}
+    .break {page-break-after:always}
+    .sincerrar{ background-color: #FFDDDD; }
+    /*h5{float:right; font-weight: lighter; margin-bottom: 0;}*/
+    h5 {
+        display: inline-block;
+        font-weight: lighter;
+        margin: 0;
+        text-align: right;
+        vertical-align: top;
+        width: 80%;
+    }
+    .pageheader .pagetitle {
+        color: #666666;
+        font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+        font-size: 28px;
+        font-weight: normal;
+        margin: 0 10px;
+    }
+    .pageheader .pagedesc {
+        color: #666666;
+        margin: 0 10px;
+    }
+    table {
+        font-family: 'Verdana' ;
+        font-size: 10px;
+        width: 100%;
+        border-collapse:collapse;
+    }
+    table tr th{
+        border: 1px solid gray;
+        /*  background: #E5E5E5;*/
+        padding: 5px;
+        font-size: 10px;
+        letter-spacing: 0.1em;
+    }
+    table tr td{    border: 1px solid gray;  padding:3px 15px;}
+
+</style>
+<img style="width: 18%;" src="{{asset('assets/images/logo_small.png')}}" />
+<h5> <small>Fecha: {{date('now')|date('d / m / Y H:i')}}</small><br><br>
+    <small>Usuario: {{app.user.nombre}} </small></h5>
+<hr>
+<div style="display:block; clear: both">
+    <div class="pageheader notab">
+        <h1 class="pagetitle">Listado de Productos - Valorizado</h1>
+        {% if idprov %}
+        <span class="pagedesc"><strong>Proveedor:  {{listado[0].proveedor}} </strong></span>
+        {% endif%}
+    </div>
+</div>
+<hr>
+<table class="lista_precios" cellspacing="0" cellpadding="0">
+    <thead>
+    <tr>
+        <th>Código</th>
+        <th>Producto</th>
+        {% if not idprov %}
+        <th>Proveedor</th>
+        {% endif%}
+        <th>Mínimo</th>
+        <th>Actual</th>
+        <th>Valorizado</th>
+    </tr>
+    </thead>
+    <tbody>
+        {% set total =0 %}
+        {% for item in listado %}        
+            {% set total = total + item.getValorizadoActual %}
+        <tr>
+            <td>{{item.codigo |upper}}</td>
+            <td>{{item.nombre}}</td>
+            {% if not idprov %}
+            <td class=" align-right" >{{item.proveedor }}</td>
+            {% endif%}
+            <td class=" align-right" >{{item.stockminimo| number_format(2,'.',',')}}</td>
+            <td class="align-right " >{{item.stockactual| number_format(3,'.',',') }}</td>
+            <td class="align-right" >{{item.getValorizadoActual| number_format(3,'.',',')}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+            <th colspan="{% if idprov %} 4 {% else %} 5 {% endif %}" class="align-right">Valorizado Total:</th>
+            <th class="align-right">{{total| number_format(2,'.',',')}}</th>
+        </tfoot>
+</table>
+<script type="text/javascript">    
+        window.print(); 
+      // window.close(); 
+      //window.setTimeout('window.close()', 1000);
+</script>   

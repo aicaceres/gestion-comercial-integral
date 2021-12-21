@@ -1,0 +1,28 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Exportación de archivos</h1>
+    <span class="pagedesc"> Afip Ventas </span>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+{% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+    
+        {{ periodo }}
+    
+</div> 
+</div>  
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }} 
+    
+<script type="text/javascript">
+jQuery(document).ready(function($) {        
+    
+});
+
+</script>    
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Lotes</h1>
+    <span class="pagedesc">Consulta y administración de lotes de productos</span>    
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+    <div style="margin-bottom: 15px;">    
+        <label style="display:block"><strong>PRODUCTO : </strong></label>
+        <select class="chzn-select" id="selectProducto" name="prodId">
+             <option value="0"> -- Todos --</option>
+        {% for dep in productos %}
+            <option value="{{dep.id}}" {% if dep.id==prodId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
+        {% endfor %}
+        </select> 
+    </div>        
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Fecha Ingreso</th>
+                <th>N° Lote</th>
+                <th>Fecha Vencimiento</th>
+                 <th class="nosort actionbutton addbutton">
+                    <a href="javascript:void(0)" id="addlote" title="Cargar Lote" class="editar create">Nuevo Lote</a>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+            <tr {% if not entity.activo %} class="deleted" {% endif %}>
+                <td>{{entity.producto }}</td>
+                <td><span class="hidden">{{ entity.created|date('Ymd') }}</span>{{ entity.created|date('d-m-Y') }}</td>
+                <td>{{entity.nroLote }}</td>
+                <td {% if entity.vencido %} style="color:red" {%endif%} ><span class="hidden">{{ entity.fechaVencimiento|date('Ymd') }}</span>{{ entity.fechaVencimiento|date('d-m-Y') }}</td>
+                <td>
+                    <a href="{{ path('stock_lote_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Datos"></a>
+                    {% if entity.tieneSalidas %} 
+                        <a href="javascript:void(0)" tabindex="0" title="Habilitar/deshabilitar" class="btn btnaction {% if entity.activo %}btn_equis{% else %}btn_ok{% endif %} " onclick="toggleactivo( jQuery(this) );" url="{{ path('stock_lote_toggle', { 'id': entity.id }) }}"></a>
+                    {% else %}
+                        <a href url="{{ path('stock_lote_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar" ></a>
+                    {% endif%}                        
+                </td>    
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+           
+<div id="popuplote" style="display:none;">
+  <form id="formlote" class="stdform"> 
+      <fieldset>
+          <div style="text-align: center">
+              <h5 id="productoTxt"></h5>
+          </div>
+      </fieldset>    
+      <fieldset>
+          <div style="margin: 10px 0">
+              <label class="required" style="width:90px">N° lote:</label>
+              <input id="nroLote" class="width100" title="N° Lote" value="" required="required" type="text"> 
+          </div>
+      </fieldset>    
+      <fieldset>    
+          <div>
+              <label class="required" style="width:90px">Fecha Vto:</label>
+              <input id="fechaVencimiento" class="datepicker width100" required="required" value="" title="Fecha Vencimiento" type="text">  
+          </div>   
+      </fieldset>   
+      <br>
+  </form>
+   
+</div>           
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+    jQuery(document).ready(function($){ 
+        $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+        $("#selectProducto").chosen({no_results_text: "Sin resultados",search_contains: true});                  
+        
+        var oTable = $('#dyntable2').dataTable();
+        oTable.fnSort( [ [3,'asc'] ] );
+        
+        $('#selectProducto').on('change',function(){
+            var url = "{{ path('stock_lote') }}?" + "prodId=" + $(this).val() ;
+            window.location.href = url;
+        }); 
+        
+        $("#addlote").click(function(){
+            if( $('#selectProducto').val()=='0' ){
+                alert('Debe seleccionar un producto para ingresar lotes');
+                $('#selectProducto').focus();
+                return false;
+            }  
+            $('#productoTxt').html( $('#selectProducto option:selected').text() );
+            $('#nroLote').val('');
+            $('#fechaVencimiento').val('');
+            $('#popuplote').dialog({
+                modal: true, autoOpen: true, title: 'Carga de lote', width:'350',
+                buttons: [{text: "Agregar", class: 'closePopup',
+                click: function() { 
+                    var prod = $('#selectProducto').val();                    
+                    var nro = $(this).find('#nroLote').val();
+                    var fecha = $(this).find('#fechaVencimiento').val();
+                    var $addLoteProducto="{{ path('add_loteproducto')}}";
+                    // crear lote nuevo.
+                    $.get($addLoteProducto,{prod_id: prod, nro:nro, vto:fecha  },
+                        function(datos){ 
+                           if(datos.id){ 
+                                $('#selectProducto').change();  
+                            }else{
+                                alert('No ha podido cargarse el lote');
+                                return false; 
+                            }
+                        }, "json");
+                    
+                    //recargar select y seleccionar el valor
+                    $(this).dialog("close"); 
+                }}]
+            });            
+            
+        });
+        
+    });
+function toggleactivo(item){
+    var url = item.attr('url');
+    var tr = item.parent().parent();
+    jQuery.post(url,function(data){ 
+        if(data=='OK'){ 
+            tr.toggleClass('deleted');
+            item.toggleClass('btn_ok');
+            item.toggleClass('btn_equis');
+        }
+    }, "json");
+}
+</script> 
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Informe</h1>
+    <span class="pagedesc">Discriminado de IIBB CHACO</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+    
+    <div class="" style="margin-bottom: 15px;">  
+        <form action="{{ path }}" method="GET">
+            <div style="display: inline-block; margin-right: 30px;">
+                <label><strong>Período:</strong></label>
+                <input name="fecha_desde" required="required" class="datepicker" tabindex="2" type="text" value="{{desde}}"> 
+                <input name="fecha_hasta" required="required" class="datepicker" tabindex="2" type="text" value="{{hasta}}"> 
+            </div>
+            <button type="submit" >Buscar</button>
+        </form>
+    </div>
+            {% set neto,dgr,dgrchaco = 0,0,0 %}
+        <table cellpadding="0" cellspacing="0" border="0" class="stdtable"  id="tableiibbchaco">
+            <thead>
+                <tr>
+                    <th>Comprobante</th>
+                    <th>Fecha</th>
+                    <th>CUIT - Razón - IIBB</th>
+                    <th>Neto</th>
+                    <th>IIBB</th>
+                    <th>IIBB CHACO</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}                    
+                    <tr>
+                            {% set neto = neto + item.neto%}
+                            <td>{{item.tipoComprobante}} {{item.tipo}} {{item.tipofact}}-{{item.nrocomp}}</td>
+                            <td>{{item.fecha|date('d-m-Y')}}</td>
+                            <td>{{item.cuit}} {{item.razon}} {{item.iibb}}</td>
+                            <td class="alignright">{{item.neto|number_format(3,'.','')}}</td>
+                            {% if item.pcia==5 %}
+                                {% set dgrchaco = dgrchaco + item.percDgr%}
+                                <td class="alignright"></td>
+                                <td class="alignright">{{item.percDgr|number_format(3,'.','')}}</td>                       
+                            {% else %}                            
+                                {% set dgr = dgr + item.percDgr%}
+                                <td class="alignright">{{item.percDgr|number_format(3,'.','')}}</td>
+                                <td class="alignright"></td>
+                            {% endif %}
+                        </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+            <th colspan="3"></th>
+            <th class="alignright" >{{neto|number_format(3,'.','')}}</th>
+            <th class="alignright" >{{dgr|number_format(3,'.','')}}</th>
+            <th class="alignright" >{{dgrchaco|number_format(3,'.','')}}</th>
+            </tfoot>
+        </table>                                 
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+    <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">    
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});        
+    var filename = "IIBB-CHACO-{{app.session.get('unidneg_nombre')}}{{'now'|date('mY')}}";
+tableExporter =  $("#tableiibbchaco").tableExport(
+        {headers: true,
+        footers: true,
+        formats: ['xlsx', 'csv', 'txt'],
+        filename: filename,
+        bootstrap: false,
+        exportButtons: true,
+        position: 'top',
+        ignoreRows: null,
+        ignoreCols: null,
+        trimWhitespace: true}                
+                );
+tableExporter.types.date.assert = function(v){return false;};            
+   $('.tableexport-caption').addClass('alignright');     
+}); 
+</script>  
+{% endblock %}

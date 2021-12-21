@@ -1,0 +1,48 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% if entity.id  %}
+    {% set pagetitle= entity.route %}
+    {% set urlupdate=path('permiso_update', { 'id': entity.id }) %}
+{% else %}
+    {% set pagetitle= 'Alta de Nuevo Permiso' %}
+    {% set urlupdate=path('permiso_create') %}
+{%endif%}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Permisos</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ pagetitle}}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+ {{ form_start(form, {'attr': {'class': 'quickform'}}) }}
+        <fieldset >
+            <p>               
+                {{ form_label(form.padre) }}
+                {{ form_widget(form.padre) }}
+                {{ form_errors(form.padre) }}                
+            </p>
+            <p>
+            {{ form_label(form.orden) }}
+            {{ form_widget(form.orden, { 'attr': {'class' : 'mininput' } }) }}
+            {{ form_errors(form.orden) }}
+             </p>
+            <p>
+             {{ form_row(form.route, { 'attr': {'class' : 'smallinput', 'style':'text-transform:lowercase' } }) }}
+             </p>
+            <p>
+             {{ form_row(form.text, { 'attr': {'class' : 'smallinput' } }) }}
+             </p>
+                   
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('sistema_seguridad_permiso')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+<div class="vernav2 iconmenu">
+    <ul>
+        {% if app.user.access(app.session.get('unidneg_id'),'stock_pedido') %}
+        <li><a href="#item_pedido" class="elements">Pedidos Interdepósitos</a>
+            <span class="arrow"></span>
+            <ul id="item_pedido">
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_pedido') %}
+                <li id="pedido"><a href="{{ path('stock_pedido') }}">Pedidos</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_despacho') %}
+                <li id="despacho"><a href="{{ path('stock_despacho') }}">Despacho Mercadería</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_despacho_recepcion_new') %}
+                <li id="recepcion"><a href="{{ path('stock_despacho_recepcion') }}">Recepción Mercadería</a></li>
+                {% endif %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'stock_producto') %}
+        <li id="producto"><a href="{{path('stock_producto')}}" class="elements">Productos</a></li>
+        <li id="lote"><a href="{{path('stock_lote')}}" class="elements"> Administración de Lotes</a></li>
+        {% endif %}                   
+        {% if app.user.access(app.session.get('unidneg_id'),'stock_inventario') %}
+        <li><a href="#inventario" class="elements">Inventario</a>
+            <span class="arrow"></span>
+            <ul id="inventario">
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_inventario_enstock') %}
+                <li id="enstock"><a href="{{ path('stock_inventario_enstock') }}">En Stock</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_inventario_valorizado') %}
+                <li id="valorizado"><a href="{{ path('stock_inventario_valorizado') }}">Valorizado</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_inventario_bajominimo') %}
+                <li id="bajominimo"><a href="{{ path('stock_inventario_bajominimo') }}">Bajo Mínimo</a></li>   
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_ajuste') %}
+                <li id="ajuste"><a href="{{ path('stock_ajuste') }}">Ajuste de Stock</a></li>     
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_movimiento') %}
+                <li id="movimiento"><a href="{{ path('stock_movimiento') }}">Movimientos de Stock</a></li>     
+                {% endif %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'stock_precio') %}
+        <li><a href="#precio" class="elements">Precios</a>
+            <span class="arrow"></span>
+            <ul id="precio">
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_precio_lista') %}
+                <li id="lista"><a href="{{ path('stock_precio_lista') }}">Listas de Precio</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_precio_listado') %}
+                <li id="listado"><a href="{{ path('stock_precio_listado') }}">Listados</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_precio_actualizacion') %}
+                <li id="actualizacion"><a href="{{ path('stock_precio_actualizacion') }}">Actualización de Precios</a></li>
+                {% endif %}
+            </ul>
+        </li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'stock_informe') %}
+        <li><a href="#informe" class="elements">Informes</a>
+            <span class="arrow"></span>
+            <ul id="informe">
+                {% if app.user.access(app.session.get('unidneg_id'),'stock_informe_despachado') %}
+                <li id="despachado"><a href="{{ path('stock_informe_despachado') }}">Productos despachados</a></li>
+                {% endif %}                
+            </ul>
+        </li>
+        {% endif %}
+                                
+    </ul>
+    <a class="togglemenu"></a>
+    <br /><br />
+</div><!--leftmenu-->

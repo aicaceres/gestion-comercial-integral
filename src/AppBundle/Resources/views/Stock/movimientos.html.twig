@@ -1,0 +1,122 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Movimientos de Stock</h1>
+    <span class="pagedesc">Consulta de movimientos de productos</span>    
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+   
+<div id="contentwrapper" class="contentwrapper">
+<div>    
+    <form id="printform" name="printform" target="_blank"  action="#" method="post">
+        <input type="hidden" id="productoid" name="productoid"/>
+        <input type="hidden" id="fdesde" name="fdesde"/>
+        <input type="hidden" id="fhasta" name="fhasta"/>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    </form> 
+    <form id="searchform" action="{{ path('stock_movimiento') }}" method="get">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Producto:</strong></label>
+            <select class="select2" id="selectProducto" name="prodId">
+            {% for prod in productos %}
+                <option value="{{prod.id}}" {% if prod.id==prodId %} selected="selected" {% endif %}> {{prod.codigoNombre}}</option>
+            {% endfor %}
+            </select>  
+        </div>    
+        <div style="display: inline-block; margin-right: 30px;">     
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Fecha: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>        
+    </form>
+</div>    
+              
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Depósito</th>
+                <th>Tipo Movimiento</th>
+                <th>Ingreso/Egreso</th>
+                <th>Cantidad</th>
+                <th>Usuario</th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+               <tr>
+                   <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
+                   <td>{{entity.deposito}}</td>
+                   <td>{{entity.tipoMovimiento}}
+                       {% if entity.tipo=='AJUSTE' %}
+                           {% set url = path('stock_ajuste_show', { 'id': entity.movimiento }) %}
+                        {% elseif entity.tipo=='Despacho' %}   
+                            {% set url = path('stock_despacho_show', { 'id': entity.movimiento }) %}
+                        {% elseif entity.tipo=='compras_pedido' %}  
+                            {% set url = path('compras_pedido_show', { 'id': entity.movimiento }) %}
+                        {% elseif entity.tipo=='compras_factura' %}  
+                            {% set url = path('compras_factura_show', { 'id': entity.movimiento }) %}
+                        {% elseif entity.tipo=='COMPRAS_NOTADEBCRED' %}  
+                            {% set url = path('compras_notadebcred_show', { 'id': entity.movimiento }) %}
+                        {%endif%}                                
+                   <a href="{{url}}" target="_blank" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
+                   </td>
+                   <td class="aligncenter ">{% if entity.signo == '+'%}
+                       <img src="{{ asset('assets/images/icons/in.png') }}" style="margin-top: 5px"/>
+                       {%else%}
+                       <img src="{{ asset('assets/images/icons/out.png') }}" style="margin-top: 5px"/>
+                       {%endif%}
+                    </td>
+                   <td>{{entity.cantidad ~' '~ entity.producto.unidadMedida}}</td>
+                   <td>{{entity.createdBy.username}}</td>
+               </tr>
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+                 
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+    jQuery(document).ready(function($){         
+        $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+          $('#selectProducto').change(function(){ 
+            $('#searchform').submit();
+        }); 
+        var oTable = $('#dyntable2').dataTable();
+        oTable.fnSort( [ [0,'desc'] ] );
+        
+        $('#printform').on('submit',function(){
+            return false;
+            $('#productoid').val($('#selectProducto').val());
+            $('#fdesde').val($('#desde').val());
+            $('#fhasta').val($('#hasta').val());
+            $('#searchterm').val( $('#dyntable2_filter input').val() );
+            var datos = [];
+            oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+                var i = value[0].indexOf('</span>');
+                if( i >-1 ){
+                    var fecha = value[0].substr(i+7);
+                    value[0]=fecha;
+                }
+                var j = value[4].indexOf('</span>');
+                if( j >-1 ){
+                    var entrega = value[4].substr(j+7);
+                    value[4]=entrega;
+                }
+                value.splice(6);
+                datos[index] = value;
+            }); 
+            $('#datalist').val(JSON.stringify(datos));
+    });
+        
+ });
+</script> 
+{% endblock %}

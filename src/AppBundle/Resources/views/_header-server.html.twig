@@ -1,0 +1,47 @@
+<div class="header">
+    <ul class="headermenu">
+        <li id="homepage" ><a href="{{ path('homepage') }}"><span class="icon icon-flatscreen"></span>Tablero</a></li>
+        {% if app.user.access(app.session.get('unidneg_id'),'stock') %}
+        <li id="stock"><a href="{{ path('stock') }}"><span class="icon icon-product"></span>Stock</a></li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'compras') %}
+        <li id="compras"><a href="{{ path('compras') }}"><span class="icon icon-cart"></span>Compras</a></li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas') %}
+        <li id="ventas"><a href="{{ path('ventas') }}"><span class="icon icon-sale"></span>Ventas</a></li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema') %}
+        <li id="sistema" ><a href="{{ path('sistema') }}"><span class="icon icon-setting"></span>Sistema</a></li>
+        {% endif %}
+    </ul>
+    <div class="headerwidget">
+    <div class="earnings" style="min-width:350px">
+        <div class="one_third">
+            <h4>Op1</h4>
+            <h2 id="venc30dias">$</h2>
+        </div><!--one_half-->
+        <div class="one_third">
+            <h4>Op2</h4>
+            <h2 id="porcobrar">$</h2>
+        </div><!--one_half-->
+        <div class="one_third last alignright">
+            <h4>Op3</h4>
+            <h2 id="porpagar">$</h2>
+        </div><!--one_half last-->
+    </div><!--earnings-->
+    </div><!--headerwidget-->
+</div><!--header-->
+
+{% if ('homepage' in app.request.attributes.get('_route')) %}
+    {% include "AppBundle:Menus:menu.html.twig" %}
+{% elseif ( 'sistema' in app.request.attributes.get('_route')) %}
+    {% include "AppBundle:Menus:menu-sistema.html.twig" %}
+{% elseif ( 'stock' in app.request.attributes.get('_route')) %}
+    {% include "AppBundle:Menus:menu-stock.html.twig" %}
+{% elseif ( 'venta' in app.request.attributes.get('_route')) %}
+    {% include "AppBundle:Menus:menu-venta.html.twig" %}
+{% elseif ( 'compras' in app.request.attributes.get('_route')) %}
+    {% include "AppBundle:Menus:menu-compra.html.twig" %}
+{% else %}
+    {% include "AppBundle:Menus:menu-default.html.twig" %}
+{% endif %} 

@@ -1,0 +1,35 @@
+<div style="overflow:auto">
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable datosafip" id="afip-cabecera">                    
+        <tbody>
+            <tr style="background-color: gainsboro">                
+                <td>CUIT Informante</td>
+                <td>Período</td>
+                <td>Secuencia</td>                
+                <td>Sin Movimiento</td>
+                <td>Prorratear Crédito Fiscal Computable</td>
+                <td>Crédito Fiscal Computable Global ó Por Comprobante</td>
+                <td>Importe Crédito Fiscal Computable Global</td>
+                <td>Importe Crédito Fiscal Computable, con asignación directa.</td>                                    
+                <td>Importe Crédito Fiscal Computable, determinado por prorrateo.</td>                                    
+                <td>Importe Crédito Fiscal no Computable Global</td>                                    
+                <td>Crédito Fiscal Contrib. Seg. Soc. y Otros Conceptos</td>                                    
+                <td>Crédito Fiscal Computable Contrib. Seg. Soc. y Otros Conceptos</td>                                    
+            </tr>                              
+            <tr {% if cabecera.error|length>0 %} style="background-color:mistyrose"{% endif %} >                                                
+                <td>{{cabecera.campo1}}</td>
+                <td>{{cabecera.campo2}}</td>
+                <td>{{ cabecera.campo3 }}</td>                    
+                <td>{{ cabecera.campo4 }}</td>
+                <td>{{ cabecera.campo5 }}</td>
+                <td>{{ cabecera.campo6 }}</td>
+                <td>{{ cabecera.campo7 }}</td>
+                <td>{{ cabecera.campo8 }}</td>
+                <td>{{ cabecera.campo9 }}</td>
+                <td>{{ cabecera.campo10 }}</td>
+                <td>{{ cabecera.campo11 }}</td>
+                <td>{{ cabecera.campo12 }}</td>                
+            </tr>            
+        </tbody>         
+    </table>     
+</div>            
+           

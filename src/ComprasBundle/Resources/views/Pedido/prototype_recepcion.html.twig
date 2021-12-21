@@ -1,0 +1,26 @@
+<tr class="item" divdata="item_items">
+    <td class="ordTd"></td>
+    <td class="prodTd">{{ form_widget(item.producto) }} 
+        <a href="javascript:void(0)" class="btnlote btn btn_info" title="Ver/Ocultar Lote"></a>
+        <div class="lote" style="display:none;padding-bottom: 5px;">
+            {{ form_widget(item.lotes, { 'attr': {'class' : 'select2Lote' } }) }}      
+            <a href="javascript:void(0)" class="addlote" title="Cargar Lote">
+                <img src="{{ asset('assets/images/icons/add.png') }}" style="margin-top: 5px"/>
+            </a>
+        </div>
+    </td>
+    <td class="stockTd alignright"> 
+        <span class="cantstk"></span> <span class="unidmedstk"></span> 
+        <span class="hidden">{{ form_widget(item.cantidad) }}</span>
+    </td>
+    <td class="cantTd">-</td>
+    <td class="recTd">{{ form_widget(item.entregado, { 'attr': {'class' : 'width50 floatleft'} }) }} 
+        <span class="unidmed floatleft" style="padding-left: 5px"></span>
+    </td>
+    <td class="bulto">{{ form_widget(item.bulto) }} </td>
+    <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }} </td>
+    <td class="totalTd alignright">
+        <span class="canttot"></span> <span class="unidmedtot"></span>         
+    </td>
+    <td class="delTd" style="text-align:center;"></td>
+</tr>

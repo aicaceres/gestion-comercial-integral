@@ -1,0 +1,7 @@
+<label for="txtrubro">Rubro:</label>
+<select id="txtrubro" name="txtrubro" class="uniformselect">
+    {% for rub in rubros %}
+    <option value="{{rub.id}}" {% if rub.nombre==dato %} selected="selected" {%endif%} >{{rub.nombre}}</option>
+    {% endfor %}
+</select>
+<button href class="addrubro" title="Agregar Rubro" type="button">+</button>

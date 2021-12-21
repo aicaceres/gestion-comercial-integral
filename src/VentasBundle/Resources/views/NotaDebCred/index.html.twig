@@ -1,0 +1,106 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Notas de Débito/Crédito</h1>
+    <span class="pagedesc">Relación con Clientes</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+<div>  
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_ventas_notadebcred") }}" method="post">
+        <input type="hidden" id="clienteid" name="clienteid"/>
+        <input type="hidden" id="fdesde" name="fdesde"/>
+        <input type="hidden" id="fhasta" name="fhasta"/>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    </form>    
+    <form id="searchform" action="{{ path('ventas_notadebcred') }}" method="get">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Cliente:</strong></label>
+            <select class="uniformselect" id="selectCliente" name="cliId">
+                <option value="0">Todos</option>
+            {% for cli in clientes %}
+                <option value="{{cli.id}}" {% if cli.id==cliId %} selected="selected" {% endif %}> {{cli.nombre}}</option>
+            {% endfor %}
+            </select>  
+        </div>    
+        <div style="display: inline-block; margin-right: 30px;">     
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Fecha: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>        
+    </form>
+</div><!-- button -->       
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">       
+        <thead>
+            <tr>
+                <th>Tipo</th>
+                <th>Nº Nota</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Total</th>
+                <th class="nosort actionbutton addbutton">
+                   {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
+                    <a class="editar create" href="{{ path('ventas_notadebcred_new') }}">Nueva Nota</a>
+                    {% else %} &nbsp; {% endif %} 
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+            <tr>
+                <td>{{entity.signoNota}}</td>
+                <td>{{entity.tipoNota~' '~entity.nuevoNroComprobante}}</td>
+                <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
+                <td>{{ entity.cliente }}</td>
+                <td class="alignright">{{ entity.getTotal|number_format(2,'.',',') }}</td>
+                <td class="buttons">
+                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
+                    <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Nota"></a>
+                    {% endif %}                    
+                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table>     
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}     
+<script type="text/javascript">
+jQuery(document).ready(function($){
+    $('#selectCliente').change(function(){ 
+        $('#searchform').submit();
+    }); 
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});  
+    
+    var oTable = $('#dyntable2').dataTable();
+    oTable.fnSort( [ [2,'desc'],[1,'desc'] ] );   
+    
+    $('#printform').on('submit',function(){
+        $('#clienteid').val($('#selectCliente').val());
+        $('#fdesde').val($('#desde').val());
+        $('#fhasta').val($('#hasta').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {  
+            var i = value[2].indexOf('</span>');
+            if( i >-1 ){
+                var fecha = value[2].substr(i+7);
+                value[2]=fecha;
+            }
+            value.splice(5);
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });    
+});
+</script>        
+{% endblock %}

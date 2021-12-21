@@ -1,0 +1,75 @@
+{% extends "base.html.twig" %}
+
+{% block page_content %}
+<div class='row'>
+    <div class='col-md-12'>
+        <div class='box box-solid {{box_color}}'>
+            <div class='box-header'>
+                <h3 class='box-title'> Perfil de {{entity.username}}  </h3>
+            </div><!-- /.box-header -->
+            <form action="{{path('usuario_profile_update') }}" name="configbundle_usuario" method="post" role="form" {{ form_enctype(form) }}>
+                <input name="_method" value="PUT" type="hidden">
+                <div id="configbundle_usuario" class='box-body pad'>
+                    {% include "form-notification.html.twig" %}
+                    <div class="row pad">
+                        <div class="col-md-6">
+                            <fieldset>
+                                <div class="form-group">
+                                    {{ form_row(form.username, { 'attr': {'class' : 'form-control', 'style':'text-transform:uppercase' } }) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(form.nombre, { 'attr': {'class' : 'form-control' } }) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_row(form.dni, { 'attr': {'class' : 'form-control' } }) }}
+                                </div>
+                                <div class="form-group">
+                                    {{ form_label(form.email) }}
+                                    <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                                            {{ form_widget(form.email, { 'attr': {'class' : 'form-control' } }) }}
+                                    </div>
+                                    {{ form_errors(form.email) }}
+                                </div>
+
+                            </fieldset>
+                        </div>
+                        <div class="col-md-6">
+                            <fieldset>
+                                <div class="form-group">
+                                    {{ form_label(form.password.first,'Contraseña:') }}
+                                    <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                            {{ form_widget(form.password.first, { 'attr': {'class' : 'form-control' } }) }}
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    {{ form_label(form.password.second,'Repetir contraseña:') }}
+                                    <div class="input-group">
+                                            <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                            {{ form_widget(form.password.second, { 'attr': {'class' : 'form-control' } }) }}
+                                    </div>
+
+                                </div>
+                                {{ form_errors(form.password.first) }}
+                                <p class="text-info ">
+                                    <i class="fa fa-info-circle" ></i> <small>Dejar en blanco si no desea cambiar su contraseña</small>
+                                </p>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <div class="btn-group pull-right">
+                        <button type="submit" class="btn btn-app"><i class="fa fa-save"></i> Guardar</button>
+                        <a class="btn btn-app" type="button" href="#" onclick="history.back();"><i class="fa fa-reply"></i> Cancelar</a>
+                    </div>
+                </div>
+                <div style="display:none;">
+                {{ form_rest(form) }}
+                </div>
+            </form>
+        </div><!-- /.box -->
+    </div><!-- /.col-->
+</div><!-- ./row -->
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Actualización de Precios</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Actualización por lotes</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+        {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+
+        <fieldset >
+                <p>
+      {{ form_row(form.precioLista, { 'attr': {'class' : 'uniformselect'  } }) }} 
+                </p>
+                    <p>
+      {{ form_label(form.criteria) }} 
+      {{ form_widget(form.criteria, { 'attr': {'class' : 'radionumerac criteria' } }) }} 
+                    </p>
+                    <div id="criteriavalues" >   <p>
+        {{ form_label(form.valores) }}
+      {{ form_widget(form.valores, { 'attr': {'class' : 'chzn-select smallinput valores', 
+                        'multiple':'multiple','data-placeholder':'...' } }) }} 
+                        </p></div>
+                <p>
+        {{ form_label(form.tipoActualizacion) }}
+        {{ form_widget(form.tipoActualizacion, { 'attr': {'class' : 'radionumerac' } }) }}
+        {{ form_errors(form.tipoActualizacion) }}
+                </p>           
+                <p>
+        {{ form_label(form.valor,'Valor (+/-)') }}
+        {{ form_widget(form.valor, { 'attr': {'class' : 'width100' } }) }} <span id="tipoactualizacion"></span>
+        {{ form_errors(form.valor) }}                    
+                </p>
+                <input type="hidden" id="valtxt" name="valtxt"/>
+            <br clear="all" /> 
+            <div class="actionbutton">
+               <!-- <button class="simular" >Simular</button>-->
+                <button class="guardar" type="submit" >Procesar Actualización</button>
+                <a class="cancelar" type="button" href="{{ path('stock_precio_actualizacion')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+    <div id="simulacion" ></div>
+</div>    
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function($){
+        $('input:radio').uniform(); 
+        $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+        $('#criteriavalues').html('');
+        $('.criteria input').change(function(){ 
+            val = $(this).val();
+            if(val=='T'){
+                $('#criteriavalues').html('');
+            }else {
+                $.ajax({
+                    url: "{{ path("get_rubro_proveedor") }}",
+                    async:true,
+                    data: 'tipo='+val ,
+                    success: function(data) {
+                        $('#criteriavalues').html(data);
+                    }, error: function() {
+                        alert('No se puede realizar la operación en este momento');
+                    }
+                });
+            }
+        });
+        $('form').submit(function(){
+            if( $('#criteriavalues').html()!='' && $("[name*='valores']").val()==null ){
+                alert( 'Debe completar todos los datos para continuar' );
+                $('.default').focus();
+                return false;
+            }else{
+                if( confirm('Confirma procesar la actualización?') )
+                    $('#valtxt').val($("[name*='valores']").val());
+                else return false;
+            }    
+        });
+    });
+
+</script>
+{% endblock %}

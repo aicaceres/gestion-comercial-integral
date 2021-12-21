@@ -1,0 +1,124 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#F5C98F" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+
+        <h2 text-align="center"> Pago a Proveedores </h2>     
+        <table>
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle"><strong>Proveedor: </strong>{{entity.proveedor}}</td>
+                <td border.type="none" height="30px" vertical-align="middle"><strong>PAGO Nº</strong> {{entity.nroPago}}</td>
+            </tr> 
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle"><strong>Fecha de Pago:</strong> {{ entity.fecha|date('d-m-Y') }}</td>
+                <td border.type="none" height="30px" vertical-align="middle"><strong>Comprobante N°:</strong> {{entity.nroComprobante}} </td>
+            </tr> 
+        </table>
+        {% set compasoc = comprobantes|length%}
+        {% if compasoc > 0 %}
+            {% set j=0 %}
+            {% if compasoc < 4 %}{% set compasoc = 4 %} {% endif %}
+            {% if compasoc is not divisible by(4) %} {% set compasoc = compasoc + 3 %} {% endif %}
+            <table>
+                <tr>
+                    <td colspan="4"  border.type="none" height="30px" vertical-align="middle"><strong>Comprobantes asociados: {{comprobantes|length}}</strong> </td>
+                </tr>  
+                {% for i in 1..(compasoc/4) %}
+                    <tr>
+                        <td font-size="9px" border.type="none" height="20px" vertical-align="middle"> 
+                            {% if j< comprobantes|length %}
+                                {{comprobantes[j]}}
+                                {% set j=j+1 %}
+                            {% endif %}
+                        </td>                        
+                        <td font-size="9px" border.type="none" height="20px" vertical-align="middle"> 
+                            {% if j< comprobantes|length %}
+                                {{comprobantes[j]}}
+                                {% set j=j+1 %}
+                            {% endif %}
+                        </td>
+                        <td font-size="9px" border.type="none" height="20px" vertical-align="middle"> 
+                            {% if j< comprobantes|length %}
+                                {{comprobantes[j]}}
+                                {% set j=j+1 %}
+                            {% endif %}
+                        </td>
+                        <td font-size="9px" border.type="none" height="20px" vertical-align="middle"> 
+                            {% if j< comprobantes|length %}
+                                {{comprobantes[j]}}
+                                {% set j=j+1 %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>                
+        {% endif %}
+        <div height="20px"></div>
+        {% if entity.detalle %}
+            <table>
+                <tr>
+                    <td  border.type="none" height="30px" vertical-align="middle" ><strong>Detalle:</strong> {{entity.detalle}}</td>
+                </tr>  
+            </table>
+            <div height="20px"></div>
+        {% endif %}        
+        <table>
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle"><strong>Importe:</strong> ${{entity.importe|number_format(3,'.',',')}}</td>
+                <td border.type="none" height="30px" vertical-align="middle"><strong>Depósito:</strong> ${{entity.deposito|number_format(3,'.',',')}}</td>
+                <td border.type="none" height="30px" vertical-align="middle"><strong>Cheques:</strong> ${{entity.getTotalCheques|number_format(3,'.',',')}}</td>
+                <td border.color="grey" height="30px" text-align="center" vertical-align="middle"><strong>TOTAL: ${{entity.getTotal|number_format(3,'.',',')}}</strong></td>
+            </tr>
+        </table>
+        <div height="20px"></div>
+        {% if  entity.chequesPagados|length >0%}    
+            <table>
+                <tr>
+                    <td colspan="7" border.type="none" height="30px" vertical-align="middle" ><strong>Detalle de Cheques:</strong></td>
+                </tr>         
+                <tr font-size="10px">
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Nº Interno</strong> </td>
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Nº Cheque</strong> </td>
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Fecha</strong></td>
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Titular</strong></td>
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Dador</strong></td>
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Banco</strong></td>
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Sucursal</strong></td>
+                    <td border.color="grey" border.type="bottom" height="20px" vertical-align="middle"><strong>Importe</strong></td>
+                </tr>
+                {% for cheque in entity.chequesPagados %}        
+                    <tr font-size="9px">
+                        <td border.type="none" height="20px" vertical-align="middle">{{cheque.nroInterno}} </td>
+                        <td border.type="none" height="20px" vertical-align="middle">{{cheque.nroCheque}}</td>
+                        <td border.type="none" height="20px" vertical-align="middle">{{cheque.fecha|date('d/m/Y')}}</td>
+                        <td border.type="none" height="20px" vertical-align="middle">{{cheque.titularCheque}}</td>
+                        <td border.type="none" height="20px" vertical-align="middle">{{cheque.dador}}</td>
+                        <td border.type="none" height="20px" vertical-align="middle">{{cheque.banco}}</td>
+                        <td border.type="none" height="20px" vertical-align="middle">{{cheque.sucursal}}</td>
+                        <td border.type="none" height="20px" text-align="right" vertical-align="middle"><strong>${{cheque.valor|number_format(3,'.',',')}}</strong></td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif%}
+
+    </dynamic-page>
+</pdf>

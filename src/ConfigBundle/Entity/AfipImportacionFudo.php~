@@ -1,0 +1,101 @@
+<?php
+
+namespace ConfigBundle\Entity;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * ConfigBundle\Entity\AfipImportacionFudo
+ * @ORM\Table(name="afip_importacion_fudo")
+ * @ORM\Entity()
+ */
+class AfipImportacionFudo {
+    /**
+     * @var integer $id
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+    /**
+     * @ORM\Column(name="descripcion", type="string", nullable=true)
+     */
+    protected $descripcion;
+
+    /**
+     * @ORM\Column(name="fecha", type="string", nullable=true)
+     */
+    protected $fecha;
+
+    /**
+     * @ORM\Column(name="tipo_comprobante", type="string", nullable=true)
+     */
+    protected $tipoComprobante;
+
+    /**
+     * @ORM\Column(name="letra", type="string", nullable=true)
+     */
+    protected $letra;
+
+    /**
+     * @ORM\Column(name="punto_venta", type="string", nullable=true)
+     */
+    protected $puntoVenta;
+
+    /**
+     * @ORM\Column(name="numero_comprobante", type="string", nullable=true)
+     */
+    protected $numeroComprobante;
+
+    /**
+     * @ORM\Column(name="cond_fiscal", type="string", nullable=true)
+     */
+    protected $condFiscal;
+
+    /**
+     * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     */
+    protected $nombreCliente;
+
+    /**
+     * @ORM\Column(name="direccion_cliente", type="string", nullable=true)
+     */
+    protected $direccionCliente;
+
+    /**
+     * @ORM\Column(name="cuit_cliente", type="string", nullable=true)
+     */
+    protected $cuitCliente;
+
+    /**
+     * @ORM\Column(name="remito", type="string", nullable=true)
+     */
+    protected $remito;
+
+    /**
+     * @ORM\Column(name="neto_gravado", type="string", nullable=true)
+     */
+    protected $netoGravado;
+
+    /**
+     * @ORM\Column(name="alicuota", type="string", nullable=true)
+     */
+    protected $alicuota;
+
+    /**
+     * @ORM\Column(name="iva_liquidado", type="string", nullable=true)
+     */
+    protected $ivaLiquidado;
+
+    /**
+     * @ORM\Column(name="total", type="string", nullable=true)
+     */
+    protected $total;
+
+    /**
+     * @ORM\Column(name="procesado", type="boolean", nullable=true)
+     */
+    protected $procesado = false;
+
+}

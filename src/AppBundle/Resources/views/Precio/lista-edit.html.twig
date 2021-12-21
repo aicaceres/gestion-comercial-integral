@@ -1,0 +1,62 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% if entity.id  %}
+    {% set pagetitle= 'Editar lista '~entity.nombre|upper %}
+    {% set urlupdate=path('stock_precio_lista_update', { 'id': entity.id }) %}
+{% else %}
+    {% set pagetitle= 'Alta de Nueva Lista' %}
+    {% set urlupdate=path('stock_precio_lista_create') %}
+{%endif%}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Listas de Precios</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ pagetitle}}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            {% if not entity.id  %}
+                <label><strong>Crear desde Lista:</strong></label>
+                <select class="uniformselect" name="lista_origen">
+                    <option value="" >- - -</option>
+                {% for item in listas %}
+                    <option value="{{item.id}}" >{{item.nombre}}</option>
+                {% endfor %}
+                </select>  
+            {%endif%}
+                <p>
+        {{ form_label(form.nombre) }}
+        {{ form_widget(form.nombre, { 'attr': {'class' : 'width100 upper' } }) }}
+        {{ form_errors(form.nombre) }}
+                </p>
+                <p>
+        {{ form_label(form.descripcion) }}
+        {{ form_widget(form.descripcion, { 'attr': {'class' : 'mediuminput' } })  }}
+        {{ form_errors(form.descripcion) }}    
+                </p>       
+        <p>{{ form_row(form.vigenciaDesde, { 'attr': {'class' : 'datepicker' } }) }}   </p>                                         
+        <p>{{ form_label(form.vigenciaHasta) }}
+            {{ form_widget(form.vigenciaHasta, { 'attr': {'class' : 'datepicker' } }) }} 
+        {{ form_errors(form.vigenciaHasta) }}</p>                                         
+        <p>{{ form_row(form.principal) }}   </p>                                         
+        <p>{{ form_row(form.activo) }}   </p>                                         
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('stock_precio_lista')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+    jQuery(document).ready(function(){
+        jQuery('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    });
+</script>{% endblock %}

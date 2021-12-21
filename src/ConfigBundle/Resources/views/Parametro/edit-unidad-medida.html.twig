@@ -1,0 +1,55 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Unidades de Medida</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos' : 'Alta de Nueva Unidad' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+   {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="one_half">                    
+                <p>
+        {{ form_label(form.descripcion) }}
+        {{ form_widget(form.descripcion, { 'attr': {'class' : 'smallinput capitalize' } })  }}
+        {{ form_errors(form.descripcion) }}    
+                </p>
+                <p>
+        {{ form_label(form.nombre) }}
+        {{ form_widget(form.nombre, { 'attr': {'class' : 'mininput capitalize' } }) }}
+        {{ form_errors(form.nombre) }}
+                </p>
+                <p>
+        {{ form_row(form.activo) }}
+                </p>      
+
+            </div> <!--one_half -->
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{path('sistema_parametro', { 'slug': 'unidad-medida' })}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+    jQuery(document).ready(function($){
+        $('input:radio').uniform();
+        $('.radionumerac').on('change',function(){
+            if( $('#uniform-configbundle_parametrotype_boleano_0 span').hasClass('checked')  ){
+                $('#emitefactura').show();
+            }else{
+                $('#emitefactura').hide();
+            }    
+        });
+        $('.radionumerac').change();
+    });
+</script>{% endblock %}

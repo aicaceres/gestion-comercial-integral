@@ -1,0 +1,435 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pedidos a Proveedor</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+    <h1 id="popup_title" >Recepción de Pedidos</h1>
+    {% include "AppBundle::notificacion.html.twig" %}
+    <div class="divEdicion">
+        {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="two_fields">
+                <div> <label for="nroPedido">Nº pedido:</label>
+                    <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
+                </div>     
+                <div> <label for="nroPedido">Fecha:</label>
+                    <input type="text" value="{{entity.fechaPedido|date('d-m-Y')}}" disabled="disabled" class="width100">
+                </div>                     
+            </div> 
+            <div class="two_fields">
+                <div> <label for="nroPedido">Proveedor:</label>
+                    <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="mediuminput">
+                </div>     
+                <div> <label for="nroPedido">Depósito:</label>
+                    <input type="text" value="{{entity.deposito}}" disabled="disabled" class="mediuminput">
+                </div>                     
+            </div> 
+            <hr style="border:1px solid #eee;">
+            <fieldset >
+                <div  class="two_fields">
+                    {{ form_row(form.fechaEntrega, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }} 
+                    {{ form_row(form.recibido,{'label': 'RECIBIDO','label_attr':{'style':'width:160px'},'attr': {'title':'Marcar como recibido y realizar el ingreso al stock!'} }) }}                
+                </div>                                 
+                <div class="two_fields generarnuevo" style="display:none;">
+                    <div>&nbsp;</div>
+                    {{ form_row(form.generarnuevo,{'label': 'Generar nuevo por faltante','label_attr':{'style':'width:160px'},'attr': {'title':'Generar nuevo pedido con items faltantes.'} }) }}                
+                </div>                                 
+            </fieldset > 
+
+            <div style="padding-top: 20px;" id="divItems">
+
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th class="head1" style="width:3%;">Nº</th>
+                            <th class="head1">Producto</th>
+                            <th class="head1" style="width:10%;">Stock</th>
+                            <th class="head1" style="width:12%;">Solicitado</th>
+                            <th class="head1" style="width:12%;">Recibido</th>
+                            <th class="head1" style="width:10%;">TOTAL</th>
+                            <th class="head1" colspan="2" style="width:3%;"></th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="detalles">
+                        {% for item in entity.detalles %}
+                            {% include "ComprasBundle:Pedido:tr_item_recepcion.html.twig" %}                                
+                        {% endfor %}   
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th class="head1 alignright" colspan="6" ></th>                            
+                            <th class="head1" style="text-align:center;" colspan="2">
+                                <a id="linkAdd" class="editTd" href="javascript:void(0)" title="Agregar item" tabIndex="-1" 
+                                    data-url="{{path('compras_render_edit_item_recepcion',{'id':0})}}" data-actionurl="{{path('compras_item_recepcion_update',{'id':0})}}">
+                                     <img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                               <!-- <a href="javascript:void(0)" id="linkAdd" data-url="{{path('compras_render_edit_item_recepcion',{'id':0})}}" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>                                -->
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>    
+                <fieldset>
+                    <div  class="two_fields">
+                        {{ form_row(form.calificacionProveedor) }}                
+                        {{ form_row(form.obsRecepcion, { 'attr': {'class' : 'mediuminput'} }) }}
+                    </div> 
+                </fieldset>
+            </div>                
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('compras_pedido_recepcion')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+        {{ form_end(form) }}
+    </div>    
+</div>
+  
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('#uniform-comprasbundle_recepcion_calificacionProveedor').parent().css('vertical-align','top');        
+    $(document).on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13' && !$(e.target).is("textarea") ){ e.preventDefault(); }
+    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    
+    $(document).keypress(function(e) {
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+        if(e.which == 13){
+            $('.additem').click();
+        }
+    });
+    $('.guardar').click(function() {          
+        if( $('#comprasbundle_recepcion_recibido').is(':checked')){
+            if( $('tbody tr.item').length > 0 ){
+                if (!confirm('Confirma la recepción del pedido e ingreso de la mercadería?')) {
+                    return false;
+                }
+            }else{
+                alert('Debe ingresar items al pedido para recepcionar!'); return false;
+            }
+        }
+    });
+    $('#comprasbundle_recepcion_recibido').change(function(){        
+        if( $(this).prop('checked') ){
+            $('.generarnuevo').show();
+         }else{  
+           $('.generarnuevo').hide();
+           $('#comprasbundle_recepcion_generarnuevo').prop('checked',false);
+           $.uniform.update();
+         }         
+    });
+    $('#comprasbundle_recepcion_recibido').change();        
+    $('.item').find('.ordTd').each(function(index) {
+                  $(this).html(index+1);
+                });
+    // Marcar como no recibido
+    $(document).on('click','.delTd', function(e) {
+        var res = true;
+        res = confirm('Registrar como no recibido?');
+        if (res) {
+            e.preventDefault();
+            id = $(this).data('id');
+            tr = $(this).parent().parent();
+          // Eliminar item
+          $.post( "{{path('compras_item_despacho_noentregado')}}" , {'id':id},function(data){
+            if(data==='OK'){
+                tr.find('.recTd').html('--');
+                //reordenar nros
+                $('.item').find('.ordTd').each(function(index) {
+                  $(this).html(index+1);
+                });
+            }else{
+                alert( 'error '+data.msg );
+            }
+        } ).fail(function() {
+           alert( "No se ha podido registrar. Intente nuevamente." );
+         });
+        }
+    });    
+ // EDITAR ITEM    
+    $(document).on('click','.editTd',function(){
+        var partialurl =  $(this).data('url'); 
+        var actionurl = $(this).data('actionurl');  
+        var action = ($(this).attr('id')=='linkAdd') ? 'add' : 'edit';
+        var tr = $(this).parent().parent();                    
+        $('#popup').dialog('open');
+        $('#popup')
+            .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
+            .load(partialurl, function() {
+                var form = $("[name='comprasbundle_recepciondetalle']");
+                var pedidoId = form.find('#pedidoid');
+                form.find("#comprasbundle_recepciondetalle_bulto").uniform();
+                form.find("#comprasbundle_recepciondetalle_bulto").change(function () {
+                    changeBulto($(this));
+                });
+                $("#comprasbundle_recepciondetalle_bulto").change();
+                if(action=='add'){
+                    form.find('#pedidoid').val('{{entity.id}}');
+                    var prod = form.find("#comprasbundle_recepciondetalle_producto");              
+                    prod.chosen({no_results_text: "Sin resultados", search_contains: true});
+                    prod.change(function () {
+                       changeProducto($(this));
+                    });
+                    form.find('.chzn-container').last().trigger('mousedown');
+                }else{
+                    form.find('#comprasbundle_recepciondetalle_entregado').focus();      
+                }
+                form.find('.select2Lote').select2({
+                    placeholder: 'Seleccione un lote',
+                    ajax: {
+                      url: function (params) {
+                        return  getUrlLotes();
+                      },                  
+                      dataType: 'json',
+                      processResults: function (data) {
+                        return {
+                          results: data
+                        };
+                      },
+                      cache: false
+                    }
+                  }
+                );
+                form.find(".addloteRecepcion").click(function(){ addlote( jQuery(this) );  }); 
+               
+              })
+            .dialog({
+            modal: true, autoOpen: true, title: 'Detalle del item',width: '50%', minHeight: 200,
+            buttons: [{text: 'Guardar', class: 'closePopup additem',
+                    click: function() { 
+                        var form = $("[name='comprasbundle_recepciondetalle']");  
+                        if(!form.find("#comprasbundle_recepciondetalle_entregado").val()){
+                            alert('Debe ingresar una cantidad!');
+                            form.find("#comprasbundle_recepciondetalle_entregado").focus();
+                            return false;
+                        }
+                        if(form.find("#comprasbundle_recepciondetalle_bulto").is(':checked') && !form.find("#comprasbundle_recepciondetalle_cantidadxBulto").val()){
+                            alert('Si indica por bulto debe ingresar una cantidad!');
+                            form.find("#comprasbundle_recepciondetalle_cantidadxBulto").focus();
+                            return false;
+                        }
+                        // guardar item en detalle 
+                         $.post( actionurl , form.serialize(),function(data){
+                             if(data.msg==='OK'){
+                                 // reemplazar en la tabla
+                                 if( action=='add' ){
+                                     $('#detalles').append('<tr></tr>');
+                                     $('#detalles tr').last().replaceWith(data.tr);
+                                 }else{
+                                     tr.replaceWith(data.tr);
+                                 }    
+                                //reordenar nros
+                                $('.item').find('.ordTd').each(function(index) {
+                                  $(this).html(index+1);
+                                });
+                            } else {
+                                alert('error ' + data.msg);
+                            }
+                            }).fail(function () {
+                                alert("No se ha podido guardar el item. Intente nuevamente.");
+                            }, "json");
+
+                            $(this).dialog("destroy");
+                        }}]
+            });
+        });  
+       
+// AGREGAR NUEVO ITEM   
+ /*   $('#linkAdd').on('click',function(){
+        var partialurl =  $(this).data('url');    
+        $('#popup').dialog('open');
+        $('#popup')
+            .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
+            .load(partialurl+'?rec=1', function() {
+                var form = $("[name='comprasbundle_recepciondetalle']");
+                form.find('#despachoid').val('{{entity.id}}');
+                var prod = form.find("#comprasbundle_recepciondetalle_producto");
+                prod.chosen({no_results_text: "Sin resultados", search_contains: true});
+                prod.change(function () {
+                    changeProducto($(this));
+                });
+                form.find("#appbundle_despachodetalle_bulto").uniform();
+                form.find("#appbundle_despachodetalle_bulto").change(function () {
+                    changeBulto($(this));
+                });
+                var lote_selector = form.find('#appbundle_despachodetalle_lotes');
+                //lote_selector.html('<option></option>');
+                lote_selector.chosen({no_results_text: "Sin resultados",placeholder_text_multiple:"Seleccionar..",search_contains: true});
+                form.find('#appbundle_despachodetalle_lotes_chzn').css('width','400px');
+                form.find('#appbundle_despachodetalle_producto_chzn').trigger('mousedown');
+              })
+            .dialog({
+            modal: true, autoOpen: true, title: 'Agregar item al despacho',width: '50%', minHeight: 200,
+            buttons: [{text: "Agregar", class: 'closePopup additem',
+                    click: function() { 
+                        var form = $("[name='appbundle_despachodetalle']");  
+                        if(!form.find("#appbundle_despachodetalle_producto").val()){
+                            alert('Debe ingresar un producto!');
+                            form.find('.chzn-container').last().trigger('mousedown');
+                            return false;
+                        }
+                        if(!form.find("#appbundle_despachodetalle_cantidad").val()){
+                            alert('Debe ingresar una cantidad!');
+                            form.find("#appbundle_despachodetalle_cantidad").focus();
+                            return false;
+                        }
+                        if(form.find("#appbundle_despachodetalle_bulto").is(':checked') && !form.find("#appbundle_despachodetalle_cantidadxBulto").val()){
+                            alert('Si indica por bulto debe ingresar una cantidad!');
+                            form.find("#appbundle_despachodetalle_cantidadxBulto").focus();
+                            return false;
+                        }
+                        form.append($('<input>')
+                            .attr('type', 'hidden')
+                            .attr('name', 'recepcion')
+                            .val(1)
+                        );
+                        // guardar item en detalle 
+                         $.post( "{{path('stock_item_despacho_create')}}" , form.serialize(),function(data){
+                             if(data.msg==='OK'){
+                                 // insertar en la tabla
+                                $('#detalle tbody').append(data.tr); 
+                                //reordenar nros
+                                $('#detalle').find('.ordTd').each(function(index) {
+                                  $(this).html(index+1);
+                                });
+                            } else {
+                                alert('error ' + data.msg);
+                            }
+                            }).fail(function () {
+                                alert("No se ha podido guardar el item. Intente nuevamente.");
+                            }, "json");
+
+                            $(this).dialog("destroy");
+                        }}]
+            });
+        });        
+           
+       */
+ 
+});    
+function changeBulto(item) {        
+    var form = jQuery("[name='comprasbundle_recepciondetalle']");
+    form.find(".unidmed").hide();
+    var cantxbulto = form.find('#comprasbundle_recepciondetalle_cantidadxBulto');    
+    if (item.is(':checked')) {
+        form.find('#unidmed_bulto').show();
+        cantxbulto.prop('readonly', false);
+        cantxbulto.css('color', '#666');        
+        if (cantxbulto.val() == '')
+            cantxbulto.val(1);
+        cantxbulto.focus();
+    } else {
+        form.find('#unidmed_unidad').show();
+        cantxbulto.prop('readonly', true);
+        cantxbulto.css('color', '#fff');
+    }
+}
+
+function changeProducto(producto) {
+        var form = jQuery("[name='comprasbundle_recepciondetalle']");
+        form.find('.loaders').show();
+        form.find('#comprasbundle_recepciondetalle_entregado').val('');
+        form.find('#comprasbundle_recepciondetalle_bulto').prop('checked', 0);
+        jQuery.uniform.update();
+        form.find('#comprasbundle_recepciondetalle_cantidadxBulto').val('');
+        form.find(".unidmed").hide();
+        form.find('.prodPedPendiente').text('');
+        jQuery.ajax({
+            url: "{{ path("get_data_producto") }}",
+            async:false,
+            dataType: "json",
+            data: 'prod=' + producto.val() + '&dep={{entity.deposito.id}}',
+            success: function (data) {                  
+                form.find('#comprasbundle_recepciondetalle_entregado').val(1);
+                form.find('.unidmed').text(data.unidmed);
+                if (data.bulto) {
+                    form.find('#unidmed_bulto').show();
+                    form.find('#comprasbundle_recepciondetalle_cantidadxBulto').val(data.cantxBulto);
+                } else {
+                    form.find('#unidmed_unidad').show();
+                    form.find('#comprasbundle_recepciondetalle_cantidadxBulto').val('');
+                }
+                form.find('#comprasbundle_recepciondetalle_bulto').prop('checked', data.bulto);                
+                jQuery.uniform.update();
+                jQuery('#comprasbundle_recepciondetalle_bulto').change();
+                if (data.stock) {
+                    txt = 'STOCK: ' + data.stock + ' ' + data.unidmed;
+                }else{ txt ='NO HAY EN STOCK'; }
+                form.find('.prodPedPendiente').text(txt);
+                form.find('#comprasbundle_recepciondetalle_entregado').focus();
+                form.find('.loaders').hide();
+            }
+        });
+    }
+
+    
+/*
+function lotes( item ){
+    var lote = item.next('.lote');
+    if(item.parent().find('[name*="producto"]').val()){
+      lote.toggle();  
+      if( !lote.is(":visible")){
+          lote.find('[name*="lotes"]').val("-1").trigger("change");
+          lote.find('[name*="lotes"]').attr('required',false);
+      }else{
+          lote.find('.addlote').show();
+          lote.find('.addlote').click();               
+      }
+    }
+}*/
+function addlote( item ){
+    jQuery('#nroLote').val('');
+    jQuery('#fechaVencimiento').val('');
+    jQuery('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    jQuery('#popuplote').dialog({
+        modal: true, autoOpen: true, title: 'Carga de lote', minHeight: 180,
+        buttons: [{text: "Agregar", class: 'closePopup',
+                click: function() { 
+                    var prod = jQuery('#comprasbundle_recepciondetalle_producto').val();
+                    var nro = jQuery(this).find('#nroLote').val();
+                    var fecha = jQuery(this).find('#fechaVencimiento').val();
+                    if( nro=='' || fecha=='' ){
+                        alert('Debe ingresar los datos requeridos.');
+                        return false;
+                    }
+                    var $addLoteProducto="{{ path('add_loteproducto')}}";
+                    // crear lote nuevo.
+                    var select = item.parent().find('[name*="lotes"]');
+                    jQuery.get($addLoteProducto,{prod_id: prod, nro:nro, vto:fecha  },
+                        function(datos){ 
+                            var newOption = new Option(datos.text, datos.id, true, true);
+                            
+                            // create the option and append to Select2
+                          //  var option = new Option(datos.id, datos.text, false, false);
+                            select.append(newOption).trigger('change');
+
+                            // manually trigger the `select2:select` event
+                            select.trigger({
+                                type: 'select2:select',
+                                params: {
+                                    data: datos
+                                }
+                            });
+                            
+                        }, "json");
+                    
+                    //recargar select y seleccionar el valor
+                    jQuery(this).dialog("close"); 
+                }}]
+    });
+}
+function getUrlLotes(){
+    return '{{ path('select_lotes') }}?prodid='+jQuery('#comprasbundle_recepciondetalle_producto').val();
+}
+</script>{% endblock %}

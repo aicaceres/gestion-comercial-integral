@@ -1,0 +1,87 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Despachos</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Despacho Nº: {{ entity.nroDespacho }}</h1>
+<div class="divEdicion">
+    <form action="#" method="post" class="stdform">
+        <fieldset >
+            <div class="two_fields nroEmbarque">
+                <div><label for="nroFactura" >Despacho Nº:</label>
+                    <input type="text" value="{{ entity.nroDespacho }}" disabled="disabled" class="width100">
+                </div>
+                <div><label for="nroPedido">Fecha:</label>
+                    <input type="text" value="{{entity.fechaDespacho|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div> 
+            <div class="two_fields">
+                <div><label for="unidadNegocio">Origen del Despacho:</label>
+                    <input type="text" value="{{entity.depositoOrigen.empresaUnidadDeposito}}" disabled="disabled" class="mediuminput">
+                </div>
+                <div><label for="unidadNegocio">Destino:</label>
+                    <input type="text" value="{{entity.depositoDestino.empresaUnidadDeposito}}" disabled="disabled" class="mediuminput">
+                </div>
+            </div> 
+             {% if entity.observDespacho%}
+             <div>
+                 <label>Observaciones del Despacho:</label>
+                 <textarea class="mediuminput" rows="1">{{entity.observDespacho}}</textarea>
+            </div>
+            {% endif %}
+             {% if entity.fechaEntrega%}
+             <p>
+                 <label>Fecha de Entrega:</label>
+                 <input type="text" value="{{entity.fechaEntrega|date('d/m/Y')}}" disabled="disabled" class="width100">
+            </p>
+            {% endif %}
+            {% if entity.observRecepcion%}
+            <div>
+                 <label>Observaciones de la Recepción:</label>
+                 <textarea class="mediuminput" rows="1">{{entity.observRecepcion}}</textarea>
+            </div>
+            {% endif %}
+            <div>
+                <br>
+                   <h4>DETALLE DE LA ORDEN DE DESPACHO</h4>
+                    
+<div style="padding-top: 20px;">
+                <table style="width:80%;margin: 0 auto;" cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th class="head1" style="width:5%;">Nº</th>
+                            <th class="head1">Producto</th>
+                            <th style="width:15%;">Solicitado</th>
+                            <th style="width:15%;">Despachado</th>
+                            <th style="width:15%;">Entregado</th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="" >
+                    {% for det in entity.detalles %}
+                        <tr>
+                            <td>{{loop.index}}</td>
+                            <td>{{det.producto.codigoNombre}}
+                             {{det.lotesTxt|raw}}   
+                            </td>
+                            <td class="alignright">{{(det.solicitadoTxt)}}</td>
+                            <td class="alignright" {% if det.hayInconsistencia %} style="color:red" title="Posible Inconsistencia en stock" {% endif %}>{{(det.cantidadTxt)}}</td>
+                            <td class="alignright" {% if det.hayInconsistencia %} style="color:red" title="Posible Inconsistencia en stock" {% endif %}>{{(det.entregadoTxt)}}</td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                </table>    
+            </div>                     
+   
+                </div>                      
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
+            </div>
+        </fieldset>
+    </form>
+</div>    
+</div>
+{% endblock %}

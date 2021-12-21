@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=UTF-8" />
+   </head>
+   <body  >  
+<style>
+table{ font-family:'Arial';font-size: 12px; }
+table tr th{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+    background: #CCCCCC;
+    font-size: 13px;
+    }
+table tr td{
+    border: 1px solid black;
+    height: 20px;
+    vertical-align: middle;
+    padding: 5px;
+}
+.align-right{
+    text-align: right;
+    padding-right: 10px !important;
+}
+</style>       
+      <h2 text-align="center"> Listado de Inventario</h2>              
+        <h4><strong>Depósito:</strong> {{ filtro[0] }} - <strong>Proveedor:</strong> {{ filtro[1] }}   </h4>        
+        <div height="10px"></div>
+        {% if search %}
+            <h4> Término de Búsqueda: "{{search}}" </h4>            
+        {%endif%}       
+        <table cellspacing="0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    {% if filtro[0]=='Todos'%}
+                    <th>Depósito</th>     
+                    {% endif%}
+                    <th>Rubro</th>                
+                    <th>Código</th>                
+                    <th>Producto</th>      
+                    {% if filtro[1]=='Todos'%}
+                    <th>Proveedor</th>
+                    {% endif%}
+                    <th>Actual</th>                
+                </tr>                        
+            </thead>
+            <tbody>
+                {% for item in items %}               
+                    <tr>
+                        <td class="align-right">{{loop.index}}</td>
+                         {% if filtro[0]=='Todos'%}
+                        <td>{{item[0]}}</td>
+                        {% endif%}
+                        <td>{{item[1]}}</td>
+                        <td>{{item[2]}} </td>
+                        <td>{{item[3]}} </td>
+                         {% if filtro[1]=='Todos'%}
+                        <td>{{item[4]}}</td>
+                        {% endif%}
+                        <td class="align-right">{{item[5]}}</td>                                    
+                    </tr>                           
+                {% endfor %}
+            </tbody>              
+        </table>    
+
+   </body>
+</html>

@@ -1,0 +1,51 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Titulares de Cheques</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nuevo titular' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+ {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="two_fields">
+            {{ form_row(form.nombre, { 'attr': {'class' : 'mediuminput'  } }) }}                                         
+            {{ form_row(form.cuit, { 'attr': {'class' : 'smallinput'  } }) }}   
+            </div> 
+            <p>
+                 {{ form_row(form.direccion, { 'attr': {'class' : 'mediuminput'  } }) }}       
+            </p> 
+            <div class="locate">
+        {{ form_row(form.pais, { 'attr': {'class' : 'uniformselect'  } }) }}   
+        {{ form_row(form.provincia, { 'attr': {'class' : 'uniformselect'  } }) }}   
+        {{ form_row(form.localidad, { 'attr': {'class' : 'uniformselect'  } }) }}   
+                </div>  
+            <div class="two_fields">
+            {{ form_row(form.telefono, { 'attr': {'class' : 'smallinput'  } }) }}                                         
+            {{ form_row(form.celular, { 'attr': {'class' : 'smallinput'  } }) }}   
+            </div> 
+            <p>
+                 {{ form_row(form.email, { 'attr': {'class' : 'smallinput'  } }) }}       
+            </p>
+            <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>    
+            <div class="two_fields">
+            {{ form_row(form.devueltos) }}                                         
+            {{ form_row(form.activo) }}   
+            </div>
+                   
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('sistema_titularcheque')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %} {% include "ConfigBundle::block-locate-js.html.twig" %} {% endblock %}

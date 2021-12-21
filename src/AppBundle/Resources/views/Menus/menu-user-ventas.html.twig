@@ -1,0 +1,22 @@
+<div class="vernav2 iconmenu">
+    <ul>
+        <li><a href="#item_producto" class="elements">Productos</a>
+            <span class="arrow"></span>
+            <ul id="item_producto">
+                <li id="producto"><a href="{{ path('modvtas_producto') }}">Listado</a></li>
+                <li id="preciolistado"><a href="{{ path('modvtas_preciolistado') }}">Lista de Precios</a></li>
+            </ul>
+        </li>
+        <li id="pedido"><a href="{{ path('ventas_pedido') }}" class="elements">Notas de Pedido</a></li>
+        <li><a href="#item_cliente" class="elements">Clientes</a>
+            <span class="arrow"></span>
+            <ul id="item_cliente">
+                <li id="cliente"><a href="{{ path('modvtas_cliente') }}">Listado</a></li>
+                <li id="ctactecliente"><a href="{{path('modvtas_ctactecliente')}}">Cuenta Coriente</a></li>
+            </ul>
+        </li>
+        <li id="comision"><a href="{{ path('ventas_comision') }}" class="elements desactivado">Comisiones</a></li>
+    </ul>
+    <a class="togglemenu"></a>
+    <br /><br />
+</div><!--leftmenu-->

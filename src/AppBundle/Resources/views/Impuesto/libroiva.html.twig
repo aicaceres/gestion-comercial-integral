@@ -1,0 +1,134 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Impuestos</h1>
+    <span class="pagedesc">Libros de IVA - {{tipo}}</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+    
+    <div class="" style="margin-bottom: 15px;">  
+        <form action="{{ path }}" method="GET">
+            <div style="display: inline-block; margin-right: 30px;">
+                <label><strong>Período:</strong></label>
+                <input name="fecha_desde" required="required" class="datepicker" tabindex="2" type="text" value="{{desde}}"> 
+                <input name="fecha_hasta" required="required" class="datepicker" tabindex="2" type="text" value="{{hasta}}"> 
+            </div>
+            <button type="submit" >Buscar</button>
+        </form>
+    </div>
+            
+{% if tipo =='COMPRAS' %}
+    {% if periodo %}
+        <div style="margin-top:20px" >          
+            <a class="btn btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=CBTE" > <span>LIBRO_IVA_DIGITAL_COMPRAS_CBTE.TXT</span> </a>            
+            <a class="btn btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=ALIC" > <span>LIBRO_IVA_DIGITAL_COMPRAS_ALICUOTAS.TXT</span> </a>
+        </div>                    
+    {% else %}
+        <span>Para exportar los libros de IVA digital debe seleccionar un período de mes completo.</span>
+    {% endif %}            
+{% endif %}               
+            
+            {% set neto,iva,nograv,imp,retiva,dgr,muni,total = 0,0,0,0,0,0,0,0 %}
+        <table cellpadding="0" cellspacing="0" border="0" class="stdtable"  id="libroivacompras">
+            <thead>
+                <tr>
+                    <th>Comprobante</th>
+                    <th>Fecha</th>
+                    <th>CUIT - Razón - IIBB</th>
+                    <th>Neto</th>
+                    <th>IVA</th>
+                    <th>Imp. RNI</th>
+                    <th>No Grav.</th>
+                    <th>Exentos</th>
+                    <th>Impuestos</th>
+                    <th>Ret.IVA</th>
+                    {% if tipo == 'COMPRAS'%}
+                    <th>Perc. IIBB</th>
+                    <th>Imp. Muni</th>
+                    {% endif %}
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}                    
+                    <tr>
+                            {% set neto = neto + item.neto%}
+                            {% set iva = iva + item.iva%}
+                            {% set nograv = nograv + item.nograv%}
+                            {% set imp = imp + item.impuestos%}
+                            {% set retiva = retiva + item.retIVA%} 
+                            {% set total = total + item.total%}
+                            <td>{{item.tipoComprobante}} {{item.tipo}} {{item.tipofact}}-{{item.nrocomp}}</td>
+                            <td>{{item.fecha|date('d-m-Y')}}</td>
+                            <td>{{item.cuit}} {{item.razon}} {{item.iibb}}</td>
+                            <td class="alignright">{{item.neto|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.iva|number_format(3,'.','')}}</td>
+                            <td class="alignright">0.00</td>
+                            <td class="alignright">{{item.nograv|number_format(3,'.','')}}</td>
+                            <td class="alignright">0.00</td>
+                            <td class="alignright">{{item.impuestos|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.retIVA|number_format(3,'.','')}}</td>
+                               {% if tipo == 'COMPRAS'%}
+                            {% set dgr = dgr + item.percDgr%}
+                            {% set muni = muni + item.percMuni%}                                   
+                            <td class="alignright">{{item.percDgr|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.percMuni|number_format(3,'.','')}}</td>
+                            {% endif %}
+                            <td class="alignright">{{item.total|number_format(3,'.','')}}</td>
+                        </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+            <th colspan="3"></th>
+            <th class="alignright" >{{neto|number_format(3,'.','')}}</th>
+            <th class="alignright" >{{iva|number_format(3,'.','')}}</th>
+            <th class="alignright" >0.00</th>
+            <th class="alignright" >{{nograv|number_format(3,'.','')}} </th>
+            <th class="alignright" >0.00</th>
+            <th class="alignright" >{{imp|number_format(3,'.','')}} </th>
+            <th class="alignright" >{{retiva|number_format(3,'.','')}}</th>
+             {% if tipo == 'COMPRAS'%}
+            <th class="alignright" >{{dgr|number_format(3,'.','')}}</th>
+            <th class="alignright" >{{muni|number_format(3,'.','')}}</th>
+            {% endif %}
+            <th class="alignright" >{{total|number_format(3,'.','')}}</th>
+            </tfoot>
+        </table>                         
+    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+    <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">    
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});    
+    $('.togglemenu').click();
+    var filename = "Iva{{tipo|capitalize}}{{app.session.get('unidneg_nombre')|slice(0, 10)}}{{'now'|date('mY')}}";
+    
+tableExporter = $("#libroivacompras").tableExport(
+        {headers: true,
+        footers: true,
+        formats: ['xlsx', 'csv', 'txt'],
+        filename: filename,
+        bootstrap: false,
+        exportButtons: true,
+        position: 'top',
+        ignoreRows: null,
+        ignoreCols: null,
+        trimWhitespace: true}                
+                );
+tableExporter.types.date.assert = function(v){return false;};       
+   $('.tableexport-caption').addClass('alignright');     
+   /* $('#libroiva').tableExport({type:'excel',
+                        mso: {fileFormat:'xmlss',
+                              worksheetName: ['Table 1','Table 2', 'Table 3']}});*/
+}); 
+</script>  
+{% endblock %}

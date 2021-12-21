@@ -1,0 +1,19 @@
+<tr class="item" id="" divdata="item_items">
+    <td class="ordTd">         
+    <div class="loaders">
+        <img src="{{asset('assets/images/loaders/loader2.gif')}}" alt="" />
+    </div>
+    </td>
+    <td class="prodTd">
+        {{form_widget(item.producto)}}   
+        <div style="display:none"> {{form_widget(item.cantidad)}}  </div> 
+    </td>
+    <td class="cantTd">-</td>
+    <td class="recTd">{{ form_widget(item.entregado, { 'attr': {'class' : 'width50 floatleft'} }) }} 
+        <span class="unidmed floatleft" style="padding-left: 5px"></span>
+    </td>
+    <td class="bulto">{{ form_widget(item.bulto) }}</td>
+    <td class="cantxBulto">{{ form_widget(item.cantidadxBulto, { 'attr': {'class' : 'width50 floatleft'} }) }}</td>
+    <td class="totalTd alignright"></td>
+    <td class="delTd" style="text-align:center;"></td>
+</tr>

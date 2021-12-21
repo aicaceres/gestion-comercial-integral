@@ -1,0 +1,51 @@
+<style>
+    .loaders{
+        width: 100%;
+        text-align: center;
+        margin-top: 10px;
+        display:none;
+    }
+    .solicitado {
+	margin: 0 auto 5px auto;
+	display: block;
+	width: 100%;
+	text-align: center;
+	color: orangered;
+    }
+    .chzn-disabled{
+        opacity:1 !important;
+    }
+    .chzn-container-single.chzn-disabled .chzn-single div b{
+        display:none;
+    }
+</style>    
+{{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+<fieldset>    
+<div>
+    {{ form_row(form.producto) }}
+</div>
+</fieldset>
+<fieldset style="margin-bottom:7px">
+<div>
+    {{ form_row(form.cantidad, { 'attr': {'class' : 'width50 floatleft'} }) }}
+    <span id="unidmed_unidad" class="unidmed floatleft" style="padding-left: 5px">{%if entity.producto%}{{entity.producto.unidadMedida}}{%endif%}</span>
+   &nbsp;&nbsp; {{ form_widget(form.bulto, { 'attr': {'class' : 'bulto'} }) }}
+   &nbsp;&nbsp;  {{ form_widget(form.cantidadxBulto) }}
+   <span id="unidmed_bulto" class="unidmed" style="padding-left: 5px;display: inline-block;">{%if entity.producto%}{{entity.producto.unidadMedida}}{%endif%}</span>
+</div>
+<input id="despachoid" value="{%if entity.id%}{{entity.despacho.id}}{%endif%}" name="despachoid" type="hidden"/>   
+</fieldset>
+   <fieldset>
+<div>
+    {{ form_row(form.lotes) }}
+</div>
+</fieldset>
+{% if entity.pedidoDetalle %}
+<div class="solicitado">
+    SOLICITADO: {{entity.pedidoDetalle.cantidadTxt}} - Pedido N° {{entity.pedidoDetalle.pedido.nroPedido}}
+</div>
+{% endif%}
+ <div class="loaders">
+    <img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" />
+</div>
+ {{ form_end(form) }} 

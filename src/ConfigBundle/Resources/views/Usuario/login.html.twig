@@ -1,0 +1,106 @@
+{% extends "::base.html.twig" %}
+{% block title %}Sistema de Gestión - Ingreso{% endblock %}
+{% block body %}
+    <body class="loginpage">
+        <div class="loginbox">
+            <div class="loginboxinner">
+{% if empresas %}
+                <div class="widgetcontent">
+                    <ul id="slidercontent">
+                        {% for empresa in empresas %}
+                        <li data-empresaid="{{empresa.id}}">
+                            <div class="slide_wrap" >
+                                <div class="logo">
+                                    <h1><span class="{{empresa.estilo}}">{{empresa.label1}}.</span>{{empresa.label2}}</h1>
+                                    <p>Sistema de Gestion Integral</p>
+                                    <br>
+                                    <select class="uniformselect">
+                                    {% for unidad in empresa.unidades if unidad.activo %}
+                                        <option value="{{unidad.id}}"> {{unidad.nombre}}</option>
+                                    {% endfor %}                
+                                    </select>                                
+                                </div>
+                            </div>
+                        </li>
+                         {% endfor %}                    
+                    </ul>
+                </div><!--widgetcontent-->
+{% endif %}
+                <br clear="all" />
+                {% if error %}
+                    <div>
+                        <div class="loginmsg">{{ error.message|trans }}</div>
+                    </div><!--nousername-->
+                {% endif %}
+                <div class="nousername">
+                    <div class="loginmsg">Debe ingresar el nombre de Usuario.</div>
+                </div><!--nousername-->
+                <div class="nopassword">
+
+                    <div class="loginf">
+                        <div class="thumb"><img alt="" src="{{ asset('assets/images/thumbs/useravatar.png') }}" /></div>
+                        <div class="userlogged">
+                            <h4></h4>
+                            <a href="{{path('usuario_login')}}">No eres <span></span>?</a>
+                        </div>
+                    </div><!--loginf-->
+                    <div class="loginmsg">Debe ingresar una contraseña válida.</div>
+                </div><!--nopassword-->
+                <form id="login" action="{{ path("usuario_login_check") }}" method="post">
+                    <div class="username">
+                        <div class="usernameinner">
+                            <input type="text" size="25" name="_username" id="username" value="{{ last_username }}"/>
+                        </div>          
+                    </div>
+                    <div class="password">
+                        <div class="passwordinner">
+                            <input type="password" name="_password" id="password"/>
+                        </div>
+                    </div>
+                        <input type="hidden" name="empresa" id="empresa" value="">
+                        <input type="hidden" name="unidad" id="unidad" value="">
+                    <button>Ingresar</button>
+                    <div class="keep"><input type="checkbox" id="remember_me" name="_remember_me" /> No cerrar sesión</div>
+                </form>
+            </div><!--loginboxinner-->
+        </div><!--loginbox-->
+    </body>
+{% endblock %}
+{% block page_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/custom/index.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.bxSlider.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($){
+    $('select').uniform();
+    slider = $('#slidercontent').bxSlider(); 
+    
+    $('form').submit(function(){
+        var nro = slider.getCurrentSlide() + 2;
+        var slide =slider.find('li:nth-child('+ nro +')');
+        //var empresa = slide.data('empresaid');
+        var unidad = slide.find('.uniformselect').val();
+        var user = $('#username').val();
+        var res = true;
+        $.ajax({
+              type: "POST",
+              url: "{{ path('check_ingreso') }}",
+              async: false,
+              data: { user: user, unidad: unidad },
+              success: function(data) {
+                  if(data=='ERROR'){
+                    alert( "No posee permiso para ingresar a esta Unidad de Negocio" );
+                    res = false;
+                  }
+              },
+              error: function(data) {
+                    alert('No posee permiso para ingresar a esta Unidad de Negocio.');
+                    res = false;
+                }
+            });
+        return res;        
+        
+        
+    });
+});
+</script>
+{% endblock %}

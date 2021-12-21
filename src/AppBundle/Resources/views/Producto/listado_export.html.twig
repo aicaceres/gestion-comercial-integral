@@ -1,0 +1,49 @@
+
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="export">
+        <thead>
+            <tr>
+                <th>Depósito</th>
+                <th>Rubro</th>
+                <th>Código</th>
+                <th>Producto</th>
+                <th>Proveedor</th>
+                <th style="width: 90px;display: inline-block;">Stock Actual</th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for item in items  %}
+            <tr>
+                <td>{{ item[0]|upper}}</td>
+                <td>{{ item[1] }}</td>
+                <td style="width:8%;">{{ item[2] }}</td>
+                <td>{{ item[3] }}</td>
+                <td>{{ item[4] }}</td>
+                <td class="alignright" style="font-weight:bold; width:10%;">{{ item[5] }}</td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table>    
+      <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">    
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+
+<script type="text/javascript">
+    
+jQuery(document).ready(function($) {
+    tableExporter = $("#export").tableExport(
+        {headers: true,
+        footers: true,
+        formats: ['xlsx', 'csv', 'txt'],
+        filename: 'nombrearch',
+        bootstrap: false,
+        exportButtons: true,
+        position: 'top',
+        ignoreRows: null,
+        ignoreCols: null,
+        trimWhitespace: true}                
+                );
+tableExporter.types.date.assert = function(v){return false;};       
+   $('.tableexport-caption').addClass('alignright');     
+});    
+</script>   

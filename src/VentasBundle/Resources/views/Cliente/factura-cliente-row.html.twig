@@ -1,0 +1,10 @@
+<p>
+    <label for="concepto">Facturas:</label>
+    <select name="concepto" id="concepto"
+            class="chzn-select smallinput valores" multiple="multiple" data-placeholder="Seleccionar...">
+        <option value=""></option>
+        {% for dato in datos %}
+        <option value="{{dato.clave}}">{{dato.text}}</option>
+        {% endfor %}
+    </select> 
+</p>

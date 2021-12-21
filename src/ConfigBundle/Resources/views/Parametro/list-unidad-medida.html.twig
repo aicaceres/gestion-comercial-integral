@@ -1,0 +1,41 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Unidades de Medida</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Unidad Medida</th>
+                <th>Abreviatura</th>
+                <th class="nosort">Activo</th>
+                <th class="nosort actionbutton addbutton">
+                    <a class="editar create" href="{{ path('sistema_parametro_new', { 'slug': 'unidad-medida' }) }}">Agregar Unidad</a>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+            <tr>
+                <td>{{ entity.descripcion }}</td>
+                <td>{{ entity.nombre}}</td>
+                <td><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %}/></td>
+                <td>
+                    <a href="{{path('sistema_parametro_edit', { 'slug': 'unidad-medida', 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                    <a href url="{{ path('sistema_parametro_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
+                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+{% endblock %}
+    
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}  
+
+{% block body %}
+    <body class="withvernav">
+        <div class="bodywrapper">
+            {% include "AppBundle::header.html.twig" %}
+            <div class="centercontent">
+
+                {% block contentwrapper %}  
+                    <div class="errorwrapper error403">
+                        <div class="errorcontent">
+                            <h1>ACCESO DENEGADO</h1>
+                            <h3>Usted no posee los permisos necesarios para acceder a esta página.</h3>
+
+                            <p>Esto puede ser por las siguientes causas</p>
+                            <ul>
+                                <li>Esta sección esta restringida intencionalmente para su usuario.</li>
+                                <li>Es imposible acceder a esta sección en este momento.</li>
+                            </ul>
+                            <br />
+                            <button class="stdbtn btn_black" onclick="history.back();">Volver a la página anterior</button> 
+                        </div><!--errorcontent-->
+                    </div><!--errorwrapper-->                
+                {% endblock %}
+                
+            </div>
+        </div>
+    </body>             
+{% endblock %}

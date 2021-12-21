@@ -1,0 +1,114 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pagos a Proveedores</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+<div>        
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_proveedor_pagos") }}" method="post">
+        <input type="hidden" id="proveedorid" name="proveedorid"/>
+        <input type="hidden" id="fdesde" name="fdesde"/>
+        <input type="hidden" id="fhasta" name="fhasta"/>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    </form>    
+    <form id="searchform" action="{{ path('compras_proveedor_pagos') }}" method="get">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Proveedor:</strong></label>
+            <select class="select2" id="selectProveedor" name="provId">
+            {% for prov in proveedores if prov.activo %}
+                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
+            {% endfor %}
+            </select>  
+        </div>    
+        <div style="display: inline-block; margin-right: 30px;">     
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Fecha Pago: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>        
+    </form>
+</div><!-- button -->     
+
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">        
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th class="nosort">Nº Comprobante</th>
+                <th class="nosort">Concepto</th>
+                <th class="nosort">Detalle</th>
+                <th class="nosort">Importe</th>
+                <th class="nosort actionbutton addbutton">
+                   {% if app.user.access(app.session.get('unidneg_id'),'compras_proveedor_pagos') %}
+                    <a class="editar create" href="{{ path('compras_proveedor_pagos_new', { 'id': provId }) }}">Nuevo Pago</a>
+                    {% else %} &nbsp; {% endif %} 
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
+                <td>{{ entity.nroComprobante }}</td>
+                <td title="{{entity.concepto}}"><span class="hidden">{{entity.concepto}}</span>{{ entity.conceptoTxt }}</td>
+                <td>{{entity.detalle}}</td>
+                <td style="text-align: right">{{ entity.getTotal|number_format(3,'.',',') }}</td>
+                <td class="buttons">
+                   <a href="{{ path('compras_proveedor_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
+                   <a href url="{{ path('compras_proveedor_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a> &nbsp;
+                   <a href="javascript:void(0)" url="{{ path('compras_pago_print', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Pago"></a>
+                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table>     
+</div>               
+        
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $(document).on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+    });
+    $('#selectProveedor').change(function(){ 
+        $('#searchform').submit();
+    }); 
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    var oTable = $('#dyntable2').dataTable();
+    $('#printform').on('submit',function(){
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#fdesde').val($('#desde').val());
+        $('#fhasta').val($('#hasta').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+            //fecha
+            var i = value[0].indexOf('</span>');
+            if( i >-1 ){
+                var fecha = value[0].substr(i+7);
+                value[0]=fecha;
+            }         
+            //concepto
+            var a = value[2].indexOf('<span class="hidden">');
+            var b = value[2].indexOf('</span>');
+            if( a >-1 ){
+                var conc = value[2].substr(a+22,b-22);
+                value[2]=conc;
+            }
+            value.splice(5);
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });    
+});    
+</script>    
+{% endblock %}

@@ -1,0 +1,38 @@
+<input type="hidden" value="{{ app.request.attributes.get('_route') }}" id="route"/>
+<input type="hidden" value="{{ app.request.attributes.get('slug') }}" id="slug"/>
+{{ app.session.set('iva','21')}}
+<div class="topheader">
+    <div class="left">
+        <h1 class="logo" style="height: 40px;"><a style="color: white; margin: 12px 2px;display: block;" href="{{ path('homepage') }}">
+            <span class="{{ app.session.get('theme') }}">{{app.session.get('labels')['label1']}}.</span>{{app.session.get('labels')['label2']}}
+            </a></h1>
+        <span class="slogan"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }}</span>                     
+        <br clear="all" />           
+    </div><!--left-->
+    <div class="right">
+        <div class="notification">
+            <a class="count enviado"  href="{{ path('stock_pedidos_solicitados') }}" title="Pedidos Interdepósitos - Solicitados"><span>&nbsp;</span></a>
+            <a class="count recibido"  href="{{ path('stock_pedidos_demandados') }}" title="Pedidos Interdepósitos - Demandados"><span>&nbsp;</span></a>
+            {% if app.user.access(app.session.get('unidneg_id'),'compras_pedido') %}
+            <a class="count compra" href="{{ path('compras_pedidos_pendientes') }}" title="Compras - Pedidos Pendientes"><span>&nbsp;</span></a>
+            {% endif %}
+        </div>
+        <div class="userinfo">
+            <img src="{{ asset('assets/images/thumbs/avatarb.png')}}" alt="" />
+            <span>{{ app.user.nombre }}</span>
+        </div><!--userinfo-->
+        <div class="userinfodrop">    
+            <div class="userdata">
+                <h4>{{ app.user.nombre }}</h4>
+                <h4>[ {{ app.user.username }} ]</h4>
+                <ul>
+                    <!--<li><a href="accountsettings.html">Configuración</a></li>
+                    <li><a href="#">Ayuda</a></li>-->
+                    <li><a href="{{ path('usuario_profile') }}">Perfil de Usuario</a></li>
+                    <li><a href="{{ path('usuario_logout') }}">Salir del Sistema</a></li>
+                </ul>
+            </div><!--userdata-->
+        </div><!--userinfodrop-->
+    </div><!--right-->
+</div><!--topheader-->
+{% include "AppBundle::_header-server.html.twig" %}

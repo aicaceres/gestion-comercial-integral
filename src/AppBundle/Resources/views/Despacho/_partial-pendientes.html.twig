@@ -1,0 +1,33 @@
+<h4 style="text-align: center">{{deposito.empresaUnidadDeposito}}</h4>
+<br>
+{% if porproducto|length>0%}      
+        <div id="tabs-productos">            
+            <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+                <thead>
+                    <tr>
+                        <th style="width:2%">#</th>
+                        <th>Cód.Barra</th>
+                        <th>Producto</th>
+                        <th class="nosort">Cantidad</th>
+                        <th>Pedido</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for prod in porproducto if not prod.despachoDetalle %}
+                        <tr style="height:30px" data-id="{{prod.id}}">
+                            <td>{{prod.id}}</td>
+                            <td>{{prod.producto.codigoBarra}}</td>
+                            <td class="prodTd">{{prod.producto.codigoNombre}}</td>
+                            <td class="alignright">{{prod.cantidadTxt}} [ {{prod.cantidadItemTotal}} {{prod.producto.unidadMedida}} ]</td>
+                            <td> {{prod.pedido.nroPedido}}</td>
+                            <td> <span class="hidden">{{ prod.pedido.fechaPedido|date('Ymd') }}</span>{{ prod.pedido.fechaPedido|date('d-m-Y') }}</td>
+                        </tr>        
+                    {% endfor %}
+                </tbody>
+            </table>
+                <form id="selecteds"></form>
+        </div>        
+{% else%}
+    <h5 style="text-align: center">No hay pedidos pendientes</h5>
+{% endif%}

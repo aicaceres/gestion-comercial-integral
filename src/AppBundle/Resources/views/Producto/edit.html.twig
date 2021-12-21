@@ -1,0 +1,176 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Productos</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nuevo Producto' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+    <fieldset >                    
+        <p>
+            {{ form_label(form.codigo) }}
+            {{ form_widget(form.codigo, { 'attr': {'class' : 'width100' } }) }}
+            {{ form_errors(form.codigo) }}
+        </p>
+        <p>
+            {{ form_label(form.nombre) }}
+            {{ form_widget(form.nombre, { 'attr': {'class' : 'smallinput'} }) }}
+            {{ form_errors(form.nombre) }}    
+        </p>
+        <p>
+            {{ form_label(form.descripcion) }}
+            {{ form_widget(form.descripcion, { 'attr': {'class' : 'smallinput' } })  }}
+            {{ form_errors(form.descripcion) }}    
+        </p>   
+        <p>
+            {{ form_label(form.codigoBarra,'Código de Barra') }}
+            {{ form_widget(form.codigoBarra, { 'attr': {'class' : 'mininput' } })  }}
+            {{ form_errors(form.codigoBarra) }}
+        </p>                                               
+        <p>
+            {{ form_label(form.unidadMedida) }}
+            {{ form_widget(form.unidadMedida)  }}
+            {{ form_errors(form.unidadMedida) }}
+        </p>                                               
+
+        <div class="locate">
+            <div>
+                {{ form_label(form.stock_minimo) }}
+                {{ form_widget(form.stock_minimo, { 'attr': {'class' : 'width100' } })  }}
+                {{ form_errors(form.stock_minimo) }}    
+                <a href="javascript:void(0)" class="minimoPorDeposito" title="Mínimo por depósito">
+                    <img src="{{ asset('assets/images/icons/glass.png') }}" style="vertical-align:middle"/>
+                </a>
+            </div>
+            <div>
+                {{ form_row(form.costo, { 'attr': {'class' : 'number' } })  }}                           
+            </div>
+            <div>
+                {{ form_label(form.iva,'IVA') }}
+                {{ form_widget(form.iva, { 'attr': {'class' : 'number' } })  }}
+                {{ form_errors(form.iva) }}  %                            
+            </div>
+        </div>                           
+        <div class="widgetbox" id="stockMinimo" style="width: 50%;margin-left: 150px;background: beige;padding: 15px;display:none;">
+            <div class="title" style="margin:0;"><h5>Stock mínimo por depósito <a href="#" id="addStockxDeposito" title="Agregar otro depósito">[ + ]</a></h5></div>
+            <div class="widgetcontent">
+                {{ form_errors(form.stock) }}
+                <table class="stdtable stockxDeposito" cellspacing="0" cellpadding="0" border="0" style="background:white;margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Depósito</th>
+                            <th style="width:30%">Stock Mínimo</th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.stock | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Producto:_stock_minimo_prototype.html.twig' with {'item':form.stock.vars.prototype} %}{% endfilter %}">
+                        {% for st in form.stock %}
+                            <tr class="item" style="height:30px" divdata="item_{{loop.index-1}}">
+                                <td class="depTd">{{ st.vars.data.deposito.nombre|upper }}<div style="display:none">{{ form_widget(st.deposito) }}<div></td>
+                                <td class="minTd">{{ form_widget(st.stockMinimo, { 'attr': {'class' : 'stkmin mediuminput' } }) }}</td>                            
+                            </tr>
+                        {% endfor %}           
+                    </tbody>
+                </table>
+
+            </div><!--widgetcontent-->
+        </div>
+
+
+        <p>{{ form_row(form.rubro) }}   </p>                                         
+        <p>
+            {{ form_label(form.proveedor) }}
+            {{ form_widget(form.proveedor) }}  
+            {{ form_errors(form.proveedor) }}                      
+        </p>         
+        <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>    
+        <div class="two_fields">
+            {{ form_row(form.bulto) }} 
+            {{ form_row(form.cantidadxBulto, { 'attr': {'class' : 'mininput' } }) }}   
+        </div>
+
+        <div class="two_fields">
+            {{ form_row(form.facturable) }} 
+            {{ form_row(form.activo) }}   
+        </div>         
+        <br clear="all" /> 
+        <div class="actionbutton">
+            <button class="guardar" type="submit" >Guardar</button>
+            <a class="cancelar" type="button" href="{{ path('stock_producto')}}">Cancelar</a>
+        </div>
+    </fieldset>
+    {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+    jQuery(document).ready(function($){
+        $('[id*="deposito"]').attr('readonly','readonly');
+        $(":file").uniform(); 
+        $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+        $(".minimoPorDeposito").on('click',function(){
+            if($('#stockMinimo').is(':visible')){
+                $('#stockMinimo').hide();
+            }else{
+                $('#stockMinimo').show();
+            }            
+        });
+        $('.stkmin').on('change',function(){
+            checkStock($(this));
+        });
+        // stock x deposito
+        $holder = $('table.stockxDeposito tbody');
+        $('#addStockxDeposito').on('click',function(e){
+           e.preventDefault();
+            addNewDeposito();
+            e.stopPropagation();
+        });
+    });
+function addNewDeposito(){
+    var prototype = $holder.data('prototype');
+    var index = $holder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $holder.append(newForm);
+    $holder.data('index', index + 1);
+    $holder.find('.stkmin').last().on('change',function(){
+            checkStock(jQuery(this));
+        });
+    dep = $holder.find('.depTd select').last(); 
+    dep.select2();
+    // cargar depósitos..
+    prod = '{{entity.id}}';
+    jQuery.get( "{{path('get_depositos_sinstock_por_producto')}}",{id: prod } , function( data ) {
+        dep.html('');
+        for (var i = 0, total = data.length; i < total; i++) {
+            dep.append('<option value="' + data[i].id + '">' + data[i].nombre + '</option>');
+        }        
+        dep.focus();
+    }, "json");
+}    
+function checkStock(item){
+    dep = item.parent().parent().find('select');
+    if(dep.val()){
+        if( isNaN(item.val()) )
+            item.val(0);
+        var tot = 0;
+        jQuery('.stkmin').each(function(){
+            var stkmin = jQuery(this).val();
+            var val = ( isNaN(stkmin) || (stkmin==='') )  ? 0 : parseFloat(stkmin);
+            tot = tot + val ;
+        });
+        jQuery('#appbundle_producto_stock_minimo').val( parseFloat(tot).toFixed(3) );
+    }else{
+        alert('Seleccione un depósito para indicar el stock!');
+        jQuery('#appbundle_producto_stock_minimo').val( 0 );
+        dep.focus();
+    }
+}    
+</script>
+{% endblock %}

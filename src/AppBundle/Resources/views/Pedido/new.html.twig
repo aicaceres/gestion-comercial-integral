@@ -1,0 +1,71 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pedidos Interdepósitos</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title"> Alta de Nuevo Pedido</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div>
+                 {{ form_row(form.depositoOrigen) }}
+            </div>
+            <div class="two_fields">
+                {{ form_row(form.unidadNegocio) }}   
+                {{ form_row(form.depositoDestino) }}   
+            </div>  
+                
+            <div class="two_fields">
+                <div><label for="nroPedido">Nº pedido:</label>
+                    <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
+                </div>
+                {{ form_row(form.fechaPedido, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+            </div> 
+            <div  class="two_fields">
+                <div>
+                    {{ form_label(form.estado) }}
+                    <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
+                </div>
+                {{ form_widget(form.estado) }}
+            </div> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar y agregar items</button>
+                <a class="cancelar" type="button" href="{{ path('stock_pedido')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+    {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-deposito-js.html.twig" %} 
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    depositos = "[{{ app.session.get('depositos')|join(', ') }}]";
+    $('#appbundle_pedido_depositoOrigen option').each(function() {
+        if ( depositos.search(  $(this).val() ) == -1 )  {
+            $(this).remove();
+        }
+    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('.guardar').click(function() {
+        if( !$('#appbundle_pedido_depositoOrigen').val() ){
+            alert('Debe seleccionar un Depósito de origen para el pedido');
+            return false;  
+        };
+        if( !$('#appbundle_pedido_depositoDestino').val() ){
+            alert('Debe seleccionar un Depósito destino para el pedido');
+            return false;  
+        };
+        if( $('#appbundle_pedido_depositoOrigen').val() == $('#appbundle_pedido_depositoDestino').val() ){
+            alert('El depósito de origen no puede ser el mismo que el de destino');
+            return false;  
+        };
+    });
+});    
+</script>{% endblock %}

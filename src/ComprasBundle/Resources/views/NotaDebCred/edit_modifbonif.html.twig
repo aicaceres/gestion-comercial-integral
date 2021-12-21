@@ -1,0 +1,468 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Notas de Débito y Crédito</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar Nota ' : 'Alta de Nueva Nota' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+             <div style="color:red">
+                    {{ form_errors(form.nroComprobante) }}  
+             </div>                          
+            <div class="two_fields">
+                {{ form_row(form.signo) }}  
+                <div style="display:none"><label for="nroFactura">Nº Interno:</label>
+                    <input type="text" value="{{entity.nroNotaDebCred}}" disabled="disabled" class="width100">
+                </div>
+            </div> 
+               
+            <div class="two_fields nrofactura">
+                {{ form_row(form.tipoNota, { 'attr': {'style' : 'min-width:15%'} }) }}  
+                {{ form_widget(form.nroComprobante, { 'attr': {'class' : 'width100','tabindex':'0','maxlength':'20', 'title':'N° de Nota del Proveedor'} }) }}  
+                {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+            </div>                 
+            
+            <p>
+                {{ form_row(form.proveedor, { 'attr': {'tabindex':'0'} }) }}   
+            </p> 
+
+            <div  class="credito">
+            {{ form_label(form.facturas)  }}   
+            {{ form_widget(form.facturas, { 'attr': { 'class' : 'select2', 'tabindex':'0'} }) }}    
+            </div>
+            <div  class="credito" style="margin-top:10px">
+                {{ form_row(form.modificaStock, { 'attr': {'style' : 'min-width:50px'} }) }}  
+            </div>
+            
+            <div style="padding-top: 20px; margin:auto; width: 100%;" id="divItems">
+                {{ form_errors(form.detalles) }}
+                <table cellpadding="0" cellspacing="0" border="0" class="factura stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="width:3%;">#</th>
+                            <th>Producto</th>
+                            <th style="width:12%;">Cant.</th>
+                            <th style="width:10%;" colspan="2">Bulto</th>
+                            <th style="width:10%;">Precio Unit.</th>
+                            <th style="width:10%;">SubTotal</th>                            
+                            <th style="width:3%;"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'ComprasBundle:NotaDebCred:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                    {% for det in form.detalles %}
+                        <tr class="item" divdata="item_{{loop.index-1}}">
+                            <td class="ordTd"></td>
+                            <td class="prodTd" data-iva="{{det.vars.data.producto.iva}}">{{ form_widget(det.producto) }}</td>
+                            <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
+                              <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
+                            </td>
+                            <td class="bulto">{{ form_widget(det.bulto) }}</td>
+                            <td class="cantxBulto">{{ form_widget(det.cantidadxBulto) }}</td>
+                            <td class="precTd  alignright">
+                                <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
+                            </td>
+                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(3,'.','') }}</td>
+                            <td class="delTd" style="text-align:center;"></td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="6" style="text-align:right"> SubTotal</th>                            
+                            <th class="cktotal red" id="Total">{{ form_widget(form.subtotal, { 'attr': {'style':'text-align:right;'} }) }}</th>
+                            <th style="text-align:center;">
+                                <a href="#" id="linkAdd" tabindex="0"  title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                            </th>
+                        </tr>                        
+                    </tfoot>
+                </table> 
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">   
+                    <thead>
+                        <tr>
+                            <th>Subtotal Neto </th>                                                       
+                            <th>Impuesto Interno </th>                                                       
+                            <th>IVA </th>                                                       
+                            <th>Percep. IVA </th>                                                       
+                            <th>Percep. DGR </th>                                                       
+                            <th>Percep. Muni </th>                                                       
+                            <th>Total Bonif. </th>                                                       
+                            <th>No Grav.</th> 
+                            <th>TOTAL</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'readonly':'readonly', 'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                            <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>   
+                        </tr> 
+                    </tbody>
+                </table>              
+            </div>             
+             
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('compras_notadebcred')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+ {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {   
+    $(document).on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+    });    
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+        
+    $collectionHolder = $('table.factura tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });
+    $collectionHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });    
+    $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        addNewItem();
+        e.stopPropagation();
+        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
+    });    
+   
+    $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+   $(".chzn-select").change(function(){ changeProducto( $(this) ) }); 
+   $('.cantTd input, .precTd input[type=text]').change(function(){ 
+       if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
+    /*$('.cktotal input').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) 
+            jQuery(this).val(0);  
+        totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 ); 
+    });*/
+    $('.cktotal input').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) 
+            jQuery(this).val(0);  
+        var ck = jQuery(this).attr('id');
+        if( ck==='comprasbundle_notadebcred_totalBonificado' ){
+            actualizaTotales();
+        }else{ 
+            totales( ( ck==='comprasbundle_notadebcred_total' ) ? 0 : 1 ); 
+        }
+    });
+   $(document).keypress(function(e) {
+        if (e.which == 43) { 
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+    });
+    $('#comprasbundle_notadebcred_tipoNota').on('change',function(){
+        actualizaTotales();
+    });
+    $('.guardar').click(function() {
+        if( !$('#comprasbundle_notadebcred_proveedor').val() ){
+            alert('Debe seleccionar un Proveedor');
+            return false;  
+        };        
+        if( $('tbody tr.item').length > 0 ){
+            if (!confirm('Confirma la registración?')) {
+               return false;
+            }                                   
+        }else{  alert('Debe ingresar items a la nota'); return false;}
+     
+    });
+    
+    $('[name*="proveedor"]').change(function(){
+        if($('[name*="signo"]').val()=='-'){
+            var factura_selector = jQuery('[id^="comprasbundle"][id$="_facturas"]');
+            factura_selector.html('<option></option>');
+            $.get( "{{ path('select_facturas') }}",{id: $(this).val() } , function( data ) {
+                for (var i = 0, total = data.length; i < total; i++) {
+                    txt = data[i].nroComprobante + ' ($' + data[i].saldo + ')';
+                    factura_selector.append('<option value="' + data[i].id + '">' + txt + '</option>');
+                }
+            });
+        }
+    });   
+    $('[name*="proveedor"]').change();
+    $('[name*="signo"]').change(function(){
+        if( $(this).val() == '-'){
+            // mostrar factura y modificaStock
+            $('.credito').show();
+        }else{
+            // ocultar
+            $('.credito').hide();
+        }
+    });
+    $('[name*="signo"]').change();
+    $('[name*="signo"]').focus();
+    $(".bulto input").change(function(){ changeBulto( $(this) );  });
+    $(".bulto input").each(function() {
+        changeBulto( $(this) );
+    });
+    
+    {% if not entity.id  %}
+        $('.nrofactura > div:first-of-type').css('width','22%');
+        $('.nrofactura > div:first-of-type > div').css('width','22%');
+    {% endif %}
+    $('.nrofactura > input').css('height','20px');
+    actualizaTotales();
+  // totales();
+});    
+ // funciones personalizas para el formulario
+ function addNewItem() {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
+    
+    /*  PARA AGREGAR NUEVOS VALORES A PRODUCTO
+    var select, chosen;
+    // cache the select element as we'll be using it a few times
+    select = jQuery(".chzn-select");
+    // init the chosen plugin
+    select.chosen({ no_results_text: 'Presione Enter para agregar nuevo concepto:' });   
+    // get the chosen object
+    chosen = select.data('chosen');
+    // Bind the keyup event to the search box input
+    chosen.dropdown.find('input').on('keyup', function(e)
+    {        
+        // if we hit Enter and the results list is empty (no matches) add the option
+        if (e.which == 13 && chosen.dropdown.find('li.no-results').length > 0)
+        {
+            var option = jQuery("<option>").val(this.value).text(this.value);   
+            // add the new option
+            select.prepend(option);
+            // automatically select it
+            select.find(option).prop('selected', true);
+            // trigger the update
+            select.trigger("liszt:updated");
+        }
+    });*/
+    
+    
+    jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+    jQuery('input').on('focus',function(){ jQuery(this).select(); });
+    jQuery(".chzn-select").change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery(".bulto input").last().uniform();
+    jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
+    jQuery('.cantTd input, .precTd input[type=text]').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
+    jQuery('.cktotal').change(function(){ 
+        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  totales(); });
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            actualizaTotales();
+        }
+    });
+}
+function changeProducto(producto){
+  /*  var trIndex = producto.parent().parent();
+    
+    jPrompt('Descripcion:', null, 'Nuevo Item', function(r) {
+                        if( r ){
+                            producto.parent().find('[name*="textoProducto"]').val(r.toUpperCase());
+                            producto.parent().find('.chzn-container-single .chzn-single span').html(r.toUpperCase());
+                            trIndex.find('.precTd input[type=text]').focus();
+                        } 
+                    });
+    */
+   
+    jQuery.ajax({
+               url: "{{ path("get_data_producto") }}",
+               dataType:"json",
+               data: 'prod='+ producto.val(),
+               success: function(data) { 
+                   trIndex = producto.parent().parent();
+                   var prodTd = trIndex.find('.prodTd'); 
+                   prodTd.data('iva',data.iva);
+                   trIndex.find('.cantTd input').val(1);
+                   trIndex.find('span.unidmed').html(data.unidmed);
+                   if(data.bulto){
+                       trIndex.find('span.unidmed').hide();
+                       trIndex.find('.cantxBulto input').val(data.cantxBulto);
+                   }else{
+                       trIndex.find('span.unidmed').show();
+                       trIndex.find('.cantxBulto input').val('');
+                   }
+                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   jQuery.uniform.update();
+                   trIndex.find('.cantTd input').focus();
+                   actualizaTotales();
+               }
+           });
+}
+function changeBulto(item){ 
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+        var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
+        if( item.is(':checked') ){
+            unidmed.hide();
+            cantxbulto.prop('readonly',false);     
+            cantxbulto.css('color','#666');
+            cantxbulto.focus();
+        }else{
+           unidmed.show(); 
+           cantxbulto.prop('readonly',true);
+           cantxbulto.css('color','#fff');           
+        }   
+}
+function actualizaTotales(){
+        var Total=0;
+        var IvaTotal=0;
+        var totbon = checknumero( jQuery('#comprasbundle_notadebcred_totalBonificado') );
+        // sumar y calcular total
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+            var cant =  checknumero( item.find('.cantTd input') ) ;
+            var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
+            if( jQuery('#comprasbundle_notadebcred_tipoNota').val()=='A'){
+                var iva =  parseFloat( item.find('.prodTd').data('iva') )/100 ;
+            }else{ iva= 0; }
+            sbtotItm = prec * cant;
+            Total += sbtotItm;
+            IvaTotal += (sbtotItm * iva);
+          //  console.log(sbtotItm);
+            item.find('.totalTd').text( sbtotItm.toFixed(3));                
+        });
+        // modificar iva si hay bonificacion y es factura A
+        if(totbon>0 ){
+            var newTotal=0;
+            var IvaTotal=0;
+            jQuery("tr.item").each(function(){
+                var item = jQuery(this);
+                var cant =  checknumero( item.find('.cantTd input') ) ;
+                var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
+                if( jQuery('#comprasbundle_notadebcred_tipoNota').val()=='A'){
+                    var iva =  parseFloat( item.find('.prodTd').data('iva') )/100 ;
+                }else{ iva= 0; }
+                sbtotItm = prec * cant;
+                bon = (totbon * 100)/Total;
+                sbtotItm = sbtotItm - (sbtotItm * (bon/100));
+                newTotal += sbtotItm;
+                IvaTotal += (sbtotItm * iva);
+                //item.find('.totalTd').text( sbtotItm.toFixed(3));                
+            });
+            Total = newTotal;
+        }
+
+        jQuery('#Total input[type=text]').val(Total.toFixed(3));
+        //var iva = Total * 0.21;
+        jQuery('#comprasbundle_notadebcred_iva').val(  IvaTotal.toFixed(3)  ); 
+        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));      
+        totales(1);
+        $collectionHolder.find('.ordTd').each(function(index) {
+            jQuery(this).html(index+1);
+        }); 
+    }
+function totales(suma){
+    var neto = checknumero(jQuery('#comprasbundle_notadebcred_subtotal'));    
+    jQuery('#comprasbundle_notadebcred_subtotalNeto').val(  neto.toFixed(3)  ); 
+  //  var subtotalneto = checknumero( jQuery('#comprasbundle_factura_subtotalNeto') );
+    var impuesto = checknumero( jQuery('#comprasbundle_notadebcred_impuestoInterno') );
+    var iva = checknumero( jQuery('#comprasbundle_notadebcred_iva') );
+    var perciva = checknumero( jQuery('#comprasbundle_notadebcred_percepcionIva') );
+    var percdgr = checknumero( jQuery('#comprasbundle_notadebcred_percepcionDgr') );
+    var percmun = checknumero( jQuery('#comprasbundle_notadebcred_percepcionMunicipal') );
+    //var totbon = checknumero( jQuery('#comprasbundle_factura_totalBonificado') );
+    var tmc = checknumero( jQuery('#comprasbundle_notadebcred_tmc') ); 
+    if(suma){ 
+        var totales = neto +  impuesto + iva + perciva + percdgr + percmun +  tmc ;  
+         jQuery('#comprasbundle_notadebcred_total').val( totales.toFixed(3) );   
+     }else{
+         checknumero( jQuery('#comprasbundle_notadebcred_total') ); 
+     }
+}    
+/*function actualizaTotales(){
+        var Total=0;
+        var IvaTotal=0;
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+            var cant =  checknumero( item.find('.cantTd input') ) ;
+            var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
+            var iva =  parseFloat( item.find('.prodTd').data('iva') )/100 ;
+                sbtotItm = prec * cant;
+                Total += sbtotItm;
+                IvaTotal += (sbtotItm * iva);
+                item.find('.totalTd').text( sbtotItm.toFixed(3));                
+        });
+        jQuery('#Total input[type=text]').val(Total.toFixed(3));
+        //var iva = Total * 0.21;
+        jQuery('#comprasbundle_notadebcred_iva').val(  IvaTotal.toFixed(3)  ); 
+        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));      
+        totales(1);
+        $collectionHolder.find('.ordTd').each(function(index) {
+            jQuery(this).html(index+1);
+        }); 
+    }
+
+function totales(suma){
+    var neto = checknumero(jQuery('#comprasbundle_notadebcred_subtotal'));    
+    jQuery('#comprasbundle_notadebcred_subtotalNeto').val(  neto.toFixed(3)  ); 
+  //  var subtotalneto = checknumero( jQuery('#comprasbundle_factura_subtotalNeto') );
+    var impuesto = checknumero( jQuery('#comprasbundle_notadebcred_impuestoInterno') );
+    var iva = checknumero( jQuery('#comprasbundle_notadebcred_iva') );
+    var perciva = checknumero( jQuery('#comprasbundle_notadebcred_percepcionIva') );
+    var percdgr = checknumero( jQuery('#comprasbundle_notadebcred_percepcionDgr') );
+    var percmun = checknumero( jQuery('#comprasbundle_notadebcred_percepcionMunicipal') );
+    var totbon = checknumero( jQuery('#comprasbundle_notadebcred_totalBonificado') );
+    var tmc = checknumero( jQuery('#comprasbundle_notadebcred_tmc') ); 
+    if(suma){        
+        var totales = neto  +  impuesto + iva + perciva + percdgr + percmun - totbon +  tmc ;  
+         jQuery('#comprasbundle_notadebcred_total').val( totales.toFixed(3) );   
+     }else{
+         checknumero( jQuery('#comprasbundle_notadebcred_total') ); 
+     }
+}
+*/
+/*
+function actualizaTotales(){
+        var band=0, Total=0;
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+            cant = parseFloat(item.find('.cantTd input').val());
+            prec = parseFloat(item.find('.precTd input[type=text]').val());
+            if(cant && prec){
+                //calcular
+                band=1;
+                sbtotItm = prec * cant;
+                Total += sbtotItm;
+                item.find('.totalTd').text( sbtotItm.toFixed(2));                
+            }
+        });
+        if( band ){
+           jQuery('#Total input[type=text]').val(Total.toFixed(2));
+        
+            $collectionHolder.find('.ordTd').each(function(index) {
+               jQuery(this).html(index+1);
+           }); 
+        }
+    }
+    */
+</script>{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Notas de Débito/Crédito de Clientes</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Nota {{entity.signoNota}} Nº: {{ entity.tipoNota~' '~entity.nuevoNroComprobante}}</h1>
+<div class="divEdicion">
+    <form action="#" method="post" class="stdform">
+        <fieldset >
+            <div class="two_fields">
+                <div><label for="nroFactura">Nº Nota:</label>
+                    <input type="text" value="{{entity.tipoNota}}" disabled="disabled" style="width:12px">
+                    <input type="text" value="{{entity.nuevoNroComprobante}}" disabled="disabled" class="smallinput">
+                </div>
+                <div><label for="nroPedido">Fecha:</label>
+                    <input type="text" value="{{entity.fecha|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div> 
+                <div><label for="nroPedido">Cliente:</label>
+                    <input type="text" value="{{entity.cliente}}" disabled="disabled" class="smallinput">
+                </div>
+    
+            <div class="two_fields">
+                <div >
+                    <label for="estado" >Estado:</label>
+                    <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
+                </div> 
+                <div><label for="nroPedido">Saldo:</label>
+                    <input type="text" value="{{entity.saldo}}" disabled="disabled" class="mininput">
+                </div>                
+            </div>
+            <div class="two_fields">
+                <div><label for="nroPedido">CAE:</label>
+                    <input type="text" value="{{entity.cae}}" disabled="disabled" class="smallinput">
+                </div>
+
+                <div><label for="nroPedido">Vto CAE:</label>
+                    <input type="text" value="{{entity.caeVto|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div>
+            <div style="padding-top: 20px; margin-left: 50px; width: 80%;" >
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="width:3%;">#</th>
+                            <th>Producto</th>
+                            <th style="width:15%;">Cantidad</th>
+                            <th style="width:15%;">Precio Unit.</th>
+                            <th style="width:10%;">Iva</th>
+                            <th style="width:10%;">SubTotal</th>              
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for det in entity.detalles %}
+                       <tr>
+                            <td>{{loop.index}}</td>
+                            <td>{{det.producto.codigoNombre}} - {{det.textoProducto}}  </td>
+                            <td class="alignright">{{det.cantidadTxt}}</td>
+                            <td class="alignright">{{det.precio|number_format(2,'.',',')}}</td>
+                            <td class="alignright">{{det.iva|number_format(2,'.',',')}}</td>
+                            <td class="alignright">{{ det.total|number_format(2,'.',',') }}</td>
+                        </tr>
+                    {% endfor %}           
+                    </tbody>                    
+                    <tfoot>
+                        <tr>
+                            <th class="head1" colspan="4" style="text-align:right">Totales</th>
+                            <th class="head1" style="text-align:right;padding-right: 10px;">{{entity.iva|number_format(2,'.',',')}}</th>
+                            <th class="head1" style="text-align:right;padding-right: 10px;">{{entity.total|number_format(2,'.',',')}}</th>
+                        </tr>
+                    </tfoot>
+                </table> 
+                                           
+            </div>                
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
+            </div>
+        </fieldset>
+    </form>
+</div>    
+</div>
+{% endblock %}

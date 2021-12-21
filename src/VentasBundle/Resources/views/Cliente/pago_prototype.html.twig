@@ -1,0 +1,10 @@
+<tr>
+    <td>{{form_widget(item.id)}}{{ form_widget(item.nroCheque, { 'attr': {'maxlength' : '10'} }) }}</td>
+    <td>{{ form_widget(item.fecha, { 'attr': {'class' : 'datepicker'} }) }}</td>
+    <td>{{ form_widget(item.titularCheque) }}</td>
+    <td>{{ form_widget(item.dador) }}</td>
+    <td>{{ form_widget(item.banco) }}</td>
+    <td>{{ form_widget(item.sucursal) }}</td>
+    <td class="importeTd">{{ form_widget(item.valor, { 'attr': {'class' : 'alignright'} }) }}</td>
+    <td class="delTd" ></td>
+</tr>

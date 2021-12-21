@@ -1,0 +1,62 @@
+<div class="vernav2 iconmenu">
+    <ul>
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema_banco') %}
+        <li id="banco"><a href="{{path('sistema_banco')}}" class="elements">Bancos</a></li>
+        <li id="cheque"><a href="{{path('sistema_cheque')}}" class="elements">Cheques</a></li>
+        <li id="titularcheque"><a href="{{path('sistema_titularcheque')}}" class="elements">Titular de Cheque</a></li>
+        <li> &nbsp;</li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema_deposito') %}
+        <li id="deposito"><a href="{{path('sistema_deposito')}}" class="elements">Depósitos</a></li>
+        {% endif %}               
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema_centrocosto') %}
+        <li id="centro-costo"><a href="{{path('sistema_centrocosto')}}" class="elements">Centros de Costo</a></li>
+        {% endif %}               
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema_parametro') %}
+        <li><a href="#parametros" class="elements">Parámetros</a>
+            <span class="arrow"></span>
+            <ul id="parametros">
+                <li id="rubro"><a href="{{path('sistema_parametro', { 'slug': 'rubro' })}}">Rubros</a></li>
+                <li id="unidad-medida"><a href="{{path('sistema_parametro', { 'slug': 'unidad-medida' })}}">Unidades de Medida</a></li>
+               <li id="condicion-pago"><a href="{{path('sistema_parametro', { 'slug': 'condicion-pago' })}}">Condiciones de Pago</a></li>
+               <li id="calificacion-proveedor"><a href="{{path('sistema_parametro', { 'slug': 'calificacion-proveedor' })}}">Calificación de Proveedor</a></li>
+               <!--  <li id="numeracion"><a href="{{path('sistema_parametro', { 'slug': 'numeracion' })}}">Numeraciones</a></li>
+                <li id="plan-cuentas"><a href="{{path('sistema_parametro', { 'slug': 'plan-cuentas' })}}">Plan de Cuentas</a></li>-->
+                <li id="sit-impositiva"><a href="{{path('sistema_parametro', { 'slug': 'sit-impositiva' })}}">Situación Impositiva</a></li>
+                <li id="localidad"><a href="{{path('sistema_parametro', { 'slug': 'localidad' })}}">Localidades</a></li>
+                <li> &nbsp;</li>
+                <li id="afip"><a href="{{path('sistema_parametro', { 'slug': 'localidad' })}}">Localidades</a></li>
+            </ul>
+        </li>
+        <li><a href="#paramafip" class="elements">Parámetros Afip</a>
+            <span class="arrow"></span>
+            <ul id="paramafip">
+                <li id="alicuota"><a href="{{path('sistema_parametro_afip', { 'slug': 'alicuota' })}}">Alícuotas</a></li>                
+                <li id="comprobante"><a href="{{path('sistema_parametro_afip', { 'slug': 'comprobante' })}}">Comprobantes</a></li>                
+                <li id="operacion"><a href="{{path('sistema_parametro_afip', { 'slug': 'operacion' })}}">Operaciones</a></li>                              
+            </ul>
+        </li>
+        
+        
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema_seguridad') %}
+        <li><a href="#seguridad" class="error">Seguridad</a>
+            <span class="arrow"></span>
+            <ul id="seguridad">
+                {% if app.user.access(app.session.get('unidneg_id'),'sistema_seguridad_empresa') %}
+                <li id="empresa"><a href="{{path('sistema_seguridad_empresa')}}">Empresa</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'sistema_seguridad_usuario') %}
+                <li id="usuario"><a href="{{path('sistema_seguridad_usuario')}}">Usuarios</a></li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'sistema_seguridad_perfil') %}
+                <li id="perfil"><a href="{{path('sistema_seguridad_perfil')}}">Perfiles</a></li>
+                {% endif %}
+                <!--<li><a href="#">Roles</a></li>-->
+            </ul>
+        </li>
+        {% endif %}
+    </ul>
+    <a class="togglemenu"></a>
+    <br /><br />
+</div><!--leftmenu-->

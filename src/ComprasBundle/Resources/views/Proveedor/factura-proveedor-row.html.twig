@@ -1,0 +1,11 @@
+<p>
+    <label for="concepto">Facturas:</label>
+    <select name="concepto" id="concepto"
+            class="chzn-select smallinput valores" multiple="multiple" data-placeholder="Seleccionar...">
+        <option value=""></option>
+        {% for dato in datos %}
+        <option value="{{dato.clave}}" data-saldo="{{dato.saldo}}">{{dato.text}}</option>
+        {% endfor %}
+    </select> 
+    <span title="Sumatoria de saldos de facturas seleccionadas" style="margin: 0 15px;font-size: 110%;font-weight: bold;" id="totalfacturas"></span>
+</p>

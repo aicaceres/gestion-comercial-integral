@@ -1,0 +1,21 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Control de Stock</h1>
+    <span class="pagedesc">Administración de Productos, Listas de Precios y Depósitos</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+    
+    <div class="two_third dashboard_left">              
+        <ul class="shortcuts">         
+         <!--    <li><a href="{{ path('stock_producto') }}" class="producto"><span>PRODUCTOS</span></a></li>
+            <li><a href="{{ path('stock_precio_listado') }}" class="lista"><span>LISTA PRECIOS</span></a></li>
+            <li><a href="{{ path('stock_pedido') }}" class="deposito"><span>PEDIDOS</span></a></li>-->
+        </ul>
+        <br clear="all" />
+    </div><!--two_third dashboard_left -->
+</div>
+{% endblock %}

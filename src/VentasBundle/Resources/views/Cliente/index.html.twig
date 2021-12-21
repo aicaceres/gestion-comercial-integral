@@ -1,0 +1,80 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Clientes</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <form id="printform" name="printform" target="_blank" action="{{ path("print_ventas_cliente") }}" method="post" style="height:40px; ">
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    </form> 
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">       
+        <thead>
+            <tr>
+                <th>Nombre y Apellido</th>
+                <th>CUIT</th>
+                <th>Dirección</th>
+                <th>Localidad</th>
+                <th class="nosort">Teléfono</th>
+                <th class="nosort">SALDO</th>
+                <th style="width:5%;" class="nosort">Activo</th>
+                <th class="nosort actionbutton addbutton">
+                   {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_new') %}
+                    <a class="editar create" href="{{ path('ventas_cliente_new') }}" style="text-align:center">Agregar Cliente</a>
+                    {% else %} &nbsp; {% endif %} 
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+           {% for entity in entities %}
+            <tr>
+                <td>{{ entity.nombre |upper }}</td>
+                <td>{{ entity.cuit }}</td>
+                <td>{{ entity.direccion }}</td>
+                <td>{{ entity.localidad }}</td>
+                <td>{{ entity.telefono }}</td>
+                <td class="alignright {% if(entity.getSaldo>0) %}red{%endif%}" >{{ entity.getSaldo|number_format(2,'.',',') }}</td>
+                <td><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /></td>
+                <td>
+                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_edit') %}
+                    <a href="{{ path('ventas_cliente_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                    {% endif %}
+                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_delete') %}
+                        <a href url="{{ path('ventas_cliente_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
+                    {% endif %}                                         
+                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table> 
+</div>
+
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($){
+    var oTable = $('#dyntable2').dataTable();
+   
+   $('#printform').on('submit',function(){
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {  
+            var i = value[6].indexOf('<div class=');
+            if( i >-1 ){
+                var j = value[6].indexOf('checked=\"checked\"');
+                value[6] = (j>-1)?'Si':'No' ;
+            }
+            value.splice(7);
+            datos[index] = value;
+        }); 
+        $('#datalist').val(JSON.stringify(datos));
+    });
+});
+</script>     
+{% endblock %}

@@ -1,0 +1,134 @@
+<html>
+    <head>
+        <style>
+            @page { size : A4; }
+            .align-center{text-align: center}
+            .alignright{text-align:right;}
+            .alignleft {
+                padding-left: 20px;
+                text-align: left;
+            }
+            .break {page-break-after:always}
+            body{ font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+                    margin: 10px 20px;}
+            h5 {
+                font-weight: lighter;
+                margin: 0;
+                position: absolute;
+                right: 20px;
+                text-align: right;
+                top: 10px;
+            }
+            h4 {
+                font-size: 0.8em;
+                margin: 2px;
+            }
+            h4 span {
+                font-weight: normal;
+                margin-left: 5px;
+            }
+            .nropedido{
+                display: inline-block;
+                float: right;
+                font-size: 1.3em;
+                vertical-align: top;
+                width: 20%;
+            } 
+            .nropedido label {
+                display: block;
+                font-size: 0.6em;
+                padding: 10px 0;
+            }
+            .pageheader{margin-bottom: 10px;}
+            .pageheader .pagetitle {
+                color: #666666;
+                font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
+                font-size: 28px;
+                font-weight: normal;
+                margin: 0 10px;
+            }
+            .pageheader .pagedesc {
+                color: #666666;
+                margin: 0 10px;
+            }
+            table {
+                font-family: 'Verdana' ;
+                font-size: 10px;
+                width: 100%;
+                border-collapse:collapse;
+            }
+            table tr th{
+                border-top: 1px solid gray;
+                border-bottom: 1px solid gray;
+                /*  background: #E5E5E5;*/
+                padding: 5px;
+                font-size: 10px;
+                letter-spacing: 0.1em;
+            }
+            table tr td{ padding:3px 15px;}
+            table tbody{ min-height: 200px;}
+        </style>
+    </head>
+    <body>
+        {% set recibido=false %}
+        {% if entity.estado in ['RECIBIDO','FACTURADO']  %}{% set recibido=true %}{% endif %}
+        <img style="width: 15%;position:absolute;" src="{{asset('assets/images/logo_small.png')}}" />
+        <div class="align-center" style="height:32px;">
+            <span style="display: block;padding-top: 10px;">PEDIDO INTERDEPÓSITO</span>
+        </div>
+        <h5> 
+            <small style="display: block;margin-bottom: 5px;">Fecha: {{date('now')|date('d / m / Y H:i')}}</small>
+            <small>Usuario: {{app.user.nombre}} </small>
+        </h5>
+        <hr>
+        <div style="display:block; clear: both">
+            <div class="pageheader notab">
+                <div style="display:inline-block; width: 50%;">
+                    <h4>De Depósito:<span>{{entity.depositoOrigen.empresaUnidadDeposito}}</span></h4>
+                    <h4>A :<span>{{entity.depositoDestino.empresaUnidadDeposito}}</span></h4>
+                </div>
+                <div class="nropedido">
+                    <h4>PEDIDO Nº</h4>
+                    <h4>{{entity.nroPedido}}</h4>
+                   {% if recibido %} <label>Recibido el: {{entity.fechaEntrega|date('d/m/Y')}}</label> {% endif %}
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">Código</th>
+                        <th style="width: 20%;">Cant.</th>
+                        <th class="alignleft">Detalle</th>
+                        <th style="width: 15%;">Final</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in entity.detalles %}
+                    <tr>
+                        <td>{{item.producto.codigo}}</td>
+                        <td class="alignright">{% if recibido %}{{item.entregado}}{%else%}{{item.cantidadTxt}}{%endif%}</td>
+                        <td>{{item.producto.nombre}}</td>
+                        <td class="alignright">{% if recibido %}{{item.getTotalRecibido|number_format(2,'.',',')}}{%else%}{{item.total|number_format(2,'.',',')}}{%endif%} {{item.producto.unidadMedida}}</td>
+                    </tr>
+                {% endfor %}
+                    {% for i in range(1, 10 - entity.detalles|length)%}
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="alignleft"></th>
+                        <th class="alignright">TOTAL</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+<script type="text/javascript">    
+        window.print(); 
+        window.setTimeout('window.close()', 1000);
+</script>          
+    </body>
+</html>

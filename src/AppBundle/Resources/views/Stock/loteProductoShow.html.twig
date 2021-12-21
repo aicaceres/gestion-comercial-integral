@@ -1,0 +1,102 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Lote N° {{entity.nroLote}}</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+    <form action="#" method="post" class="stdform">
+        <style>  
+            .formdiv{ display: inline-block;
+                 margin-bottom: 10px; }
+        </style>        
+        <fieldset>
+            <div class="formdiv"><label for="fecha">Nro Lote:</label>
+            <input type="text" value="{{entity.nroLote}}" disabled="disabled" class="width100">
+        </div>
+        <div class="formdiv"><label for="fecha">Vencimiento:</label>
+            <input type="text" value="{{entity.fechaVencimiento|date('d/m/Y')}}" disabled="disabled" class="width100">
+        </div>        
+        </fieldset>
+        <fieldset>        
+            <div style="margin-bottom: 10px;"><label for="detalle">Producto:</label>
+                <input type="text" value="{{entity.producto}}" disabled="disabled" class="mediuminput"> 
+            </div>
+        </fieldset>       
+        <fieldset>                
+            <div class="formdiv">
+                <label for="detalle">Fecha Alta:</label>
+                <input type="text" value="{{entity.created|date('d/m/Y')}}" disabled="disabled" class="width100">
+            </div>
+            <div class="formdiv"><label style="width:100px">Usuario:</label>
+                <input type="text" value="{{entity.createdBy.username}}" disabled="disabled" class="width100"> 
+            </div>
+            <div class="formdiv" ><label style="width:100px">Ingreso:</label>               
+                <input type="text" value="{{entity.getIngreso}}" readonly="readonly" style="width:180px;" > 
+            </div>         
+        </fieldset>
+{% if entity.tieneSalidas%}
+            <div class="two_fields">
+                <div style="vertical-align:top;margin-right:5px;">
+                    <h5 style="margin-bottom:10px">Salidas por Ajuste de Stock</h5>
+                    <table cellpadding="0" cellspacing="0" border="0" class="stdtable ">
+                        <thead>
+                            <tr>
+                                <th class="head0" style="width:10%;">Fecha</th>
+                                <th class="head0" style="width:20%;">Cantidad</th>
+                                <th class="head0" style="width:60%;">Usuario</th>
+                                <th class="head0" style="width:1%;"></th>
+                            </tr>
+                        </thead>                                                    
+                        <tbody>
+                            {% for item in entity.ajusteDetalles %}
+                                <tr>
+                                    <td>{{item.stockAjuste.fecha|date('d/m/Y')}}</td>
+                                    <td>{{item.cantidadTxt}}</td>
+                                    <td>{{item.stockAjuste.createdBy.username}}</td>
+                                    <td><a href="{{ path('stock_ajuste_show', { 'id': item.stockAjuste.id }) }}" class="editar btn btnaction btn_folder" title="Ver Ajuste"></a></td>
+                                </tr>
+                            {% endfor %}           
+                        </tbody>                            
+                         
+                    </table>   
+                </div>
+                <div style="vertical-align:top;margin-left:5px;">
+                    <h5 style="margin-bottom:10px">Salidas por Despacho de Mercaderías</h5>
+                    <table cellpadding="0" cellspacing="0" border="0" class="stdtable ">
+                        <thead>
+                            <tr>
+                                <th class="head0" style="width:10%;">Fecha</th>
+                                <th class="head0" style="width:20%;">Cantidad</th>
+                                <th class="head0" style="width:60%;">Usuario</th>
+                                <th class="head0" style="width:1%;"></th>
+                            </tr>
+                        </thead>                                                    
+                        <tbody>
+                            {% for item in entity.despachoDetalles %}
+                                <tr>
+                                    <td>{{item.despacho.fechaDespacho|date('d/m/Y')}}</td>
+                                    <td>{{item.cantidadTxt}}</td>
+                                    <td>{{item.despacho.createdBy.username}}</td>
+                                    <td><a href="{{ path('stock_despacho_show', { 'id': item.despacho.id }) }}" class="editar btn btnaction btn_folder" title="Ver Ajuste"></a></td>
+                                </tr>
+                            {% endfor %}             
+                        </tbody>                            
+                         
+                    </table>                     
+                    
+                    
+                </div>
+            </div>
+     {% endif%}
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
+            </div>
+    </form>
+</div>    
+</div>
+{% endblock %}

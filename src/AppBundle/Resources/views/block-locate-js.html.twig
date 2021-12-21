@@ -1,0 +1,44 @@
+<script type="text/javascript">
+jQuery(document).ready(function() {
+    jQuery('[id^="appbundle"][id$="_pais"]').change(function() {
+        var data = { pais_id: jQuery(this).val()  };
+
+        jQuery.ajax({
+            type: 'post',
+            url: '{{ path("select_provincias") }}',
+            data: data,
+            success: function(data) {
+                var provincia_selector = jQuery('[id^="appbundle"][id$="_provincia"]');
+                provincia_selector.html('<option></option>');
+                jQuery('[id^="uniform-appbundle"][id$="_provincia"] span').html('Seleccione Provincia');
+
+                for (var i = 0, total = data.length; i < total; i++) {
+                    provincia_selector.append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                }
+                jQuery('[id^="appbundle"][id$="_localidad"]').html("<option></option>");
+                jQuery('[id^="uniform-appbundle"][id$="_localidad"] span').html('Seleccione Localidad');
+            }
+        });
+    });
+    jQuery('[id^="appbundle"][id$="_provincia"]').change(function() {
+        var data = {
+            provincia_id: jQuery(this).val()
+        };
+
+        jQuery.ajax({
+            type: 'post',
+            url: '{{ path("select_localidades") }}',
+            data: data,
+            success: function(data) {
+                var localidad_selector = jQuery('[id^="appbundle"][id$="_localidad"]');
+                jQuery('[id^="uniform-appbundle"][id$="_localidad"] span').html('Seleccione Localidad');
+                localidad_selector.html('<option></option>');
+
+                for (var i = 0, total = data.length; i < total; i++) {
+                    localidad_selector.append('<option value="' + data[i].id + '">' + data[i].name + '</option>');
+                }
+            }
+        });
+    });
+});
+</script>

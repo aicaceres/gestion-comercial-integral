@@ -1,0 +1,73 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#F5C98F" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        {% set recibido=false %}
+    {% if entity.estado in ['RECIBIDO','FACTURADO']  %}{% set recibido=true %}{% endif %}
+    <h2 text-align="center"> Pedido Interdepósito </h2>     
+
+    <table font-size="9px">
+        <tr>
+            <td border.type="none" height="20px" vertical-align="middle"><strong>Fecha de Pedido:</strong> {{ entity.fechaPedido|date('d-m-Y') }}</td>
+            <td border.type="none" height="20px" vertical-align="middle"><strong>Depósito Origen:</strong> {{entity.depositoOrigen.empresaUnidadDeposito}}</td>
+        </tr> 
+        <tr>
+            <td border.type="none" height="20px" vertical-align="middle"><strong>PEDIDO Nº</strong> {{entity.nroPedido}}</td>
+            <td border.type="none" height="20px" vertical-align="middle"><strong>Depósito Destino:</strong> {{entity.depositoDestino.empresaUnidadDeposito}}</td>
+        </tr> 
+        <tr>
+            <td border.type="none" height="20px" vertical-align="middle"> <strong>Estado:</strong> {{entity.estado}} </td>       
+            <td border.type="none" height="20px" vertical-align="middle">{% if recibido %} <strong>Recibido el:</strong> {{entity.fechaEntrega|date('d/m/Y')}} {% endif %}</td>
+        </tr> 
+    </table>
+
+    <div height="20px"></div>
+    
+    <table font-size="9px">   
+        <tr>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="1 cm"><strong>#</strong></td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px"><strong>Producto</strong></td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="2 cm"><strong>Cantidad</strong></td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="2 cm"><strong>Despachado</strong></td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="2 cm"><strong>Entregado</strong></td>
+          <!--  <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="2 cm"><strong>TOTAL</strong></td> -->
+        </tr>
+        {% if entity.detalles|length>0 %}
+            {% for det in entity.detalles %}
+            <tr>
+                <td border.color="black" height="20px" vertical-align="middle" padding-left="10px">{{loop.index}}</td>
+                <td border.color="black" height="20px" vertical-align="middle" padding-left="10px">{{det.producto.codigoNombre}}</td>
+                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.cantidadTxt}}</td>
+                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.despachadoTxt}}</td>
+                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.entregadoTxt}}</td>
+            <!--    <td border.color="black" height="20px" vertical-align="middle" padding-left="10px">{% if entity.estado=='RECIBIDO' %}{{det.getTotalRecibido|number_format(3,'.',',')}}{%else%}{{det.cantidadTotal|number_format(3,'.',',')}}{%endif%} {{det.producto.unidadMedida}}</td>-->
+            </tr>
+            {% endfor %}
+        {% endif %}
+    </table>   
+
+
+
+    
+
+</dynamic-page>
+</pdf>

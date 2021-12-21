@@ -1,0 +1,104 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block page_stylesheets %}
+<style>            
+    #detemb table tr td select{ font-size:inherit; }       
+</style>{% endblock %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Despachos</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Nuevo Despacho de Mercaderías</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div style="padding-top: 10px; ">
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        {{ form_errors(form) }}
+        <fieldset >            
+            <div class="three_fields">
+                <div><label>Nº despacho:</label>
+                    <input type="text" value="{{entity.nroDespacho}}" disabled="disabled" class="width100">
+                </div>
+                {{ form_row(form.despachoNro) }}  
+                {{ form_row(form.fechaDespacho, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+            </div>            
+            <div>
+                 {{ form_label(form.depositoOrigen,'Origen del despacho:') }}
+                 {{ form_widget(form.depositoOrigen, { 'attr': {'class' : 'mininput'} }) }}
+            </div>
+            <div class="two_fields">
+                <div style="width:40%" >{{ form_label(form.unidadNegocio,'Destino del despacho:') }}   
+                {{ form_widget(form.unidadNegocio) }}   </div>
+                <div style="width:55%">
+                {{ form_label(form.depositoDestino) }} 
+                {{ form_widget(form.depositoDestino) }} 
+                </div>
+            </div>    
+              <div>
+                 {{ form_label(form.observDespacho,'Observaciones:') }}
+                 {{ form_widget(form.observDespacho, { 'attr': {'class' : 'mediuminput'} }) }}
+            </div>  
+
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar y agregar items</button>
+                <a class="cancelar" type="button" href="{{ path('stock_despacho')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+      {{ form_end(form) }}
+</div>    
+
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {% include "AppBundle::block-deposito-js.html.twig" %} 
+<script type="text/javascript">
+jQuery(document).ready(function($){
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});    
+    // elimina los depósitos no autorizados
+    depositos = "[{{ app.session.get('depositos')|join(', ') }}]";
+    $('#appbundle_despacho_depositoOrigen option').each(function() {        
+        if ( depositos.search(  $(this).val() ) == -1 )  {
+            $(this).remove();
+        }
+    });    
+    // Previene submit al enter
+    $(document).on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+    });
+
+    // cambio de depósito
+    $('[id^="appbundle_despacho_deposito"]').on('change',function(e){ 
+        if( $('#appbundle_despacho_depositoDestino').val() &&  $('#appbundle_despacho_depositoOrigen').val() ){
+            if( $('#appbundle_despacho_depositoOrigen').val() == $('#appbundle_despacho_depositoDestino').val() ){
+                alert('El depósito de origen no puede ser el mismo que el de destino');
+                return false;  
+            }           
+        }
+    });
+    
+    // Submit de formulario
+    $('.guardar').click(function() {  
+        if( !$('#appbundle_despacho_depositoOrigen').val() ){
+            alert('Debe seleccionar un Depósito de origen para el despacho');
+            return false;  
+        };
+        if( !$('#appbundle_despacho_depositoDestino').val() ){
+            alert('Debe seleccionar un Depósito destino para el despacho');
+            return false;  
+        };
+        if( $('#appbundle_despacho_depositoOrigen').val() == $('#appbundle_despacho_depositoDestino').val() ){
+            alert('El depósito de origen no puede ser el mismo que el de destino');
+            return false;  
+        };                
+        if (!confirm('Confirma la registración?')) {
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

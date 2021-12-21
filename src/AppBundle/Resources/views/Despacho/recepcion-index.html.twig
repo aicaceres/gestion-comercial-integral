@@ -1,0 +1,74 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Recepción de Mercaderías</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <form class="deposito_selector" id="searchform" action="{{ path('stock_despacho_recepcion') }}" method="get">
+        <div style="display: inline-block; margin:10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>DEPÓSITO:</strong></label>
+            <select class="uniformselect" id="selectDeposito" name="depId">
+                {% for dep in depositos %}
+                    <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.empresaUnidadDeposito}}</option>
+                {% endfor %}
+            </select>  
+        </div>    
+        <div style="display: inline-block; margin:10px;">     
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Período: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{periodo.desde}}" name="desde" id="desde" /> 
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{periodo.hasta}}" name="hasta" id="hasta" /> 
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>        
+    </form>     
+          
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Nº</th>
+                <th>Origen del Envío</th>
+                <th>Estado</th>
+                <th class="nosort actionbutton addbutton">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities if entity.estado=="DESPACHADO" or entity.estado=='ENTREGADO' %} 
+            <tr>
+                <td><span class="hidden">{{ entity.fechaDespacho|date('Ymd') }}</span> {{ entity.fechaDespacho|date('d-m-Y') }}</td>
+                <td>{{ entity.nroDespacho}}</td>
+                <td>{{ entity.depositoOrigen.empresaUnidadDeposito }}</td>
+                <td {% if entity.hayInconsistencia %} style="color:red" title="Posible Inconsistencia en stock" {% endif %}> {{ entity.estado }}</td>
+                <td class="buttons">
+                   {% if app.user.access(app.session.get('unidneg_id'),'stock_despacho_recepcion_new') and entity.estado=="DESPACHADO" %}
+                    <a href="{{ path('stock_despacho_recepcion_new', { 'id': entity.id }) }}" class="editar btn btnaction btn_truck" title="Recibir Mercadería"></a>                    
+                    {% endif %}
+                   {% if  entity.estado=="ENTREGADO" %}
+                    <a href="{{ path('stock_despacho_recepcion_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Recepción"></a>                    
+                    <a href="javascript:void(0)" url="{{ path('stock_despacho_print', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir"></a>&nbsp;
+                    {% endif %}
+                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+    </table>     
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($){
+    var oTable = $('#dyntable2').dataTable();
+     oTable.fnSort( [ [0,'desc'],[1,'desc'] ] );    
+    $('#selectDeposito').change(function(){ 
+        $('#searchform').submit();
+    }); 
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});   
+});
+</script>   
+{% endblock %}

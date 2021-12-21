@@ -1,0 +1,214 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Pagos de Cliente - {{entity.cliente.nombre}}</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos' : 'Alta de Nuevo Pago' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">    
+    {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        {{ form_errors(form) }}
+        <fieldset >
+            <div class="two_fields">
+                <div><label for="nroFactura">Nº Pago:</label>
+                    <input type="text" value="{{entity.nroPago}}" disabled="disabled" class="width100">
+                </div>
+                <div>
+                {{ form_label(form.nroComprobante)  }}                                
+                {{ form_widget(form.nroComprobante, { 'attr': {'class' : 'smallinput hasInfo','tabindex':'0','maxlength':'20', 'title':'N° de comprobante del Cliente'} })  }}                                
+                </div>                 
+            </div> 
+            <p>{{ form_row(form.cliente) }}   </p>
+            <p>{{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}</p>
+            <p><div id="facturas" ></div></p>
+            <p>{{ form_row(form.detalle, { 'attr': {'class' : 'mediuminput'} }) }}</p>
+            <div class="locate">
+                {{ form_row(form.importe, { 'attr': {'class' : 'width50'} }) }}
+                {{ form_row(form.deposito, { 'attr': {'class' : 'width50'} }) }}
+                <div><label for="importe">Cheques:</label>
+                    <input type="text" value="" disabled="disabled" id="totCheques" class="width50">
+                </div>
+                <div><label for="importe">TOTAL:</label>
+                    <input type="text" value="" disabled="disabled" id="total" class="width100">
+                </div>
+            </div>   
+            <br clear="all" /> 
+            <a href="#" id="getCheques" class="btn btn_search radius50" style="float: right;margin-bottom: 4px;"><span>Buscar Cheques</span></a>
+           
+            <div style="margin-bottom: 20px;">
+                 <h4>Cheques </h4>
+                    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" >
+                        <thead>
+                            <tr>
+                                <th style="width:12%;" class="head0">Nº Cheque</th>
+                                <th class="head0" style="width:12%;">Fecha</th>
+                                <th class="head0">Titular</th>
+                                <th class="head0">Dador</th>
+                                <th class="head0">Banco</th>
+                                <th class="head0">Sucursal</th>
+                                <th class="head0" style="width:10%;">Importe</th>
+                                <th class="head0" style="text-align:center;width: 5%;"><a href="#" id="linkAdd" title="Agregar Cheque"><img src="{{asset('assets/images/icons/add.png')}}" /></a></th>
+                            </tr>
+                        </thead>
+                        <tbody data-index="{{form.chequesRecibidos | length }}" 
+                               data-prototype="{% filter escape %}{% include 'VentasBundle:Cliente:pago_prototype.html.twig' with {'item':form.chequesRecibidos.vars.prototype} %}{% endfilter %}" >
+                        {% for cheque in form.chequesRecibidos %}
+                            <tr class="item">
+                                <td>{{form_widget(cheque.id)}}{{ form_widget(cheque.nroCheque, { 'attr': {'maxlength' : '10'} }) }}</td>
+                                <td>{{ form_widget(cheque.fecha, { 'attr': {'class' : 'datepicker'} }) }}</td>
+                                <td>{{ form_widget(cheque.titularCheque) }}</td>
+                                <td>{{ form_widget(cheque.dador) }}</td>
+                                <td>{{ form_widget(cheque.banco) }}</td>
+                                <td>{{ form_widget(cheque.sucursal) }}</td>
+                                <td class="importeTd">{{ form_widget(cheque.valor, { 'attr': {'class' : 'alignright'} }) }}</td>
+                                <td class="delTd" ></td>                                
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>                
+            </div>       
+            <input type="hidden" id="txtconcepto" name="txtconcepto"/>
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('ventas_cliente_pagos')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+    {{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+var $collectionHolder;
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('#ventasbundle_pagocliente_cliente').on('change',function(){
+        $.ajax({
+            url: "{{ path("ventas_cliente_pagos_getfacturas") }}",
+            async: true,
+            data: 'cli='+ $(this).val() ,
+            success: function(data) {
+                $('#facturas').html(data);
+                $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+            }, error: function() {
+                alert('No se puede realizar la operación en este momento');
+            }
+       });
+    });
+    $('#ventasbundle_pagocliente_cliente').change();
+    
+    
+   $('[name*="importe"],[name*="deposito"]').on('change', function() {
+        actualizarTotal();
+    });
+   $('#getCheques').on('click', function() {  cargarCheques();  });
+    $('.guardar').click(function() {
+        if (!confirm('Confirma la registración?')) { return false;  }
+        $('#txtconcepto').val($("[name='concepto']").val());
+    });
+    // Cheques
+    $collectionHolder = $('table.stdtable tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });
+    $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        $('.togglemenu').click();
+        addNewItem();
+    });
+}); 
+function addNewItem( cheque ) {
+    var prototype = $collectionHolder.data('prototype');
+    var index = $collectionHolder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $collectionHolder.data('index', index + 1);
+    $collectionHolder.append(newForm);
+    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
+    lastTd = $collectionHolder.find('tr').last();
+    lastTd.find('.importeTd input').val(0);
+    lastTd.find('td input').first().focus();
+    if(cheque){
+        lastTd.find('[name*="id"]').val(cheque.id);
+        lastTd.find('[name*="nroCheque"]').val(cheque.nroCheque);
+        lastTd.find('[name*="fecha"]').val(cheque.fecha);
+        lastTd.find('[name*="titular"]').val(cheque.titular);
+        lastTd.find('[name*="titular"]').trigger("liszt:updated");
+        lastTd.find('[name*="dador"]').val(cheque.dador);
+        lastTd.find('[name*="banco"]').val(cheque.banco);
+        lastTd.find('[name*="sucursal"]').val(cheque.sucursal);
+        lastTd.find('[name*="valor"]').val(cheque.valor);
+        lastTd.find('input').attr('readonly','readonly');
+        lastTd.find('select option:not(:selected)').each(function(){
+            jQuery(this).attr('disabled', 'disabled');
+        });
+        actualizarTotal();
+    }else{
+        jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
+        jQuery('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});        
+        jQuery('[name*="valor"]').on('change',function() {
+            cheque = parseFloat( jQuery(this).val() );
+            if( isNaN(cheque) ){ jQuery(this).val(0); } 
+            actualizarTotal();
+        });
+    } 
+    
+}
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        var res = true;
+        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
+            res = confirm('Desea eliminar este item?');
+        if (res) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            actualizarTotal();
+        }
+    });
+}
+function actualizarTotal(){
+    efectivo = parseFloat( jQuery('[name*="importe"]').val() );
+    if( isNaN(efectivo) ){ jQuery('[name*="importe"]').val(0); efectivo=0; }
+    deposito = parseFloat( jQuery('[name*="deposito"]').val() );
+    if( isNaN(deposito) ){ jQuery('[name*="deposito"]').val(0); deposito=0; }
+    valor=0;
+    jQuery('[name*="valor"]').each(function(){
+        valor +=  parseFloat( jQuery(this).val() );
+    });
+    jQuery('#totCheques').val(valor);
+    jQuery('#total').val(valor + efectivo + deposito );
+    jQuery('[name*="importe"]').val( efectivo );
+    jQuery('[name*="deposito"]').val( deposito );
+}
+function cargarCheques(){
+    var $rutaChequesCartera="{{ path('ventas_cliente_pagos_getcheques')}}";
+    var $getDatosCheque="{{ path('ventas_cliente_pagos_getdatoscheque')}}";
+    jQuery('#popup').dialog({
+        modal: true, autoOpen: false, title: 'Cheques en Cartera', width: '70%', minHeight: 400,
+        buttons: [{text: "Agregar", class: 'closePopup',
+                click: function() { 
+                    jQuery(this).find('input[type="checkbox"]:checked').each(function() {
+                        jQuery.get($getDatosCheque,{id: jQuery(this).attr('id') },
+                            function(data){
+                                addNewItem(data);
+                        }, "json");
+                    });                    
+                    jQuery(this).dialog("close"); 
+                }}],
+    });    
+    jQuery.get($rutaChequesCartera , function( data ) { 
+        jQuery('#popup').html(data); 
+        jQuery('#popup').dialog('open');
+    });
+}
+
+</script>  
+{% endblock %}

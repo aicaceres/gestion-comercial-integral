@@ -1,0 +1,13 @@
+<tr class="item"  data-id="{{item.id}}" style="height:30px;" >
+    <td class="ordTd"></td>
+    <td class="prodTd">{{item.producto.codigoNombre}}  {{item.lotesItemTxt|raw}}  </td>
+    <td class="signoTd">{{item.signo}}</td>
+    <td class="cantTd">{{item.cantidadTotal|number_format(3,'.','')~' '~item.producto.unidadmedida.nombre}} </td>        
+    <td class="motTd">{{ item.motivo }}</td>
+    <td style="text-align:center;width:20px;">
+        <a class="editTd" href="javascript:void(0)" title="Editar" tabIndex="-1" 
+           data-url="{{path('stock_render_edit_item_ajuste',{'id':item.id})}}" data-actionurl="{{path('stock_item_ajuste_update',{'id':item.id})}}">
+            <img src="{{asset('assets/images/icons/editor.png')}}" /></a>
+    </td>    
+    <td style="text-align:center;"><a class="delTd" href="javascript:void(0)" data-id="{{item.id}}"  title="Quitar" tabIndex="-1"><span class="minus"></span></a></td>
+</tr>

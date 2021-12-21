@@ -1,0 +1,59 @@
+
+<table cellpadding="0" cellspacing="0" border="0" class="stdtable"  id="table-economico">
+    <thead>
+        <tr>
+            <th style="font-family: 'RobotoCondensed'"> {{ title|raw }}</th>
+            {% for mes in meses %} 
+                {% set aux = mes|split('-') %}
+                {% set i = aux[0]|number_format %}
+                {% set mestxt = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'] %}
+                <th class="aligncenter">{{ mestxt[ i-1 ] ~ '-' ~ aux[1]  }}</th>    
+            {% endfor %}
+            <th class="aligncenter"> TOTAL </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% set row = 0 %}
+        {% for rep in reporte %}
+            
+            {% if rep.tipo is defined  %}
+                {% set rowPadre=0 %}
+                <tr class="tr-padre">
+                    <td > {{ rep.nombre|upper }} </td>
+                    {% for mes in meses %}    
+                        {% set rowPadre = rowPadre + rep[mes|raw] %}                        
+                        <td class="alignright">{{ rep[mes|raw] |number_format(3,'.','')}}</td>    
+                    {% endfor %}
+                    <td class="alignright total">{{ rowPadre|number_format(3,'.','') }}</td>
+                </tr>
+                {% set row = row + rowPadre %}
+            {% else %}
+                
+                {% for hijo in rep %}
+                    {% set rowHijo=0 %}
+                    <tr class="tr-hijo">
+                        <td> -&nbsp; {{ hijo.nombre|upper }} </td>
+                         {% for mes in meses %}    
+                             {% set rowHijo = rowHijo + hijo[mes|raw] %}
+                            <td class="alignright">{{ hijo[mes|raw]|number_format(3,'.','') }}</td>    
+                         {% endfor %}
+                        <td class="alignright total">{{ rowHijo|number_format(3,'.','') }}</td>
+                     </tr>                       
+                {% endfor %}
+                
+            {% endif %}
+            
+        {% endfor %}
+        
+    </tbody>
+    <tfoot>
+        <tr class="tr-total">
+            <th class="alignright">TOTALES</th>
+            {% for mes in meses %}                                 
+                <th class="alignright">{{ totales[mes|raw]|number_format(3,'.',',') }}</th>    
+            {% endfor %}
+            <th class="alignright">{{ row|number_format(3,'.',',') }}</th>
+        </tr>
+    </tfoot>
+</table>
+
