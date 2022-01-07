@@ -33,10 +33,10 @@
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">        
         <thead>
             <tr>
-                <th>Rubro</th>
                 <th>Código</th>
                 <th>Producto</th>
                 <th>Proveedor</th>
+                <th>Rubro</th>
                 <th class="nosort">Unid.Med.</th>
                 <th class="nosort">Bulto</th>
                 <th class="nosort">Costo</th>
@@ -51,10 +51,10 @@
         <tbody>
            {% for entity in entities %}
             <tr>             
-                <td>{% if entity.rubro %}{{ entity.rubro.nombre }}{% endif %}</td>
                 <td>{{ entity.codigo |upper }}</td>
                 <td>{{ entity.nombre }}</td>
                 <td>{{ entity.proveedor }}</td>
+                <td>{% if entity.rubro %}{{ entity.rubro.nombre }}{% endif %}</td>
                 <td>{{ entity.unidadMedida }}</td>
                 <td>{%if entity.bulto%}{{ entity.cantidadxBulto }}{%endif%}</td>
                 <td class="alignright" style="width:5%;">{{entity.costo| number_format(3,'.',',')}}</td>
