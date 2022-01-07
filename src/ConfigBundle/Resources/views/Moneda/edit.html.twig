@@ -1,0 +1,34 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Monedas</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nueva Moneda' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+ {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="two_fields">
+            {{ form_row(form.nombre, { 'attr': {'class' : 'smallinput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
+            {{ form_row(form.simbolo, { 'attr': {'class' : 'mininput'} }) }} 
+            </div> 
+            <div class="two_fields">
+            {{ form_row(form.cotizacion, { 'attr': {'class' : 'mininput'} }) }}
+            {{ form_row(form.tope, { 'attr': {'class' : 'mininput'} }) }} 
+            </div> 
+
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('sistema_moneda')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}

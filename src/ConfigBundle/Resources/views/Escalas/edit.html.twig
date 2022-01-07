@@ -1,0 +1,38 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Escalas Impositivas</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nuevo Item' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+ {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >        
+            <div class="two_fields">
+            {{ form_row(form.nombre, { 'attr': {'class' : 'mediuminput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
+            {{ form_row(form.tipo, { 'attr': {'class' : 'mininput'} }) }} 
+            </div> 
+            <div class="two_fields">
+            {{ form_row(form.retencion, { 'attr': {'class' : 'mininput'} }) }} 
+            {{ form_row(form.adicional, { 'attr': {'class' : 'mininput'} }) }}
+            </div> 
+            <div class="two_fields">
+            {{ form_row(form.minimo, { 'attr': {'class' : 'mininput'} }) }} 
+            {{ form_row(form.codigo_atp, { 'attr': {'class' : 'mininput'} }) }}
+            </div> 
+
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('sistema_escalas')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</div>    
+</div>
+{% endblock %}

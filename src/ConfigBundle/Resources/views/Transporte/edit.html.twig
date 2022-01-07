@@ -1,0 +1,51 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Transportes</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nuevo Transporte' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+ {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <p>             
+                {{ form_label(form.nombre) }}
+                {{ form_widget(form.nombre, { 'attr': {'class' : 'smallinput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
+                {{ form_errors(form.nombre) }}                
+            </p>
+            <p>
+            {{ form_label(form.cuit) }}
+            {{ form_widget(form.cuit,{'attr':{'class':'mininput'}}) }}
+            {{ form_errors(form.cuit) }}
+             </p>
+             <p>
+             {{ form_row(form.direccion,{'attr':{'class':'mediuminput'}})}}
+             </p>
+             <p>
+             {{ form_row(form.telefono,{'attr':{'class':'mediuminput'}})}}
+             </p>
+             <div class="locate">
+        {{ form_row(form.pais, { 'attr': {'class' : 'uniformselect'  } }) }}   
+        {{ form_row(form.provincia, { 'attr': {'class' : 'uniformselect'  } }) }}   
+        {{ form_row(form.localidad, { 'attr': {'class' : 'uniformselect'  } }) }}   
+                </div> 
+                   
+            <br clear="all" /> 
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('sistema_transporte')}}">Cancelar</a>
+            </div>
+        </fieldset>
+{{ form_end(form) }}
+</form>
+</div>    
+</div>
+{% endblock %}
+{% block extra_javascripts %} 
+{% include "AppBundle::block-locate-js.html.twig" %}   
+{% endblock %}

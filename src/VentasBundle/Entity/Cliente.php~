@@ -1,0 +1,241 @@
+<?php
+namespace VentasBundle\Entity;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * VentasBundle\Entity\Cliente
+ * @ORM\Table(name="cliente")
+ * @ORM\Entity(repositoryClass="VentasBundle\Entity\ClienteRepository")
+ */
+class Cliente
+{
+    /**
+     * @var integer $id
+     * @ORM\Column(name="id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    /**
+     * @var string $nombre
+     * @ORM\Column(name="nombre", type="string", nullable=false)
+     * @Assert\NotBlank()
+     */    
+    protected $nombre;
+    /**
+     * @var string $dni
+     * @ORM\Column(name="dni", type="string", length=8, nullable=true)
+     */
+    protected $dni;
+    /**
+     * @var string $cuit
+     * @ORM\Column(name="cuit", type="string", length=13, nullable=true)
+     */
+    protected $cuit;
+    /**
+     * @var string $nroInscripcion
+     * @ORM\Column(name="nro_inscripcion", type="string", nullable=true)
+     */
+    protected $nroInscripcion;    
+    /**
+     * @var string $direccion
+     * @ORM\Column(name="direccion", type="string", nullable=true)
+     */
+    protected $direccion;
+    /**
+     * @var string $telefono
+     * @ORM\Column(name="telefono", type="string", nullable=true)
+     */
+    protected $telefono;
+    /**
+     * @var string $email
+     * @ORM\Column(name="email", type="string", nullable=true)
+     */
+    protected $email;
+    /**
+    * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
+    * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
+    */
+    protected $localidad;    
+    /**
+     * @ORM\Column(name="observaciones", type="text", nullable=true)
+     */
+    protected $observaciones;      
+     /**
+     * @var integer $saldoInicial
+     * @ORM\Column(name="saldo_inicial", type="decimal", scale=2, nullable=true )
+     */
+    protected $saldoInicial; 
+    /**
+     * @var integer $limiteCredito
+     * @ORM\Column(name="limite_credito", type="decimal", scale=2, nullable=true )
+     */
+    protected $limiteCredito;    
+    /**
+     * @var date $ultVerificacionCuit
+     * @ORM\Column(name="ult_verificacion_cuit", type="date", nullable=true)
+     */
+    private $ultVerificacionCuit ;     
+    /**
+     * @ORM\Column(name="consumidor_final", type="boolean",nullable=true)
+     */
+    protected $consumidorFinal = false;        
+    /**
+     * @ORM\Column(name="activo", type="boolean",nullable=true)
+     */
+    protected $activo = true;    
+    
+     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
+     * @ORM\JoinColumn(name="categoria_iva_id", referencedColumnName="id")
+     **/  
+    protected $categoria_iva;
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Escalas")
+     * @ORM\JoinColumn(name="categoria_rentas_id", referencedColumnName="id")
+     * */
+    protected $categoriaRentas;
+     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
+     * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
+     **/  
+    protected $formaPago;    
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
+     * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
+     */
+    protected $precioLista;
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Transporte")
+     * @ORM\JoinColumn(name="transporte_id", referencedColumnName="id")
+     */
+    protected $transporte;
+    
+    /**
+    * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Provincia")
+    * @ORM\JoinColumn(name="provincia_rentas_id", referencedColumnName="id")
+    */
+    protected $provinciaRentas;
+
+    /**
+     * Trabajo
+     */
+    /**
+     * @var string $trabajo
+     * @ORM\Column(name="trabajo", type="string", nullable=true)
+     */
+    protected $trabajo;
+    /**
+     * @var string $direccionTrabajo
+     * @ORM\Column(name="direccion_trabajo", type="string", nullable=true)
+     */
+    protected $direccionTrabajo;
+    /**
+     * @var string $telefonoTrabajo
+     * @ORM\Column(name="telefono_trabajo", type="string", nullable=true)
+     */
+    protected $telefonoTrabajo;
+    /**
+    * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
+    * @ORM\JoinColumn(name="localidad_trabajo_id", referencedColumnName="id")
+    */
+    protected $localidadTrabajo;
+
+
+     /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\Factura", mappedBy="cliente")
+     */
+    protected $facturasVenta;
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PagoCliente", mappedBy="cliente")
+     */
+    protected $pagos;   
+  
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\NotaDebCred", mappedBy="cliente")
+     */
+    protected $notasDebCredVenta;
+ 
+    /**
+     * @var datetime $created
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $created;
+
+    /**
+     * @var datetime $updated
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
+    
+    /**
+     * @var User $createdBy
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
+     * @var User $updatedBy
+     * @Gedmo\Blameable(on="update")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
+     * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
+     */
+    private $updatedBy;     
+
+    
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->facturasVenta = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->activo = true;
+        $this->consumidorFinal = false;
+        $this->saldoInicial = 0;
+    }
+        
+    public function __toString() {
+        return $this->nombre;
+    } 
+
+    public function getDomicilioCompleto(){
+        return $this->direccion.', '.$this->localidad.', '.$this->getLocalidad()->getProvincia();
+    }
+    
+    public function getSaldo(){
+        $facturas = $this->facturasVenta;
+        $pagos = $this->pagos;
+        $notasDebito = $this->notasDebCredVenta;
+        $saldo = $this->saldoInicial;
+        foreach ($facturas as $fact) {
+            if( !in_array($fact->getEstado(),['ANULADO']) )
+                $saldo += $fact->getTotal();
+        }
+        foreach ($notasDebito as $deb) {
+            if($deb->getSigno()=='+' )
+                $saldo += $deb->getTotal();
+            else
+                $saldo -= $deb->getTotal();
+
+        }
+        foreach ($pagos as $pag) {
+            $saldo -= $pag->getTotal();
+        }
+        return $saldo;
+    }    
+ 
+    public function getFechaUltimaCompra(){
+        $facturas = $this->facturasVenta;
+        $fecha=null;
+        foreach ($facturas as $fact) {
+            $fecha = $fact->getFechaFactura()->format('Y-m-d');
+        }
+        return $fecha;
+    }
+}

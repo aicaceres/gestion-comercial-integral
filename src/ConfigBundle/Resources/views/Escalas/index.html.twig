@@ -1,0 +1,80 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Escalas Impositivas</h1>
+    <span class="pagedesc">Listado de escalas impositivas del sistema</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+<div class="deposito_selector" style="margin-bottom: 15px;">             
+    <form id="searchform" action="{{ path('sistema_escalas') }}" method="get">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Tipo de Escala:</strong></label>
+            <select id="selectTipo" name="tipoId">
+                <option value="R" {% if tipoId=='R' %}selected="selected" {% endif %}>RETENCIONES DE RENTAS</option>
+                <option value="P" {% if tipoId=='P' %}selected="selected" {% endif %}>PERCEPCIONES DE RENTAS</option>
+                <option value="O" {% if tipoId=='O' %}selected="selected" {% endif %}>GANANCIAS</option>
+            </select>  
+        </div>    
+            
+    </form>
+</div>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="escalas">
+        <thead>
+            <tr>                            
+                <th>Nombre</th>                
+                <th>% Retención</th>                
+                <th>% Adicional</th>                
+                <th>Mínimo</th>                
+                <th>Código ATP</th>                
+                <th class="nosort actionbutton addbutton">
+                {% if tipoId !='O' %}
+                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_escalas_new') %}
+                    <a class="editar create" href="{{ path('sistema_escalas_new', { 'tipo': tipoId }) }}">Agregar Escala</a>
+                    {% else %} &nbsp; {% endif %}
+                {% else %}
+                &nbsp; 
+                {% endif %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>                            
+                <td>{{ entity.nombre|upper }}</td>                
+                <td>{{ entity.retencion }}</td>                
+                <td>{{ entity.adicional }}</td>                 
+                <td>{{ entity.minimo }}</td>                
+                <td>{{ entity.codigoAtp }}</td>                
+                <td>
+                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_escalas_edit') %}
+                    <a href="{{ path('sistema_escalas_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                    {% endif %}
+                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_escalas_delete') %}
+                        <a href url="{{ path('sistema_escalas_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
+                    {% endif %}
+                </td>
+            </tr>
+           {% endfor %}           
+        </tbody>
+    </table> 
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $(document).on('keypress',function(e){
+        var keycode = (e.keyCode ? e.keyCode : e.which);
+        if(keycode == '13'){ e.preventDefault(); }
+    });
+    $('#selectTipo').change(function(){ 
+        $('#searchform').submit();
+    });      
+});    
+</script>   
+{% endblock %}
