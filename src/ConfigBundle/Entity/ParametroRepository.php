@@ -52,22 +52,10 @@ class ParametroRepository extends EntityRepository {
                 ->from('ConfigBundle\Entity\Parametro', 'p')
                 ->innerJoin('p.agrupador', 'r')
                 ->where('r.padre_id=:agr')
-                ->setParameter('agr', $agrupador);
+                ->setParameter('agr', $agrupador)
+                ->orderBy('p.nombre');
         return $qb;
     }
-
-    /*  public function findUltNroFactura($tipo){
-      $agrupador = $this->findOneByNombre('numeracion');
-      $query = $this->_em->createQuery("Select r.numerico prefijo, r.numerico2 numero from CM\AdminBundle\Entity\Parametro r
-      where r.nombre='FACTURA' and r.descripcion='".$tipo."' and r.agrupador_id=".$agrupador->getId());
-      return $query->getOneOrNullResult();
-      }
-      public function setUltNroFactura($tipo,$nro){
-      $agrupador = $this->findOneByNombre('numeracion');
-      $query = $this->_em->createQuery("Update CM\AdminBundle\Entity\Parametro r
-      set r.numerico2=".$nro." where r.nombre='FACTURA' and r.descripcion='".$tipo."' and r.agrupador_id=".$agrupador->getId());
-      return $query->execute();
-      } */
 
     public function findUltNro($tipo, $letra) {
         $agrupador = $this->findOneByNombre('numeracion');
@@ -98,13 +86,18 @@ class ParametroRepository extends EntityRepository {
         return $query->getQuery()->getOneOrNullResult();
     }
 
-    public function repetido($ptovta, $nro) {
+    /**
+     * Escalas impositivas
+     */        
+    public function getByTipoEscala($tipo='R'){
+        $consulta = ($tipo=='O') ? "e.tipo='G' OR e.tipo='H'" : "e.tipo='".$tipo."'";
         $query = $this->_em->createQueryBuilder();
-        $query->select('b')
-                ->from('ConfigBundle\Entity\AfipImportacionBuffets', 'b')
-                ->where('b.puntoVenta = ' . "'" . $ptovta . "'")
-                ->andWhere('b.numeroComprobante=' . "'" . $nro . "'");
-        return $query->getQuery()->getOneOrNullResult();
+        $query->select('e')
+                ->from('ConfigBundle\Entity\Escalas', 'e')
+                ->where('1=1')
+                ->orderBy('e.id');
+        $query->andWhere($consulta);
+        return $query->getQuery()->getResult();
     }
 
 }

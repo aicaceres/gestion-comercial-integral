@@ -45,6 +45,10 @@ class Parametro
     protected $numerico2;
 
     /**
+     * @ORM\Column(name="codigo", type="string", nullable=true)
+     */
+    protected $codigo;
+    /**
      * @ORM\Column(name="boleano", type="boolean")
      */
     protected $boleano;
@@ -353,5 +357,28 @@ class Parametro
     public function removeAgrupado(\ConfigBundle\Entity\Parametro $agrupados)
     {
         $this->agrupados->removeElement($agrupados);
+    }
+
+    /**
+     * Set codigo
+     *
+     * @param string $codigo
+     * @return Parametro
+     */
+    public function setCodigo($codigo)
+    {
+        $this->codigo = $codigo;
+
+        return $this;
+    }
+
+    /**
+     * Get codigo
+     *
+     * @return string 
+     */
+    public function getCodigo()
+    {
+        return $this->codigo;
     }
 }

@@ -9,6 +9,9 @@
         {% if app.user.access(app.session.get('unidneg_id'),'sistema_deposito') %}
         <li id="deposito"><a href="{{path('sistema_deposito')}}" class="elements">Depósitos</a></li>
         {% endif %}               
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema_transporte') %}
+        <li id="transporte"><a href="{{path('sistema_transporte')}}" class="elements">Transportes</a></li>
+        {% endif %}               
         {% if app.user.access(app.session.get('unidneg_id'),'sistema_centrocosto') %}
         <li id="centro-costo"><a href="{{path('sistema_centrocosto')}}" class="elements">Centros de Costo</a></li>
         {% endif %}               
@@ -16,12 +19,18 @@
         <li><a href="#parametros" class="elements">Parámetros</a>
             <span class="arrow"></span>
             <ul id="parametros">
-                <li id="rubro"><a href="{{path('sistema_parametro', { 'slug': 'rubro' })}}">Rubros</a></li>
-                <li id="unidad-medida"><a href="{{path('sistema_parametro', { 'slug': 'unidad-medida' })}}">Unidades de Medida</a></li>
-               <li id="condicion-pago"><a href="{{path('sistema_parametro', { 'slug': 'condicion-pago' })}}">Condiciones de Pago</a></li>
-               <li id="calificacion-proveedor"><a href="{{path('sistema_parametro', { 'slug': 'calificacion-proveedor' })}}">Calificación de Proveedor</a></li>               
+                <li id="rubro"><a href="{{path('sistema_parametro', { 'slug': 'rubro' })}}">Rubros</a></li>                
+                <li id="rubrocompras"><a href="{{path('sistema_rubrocompras')}}">Rubros de Compras</a></li>                
+               <li id="formapago"><a href="{{path('sistema_formapago')}}">Formas de Pago</a></li>
+               <li id="actividadcomercial"><a href="{{path('sistema_actividadcomercial')}}">Actividades Comerciales</a></li>
+               <li id="moneda"><a href="{{path('sistema_moneda')}}">Monedas</a></li>
+               
                 <li id="sit-impositiva"><a href="{{path('sistema_parametro', { 'slug': 'sit-impositiva' })}}">Situación Impositiva</a></li>
+                <li id="escalas"><a href="{{path('sistema_escalas')}}">Escalas Impositivas</a></li>
                 <li id="localidad"><a href="{{path('sistema_parametro', { 'slug': 'localidad' })}}">Localidades</a></li>                
+
+                <li id="unidad-medida"><a href="{{path('sistema_parametro', { 'slug': 'unidad-medida' })}}">Unidades de Medida</a></li>
+               <li id="calificacion-proveedor"><a href="{{path('sistema_parametro', { 'slug': 'calificacion-proveedor' })}}">Calificación de Proveedor</a></li>
             </ul>
         </li>
         <li><a href="#paramafip" class="elements">Parámetros Afip</a>

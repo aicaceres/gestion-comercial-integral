@@ -9,6 +9,7 @@ use ConfigBundle\Form\EventListener\AddProvinciaFieldSubscriber;
 use ConfigBundle\Form\EventListener\AddPaisFieldSubscriber;
 
 use ConfigBundle\Entity\ParametroRepository;
+use ConfigBundle\Entity\EscalasRepository;
 use ConfigBundle\Form\ParametroType;
 
 class ClienteType extends AbstractType
@@ -20,27 +21,42 @@ class ClienteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $propertyPathToLocalidad = 'localidad';
+        $propertyPathToLocalidadTrabajo = 'localidadTrabajo';
 
         $builder
             ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidad))
             ->addEventSubscriber(new AddProvinciaFieldSubscriber($propertyPathToLocalidad))
             ->addEventSubscriber(new AddPaisFieldSubscriber($propertyPathToLocalidad)); 
+        $builder
+            ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidadTrabajo)); 
         
          $builder->add('nombre', 'text', array('label' => 'Nombre y Apellido:','required'=>true))
                  ->add('dni', 'text', array('label' => 'DNI:','required'=>true))
                  ->add('cuit', 'text', array('label' => 'CUIT:','required'=>true))
                  ->add('direccion', 'text', array('label' => 'Dirección:','required'=>false))
-                 ->add('telefono', 'text', array('label' => 'Teléfono:','required'=>false))
-                 ->add('celular', 'text', array('label' => 'Celular:','required'=>false))
+                 ->add('telefono', 'text', array('label' => 'Teléfonos:','required'=>false))
+                 
                  ->add('observaciones', 'textarea', array('label' => 'Observaciones:','required'=>false))
                  ->add('email', 'email', array('label' => 'Email:','required'=>false))
                  ->add('saldoInicial',null,array('label' => 'Saldo Inicial Cta. Cte.:','required'=>false))    
+                 ->add('limiteCredito',null,array('label' => 'Limite de Crédito:','required'=>false))  
+                 ->add('ultVerificacionCuit', 'date', array('widget' => 'single_text', 'label' => 'Ult. Verif. CUIT:',
+                    'format' => 'dd-MM-yyyy', 'required' => false))  
                  ->add('activo',null,array('label' => 'Activo:','required'=>false))
-                 ->add('consumidorFinal')
+            
                  ->add('precioLista','entity',array('label'=>'Lista:',
                 'class' => 'AppBundle:PrecioLista', 'required' =>true))   
-                 ;        
-               
+                 ->add('formaPago','entity',array('label'=>'Forma de Pago:',
+                'class' => 'ConfigBundle:FormaPago', 'required' =>false))   
+                 ->add('transporte','entity',array('label'=>'Transporte:',
+                'class' => 'ConfigBundle:Transporte', 'required' =>false))   
+                 ->add('provinciaRentas','entity',array('label'=>'Provincia para Rentas:',
+                'class' => 'ConfigBundle:Provincia', 'required' =>false))   
+                ->add('trabajo', 'text', array('label' => 'Trabajo:','required'=>false))
+                ->add('direccionTrabajo', 'text', array('label' => 'Dirección Trabajo:','required'=>false))
+                ->add('telefonoTrabajo', 'text', array('label' => 'Tel. Trabajo:','required'=>false))
+                
+                 ;                       
         
         $optionsIva = array(
             'class'         => 'ConfigBundle:Parametro',
@@ -54,6 +70,17 @@ class ClienteType extends AbstractType
                     ->setParameter('val', ParametroType::getTablaId($repository, 'sit-impositiva'));
             });                       
         $builder->add('categoria_iva', 'entity', $optionsIva);
+        $optionsDgr = array(
+            'class'         => 'ConfigBundle:Escalas',
+            'placeholder'   => 'Seleccionar...',
+            'required'      =>false,          
+             'choice_label' => 'nombre',
+            'label'         => 'Categoría Rentas:',
+            'query_builder' => function (EscalasRepository $repository) {
+                return $qb = $repository->createQueryBuilder('e')
+                    ->where("e.tipo='P' ");
+            });
+         $builder->add('categoriaRentas', 'entity', $optionsDgr);   
     }
   
     

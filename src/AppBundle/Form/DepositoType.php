@@ -7,7 +7,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use ConfigBundle\Form\EventListener\AddLocalidadFieldSubscriber;
 use ConfigBundle\Form\EventListener\AddProvinciaFieldSubscriber;
 use ConfigBundle\Form\EventListener\AddPaisFieldSubscriber;
-//use ConfigBundle\Entity\UsuarioRepository;
 
 class DepositoType extends AbstractType
 {

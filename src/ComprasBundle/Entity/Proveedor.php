@@ -76,17 +76,45 @@ class Proveedor {
      * */
     protected $categoria_iva;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
-     * @ORM\JoinColumn(name="categoria_dgr_id", referencedColumnName="id")
-     * */
-    protected $categoria_dgr;
+     /**
+     * @var string $representanteLocal
+     * @ORM\Column(name="representante_local", type="string", nullable=true)
+     */
+    protected $representanteLocal;
+     /**
+     * @var string $representanteSede
+     * @ORM\Column(name="representante_sede", type="string", nullable=true)
+     */
+    protected $representanteSede;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
-     * @ORM\JoinColumn(name="condicion_venta_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\RubroCompras")
+     * @ORM\JoinColumn(name="rubro_compras_id", referencedColumnName="id")
      * */
-    protected $condicion_venta;
+    protected $rubroCompras;    
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Escalas")
+     * @ORM\JoinColumn(name="categoria_rentas_id", referencedColumnName="id")
+     * */
+    protected $categoriaRentas;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\ActividadComercial")
+     * @ORM\JoinColumn(name="actividad_comercial_id", referencedColumnName="id")
+     * */
+    protected $actividadComercial;
+
+    /**
+     * @var date $vencCertNoRetenerRentas
+     * @ORM\Column(name="venc_cert_no_retener_rentas", type="date", nullable=true)
+     */
+    private $vencCertNoRetenerRentas ;      
+    /**
+     * @var date $vencCertExcepcionGanancias
+     * @ORM\Column(name="venc_cert_excepcion_ganancias", type="date", nullable=true)
+     */
+    private $vencCertExcepcionGanancias ;      
 
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
@@ -380,48 +408,6 @@ class Proveedor {
      */
     public function getCategoriaIva() {
         return $this->categoria_iva;
-    }
-
-    /**
-     * Set categoria_dgr
-     *
-     * @param \ConfigBundle\Entity\Parametro $categoriaDgr
-     * @return Proveedor
-     */
-    public function setCategoriaDgr(\ConfigBundle\Entity\Parametro $categoriaDgr = null) {
-        $this->categoria_dgr = $categoriaDgr;
-
-        return $this;
-    }
-
-    /**
-     * Get categoria_dgr
-     *
-     * @return \ConfigBundle\Entity\Parametro
-     */
-    public function getCategoriaDgr() {
-        return $this->categoria_dgr;
-    }
-
-    /**
-     * Set condicion_venta
-     *
-     * @param \ConfigBundle\Entity\Parametro $condicionVenta
-     * @return Proveedor
-     */
-    public function setCondicionVenta(\ConfigBundle\Entity\Parametro $condicionVenta = null) {
-        $this->condicion_venta = $condicionVenta;
-
-        return $this;
-    }
-
-    /**
-     * Get condicion_venta
-     *
-     * @return \ConfigBundle\Entity\Parametro
-     */
-    public function getCondicionVenta() {
-        return $this->condicion_venta;
     }
 
     /**
@@ -725,4 +711,165 @@ class Proveedor {
         return $this->pedidos;
     }
 
+
+    /**
+     * Set representanteLocal
+     *
+     * @param string $representanteLocal
+     * @return Proveedor
+     */
+    public function setRepresentanteLocal($representanteLocal)
+    {
+        $this->representanteLocal = $representanteLocal;
+
+        return $this;
+    }
+
+    /**
+     * Get representanteLocal
+     *
+     * @return string 
+     */
+    public function getRepresentanteLocal()
+    {
+        return $this->representanteLocal;
+    }
+
+    /**
+     * Set representanteSede
+     *
+     * @param string $representanteSede
+     * @return Proveedor
+     */
+    public function setRepresentanteSede($representanteSede)
+    {
+        $this->representanteSede = $representanteSede;
+
+        return $this;
+    }
+
+    /**
+     * Get representanteSede
+     *
+     * @return string 
+     */
+    public function getRepresentanteSede()
+    {
+        return $this->representanteSede;
+    }
+
+    /**
+     * Set vencCertNoRetenerRentas
+     *
+     * @param \DateTime $vencCertNoRetenerRentas
+     * @return Proveedor
+     */
+    public function setVencCertNoRetenerRentas($vencCertNoRetenerRentas)
+    {
+        $this->vencCertNoRetenerRentas = $vencCertNoRetenerRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get vencCertNoRetenerRentas
+     *
+     * @return \DateTime 
+     */
+    public function getVencCertNoRetenerRentas()
+    {
+        return $this->vencCertNoRetenerRentas;
+    }
+
+    /**
+     * Set vencCertExcepcionGanancias
+     *
+     * @param \DateTime $vencCertExcepcionGanancias
+     * @return Proveedor
+     */
+    public function setVencCertExcepcionGanancias($vencCertExcepcionGanancias)
+    {
+        $this->vencCertExcepcionGanancias = $vencCertExcepcionGanancias;
+
+        return $this;
+    }
+
+    /**
+     * Get vencCertExcepcionGanancias
+     *
+     * @return \DateTime 
+     */
+    public function getVencCertExcepcionGanancias()
+    {
+        return $this->vencCertExcepcionGanancias;
+    }
+
+    /**
+     * Set rubroCompras
+     *
+     * @param \ConfigBundle\Entity\RubroCompras $rubroCompras
+     * @return Proveedor
+     */
+    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null)
+    {
+        $this->rubroCompras = $rubroCompras;
+
+        return $this;
+    }
+
+    /**
+     * Get rubroCompras
+     *
+     * @return \ConfigBundle\Entity\RubroCompras 
+     */
+    public function getRubroCompras()
+    {
+        return $this->rubroCompras;
+    }
+
+    /**
+     * Set categoriaRentas
+     *
+     * @param \ConfigBundle\Entity\Escalas $categoriaRentas
+     * @return Proveedor
+     */
+    public function setCategoriaRentas(\ConfigBundle\Entity\Escalas $categoriaRentas = null)
+    {
+        $this->categoriaRentas = $categoriaRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get categoriaRentas
+     *
+     * @return \ConfigBundle\Entity\Escalas 
+     */
+    public function getCategoriaRentas()
+    {
+        return $this->categoriaRentas;
+    }
+
+    /**
+     * Set actividadComercial
+     *
+     * @param \ConfigBundle\Entity\ActividadComercial $actividadComercial
+     * @return Proveedor
+     */
+    public function setActividadComercial(\ConfigBundle\Entity\ActividadComercial $actividadComercial = null)
+    {
+        $this->actividadComercial = $actividadComercial;
+
+        return $this;
+    }
+
+    /**
+     * Get actividadComercial
+     *
+     * @return \ConfigBundle\Entity\ActividadComercial 
+     */
+    public function getActividadComercial()
+    {
+        return $this->actividadComercial;
+    }
 }

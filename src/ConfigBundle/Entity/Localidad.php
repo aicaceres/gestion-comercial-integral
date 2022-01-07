@@ -174,4 +174,11 @@ class Localidad
         return $this->byDefault;
     }
 
+    /**
+     * Return localidad - provincia
+     */
+    public function getNombreProvincia(){
+        return $this->getName().' ('.$this->getProvincia()->getName().')';
+    }
+
 }

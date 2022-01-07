@@ -3,7 +3,7 @@ namespace AppBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-
+use Doctrine\ORM\EntityRepository;
 use ConfigBundle\Entity\ParametroRepository;
 use ConfigBundle\Form\ParametroType;
 
@@ -36,16 +36,21 @@ class ProductoType extends AbstractType
                 'prototype_name' => 'items',
                 'attr'           => array(
                     'class' => 'row item'
-                )))       
-            ->add('proveedor','entity',array('label'=>'Proveedor',
-                'class'         => 'ComprasBundle:Proveedor',
-                'placeholder'   => 'Seleccionar Proveedor',
-                'required'      =>false,
-                'attr' => array('class' => 'uniformselect')));
+                )))    
+            ->add('proveedor','entity',array('label'=>'Proveedor:',
+                'class' => 'ComprasBundle:Proveedor', 'required' =>false,
+                'attr'  => array('class' => 'chzn-select'),
+                'query_builder'=> function(EntityRepository $repository){
+                    return $qb = $repository->createQueryBuilder('p')
+                            ->where('p.activo=1')
+                            ->orderBy('p.nombre');
+                    }
+                ))         
+            ;
 
          $builder->add('rubro','entity',array(
                     'label'=>'Rubro',
-                    'choice_label'=>'rubroSubrubroTxt',
+                    'choice_label'=>'nombre',
                     'placeholder'=>'Seleccionar Rubro...',
                     'attr' => array('class' => 'chzn-select'),
                     'required'      =>false,

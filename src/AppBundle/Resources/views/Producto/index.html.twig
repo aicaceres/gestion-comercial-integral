@@ -50,9 +50,8 @@
         </thead>
         <tbody>
            {% for entity in entities %}
-            <tr>
-             <!--   <td><span class="rubro">{% if entity.rubro %}{{ entity.rubro.rubroSubrubroTxt }}</span><span class="descrubro" style="display:none;"> - {{ entity.rubro.descripcion }}</span>{% endif %}</td> -->
-                <td>{% if entity.rubro %}{{ entity.rubro.rubroSubrubroTxt }}{% endif %}</td>
+            <tr>             
+                <td>{% if entity.rubro %}{{ entity.rubro.nombre }}{% endif %}</td>
                 <td>{{ entity.codigo |upper }}</td>
                 <td>{{ entity.nombre }}</td>
                 <td>{{ entity.proveedor }}</td>
