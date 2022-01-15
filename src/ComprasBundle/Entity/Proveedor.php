@@ -42,7 +42,7 @@ class Proveedor {
 
     /**
      * @var string $iibb
-     * @ORM\Column(name="iibb", type="string", length=13, nullable=true)
+     * @ORM\Column(name="iibb", type="string", length=20, nullable=true)
      */
     protected $iibb;
 

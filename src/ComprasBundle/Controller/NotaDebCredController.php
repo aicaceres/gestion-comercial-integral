@@ -104,7 +104,7 @@ class NotaDebCredController extends Controller {
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
                 $entity->setUnidadNegocio($unidneg);
 
-                $existe = $em->getRepository('ComprasBundle:NotaDebCred')->isDuplicado($entity);
+                $existe = $em->getRepository('ComprasBundle:NotaDebCred')->isDuplicado($entity);              
                 if ($existe) {
                     $this->addFlash('error', 'Ya existe este nro de comprobante para este proveedor!');
                     $em->getConnection()->rollback();
@@ -183,9 +183,6 @@ class NotaDebCredController extends Controller {
                 }
             }
         }
-
-        var_dump($errors);
-        die;
 
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
                     'entity' => $entity,

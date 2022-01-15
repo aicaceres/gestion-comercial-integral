@@ -28,6 +28,8 @@ class ClienteType extends AbstractType
             ->addEventSubscriber(new AddProvinciaFieldSubscriber($propertyPathToLocalidad))
             ->addEventSubscriber(new AddPaisFieldSubscriber($propertyPathToLocalidad)); 
         $builder
+            ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidadTrabajo))
+            ->addEventSubscriber(new AddProvinciaFieldSubscriber($propertyPathToLocalidadTrabajo))
             ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidadTrabajo)); 
         
          $builder->add('nombre', 'text', array('label' => 'Nombre y Apellido:','required'=>true))

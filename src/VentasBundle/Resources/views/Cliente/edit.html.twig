@@ -38,11 +38,7 @@
 					{{ form_row(form.telefonoTrabajo, { 'attr': {'class' : 'smallinput' } })  }}
 				</div>
 				<p>{{ form_row(form.direccionTrabajo, { 'attr': {'class' : 'mediuminput' } })}}</p>
-				<p>
-					{{ form_label(form.localidadTrabajo,'Localidad Trabajo') }}
-                    {{ form_widget(form.localidadTrabajo, { 'attr': {'class' : 'chzn-select' } })  }}
-					{{ form_errors(form.localidadTrabajo) }}
-				</p>
+				
                 <div class="two_fields">
                     {{ form_row(form.cuit, { 'attr': {'class' : 'smallinput'  } }) }}
                     {{ form_row(form.ultVerificacionCuit, { 'attr': {'class' : 'datepicker'  } }) }}

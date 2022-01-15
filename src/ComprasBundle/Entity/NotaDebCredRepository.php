@@ -36,7 +36,8 @@ class NotaDebCredRepository extends EntityRepository {
                 ->where("f.estado !='CANCELADO' ")
                 ->andWhere("u.id=" . $entity->getUnidadNegocio()->getId())
                 ->andWhere("f.nroComprobante='" . $entity->getNroComprobante() . "'")
-                ->andWhere('p.id=' . $entity->getProveedor()->getId());
+                ->andWhere('p.id=' . $entity->getProveedor()->getId())
+                ->andWhere("f.signo='". $entity->getSigno()."'");                
         return $query->getQuery()->getResult();
     }
 
