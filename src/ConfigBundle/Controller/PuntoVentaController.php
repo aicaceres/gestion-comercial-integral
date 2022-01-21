@@ -188,5 +188,6 @@ class PuntoVentaController extends Controller
             $array[] = ['id' => $pto->getId(), 'text' => $pto->getNombre()];
         }
         return new Response(json_encode($array));
-    }    
+    }   
+
 }

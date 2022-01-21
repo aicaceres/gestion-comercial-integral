@@ -6,7 +6,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * ConfigBundle\Entity\FormaPago
  * @ORM\Table(name="forma_pago")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="ConfigBundle\Entity\ParametroRepository")
  * @UniqueEntity(
  *     fields={"nombre"},
  *     errorPath="nombre",
@@ -85,6 +85,10 @@ class FormaPago {
     public function __toString() {
         return $this->nombre;
     }    
+
+    public function getTextSelect(){
+        return $this->nombre.' [%'.$this->porcentajeRecargo.']';
+    }
 
     /**
      * Get id

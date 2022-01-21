@@ -10,46 +10,9 @@
 <div id="contentwrapper" class="contentwrapper">
     <div class="two_third dashboard_left">              
         <ul class="shortcuts">         
-          <li><a id="punto-venta" href="{{path('ventas_puntoventa_new')}}" data-url="" class="factura"><span>Punto de Venta</span></a></li>
+          <li><a id="punto-venta" href="{{ path('ventas_venta_new') }}" data-url="" class="factura"><span>Punto de Venta</span></a></li>
         </ul>
         <br clear="all" />
     </div><!--two_third dashboard_left -->
 </div>
 {% endblock %}
-
-{% block extra_javascripts %}
-<script type="text/javascript">
-jQuery(document).ready(function($) {
-    const btn = $('#factura-rapida');    
-    btn.on('click',function(){
-        const url = $(this).data('url');       
-    
-    $('#popup').dialog('open');
-            $('#popup')
-                .html('<div class="loaders"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
-                .load(url , function() {
-                     const firstElement = $('#ventasbundle_factura_afipPuntoVenta')               
-                    $('body').on('keydown',function(e){
-                        var keyCode = e.keyCode || e.which; 
-                        if (keyCode == 9) {                                                            
-                          if( !(document.activeElement.classList.contains('myfocusable')) ){
-                                firstElement.focus();
-                                e.preventDefault();
-                          }                                                     
-                        }                         
-                    })
-                    firstElement.focus();                    
-                        // despues de cargar          
-                      })
-                .dialog({
-                    autoOpen: true, title: 'FACTURACION RAPIDA',width: '90%',modal: true,  
-            position: ['middle',50],
-                    buttons: [{text: "Agregar Items", class: 'closePopup myfocusable',
-                            click: function() { 
-                                // click
-                            }}]
-            });               
-            $('#popup').dialog( "option", "modal", true );
-      });      
-});  
-</script>{% endblock %}

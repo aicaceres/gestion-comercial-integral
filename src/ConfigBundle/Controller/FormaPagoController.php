@@ -1,4 +1,5 @@
 <?php
+
 namespace ConfigBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
@@ -31,7 +32,7 @@ class FormaPagoController extends Controller
             'entities' => $entities,
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_formapago_create")
      * @Method("POST")
@@ -58,10 +59,10 @@ class FormaPagoController extends Controller
     }
 
     /**
-    * Creates a form to create a FormaPago entity.
-    * @param FormaPago $entity The entity
-    * @return \Symfony\Component\Form\Form The form
-    */
+     * Creates a form to create a FormaPago entity.
+     * @param FormaPago $entity The entity
+     * @return \Symfony\Component\Form\Form The form
+     */
     private function createCreateForm(FormaPago $entity)
     {
         $form = $this->createForm(new FormaPagoType(), $entity, array(
@@ -70,7 +71,7 @@ class FormaPagoController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/new", name="sistema_formapago_new")
      * @Method("GET")
@@ -86,7 +87,7 @@ class FormaPagoController extends Controller
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_formapago_edit")
      * @Method("GET")
@@ -111,10 +112,10 @@ class FormaPagoController extends Controller
     }
 
     /**
-    * Creates a form to edit a FormaPago entity.
-    * @param FormaPago $entity The entity
-    * @return \Symfony\Component\Form\Form The form
-    */
+     * Creates a form to edit a FormaPago entity.
+     * @param FormaPago $entity The entity
+     * @return \Symfony\Component\Form\Form The form
+     */
     private function createEditForm(FormaPago $entity)
     {
         $form = $this->createForm(new FormaPagoType(), $entity, array(
@@ -123,7 +124,7 @@ class FormaPagoController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_formapago_update")
      * @Method("PUT")
@@ -138,7 +139,7 @@ class FormaPagoController extends Controller
             throw $this->createNotFoundException('Unable to find FormaPago entity.');
         }
 
-       // $deleteForm = $this->createDeleteForm($id);
+        // $deleteForm = $this->createDeleteForm($id);
         $editForm = $this->createEditForm($entity);
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
@@ -152,21 +153,51 @@ class FormaPagoController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_formapago_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
+    {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_formapago_delete');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:FormaPago')->find($id);
-        try{
-            $em->remove($entity); 
+        try {
+            $em->remove($entity);
             $em->flush();
-            $msg ='OK';
-        } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }
+            $msg = 'OK';
+        } catch (\Exception $ex) {
+            $msg = $ex->getTraceAsString();
+        }
         return new Response(json_encode($msg));
+    }
+
+    /**
+     * @Route("/getDatosFormaPago", name="get_datos_formapago")
+     * @Method("GET")
+     */
+    public function getDatosFormaPagoAction(Request $request)
+    {
+        $id = $request->get('id');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('ConfigBundle:FormaPago')->find($id);
+        $partial = $this->renderView(
+            'VentasBundle:Venta:_partial-datos-formapago.html.twig',
+            array('item' => $entity)
+        );
+        return new Response($partial);
+    }
+
+    /**
+     * @Route("/getListaFormaPago", name="get_lista_formapago")
+     * @Method("GET")
+     */
+    public function getListaFormaPagoAction() {
+        $em = $this->getDoctrine()->getManager();
+        $formas = $em->getRepository('ConfigBundle:FormaPago')->findAll();
+        $partial = $this->renderView('ConfigBundle:FormaPago:_partial-lista-formapago.html.twig',
+                array('formas' => $formas));
+        return new Response($partial);
     }
 }

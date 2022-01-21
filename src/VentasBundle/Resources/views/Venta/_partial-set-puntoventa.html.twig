@@ -1,0 +1,12 @@
+
+{% if puntos|length > 0 %}
+    <div style="text-align:center;">
+        <select class="form-control select2" id="punto-venta-actual">
+            {% for field in puntos %}
+            <option value="{{field.id}}">{{field.nombre}}</> 
+            {% endfor %}
+        </select>      
+    </div>
+{% else %}
+    <h1>No posee puntos de venta asociados</h1>
+{% endif %}

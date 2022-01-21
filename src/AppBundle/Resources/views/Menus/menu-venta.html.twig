@@ -9,8 +9,8 @@
 					class="arrow"></span>
 				<ul
 					id="item_facturacion">
-					<li id="puntoventa">
-						<a href="{{ path('ventas_puntoventa_new') }}">Punto de Venta Rápida</a>
+					<li id="venta">
+						<a href="{{ path('ventas_venta_new') }}">Punto de Venta</a>
 					</li>
 					<li id="factura">
 						<a href="{{path('ventas_factura')}}">Facturas de Venta</a>
@@ -50,7 +50,7 @@
 				</ul>
 			</li>
 		{% endif %}
-		{% if app.user.access(app.session.get('unidneg_id'),'compras_libroiva') %}
+		{% if app.user.access(app.session.get('unidneg_id'),'ventas_libroiva') %}
 			<li>
 				<a
 					href="#impuestos"
@@ -71,6 +71,9 @@
 					</li>
 				</ul>
 			</li>
+		{% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_parametros') %}
+			<li id="parametrizacion"><a href="{{path('ventas_parametrizacion')}}" class="elements">Parametrización</a></li>
 		{% endif %}
 	</ul>
 	<a

@@ -6,7 +6,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * VentasBundle\Entity\Cliente
- * @ORM\Table(name="cliente")
+ * @ORM\Table(name="cliente",indexes={@ORM\Index(name="activo_idx",columns={"activo"}),@ORM\Index(name="nombre_idx",columns={"nombre"})}))
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\ClienteRepository")
  */
 class Cliente
@@ -204,8 +204,8 @@ class Cliente
         return $this->nombre;
     } 
 
-    public function getDomicilioCompleto(){
-        return $this->direccion.', '.$this->localidad.', '.$this->getLocalidad()->getProvincia();
+    public function getDomicilioCompleto(){        
+        return $this->direccion.', '.$this->getLocalidad().', '.$this->getLocalidad()->getProvincia();
     }
     
     public function getSaldo(){
