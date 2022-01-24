@@ -8,7 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 /**
  * VentasBundle\Entity\Venta
  * @ORM\Table(name="ventas_venta")
- * @ORM\Entity(repositoryClass="VentasBundle\Entity\FacturaRepository")
+ * @ORM\Entity(repositoryClass="VentasBundle\Entity\VentaRepository")
  */
 class Venta {
     /**
@@ -22,7 +22,7 @@ class Venta {
      * @var integer $nroOperacion
      * @ORM\Column(name="nro_operacion", type="integer")     
      */
-    protected $nroOperacion;
+    protected $nroOperacion = '';
     /**
      * @var datetime $fechaVenta
      * @ORM\Column(name="fecha_venta", type="datetime", nullable=false)
@@ -73,6 +73,14 @@ class Venta {
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\VentaDetalle", mappedBy="venta",cascade={"persist", "remove"})
      */
     protected $detalles;
+
+    public function getTotal() {
+        $total = 0;
+        foreach ($this->detalles as $item) {
+            $total = $total + $item->getTotal();
+        }
+        return $total;
+    }
 
 
     /**

@@ -23,12 +23,6 @@ class Parametrizacion {
     protected $ventasClienteBydefault;
 
     /**
-     * @var integer $ultimoNroOperacion
-     * @ORM\Column(name="ultimo_nro_operacion", type="integer")     
-     */
-    protected $ultimoNroOperacion = 0;
-
-    /**
      * Get id
      *
      * @return integer 
@@ -61,26 +55,4 @@ class Parametrizacion {
         return $this->ventasClienteBydefault;
     }
 
-    /**
-     * Set ultimoNroOperacion
-     *
-     * @param integer $ultimoNroOperacion
-     * @return Parametrizacion
-     */
-    public function setUltimoNroOperacion($ultimoNroOperacion)
-    {
-        $this->ultimoNroOperacion = $ultimoNroOperacion;
-
-        return $this;
-    }
-
-    /**
-     * Get ultimoNroOperacion
-     *
-     * @return integer 
-     */
-    public function getUltimoNroOperacion()
-    {
-        return $this->ultimoNroOperacion;
-    }
 }

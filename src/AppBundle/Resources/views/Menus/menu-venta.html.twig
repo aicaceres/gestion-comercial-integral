@@ -1,5 +1,21 @@
 <div class="vernav2 iconmenu">
 	<ul>
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta') %}
+			<li>
+				<a
+					href="#item_venta"
+					class="elements">Ventas</a>
+				<span class="arrow"></span>
+				<ul id="item_venta">
+					<li id="venta">
+						<a href="{{ path('ventas_venta') }}">Ventas</a>
+					</li>					
+					<li id="new">
+						<a href="{{ path('ventas_venta_new') }}">Nueva Venta</a>
+					</li>					
+				</ul>
+			</li>
+		{% endif %}
 		{% if app.user.access(app.session.get('unidneg_id'),'ventas_factura') %}
 			<li>
 				<a
@@ -8,10 +24,7 @@
 				<span
 					class="arrow"></span>
 				<ul
-					id="item_facturacion">
-					<li id="venta">
-						<a href="{{ path('ventas_venta_new') }}">Punto de Venta</a>
-					</li>
+					id="item_facturacion">					
 					<li id="factura">
 						<a href="{{path('ventas_factura')}}">Facturas de Venta</a>
 					</li>

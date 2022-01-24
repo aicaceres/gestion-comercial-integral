@@ -18,6 +18,46 @@ use VentasBundle\Form\VentaType;
  */
 class VentaController extends Controller
 {
+
+    /**
+     * @Route("/", name="ventas_venta")
+     * @Method("GET")
+     * @Template()
+     */
+    public function indexAction(Request $request) {
+        $unidneg = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_venta');
+        $em = $this->getDoctrine()->getManager();        
+        $puntoventaId = $request->get('puntoventaId');
+        $desde = $request->get('desde');
+        $hasta = $request->get('hasta');
+        $puntos = $this->getUser()->getPuntosVenta($unidneg);        
+        $entities = $em->getRepository('VentasBundle:Venta')->findByCriteria($unidneg,$puntoventaId, $desde, $hasta);
+        return $this->render('VentasBundle:Venta:index.html.twig', array(
+                    'entities' => $entities,
+                    'puntos' => $puntos,
+                    'puntoventaId' => $puntoventaId,                    
+                    'desde' => $desde,
+                    'hasta' => $hasta
+        ));
+    }
+
+    /**
+     * @Route("/{id}/show", name="ventas_venta_show")
+     * @Method("GET")
+     * @Template()
+     */
+    public function showAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Venta')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Venta entity.');
+        }
+        return $this->render('VentasBundle:Venta:show.html.twig', array(
+                    'entity' => $entity));
+    }
+
     /**
      * @Route("/newVenta", name="ventas_venta_new")
      * @Method("GET")
@@ -26,16 +66,13 @@ class VentaController extends Controller
     public function newVentaAction(Request $request)
     {
         $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_facturacion');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
         $puntosVenta = $this->getUser()->getPuntosVenta($session->get('unidneg_id'));
         if (!$puntosVenta) {
             $this->addFlash('error', 'No posee ningún punto de venta asigando.');
             $session->set('puntoVentaActual',  array('id' => 0, 'nombre' => ''));
             return $this->redirect($request->headers->get('referer'));
-        }
-        if (null === $session->get('puntoVentaActual')) {
-            $session->set('puntoVentaActual', array('id' => 0, 'nombre' => ''));
-        }
+        }        
 
         $entity = new Venta();
         $entity->setFechaVenta( new \DateTime() );        
@@ -49,7 +86,15 @@ class VentaController extends Controller
             $entity->setFormaPago( $cliente->getFormaPago() );
             $entity->setPrecioLista( $cliente->getPrecioLista() );
             $entity->setTransporte( $cliente->getTransporte() );
-        }        
+        }  
+
+        if (null === $session->get('puntoVentaActual')) {
+            $session->set('puntoVentaActual', array('id' => 0, 'nombre' => ''));            
+        }
+        if ($session->get('puntoVentaActual')['id'] != 0) {
+            $ptoActual = $em->getRepository('ConfigBundle:PuntoVenta')->find( $session->get('puntoVentaActual')['id']);
+            $entity->setNroOperacion( $ptoActual->getUltimoNroOperacionVenta() + 1 );
+        }                
 
         $form = $this->createCreateForm($entity,'new');     
         return $this->render('VentasBundle:Venta:new.html.twig', array(
@@ -66,7 +111,7 @@ class VentaController extends Controller
      */
     public function createAction(Request $request) {
         $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_facturacion');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
         $puntosVenta = $this->getUser()->getPuntosVenta($session->get('unidneg_id'));
        
         $entity = new Venta();
@@ -80,9 +125,14 @@ class VentaController extends Controller
                 $entity->setFechaVenta( new \DateTime() );  
                 // set punto de venta desde sessionados
                 $puntoVenta = $em->getRepository('ConfigBundle:PuntoVenta')->find( $session->get('puntoVentaActual')['id'] );
-                $entity->setPuntoVenta( $puntoVenta );                
+                $entity->setPuntoVenta( $puntoVenta );           
+                $nroOperacion = $puntoVenta->getUltimoNroOperacionVenta() + 1;     
+                $entity->setNroOperacion( $nroOperacion );
+                // update ultimoNroOperacion en puntoventa
+                $puntoVenta->setUltimoNroOperacionVenta($nroOperacion);
 
                 $em->persist($entity);            
+                $em->persist($puntoVenta);            
                 $em->flush();                
 
                 $em->getConnection()->commit();
@@ -128,7 +178,7 @@ class VentaController extends Controller
     public function renderPuntosVentaAction(Request $request)
     {
         $unidneg_id = $this->get('session')->get('unidneg_id');
-        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_facturacion');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
         $puntos = $this->getUser()->getPuntosVenta($unidneg_id);
         $partial = $this->renderView(
             'VentasBundle:Venta:_partial-set-puntoventa.html.twig',
@@ -147,11 +197,13 @@ class VentaController extends Controller
         $em = $this->getDoctrine()->getManager();
         $punto = $em->getRepository('ConfigBundle:PuntoVenta')->find($id);
         $data = array('id' => 0, 'nombre' => '');
+        $nro = null;
         if ($punto) {
             $data = array('id' => $id, 'nombre' => $punto->getNombre());
+            $nro = $punto->getUltimoNroOperacionVenta()+1;
         }
         $session->set('puntoVentaActual', $data);
-        return new Response(json_encode($data));
+        return new Response($nro);
     }
 
 }

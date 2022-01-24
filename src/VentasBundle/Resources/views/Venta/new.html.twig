@@ -41,12 +41,13 @@
                 <option value="{{i.id}}" {% if i.id == idpto %} selected="selected" {% endif %}>{{i.nombre}}</option>
             {% endfor %}
         </select>
-{{entity.nroOperacion}}
+        <span style="margin-left:20px" class="nroOperacion">#{{entity.nroOperacion}}</span>
         <span style="font-size:20px" class="floatright fechahora">{{entity.fechaVenta|date('d/m/Y H:i')}}</span>
     </h1>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
+<div id="control"> </div>
 <div id="contentwrapper" class="contentwrapper">
 {% include "AppBundle::notificacion.html.twig" %}
     
@@ -118,6 +119,9 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
+
+        $(document).on('keydown',function(e){ detectarControles(e); })
+
         $('.togglemenu').click();    
         $('.select2').select2({ width:'style' });
         $('#ventasbundle_venta_cliente').focus();
@@ -133,10 +137,14 @@ jQuery(function ($) {
             $.getJSON("{{ path('ventas_set_puntosventa')}}" , 
                 {'puntoVenta':pto}).done(function(data){
                 // validar que se haya definido uno para continuar
-                if(data.id==0){
+                if( data == null ){
                     alert('Debe seleccionar un punto de venta para continuar!!');
                     $('#form-punto-venta').hide();
+                    $('.nroOperacion').hide();
                 }else{                    
+                    $('#ventasbundle_venta_nroOperacion').val(data);    
+                    $('.nroOperacion').html( '#'+data);
+                    $('.nroOperacion').show();
                     $('#form-punto-venta').show();
                 }
             });
@@ -180,13 +188,6 @@ jQuery(function ($) {
 
         });
 
-        // Detecta tecla + para agregar items
-        $(document).keypress(function(e) {
-            if (e.which == 43) { 
-                e.preventDefault();
-                $('#linkAdd').click();
-            }
-        });
 // Get the container who holds the collection
     $collectionHolder = $('table.venta tbody');
     $collectionHolder.find('.delTd').each(function() {
@@ -202,13 +203,6 @@ jQuery(function ($) {
         $collectionHolder.find('.chzn-container').last().trigger('mousedown');          
     });
     
-       /* $(document).on('blur',function(e){                        
-            $(this).focus();            
-            console.log('salio')
-            $(document).find('#ventasbundle_venta_cliente').focus();
-            e.preventDefault();
-        });*/        
-
     });
 // funciones personalizas para el formulario
  function addNewItem() {
@@ -465,6 +459,24 @@ function openModalProducto(obj){
     $('#productos_table_filter input').focus();
 }
 
-
+function detectarControles(e) {
+    if( e.ctrlKey && e.altKey ){
+        // ctrl + alt + C
+        if( e.keyCode == 67 ){
+            e.preventDefault();
+            openModal($('#ventasbundle_venta_cliente'))
+        }
+        // ctrl + alt + J
+        if( e.keyCode == 70 ){
+            e.preventDefault();
+            openModal($('#ventasbundle_venta_formapago'))
+        }        
+    }     
+    // tecla + agrega item
+    if (e.keyCode == 171) { 
+        e.preventDefault();
+        $('#linkAdd').click();
+    }
+}
 });
 </script>{% endblock %}

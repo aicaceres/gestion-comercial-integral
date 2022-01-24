@@ -31,6 +31,12 @@ class PuntoVenta
     protected $descripcion;
 
     /**
+     * @var integer $ultimoNroOperacionVenta
+     * @ORM\Column(name="ultimo_nro_operacion_venta", type="integer")     
+     */
+    protected $ultimoNroOperacionVenta = 0;
+
+    /**
      * @ORM\Column(name="activo", type="boolean")
      */
     protected $activo = true;    
@@ -191,5 +197,28 @@ class PuntoVenta
     public function getRolesUnidadNegocio()
     {
         return $this->rolesUnidadNegocio;
+    }
+
+    /**
+     * Set ultimoNroOperacionVenta
+     *
+     * @param integer $ultimoNroOperacionVenta
+     * @return PuntoVenta
+     */
+    public function setUltimoNroOperacionVenta($ultimoNroOperacionVenta)
+    {
+        $this->ultimoNroOperacionVenta = $ultimoNroOperacionVenta;
+
+        return $this;
+    }
+
+    /**
+     * Get ultimoNroOperacionVenta
+     *
+     * @return integer 
+     */
+    public function getUltimoNroOperacionVenta()
+    {
+        return $this->ultimoNroOperacionVenta;
     }
 }
