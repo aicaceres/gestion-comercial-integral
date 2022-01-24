@@ -22,3 +22,4 @@
 /composer.json
 /composer.lock
 /docs/
+*.php~
