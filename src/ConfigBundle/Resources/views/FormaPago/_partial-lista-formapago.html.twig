@@ -1,0 +1,20 @@
+<table id="formapago_table" cellpadding="0" cellspacing="0" border="0" class="stdtable">
+    <thead>
+        <tr>
+            <th class="nosort"> Forma de Pago </th>
+            <th class="nosort"> Descuento/Recargo </th>
+            <th class="nosort"> Cuotas </th>
+            <th class="nosort"> Plazo </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in formas %}
+        <tr>
+            <td><a class="nombre-formapago" data-id="{{item.id}}" href="javascript:void(0);">{{item.nombre}}</a></td>
+            <td class="alignright">{{item.porcentajeRecargo ~ ' %' }}</td>
+            <td class="alignright">{{item.cuotas}}</td>
+            <td> {{item.plazo ~ ' ' ~ item.vencimiento|upper }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

@@ -33,7 +33,7 @@ class FacturaDetalle {
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3)
      */
-    protected $cantidad;
+    protected $cantidad = 1;
 
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)

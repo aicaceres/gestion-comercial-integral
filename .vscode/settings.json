@@ -1,0 +1,9 @@
+{
+    "editor.defaultFormatter": "Sophisticode.php-formatter",
+    "[php]": {
+        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+    },
+    "[twig]": {
+        "editor.defaultFormatter": "SimonSiefke.prettier-vscode"
+    }
+}

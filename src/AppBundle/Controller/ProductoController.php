@@ -732,4 +732,123 @@ class ProductoController extends Controller {
         return new Response(json_encode(array('id' => $lote->getId(), 'text' => $lote->__toString())));
     }
 
+/// PARA VENTA RAPIDA
+    /**
+     * @Route("/getListaProductos", name="get_lista_productos")
+     * @Method("GET")
+     */
+    public function getListaProductosAction() {
+        $em = $this->getDoctrine()->getManager();
+        $productos = $em->getRepository('AppBundle:Producto')->findByActivo(1);
+        $partial = $this->renderView('AppBundle:Producto:_partial-lista-productos.html.twig',
+                array('productos' => $productos));
+        return new Response($partial);
+    }
+
+    /**
+     * @Route("/productoListDatatables", name="producto_list_datatables")
+     * @Method("POST")
+     * @Template()
+     */
+    public function productoListDatatablesAction(Request $request) {
+        // Set up required variables
+        $this->entityManager = $this->getDoctrine()->getManager();        
+        $this->repository = $this->entityManager->getRepository('AppBundle:Producto');
+        // Get the parameters from DataTable Ajax Call
+        if ($request->getMethod() == 'POST') {
+            $draw = intval($request->get('draw'));
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $search = $request->get('search');
+            $orders = $request->get('order');
+            $columns = $request->get('columns');
+
+            $listaprecio = $request->get('listaprecio');
+        }
+        else // If the request is not a POST one, die hard
+            die;
+
+        // Process Parameters
+        // Orders       
+
+        foreach ($orders as $key => $order) {
+            // Orders does not contain the name of the column, but its number,
+            // so add the name so we can handle it just like the $columns array
+            $orders[$key]['name'] = $columns[$order['column']]['name'];
+        }
+
+        // Further filtering can be done in the Repository by passing necessary arguments
+        $otherConditions = "array or whatever is needed";
+
+        // Get results from the Repository
+        $results = $this->repository->getListDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $listaprecio);
+
+        // Returned objects are of type Town
+        $objects = $results["results"];
+        // Get total number of objects
+        $total_objects_count = $this->repository->listcount();
+        // Get total number of results
+        $selected_objects_count = count($objects);
+        // Get total number of filtered data
+        $filtered_objects_count = $results["countResult"];
+
+        // Construct response
+        $response = '{
+            "draw": ' . $draw . ',
+            "recordsTotal": ' . $total_objects_count . ',
+            "recordsFiltered": ' . $filtered_objects_count . ',
+            "data": [';
+
+        $i = 0;
+
+        foreach ($objects as $key => $producto) {
+            $response .= '["';
+
+            $j = 0;
+            $nbColumn = count($columns);
+            foreach ($columns as $key => $column) {
+                // In all cases where something does not exist or went wrong, return -
+                $responseTemp = $precioTemp = "-";
+                $precio = $producto->getPrecios()[0];
+                if ($precio !== null) {
+                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precio->getPrecio()));
+                }
+                switch ($column['name']) {                    
+                    case 'nombre': {
+                            // Do this kind of treatments if you suspect that the string is not JS compatible
+                            $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
+                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precioTemp."' href='javascript:void(0);'>".$name."</a>";                            
+                            break;
+                        }                    
+                    case 'codigo': {
+                            $codigo = $producto->getCodigo();
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $codigo));
+                            break;
+                        } 
+                    case 'precio': {
+                            $responseTemp = $precioTemp;
+                            break;
+                        }                                       
+                }
+
+                // Add the found data to the json
+                $response .= $responseTemp;
+
+                if (++$j !== $nbColumn)
+                    $response .= '","';
+            }
+
+            $response .= '"]';
+
+            // Not on the last item
+            if (++$i !== $selected_objects_count)
+                $response .= ',';
+        }
+
+        $response .= ']}';
+
+        // Send all this stuff back to DataTables
+        return new Response($response);
+    }
+
 }

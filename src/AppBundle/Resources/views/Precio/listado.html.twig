@@ -57,7 +57,7 @@
                 <th class="nosort">Últ. Modif.</th>
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'stock_precio_new') %}
-                    <button onclick="jQuery('form').submit();" class="guardar create" >Agregar Precio</button>
+                        <button onclick=" jQuery('#searchform').submit();" class="guardar create">Agregar Precio</button>
                     {% else %} &nbsp; {% endif %} 
                 </th>
                 

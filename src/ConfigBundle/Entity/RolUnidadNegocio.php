@@ -46,6 +46,15 @@ class RolUnidadNegocio
      * )
      */
     private $depositos;
+
+     /**
+     * @ORM\ManyToMany(targetEntity="ConfigBundle\Entity\PuntoVenta", inversedBy="rolesUnidadNegocio")
+     * @ORM\JoinTable(name="puntosventa_x_unidadnegocio",
+     *      joinColumns={@ORM\JoinColumn(name="rol_unidadnegocio_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="punto_venta_id", referencedColumnName="id")}
+     * )
+     */
+    private $puntosVenta;
     
     /**
      * Constructor
@@ -53,8 +62,8 @@ class RolUnidadNegocio
     public function __construct()
     {
         $this->depositos = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-    
+        $this->puntosVenta = new \Doctrine\Common\Collections\ArrayCollection();
+    }    
 
     /**
      * Get id
@@ -204,5 +213,43 @@ class RolUnidadNegocio
                 $deps->add($value);
         }        
         return $deps;
+    }
+
+    /**
+     * Add puntosVenta
+     *
+     * @param \ConfigBundle\Entity\PuntoVenta $puntosVenta
+     * @return RolUnidadNegocio
+     */
+    public function addPuntosVentum(\ConfigBundle\Entity\PuntoVenta $puntosVenta)
+    {
+        $this->puntosVenta[] = $puntosVenta;
+
+        return $this;
+    }
+
+    /**
+     * Remove puntosVenta
+     *
+     * @param \ConfigBundle\Entity\PuntoVenta $puntosVenta
+     */
+    public function removePuntosVentum(\ConfigBundle\Entity\PuntoVenta $puntosVenta)
+    {
+        $this->puntosVenta->removeElement($puntosVenta);
+    }
+
+    /**
+     * Get puntosVenta
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getPuntosVenta()
+    {
+        $ptos = new \Doctrine\Common\Collections\ArrayCollection();
+        foreach ($this->puntosVenta as $value) {
+            if($value->getActivo())
+                $ptos->add($value);
+        }        
+        return $ptos;
     }
 }

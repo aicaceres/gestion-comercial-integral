@@ -34,40 +34,7 @@ jQuery(document).ready(function(){
    jQuery('#tabs').tabs();
 
    jQuery('.select2').select2();;
-   
-    ///// CHANGE THEME /////
-    jQuery('.changetheme a').bind('mousedown', function(e) {
-       // var ck = jQuery.cookie("addonstyle");
-        if(e.altKey && e.ctrlKey){
-            e.preventDefault();
-          //  var css;
-            jQuery.ajax({
-                    url: 'http://colchonesmisiones/changeTheme',
-                    type: 'POST',
-                    async: false,
-                    success: function(data) {
-                      //  c = data;
-                      //  css = window.link.split('.', 1) + '.' + c + '.css';
-                       // jQuery('head').append('<link id="addonstyle" rel="stylesheet" href="' + css + '" type="text/css" />');
-                        if(data=='default'){
-                          //  jQuery('.changetheme a').removeClass('hide');
-                         //   jQuery('.changetheme a.contrast').addClass('hide');
-                            window.location.href='http://colchonesmisiones/';
-                        }else{
-                         //   jQuery('.changetheme a').addClass('hide');
-                         //   jQuery('.changetheme a.contrast').removeClass('hide');
-                            alert('Utilizará el tema alternativo');
-                            window.location.href='http://colchonesmisiones/especial';
-                        }
-                        // jQuery.cookie("addonstyle", c, {path: '/'});
-                    },
-                    error: function() {
-                        alert('Imposible cambiar de tema en este momento.');
-                    }
-                });
-        }
-    });
-    
+       
 	///// SHOW/HIDE USERDATA WHEN USERINFO IS CLICKED /////
 	jQuery('.userinfo').click(function(){
 		if(!jQuery(this).hasClass('active')) {

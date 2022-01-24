@@ -18,20 +18,19 @@ jQuery(document).ready(function(){
                 
 	//// CONTROL DE MENU ///
         var route = jQuery("#route").val();
-        var subroute = route.split('_',3);        
+        var subroute = route.split('_',3);           
         jQuery("#"+subroute[0]).addClass("current");
       /* for (var i=0; i < subroute.length; i++){
             jQuery("#"+subroute[i]).addClass("current");
         }*/
         for (var i=(subroute.length-1); i > 0 ; i--){
-            var item = jQuery("#"+subroute[i]);
-            if(item.length){
+            var item = jQuery("#"+subroute[i]);            
+            if(item.length) {                
                 jQuery("#"+subroute[i]).addClass("current");
                 break;
             }
         }
    
-
         if(subroute.length>1){
             var ul = "#"+subroute[1];
             if(route.search("extra")>=0){

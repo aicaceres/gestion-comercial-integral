@@ -262,4 +262,89 @@ class ClienteRepository extends EntityRepository {
         return $query->getQuery()->getScalarResult();
     }
 
+// PARA LISTA DE CLIENTES POPUP
+    public function listcount()
+    {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("count(e.id)")
+                ->from('VentasBundle\Entity\Cliente', 'e')
+                ->where('e.activo=1');
+        return $query->getQuery()->getSingleScalarResult();
+    }
+    public function getListDTData($start, $length, $orders, $search, $columns, $otherConditions)
+    {
+        // Create Main Query
+        $query = $this->_em->createQueryBuilder();
+        $query->select("e")
+                ->from('VentasBundle\Entity\Cliente', 'e');
+         
+        // Create Count Query
+        $countQuery = $this->_em->createQueryBuilder();
+        $countQuery->select("count(e.id)")
+                ->from('VentasBundle\Entity\Cliente', 'e');          
+        
+        // Other conditions than the ones sent by the Ajax call ?        
+        if ($otherConditions === null)
+        {
+            // No
+            // However, add a "always true" condition to keep an uniform treatment in all cases
+            $query->where("e.activo=1");
+            $countQuery->where("e.activo=1");
+        }
+        else
+        {
+            // Add condition
+            $query->where($otherConditions);
+            $countQuery->where($otherConditions);
+        }
+ 
+        if( $search['value'] ){
+            $searchItem = trim($search['value']);
+            $searchQuery =  ' e.nombre LIKE \'%'.$searchItem.'%\' OR e.cuit LIKE \'%'.$searchItem.'%\' '; 
+            $query->andWhere($searchQuery);
+            $countQuery->andWhere($searchQuery);
+        }
+                        
+        // Limit
+        $query->setFirstResult($start)->setMaxResults($length);
+        
+        // Order
+        foreach ($orders as $key => $order)
+        {
+            // $order['name'] is the name of the order column as sent by the JS
+            if ($order['name'] != '')
+            {
+                $orderColumn = null;
+            
+                switch($order['name'])
+                {
+                    case 'nombre':
+                    {
+                        $orderColumn = 'e.nombre';
+                        break;
+                    }
+                    case 'cuit':
+                    {
+                        $orderColumn = 'e.cuit';
+                        break;
+                    }                    
+                }
+        
+                if ($orderColumn !== null)
+                {
+                    $query->orderBy($orderColumn, $order['dir']);
+                }
+            }
+        }
+        
+        // Execute       
+        $results = $query->getQuery()->getResult();
+        $countResult = $countQuery->getQuery()->getSingleScalarResult();
+        
+        return array(
+            "results" 		=> $results,
+            "countResult"	=> $countResult
+        );
+    }   
+
 }

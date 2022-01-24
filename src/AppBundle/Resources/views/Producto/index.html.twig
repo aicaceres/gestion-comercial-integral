@@ -19,8 +19,10 @@
     <form id="searchform" action="{{ path('stock_producto') }}" method="get">
         <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
-            <label><strong>Proveedor:</strong></label>
-            <select class="uniformselect" id="selectProveedor" name="provId">
+        <label style="vertical-align: top;">
+            <strong>PROVEEDOR: &nbsp;</strong>
+        </label>
+        <select class="chzn-select" id="selectProveedor" name="provId">
                 <option value="0">Todos</option>
             {% for prov in proveedores %}
                 <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
@@ -80,9 +82,9 @@
 {% include "AppBundle::block-list-js.html.twig" %}
  <script type="text/javascript">
 jQuery(document).ready(function($) {
-    $('#selectProveedor').change(function(){ 
-        $('#searchform').submit();
-    });   
+    $(".chzn-select").chosen();
+    $(".chzn-select").change(function(){ $('#searchform').submit(); });
+     
     var oTable = $('#dyntable2').dataTable();
     
     $('#printform').on('submit',function(){

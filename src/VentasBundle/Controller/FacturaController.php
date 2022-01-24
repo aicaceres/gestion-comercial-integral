@@ -279,26 +279,4 @@ class FacturaController extends Controller {
             'Content-Disposition' => 'filename=listado_ventas_facturas_' . $hoy->format('dmY_Hi') . '.pdf'));
     }
 
-    /*
-     *  FACTURACION RAPIDA PUNTO DE VENTA
-     */
-
-    /**
-     * @Route("/newPuntoVenta", name="ventas_puntoventa_new")
-     * @Method("GET")
-     * @Template()
-     */
-    public function newPuntoVentaAction() {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura_new');
-        $entity = new Factura();
-        $form = $this->createForm(new PuntoVentaType(), $entity, array(
-            'action' => $this->generateUrl('ventas_factura_create'),
-            'method' => 'POST',
-        ));
-        return $this->render('VentasBundle:Factura:puntoventa.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
-        ));
-    }
-
 }

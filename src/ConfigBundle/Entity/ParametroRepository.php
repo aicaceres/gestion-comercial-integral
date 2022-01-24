@@ -99,5 +99,4 @@ class ParametroRepository extends EntityRepository {
         $query->andWhere($consulta);
         return $query->getQuery()->getResult();
     }
-
 }
