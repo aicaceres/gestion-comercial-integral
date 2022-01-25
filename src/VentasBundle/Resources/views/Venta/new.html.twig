@@ -407,7 +407,8 @@ function openModalProducto(obj){
                     { "targets"  : 'nosort', "orderable": false }        
                 ],
                 "rowCallback": function (row, data) {                             
-                    // registrar seleccion            
+                    // registrar seleccion           
+                    $(row).find('td:nth-child(3n)').addClass('alignright');
                     $(row).find('a').on('click', function(e){
                         e.preventDefault();
                         // cargar option
