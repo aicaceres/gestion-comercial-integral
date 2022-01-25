@@ -811,7 +811,8 @@ class ProductoController extends Controller {
                 $responseTemp = $precioTemp = "-";
                 $precio = $producto->getPrecios()[0];
                 if ($precio !== null) {
-                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precio->getPrecio()));
+                    $precioiva = $precio->getPrecio() * ( 1 + ( $producto->getIva()/100 ) );
+                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioiva));
                 }
                 switch ($column['name']) {                    
                     case 'nombre': {
