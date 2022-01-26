@@ -9,6 +9,13 @@
     color: #666666;
     background-color: gainsboro;
     }
+    a.btn_search{
+        margin:0;
+    }
+    .divnotif{
+        padding: 0 10px;
+    }
+
     .venta.stdtable.noaction tbody tr.item td{
         padding: 4px 10px;
     }
@@ -49,15 +56,15 @@
 {% block contentwrapper %}
 <div id="control"> </div>
 <div id="contentwrapper" class="contentwrapper">
-{% include "AppBundle::notificacion.html.twig" %}
-    
+{% include "AppBundle::notificacion.html.twig" %}    
     <div  id="form-punto-venta" {% if app.session.get('puntoVentaActual')['id'] == 0 %} style="display:none" {% endif %}>
 
         {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}     
         <fieldset >                                        
-            <div style="display:inline-block; width: 30%;">                                 
+            <div id="selectorCliente" style="display:inline-block; width: 30%;">                                 
                 {{ form_label(form.cliente) }}
-                {{ form_widget(form.cliente,{'attr':{'style':'width:100%','url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente'}}) }}          
+                {{ form_widget(form.cliente,{'attr':{'url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente'}}) }}    
+                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>      
             </div>
             <div style="display:inline-block; width: 10%;"> 
                 {{ form_label(form.precioLista)}}
@@ -69,7 +76,8 @@
             </div>
             <div style="display:inline-block; width: 25%; margin-left:10px;"> 
                 {{ form_label(form.formaPago)}}
-                {{ form_widget(form.formaPago,{'attr':{'style':'width:100%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}})}}
+                {{ form_widget(form.formaPago,{'attr':{'url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}})}}
+                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
             </div>
             <div style="display:inline-block; width: 10%;"> 
                 {{ form_label(form.moneda)}}
@@ -109,7 +117,10 @@
         {{ form_end(form) }}
 
     </div> 
-      
+    <div class="notifmsg info png_bg" style="margin-top:10px">
+        <a href="#" class="close"></a>
+        <div><small>Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong> Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong> Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong> + = Agregar producto </small></div>
+    </div> 
 </div>
 {% endblock %}
 {% block extra_javascripts %}
@@ -157,6 +168,12 @@ jQuery(function ($) {
                 openModal($(this))
             }
         });
+        // en buscar abrir popup correspondiente
+        $(document).on('click','.btn_search',function(e) {
+            obj = $(this).parent().find('select');
+            e.preventDefault();
+            openModal(obj)           
+        })
 
         // al modificar forma de pago actualizar datos del partial
         $('#ventasbundle_venta_formaPago').on('change', function() {
