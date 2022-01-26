@@ -199,5 +199,108 @@ class ProductoRepository extends EntityRepository {
             "countResult"	=> $countResult
         );
     }
+/**
+* para administracion de productos
+ */
+    public function indexCount($provId = null) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("count(p.id)")
+                ->from('AppBundle\Entity\Producto', 'p');
+        if ($provId) {
+            $query->innerJoin('p.proveedor', 'pr')
+                    ->andWhere('pr.id=' . $provId);
+        }
+        return $query->getQuery()->getSingleScalarResult();
+    }
+
+    public function getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions, $provId = null) {
+        // Create Main Query
+        $query = $this->_em->createQueryBuilder();
+        $query->select("p")
+                ->from('AppBundle\Entity\Producto', 'p');
+
+        // Create Count Query
+        $countQuery = $this->_em->createQueryBuilder();
+        $countQuery->select("count(p.id)")
+                ->from('AppBundle\Entity\Producto', 'p');
+
+        // Create inner joins
+        $query->innerJoin('p.proveedor', 'pr')
+              ->innerJoin('p.rubro', 'r')
+              ->where('r.agrupador_id=111') ;
+
+        $countQuery->innerJoin('p.proveedor', 'pr')
+                   ->innerJoin('p.rubro', 'r')
+                   ->where('r.agrupador_id=111') ;
+
+        // Other conditions than the ones sent by the Ajax call ?
+/*        if ($otherConditions === null) {
+            // No
+            // However, add a "always true" condition to keep an uniform treatment in all cases
+            $query->where("1=1");
+            $countQuery->where("1=1");
+        }
+        else {
+            // Add condition
+            $query->where($otherConditions);
+            $countQuery->where($otherConditions);
+        }*/
+        if ($provId) {
+            $searchQuery = 'pr.id=' . $provId;
+            $query->andWhere($searchQuery);
+            $countQuery->andWhere($searchQuery);
+        }
+
+        if ($search['value']) {
+            $searchItem = trim($search['value']);
+            $searchQuery = ' p.nombre LIKE \'%' . $searchItem . '%\' OR p.codigo LIKE \'%' . $searchItem . '%\' ' .
+                    ' OR pr.nombre LIKE \'%' . $searchItem . '%\'  OR  r.nombre LIKE \'%' . $searchItem . '%\' ' ;
+            $query->andWhere($searchQuery);
+            $countQuery->andWhere($searchQuery);
+        }
+
+        // Limit
+        $query->setFirstResult($start)->setMaxResults($length);
+
+        // Order
+        foreach ($orders as $key => $order) {
+            // $order['name'] is the name of the order column as sent by the JS
+            if ($order['name'] != '') {
+                $orderColumn = null;
+
+                switch ($order['name']) {
+                    case 'codigo': {
+                            $orderColumn = 'p.codigo';
+                            break;
+                        }
+                    case 'nombre': {
+                            $orderColumn = 'p.nombre';
+                            break;
+                        }
+                    case 'proveedor': {
+                            $orderColumn = 'pr.nombre';
+                            break;
+                        }
+                    case 'rubro': {
+                            $orderColumn = 'r.nombre';
+                            break;
+                        }                                     
+                }
+
+                if ($orderColumn !== null) {
+                    $query->orderBy($orderColumn, $order['dir']);
+                }
+            }
+        }
+
+        // Execute
+        $results = $query->getQuery()->getResult();
+        $countResult = $countQuery->getQuery()->getSingleScalarResult();
+
+        return array(
+            "results" => $results,
+            "countResult" => $countResult
+        );
+    }
 
 }

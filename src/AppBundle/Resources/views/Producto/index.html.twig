@@ -32,15 +32,13 @@
     </form>
 </div><!-- button -->     
     
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">        
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="productos_table">        
         <thead>
             <tr>
                 <th>Código</th>
                 <th>Producto</th>
                 <th>Proveedor</th>
                 <th>Rubro</th>
-                <th class="nosort">Unid.Med.</th>
-                <th class="nosort">Bulto</th>
                 <th class="nosort">Costo</th>
                 <th style="width:5%;" class="nosort">Activo</th>
                 <th class="nosort actionbutton addbutton">
@@ -51,28 +49,7 @@
             </tr>
         </thead>
         <tbody>
-           {% for entity in entities %}
-            <tr>             
-                <td>{{ entity.codigo |upper }}</td>
-                <td>{{ entity.nombre }}</td>
-                <td>{{ entity.proveedor }}</td>
-                <td>{% if entity.rubro %}{{ entity.rubro.nombre }}{% endif %}</td>
-                <td>{{ entity.unidadMedida }}</td>
-                <td>{%if entity.bulto%}{{ entity.cantidadxBulto }}{%endif%}</td>
-                <td class="alignright" style="width:5%;">{{entity.costo| number_format(3,'.',',')}}</td>
-                <td style="width:5%;"><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /></td>
-                <td>
-                    <a href="{{ path('stock_producto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver" ></a>&nbsp;
-                     {% if app.user.access(app.session.get('unidneg_id'),'stock_producto_edit') %}
-                    <a href="{{ path('stock_producto_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar" ></a>&nbsp;
-                    {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'stock_producto_delete') %}
-                        <a href url="{{ path('stock_producto_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
-                    {% endif %}
-                    
-                </td>
-            </tr>
-           {% endfor %}
+           
         </tbody>
     </table> 
 </div>
@@ -82,10 +59,62 @@
 {% include "AppBundle::block-list-js.html.twig" %}
  <script type="text/javascript">
 jQuery(document).ready(function($) {
+    $('.togglemenu').click();
     $(".chzn-select").chosen();
     $(".chzn-select").change(function(){ $('#searchform').submit(); });
      
-    var oTable = $('#dyntable2').dataTable();
+    const proveedor = $('#selectProveedor').val();
+console.log(proveedor);
+    var oTable = $('#productos_table').dataTable({
+                "columnDefs": [        
+                    // These are the column name variables that will be sent to the server
+                    { "name": "codigo", "targets": 0 },
+                    { "name": "producto",  "targets": 1 },                    
+                    { "name": "proveedor",  "targets": 2 },                    
+                    { "name": "rubro",  "targets": 3 },                    
+                    { "name": "costo",  "targets": 4 },                    
+                    { "name": "activo",  "targets": 5 },  
+                    { "name": "actions",  "targets": 6 },                  
+                    { "targets"  : 'nosort', "orderable": false }        
+                ],
+                "rowCallback": function (row, data) {                             
+                    // registrar seleccion           
+                    $(row).find('td:nth-child(5n)').addClass('alignright');
+                    $(row).find('td:nth-child(6n)').addClass('aligncenter');                   
+                 },
+                // Server-side parameters
+                "processing": true,
+                "serverSide": true,
+                // Ajax call
+                "ajax": {
+                    "url": "{{ path('producto_index_datatables') }}",
+                    "type": "POST",
+                    "data" : { 'proveedor' : proveedor },
+                },
+                // Classic DataTables parameters
+                "bPaginate" : true,
+                "bInfo" : true, 
+                "bSearchable": true,        
+                "bLengthChange": true,
+                "pageLength":10,
+                "order": [[0, 'asc']],
+                "sPaginationType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": "<<",
+                        "sNext": ">",
+                        "sLast": ">>",
+                        "sPrevious": "<"
+                    },
+                    "sProcessing": "<div style='color:red;text-align: center;'>CARGANDO DATOS...</div>",
+                    "sLengthMenu": "Mostrar _MENU_ registros ",
+                    "sZeroRecords": "Sin datos",
+                    "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                    "sInfoEmpty": "Sin coincidencias",
+                    "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                    "sSearch": "Buscar:"
+                }
+            }); 
     
     $('#printform').on('submit',function(){
         $('#proveedorid').val($('#selectProveedor').val());
@@ -119,12 +148,6 @@ jQuery(document).ready(function($) {
         }); 
     });*/
     
-  /*  $('.rubro').on('mouseover',function(){
-        $(this).siblings('.descrubro').show();
-    });
-    $('.rubro').on('mouseleave',function(){
-        $(this).siblings('.descrubro').hide();
-    });*/
 });    
 </script>  
 {% endblock %}

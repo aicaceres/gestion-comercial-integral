@@ -27,14 +27,14 @@ class ProductoController extends Controller {
         $provId = $request->get('provId');
         $em = $this->getDoctrine()->getManager();
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
-        if ($provId) {
+       /* if ($provId) {
             $entities = $em->getRepository('AppBundle:Producto')->findByProveedor($provId);
         }
         else {
             $entities = $em->getRepository('AppBundle:Producto')->findAll();
-        }
+        }*/
         return $this->render('AppBundle:Producto:index.html.twig', array(
-                    'entities' => $entities,
+                   // 'entities' => $entities,
                     'proveedores' => $proveedores,
                     'provId' => $provId,
         ));
@@ -829,6 +829,146 @@ class ProductoController extends Controller {
                     case 'precio': {
                             $responseTemp = $precioTemp;
                             break;
+                        }                                       
+                }
+
+                // Add the found data to the json
+                $response .= $responseTemp;
+
+                if (++$j !== $nbColumn)
+                    $response .= '","';
+            }
+
+            $response .= '"]';
+
+            // Not on the last item
+            if (++$i !== $selected_objects_count)
+                $response .= ',';
+        }
+
+        $response .= ']}';
+
+        // Send all this stuff back to DataTables
+        return new Response($response);
+    }
+
+    /**
+     * @Route("/productoIndexDatatables", name="producto_index_datatables")
+     * @Method("POST")
+     * @Template()
+     */
+    public function productoIndexDatatablesAction(Request $request) {
+        // Set up required variables
+        $this->entityManager = $this->getDoctrine()->getManager();        
+        $this->repository = $this->entityManager->getRepository('AppBundle:Producto');
+        // Get the parameters from DataTable Ajax Call
+        if ($request->getMethod() == 'POST') {
+            $draw = intval($request->get('draw'));
+            $start = $request->get('start');
+            $length = $request->get('length');
+            $search = $request->get('search');
+            $orders = $request->get('order');
+            $columns = $request->get('columns');
+
+            $provId = $request->get('proveedor');
+        }
+        else // If the request is not a POST one, die hard
+            die;
+
+        // Process Parameters
+        // Orders       
+
+        foreach ($orders as $key => $order) {
+            // Orders does not contain the name of the column, but its number,
+            // so add the name so we can handle it just like the $columns array
+            $orders[$key]['name'] = $columns[$order['column']]['name'];
+        }
+
+        // Further filtering can be done in the Repository by passing necessary arguments
+        $otherConditions = "array or whatever is needed";
+
+        $unidNeg = $this->get('session')->get('unidneg_id');
+
+        // Get results from the Repository
+        $results = $this->repository->getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $provId);
+
+        // Returned objects are of type Town
+        $objects = $results["results"];
+        // Get total number of objects
+        $total_objects_count = $this->repository->indexCount();
+        // Get total number of results
+        $selected_objects_count = count($objects);
+        // Get total number of filtered data
+        $filtered_objects_count = $results["countResult"];
+
+        // Construct response
+        $response = '{
+            "draw": ' . $draw . ',
+            "recordsTotal": ' . $total_objects_count . ',
+            "recordsFiltered": ' . $filtered_objects_count . ',
+            "data": [';
+
+        $i = 0;
+
+        foreach ($objects as $key => $producto) {
+            $response .= '["';
+
+            $j = 0;
+            $nbColumn = count($columns);
+            foreach ($columns as $key => $column) {
+                // In all cases where something does not exist or went wrong, return -
+                switch ($column['name']) {                    
+                    case 'codigo': {
+                            $codigo = $producto->getCodigo();
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $codigo));
+                            break;
+                        } 
+                    case 'nombre': {
+                            // Do this kind of treatments if you suspect that the string is not JS compatible
+                            $name = $producto->getNombre();
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $name));                            
+                            break;
+                        }                    
+                    case 'proveedor': {
+                            $prov = $producto->getProveedor();
+                            // This cannot happen if inner join is used
+                            // However it can happen if left or right joins are used
+                            if ($prov !== null) {
+                                $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r"), ' ', $prov->getNombre()));
+                            }
+                            break;
+                        }
+                    case 'rubro': {
+                            $rubro = $producto->getRubro();
+                            // This cannot happen if inner join is used
+                            // However it can happen if left or right joins are used
+                            if ($rubro !== null) {
+                                $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r"), ' ', $rubro->getNombre()));
+                            }
+                            break;
+                        }
+                    case 'costo': {
+                            $costo = $producto->getCosto();
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $costo));
+                            break;
+                        }
+                    case 'activo': {                
+                            $activo = ($producto->getActivo()) ? " checked='checked'" : "";           
+                            $title = ($producto->getActivo()) ? " title='Activo'" : " title='Inactivo'";           
+                            $responseTemp = "<input type='checkbox' disabled='disabled' ".$activo.$title. " />" ;                            
+                           break;                        
+                    }                                       
+                    case 'actions': {
+                            $user = $this->getUser();
+                            $responseTemp = "<a href='" . $this->generateUrl('stock_producto_show', array('id' => $producto->getId())) . "' class='editar btn btnaction btn_folder' title='Ver' ></a>&nbsp;";                            
+                            if ($user->getAccess($unidNeg, 'stock_producto_edit')) {
+                                $linkEdit = "<a href='" . $this->generateUrl('stock_producto_edit', array('id' => $producto->getId())) . "' class='editar btn btnaction btn_pencil' title='Editar' ></a>&nbsp;";     
+                                $responseTemp = $responseTemp . $linkEdit;
+                            }                            
+                            if ($user->getAccess($unidNeg, 'stock_producto_delete')) {
+                                $linkDel = "<a href url='" . $this->generateUrl('stock_producto_delete', array('id' => $producto->getId())) . "' class='delete btn btnaction btn_trash' title='Borrar' ></a>&nbsp;";     
+                                $responseTemp = $responseTemp . $linkDel;
+                            }                             
                         }                                       
                 }
 
