@@ -17,7 +17,7 @@
             <select id="selectTipo" name="tipoId">
                 <option value="R" {% if tipoId=='R' %}selected="selected" {% endif %}>RETENCIONES DE RENTAS</option>
                 <option value="P" {% if tipoId=='P' %}selected="selected" {% endif %}>PERCEPCIONES DE RENTAS</option>
-                <option value="O" {% if tipoId=='O' %}selected="selected" {% endif %}>GANANCIAS</option>
+                <option value="G" {% if tipoId=='G' %}selected="selected" {% endif %}>GANANCIAS</option>
             </select>  
         </div>    
             
@@ -31,14 +31,10 @@
                 <th>% Adicional</th>                
                 <th>Mínimo</th>                
                 <th>Código ATP</th>                
-                <th class="nosort actionbutton addbutton">
-                {% if tipoId !='O' %}
+                <th class="nosort actionbutton addbutton">                
                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_escalas_new') %}
                     <a class="editar create" href="{{ path('sistema_escalas_new', { 'tipo': tipoId }) }}">Agregar Escala</a>
-                    {% else %} &nbsp; {% endif %}
-                {% else %}
-                &nbsp; 
-                {% endif %}
+                    {% else %} &nbsp; {% endif %}                
                 </th>
             </tr>
         </thead>

@@ -14,7 +14,7 @@ class EscalasType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('tipo',null,array('label' => 'Tipo:'))
+            ->add('tipo','hidden')
             ->add('nombre',null,array('label' => 'Nombre:'))
             ->add('retencion',null,array('label' => '% Retención:'))
             ->add('adicional',null,array('label' => '% Adicional:'))                       
