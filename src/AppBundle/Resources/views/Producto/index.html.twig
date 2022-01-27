@@ -10,11 +10,11 @@
 
 <div id="contentwrapper" class="contentwrapper">
 <div>  
-    <form id="printform" name="printform" target="_blank"  action="{{ path("print_productos") }}" method="post">
+    <form id="printform" name="printform" target="_blank"  action="{{ path("export_productos") }}" method="post">
         <input type="hidden" id="proveedorid" name="proveedorid"/>
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
-        <button class="stdbtn print floatright" type="submit" >Imprimir</button>
+        <button class="stdbtn print floatright" type="submit" >Exportar</button>
     </form>    
     <form id="searchform" action="{{ path('stock_producto') }}" method="get">
         <div style="display: inline-block; margin-bottom: 10px;">
@@ -41,7 +41,7 @@
                 <th>Rubro</th>
                 <th class="nosort">Costo</th>
                 <th style="width:5%;" class="nosort">Activo</th>
-                <th class="nosort actionbutton addbutton">
+                <th class="nosort actionbutton addbutton ">
                    {% if app.user.access(app.session.get('unidneg_id'),'stock_producto_new') %}
                     <a class="editar create" href="{{ path('stock_producto_new') }}">Agregar Producto</a>
                     {% else %} &nbsp; {% endif %} 
@@ -64,7 +64,7 @@ jQuery(document).ready(function($) {
     $(".chzn-select").change(function(){ $('#searchform').submit(); });
      
     const proveedor = $('#selectProveedor').val();
-console.log(proveedor);
+
     var oTable = $('#productos_table').dataTable({
                 "columnDefs": [        
                     // These are the column name variables that will be sent to the server

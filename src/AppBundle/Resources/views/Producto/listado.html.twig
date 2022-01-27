@@ -29,7 +29,7 @@
             </select>  
             &nbsp;&nbsp;&nbsp;
             <label><strong>Proveedor:</strong></label>
-            <select class="uniformselect" id="selectProveedor" name="provId">
+            <select class="chzn-select" id="selectProveedor" name="provId">
                 <option value="0">Todos</option>
             {% for prov in proveedores %}
                 <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
@@ -69,6 +69,8 @@
 {% include "AppBundle::block-list-js.html.twig" %}    
 <script type="text/javascript">
 jQuery(document).ready(function($) {
+    $(".chzn-select").chosen();
+    $('#selectProveedor_chzn').css('vertical-align', 'bottom');
     $('#selectProveedor,#selectDeposito').change(function(){ 
         form = $('#searchform').serialize();
         window.location.href= "{{ path('stock_inventario_enstock') }}?"+form ;

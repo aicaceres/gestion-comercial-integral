@@ -305,6 +305,31 @@ class ProductoController extends Controller {
     }
 
     /**
+     * @Route("/exportProductos",
+     * name="export_productos")
+     * @Template()
+     */
+    public function exportProductosAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $search =  $request->get('searchterm');
+        $proveedorId = $request->get('proveedorid');        
+        $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
+        $items = $em->getRepository('AppBundle:Producto')->getProductosForExportXls($proveedorId,$search);
+
+        $textoFiltro = array(($proveedor ? $proveedor->getNombre() : 'Todos'));
+
+        $partial = $this->renderView('AppBundle:Producto:export-xls.html.twig',
+                array('items' => $items, 'filtro' => $textoFiltro, 'search' => $search));
+        $hoy = new \DateTime();
+        $fileName = 'Productos_' . $hoy->format('dmY_Hi');
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->headers->set('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+        $response->headers->set('Content-Disposition', 'filename="' . $fileName . '.xls"');
+        $response->setContent($partial);
+        return $response;
+    }
+    /**
      * @Route("/exportInventarioEnStock",
      * name="export_inventario_enstock")
      * @Template()

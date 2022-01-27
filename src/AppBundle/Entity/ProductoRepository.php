@@ -107,6 +107,27 @@ class ProductoRepository extends EntityRepository {
         return $stk->getQuery()->getArrayResult();        
     }
 
+    public function getProductosForExportXls($provId=null, $search=null){
+        $query = $this->_em->createQueryBuilder();
+        $query->select("p")
+                ->from('AppBundle\Entity\Producto', 'p')
+                ->leftJoin('p.proveedor', 'pr')                
+                ->leftJoin('p.rubro', 'r')                
+                ->where('r.agrupador_id = 111')
+                ->orderBy('p.nombre')    ;
+        if($provId){
+            $query->andWhere('pr.id='.$provId);
+        }
+
+        if ($search) {
+            $searchItem = trim($search);
+            $searchQuery = ' p.nombre LIKE \'%' . $searchItem . '%\' OR p.codigo LIKE \'%' . $searchItem . '%\' ' .
+                    ' OR pr.nombre LIKE \'%' . $searchItem . '%\'  OR  r.nombre LIKE \'%' . $searchItem . '%\' '. ' OR p.costo LIKE \'%'. $searchItem . '%\' ';
+            $query->andWhere($searchQuery);
+        }
+        return $query->getQuery()->getResult();
+    }
+
 
 // PARA LISTA DE PRODUCTOS POPUP
     public function listcount()
