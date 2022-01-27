@@ -118,7 +118,6 @@ class ProductoRepository extends EntityRepository {
         if($provId){
             $query->andWhere('pr.id='.$provId);
         }
-
         if ($search) {
             $searchItem = trim($search);
             $searchQuery = ' p.nombre LIKE \'%' . $searchItem . '%\' OR p.codigo LIKE \'%' . $searchItem . '%\' ' .

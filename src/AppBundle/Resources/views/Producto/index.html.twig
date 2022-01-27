@@ -118,12 +118,12 @@ jQuery(document).ready(function($) {
     
     $('#printform').on('submit',function(){
         $('#proveedorid').val($('#selectProveedor').val());
-        $('#searchterm').val( $('#dyntable2_filter input').val() );
-        var datos = [];
+        $('#searchterm').val( $('#productos_table_filter input').val() );
+        /*var datos = [];
         oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             datos[index] = value;
         }); 
-        $('#datalist').val(JSON.stringify(datos));
+        $('#datalist').val(JSON.stringify(datos));*/
     });
     
     //oTable.fnSort( [ [1,'desc'] ] );     
