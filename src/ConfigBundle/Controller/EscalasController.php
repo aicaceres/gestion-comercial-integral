@@ -17,6 +17,7 @@ use ConfigBundle\Form\EscalasType;
  */
 class EscalasController extends Controller
 {
+    private $tipos = array('R'=>'RETENCIÓN DE RENTAS','P' => 'PERCEPCIÓN DE RENTAS', 'G' => 'GANANCIAS' ,'H'=>'GANANCIAS');
     /**
      * @Route("/", name="sistema_escalas")
      * @Method("GET")
@@ -55,6 +56,7 @@ class EscalasController extends Controller
         }
         return $this->render('ConfigBundle:Escalas:edit.html.twig', array(
             'entity' => $entity,
+            'tipos' => $this->tipos,
             'form'   => $form->createView(),
         ));
     }
@@ -83,9 +85,11 @@ class EscalasController extends Controller
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_escalas_new');
         $entity = new Escalas();
         $entity->setTipo($tipo);
-        $form   = $this->createCreateForm($entity);
+        if($tipo == 'G') $entity->setNombre( 'HONORARIOS DIRECTORES Y ADMINI');
+        $form   = $this->createCreateForm($entity);        
         return $this->render('ConfigBundle:Escalas:edit.html.twig', array(
             'entity' => $entity,
+            'tipos' => $this->tipos,
             'form'   => $form->createView(),
         ));
     }
@@ -105,9 +109,9 @@ class EscalasController extends Controller
         }
         $editForm = $this->createEditForm($entity);
         //$deleteForm = $this->createDeleteForm($id);
-
         return $this->render('ConfigBundle:Escalas:edit.html.twig', array(
             'entity'      => $entity,
+            'tipos' => $this->tipos,
             'form'   => $editForm->createView(),
             //'delete_form' => $deleteForm->createView(),
         ));
@@ -151,6 +155,7 @@ class EscalasController extends Controller
         }
         return $this->render('ConfigBundle:Escalas:edit.html.twig', array(
             'entity'      => $entity,
+            'tipos' => $this->tipos,
             'form'   => $editForm->createView(),
             //'delete_form' => $deleteForm->createView(),
         ));

@@ -8,14 +8,23 @@
 
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nuevo Item' }}</h1>
+{% set tipo = tipos[entity.tipo] %}
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar Escala de '~tipo|upper : 'Nueva Escala de '~tipo }}</h1>
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
  {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >        
             <div class="two_fields">
+            {% if entity.tipo == 'G' or entity.tipo == 'H' %}
+                <div>
+                    <label>Tipo:</label>
+                    <select name="tipo" id="tipo">
+                        <option value="G" {% if entity.tipo == 'G' %} selected="selected" {% endif %}>GANANCIA</option>
+                        <option value="H" {% if entity.tipo == 'H' %} selected="selected" {% endif %}>HONORARIOS</option>
+                    </select>
+                </div>
+            {% endif %}            
             {{ form_row(form.nombre, { 'attr': {'class' : 'mediuminput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
-            {{ form_row(form.tipo, { 'attr': {'class' : 'mininput'} }) }} 
             </div> 
             <div class="two_fields">
             {{ form_row(form.retencion, { 'attr': {'class' : 'mininput'} }) }} 
@@ -35,4 +44,22 @@
 {{ form_end(form) }}
 </div>    
 </div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+jQuery(function ($) {
+    $(window).on('load', function () {
+        $(document).on('change','#tipo',function(){ 
+            let tipo =  $(this).val();
+            $('#configbundle_escalas_tipo').val(tipo);
+            if( tipo == 'G'){ 
+                $('#configbundle_escalas_nombre').val('HONORARIOS DIRECTORES Y ADMINI');
+            }else{
+                $('#configbundle_escalas_nombre').val('HONORARIOS PROFESIONALES');
+            }
+            $('#configbundle_escalas_retencion').focus();
+        });
+    });
+});
+</script>   
 {% endblock %}
