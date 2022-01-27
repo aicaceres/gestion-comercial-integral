@@ -335,9 +335,13 @@ class PrecioListaController extends Controller
         $listado = $em->getRepository('AppBundle:PrecioLista')
                       ->findByRubroProductoyLista($rubroid,$provid,$id);
         return $this->render('AppBundle:Precio:listado.html.twig', array(
-            'listas' => $listas, 'listado' => $listado, 'listaId' => $id,
-            'proveedores' => $proveedores,'provId' => $provid,
-            'rubros' => $rubros,'rubroId' => $rubroid
+            'listas' => $listas, 
+            'listado' => $listado, 
+            'listaId' => $id,
+            'proveedores' => $proveedores,
+            'provId' => $provid,
+            'rubros' => $rubros,
+            'rubroId' => $rubroid
         ));
     }
     
