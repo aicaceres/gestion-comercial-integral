@@ -20,7 +20,8 @@ class EscalasRepository extends EntityRepository {
         $query->select('e')
                 ->from('ConfigBundle\Entity\Escalas', 'e')
                 ->where($consulta)
-                ->orderBy($order);        
+                ->orderBy($order);
+        
         return $query->getQuery()->getResult();
     }
 
