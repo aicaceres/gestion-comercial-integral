@@ -116,7 +116,7 @@
                     <tbody data-index="{{form.precios | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Producto:_precios_prototype.html.twig' with {'item':form.precios.vars.prototype} %}{% endfilter %}">
                         {% for prc in form.precios %}
                             <tr class="item2" style="height:30px" divdata="item2_{{loop.index-1}}">
-                                <td class="listaTd">{{ prc.vars.data.precioLista.nombre|upper }}<div style="display:none">{{ form_widget(prc.precioLista) }}<div></td>
+                                <td class="listaTd">{{ prc.vars.data.precioLista|upper }}<div style="display:none">{{ form_widget(prc.precioLista) }}<div></td>
                                 <td class="precTd">{{ form_widget(prc.precio, { 'attr': {'class' : 'precval mediuminput' } }) }}</td>                            
                             </tr>
                         {% endfor %}           

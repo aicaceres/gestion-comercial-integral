@@ -465,12 +465,50 @@ class PrecioListaController extends Controller
             'action' => $this->generateUrl('stock_precio_update', array('id' => $entity->getId())),
             'method' => 'POST',
         ));
+        $deleteForm = $this->createFormBuilder()
+                        ->setAction($this->generateUrl('stock_precio_delete', array('id' => $id)))
+                        ->setMethod('DELETE')
+                        ->getForm();
+
         return $this->render('AppBundle:Precio:precio-edit.html.twig', array(
             'entity' => $entity,
             'form'   => $form->createView(),
+            'delete_form' => $deleteForm->createView()
         ));
     }    
     
+    /**
+     * @Route("/delete/{id}", name="stock_precio_delete")
+     * @Method("DELETE")
+     */
+    public function precioDeleteAction(Request $request, $id) {
+        $em = $this->getDoctrine()->getManager();
+        $form = $this->createFormBuilder()
+                        ->setAction($this->generateUrl('stock_precio_delete', array('id' => $id)))
+                        ->setMethod('DELETE')
+                        ->getForm();
+        $form->handleRequest($request);
+        if ($form->isValid()) {
+            try {
+                $em->getConnection()->beginTransaction();
+                $entity = $em->getRepository('AppBundle:Precio')->find($id);
+                if (!$entity) {
+                    throw $this->createNotFoundException('No existe el precio.');
+                }  
+                $em->remove($entity);
+                $em->flush();
+                $em->getConnection()->commit();
+                $this->addFlash('success', 'El precio fue eliminado!');
+            }
+            catch (\Exception $ex) {
+                $em->getConnection()->rollback();
+                $this->addFlash('danger', $ex->getMessage());
+            }
+        }
+
+        return $this->redirectToRoute('stock_precio_listado');
+    }
+
     /**
      * @Route("/{id}", name="stock_precio_update")
      * @Method("POST")

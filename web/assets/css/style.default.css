@@ -2174,7 +2174,7 @@ a.desactivado{ cursor: not-allowed !important ; opacity: 0.5;}
   display: block;
   text-align: center;
 }
-.actionbutton a.editar,.actionbutton button.guardar,.actionbutton a.cancelar {  line-height: 21px;
+.actionbutton a.editar,.actionbutton button.guardar,.actionbutton a.cancelar, .actionbutton button.delete {  line-height: 21px;
         background-color: #E50000;
 	margin-top: 10px; text-align: right; padding: 7px 20px; -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; border: 0;
 	border: 1px solid #E50000; cursor: pointer; font-weight: bold; color: #fff; display:inline-block;
