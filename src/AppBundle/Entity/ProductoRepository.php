@@ -107,6 +107,23 @@ class ProductoRepository extends EntityRepository {
         return $stk->getQuery()->getArrayResult();        
     }
 
+    public function findListasSinPrecioPorProducto($id){
+        $qb=$this->_em->createQueryBuilder();
+        $qb2=$this->_em->createQueryBuilder();
+
+        $nots= $qb2->select('l.id')
+                ->from('AppBundle\Entity\Precio','pr')
+                ->innerJoin('pr.precioLista', 'l')   
+                ->innerJoin('pr.producto', 'p')   
+                ->where('p.id='.$id );       
+
+        $lista = $qb->select('l2.id, upper(l2.nombre) nombre ')
+             ->from('AppBundle\Entity\PrecioLista', 'l2')  
+             ->where($qb2->expr()->notIn('l2.id', $nots->getDQL()))
+             ->orderBy('l2.nombre')   ;
+        return $lista->getQuery()->getArrayResult();        
+    }
+
     public function getProductosForExportXls($provId=null, $search=null){
         $query = $this->_em->createQueryBuilder();
         $query->select("p")

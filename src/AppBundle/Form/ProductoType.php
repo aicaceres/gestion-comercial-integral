@@ -37,6 +37,15 @@ class ProductoType extends AbstractType
                 'attr'           => array(
                     'class' => 'row item'
                 )))    
+            ->add('precios', 'collection', array(
+                'type'           => new PrecioProductoType(),
+                'by_reference'   => false,
+                'allow_delete'   => true,
+                'allow_add'      => true,
+                'prototype_name' => 'items2',
+                'attr'           => array(
+                    'class' => 'row item2'
+                )))    
             ->add('proveedor','entity',array('label'=>'Proveedor:',
                 'class' => 'ComprasBundle:Proveedor', 'required' =>false,
                 'attr'  => array('class' => 'chzn-select'),

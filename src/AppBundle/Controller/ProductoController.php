@@ -676,6 +676,24 @@ class ProductoController extends Controller {
         $depositos = $em->getRepository('AppBundle:Producto')->findDepositosSinstockPorProducto($id, $unidneg);
         return new Response(json_encode($depositos));
     }
+    /**
+     * @Route("/getListasSinPrecioPorProducto", name="get_listas_sinprecio_por_producto")
+     * @Method("GET")
+     */
+    public function getListasSinPrecioPorProducto(Request $request) {
+        $id = $request->get('id');
+        $em = $this->getDoctrine()->getManager();  
+        if($id){
+            $listas = $em->getRepository('AppBundle:Producto')->findListasSinPrecioPorProducto($id);
+        }else{
+            $aux = $em->getRepository('AppBundle:PrecioLista')->findByActivo(1);
+            $listas = array();
+            /*foreach($aux as $lista){
+
+            }*/
+        }      
+        return new Response(json_encode($listas));
+    }
 
 // STOCK DEL PRODUCTO EN UN DEPOSITO
 

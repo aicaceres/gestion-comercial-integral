@@ -12,7 +12,7 @@
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
     {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
-    <fieldset >                    
+    <fieldset >     
         <p>
             {{ form_label(form.codigo) }}
             {{ form_widget(form.codigo, { 'attr': {'class' : 'width100' } }) }}
@@ -89,15 +89,44 @@
             {{ form_errors(form.proveedor) }}                      
         </p>         
         <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>    
-        <div class="two_fields">
+        <div class="locate">
             {{ form_row(form.bulto) }} 
-            {{ form_row(form.cantidadxBulto, { 'attr': {'class' : 'mininput' } }) }}   
+            {{ form_row(form.cantidadxBulto, { 'attr': {'class' : 'mininput' }, 'label_attr': {'style': 'width:105px !important;'} }) }} 
+            {{ form_row(form.activo) }}    
         </div>
 
         <div class="two_fields">
-            {{ form_row(form.facturable) }} 
-            {{ form_row(form.activo) }}   
-        </div>         
+            {{ form_row(form.facturable) }}              
+            <div class="aligncenter">
+                <button id="precios" class="guardar" type="button" >Precios</button> 
+            </div>
+        </div>  
+
+        <div class="widgetbox" id="divprecios" style="width:60%;margin-left: 150px;background: beige;padding: 15px;display:none;">
+            <div class="title" style="margin:0;"><h5>Precios de Venta <a href="#" id="addPrecioVenta" title="Agregar otro precio">[ + ]</a></h5></div>
+            <div class="widgetcontent">
+                {{ form_errors(form.precios) }}
+                <table class="stdtable precioxlista" cellspacing="0" cellpadding="0" border="0" style="background:white;margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Lista</th>
+                            <th style="width:30%">Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.precios | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Producto:_precios_prototype.html.twig' with {'item':form.precios.vars.prototype} %}{% endfilter %}">
+                        {% for prc in form.precios %}
+                            <tr class="item2" style="height:30px" divdata="item2_{{loop.index-1}}">
+                                <td class="listaTd">{{ prc.vars.data.precioLista.nombre|upper }}<div style="display:none">{{ form_widget(prc.precioLista) }}<div></td>
+                                <td class="precTd">{{ form_widget(prc.precio, { 'attr': {'class' : 'precval mediuminput' } }) }}</td>                            
+                            </tr>
+                        {% endfor %}           
+                    </tbody>
+                </table>
+
+            </div><!--widgetcontent-->
+        </div>
+
+
         <br clear="all" /> 
         <div class="actionbutton">
             <button class="guardar" type="submit" >Guardar</button>
@@ -131,6 +160,24 @@
            e.preventDefault();
             addNewDeposito();
             e.stopPropagation();
+        });
+
+        // Precios
+        $holder2 = $('table.precioxlista tbody');
+        $('#addPrecioVenta').on('click',function(e){
+           e.preventDefault();
+            addNewPrecio();
+            e.stopPropagation();
+        });
+        $('.precval').on('change',function(){
+            checkPrecio($(this));
+        });
+        $("#precios").on('click',function(){
+            if($('#divprecios').is(':visible')){
+                $('#divprecios').hide();
+            }else{
+                $('#divprecios').show();
+            }            
         });
     });
 function addNewDeposito(){
@@ -172,5 +219,35 @@ function checkStock(item){
         dep.focus();
     }
 }    
+/// PRECIOS
+function addNewPrecio(){
+    var prototype = $holder2.data('prototype');
+    var index = $holder2.data('index');
+    var newForm = prototype.replace(/items2/g, index);
+    $holder2.append(newForm);
+    $holder2.data('index', index + 1);
+    $holder2.find('.precval').last().on('change',function(){
+            checkPrecio(jQuery(this));
+        });
+    lista = $holder2.find('.listaTd select').last(); 
+    lista.select2();
+    // cargar listas..
+    prod = '{{entity.id}}';
+    jQuery.get( "{{path('get_listas_sinprecio_por_producto')}}",{id: prod } , function( data ) {
+        // si tengo lista agrego, sino quito item
+        lista.html('');
+        if( data.length>0 ){
+            for (var i = 0, total = data.length; i < total; i++) {
+                lista.append('<option value="' + data[i].id + '">' + data[i].nombre + '</option>');
+            }        
+            lista.focus();
+        }else{
+            alert('No hay lista de precio sin cargar!')
+            jQuery('.item2').last().remove();
+        }
+    }, "json");
+}
+function checkPrecio(item){
+}
 </script>
 {% endblock %}

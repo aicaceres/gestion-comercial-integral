@@ -76,7 +76,7 @@ class Producto
     protected $proveedor;     
     
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Precio", mappedBy="producto")
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Precio", mappedBy="producto",cascade={"persist"})
      */
     protected $precios;
     
@@ -712,6 +712,7 @@ class Producto
      */
     public function addPrecio(\AppBundle\Entity\Precio $precios)
     {
+        $precios->setProducto($this);
         $this->precios[] = $precios;
         return $this;
     }
