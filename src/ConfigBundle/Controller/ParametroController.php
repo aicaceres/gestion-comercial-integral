@@ -113,7 +113,7 @@ class ParametroController extends Controller {
         $em->flush();
         $rubros = $em->getRepository('ConfigBundle:Parametro')->findRubros();
         $partial = $this->renderView('ConfigBundle:Parametro:_partial-rubros.html.twig',
-                array('rubros' => $rubros, 'dato' => $rub));
+                array('rubros' => $rubros, 'dato' => $rubro));
         return new Response($partial);
     }
 
@@ -226,7 +226,7 @@ class ParametroController extends Controller {
             ));
             if ($slug == 'rubro') {
                 $rubros = $em->getRepository('ConfigBundle:Parametro')->findRubros();
-                $dato = $em->getRepository('ConfigBundle:Parametro')->findOneByAgrupador($entity->getAgrupador());
+                $dato = $em->getRepository('ConfigBundle:Parametro')->find($entity->getAgrupador());
 
                 return $this->render('ConfigBundle:Parametro:edit-rubro.html.twig', array(
                             'entity' => $entity,
