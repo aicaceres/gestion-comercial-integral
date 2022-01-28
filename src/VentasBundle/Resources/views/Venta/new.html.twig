@@ -5,6 +5,10 @@
         font-weight: bold;
         padding: 0px 2px 0px 8px;
     }
+    #vtafields label{
+        display: inline-block;
+        width:100%;
+    }    
     #form-punto-venta select:focus, #form-punto-venta input:focus,#form-punto-venta button:focus,#form-punto-venta a:focus, #form-punto-venta .select2-container *:focus{
     color: #666666;
     background-color: gainsboro;
@@ -60,10 +64,10 @@
     <div  id="form-punto-venta" {% if app.session.get('puntoVentaActual')['id'] == 0 %} style="display:none" {% endif %}>
 
         {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}     
-        <fieldset >                                        
+        <fieldset id="vtafields" >                                        
             <div id="selectorCliente" style="display:inline-block; width: 30%;">                                 
                 {{ form_label(form.cliente) }}
-                {{ form_widget(form.cliente,{'attr':{'url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente'}}) }}    
+                {{ form_widget(form.cliente,{'attr':{'style':'width:80%','url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente'}}) }}    
                 <a href="javascript:void(0)" class="btn btnaction btn_search"></a>      
             </div>
             <div style="display:inline-block; width: 10%;"> 
@@ -76,7 +80,7 @@
             </div>
             <div style="display:inline-block; width: 25%; margin-left:10px;"> 
                 {{ form_label(form.formaPago)}}
-                {{ form_widget(form.formaPago,{'attr':{'url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}})}}
+                {{ form_widget(form.formaPago,{'attr':{'style':'width:80%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}})}}
                 <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
             </div>
             <div style="display:inline-block; width: 10%;"> 

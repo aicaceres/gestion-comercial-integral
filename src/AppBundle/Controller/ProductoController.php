@@ -473,6 +473,7 @@ class ProductoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $depositoId = $request->get('depositoid');
         $proveedorId = $request->get('proveedorid');
+        $search = $request->get('searchterm');
         $deposito = $em->getRepository('AppBundle:Deposito')->find($depositoId);
         $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
 
