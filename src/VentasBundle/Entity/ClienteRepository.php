@@ -347,4 +347,119 @@ class ClienteRepository extends EntityRepository {
         );
     }   
 
+
+/**
+* para administracion de productos
+ */
+    public function indexCount($provId = null) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("count(c.id)")
+                ->from('VentasBundle\Entity\Cliente', 'c');        
+        return $query->getQuery()->getSingleScalarResult();
+    }
+
+    public function getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions) {
+        // Create Main Query
+        $query = $this->_em->createQueryBuilder();
+        $query->select("c")
+                ->from('VentasBundle\Entity\Cliente', 'c');
+
+        // Create Count Query
+        $countQuery = $this->_em->createQueryBuilder();
+        $countQuery->select("count(c.id)")
+                ->from('VentasBundle\Entity\Cliente', 'c');
+
+        // Create inner joins
+        $query->innerJoin('c.localidad', 'l');
+
+        $countQuery->innerJoin('c.localidad', 'l');
+
+        // Other conditions than the ones sent by the Ajax call ?
+/*        if ($otherConditions === null) {
+            // No
+            // However, add a "always true" condition to keep an uniform treatment in all cases
+            $query->where("1=1");
+            $countQuery->where("1=1");
+        }
+        else {
+            // Add condition
+            $query->where($otherConditions);
+            $countQuery->where($otherConditions);
+        }*/        
+
+        if ($search['value']) {
+            $searchItem = trim($search['value']);
+            $searchQuery = ' c.nombre LIKE \'%' . $searchItem . '%\' OR c.cuit LIKE \'%' . $searchItem . '%\' ' .
+                    ' OR c.direccion LIKE \'%' . $searchItem . '%\'  OR  c.telefono LIKE \'%' . $searchItem . '%\' '. ' OR l.name LIKE \'%' . $searchItem . '%\'' ;
+            $query->andWhere($searchQuery);
+            $countQuery->andWhere($searchQuery);
+        }
+
+        // Limit
+        $query->setFirstResult($start)->setMaxResults($length);
+
+        // Order
+        foreach ($orders as $key => $order) {
+            // $order['name'] is the name of the order column as sent by the JS
+            if ($order['name'] != '') {
+                $orderColumn = null;
+
+                switch ($order['name']) {
+                    case 'nombre': {
+                            $orderColumn = 'c.nombre';
+                            break;
+                        }
+                    case 'cuit': {
+                            $orderColumn = 'c.cuit';
+                            break;
+                        }
+                    case 'direccion': {
+                            $orderColumn = 'c.direccion';
+                            break;
+                        }
+                    case 'localidad': {
+                            $orderColumn = 'l.name';
+                            break;
+                        }                                     
+                    case 'telefono': {
+                            $orderColumn = 'c.telefono';
+                            break;
+                        }                                     
+                    case 'activo': {
+                            $orderColumn = 'c.activo';
+                            break;
+                        }                                     
+                }
+
+                if ($orderColumn !== null) {
+                    $query->orderBy($orderColumn, $order['dir']);
+                }
+            }
+        }
+
+        // Execute
+        $results = $query->getQuery()->getResult();
+        $countResult = $countQuery->getQuery()->getSingleScalarResult();
+
+        return array(
+            "results" => $results,
+            "countResult" => $countResult
+        );
+    }
+
+    public function getClientesForExportXls($provId=null, $search=null){
+        $query = $this->_em->createQueryBuilder();
+        $query->select("c")
+                ->from('VentasBundle\Entity\Cliente', 'c')
+                ->leftJoin('c.localidad', 'l')                
+                ->orderBy('c.nombre')    ;        
+        if ($search) {
+            $searchItem = trim($search);
+            $searchQuery = ' c.nombre LIKE \'%' . $searchItem . '%\' OR c.cuit LIKE \'%' . $searchItem . '%\' ' .
+                    ' OR c.direccion LIKE \'%' . $searchItem . '%\'  OR  c.telefono LIKE \'%' . $searchItem . '%\' '. ' OR l.name LIKE \'%' . $searchItem . '%\'' ;            
+            $query->andWhere($searchQuery);
+        }
+        return $query->getQuery()->getResult();
+    }
+
 }

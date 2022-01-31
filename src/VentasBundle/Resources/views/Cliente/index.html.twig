@@ -2,26 +2,26 @@
 {% block pageheader %}
 <div class="pageheader notab">
     <h1 class="pagetitle">Administración de Clientes</h1>
+<span class="pagedesc">Listado de Clientes del sistema</span> 
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
     {% include "AppBundle::notificacion.html.twig" %}
 
 <div id="contentwrapper" class="contentwrapper">
-    <form id="printform" name="printform" target="_blank" action="{{ path("print_ventas_cliente") }}" method="post" style="height:40px; ">
-        <input type="hidden" id="searchterm" name="searchterm"/>
-        <input type="hidden" id="datalist" name="datalist"/>
-        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    <form id="printform" name="printform" target="_blank" action="{{ path("export_ventas_cliente") }}" method="post" style="height:40px; ">
+        <input type="hidden" id="searchterm" name="searchterm"/>        
+        <button class="stdbtn floatright" type="submit" >Exportar</button>
     </form> 
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">       
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="clientes_table">       
         <thead>
             <tr>
                 <th>Nombre y Apellido</th>
                 <th>CUIT</th>
                 <th>Dirección</th>
                 <th>Localidad</th>
-                <th class="nosort">Teléfono</th>
-                <th class="nosort">SALDO</th>
+                <th class="nosort">Teléfono</th>                
+                <th class="nosort">Saldo</th>                
                 <th style="width:5%;" class="nosort">Activo</th>
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_new') %}
@@ -31,25 +31,7 @@
             </tr>
         </thead>
         <tbody>
-           {% for entity in entities %}
-            <tr>
-                <td>{{ entity.nombre |upper }}</td>
-                <td>{{ entity.cuit }}</td>
-                <td>{{ entity.direccion }}</td>
-                <td>{{ entity.localidad }}</td>
-                <td>{{ entity.telefono }}</td>
-                <td class="alignright {% if(entity.getSaldo>0) %}red{%endif%}" >{{ entity.getSaldo|number_format(2,'.',',') }}</td>
-                <td><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /></td>
-                <td>
-                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_edit') %}
-                    <a href="{{ path('ventas_cliente_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
-                    {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_delete') %}
-                        <a href url="{{ path('ventas_cliente_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
-                    {% endif %}                                         
-                </td>
-            </tr>
-           {% endfor %}
+           
         </tbody>
     </table> 
 </div>
@@ -59,21 +41,61 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($){
-    var oTable = $('#dyntable2').dataTable();
+
+        var oTable = $('#clientes_table').dataTable({
+                "columnDefs": [        
+                    // These are the column name variables that will be sent to the server
+                    { "name": "nombre", "targets": 0 },
+                    { "name": "cuit",  "targets": 1 },                    
+                    { "name": "direccion",  "targets": 2 },                    
+                    { "name": "localidad",  "targets": 3 },                    
+                    { "name": "telefono",  "targets": 4 },                    
+                    { "name": "saldo",  "targets": 5 },                    
+                    { "name": "activo",  "targets": 6 },  
+                    { "name": "actions",  "targets": 7 },                  
+                    { "targets"  : 'nosort', "orderable": false }        
+                ],
+                "rowCallback": function (row, data) {                             
+                    // registrar seleccion           
+                    $(row).find('td:nth-child(6n)').addClass('alignright');
+                   // $(row).find('td:nth-child(6n)').addClass('aligncenter');                   
+                 },
+                // Server-side parameters
+                "processing": true,
+                "serverSide": true,
+                // Ajax call
+                "ajax": {
+                    "url": "{{ path('cliente_index_datatables') }}",
+                    "type": "POST",
+                },
+                // Classic DataTables parameters
+                "bPaginate" : true,
+                "bInfo" : true, 
+                "bSearchable": true,        
+                "bLengthChange": true,
+                "pageLength":10,
+                "order": [[0, 'asc']],
+                "sPaginationType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": "<<",
+                        "sNext": ">",
+                        "sLast": ">>",
+                        "sPrevious": "<"
+                    },
+                    "sProcessing": "<div style='color:red;text-align: center;'>CARGANDO DATOS...</div>",
+                    "sLengthMenu": "Mostrar _MENU_ registros ",
+                    "sZeroRecords": "Sin datos",
+                    "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                    "sInfoEmpty": "Sin coincidencias",
+                    "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                    "sSearch": "Buscar:"
+                }
+            }); 
+    
    
    $('#printform').on('submit',function(){
-        $('#searchterm').val( $('#dyntable2_filter input').val() );
-        var datos = [];
-        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {  
-            var i = value[6].indexOf('<div class=');
-            if( i >-1 ){
-                var j = value[6].indexOf('checked=\"checked\"');
-                value[6] = (j>-1)?'Si':'No' ;
-            }
-            value.splice(7);
-            datos[index] = value;
-        }); 
-        $('#datalist').val(JSON.stringify(datos));
+        $('#searchterm').val( $('#clientes_table_filter input').val() );        
     });
 });
 </script>     
