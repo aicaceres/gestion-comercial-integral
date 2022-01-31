@@ -32,19 +32,13 @@
                 </p>                                 
             <br clear="all" /> 
             <div class="actionbutton">
-{% if entity.id  %}
-            <button class="delete floatleft " type="button" >Eliminar</button>            
-        {%endif%}
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('stock_precio_listado')}}">Cancelar</a>
             </div>
         </fieldset>
 {{ form_end(form) }}        
-</div>    
+</div>   
 </div>
-{% if entity.id  %}
-                    {{ form(delete_form) }}
-                {%endif%}
 {% endblock %}
 {% block extra_javascripts %}
 <script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>

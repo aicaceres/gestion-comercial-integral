@@ -324,7 +324,10 @@ class PrecioListaController extends Controller
         $rubroid = $request->get('rubroId');
         $em = $this->getDoctrine()->getManager();
         $listas = $em->getRepository('AppBundle:PrecioLista')->findAll();
-        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findByActivo(1);   
+        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(
+             array('activo'=> '1'), 
+             array('nombre' => 'ASC')
+           );   
         $rubros = $em->getRepository('ConfigBundle:Parametro')->findSubRubros();
        // $session = $this->get('session') ;
         if( !$id ){
@@ -395,6 +398,39 @@ class PrecioListaController extends Controller
                 array('listado' => $listado, 'rubros'=>$rubros));
         return new Response($html);
     }    
+    /**
+     * @Route("/exportPrecios", name="stock_precio_export")
+     * @Method("POST")
+     */  
+    public function exportPreciosAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $search =  $request->get('searchterm');
+        $listaId = $request->get('listaid');        
+        $lista = $em->getRepository('AppBundle:PrecioLista')->find($listaId);
+        $proveedorId = $request->get('proveedorid');        
+        $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
+        $rubroId = $request->get('rubroid');        
+        $rubro = $em->getRepository('ConfigBundle:Parametro')->find($rubroId);
+
+        $items = $em->getRepository('AppBundle:Precio')->getPreciosForExportXls($listaId,$rubroId,$proveedorId,$search);
+
+        $textoFiltro = array(
+            $lista->getNombre(),
+            ($proveedorId) ? $proveedor->getNombre() : 'Todos',
+            ($rubroId) ? $rubro->getNombre() : 'Todos'
+             );
+
+        $partial = $this->renderView('AppBundle:Precio:export-xls.html.twig',
+                array('items' => $items, 'filtro' => $textoFiltro, 'search' => $search));
+        $hoy = new \DateTime();
+        $fileName = 'Precios_'.$lista->getNombre(). $hoy->format('dmY_Hi');
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->headers->set('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+        $response->headers->set('Content-Disposition', 'filename="' . $fileName . '.xls"');
+        $response->setContent($partial);
+        return $response;
+    }
     
     /**
      * @Route("/new", name="stock_precio_new")
@@ -443,6 +479,7 @@ class PrecioListaController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
             $em->flush();
+            $this->addFlash('success','El precio fue agregado! Ingresar nuevo precio...');
         }
         return $this->redirectToRoute('stock_precio_new', [ 'listaId' => $id ], 307);
         //return $this->redirect($this->generateUrl('stock_precio_new', array('precioLista' => $id) ));
@@ -464,53 +501,37 @@ class PrecioListaController extends Controller
         $form = $this->createForm(new PrecioType(), $entity, array(
             'action' => $this->generateUrl('stock_precio_update', array('id' => $entity->getId())),
             'method' => 'POST',
-        ));
-        $deleteForm = $this->createFormBuilder()
-                        ->setAction($this->generateUrl('stock_precio_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->getForm();
+        ));        
 
         return $this->render('AppBundle:Precio:precio-edit.html.twig', array(
             'entity' => $entity,
-            'form'   => $form->createView(),
-            'delete_form' => $deleteForm->createView()
+            'form'   => $form->createView(),            
         ));
     }    
     
     /**
      * @Route("/delete/{id}", name="stock_precio_delete")
-     * @Method("DELETE")
+     * @Method("POST")
      */
-    public function precioDeleteAction(Request $request, $id) {
+    public function precioDeleteAction($id)
+    {   
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'stock_precio_edit');
         $em = $this->getDoctrine()->getManager();
-        $form = $this->createFormBuilder()
-                        ->setAction($this->generateUrl('stock_precio_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->getForm();
-        $form->handleRequest($request);
-        if ($form->isValid()) {
-            try {
-                $em->getConnection()->beginTransaction();
-                $entity = $em->getRepository('AppBundle:Precio')->find($id);
-                if (!$entity) {
-                    throw $this->createNotFoundException('No existe el precio.');
-                }  
-                $em->remove($entity);
-                $em->flush();
-                $em->getConnection()->commit();
-                $this->addFlash('success', 'El precio fue eliminado!');
-            }
-            catch (\Exception $ex) {
-                $em->getConnection()->rollback();
-                $this->addFlash('danger', $ex->getMessage());
-            }
+        $entity = $em->getRepository('AppBundle:Precio')->find($id);        
+        try{
+            $em->remove($entity);
+            $em->flush();
+            $msg ='OK';
+        } catch (\Exception $ex) {  
+            $msg= $ex->getTraceAsString();     
+            $this->addFlash('danger',$msg);
         }
-
-        return $this->redirectToRoute('stock_precio_listado');
-    }
+        $this->addFlash('success','El precio fue eliminado!');
+        return new Response(json_encode($msg));
+    }   
 
     /**
-     * @Route("/{id}", name="stock_precio_update")
+     * @Route("/update/{id}", name="stock_precio_update")
      * @Method("POST")
      * @Template("AppBundle:Precio:precio-edit.html.twig")
      */
@@ -532,6 +553,7 @@ class PrecioListaController extends Controller
         }
         return $this->redirect($this->generateUrl('stock_precio_listado'));
     }    
+
     
 /*    public function listadoViewAction(){
         $id = $this->getRequest()->get('listaId');
@@ -579,10 +601,6 @@ class PrecioListaController extends Controller
         return new Response(json_encode($datos)); 
     }*/
     
-
-
-
-
 
 
     

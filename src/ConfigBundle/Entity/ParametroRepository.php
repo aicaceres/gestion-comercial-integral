@@ -40,7 +40,7 @@ class ParametroRepository extends EntityRepository {
         $query = $this->_em->createQuery("Select r.id as padre,s.id ,r.nombre as rubro, s.nombre as codigo,
           s.descripcion as subrubro, s.numerico, s.numerico2, s.activo from ConfigBundle\Entity\Parametro r
           INNER JOIN ConfigBundle\Entity\Parametro s with r.id=s.agrupador_id
-          where r.padre_id=" . $agrupador->getId());
+          where r.padre_id=" . $agrupador->getId(). " order by s.nombre ASC ");
 
         return $query->getResult();
     }

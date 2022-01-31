@@ -9,14 +9,13 @@
 
 <div id="contentwrapper" class="contentwrapper">
     <div>  
-<form id="printform" name="printform" target="_blank"  action="{{ path("print_lista_precios") }}" method="post">
+    <form id="printform" name="printform" target="_blank"  action="{{ path("stock_precio_export") }}" method="post">
         <input type="hidden" id="listaid" name="listaid"/>
         <input type="hidden" id="rubroid" name="rubroid"/>
         <input type="hidden" id="proveedorid" name="proveedorid"/>
-        <input type="hidden" id="searchterm" name="searchterm"/>
-        <input type="hidden" id="datalist" name="datalist"/>
-        <button class="stdbtn print floatright" type="submit" >Imprimir Lista</button>
-    </form>          
+        <input type="hidden" id="searchterm" name="searchterm"/>        
+        <button class="stdbtn print floatright" type="submit" >Exportar</button>
+    </form>             
         <form id="searchform" action="{{ path('stock_precio_new') }}" method="post">
             <div style="display: inline-block;">
                 <label><strong>Seleccionar Lista:</strong></label>
@@ -49,9 +48,9 @@
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
-                <th>Rubro</th>
                 <th>Código</th>
                 <th>Producto</th>
+                <th>Rubro</th>
                 <th>Costo</th>
                 <th>Precio</th>
                 <th class="nosort">Últ. Modif.</th>
@@ -83,11 +82,6 @@ jQuery(document).ready(function($) {
         $('#proveedorid').val($('#selectProveedor').val());
         $('#rubroid').val($('#selectRubro').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
-        var datos = [];
-        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
-            datos[index] = value;
-        }); 
-        $('#datalist').val(JSON.stringify(datos));
     });
 });    
 </script>    

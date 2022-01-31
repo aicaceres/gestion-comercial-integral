@@ -1,14 +1,15 @@
 {% for precio in listado %}
 <tr>
-    <td>{{ precio.producto.rubro.nombre }}</td>
     <td>{{ precio.producto.codigo}}</td>
     <td>{{ precio.producto.nombre }}</td>
+    <td>{{ precio.producto.rubro.nombre }}</td>
     <td class="alignright">{{ precio.producto.costo }}</td>
     <td class="alignright">{{ precio.precio }}</td>
     <td>{% if precio.updated %}{{ precio.updated|date('d-m-Y H:i:s') }}{% endif %}</td>
     <td>
         {% if app.user.access(app.session.get('unidneg_id'),'stock_precio_edit') %}
-        <a href="{{ path('stock_precio_edit', { 'id': precio.id }) }}" class="editar btn btnaction btn_pencil" ></a>
+        <a href="{{ path('stock_precio_edit', { 'id': precio.id }) }}" class="editar btn btnaction btn_pencil" ></a>        
+        <a href url="{{ path('stock_precio_delete', { 'id': precio.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
         {% endif %}
     </td>
 </tr>

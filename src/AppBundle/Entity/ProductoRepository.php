@@ -129,8 +129,7 @@ class ProductoRepository extends EntityRepository {
         $query->select("p")
                 ->from('AppBundle\Entity\Producto', 'p')
                 ->leftJoin('p.proveedor', 'pr')                
-                ->leftJoin('p.rubro', 'r')                
-                ->where('r.agrupador_id = 111')
+                ->leftJoin('p.rubro', 'r') 
                 ->orderBy('p.nombre')    ;
         if($provId){
             $query->andWhere('pr.id='.$provId);
@@ -263,12 +262,10 @@ class ProductoRepository extends EntityRepository {
 
         // Create inner joins
         $query->innerJoin('p.proveedor', 'pr')
-              ->innerJoin('p.rubro', 'r')
-              ->where('r.agrupador_id=111') ;
+              ->innerJoin('p.rubro', 'r');
 
         $countQuery->innerJoin('p.proveedor', 'pr')
-                   ->innerJoin('p.rubro', 'r')
-                   ->where('r.agrupador_id=111') ;
+                   ->innerJoin('p.rubro', 'r') ;
 
         // Other conditions than the ones sent by the Ajax call ?
 /*        if ($otherConditions === null) {

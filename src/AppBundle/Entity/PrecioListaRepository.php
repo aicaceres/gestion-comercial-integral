@@ -63,4 +63,29 @@ class PrecioListaRepository extends EntityRepository {
               ->orderBy('d.rubro');
         return $query->getQuery()->getResult();
     }
+
+    /** Obtiene lista con precios para exportar */
+    public function getPreciosForExportXls($listaId,$rubroId=NULL,$provId=NULL,$search=NULL){
+        $query = $this->_em->createQueryBuilder();
+        $query->select("p")
+                ->from('AppBundle\Entity\Precio', 'p')
+                ->innerJoin('p.precioLista', 'l')  
+                ->innerJoin('p.producto','pr') 
+                ->leftJoin('pr.rubro', 'r')               
+                ->where('l.id = '.$listaId)
+                ->orderBy('pr.codigo')    ;
+        if($provId){            
+            $query->andWhere('pr.id='.$provId);
+        }
+        if($rubroId){            
+            $query->andWhere('r.id = '.$rubroId);
+        }
+        if ($search) {
+            $searchItem = trim($search);
+            $searchQuery = ' pr.nombre LIKE \'%' . $searchItem . '%\' OR pr.codigo LIKE \'%' . $searchItem . '%\' ' . ' OR  r.nombre LIKE \'%' . $searchItem 
+                     . '%\' '. ' OR pr.costo LIKE \'%'. $searchItem . '%\' '.' OR p.precio LIKE \'%'. $searchItem . '%\' '. ' OR p.updated LIKE \'%'. $searchItem . '%\' ';
+            $query->andWhere($searchQuery);
+        }
+        return $query->getQuery()->getResult();
+    }
 }
