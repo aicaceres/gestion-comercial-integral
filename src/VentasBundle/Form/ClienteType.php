@@ -21,16 +21,13 @@ class ClienteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $propertyPathToLocalidad = 'localidad';
-        $propertyPathToLocalidadTrabajo = 'localidadTrabajo';
+        //$propertyPathToLocalidadTrabajo = 'localidadTrabajo';
 
         $builder
             ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidad))
             ->addEventSubscriber(new AddProvinciaFieldSubscriber($propertyPathToLocalidad))
             ->addEventSubscriber(new AddPaisFieldSubscriber($propertyPathToLocalidad)); 
-        $builder
-            ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidadTrabajo))
-            ->addEventSubscriber(new AddProvinciaFieldSubscriber($propertyPathToLocalidadTrabajo))
-            ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidadTrabajo)); 
+       
         
          $builder->add('nombre', 'text', array('label' => 'Nombre y Apellido:','required'=>true))
                  ->add('dni', 'text', array('label' => 'DNI:','required'=>true))
@@ -57,7 +54,9 @@ class ClienteType extends AbstractType
                 ->add('trabajo', 'text', array('label' => 'Trabajo:','required'=>false))
                 ->add('direccionTrabajo', 'text', array('label' => 'Dirección Trabajo:','required'=>false))
                 ->add('telefonoTrabajo', 'text', array('label' => 'Tel. Trabajo:','required'=>false))
-                
+                ->add('localidadTrabajo', 'entity', array('label' => 'Localidad Trabajo:',
+                    'class' => 'ConfigBundle:Localidad', 'required' => false,
+                    'choice_label'=>'completo'))
                  ;                       
         
         $optionsIva = array(

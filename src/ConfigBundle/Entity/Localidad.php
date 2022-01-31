@@ -180,5 +180,11 @@ class Localidad
     public function getNombreProvincia(){
         return $this->getName().' ('.$this->getProvincia()->getName().')';
     }
+    /**
+     * Return Pais - Provincia - Localidad
+     */
+    public function getCompleto(){
+        return $this->getProvincia()->getPais()->getName() .' | '. $this->getProvincia()->getName(). ' | ' .$this->getName();
+    }
 
 }

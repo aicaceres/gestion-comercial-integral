@@ -140,6 +140,7 @@ class Cliente
     /**
     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
     * @ORM\JoinColumn(name="localidad_trabajo_id", referencedColumnName="id")
+    * @ORM\OrderBy({"name" = "ASC"})
     */
     protected $localidadTrabajo;
 

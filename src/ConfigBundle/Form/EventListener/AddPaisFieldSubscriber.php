@@ -30,7 +30,7 @@ class AddPaisFieldSubscriber implements EventSubscriberInterface
             'label'         => 'País:',
             'placeholder'   => 'Seleccione País',
             'required'      =>false,
-            'attr'          => array('class' => 'pais_selector'),
+            'attr'          => array('class' => ' pais_selector'),
         );
 
         if ($pais) {
