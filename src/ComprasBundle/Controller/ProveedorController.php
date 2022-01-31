@@ -355,13 +355,14 @@ class ProveedorController extends Controller {
             }
             elseif ($var['tipo'] == 2) {
                 $cred = $em->getRepository('ComprasBundle:NotaDebCred')->find($var['id']);
+                $letranro = $cred->getTipoNota() . $cred->getNroComprobante();
                 if ($cred->getSigno() == '+') {
                     $var['tipo'] = 4;
-                    $var['comprobante'] = 'DEB ' . $cred->getNroComprobante();
+                    $var['comprobante'] = 'DEB '. $letranro;
                     $var['concepto'] = 'Nota de Débito';
                 }
                 else {
-                    $var['comprobante'] = 'CRE ' . $cred->getNroComprobante();
+                    $var['comprobante'] = 'CRE '. $letranro;
                     $var['concepto'] = 'Nota de Crédito';
                 }
             }
