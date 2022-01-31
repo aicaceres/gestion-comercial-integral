@@ -794,13 +794,23 @@ class Producto
     }
         
     /**
-     * Stock actual
+     * Stock actual x depósito
      */
     public function getStockActualxDeposito($id){
         $actual = 0;
         foreach ($this->getStock() as $stock) {
             if( $stock->getDeposito()->getId()==$id )
                 $actual = $actual + $stock->getCantidad();
+        }
+        return number_format((float)$actual, 3, '.', '');
+    }
+    /**
+     * Stock actual total
+     */
+    public function getStockActual(){
+        $actual = 0;
+        foreach ($this->getStock() as $stock) {            
+            $actual = $actual + $stock->getCantidad();
         }
         return number_format((float)$actual, 3, '.', '');
     }

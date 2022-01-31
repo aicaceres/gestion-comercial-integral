@@ -136,7 +136,8 @@ class VentaController extends Controller
                 $em->flush();                
 
                 $em->getConnection()->commit();
-                return $this->redirect($this->generateUrl('ventas_venta_new'));
+                $this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> '.$entity->getPuntoVenta().' #'.$entity->getNroOperacion().'</span>');
+                return $this->redirect($this->generateUrl('ventas'));
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());

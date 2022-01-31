@@ -63,7 +63,7 @@
 {% include "AppBundle::notificacion.html.twig" %}    
     <div  id="form-punto-venta" {% if app.session.get('puntoVentaActual')['id'] == 0 %} style="display:none" {% endif %}>
 
-        {{ form_start(form, {'attr': {'class': 'form-horizontal'}}) }}     
+        {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_venta'}}) }}     
         <fieldset id="vtafields" >                                        
             <div id="selectorCliente" style="display:inline-block; width: 30%;">                                 
                 {{ form_label(form.cliente) }}
@@ -227,7 +227,19 @@ jQuery(function ($) {
         $collectionHolder.find('.chzn-container').last().trigger('mousedown');          
     });
     
-    });
+    // confirm on submit
+    $('#ventasbundle_venta').on('submit', function(){
+        // controlar que haya items cargados 
+        let txt = $('#selectPuntoVentaActual option:selected').text()+' #'+$('#ventasbundle_venta_nroOperacion').val();
+        txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock?';
+        if( $('tbody tr.item').length > 0 ){
+            if (!confirm(txt)) {
+               return false;
+            }                                   
+        }else{  alert('Debe ingresar items a la venta'); return false;}
+
+    })
+});
 // funciones personalizas para el formulario
  function addNewItem() {
     var prototype = $collectionHolder.data('prototype');
@@ -428,11 +440,12 @@ function openModalProducto(obj){
                     { "name": "nombre", "targets": 0 },
                     { "name": "codigo",  "targets": 1 },                    
                     { "name": "precio",  "targets": 2 },                    
+                    { "name": "stock",  "targets": 3 },                    
                     { "targets"  : 'nosort', "orderable": false }        
                 ],
                 "rowCallback": function (row, data) {                             
                     // registrar seleccion           
-                    $(row).find('td:nth-child(3n)').addClass('alignright');
+                    $(row).find('td:nth-child(3n),td:nth-child(4n)').addClass('alignright');
                     $(row).find('a').on('click', function(e){
                         e.preventDefault();
                         // cargar option

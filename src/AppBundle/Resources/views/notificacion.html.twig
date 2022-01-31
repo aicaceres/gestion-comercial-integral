@@ -2,7 +2,7 @@
     {% for mensaje in mensajes %}
     <div class="notifmsg {{ tipo }} png_bg">
         <a href="#" class="close"></a>
-        <div> {{ mensaje }} </div>
+        <div> {{ mensaje|raw }} </div>
     </div>
     {% endfor %}
 {% endfor %}

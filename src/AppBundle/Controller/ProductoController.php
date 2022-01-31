@@ -874,6 +874,11 @@ class ProductoController extends Controller {
                             $responseTemp = $precioTemp;
                             break;
                         }                                       
+                    case 'stock': {
+                            $stock = $producto->getStockActual();
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $stock));
+                            break;
+                        }                                       
                 }
 
                 // Add the found data to the json
