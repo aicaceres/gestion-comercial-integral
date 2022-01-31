@@ -74,6 +74,36 @@ class Venta {
      */
     protected $detalles;
 
+    /**
+     * @var datetime $created
+     * @Gedmo\Timestampable(on="create")
+     * @ORM\Column(type="datetime")
+     */
+    private $created;
+
+    /**
+     * @var datetime $updated
+     * @Gedmo\Timestampable(on="update")
+     * @ORM\Column(type="datetime")
+     */
+    private $updated;
+
+    /**
+     * @var User $createdBy
+     * @Gedmo\Blameable(on="create")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
+     * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
+     */
+    private $createdBy;
+
+    /**
+     * @var User $updatedBy
+     * @Gedmo\Blameable(on="update")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
+     * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
+     */
+    private $updatedBy;
+
     public function getTotal() {
         $total = 0;
         foreach ($this->detalles as $item) {
@@ -338,5 +368,97 @@ class Venta {
     public function getNroOperacion()
     {
         return $this->nroOperacion;
+    }
+
+    /**
+     * Set created
+     *
+     * @param \DateTime $created
+     * @return Venta
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    /**
+     * Get created
+     *
+     * @return \DateTime 
+     */
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    /**
+     * Set updated
+     *
+     * @param \DateTime $updated
+     * @return Venta
+     */
+    public function setUpdated($updated)
+    {
+        $this->updated = $updated;
+
+        return $this;
+    }
+
+    /**
+     * Get updated
+     *
+     * @return \DateTime 
+     */
+    public function getUpdated()
+    {
+        return $this->updated;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \ConfigBundle\Entity\Usuario $createdBy
+     * @return Venta
+     */
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
+    {
+        $this->createdBy = $createdBy;
+
+        return $this;
+    }
+
+    /**
+     * Get createdBy
+     *
+     * @return \ConfigBundle\Entity\Usuario 
+     */
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
+    }
+
+    /**
+     * Set updatedBy
+     *
+     * @param \ConfigBundle\Entity\Usuario $updatedBy
+     * @return Venta
+     */
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
+    {
+        $this->updatedBy = $updatedBy;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedBy
+     *
+     * @return \ConfigBundle\Entity\Usuario 
+     */
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
     }
 }

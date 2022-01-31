@@ -44,6 +44,7 @@
                         <tr>
                             <th style="width:3%;">#</th>
                             <th>Producto</th>
+                            <th style="width:10%;">Alícuota</th>
                             <th style="width:15%;">Cantidad</th>
                             <th style="width:10%;">Precio Unit.</th>
                             <th colspan='2' style="width:10%;">SubTotal</th>                                        
@@ -54,6 +55,7 @@
                        <tr>
                             <td>{{loop.index}}</td>
                             <td>{{det.producto.codigoNombre}}</td>
+                            <td class="alignright">{{det.afipAlicuota}}</td>
                             <td class="alignright">{{det.cantidadTxt}}</td>
                             <td class="alignright">{{det.precio|number_format(3,'.',',')}}</td>
                             <td class="alignright">{{ det.subTotal|number_format(3,'.',',') }}</td>  
@@ -61,7 +63,7 @@
                         </tr>
                         {% if det.centroCostoDetalle|length>0  %}
                         <tr class='ccdiv' style='display:none'>
-                            <td colspan='5'>
+                            <td colspan='6'>
                                 <table class="stdtable" cellspacing="0" cellpadding="0" border="0" style='width: 60%;margin:0 auto'>
                                     <thead>
                                         <tr>
@@ -86,7 +88,7 @@
                     </tbody>                    
                     <tfoot>
                         <tr>
-                            <th class="head1" colspan="4" style="text-align:right"></th>
+                            <th class="head1" colspan="5" style="text-align:right"></th>
                             <th colspan='2' class="head1" style="text-align:right;padding-right: 10px;">{{entity.subTotal|number_format(3,'.',',')}}</th>
                         </tr>
                     </tfoot>

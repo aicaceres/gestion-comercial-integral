@@ -53,7 +53,7 @@
             {% endfor %}
         </select>
         <span style="margin-left:20px" class="nroOperacion">#{{entity.nroOperacion}}</span>
-        <span style="font-size:20px" class="floatright fechahora">{{entity.fechaVenta|date('d/m/Y H:i')}}</span>
+        <span style="font-size:20px" class="floatright fechahora">{{entity.fechaVenta|date('d/m/Y H:i')}} | {{app.user.username}}</span>
     </h1>
 </div><!--pageheader-->
 {% endblock %}
@@ -134,7 +134,10 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
-
+        $('.cancelar').on('blur', function(e){ 
+            $('#selectPuntoVentaActual').select2('focus')
+            e.stopPropagation();
+        })
         $(document).on('keydown',function(e){ detectarControles(e); })
 
         $('.togglemenu').click();    

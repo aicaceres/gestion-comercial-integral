@@ -48,6 +48,7 @@ class PuntoVentaController extends Controller
             $em = $this->getDoctrine()->getManager();
             $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
             $entity->setUnidadNegocio($unidneg);
+            $entity->setNombre( strtoupper(str_replace(' ','',$entity->getNombre())) );    
             $em->persist($entity);
             $em->flush();
 
@@ -101,7 +102,7 @@ class PuntoVentaController extends Controller
         $entity = $em->getRepository('ConfigBundle:PuntoVenta')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find PuntoVenta entity.');
-        }
+        }        
         $editForm = $this->createEditForm($entity);
         //$deleteForm = $this->createDeleteForm($id);
 
@@ -144,6 +145,7 @@ class PuntoVentaController extends Controller
         $editForm = $this->createEditForm($entity);
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
+            $entity->setNombre( strtoupper(str_replace(' ','',$entity->getNombre())) );  
             $em->flush();
 
             return $this->redirect($this->generateUrl('sistema_puntoventa'));

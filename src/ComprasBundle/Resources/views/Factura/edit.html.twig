@@ -86,7 +86,7 @@
                         <tr class="item" divdata="item_{{loop.index-1}}">
                             <td class="ordTd" data-id="{{ det.vars.data.id }}"></td>
                             <td class="prodTd" data-iva="{{det.vars.data.producto.iva}}">{{ form_widget(det.producto) }}</td>
-                            <td class="ivaTd"><span class="alicuota">{{det.vars.data.afipAlicuota}}</span><span class="hidden">{{ form_widget(det.afipAlicuota) }}</span></td>
+                            <td class="ivaTd">{{ form_widget(det.afipAlicuota) }}</td>
                             <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
                               <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
                             </td>
@@ -230,16 +230,10 @@ jQuery(document).ready(function($) {
         $(this).html(i + 1);
     });    
     $('#linkAdd').on('click', function(e) {  
-        //if( $('#centrocosto-default').val() ){
-            e.preventDefault();            
-            addNewItem();
-            e.stopPropagation();
-            $collectionHolder.find('.chzn-container').last().trigger('mousedown');
-        /*}else{
-            alert('Debe seleccionar un centro de costo por defecto');
-            $('#centrocosto-default').focus();
-            return false;
-        }*/        
+        e.preventDefault();            
+        addNewItem();
+        e.stopPropagation();
+        $collectionHolder.find('.chzn-container').last().trigger('mousedown');       
     });    
    $(".prodTd .chzn-select").change(function(){ changeProducto( $(this) ) }); 
    $('.cantTd input, .precTd input[type=text]').change(function(){ 
@@ -249,8 +243,11 @@ jQuery(document).ready(function($) {
             jQuery(this).val(0);  
         totales( ( jQuery(this).attr('id')==='comprasbundle_factura_total' ) ? 0 : 1 ); 
     });
+    $(document).on('change','.ivaTd select',function(){
+        actualizaTotales();
+    })
     
-   $(document).keypress(function(e) {
+   $().keypress(function(e) {
         if (e.which == 43) { 
             e.preventDefault();
             $('#linkAdd').click();
@@ -524,11 +521,8 @@ function changeProducto(producto){
                dataType:"json",
                data: 'prod='+ producto.val(),
                success: function(data) { 
-                   trIndex = producto.parent().parent();                  
-                   var prodTd = trIndex.find('.prodTd'); 
-                   prodTd.data('iva',data.iva);
-                   trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);
-                   trIndex.find('.ivaTd .alicuota').text( trIndex.find('.ivaTd [name*="afipAlicuota"] option:selected').text() );
+                   trIndex = producto.parent().parent();   
+                   trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);                                    
                    trIndex.find('.cantTd input').val(1);
                    trIndex.find('span.unidmed').html(data.unidmed);
                    if(data.bulto){
@@ -568,14 +562,8 @@ function actualizaTotales(){
             var cant =  checknumero( item.find('.cantTd input') ) ;
             var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
             var arr = ['A','M'];
-            if(  jQuery.inArray(jQuery('#comprasbundle_factura_tipoFactura').val(),arr )!== -1 ){
-                var iva =  parseFloat( item.find('.prodTd').data('iva') )/100 ;
-                item.find('.ivaTd [name*="afipAlicuota"] option:contains('+ item.find('.prodTd').data('iva') +')').prop('selected', true);
-            }else{ 
-                iva= 0;
-                item.find('.ivaTd [name*="afipAlicuota"] option:contains(0.00)').prop('selected', true);
-            }       
-            item.find('.ivaTd .alicuota').text( item.find('.ivaTd [name*="afipAlicuota"] option:selected').text() );
+            let iva = item.find('.ivaTd [name*="afipAlicuota"] option:selected').text();  
+            iva = parseFloat(iva.replace('%', '') /100);           
             sbtotItm = prec * cant;
             Total += sbtotItm;
             IvaTotal += (sbtotItm * iva);

@@ -14,8 +14,8 @@
  {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >
             <p>             
-                {{ form_label(form.nombre) }}
-                {{ form_widget(form.nombre, { 'attr': {'class' : 'smallinput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
+                {{ form_label(form.nombre, 'Nombre Corto:') }}
+                {{ form_widget(form.nombre, { 'attr': {'class' : 'width100', 'maxlength':'10',  'style':'text-transform:uppercase','autofocus':'autofocus','title':'Máximo 10 caracteres sin espacios' } }) }}
                 {{ form_errors(form.nombre) }}                
             </p>
 <p>{{ form_row(form.descripcion,{'attr':{'class':'mediuminput'}})}}</p>
@@ -34,4 +34,14 @@
 {{ form_end(form) }}
 </div>    
 </div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+jQuery(function ($) {
+    $('#configbundle_puntoventa_nombre').on('keyup',function(e){
+        value = $(this).val();
+        $(this).val(value.replace(' ',''));
+    });
+});
+</script>
 {% endblock %}

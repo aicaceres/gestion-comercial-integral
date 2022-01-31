@@ -6,7 +6,7 @@
 {% endblock %}
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >Venta Nº: {{ entity.nroOperacion }}</h1>
+<h1 id="popup_title" >Venta {{entity.puntoVenta}} #{{ entity.nroOperacion }} <span class="floatright">{{entity.estado}}</span></h1>
 <div class="divEdicion">
 <style type="text/css">
     #form-venta label{
@@ -16,6 +16,25 @@
 </style>
 
 <form id="form-venta" name="ventasbundle_venta" class="form-horizontal">     
+    <fieldset style="padding:10px 0;margin:0 0 10px 0; width: 100%; background-color:gainsboro">    
+        <div style="display:inline-block; width: 24%;">                                 
+            <label>PUNTO VENTA: </label>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.puntoVenta}}"/>          
+        </div>     
+        <div style="display:inline-block; width: 24%;">                                 
+            <label>OPERACIÓN: </label>
+            <input type="text" disabled="disabled" class="width100" value="#{{entity.nroOperacion}}"/>          
+        </div>     
+        <div style="display:inline-block; width: 24%;">                                 
+            <label>FECHA/HORA: </label>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.fechaVenta|date('d-m-Y H:i')}}"/>          
+        </div>                    
+        <div style="display:inline-block; width: 24%;">                                 
+            <label>USUARIO: </label>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.createdBy.username}}"/>          
+        </div>                    
+                           
+    </fieldset>                                        
     <fieldset>                                        
         <div style="display:inline-block; width: 50%;">                                 
             <label>CLIENTE: </label>
