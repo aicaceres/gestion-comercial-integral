@@ -14,13 +14,14 @@
         <tr class="item" divdata="item_{{loop.index-1}}">
             <td class="ordTd"></td>                      
             <td class="prodTd">                
-                {{ form_widget(det.producto,{'attr':{'style':'width:80%','url':path('get_lista_productos'), 'fnc':'openModalProducto', 'mtitle':'Seleccionar Producto'}}) }}  
+                {{ form_widget(det.producto,{'attr':{'style':'width:80%','url':path('get_lista_productos'), 'fnc':'openModalProducto', 'mtitle':'Seleccionar Producto'}}) }} 
+                <a href="javascript:void(0)" class="btn btnaction btn_search"></a> 
             </td>                
             <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
                               <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
                             </td> 
             <td class="precTd  alignright">
-                <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
+                <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'mediuminput','style':'text-align:right;','readonly':'readonly', 'data-precio': det.vars.data.producto.precioByLista(det.vars.data.precioLista.id) } }) }} </span>
             </td>            
             <td class="itmSubtotalTd alignright">{{ det.vars.data.getTotal|number_format(2,'.','') }}</td>
             <td class="delTd" style="text-align:center;"></td>

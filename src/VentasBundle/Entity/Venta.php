@@ -69,6 +69,12 @@ class Venta {
      */
     protected $transporte;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
+     * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
+     */
+    protected $deposito;  
+
     /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\VentaDetalle", mappedBy="venta",cascade={"persist", "remove"})
      */
@@ -460,5 +466,28 @@ class Venta {
     public function getUpdatedBy()
     {
         return $this->updatedBy;
+    }
+
+    /**
+     * Set deposito
+     *
+     * @param \AppBundle\Entity\Deposito $deposito
+     * @return Venta
+     */
+    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null)
+    {
+        $this->deposito = $deposito;
+
+        return $this;
+    }
+
+    /**
+     * Get deposito
+     *
+     * @return \AppBundle\Entity\Deposito 
+     */
+    public function getDeposito()
+    {
+        return $this->deposito;
     }
 }

@@ -18,6 +18,10 @@ class ParametrizacionType extends AbstractType
                     'label_attr' => array('style'=>'width:180px'),
                     'class' => 'VentasBundle:Cliente', 'required' => true,
                     'attr' => array('class' => 'smallinput chzn-select')))
+            ->add('ventasDepositoBydefault', 'entity', array('label' => 'Depósito por defecto en ventas:',
+                    'label_attr' => array('style'=>'width:180px'),
+                    'class' => 'AppBundle:Deposito', 'required' => true,
+                    'attr' => array('class' => 'smallinput chzn-select')))
         ;
     }
     

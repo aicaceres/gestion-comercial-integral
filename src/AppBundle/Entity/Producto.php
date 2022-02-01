@@ -736,6 +736,19 @@ class Producto
     {
         return $this->precios;
     }
+    /**
+     * Get precio por lista
+     */
+    public function getPrecioByLista($lista)
+    {
+        $precio = 0;
+        foreach ($this->getPrecios() as $item){
+            if($item->getPrecioLista()->getId()==$lista){
+                $precio = $item->getPrecio();
+            }
+        }
+        return $precio;
+    }
 
     /**
      * Set iva

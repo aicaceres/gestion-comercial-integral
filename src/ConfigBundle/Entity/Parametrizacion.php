@@ -21,6 +21,11 @@ class Parametrizacion {
      * @ORM\JoinColumn(name="ventas_cliente_bydefault_id", referencedColumnName="id")
      */
     protected $ventasClienteBydefault;
+    /**
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
+     * @ORM\JoinColumn(name="ventas_deposito_bydefault_id", referencedColumnName="id")
+     */
+    protected $ventasDepositoBydefault;
 
     /**
      * Get id
@@ -55,4 +60,27 @@ class Parametrizacion {
         return $this->ventasClienteBydefault;
     }
 
+
+    /**
+     * Set ventasDepositoBydefault
+     *
+     * @param \AppBundle\Entity\Deposito $ventasDepositoBydefault
+     * @return Parametrizacion
+     */
+    public function setVentasDepositoBydefault(\AppBundle\Entity\Deposito $ventasDepositoBydefault = null)
+    {
+        $this->ventasDepositoBydefault = $ventasDepositoBydefault;
+
+        return $this;
+    }
+
+    /**
+     * Get ventasDepositoBydefault
+     *
+     * @return \AppBundle\Entity\Deposito 
+     */
+    public function getVentasDepositoBydefault()
+    {
+        return $this->ventasDepositoBydefault;
+    }
 }

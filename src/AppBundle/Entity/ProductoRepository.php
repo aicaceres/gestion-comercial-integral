@@ -153,7 +153,9 @@ class ProductoRepository extends EntityRepository {
                 ->where('e.activo=1');
         return $query->getQuery()->getSingleScalarResult();
     }
-    public function getListDTData($start, $length, $orders, $search, $columns, $otherConditions,$listaprecio)
+
+    public function getListDTData($start, $length, $orders, $search, $columns, $otherConditions,
+        $listaprecio)
     {
         // Create Main Query
         $query = $this->_em->createQueryBuilder();
@@ -171,6 +173,12 @@ class ProductoRepository extends EntityRepository {
         
         $countQuery->leftJoin('e.precios', 'p')
                    ->leftJoin('p.precioLista','l')  ;
+
+        if ($listaprecio) {
+            $searchQuery = 'l.id=' . $listaprecio;
+            $query->andWhere($searchQuery);
+            $countQuery->andWhere($searchQuery);
+        }        
 
         // Other conditions than the ones sent by the Ajax call ?        
         if ($otherConditions === null)

@@ -5,10 +5,10 @@
         font-weight: bold;
         padding: 0px 2px 0px 8px;
     }
-    #vtafields label{
+    .vtafields label{
         display: inline-block;
         width:100%;
-    }    
+    }        
     #form-punto-venta select:focus, #form-punto-venta input:focus,#form-punto-venta button:focus,#form-punto-venta a:focus, #form-punto-venta .select2-container *:focus{
     color: #666666;
     background-color: gainsboro;
@@ -64,38 +64,53 @@
     <div  id="form-punto-venta" {% if app.session.get('puntoVentaActual')['id'] == 0 %} style="display:none" {% endif %}>
 
         {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_venta'}}) }}     
-        <fieldset id="vtafields" >                                        
-            <div id="selectorCliente" style="display:inline-block; width: 30%;">                                 
+
+        <fieldset class="vtafields" >                                        
+            <div id="selectorCliente" style="display:inline-block; width: 50%;">                                 
                 {{ form_label(form.cliente) }}
                 {{ form_widget(form.cliente,{'attr':{'style':'width:80%','url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente'}}) }}    
                 <a href="javascript:void(0)" class="btn btnaction btn_search"></a>      
             </div>
-            <div style="display:inline-block; width: 10%;"> 
+            <div style="display:inline-block; width: 20%;"> 
                 {{ form_label(form.precioLista)}}
-                {{ form_widget(form.precioLista,{'attr':{'style':'width:100%','tabindex':-1}})}}
+                {{ form_widget(form.precioLista,{'attr':{'style':'width:100%','tabindex':-1}}) }}
             </div> 
-            <div style="display:inline-block; width: 15%;"> 
+            <div style="display:inline-block; width: 25%;"> 
                 {{ form_label(form.transporte)}}
-                {{ form_widget(form.transporte,{'attr':{'style':'width:100%','tabindex':-1}})}}
-            </div>
-            <div style="display:inline-block; width: 25%; margin-left:10px;"> 
-                {{ form_label(form.formaPago)}}
-                {{ form_widget(form.formaPago,{'attr':{'style':'width:80%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}})}}
-                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
-            </div>
-            <div style="display:inline-block; width: 10%;"> 
-                {{ form_label(form.moneda)}}
-                {{ form_widget(form.moneda,{'attr':{'style':'width:100%'}})}}
-            </div>
+                {{ form_widget(form.transporte,{'attr':{'style':'width:100%','tabindex':-1}}) }}
+            </div>                                 
         </fieldset> 
         <fieldset >        
-            <div class="datos-cliente" style="display:inline-block; width:55%; vertical-align: top;">  
+            <div class="datos-cliente" style="display:inline-block; width:100%; vertical-align: top;margin-bottom:10px">  
                 {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}   
+            </div>                                                                                             
+        </fieldset>
+
+        <fieldset class="vtafields" >                                                    
+            <div style="display:inline-block; width: 35%; "> 
+                {{ form_label(form.formaPago)}}
+                {{ form_widget(form.formaPago,{'attr':{'style':'width:80%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}}) }}
+                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
             </div>
-            <div class="datos-formapago" style="display:inline-block; width: 40%; vertical-align: top;margin-left:10px;">  
+            <div style="display:inline-block; width: 20%;"> 
+                {{ form_label(form.moneda)}}
+                {{ form_widget(form.moneda,{'attr':{'style':'width:100%'}}) }}
+            </div>
+            <div style="display:inline-block; width: 25%;"> 
+                {{ form_label(form.deposito)}}
+                {{ form_widget(form.deposito,{'attr':{'style':'width:100%','tabindex':-1}}) }}
+            </div>   
+        </fieldset> 
+
+        <fieldset >                    
+            <div class="datos-formapago" style="display:inline-block; width: 35%; vertical-align: top;">  
                 {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}   
             </div>                                                                                   
+            <div class="datos-moneda" style="display:inline-block; width: 25%; vertical-align: top;">  
+                {% include "VentasBundle:Venta:_partial-datos-moneda.html.twig" with {'item':entity.moneda}  %}   
+            </div>                                                                                   
         </fieldset>
+
         <fieldset>
             <div style="padding-top: 20px; margin:auto; width: 100%;">                
                 {{ form_errors(form.detalles) }}
@@ -107,7 +122,6 @@
                 {% include "VentasBundle:Venta:_partial-resumen.html.twig" %}      
             </div>
         </fieldset>
-
 
         <fieldset>          
             <br clear="all" /> 
@@ -140,7 +154,7 @@ jQuery(function ($) {
         })
         $(document).on('keydown',function(e){ detectarControles(e); })
 
-        $('.togglemenu').click();    
+       // $('.togglemenu').click();    
         $('.select2').select2({ width:'style' });
         $('#ventasbundle_venta_cliente').focus();
 
@@ -191,6 +205,19 @@ jQuery(function ($) {
                 if(data){                    
                     $('.datos-formapago').html(data);
                     $('.porcentajeRecargo').text( $('#porcentajeRecargo').val() )
+                    actualizaTotales();
+                }
+            });
+        });
+        // al modificar moneda actualizar datos del partial
+        $('#ventasbundle_venta_moneda').on('change', function() {
+            $('.datos-moneda').html('');
+            id = $(this).val();            
+            $.get( "{{ path('get_datos_moneda')}}" , {'id': id}).done(function(data){
+                // actualizar datos
+                if(data){                    
+                    $('.datos-moneda').html(data);
+                    $('.simbolo').html($('#simbolo').val()); 
                     actualizaTotales();
                 }
             });
@@ -275,49 +302,34 @@ function addItemFormDeleteLink($itemFormTd) {
     });
 }
 function actualizaTotales(){
-    var Total=0;
+    let Total=0;
+    const cotizacion = parseFloat($('#cotizacion').val()) ;
     $("tr.item").each(function(){
-        var item = $(this);
-        var cant =  checknumero( item.find('.cantTd input') ) ;
-        var prec =  checknumero( item.find('.precTd input[type=text]') ) ;            
-         /*   if(jQuery('#exento').val()==1){
-                porciva = 0;
-                item.find('.iva2Td [name*="afipAlicuota"] option:contains(0.00)').prop('selected', true);                
-            }else{
-                porciva = parseFloat(item.find('.porciva').html());
-                item.find('.iva2Td [name*="afipAlicuota"] option:contains('+ item.find('.porciva').html() +')').prop('selected', true);
-            }
-            item.find('.iva2Td .alicuota').text( item.find('.iva2Td [name*="afipAlicuota"] option:selected').text() );
-            */
-            //var porciva = (jQuery('#exento').val()==1) ? 0 : parseFloat(item.find('.porciva').html()); 
-           /// iva = ( prec * porciva)/100 ;
-           // if(cant && prec){
-                //calcular
-            //    band=1;
-                sbtotItm = prec * cant;
-                ///sbtotIva = iva * cant;
-                Total += sbtotItm;
-                ///TotalIva += sbtotIva;
-                item.find('.itmSubtotalTd').text( sbtotItm.toFixed(3));                
-                ///item.find('.ivaTd input').val( sbtotIva.toFixed(2));                
-            //}
-        });
-       // if( band ){
-           ///jQuery('#totaliva').text(TotalIva.toFixed(2));
-        $('#subtotalTh').html(Total.toFixed(3));
-        $('#gralSubtotalTd').find('span').html(Total.toFixed(3));
-        // porcentaje de descuento/recargo   
-        const porcentaje = checknumero( $('#porcentajeRecargo') ) ;
-        const descrec = Total * (porcentaje/100);
-        const totalgral = Total + descrec;
-        $('#importeRecargo').text(descrec.toFixed(3));
-        $('#totalGral').text(totalgral.toFixed(3));
+        let item = $(this);
+        const cant =  checknumero( item.find('.cantTd input') ) ;
+        checknumero( item.find('.precTd input[type=text]') ) ;
+        let prec = item.find('.precTd input[type=text]').data('precio'); 
 
-        $collectionHolder.find('.ordTd').each(function(index) {
-            $(this).html(index+1);
-        }); 
-       // }
+        // calcular la cotización si es distinta a 1        
+        prec = prec * cotizacion;
+        item.find('.precTd input[type=text]').val( prec.toFixed(3) );
+                
+        let sbtotItm = prec * cant;                
+        Total += sbtotItm;                
+        item.find('.itmSubtotalTd').text( sbtotItm.toFixed(3));                
+    });
+    $('#subtotalTh').html(Total.toFixed(3));
+    $('#gralSubtotalTd').find('span.valor').html(Total.toFixed(3));
+    // porcentaje de descuento/recargo   
+    const porcentaje = checknumero( $('#porcentajeRecargo') ) ;
+    const descrec = Total * (porcentaje/100);
+    const totalgral = Total + descrec;
+    $('#importeRecargo').text(descrec.toFixed(3));
+    $('#totalGral').text(totalgral.toFixed(3));
 
+    $collectionHolder.find('.ordTd').each(function(index) {
+        $(this).html(index+1);
+    }); 
 }
 function openModal(obj){
     const url = obj.attr('url');
@@ -434,6 +446,8 @@ function openModalFormaPago(){
 // PRODUCTOS
 function openModalProducto(obj){
     const listaprecio = $('#ventasbundle_venta_precioLista').val();
+    const deposito = $('#ventasbundle_venta_deposito').val();
+    const cotizacion = $('#cotizacion').val();
     var oTable = $('#productos_table').dataTable({
                 "columnDefs": [        
                     // These are the column name variables that will be sent to the server
@@ -453,8 +467,10 @@ function openModalProducto(obj){
                         opt.val($(this).data('id'));
                         opt.text($(this).text());  
                         // cargar precio
-                        obj.parent().siblings('.precTd').find('input').val( $(this).data('precio') );
-                        //checknumero( prec.val( $(this).data('precio') ) ) ;
+                        objprecio = obj.parent().siblings('.precTd').find('input');
+                        objprecio.val( $(this).data('precio') );
+                        objprecio.data('precio',$(this).data('precio') );
+                        
                         actualizaTotales();                        
                         $('#popup').dialog("destroy");        
                         obj.focus();                 
@@ -467,7 +483,10 @@ function openModalProducto(obj){
                 "ajax": {
                     "url": "{{ path('producto_list_datatables') }}",
                     "type": "POST",
-                    "data" : { 'listaprecio' : listaprecio },
+                    "data" : { 'listaprecio' : listaprecio, 
+                                'deposito' : deposito,
+                                'cotizacion' : cotizacion 
+                            },    
                 },
                 // Classic DataTables parameters
                 "bPaginate" : true,
@@ -493,6 +512,8 @@ function openModalProducto(obj){
                     "sSearch": "Buscar:"
                 }
             }); 
+    // cambiar simbolo en columna precio
+    oTable.find('.simbolo').text( $('#simbolo').val() );    
      // focus en buscar    
     $('#productos_table_filter input').focus();
 }

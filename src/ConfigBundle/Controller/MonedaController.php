@@ -169,4 +169,20 @@ class MonedaController extends Controller
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }
         return new Response(json_encode($msg));
     }
+
+    /**
+     * @Route("/getDatosMoneda", name="get_datos_moneda")
+     * @Method("GET")
+     */
+    public function getDatosMonedaAction(Request $request)
+    {
+        $id = $request->get('id');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('ConfigBundle:Moneda')->find($id);
+        $partial = $this->renderView(
+            'VentasBundle:Venta:_partial-datos-moneda.html.twig',
+            array('item' => $entity)
+        );
+        return new Response($partial);
+    }
 }

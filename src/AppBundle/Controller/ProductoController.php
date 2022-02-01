@@ -808,6 +808,9 @@ class ProductoController extends Controller {
             $columns = $request->get('columns');
 
             $listaprecio = $request->get('listaprecio');
+            $deposito = $request->get('deposito');            
+            $cotizacion = $request->get('cotizacion');
+
         }
         else // If the request is not a POST one, die hard
             die;
@@ -856,13 +859,15 @@ class ProductoController extends Controller {
                 $precio = $producto->getPrecios()[0];
                 if ($precio !== null) {
                     $precioiva = $precio->getPrecio() * ( 1 + ( $producto->getIva()/100 ) );
-                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', round($precioiva,3) ));
+                    $precioOrig = round($precioiva,3);
+                    $precioConv = round( ($precioOrig * $cotizacion) ,3);
+                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv ));
                 }
                 switch ($column['name']) {                    
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
-                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precioTemp."' href='javascript:void(0);'>".$name."</a>";                            
+                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precioOrig."' href='javascript:void(0);'>".$name."</a>";                            
                             break;
                         }                    
                     case 'codigo': {
@@ -875,7 +880,7 @@ class ProductoController extends Controller {
                             break;
                         }                                       
                     case 'stock': {
-                            $stock = $producto->getStockActual();
+                            $stock = $producto->getStockActualxDeposito($deposito);
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $stock));
                             break;
                         }                                       

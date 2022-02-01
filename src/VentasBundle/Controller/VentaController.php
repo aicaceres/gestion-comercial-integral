@@ -75,18 +75,22 @@ class VentaController extends Controller
         }        
 
         $entity = new Venta();
-        $entity->setFechaVenta( new \DateTime() );        
+        $entity->setFechaVenta( new \DateTime() );                
         $em = $this->getDoctrine()->getManager();
         // Set cliente segun parametrizacion
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
         if($param){
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
-            // set datos asociados al cliente con su definicion por defecto
+            $deposito = $em->getRepository('AppBundle:Deposito')->find($param->getVentasDepositoBydefault());
+            $entity->setDeposito($deposito);
+            // set datos asociados al cliente con su definicion por defecto           
             $entity->setFormaPago( $cliente->getFormaPago() );
             $entity->setPrecioLista( $cliente->getPrecioLista() );
             $entity->setTransporte( $cliente->getTransporte() );
         }  
+        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
+        $entity->setMoneda( $moneda );
 
         if (null === $session->get('puntoVentaActual')) {
             $session->set('puntoVentaActual', array('id' => 0, 'nombre' => ''));            
