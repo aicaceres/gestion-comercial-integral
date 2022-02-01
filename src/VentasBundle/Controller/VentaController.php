@@ -10,6 +10,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
 use ConfigBundle\Controller\UtilsController;
+use AppBundle\Entity\Stock;
+use AppBundle\Entity\StockMovimiento;
 use VentasBundle\Entity\Venta;
 use VentasBundle\Form\VentaType;
 
@@ -137,7 +139,35 @@ class VentaController extends Controller
 
                 $em->persist($entity);            
                 $em->persist($puntoVenta);            
-                $em->flush();                
+                $em->flush();            
+
+                // Descuento de stock 
+                $deposito = $entity->getDeposito();
+                foreach ($entity->getDetalles() as $detalle){
+                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                    if ($stock) {
+                        $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
+                    }else {
+                        $stock = new Stock();
+                        $stock->setProducto($detalle->getProducto());
+                        $stock->setDeposito($deposito);
+                        $stock->setCantidad( 0 - $detalle->getCantidad());
+                    }
+                    $em->persist($stock);
+
+    // Cargar movimiento
+                    $movim = new StockMovimiento();
+                    $movim->setFecha($entity->getFechaVenta());
+                    $movim->setTipo('ventas_venta');
+                    $movim->setSigno('-');
+                    $movim->setMovimiento($entity->getId());
+                    $movim->setProducto($detalle->getProducto());
+                    $movim->setCantidad($detalle->getCantidad());
+                    $movim->setDeposito($deposito);
+                    $em->persist($movim);
+                    $em->flush();
+
+                }                                                            
 
                 $em->getConnection()->commit();
                 $this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> '.$entity->getPuntoVenta().' #'.$entity->getNroOperacion().'</span>');

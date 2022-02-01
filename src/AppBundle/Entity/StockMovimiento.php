@@ -88,6 +88,8 @@ class StockMovimiento
                 return 'Factura de Compras';
             case 'COMPRAS_NOTADEBCRED':
                 return 'Nota débito/crédito de Compras';
+            case 'ventas_venta':
+                return 'Venta';
             default:
                 return NULL;
         }
