@@ -137,7 +137,8 @@
     </div> 
     <div class="notifmsg info png_bg" style="margin-top:10px">
         <a href="#" class="close"></a>
-        <div><small>Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong> Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong> Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong> + = Agregar producto </small></div>
+        <div><small>Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong> Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong> Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong> + = Agregar producto <strong class="divnotif">|</strong> Ctrl+Alt+G = Guardar  </small>
+        </div>
     </div> 
 </div>
 {% endblock %}
@@ -258,7 +259,7 @@ jQuery(function ($) {
     $('#ventasbundle_venta').on('submit', function(){
         // controlar que haya items cargados 
         let txt = $('#selectPuntoVentaActual option:selected').text()+' #'+$('#ventasbundle_venta_nroOperacion').val();
-        txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock?';
+        txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
         if( $('tbody tr.item').length > 0 ){
             if (!confirm(txt)) {
                return false;
@@ -288,7 +289,7 @@ jQuery(function ($) {
     openModal(newProd);  
 }    
 function addItemFormDeleteLink($itemFormTd) {
-    var $removeFormA = jQuery('<a href="#" title="Quitar"><span class="minus"></span></a>');
+    var $removeFormA = jQuery('<a href="#" class="delItem" title="Quitar"><span class="minus"></span></a>');
     $itemFormTd.append($removeFormA);
     $removeFormA.on('click', function(e) {
         var res = true;
@@ -299,6 +300,9 @@ function addItemFormDeleteLink($itemFormTd) {
             $itemFormTd.parent().remove();
             actualizaTotales();
         }
+    });
+    $removeFormA.on('blur', function(e) {
+        $('#linkAdd').focus();
     });
 }
 function actualizaTotales(){
@@ -519,6 +523,7 @@ function openModalProducto(obj){
 }
 
 function detectarControles(e) {
+console.log( e.keyCode )
     if( e.ctrlKey && e.altKey ){
         // ctrl + alt + C
         if( e.keyCode == 67 ){
@@ -529,6 +534,10 @@ function detectarControles(e) {
         if( e.keyCode == 70 ){
             e.preventDefault();
             openModal($('#ventasbundle_venta_formapago'))
+        }        
+        if( e.keyCode == 71 ){
+            e.preventDefault();
+            $('#ventasbundle_venta').submit();
         }        
     }     
     // tecla + agrega item

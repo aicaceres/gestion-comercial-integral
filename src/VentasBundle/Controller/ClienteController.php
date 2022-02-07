@@ -989,7 +989,7 @@ class ClienteController extends Controller {
                                 $responseTemp = $responseTemp . $linkEdit;
                             }                            
                             if ($user->getAccess($unidNeg, 'ventas_cliente_delete')) {
-                                $linkDel = "<a href url='" . $this->generateUrl('ventas_cliente_delete', array('id' => $cliente->getId())) . "' class='delete btn btnaction btn_trash' title='Borrar' ></a>&nbsp;";     
+                                $linkDel = "<a href url='" . $this->generateUrl('ventas_cliente_delete_ajax', array('id' => $cliente->getId())) . "' class='delete btn btnaction btn_trash' title='Borrar' ></a>&nbsp;";     
                                 $responseTemp = $responseTemp . $linkDel;
                             } 
                             break;                            

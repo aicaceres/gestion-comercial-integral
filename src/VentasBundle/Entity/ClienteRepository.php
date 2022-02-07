@@ -447,7 +447,7 @@ class ClienteRepository extends EntityRepository {
         );
     }
 
-    public function getClientesForExportXls($provId=null, $search=null){
+    public function getClientesForExportXls($search=null){
         $query = $this->_em->createQueryBuilder();
         $query->select("c")
                 ->from('VentasBundle\Entity\Cliente', 'c')
