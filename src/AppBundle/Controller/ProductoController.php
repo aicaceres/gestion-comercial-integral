@@ -860,7 +860,7 @@ class ProductoController extends Controller {
                 if ($precio !== null) {
                     $precioiva = $precio->getPrecio() * ( 1 + ( $producto->getIva()/100 ) );
                     $precioOrig = round($precioiva,3);
-                    $precioConv = round( ($precioOrig * $cotizacion) ,3);
+                    $precioConv = round( ($precioOrig / $cotizacion) ,3);
                     $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv ));
                 }
                 switch ($column['name']) {                    

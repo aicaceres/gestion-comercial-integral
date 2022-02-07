@@ -311,7 +311,7 @@ function actualizaTotales(){
         let prec = item.find('.precTd input[type=text]').data('precio'); 
 
         // calcular la cotización si es distinta a 1        
-        prec = prec * cotizacion;
+        prec = prec / cotizacion;
         item.find('.precTd input[type=text]').val( prec.toFixed(3) );
                 
         let sbtotItm = prec * cant;                
