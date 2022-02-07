@@ -977,7 +977,7 @@ class ProductoController extends Controller {
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $codigo));
                             break;
                         } 
-                    case 'nombre': {
+                    case 'producto': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = $producto->getNombre();
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $name));                            
