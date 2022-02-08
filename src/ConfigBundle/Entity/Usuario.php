@@ -98,6 +98,16 @@ class Usuario implements UserInterface
          }
         return false; 
     }
+    public function isAdmin($unidneg){
+        if( $this->id ){
+            foreach ($this->getRolesUnidadNegocio() as $rolUN) {
+                 if( $rolUN->getUnidadNegocio()->getId() == $unidneg ){
+                     return $rolUN->getRol()->getAdmin();
+                 }
+             }
+         }
+        return false; 
+    }
 
     /**
      * Get depositos del usuario según unidad de negocio
@@ -107,20 +117,6 @@ class Usuario implements UserInterface
             foreach ($this->getRolesUnidadNegocio() as $rolUN) {
                  if( $rolUN->getUnidadNegocio()->getId() == $unidneg ){
                      return $rolUN->getDepositos();
-                 }
-             }
-         }
-        return false; 
-    }
-
-    /**
-     * Get puntosVenta del usuario según unidad de negocio
-     */
-    public function getPuntosVenta($unidneg){
-        if( $this->id ){
-            foreach ($this->getRolesUnidadNegocio() as $rolUN) {
-                 if( $rolUN->getUnidadNegocio()->getId() == $unidneg ){
-                     return $rolUN->getPuntosVenta();
                  }
              }
          }

@@ -6,7 +6,7 @@
             <th style="width:12%;">Cant.</th>
             <th style="width:10%;">Precio Unit.</th>
             <th style="width:10%;">SubTotal</th>                            
-            <th style="width:3%;"><a href="#" id="linkAdd" tabindex="0"  title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a></th>
+            <th style="width:3%;"><a href="#" id="linkAdd" tabindex="0"  title="Agregar"><span class="add-item-button">+</span></a></th>
         </tr>
     </thead>
     <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'VentasBundle:Venta:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">

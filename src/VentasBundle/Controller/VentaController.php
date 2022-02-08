@@ -28,17 +28,27 @@ class VentaController extends Controller
      */
     public function indexAction(Request $request) {
         $unidneg = $this->get('session')->get('unidneg_id');
-        UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_venta');
-        $em = $this->getDoctrine()->getManager();        
-        $puntoventaId = $request->get('puntoventaId');
+        $user = $this->getUser();
+        UtilsController::haveAccess($user, $unidneg, 'ventas_venta');
+        $em = $this->getDoctrine()->getManager();                
+        
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
-        $puntos = $this->getUser()->getPuntosVenta($unidneg);        
-        $entities = $em->getRepository('VentasBundle:Venta')->findByCriteria($unidneg,$puntoventaId, $desde, $hasta);
+        
+        if( $user->getAccess($unidneg, 'ventas_venta_own') && !$user->isAdmin($unidneg)){
+            $id = $user->getId();
+            $owns = true;
+        }else{
+            $id = $request->get('userId');
+            $owns = false;
+        }        
+        $entities = $em->getRepository('VentasBundle:Venta')->findByCriteria($unidneg, $desde, $hasta, $id);
+        $users = $em->getRepository('VentasBundle:Venta')->getUsers();                
         return $this->render('VentasBundle:Venta:index.html.twig', array(
                     'entities' => $entities,
-                    'puntos' => $puntos,
-                    'puntoventaId' => $puntoventaId,                    
+                    'id' => $id,
+                    'owns' => $owns,
+                    'users' => $users,                    
                     'desde' => $desde,
                     'hasta' => $hasta
         ));
@@ -67,6 +77,8 @@ class VentaController extends Controller
      */
     public function newVentaAction(Request $request)
     {
+//var_dump(gethostname());
+
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
         $puntosVenta = $this->getUser()->getPuntosVenta($session->get('unidneg_id'));

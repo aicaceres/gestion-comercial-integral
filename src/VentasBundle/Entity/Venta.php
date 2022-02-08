@@ -38,10 +38,10 @@ class Venta {
     protected $estado = 'PENDIENTE';
 
     /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\PuntoVenta", inversedBy="Ventas")
-     * @ORM\JoinColumn(name="punto_venta_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
+     * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
-    protected $puntoVenta;
+    protected $unidadNegocio;
 
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="Ventas")
@@ -196,29 +196,6 @@ class Venta {
     public function getCliente()
     {
         return $this->cliente;
-    }
-
-    /**
-     * Set puntoVenta
-     *
-     * @param \ConfigBundle\Entity\PuntoVenta $puntoVenta
-     * @return Venta
-     */
-    public function setPuntoVenta(\ConfigBundle\Entity\PuntoVenta $puntoVenta = null)
-    {
-        $this->puntoVenta = $puntoVenta;
-
-        return $this;
-    }
-
-    /**
-     * Get puntoVenta
-     *
-     * @return \ConfigBundle\Entity\PuntoVenta 
-     */
-    public function getPuntoVenta()
-    {
-        return $this->puntoVenta;
     }
 
     /**
@@ -489,5 +466,26 @@ class Venta {
     public function getDeposito()
     {
         return $this->deposito;
+    }
+
+    /**
+     * Set unidadNegocio
+     *
+     * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
+     * @return Venta
+     */
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null) {
+        $this->unidadNegocio = $unidadNegocio;
+
+        return $this;
+    }
+
+    /**
+     * Get unidadNegocio
+     *
+     * @return \ConfigBundle\Entity\UnidadNegocio
+     */
+    public function getUnidadNegocio() {
+        return $this->unidadNegocio;
     }
 }
