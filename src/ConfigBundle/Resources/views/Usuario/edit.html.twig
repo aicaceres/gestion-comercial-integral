@@ -61,8 +61,7 @@
 								<thead>
 									<tr>
 										<th style="width:30%">Unidad de Negocio</th>
-										<th style="width:40%">Depósitos</th>
-										<th style="width:40%">Puntos de Venta</th>
+										<th style="width:40%">Depósitos</th>	
 										<th style="width:25%">Perfil</th>
 										<th style="width:5%; text-align: center">
 											<a href="javascript:void(0);" id="linkAdd" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}"/></a>
@@ -73,8 +72,7 @@
 									{% for rolxunid in form.rolesUnidadNegocio %}
 										<tr class="item">
 											<td>{{form_widget(rolxunid.unidadNegocio)}}</td>
-											<td>{{form_widget(rolxunid.depositos, { 'attr': {'class' : 'select2' } })}}</td>
-											<td>{{form_widget(rolxunid.puntosVenta, { 'attr': {'class' : 'select2' } })}}</td>
+											<td>{{form_widget(rolxunid.depositos, { 'attr': {'class' : 'select2' } })}}</td>											
 											<td>{{form_widget(rolxunid.rol)}}</td>
 											<td class="delTd" style="text-align:center;"></td>
 										</tr>
@@ -112,10 +110,7 @@
         $(document).on('change', '[id$="_unidadNegocio"]', function (e) {
             depositos = $(this).parent().siblings('td').find('[id$="_depositos"]');
             depositos.val(null).trigger("change");
-            changeSelect(depositos, $(this).val());
-            puntos = $(this).parent().siblings('td').find('[id$="_puntosVenta"]');
-            puntos.val(null).trigger("change");
-            changeSelect(puntos, $(this).val());
+            changeSelect(depositos, $(this).val());            
         });
 
         $('#linkAdd').on('click', function (e) {
@@ -129,13 +124,11 @@
             });
     });
 function changeSelect(select, unidadNegocio) {
-    url = ( select.attr('id').includes('depositos') ) 
-            ? '{{ path('autocomplete_depositos') }}?unidneg_id=' 
-            : '{{ path('autocomplete_puntosventa') }}?unidneg_id=';
+    url = '{{ path('autocomplete_depositos') }}?unidneg_id='+ unidadNegocio;
     select.select2({
         placeholder: 'Seleccione una opción',
         ajax: {
-        url: url + unidadNegocio,
+        url: url ,
         dataType: 'json',
         delay: 250,
         processResults: function (data) {

@@ -15,13 +15,15 @@ class ParametrizacionType extends AbstractType
     {
         $builder            
             ->add('ventasClienteBydefault', 'entity', array('label' => 'Cliente por defecto en ventas:',
-                    'label_attr' => array('style'=>'width:180px'),
+                    'label_attr' => array('style'=>'width:200px'),
                     'class' => 'VentasBundle:Cliente', 'required' => true,
                     'attr' => array('class' => 'smallinput chzn-select')))
             ->add('ventasDepositoBydefault', 'entity', array('label' => 'Depósito por defecto en ventas:',
-                    'label_attr' => array('style'=>'width:180px'),
+                    'label_attr' => array('style'=>'width:200px'),
                     'class' => 'AppBundle:Deposito', 'required' => true,
                     'attr' => array('class' => 'smallinput chzn-select')))
+            ->add('ultimoNroOperacionVenta',null,array('label' => 'Último N° de Operación de Venta:',
+                    'label_attr' => array('style'=>'width:200px')))
         ;
     }
     

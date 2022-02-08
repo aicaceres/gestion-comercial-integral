@@ -1,7 +1,7 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <style type="text/css">
-    #form-punto-venta label{
+    #form-venta-rapida label{
         font-weight: bold;
         padding: 0px 2px 0px 8px;
     }
@@ -9,12 +9,12 @@
         display: inline-block;
         width:100%;
     }        
-    #form-punto-venta select:focus, #form-punto-venta input:focus,#form-punto-venta button:focus,#form-punto-venta a:focus, #form-punto-venta .select2-container *:focus{
+    #form-venta-rapida select:focus, #form-venta-rapida input:focus,#form-venta-rapida button:focus,#form-venta-rapida a:focus, #form-venta-rapida .select2-container *:focus{
         color:blue ;
         font-weight:bold ;
         background-color: gainsboro;
     }    
-    #form-punto-venta span.add-item-button, #form-punto-venta span.del-item-button{ 
+    #form-venta-rapida span.add-item-button, #form-venta-rapida span.del-item-button{ 
         font-size: 20px;
         font-family: courier;
         font-weight: bold;
@@ -49,17 +49,11 @@
 </style>
 <div class="pageheader notab">
 <script src="https://unpkg.com/tabbable/dist/index.umd.js"></script>
-  <script src="https://unpkg.com/focus-trap/dist/focus-trap.umd.js"></script>
-    {% set idpto = app.session.get('puntoVentaActual')['id'] %}
-    <h1 class="pagetitle">Punto de Venta: 
-        <select id="selectPuntoVentaActual" style="width:20%;" tabindex="-1" class="select2">
-            <option value="0" {% if idpto == 0 %} selected="selected" {% endif %}>Seleccionar</option>
-            {% for i in puntosVenta %}
-                <option value="{{i.id}}" {% if i.id == idpto %} selected="selected" {% endif %}>{{i.nombre}}</option>
-            {% endfor %}
-        </select>
-        <span style="margin-left:20px" class="nroOperacion">#{{entity.nroOperacion}}</span>
-        <span style="font-size:20px" class="floatright fechahora">{{entity.fechaVenta|date('d/m/Y H:i')}} | {{app.user.username}}</span>
+  <script src="https://unpkg.com/focus-trap/dist/focus-trap.umd.js"></script>    
+    <h1 class="pagetitle">VENTA:         
+        <span style="margin-left:10px" class="nroOperacion">#{{entity.nroOperacion}}</span>
+        <span style="margin-left:40px">{{app.user.username}}</span>
+        <span style="font-size:20px" class="floatright fechahora">{{entity.fechaVenta|date('d/m/Y H:i')}}</span>
     </h1>
 </div><!--pageheader-->
 {% endblock %}
@@ -67,7 +61,7 @@
 <div id="control"> </div>
 <div id="contentwrapper" class="contentwrapper">
 {% include "AppBundle::notificacion.html.twig" %}    
-    <div  id="form-punto-venta" {% if app.session.get('puntoVentaActual')['id'] == 0 %} style="display:none" {% endif %}>
+    <div id="form-venta-rapida">
 
         {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_venta'}}) }}     
 
@@ -156,7 +150,7 @@
 jQuery(function ($) {
     $(window).on('load', function () {
         $('.cancelar').on('blur', function(e){ 
-            $('#selectPuntoVentaActual').select2('focus')
+            $('#ventasbundle_venta_cliente').select2('focus')
             e.stopPropagation();
         })
         $(document).on('keydown',function(e){ detectarControles(e); })
@@ -164,30 +158,7 @@ jQuery(function ($) {
        // $('.togglemenu').click();    
         $('.select2').select2({ width:'style' });
         $('#ventasbundle_venta_cliente').focus();
-
-        // si no hay punto de venta en sesion se debe indicar antes de continuar
-        {% if app.session.get('puntoVentaActual')['id'] ==0 %} 
-            alert('Debe seleccionar un punto de venta para continuar!!');
-            $('#selectPuntoVentaActual').select2('open');
-        {% endif %}
-        // Al modificar punto de venta cambiar datos en sesión.
-        $('#selectPuntoVentaActual').on('change', function() {
-            pto = $(this).val();
-            $.getJSON("{{ path('ventas_set_puntosventa')}}" , 
-                {'puntoVenta':pto}).done(function(data){
-                // validar que se haya definido uno para continuar
-                if( data == null ){
-                    alert('Debe seleccionar un punto de venta para continuar!!');
-                    $('#form-punto-venta').hide();
-                    $('.nroOperacion').hide();
-                }else{                    
-                    $('#ventasbundle_venta_nroOperacion').val(data);    
-                    $('.nroOperacion').html( '#'+data);
-                    $('.nroOperacion').show();
-                    $('#form-punto-venta').show();
-                }
-            });
-        });
+        
         // al presionar ctrl+enter abrir popup 
         $(document).on('click change keydown',
             '#ventasbundle_venta_cliente,#ventasbundle_venta_formaPago,[name*="producto"]', function(e) {
@@ -264,7 +235,7 @@ jQuery(function ($) {
     // confirm on submit
     $('#ventasbundle_venta').on('submit', function(){
         // controlar que haya items cargados 
-        let txt = $('#selectPuntoVentaActual option:selected').text()+' #'+$('#ventasbundle_venta_nroOperacion').val();
+        let txt = 'VENTA:   #'+$('#ventasbundle_venta_nroOperacion').val();
         txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
         if( $('tbody tr.item').length > 0 ){
             if (!confirm(txt)) {

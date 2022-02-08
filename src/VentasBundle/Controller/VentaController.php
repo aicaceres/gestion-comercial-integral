@@ -81,6 +81,31 @@ class VentaController extends Controller
 
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
+        $entity = new Venta();
+        $entity->setFechaVenta( new \DateTime() );                
+        $em = $this->getDoctrine()->getManager();
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
+        if($param){
+            $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
+            $entity->setCliente($cliente);
+            $deposito = $em->getRepository('AppBundle:Deposito')->find($param->getVentasDepositoBydefault());
+            $entity->setDeposito($deposito);
+            // set datos asociados al cliente con su definicion por defecto           
+            $entity->setFormaPago( $cliente->getFormaPago() );
+            $entity->setPrecioLista( $cliente->getPrecioLista() );
+            $entity->setTransporte( $cliente->getTransporte() );
+            // ultimo nro de operacion de venta
+            $entity->setNroOperacion( $param->getUltimoNroOperacionVenta() + 1 );
+        }  
+        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
+        $entity->setMoneda( $moneda );
+        $form = $this->createCreateForm($entity,'new');     
+        return $this->render('VentasBundle:Venta:new.html.twig', array(            
+            'entity' => $entity,
+            'form' => $form->createView(),
+        ));
+
+
         $puntosVenta = $this->getUser()->getPuntosVenta($session->get('unidneg_id'));
         if (!$puntosVenta) {
             $this->addFlash('error', 'No posee ningún punto de venta asigando.');
@@ -130,8 +155,7 @@ class VentaController extends Controller
     public function createAction(Request $request) {
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
-        $puntosVenta = $this->getUser()->getPuntosVenta($session->get('unidneg_id'));
-       
+        
         $entity = new Venta();
         $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
@@ -141,16 +165,18 @@ class VentaController extends Controller
             try {
                 // set fecha de operacion
                 $entity->setFechaVenta( new \DateTime() );  
-                // set punto de venta desde sessionados
-                $puntoVenta = $em->getRepository('ConfigBundle:PuntoVenta')->find( $session->get('puntoVentaActual')['id'] );
-                $entity->setPuntoVenta( $puntoVenta );           
-                $nroOperacion = $puntoVenta->getUltimoNroOperacionVenta() + 1;     
-                $entity->setNroOperacion( $nroOperacion );
-                // update ultimoNroOperacion en puntoventa
-                $puntoVenta->setUltimoNroOperacionVenta($nroOperacion);
+                // set unidad negocio desde session
+                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($session->get('unidneg_id'));
+                $entity->setUnidadNegocio($unidneg);    
+                // set nro operacion
+                $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
+                $nroOperacion = $param->getUltimoNroOperacionVenta() + 1;
+                $entity->setNroOperacion( $nroOperacion );                    
+                // update ultimoNroOperacion en parametrizacion
+                $param->setUltimoNroOperacionVenta($nroOperacion);
 
                 $em->persist($entity);            
-                $em->persist($puntoVenta);            
+                $em->persist($param);            
                 $em->flush();            
 
                 // Descuento de stock 
@@ -182,8 +208,8 @@ class VentaController extends Controller
                 }                                                            
 
                 $em->getConnection()->commit();
-                $this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> '.$entity->getPuntoVenta().' #'.$entity->getNroOperacion().'</span>');
-                return $this->redirect($this->generateUrl('ventas'));
+                $this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
+                return $this->redirect($this->generateUrl('ventas_venta'));
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());
@@ -196,8 +222,7 @@ class VentaController extends Controller
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);            
         } 
-        return $this->render('VentasBundle:Venta:new.html.twig', array(
-            'puntosVenta' => $puntosVenta,
+        return $this->render('VentasBundle:Venta:new.html.twig', array(            
             'entity' => $entity,
             'form' => $form->createView(),
         ));

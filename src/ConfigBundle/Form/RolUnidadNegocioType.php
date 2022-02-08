@@ -17,8 +17,7 @@ class RolUnidadNegocioType extends AbstractType
                     'class' => 'ConfigBundle:UnidadNegocio','choice_label' => 'empresaUnidad', 'required' =>true))  
             ->add('rol','entity',array('label'=>'Rol:',
                     'class' => 'ConfigBundle:Rol', 'required' =>true))  
-            ->add('depositos', null, array('label' => 'Depositos:', 'required' => false, 'multiple' => true))
-            ->add('puntosVenta', null, array('label' => 'Puntos de Venta:', 'required' => false, 'multiple' => true))            
+            ->add('depositos', null, array('label' => 'Depositos:', 'required' => false, 'multiple' => true))                        
         ;
     }
     

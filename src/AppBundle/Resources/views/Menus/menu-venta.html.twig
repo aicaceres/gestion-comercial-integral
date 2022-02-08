@@ -85,7 +85,7 @@
 				</ul>
 			</li>
 		{% endif %}
-        {% if app.user.access(app.session.get('unidneg_id'),'ventas_parametros') %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_parametrizacion') %}
 			<li id="parametrizacion"><a href="{{path('ventas_parametrizacion')}}" class="elements">Parametrización</a></li>
 		{% endif %}
 	</ul>

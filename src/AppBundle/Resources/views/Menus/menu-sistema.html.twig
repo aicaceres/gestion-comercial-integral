@@ -14,14 +14,7 @@
         {% endif %}               
         {% if app.user.access(app.session.get('unidneg_id'),'sistema_centrocosto') %}
         <li id="centro-costo"><a href="{{path('sistema_centrocosto')}}" class="elements">Centros de Costo</a></li>
-        {% endif %}   
-        <li>&nbsp;</li>
-        {% if app.user.access(app.session.get('unidneg_id'),'sistema_puntoventa') %}
-            <li id="punto-venta">
-                <a href="{{path('sistema_puntoventa')}}" class="elements">Puntos de Venta</a>
-            </li>
-        {% endif %}
-
+        {% endif %}           
 
         <li>&nbsp;</li>
         {% if app.user.access(app.session.get('unidneg_id'),'sistema_parametro') %}
