@@ -278,4 +278,22 @@ class VentaController extends Controller
         return new Response($nro);
     }
 
+    /**
+    * @Route("/login", name="ventas_login")
+    */
+    public function loginAction() {                        
+        return $this->render('VentasBundle:Venta:login.html.twig');
+    }
+
+    /**
+    * @Route("checkLogin", name="ventas_login_check")
+     */
+    public function checkLoginAction(){
+        $msg = 'OK';
+        $partial = $this->renderView('VentasBundle:Venta:login.html.twig');
+        $result = array('msg'=>$msg, 'partial' => $partial );
+        return new Response( json_encode($result));
+    }
+
+
 }

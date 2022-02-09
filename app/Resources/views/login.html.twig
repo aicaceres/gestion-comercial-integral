@@ -29,7 +29,7 @@
                 <br clear="all" />
                 {% if error %}
                     <div>
-                        <div class="loginmsg">{{ error.message|trans }}</div>
+                        <div class="loginmsg">{{ error.message | replace({"Bad credentials." : "Ingrese Usuario y Contraseña válidos."}) }}</div>
                     </div><!--nousername-->
                 {% endif %}
                 <div class="nousername">
@@ -59,6 +59,7 @@
                     </div>
                         <input type="hidden" name="empresa" id="empresa" value="">
                         <input type="hidden" name="unidad" id="unidad" value="">
+                        <input type="hidden" name="_target_path" value="/" />   
                     <button>Ingresar</button>
                     <div class="keep hidden"><input type="checkbox" checked="checked" id="remember_me" name="_remember_me" /> No cerrar sesión</div>
                 </form>

@@ -26,9 +26,15 @@
             <label><strong>Fecha Venta: </strong></label>
             <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
             <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
-            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
-        </div>        
-    </form>
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>            
+        </div>          
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') %} 
+        <a href="javascript:void(0)" data-url="{{ path('ventas_venta_new') }}" id="venta-launcher" class="btn btn_blue btn_dollartag floatright " data-login="{{ path('ventas_login')}}" title="ctrl + alt + V" >
+            <span style="font-size: 14px;">NUEVA VENTA</span>
+        </a>
+        {% endif %} 
+    </form>   
+
 </div><!-- button -->     
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
@@ -42,11 +48,7 @@
                 {% if not owns %}
                 <th>Usuario</th>
                 {% endif %}
-                <th class="nosort actionbutton addbutton">
-                   {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') %}
-                    <a class="editar create" href="{{ path('ventas_venta_new') }}">Nueva Venta</a>
-                    {% else %} &nbsp; {% endif %} 
-                </th>
+                <th class="nosort actionbutton addbutton">&nbsp;</th>
             </tr>
         </thead>
         <tbody>
@@ -63,10 +65,6 @@
                 {% endif %}
                 <td class="buttons">                    
                      <a href="{{ path('ventas_venta_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Venta"></a>
-                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_cancel') %}
-                    <a style="display:none" href="javascript:void(0)" url="{{ path('ventas_factura_cancel', { 'id': entity.id }) }}" title="Cancelar"
-                       class="cancelFactura btn btnaction btn_trash"></a>
-                    {% endif %}
                 </td>
             </tr>
            {% endfor %}
@@ -78,10 +76,24 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($){
+    $(document).on('keydown',function(e){ detectarControles(e); })
     $('#selectUser').change(function(){ 
         $('#searchform').submit();
     }); 
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('#venta-louncher').on('click', function(){
+        const url_login = $(this).data('login');    
+        const url = $(this).data('url');   
+        $('#popup')
+            .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
+            .load( url_login , function(){
+                // foco en password 
+                $('#password').focus();   
+            })        
+            .dialog({
+                modal: true, autoOpen: true, title: "INGRESO A VENTAS", width: '450px', minHeight: 350           
+            }); 
+    });
     
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
@@ -103,17 +115,13 @@ jQuery(document).ready(function($){
         }); 
         $('#datalist').val(JSON.stringify(datos));
     });   
-   
-   /*$('#dyntable2 tr td.estado').each(function(){
-       checkButtons($(this));
-   });*/
-  function checkButtons(estado){
-      txt = estado.html();
-      buttons = estado.parent().find('.buttons');
-      buttons.children('.btnaction').hide();
-      if(txt=='FACTURADO' || txt=='ANULADO'){ buttons.find('.btn_folder').show();   }
-      else { buttons.find('.btn_pencil, .btn_trash').show();}
-  };      
+  function detectarControles(e) {
+    // ctrl + alt + V
+    if( e.ctrlKey && e.altKey && e.keyCode == 86 ){              
+        e.preventDefault();
+        $('#venta-louncher').trigger( "click" );        
+    }     
+}
 });
 </script>        
 {% endblock %}

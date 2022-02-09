@@ -22,6 +22,21 @@ jQuery(function($){
         yearSuffix: ''
     };
     $.datepicker.setDefaults($.datepicker.regional['es']);
+    
+    // LOGUEO PARA VENTA RAPIDA
+    $(document).on('click','#venta-launcher', function(){
+        const url_login = $(this).data('login');             
+        $('#popup')            
+            .load( url_login , function(){
+                // foco en password 
+                $('#password').focus();                   
+            })        
+            .dialog({
+                modal: true, autoOpen: false, title: "INGRESO A VENTAS", width: '450px', minHeight: 350           
+            }); 
+        $('#popup').dialog('open');
+    });
+    
 });
 
 function checknumero(obj){    
@@ -282,7 +297,7 @@ jQuery(document).ready(function(){
             return false;
         });
     });
-        
+            
         
  /// Cancelar edición
   /*  jQuery(document).keyup(function(e) {

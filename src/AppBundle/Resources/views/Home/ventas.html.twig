@@ -8,11 +8,16 @@
 {% block contentwrapper %}
     {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
+<div>
     <div class="two_third dashboard_left">              
         <ul class="shortcuts">         
-          <li><a id="venta-new" href="{{ path('ventas_venta_new') }}" data-url="" class="factura"><span>Nueva Venta</span></a></li>
+          <li>
+            <a href="javascript:void(0)" data-url="{{ path('ventas_venta_new') }}" id="venta-launcher" data-login="{{ path('ventas_login')}}" class="factura"><span>Nueva Venta</span>
+            </a>
+          </li>
         </ul>
         <br clear="all" />
     </div><!--two_third dashboard_left -->
+</div>
 </div>
 {% endblock %}

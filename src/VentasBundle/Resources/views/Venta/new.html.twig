@@ -127,7 +127,7 @@
             <br clear="all" /> 
             <div class="actionbutton">
                 <button class="guardar tabbable" type="submit" >Guardar</button>
-                <a class="cancelar tabbable" type="button" href="{{ path('ventas')}}">Cancelar</a>
+                <a class="cancelar tabbable" type="button" href="{{ path('ventas_venta')}}">Cancelar</a>
             </div>
         </fieldset>
         
@@ -500,7 +500,6 @@ function openModalProducto(obj){
 }
 
 function detectarControles(e) {
-console.log( e.keyCode )
     if( e.ctrlKey && e.altKey ){
         // ctrl + alt + C
         if( e.keyCode == 67 ){
@@ -512,6 +511,7 @@ console.log( e.keyCode )
             e.preventDefault();
             openModal($('#ventasbundle_venta_formapago'))
         }        
+        // ctrl + alt + G
         if( e.keyCode == 71 ){
             e.preventDefault();
             $('#ventasbundle_venta').submit();

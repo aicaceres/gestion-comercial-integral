@@ -2282,6 +2282,8 @@ button.addrubro {
 .stdtable.noaction tbody tr td.ivaTd,.stdtable.noaction tbody tr td.dtoTd
 { text-align: right; }
 
+.ui-dialog { clear: both; }
+
 .ui-dialog-titlebar {
     color: #32415A;
     font-family: 'RobotoBoldCondensed',Arial,Helvetica,sans-serif;
