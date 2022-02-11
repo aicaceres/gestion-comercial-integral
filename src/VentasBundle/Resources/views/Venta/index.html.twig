@@ -7,7 +7,9 @@
 {% block contentwrapper %}
 {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-<div>      
+<div>    
+<!-- Require login para ir a venta -->
+{{ app.session.set('checkrequired','1') }}
     <form id="searchform" action="{{ path('ventas_venta') }}" method="get">   
         {% if not owns %}     
         <div style="display: inline-block; margin-bottom: 10px;">
@@ -29,7 +31,7 @@
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>            
         </div>          
         {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') %} 
-        <a href="javascript:void(0)" data-url="{{ path('ventas_venta_new') }}" id="venta-launcher" class="btn btn_blue btn_dollartag floatright " data-login="{{ path('ventas_login')}}" title="ctrl + alt + V" >
+        <a href="{{ path('ventas_venta_new') }}" id="venta-launcher" class="btn btn_blue btn_dollartag floatright " title="ctrl + alt + V">
             <span style="font-size: 14px;">NUEVA VENTA</span>
         </a>
         {% endif %} 
@@ -80,21 +82,8 @@ jQuery(document).ready(function($){
     $('#selectUser').change(function(){ 
         $('#searchform').submit();
     }); 
-    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
-    $('#venta-louncher').on('click', function(){
-        const url_login = $(this).data('login');    
-        const url = $(this).data('url');   
-        $('#popup')
-            .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
-            .load( url_login , function(){
-                // foco en password 
-                $('#password').focus();   
-            })        
-            .dialog({
-                modal: true, autoOpen: true, title: "INGRESO A VENTAS", width: '450px', minHeight: 350           
-            }); 
-    });
-    
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});    
+
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
     
@@ -117,9 +106,8 @@ jQuery(document).ready(function($){
     });   
   function detectarControles(e) {
     // ctrl + alt + V
-    if( e.ctrlKey && e.altKey && e.keyCode == 86 ){              
-        e.preventDefault();
-        $('#venta-launcher').trigger( "click" );        
+    if( e.ctrlKey && e.altKey && e.keyCode == 86 ){     
+        window.location.href = "{{ path('ventas_venta_new') }}";
     }     
 }
 });

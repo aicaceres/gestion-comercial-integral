@@ -32,12 +32,12 @@ class FacturaController extends Controller {
         $cliId = $request->get('cliId');
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
-        $clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
+        /*$clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array('activo' => 1), array('nombre' => 'ASC'));*/
         $entities = $em->getRepository('VentasBundle:Factura')->findByCriteria($unidneg, $cliId, $desde, $hasta);
         //$entities = $em->getRepository('VentasBundle:Factura')->findByUnidadNegocio($this->get('session')->get('unidneg_id'));
         return $this->render('VentasBundle:Factura:index.html.twig', array(
                     'entities' => $entities,
-                    'clientes' => $clientes,
+                    //'clientes' => $clientes,
                     'cliId' => $cliId,
                     'desde' => $desde,
                     'hasta' => $hasta

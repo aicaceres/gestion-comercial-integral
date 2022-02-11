@@ -8,6 +8,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
+use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 
 use ConfigBundle\Controller\UtilsController;
 use AppBundle\Entity\Stock;
@@ -80,7 +82,7 @@ class VentaController extends Controller
 //var_dump(gethostname());
 
         $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta_new');
         $entity = new Venta();
         $entity->setFechaVenta( new \DateTime() );                
         $em = $this->getDoctrine()->getManager();
@@ -99,49 +101,8 @@ class VentaController extends Controller
         }  
         $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
         $entity->setMoneda( $moneda );
-        $form = $this->createCreateForm($entity,'new');     
+        $form = $this->createCreateForm($entity,'new');           
         return $this->render('VentasBundle:Venta:new.html.twig', array(            
-            'entity' => $entity,
-            'form' => $form->createView(),
-        ));
-
-
-        $puntosVenta = $this->getUser()->getPuntosVenta($session->get('unidneg_id'));
-        if (!$puntosVenta) {
-            $this->addFlash('error', 'No posee ningún punto de venta asigando.');
-            $session->set('puntoVentaActual',  array('id' => 0, 'nombre' => ''));
-            return $this->redirect($request->headers->get('referer'));
-        }        
-
-        $entity = new Venta();
-        $entity->setFechaVenta( new \DateTime() );                
-        $em = $this->getDoctrine()->getManager();
-        // Set cliente segun parametrizacion
-        $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
-        if($param){
-            $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
-            $entity->setCliente($cliente);
-            $deposito = $em->getRepository('AppBundle:Deposito')->find($param->getVentasDepositoBydefault());
-            $entity->setDeposito($deposito);
-            // set datos asociados al cliente con su definicion por defecto           
-            $entity->setFormaPago( $cliente->getFormaPago() );
-            $entity->setPrecioLista( $cliente->getPrecioLista() );
-            $entity->setTransporte( $cliente->getTransporte() );
-        }  
-        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
-        $entity->setMoneda( $moneda );
-
-        if (null === $session->get('puntoVentaActual')) {
-            $session->set('puntoVentaActual', array('id' => 0, 'nombre' => ''));            
-        }
-        if ($session->get('puntoVentaActual')['id'] != 0) {
-            $ptoActual = $em->getRepository('ConfigBundle:PuntoVenta')->find( $session->get('puntoVentaActual')['id']);
-            $entity->setNroOperacion( $ptoActual->getUltimoNroOperacionVenta() + 1 );
-        }                
-
-        $form = $this->createCreateForm($entity,'new');     
-        return $this->render('VentasBundle:Venta:new.html.twig', array(
-            'puntosVenta' => $puntosVenta,
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -208,8 +169,10 @@ class VentaController extends Controller
                 }                                                            
 
                 $em->getConnection()->commit();
-                $this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
-                return $this->redirect($this->generateUrl('ventas_venta'));
+                //$this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
+                // requiere login al volver a ingresar a venta
+                $this->get('session')->set('checkrequired','1');
+                return $this->redirect($this->generateUrl('ventas_venta_new'));
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());
@@ -222,6 +185,8 @@ class VentaController extends Controller
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);            
         } 
+        // no requiere login si vuelve con error
+        $this->get('session')->set('checkrequired','0');
         return $this->render('VentasBundle:Venta:new.html.twig', array(            
             'entity' => $entity,
             'form' => $form->createView(),
@@ -242,41 +207,9 @@ class VentaController extends Controller
         return $form;
     }
 
-
-    /**
-     * @Route("/renderPuntosVenta", name="ventas_render_puntosventa")
-     * @Method("GET")
-     */
-    public function renderPuntosVentaAction(Request $request)
-    {
-        $unidneg_id = $this->get('session')->get('unidneg_id');
-        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
-        $puntos = $this->getUser()->getPuntosVenta($unidneg_id);
-        $partial = $this->renderView(
-            'VentasBundle:Venta:_partial-set-puntoventa.html.twig',
-            array('puntos' => $puntos)
-        );
-        return new Response($partial);
-    }
-    /**
-     * @Route("/setPuntosVenta", name="ventas_set_puntosventa")
-     * @Method("GET")
-     */
-    public function setPuntosVentaAction(Request $request)
-    {
-        $session = $this->get('session');
-        $id = $request->get('puntoVenta');
-        $em = $this->getDoctrine()->getManager();
-        $punto = $em->getRepository('ConfigBundle:PuntoVenta')->find($id);
-        $data = array('id' => 0, 'nombre' => '');
-        $nro = null;
-        if ($punto) {
-            $data = array('id' => $id, 'nombre' => $punto->getNombre());
-            $nro = $punto->getUltimoNroOperacionVenta()+1;
-        }
-        $session->set('puntoVentaActual', $data);
-        return new Response($nro);
-    }
+/**
+* LOGIN PARA VENTAS
+ */
 
     /**
     * @Route("/login", name="ventas_login")
@@ -288,10 +221,36 @@ class VentaController extends Controller
     /**
     * @Route("checkLogin", name="ventas_login_check")
      */
-    public function checkLoginAction(){
-        $msg = 'OK';
-        $partial = $this->renderView('VentasBundle:Venta:login.html.twig');
-        $result = array('msg'=>$msg, 'partial' => $partial );
+    public function checkLoginAction(Request $request){               
+        $username = strtoupper($request->get('username')) ;
+        $password = trim($request->get('password'))  ;
+        $em = $this->get('doctrine')->getEntityManager();
+        $reload = false;
+        $user = $em->getRepository('ConfigBundle:Usuario')->findOneBy(array("username"=>$username));
+        if ($user) {
+            // Get the encoder for the users password
+            $encoder = $this->get('security.encoder_factory')->getEncoder($user);            
+            if ($encoder->isPasswordValid($user->getPassword(), $password, null)) {
+                // verificar si es el mismo usuario
+                if( $this->getUser()->getUsername() !== $username ){
+                    // loguear al nuevo usuario 
+                    $token = new UsernamePasswordToken($user, null, 'secured_area', $user->getRoles());
+                    $this->get('security.context')->setToken($token);
+                    $this->get('session')->set('_security_secured_area', serialize($token));
+                    $event = new InteractiveLoginEvent($request, $token);
+                    $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+                    // RECARGAR LA PÁGINA PARA CAMBIAR USUARIO
+                    $reload = true; 
+                    // No requiere login al recargar    
+                    $this->get('session')->set('checkrequired','0');               
+                }               
+                $result = array( 'msg' => 'OK', 'url' => $this->generateUrl('ventas_venta_new'), 'reload' => $reload);                
+            }else{
+                $result = array( 'msg' => 'Ingrese una contraseña válida!', 'field'=>'password' );
+            }
+        }else{
+            $result = array( 'msg' => 'Ingrese un usuario válido!', 'field'=>'username' );
+        }    
         return new Response( json_encode($result));
     }
 

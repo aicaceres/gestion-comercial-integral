@@ -206,7 +206,6 @@ function cargarCheques(){
                     jQuery(this).find('input[type="checkbox"]:checked').each(function() {
                         jQuery.get($getDatosCheque,{id: jQuery(this).attr('id') },
                             function(data){
-                             //   console.log(data);
                                 addNewItem(data);
                         }, "json");
                     });                    

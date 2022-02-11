@@ -405,6 +405,16 @@ class ClienteController extends Controller {
         }
     }
 
+   /**
+     * @Route("/selectClientesAjax", name="select_clientes_ajax")
+     * @Method("GET")
+     */
+    public function selectClientesAjaxAction(Request $request) {        
+        $em = $this->getDoctrine()->getManager();
+        $facturas = $em->getRepository('VentasBundle:Factura')->findByClienteId($id);
+        return new JsonResponse($facturas);
+    }
+
     /**
      * PAGOS
      */

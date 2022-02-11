@@ -747,8 +747,6 @@ class ProductoController extends Controller {
     public function selectProductosAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
         $term = $request->get('term');
-        var_dump($term);
-        die;
         $productos = $em->getRepository('AppBundle:Producto')->getProductosByTerm($term);
         $array = array();
         foreach ($productos as $prod) {

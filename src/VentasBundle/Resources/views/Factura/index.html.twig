@@ -22,12 +22,7 @@
         <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Cliente:</strong></label>
-            <select class="uniformselect" id="selectCliente" name="cliId">
-                <option value="0">Todos</option>
-            {% for cli in clientes %}
-                <option value="{{cli.id}}" {% if cli.id==cliId %} selected="selected" {% endif %}> {{cli.nombre}}</option>
-            {% endfor %}
-            </select>  
+            <select class="select2" id="selectCliente" url="{{ path('ventas_factura')}}" name="cliId"></select>  
         </div>    
         <div style="display: inline-block; margin-right: 30px;">     
             &nbsp;&nbsp;&nbsp;
@@ -85,6 +80,13 @@ jQuery(document).ready(function($){
     }); 
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     
+    $('#selectCliente').select2({
+        ajax: {
+            url: $(this).attr('url'),
+            dataType: 'json'
+            // Additional AJAX parameters go here; see the end of this chapter for the full code of this example
+        }
+    });
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
     

@@ -23,21 +23,48 @@ jQuery(function($){
     };
     $.datepicker.setDefaults($.datepicker.regional['es']);
     
-    // LOGUEO PARA VENTA RAPIDA
-    $(document).on('click','#venta-launcher', function(){
-        const url_login = $(this).data('login');             
-        $('#popup')            
-            .load( url_login , function(){
-                // foco en password 
-                $('#password').focus();                   
-            })        
-            .dialog({
-                modal: true, autoOpen: false, title: "INGRESO A VENTAS", width: '450px', minHeight: 350           
-            }); 
-        $('#popup').dialog('open');
-    });
-    
 });
+// variable global para definir si es valido el login en venta
+let validlogin = false;    
+function checkLoginVentas(url_login,referer) {        
+    jQuery('#popup').html('');        
+    jQuery('#popup')            
+        .load( url_login , function(){
+            // foco en password         
+            jQuery('#password').focus();    
+            const url_check = jQuery('#login').attr('action');                                
+            jQuery('#login').on('submit', function (e) {
+                e.preventDefault();    
+                data = { username: jQuery('#username').val(), password: jQuery('#password').val() };
+                // validar usuario y password                      
+                jQuery.getJSON(url_check, data, function (data) {               
+                    if (data.msg == 'OK') {
+                        validlogin = true;
+                        jQuery('#popup').dialog('close');
+                        if(data.reload) {
+                            window.location.reload();
+                        }
+                        jQuery('#ventasbundle_venta_cliente').focus();                        
+                    } else {
+                        jQuery('.loginmsg').html(data.msg);
+                        jQuery('.notiflogin').removeClass('hidden'); 
+                        jQuery('#' + data.field).focus();
+                        return false;                           
+                    }                            
+                });
+            })                    
+        })        
+        .dialog({
+            modal: true, autoOpen: false, title: "INGRESO A VENTAS", width: '450px', minHeight: 380,
+            close: function (event, ui) {
+                event.preventDefault();                
+                if (!validlogin) {
+                    window.location.href = referer;
+                }     
+            }           
+        }); 
+    jQuery('#popup').dialog('open');
+}
 
 function checknumero(obj){    
     num = obj.val().replace(',','.');

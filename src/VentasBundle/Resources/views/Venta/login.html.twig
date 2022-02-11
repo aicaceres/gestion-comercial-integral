@@ -6,21 +6,23 @@
     
 <div class="loginbox">
     <div class="loginboxinner">
-                
-        <form id="login" action="{{ path("usuario_login_check") }}" method="post">
+        <div class="notiflogin hidden">
+            <div class="loginmsg"></div>
+        </div>        
+        <form id="login" action="{{ path("ventas_login_check") }}" method="post">
             <div class="username">
                 <div class="usernameinner">
-                    <input type="text" size="25" required="required" name="_username" id="username" value="{{ app.user.username }}" onfocus="this.select();" />
+                    <input type="text" size="25" required="required" name="_username" id="username" value="{{ app.user.username }}" onfocus="this.select();" style="text-transform:uppercase;" />
                 </div>          
             </div>
             <div class="password">
                 <div class="passwordinner">
-                    <input type="password" required="required" name="_password" id="password" autocomplete="off" autofocus="autofocus" />
+                    <input type="password" required="required" name="_password" id="password" autocomplete="off" autofocus="autofocus" onfocus="this.select();"/>
                 </div>
             </div>
                 <input type="hidden" name="empresa" id="empresa" value="">
                 <input type="hidden" name="unidad" id="unidad" value="">
-                <input type="hidden" name="_target_path" value="/venta/newVenta" />                
+                <input type="hidden" name="_target_path" value="/venta/newVenta" />          
             <button type="submit" id="confirmar-logueo">Confirmar</button>                    
         </form>
     </div><!--loginboxinner-->
