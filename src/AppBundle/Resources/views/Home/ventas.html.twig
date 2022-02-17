@@ -24,9 +24,9 @@
           </li>
 {% endif %}
 {% if app.session.get('caja_abierta') %}
-    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cobro') %} 
+    {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura') %} 
             <li>
-                <a href="{{ path('ventas_venta_new') }}" class="pago"><span>Nuevo Cobro</span>
+                <a href="{{ path('ventas_factura_new') }}" class="pago"><span>Nuevo Cobro</span>
                 </a>
             </li>
     {% endif %}

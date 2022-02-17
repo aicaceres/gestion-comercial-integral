@@ -14,26 +14,26 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use ConfigBundle\Controller\UtilsController;
 
 /**
- * @Route("/cobro")
+ * @Route("/facturaVentas")
  */
 class CobroController extends Controller
 {
 
     /**
-     * @Route("/", name="ventas_cobro")
+     * @Route("/", name="ventas_factura")
      * @Method("GET")
      * @Template()
      */
     public function indexAction(Request $request) {
         $unidneg = $this->get('session')->get('unidneg_id');
         $user = $this->getUser();
-        UtilsController::haveAccess($user, $unidneg, 'ventas_cobro');
+        UtilsController::haveAccess($user, $unidneg, 'ventas_factura');
         $em = $this->getDoctrine()->getManager();                
         
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
         
-        if( $user->getAccess($unidneg, 'ventas_cobro_own') && !$user->isAdmin($unidneg)){
+        if( $user->getAccess($unidneg, 'ventas_factura_own') && !$user->isAdmin($unidneg)){
             $id = $user->getId();
             $owns = true;
         }else{

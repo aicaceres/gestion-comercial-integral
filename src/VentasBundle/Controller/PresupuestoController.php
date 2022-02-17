@@ -12,8 +12,6 @@ use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\Factura;
 use VentasBundle\Form\FacturaType;
 use VentasBundle\Entity\FacturaElectronica;
-//PUNTO VENTA
-use VentasBundle\Form\PuntoVentaType;
 
 /**
  * @Route("/presupuestoVentas")

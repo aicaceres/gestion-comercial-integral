@@ -12,8 +12,6 @@ use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\Factura;
 use VentasBundle\Form\FacturaType;
 use VentasBundle\Entity\FacturaElectronica;
-//PUNTO VENTA
-use VentasBundle\Form\PuntoVentaType;
 
 /**
  * @Route("/facturaVentas")
@@ -26,6 +24,33 @@ class FacturaController extends Controller {
      * @Template()
      */
     public function indexAction(Request $request) {
+        $unidneg = $this->get('session')->get('unidneg_id');
+        $user = $this->getUser();
+        UtilsController::haveAccess($user, $unidneg, 'ventas_factura');
+        $em = $this->getDoctrine()->getManager();                
+        
+        $desde = $request->get('desde');
+        $hasta = $request->get('hasta');
+        
+        if( $user->getAccess($unidneg, 'ventas_venta_own') && !$user->isAdmin($unidneg)){
+            $id = $user->getId();
+            $owns = true;
+        }else{
+            $id = $request->get('userId');
+            $owns = false;
+        }        
+        $entities = $em->getRepository('VentasBundle:Venta')->findByCriteria($unidneg, $desde, $hasta, $id);
+        $users = $em->getRepository('VentasBundle:Venta')->getUsers();                
+        return $this->render('VentasBundle:Venta:index.html.twig', array(
+                    'entities' => $entities,
+                    'id' => $id,
+                    'owns' => $owns,
+                    'users' => $users,                    
+                    'desde' => $desde,
+                    'hasta' => $hasta
+        ));
+
+
         $unidneg = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_factura');
         $em = $this->getDoctrine()->getManager();
