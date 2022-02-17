@@ -5,7 +5,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class PuntoVentaType extends AbstractType
+class CajaType extends AbstractType
 {
         /**
      * @param FormBuilderInterface $builder
@@ -26,7 +26,7 @@ class PuntoVentaType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => 'ConfigBundle\Entity\PuntoVenta'
+            'data_class' => 'ConfigBundle\Entity\Caja'
         ));
     }    
 
@@ -35,6 +35,6 @@ class PuntoVentaType extends AbstractType
      */
     public function getName()
     {
-        return 'configbundle_puntoventa';
+        return 'configbundle_caja';
     }
 }

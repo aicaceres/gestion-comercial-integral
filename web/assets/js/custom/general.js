@@ -21,15 +21,17 @@ jQuery(function($){
         showMonthAfterYear: false,
         yearSuffix: ''
     };
-    $.datepicker.setDefaults($.datepicker.regional['es']);
+    $.datepicker.setDefaults($.datepicker.regional['es']);      
     
 });
+
 // variable global para definir si es valido el login en venta
-let validlogin = false;    
+let validlogin = false;  
+// lanza popup para login de ventas  
 function checkLoginVentas(url_login,referer) {        
     jQuery('#popup').html('');        
     jQuery('#popup')            
-        .load( url_login , function(){
+        .load(url_login, function () {            
             // foco en password         
             jQuery('#password').focus();    
             const url_check = jQuery('#login').attr('action');                                
@@ -63,6 +65,64 @@ function checkLoginVentas(url_login,referer) {
                 }     
             }           
         }); 
+    jQuery('#popup').dialog('open');
+}
+
+// lanza popup para apertura de caja 
+function aperturaCajaVentas(url, cobro=false, caja=1 ) {    
+    let horaRefresh = null;
+    data = { 'id': caja };    
+    jQuery('#popup').html('');        
+    jQuery('#popup')            
+        .load(url, data, function () {      
+            // refresca la hora en un campo fecha-hora            
+            horaRefresh = setInterval(function () {
+                jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
+            }, 1000);            
+            // foco en monto         
+            jQuery('#ventasbundle_apertura_montoApertura').focus();      
+            jQuery('#ir_a_cobro').val(cobro);         
+        })                
+    .dialog({
+        modal: true, autoOpen: false, title: "APERTURA DE CAJA", width: '450px',          
+        close: function (event, ui) {
+            event.preventDefault();    
+            clearInterval(horaRefresh);            
+            if( reload )               
+                window.location.href = referer;   
+        }           
+    }); 
+    jQuery('#popup').dialog('open');
+}
+// lanza popup para cierre de caja 
+function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {    
+    let horaRefresh = null;
+    data = { 'id': caja };    
+    jQuery('#popup').html('');        
+    jQuery('#popup')            
+        .load(url, data, function () {      
+            // refresca la hora en un campo fecha-hora            
+            horaRefresh = setInterval(function () {
+                jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
+            }, 1000);            
+            // confirm para el cierre
+            jQuery('#ventasbundle_cierre').on('submit', function () {
+                if (!confirm('CONFIRMA EL CIERRE DE CAJA!\n\n Este movimiento no puede ser modificado!'))
+                    return false;                    
+            })
+            // foco en monto         
+            jQuery('#ventasbundle_cierre_montoCierre').focus();      
+            //reload = true;           
+        })                
+    .dialog({
+        modal: true, autoOpen: false, title: "CIERRE DE CAJA", width: '450px',          
+        close: function (event, ui) {
+            event.preventDefault();    
+            clearInterval(horaRefresh);            
+            if( reload )               
+                window.location.href = referer;   
+        }           
+    }); 
     jQuery('#popup').dialog('open');
 }
 

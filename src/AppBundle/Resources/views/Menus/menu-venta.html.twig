@@ -10,30 +10,38 @@
 					<li id="venta">
 						<a href="{{ path('ventas_venta') }}">Ventas</a>
 					</li>															
+					<li id="presupuesto">
+						<a href="{{ path('ventas_presupuesto') }}">Presupuestos</a>
+					</li>															
 				</ul>
 			</li>
 		{% endif %}
-		{% if app.user.access(app.session.get('unidneg_id'),'ventas_factura') %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja') %}
 			<li>
 				<a
-					href="#item_facturacion"
-					class="elements">Facturación</a>
-				<span
-					class="arrow"></span>
-				<ul
-					id="item_facturacion">					
-					<li id="factura">
-						<a href="{{path('ventas_factura')}}">Facturas de Venta</a>
+					href="#item_caja"
+					class="elements">Caja</a>
+				<span class="arrow"></span>
+				<ul id="item_caja">
+                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_cobro') %}
+					<li id="cobro">
+						<a href="{{ path('ventas_cobro') }}">Cobro de Ventas</a>
+					</li>	
+                    {% endif %}	
+
+                    <li id="notadebcred">
+						<a href="{{path('ventas_notadebcred')}}">Notas de Debito/Crédito</a>
 					</li>
-					<li
-						id="notadebcred">
-						<a
-							href="{{path('ventas_notadebcred')}}">Notas de Debito/Crédito</a>
-					</li>
+
+                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') or app.user.access(app.session.get('unidneg_id'),'ventas_caja_cierre') %}
+					<li id="apertura">
+						<a href="{{ path('ventas_apertura') }}">Apertura / Cierre</a>
+					</li>	
+                    {% endif %}														
 				</ul>
 			</li>
 		{% endif %}
-
+	
 		{% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente') %}
 			<li>
 				<a

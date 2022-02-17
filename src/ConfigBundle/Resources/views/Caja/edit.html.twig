@@ -2,13 +2,13 @@
 
 {% block pageheader %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Administración de Puntos de Venta</h1>
+    <h1 class="pagetitle">Administración de Cajas</h1>
 </div><!--pageheader-->
 {% endblock %}
 
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nuevo Punto de Venta' }}</h1>
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nueva Caja' }}</h1>
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
  {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
@@ -28,7 +28,7 @@
             <br clear="all" /> 
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
-                <a class="cancelar" type="button" href="{{ path('sistema_puntoventa')}}">Cancelar</a>
+                <a class="cancelar" type="button" href="{{ path('sistema_caja')}}">Cancelar</a>
             </div>
         </fieldset>
 {{ form_end(form) }}
@@ -38,7 +38,7 @@
 {% block extra_javascripts %}
 <script type="text/javascript">
 jQuery(function ($) {
-    $('#configbundle_puntoventa_nombre').on('keyup',function(e){
+    $('#configbundle_caja_nombre').on('keyup',function(e){
         value = $(this).val();
         $(this).val(value.replace(' ',''));
     });

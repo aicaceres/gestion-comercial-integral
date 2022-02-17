@@ -11,12 +11,34 @@
 <div>
     <div class="two_third dashboard_left">              
         <ul class="shortcuts">         
-{% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') %} 
+{% if app.user.access(app.session.get('unidneg_id'),'ventas_venta') %} 
+
+          <li>
+            <a href="{{ path('ventas_presupuesto') }}" class="lista"><span>Presupuesto</span>
+            </a>
+          </li>
           <li>
             <a href="{{ path('ventas_venta_new') }}" id="venta-launcher" 
                     onClick="{{ app.session.set('checkrequired','1') }}" class="factura"><span>Nueva Venta</span>
             </a>
           </li>
+{% endif %}
+{% if app.session.get('caja_abierta') %}
+    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cobro') %} 
+            <li>
+                <a href="{{ path('ventas_venta_new') }}" class="pago"><span>Nuevo Cobro</span>
+                </a>
+            </li>
+    {% endif %}
+{% else %}
+    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %} 
+            <li>
+                {% set urlApertura = path('ventas_apertura_new') %}            
+                <a href="javascript:void(0)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')"  class="pago"><span>Nuevo Cobro</span>
+                </a>
+            </li>
+    {% endif %}
+
 {% endif %}
         </ul>
         <br clear="all" />

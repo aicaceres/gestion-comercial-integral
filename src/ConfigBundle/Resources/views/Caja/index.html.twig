@@ -1,8 +1,8 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Administración de Puntos de Venta</h1>
-    <span class="pagedesc">Listado de puntos de ventas del sistema</span>
+    <h1 class="pagetitle">Administración de Cajas</h1>
+    <span class="pagedesc">Listado de cajas para ventas del sistema</span>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -16,8 +16,8 @@
                 <th>Descripción</th>
                 <th style="width:15%;" class="nosort">Activo</th>
                 <th class="nosort actionbutton addbutton">
-                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_puntoventa_new') %}
-                    <a class="editar create" href="{{ path('sistema_puntoventa_new') }}">Agregar</a>
+                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_caja_new') %}
+                    <a class="editar create" href="{{ path('sistema_caja_new') }}">Agregar</a>
                     {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
@@ -29,11 +29,11 @@
                 <td>{{ entity.descripcion }}</td>
                 <td><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /></td>
                 <td>
-                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_puntoventa_edit') %}
-                    <a href="{{ path('sistema_puntoventa_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_caja_edit') %}
+                    <a href="{{ path('sistema_caja_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
                     {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_puntoventa_delete') %}
-                        <a href url="{{ path('sistema_puntoventa_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
+                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_caja_delete') %}
+                        <a href url="{{ path('sistema_caja_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
                     {% endif %}
                 </td>
             </tr>

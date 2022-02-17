@@ -4,7 +4,7 @@ namespace VentasBundle\Entity;
 use Doctrine\ORM\EntityRepository;
 use ConfigBundle\Controller\UtilsController;
 
-class VentaRepository extends EntityRepository {
+class CobroRepository extends EntityRepository {
 
     /**  Buscar ventas por criterio de filtro    */
     public function findByCriteria($unidneg, $desde = NULL, $hasta = NULL, $userId = NULL) {

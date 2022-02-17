@@ -4,12 +4,12 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 /**
- * ConfigBundle\Entity\PuntoVenta
+ * ConfigBundle\Entity\Caja
  *
- * @ORM\Table(name="punto_venta")
+ * @ORM\Table(name="caja")
  * @ORM\Entity()
  */
-class PuntoVenta
+class Caja
 {
     /**
      * @var integer $id
@@ -31,10 +31,9 @@ class PuntoVenta
     protected $descripcion;
 
     /**
-     * @var integer $ultimoNroOperacionVenta
-     * @ORM\Column(name="ultimo_nro_operacion_venta", type="integer")     
+     * @ORM\Column(name="abierta", type="boolean")
      */
-    protected $ultimoNroOperacionVenta = 0;
+    protected $abierta = false;    
 
     /**
      * @ORM\Column(name="activo", type="boolean")
@@ -46,23 +45,15 @@ class PuntoVenta
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
     protected $unidadNegocio;      
-    
+ 
     /**
-     * @ORM\ManyToMany(targetEntity="ConfigBundle\Entity\RolUnidadNegocio", mappedBy="puntosVenta")
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CajaApertura", mappedBy="caja",cascade={"remove"})
      */
-    protected $rolesUnidadNegocio;      
+    protected $aperturas;
 
     public function __toString() {
         return $this->nombre;
     } 
-
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->rolesUnidadNegocio = new \Doctrine\Common\Collections\ArrayCollection();
-    }
 
     /**
      * Get id
@@ -78,7 +69,7 @@ class PuntoVenta
      * Set nombre
      *
      * @param string $nombre
-     * @return PuntoVenta
+     * @return Caja
      */
     public function setNombre($nombre)
     {
@@ -101,7 +92,7 @@ class PuntoVenta
      * Set descripcion
      *
      * @param string $descripcion
-     * @return PuntoVenta
+     * @return Caja
      */
     public function setDescripcion($descripcion)
     {
@@ -124,7 +115,7 @@ class PuntoVenta
      * Set activo
      *
      * @param boolean $activo
-     * @return PuntoVenta
+     * @return Caja
      */
     public function setActivo($activo)
     {
@@ -147,7 +138,7 @@ class PuntoVenta
      * Set unidadNegocio
      *
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
-     * @return PuntoVenta
+     * @return Caja
      */
     public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
     {
@@ -167,58 +158,65 @@ class PuntoVenta
     }
 
     /**
-     * Add rolesUnidadNegocio
+     * Set abierta
      *
-     * @param \ConfigBundle\Entity\RolUnidadNegocio $rolesUnidadNegocio
-     * @return PuntoVenta
+     * @param boolean $abierta
+     * @return Caja
      */
-    public function addRolesUnidadNegocio(\ConfigBundle\Entity\RolUnidadNegocio $rolesUnidadNegocio)
+    public function setAbierta($abierta)
     {
-        $this->rolesUnidadNegocio[] = $rolesUnidadNegocio;
+        $this->abierta = $abierta;
 
         return $this;
     }
 
     /**
-     * Remove rolesUnidadNegocio
+     * Get abierta
      *
-     * @param \ConfigBundle\Entity\RolUnidadNegocio $rolesUnidadNegocio
+     * @return boolean 
      */
-    public function removeRolesUnidadNegocio(\ConfigBundle\Entity\RolUnidadNegocio $rolesUnidadNegocio)
+    public function getAbierta()
     {
-        $this->rolesUnidadNegocio->removeElement($rolesUnidadNegocio);
+        return $this->abierta;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->aperturas = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
-     * Get rolesUnidadNegocio
+     * Add aperturas
+     *
+     * @param \VentasBundle\Entity\CajaApertura $aperturas
+     * @return Caja
+     */
+    public function addApertura(\VentasBundle\Entity\CajaApertura $aperturas)
+    {
+        $this->aperturas[] = $aperturas;
+
+        return $this;
+    }
+
+    /**
+     * Remove aperturas
+     *
+     * @param \VentasBundle\Entity\CajaApertura $aperturas
+     */
+    public function removeApertura(\VentasBundle\Entity\CajaApertura $aperturas)
+    {
+        $this->aperturas->removeElement($aperturas);
+    }
+
+    /**
+     * Get aperturas
      *
      * @return \Doctrine\Common\Collections\Collection 
      */
-    public function getRolesUnidadNegocio()
+    public function getAperturas()
     {
-        return $this->rolesUnidadNegocio;
-    }
-
-    /**
-     * Set ultimoNroOperacionVenta
-     *
-     * @param integer $ultimoNroOperacionVenta
-     * @return PuntoVenta
-     */
-    public function setUltimoNroOperacionVenta($ultimoNroOperacionVenta)
-    {
-        $this->ultimoNroOperacionVenta = $ultimoNroOperacionVenta;
-
-        return $this;
-    }
-
-    /**
-     * Get ultimoNroOperacionVenta
-     *
-     * @return integer 
-     */
-    public function getUltimoNroOperacionVenta()
-    {
-        return $this->ultimoNroOperacionVenta;
+        return $this->aperturas;
     }
 }

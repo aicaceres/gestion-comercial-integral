@@ -9,38 +9,38 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
 use ConfigBundle\Controller\UtilsController;
-use ConfigBundle\Entity\PuntoVenta;
-use ConfigBundle\Form\PuntoVentaType;
+use ConfigBundle\Entity\Caja;
+use ConfigBundle\Form\CajaType;
 
 /**
- * @Route("/puntoventa")
+ * @Route("/caja")
  */
-class PuntoVentaController extends Controller
+class CajaController extends Controller
 {
     /**
-     * @Route("/", name="sistema_puntoventa")
+     * @Route("/", name="sistema_caja")
      * @Method("GET")
      * @Template()
      */
     public function indexAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_puntoventa');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_caja');
         $em = $this->getDoctrine()->getManager();
-        $entities = $em->getRepository('ConfigBundle:PuntoVenta')->findAll();
-        return $this->render('ConfigBundle:PuntoVenta:index.html.twig', array(
+        $entities = $em->getRepository('ConfigBundle:Caja')->findAll();
+        return $this->render('ConfigBundle:Caja:index.html.twig', array(
             'entities' => $entities,
         ));
     }
     
     /**
-     * @Route("/", name="sistema_puntoventa_create")
+     * @Route("/", name="sistema_caja_create")
      * @Method("POST")
-     * @Template("ConfigBundle:PuntoVenta:edit.html.twig")
+     * @Template("ConfigBundle:Caja:edit.html.twig")
      */
     public function createAction(Request $request)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_puntoventa_new');
-        $entity = new PuntoVenta();        
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_caja_new');
+        $entity = new Caja();        
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
 
@@ -52,61 +52,61 @@ class PuntoVentaController extends Controller
             $em->persist($entity);
             $em->flush();
 
-            return $this->redirect($this->generateUrl('sistema_puntoventa'));
+            return $this->redirect($this->generateUrl('sistema_caja'));
         }
-        return $this->render('ConfigBundle:PuntoVenta:edit.html.twig', array(
+        return $this->render('ConfigBundle:Caja:edit.html.twig', array(
             'entity' => $entity,
             'form'   => $form->createView(),
         ));
     }
 
     /**
-    * Creates a form to create a PuntoVenta entity.
-    * @param PuntoVenta $entity The entity
+    * Creates a form to create a Caja entity.
+    * @param Caja $entity The entity
     * @return \Symfony\Component\Form\Form The form
     */
-    private function createCreateForm(PuntoVenta $entity)
+    private function createCreateForm(Caja $entity)
     {
-        $form = $this->createForm(new PuntoVentaType(), $entity, array(
-            'action' => $this->generateUrl('sistema_puntoventa_create'),
+        $form = $this->createForm(new CajaType(), $entity, array(
+            'action' => $this->generateUrl('sistema_caja_create'),
             'method' => 'POST',
         ));
         return $form;
     }
     
     /**
-     * @Route("/new", name="sistema_puntoventa_new")
+     * @Route("/new", name="sistema_caja_new")
      * @Method("GET")
-     * @Template("ConfigBundle:PuntoVenta:edit.html.twig")
+     * @Template("ConfigBundle:Caja:edit.html.twig")
      */
     public function newAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_puntoventa_new');
-        $entity = new PuntoVenta();
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_caja_new');
+        $entity = new Caja();
         $form   = $this->createCreateForm($entity);
-        return $this->render('ConfigBundle:PuntoVenta:edit.html.twig', array(
+        return $this->render('ConfigBundle:Caja:edit.html.twig', array(
             'entity' => $entity,
             'form'   => $form->createView(),
         ));
     }
     
     /**
-     * @Route("/{id}/edit", name="sistema_puntoventa_edit")
+     * @Route("/{id}/edit", name="sistema_caja_edit")
      * @Method("GET")
      * @Template()
      */
     public function editAction($id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_puntoventa_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_caja_edit');
         $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('ConfigBundle:PuntoVenta')->find($id);
+        $entity = $em->getRepository('ConfigBundle:Caja')->find($id);
         if (!$entity) {
-            throw $this->createNotFoundException('Unable to find PuntoVenta entity.');
+            throw $this->createNotFoundException('Unable to find Caja entity.');
         }        
         $editForm = $this->createEditForm($entity);
         //$deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('ConfigBundle:PuntoVenta:edit.html.twig', array(
+        return $this->render('ConfigBundle:Caja:edit.html.twig', array(
             'entity'      => $entity,
             'form'   => $editForm->createView(),
             //'delete_form' => $deleteForm->createView(),
@@ -114,31 +114,31 @@ class PuntoVentaController extends Controller
     }
 
     /**
-    * Creates a form to edit a PuntoVenta entity.
-    * @param PuntoVenta $entity The entity
+    * Creates a form to edit a Caja entity.
+    * @param Caja $entity The entity
     * @return \Symfony\Component\Form\Form The form
     */
-    private function createEditForm(PuntoVenta $entity)
+    private function createEditForm(Caja $entity)
     {
-        $form = $this->createForm(new PuntoVentaType(), $entity, array(
-            'action' => $this->generateUrl('sistema_puntoventa_update', array('id' => $entity->getId())),
+        $form = $this->createForm(new CajaType(), $entity, array(
+            'action' => $this->generateUrl('sistema_caja_update', array('id' => $entity->getId())),
             'method' => 'PUT',
         ));
         return $form;
     }
     
     /**
-     * @Route("/{id}", name="sistema_puntoventa_update")
+     * @Route("/{id}", name="sistema_caja_update")
      * @Method("PUT")
-     * @Template("ConfigBundle:PuntoVenta:edit.html.twig")
+     * @Template("ConfigBundle:Caja:edit.html.twig")
      */
     public function updateAction(Request $request, $id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_puntoventa_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_caja_edit');
         $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('ConfigBundle:PuntoVenta')->find($id);
+        $entity = $em->getRepository('ConfigBundle:Caja')->find($id);
         if (!$entity) {
-            throw $this->createNotFoundException('Unable to find PuntoVenta entity.');
+            throw $this->createNotFoundException('Unable to find Caja entity.');
         }
 
         // $deleteForm = $this->createDeleteForm($id);
@@ -148,9 +148,9 @@ class PuntoVentaController extends Controller
             $entity->setNombre( strtoupper(str_replace(' ','',$entity->getNombre())) );  
             $em->flush();
 
-            return $this->redirect($this->generateUrl('sistema_puntoventa'));
+            return $this->redirect($this->generateUrl('sistema_caja'));
         }
-        return $this->render('ConfigBundle:PuntoVenta:edit.html.twig', array(
+        return $this->render('ConfigBundle:Caja:edit.html.twig', array(
             'entity'      => $entity,
             'form'   => $editForm->createView(),
             //'delete_form' => $deleteForm->createView(),
@@ -158,14 +158,14 @@ class PuntoVentaController extends Controller
     }
 
     /**
-     * @Route("/delete/{id}", name="sistema_puntoventa_delete")
+     * @Route("/delete/{id}", name="sistema_caja_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_puntoventa_delete');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_caja_delete');
         $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('ConfigBundle:PuntoVenta')->find($id);
+        $entity = $em->getRepository('ConfigBundle:Caja')->find($id);
         try {
             $em->remove($entity);
             $em->flush();
@@ -180,16 +180,17 @@ class PuntoVentaController extends Controller
      * @Route("/autocompletePuntosVenta", name="autocomplete_puntosventa")
      * @Method("GET")
      */
+    /*
     public function autocompletePuntosVentaAction(Request $request)
     {
         $unidneg_id = $request->get('unidneg_id');
         $em = $this->getDoctrine()->getManager();
-        $puntos = $em->getRepository('ConfigBundle:PuntoVenta')->findByUnidadNegocio($unidneg_id);
+        $puntos = $em->getRepository('ConfigBundle:Caja')->findByUnidadNegocio($unidneg_id);
         $array = array();
         foreach ($puntos as $pto) {
             $array[] = ['id' => $pto->getId(), 'text' => $pto->getNombre()];
         }
         return new Response(json_encode($array));
-    }   
+    }  */ 
 
 }

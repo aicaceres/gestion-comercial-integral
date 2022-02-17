@@ -1,0 +1,45 @@
+{% block contentwrapper %}
+
+<style type="text/css">
+    .pagetitle.caja{
+        padding-bottom:10px;
+    }
+    .pagetitle.fecha{
+        font-size:20px;
+    }
+    #fieldmonto{
+        padding:20px 0 10px 0px;
+        font-size:16px;
+    }
+    #fieldmonto input{
+        font-size:16px;
+        font-weight:bold;
+    }
+</style>
+<div>
+    <div class="pageheader notab">   
+        <h1 class="pagetitle caja aligncenter hidden">
+            {{entity.caja.nombre}}
+        </h1>
+        <h1 class="pagetitle fecha aligncenter">
+            {{entity.fechaCierre|date('d/m/Y')}}
+            <span class="js-hora"> {{entity.fechaCierre|date('H:i:s')}}</span>
+        </h1>
+    </div>
+
+    {{ form_start(form, {'attr': {'class': 'stdform','id':'ventasbundle_cierre'}}) }}     
+    
+    <fieldset id="fieldmonto">                                        
+        {{ form_row(form.montoCierre, { 'attr': {'class' : 'mininput'} })}}                            
+    </fieldset> 
+    <input type="hidden" name="id" value="{{ entity.id }}"/>
+    <p class="actionBar aligncenter">
+        <button class="guardar" type="submit" >Registrar Cierre de Caja</button>
+    </p>
+    
+    <div name="rest" class="hiddenformrest"> {{ form_rest(form) }} </div>
+    {{ form_end(form) }}
+
+</div> 
+    
+{% endblock %}

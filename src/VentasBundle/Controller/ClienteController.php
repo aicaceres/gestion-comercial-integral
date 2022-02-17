@@ -411,7 +411,7 @@ class ClienteController extends Controller {
      */
     public function selectClientesAjaxAction(Request $request) {        
         $em = $this->getDoctrine()->getManager();
-        $facturas = $em->getRepository('VentasBundle:Factura')->findByClienteId($id);
+        $facturas = $em->getRepository('VentasBundle:Factura')->findByClienteId(0);
         return new JsonResponse($facturas);
     }
 
