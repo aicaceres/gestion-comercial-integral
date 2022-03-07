@@ -1,3 +1,5 @@
+/src/VentasBundle/Afip/
+/docs/
 /web/bundles/
 /web/uploads/
 /web/assets/css/plugins/*
@@ -21,6 +23,4 @@
 /composer.phar
 /composer.json
 /composer.lock
-/docs/
 *.php~
-/src/VentasBundle/Afip/*
