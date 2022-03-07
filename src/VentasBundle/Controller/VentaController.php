@@ -81,12 +81,12 @@ class VentaController extends Controller
     {
 //var_dump(gethostname());
 
-        $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta_new');
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta_new');
         $entity = new Venta();
         $entity->setFechaVenta( new \DateTime() );                
         $em = $this->getDoctrine()->getManager();
-        $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if($param){
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
@@ -115,22 +115,23 @@ class VentaController extends Controller
      */
     public function createAction(Request $request) {
         $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
+        $unidneg_id = $session->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
         
         $entity = new Venta();
         $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
         $em = $this->getDoctrine()->getManager();
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if ($form->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
                 // set fecha de operacion
                 $entity->setFechaVenta( new \DateTime() );  
                 // set unidad negocio desde session
-                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($session->get('unidneg_id'));
+                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
                 $entity->setUnidadNegocio($unidneg);    
-                // set nro operacion
-                $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
+                // set nro operacion                
                 $nroOperacion = $param->getUltimoNroOperacionVenta() + 1;
                 $entity->setNroOperacion( $nroOperacion );                    
                 // update ultimoNroOperacion en parametrizacion
@@ -171,7 +172,7 @@ class VentaController extends Controller
                 $em->getConnection()->commit();
                 //$this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
                 // requiere login al volver a ingresar a venta
-                $this->get('session')->set('checkrequired','1');
+                $session->set('checkrequired','1');
                 return $this->redirect($this->generateUrl('ventas_venta_new'));
             }
             catch (\Exception $ex) {
@@ -180,13 +181,12 @@ class VentaController extends Controller
             }
         }
         // Set cliente segun parametrizacion
-        $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
         if($param){
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);            
         } 
         // no requiere login si vuelve con error
-        $this->get('session')->set('checkrequired','0');
+        $session->set('checkrequired','0');
         return $this->render('VentasBundle:Venta:new.html.twig', array(            
             'entity' => $entity,
             'form' => $form->createView(),

@@ -23,8 +23,11 @@
 					class="elements">Caja</a>
 				<span class="arrow"></span>
 				<ul id="item_caja">
+					<li id="cobro">
+						<a href="{{ path('ventas_cobro') }}">Cobro de Ventas</a>
+					</li>	
 					<li id="factura">
-						<a href="{{ path('ventas_factura') }}">Cobro de Ventas</a>
+						<a href="{{ path('ventas_factura') }}">Facturas Emitidas</a>
 					</li>	
                     {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
                     <li id="notadebcred">

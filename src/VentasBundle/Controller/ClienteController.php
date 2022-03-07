@@ -250,7 +250,8 @@ class ClienteController extends Controller {
             'partial' => $partial, 
             'listaprecio' => $lista,
             'formapago' => $formapago, 
-            'transporte' => $transporte
+            'transporte' => $transporte,
+            'consumidorfinal' => $entity->getConsumidorFinal(),
         );
         return new Response( json_encode($data));
     }
@@ -749,6 +750,16 @@ class ClienteController extends Controller {
         $partial = $this->renderView('VentasBundle:Cliente:_partial-lista-clientes.html.twig',
                 array('clientes' => $clientes));
         return new Response($partial);
+    }
+    /**
+     * @Route("/getAutocompleteClientes", name="get_autocomplete_clientes")
+     * @Method("POST")
+     */
+    public function getAutocompleteClientesAction( Request $request) {
+        $term = $request->get('searchTerm');        
+        $em = $this->getDoctrine()->getManager();
+        $results = $em->getRepository('VentasBundle:Cliente')->filterByTerm($term);    
+        return new JsonResponse($results);  
     }
 
     /**

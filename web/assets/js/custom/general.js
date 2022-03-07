@@ -67,8 +67,47 @@ function checkLoginVentas(url_login,referer) {
         }); 
     jQuery('#popup').dialog('open');
 }
+// lanza popup para ver listado de ventas
+function partialVentasPorCobrar(url) {        
+    jQuery('#popup')
+        .html('')        
+        .load(url, function () { 
+            jQuery('#ventasxcobrar').dataTable({                      
+                        "bSort": false,
+                        "sPaginationType": "full_numbers",
+                            "oLanguage": {
+                                "oPaginate": {
+                                    "sFirst": "<<",
+                                    "sNext": ">",
+                                    "sLast": ">>",
+                                    "sPrevious": "<"
+                                },
+                        "sLengthMenu": "Mostrar _MENU_ registros ",
+                        "sZeroRecords": "Sin datos",
+                        "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+                        "sInfoEmpty": "Sin coincidencias",
+                        "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                                    "sSearch": "Buscar:",
+                                    "sSelect": "%d seleccionados"
+                    }
+                });
+            jQuery('#ventasxcobrar_filter input').val('#');
+            jQuery('#ventasxcobrar_filter input').focus();
+            /// hover de nro operacion resalta toda la fila
+            jQuery(document).on('focus', '.operacion', function (e) {
+                jQuery('#ventasxcobrar tbody tr').removeClass('selectedline');
+                jQuery(this).parent().addClass('selectedline');
+            })    
+                 
+        })                
+        .dialog({
+            modal: true, autoOpen: false, title: "VENTAS PENDIENTES POR COBRAR", width: "80%",minHeight: 380,    
+        }); 
+jQuery('#popup').dialog('open');    
+}
 
 // lanza popup para apertura de caja 
+// CAJA=1
 function aperturaCajaVentas(url, cobro=false, caja=1 ) {    
     let horaRefresh = null;
     data = { 'id': caja };    
@@ -95,6 +134,7 @@ function aperturaCajaVentas(url, cobro=false, caja=1 ) {
     jQuery('#popup').dialog('open');
 }
 // lanza popup para cierre de caja 
+// CAJA=1
 function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {    
     let horaRefresh = null;
     data = { 'id': caja };    

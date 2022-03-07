@@ -25,8 +25,9 @@
 {% endif %}
 {% if app.session.get('caja_abierta') %}
     {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura') %} 
+        {% set urlxCobrar = path('ventas_por_cobrar') %}
             <li>
-                <a href="{{ path('ventas_factura_new') }}" class="pago"><span>Nuevo Cobro</span>
+                <a href="javascript:void(0)" onclick="partialVentasPorCobrar('{{ urlxCobrar }}')" class="pago"><span>Nuevo Cobro</span>
                 </a>
             </li>
     {% endif %}
@@ -45,4 +46,5 @@
     </div><!--two_third dashboard_left -->
 </div>
 </div>
+{% include "AppBundle::block-list-js.html.twig" %}
 {% endblock %}

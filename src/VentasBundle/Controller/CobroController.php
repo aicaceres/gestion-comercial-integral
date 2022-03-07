@@ -10,17 +10,22 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-
 use ConfigBundle\Controller\UtilsController;
 
+use VentasBundle\Entity\Cobro;
+use VentasBundle\Form\CobroType;
+
+use VentasBundle\Afip\src\Afip;
+// $afip = new Afip(array('CUIT'=> '30714151971'));
+
 /**
- * @Route("/facturaVentas")
+ * @Route("/cobroVentas")
  */
 class CobroController extends Controller
 {
 
     /**
-     * @Route("/", name="ventas_factura")
+     * @Route("/", name="ventas_cobro")
      * @Method("GET")
      * @Template()
      */
@@ -28,77 +33,82 @@ class CobroController extends Controller
         $unidneg = $this->get('session')->get('unidneg_id');
         $user = $this->getUser();
         UtilsController::haveAccess($user, $unidneg, 'ventas_factura');
-        $em = $this->getDoctrine()->getManager();                
-        
+        $em = $this->getDoctrine()->getManager();
+        $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
+ $tipos = $afip->ElectronicBilling->getDocumentTypes();
+echo '<pre>';
+var_dump($afipTipos);
+echo '</pre>';
+die;
+
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
-        
+
         if( $user->getAccess($unidneg, 'ventas_factura_own') && !$user->isAdmin($unidneg)){
             $id = $user->getId();
             $owns = true;
         }else{
             $id = $request->get('userId');
             $owns = false;
-        }        
-        $entities = $em->getRepository('VentasBundle:Cobro')->findByCriteria($unidneg, $desde, $hasta, $id);
-        $users = $em->getRepository('VentasBundle:Cobro')->getUsers();                
-        return $this->render('VentasBundle:Venta:index.html.twig', array(
+        }
+        $entities = $em->getRepository('VentasBundle:Cobro')->findByCriteria($unidneg,$desde,$hasta,$id);
+
+        $users = $em->getRepository('VentasBundle:Cobro')->getUsers();
+        return $this->render('VentasBundle:Cobro:index.html.twig', array(
                     'entities' => $entities,
                     'id' => $id,
                     'owns' => $owns,
-                    'users' => $users,                    
+                    'users' => $users,
                     'desde' => $desde,
                     'hasta' => $hasta
         ));
     }
 
     /**
-     * @Route("/{id}/show", name="ventas_venta_show")
+     * @Route("/newCobro", name="ventas_cobro_new")
      * @Method("GET")
      * @Template()
      */
-    public function showAction($id) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta');
-        $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('VentasBundle:Venta')->find($id);
-        if (!$entity) {
-            throw $this->createNotFoundException('Unable to find Venta entity.');
-        }
-        return $this->render('VentasBundle:Venta:show.html.twig', array(
-                    'entity' => $entity));
-    }
-
-    /**
-     * @Route("/newVenta", name="ventas_venta_new")
-     * @Method("GET")
-     * @Template()
-     */
-    public function newVentaAction(Request $request)
+    public function newCobroAction(Request $request)
     {
-//var_dump(gethostname());
-
         $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta_new');
-        $entity = new Caja();
-        $entity->setFechaVenta( new \DateTime() );                
+        $unidneg_id = $session->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
         $em = $this->getDoctrine()->getManager();
-        $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
+        // CAJA=1
+        $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
+        if( !$caja->getAbierta()){
+            $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+            return $this->redirect( $request->headers->get('referer') );
+        }
+
+        $id_venta = $request->get('id');
+        $entity = new Cobro();
+        $entity->setFechaCobro( new \DateTime() );
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if($param){
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
+            // ultimo nro de operacion de cobro
+            $entity->setNroOperacion( $param->getUltimoNroOperacionCobro() + 1 );
+        }
+        if( $id_venta ){
+            // cobro de la ventas
+            $venta = $em->getRepository('VentasBundle:Venta')->find($id_venta);
+            $entity->setVenta($venta);
+            $entity->setCliente($venta->getCliente());
+            $entity->setMoneda( $venta->getMoneda() );
+            $entity->setFormaPago( $venta->getFormaPago() );
+        }else{
+            // otro cobro
             $entity->setCliente($cliente);
-            $deposito = $em->getRepository('AppBundle:Deposito')->find($param->getVentasDepositoBydefault());
-            $entity->setDeposito($deposito);
-            // set datos asociados al cliente con su definicion por defecto           
-            $entity->setFormaPago( $cliente->getFormaPago() );
-            $entity->setPrecioLista( $cliente->getPrecioLista() );
-            $entity->setTransporte( $cliente->getTransporte() );
-            // ultimo nro de operacion de venta
-            $entity->setNroOperacion( $param->getUltimoNroOperacionVenta() + 1 );
-        }  
-        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
-        $entity->setMoneda( $moneda );
-        $form = $this->createCreateForm($entity,'new');           
-        return $this->render('VentasBundle:Venta:new.html.twig', array(            
+            // moneda
+            $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneBy(array('byDefault'=>true ));
+            $entity->setMoneda($moneda);
+        }
+
+
+        $form = $this->createCreateForm($entity,'new');
+        return $this->render('VentasBundle:Cobro:new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -112,7 +122,7 @@ class CobroController extends Controller
     public function createAction(Request $request) {
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
-        
+
         $entity = new Venta();
         $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
@@ -121,22 +131,22 @@ class CobroController extends Controller
             $em->getConnection()->beginTransaction();
             try {
                 // set fecha de operacion
-                $entity->setFechaVenta( new \DateTime() );  
+                $entity->setFechaVenta( new \DateTime() );
                 // set unidad negocio desde session
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($session->get('unidneg_id'));
-                $entity->setUnidadNegocio($unidneg);    
+                $entity->setUnidadNegocio($unidneg);
                 // set nro operacion
                 $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
                 $nroOperacion = $param->getUltimoNroOperacionVenta() + 1;
-                $entity->setNroOperacion( $nroOperacion );                    
+                $entity->setNroOperacion( $nroOperacion );
                 // update ultimoNroOperacion en parametrizacion
                 $param->setUltimoNroOperacionVenta($nroOperacion);
 
-                $em->persist($entity);            
-                $em->persist($param);            
-                $em->flush();            
+                $em->persist($entity);
+                $em->persist($param);
+                $em->flush();
 
-                // Descuento de stock 
+                // Descuento de stock
                 $deposito = $entity->getDeposito();
                 foreach ($entity->getDetalles() as $detalle){
                     $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
@@ -162,7 +172,7 @@ class CobroController extends Controller
                     $em->persist($movim);
                     $em->flush();
 
-                }                                                            
+                }
 
                 $em->getConnection()->commit();
                 //$this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
@@ -179,11 +189,11 @@ class CobroController extends Controller
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
         if($param){
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
-            $entity->setCliente($cliente);            
-        } 
+            $entity->setCliente($cliente);
+        }
         // no requiere login si vuelve con error
         $this->get('session')->set('checkrequired','0');
-        return $this->render('VentasBundle:Venta:new.html.twig', array(            
+        return $this->render('VentasBundle:Venta:new.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
@@ -191,63 +201,34 @@ class CobroController extends Controller
 
     /**
      * Creates a form to create a Venta entity.
-     * @param Venta $entity The entity
+     * @param Cobro $entity The entity
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createCreateForm(Venta $entity,$type) {
-        $form = $this->createForm(new VentaType(), $entity, array(
+    private function createCreateForm(Cobro $entity,$type) {
+        $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
+        $afipDocType = $afip->ElectronicBilling->getDocumentTypes();
+        $docType = array_reduce( $afipDocType , function($array,$item){
+            $array[ $item->Id ] = $item->Desc;
+            return $array;
+        });
+        $form = $this->createForm(new CobroType(), $entity, array(
             'action' => $this->generateUrl('ventas_venta_create'),
-            'method' => 'POST',
-            'attr' => array('type'=>$type) ,
+            'method' => 'POST' ,
+            'attr' => array('type'=>$type, 'docType'=> json_encode($docType) ) ,
         ));
         return $form;
     }
 
-/**
-* LOGIN PARA VENTAS
- */
-
     /**
-    * @Route("/login", name="ventas_login")
+    * @Route("/ventasPorCobrar", name="ventas_por_cobrar")
     */
-    public function loginAction() {                        
-        return $this->render('VentasBundle:Venta:login.html.twig');
-    }
+    public function ventasPorCobrarAction() {
+        $em = $this->getDoctrine()->getManager();
+        $ventas = $em->getRepository('VentasBundle:Venta')->findBy(array('estado' => 'PENDIENTE'),array('nroOperacion'=>'ASC'));
 
-    /**
-    * @Route("checkLogin", name="ventas_login_check")
-     */
-    public function checkLoginAction(Request $request){               
-        $username = strtoupper($request->get('username')) ;
-        $password = trim($request->get('password'))  ;
-        $em = $this->get('doctrine')->getEntityManager();
-        $reload = false;
-        $user = $em->getRepository('ConfigBundle:Usuario')->findOneBy(array("username"=>$username));
-        if ($user) {
-            // Get the encoder for the users password
-            $encoder = $this->get('security.encoder_factory')->getEncoder($user);            
-            if ($encoder->isPasswordValid($user->getPassword(), $password, null)) {
-                // verificar si es el mismo usuario
-                if( $this->getUser()->getUsername() !== $username ){
-                    // loguear al nuevo usuario 
-                    $token = new UsernamePasswordToken($user, null, 'secured_area', $user->getRoles());
-                    $this->get('security.context')->setToken($token);
-                    $this->get('session')->set('_security_secured_area', serialize($token));
-                    $event = new InteractiveLoginEvent($request, $token);
-                    $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
-                    // RECARGAR LA PÁGINA PARA CAMBIAR USUARIO
-                    $reload = true; 
-                    // No requiere login al recargar    
-                    $this->get('session')->set('checkrequired','0');               
-                }               
-                $result = array( 'msg' => 'OK', 'url' => $this->generateUrl('ventas_venta_new'), 'reload' => $reload);                
-            }else{
-                $result = array( 'msg' => 'Ingrese una contraseña válida!', 'field'=>'password' );
-            }
-        }else{
-            $result = array( 'msg' => 'Ingrese un usuario válido!', 'field'=>'username' );
-        }    
-        return new Response( json_encode($result));
+        return $this->render('VentasBundle:Cobro:_partial-ventas-por-cobrar.html.twig', array(
+            'ventas' => $ventas
+        ));
     }
 
 

@@ -34,6 +34,18 @@ class Parametrizacion {
     protected $ultimoNroOperacionVenta = 0;
 
     /**
+     * @var integer $ultimoNroOperacionCobro
+     * @ORM\Column(name="ultimo_nro_operacion_cobro", type="integer")     
+     */
+    protected $ultimoNroOperacionCobro = 0;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
+     * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
+     */
+    protected $unidadNegocio;
+
+    /**
      * Get id
      *
      * @return integer 
@@ -111,5 +123,51 @@ class Parametrizacion {
     public function getUltimoNroOperacionVenta()
     {
         return $this->ultimoNroOperacionVenta;
+    }
+
+    /**
+     * Set ultimoNroOperacionCobro
+     *
+     * @param integer $ultimoNroOperacionCobro
+     * @return Parametrizacion
+     */
+    public function setUltimoNroOperacionCobro($ultimoNroOperacionCobro)
+    {
+        $this->ultimoNroOperacionCobro = $ultimoNroOperacionCobro;
+
+        return $this;
+    }
+
+    /**
+     * Get ultimoNroOperacionCobro
+     *
+     * @return integer 
+     */
+    public function getUltimoNroOperacionCobro()
+    {
+        return $this->ultimoNroOperacionCobro;
+    }
+
+    /**
+     * Set unidadNegocio
+     *
+     * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
+     * @return Parametrizacion
+     */
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
+    {
+        $this->unidadNegocio = $unidadNegocio;
+
+        return $this;
+    }
+
+    /**
+     * Get unidadNegocio
+     *
+     * @return \ConfigBundle\Entity\UnidadNegocio 
+     */
+    public function getUnidadNegocio()
+    {
+        return $this->unidadNegocio;
     }
 }

@@ -9,20 +9,20 @@ class CobroRepository extends EntityRepository {
     /**  Buscar ventas por criterio de filtro    */
     public function findByCriteria($unidneg, $desde = NULL, $hasta = NULL, $userId = NULL) {
         $query = $this->_em->createQueryBuilder();
-        $query->select('v')
-                ->from('VentasBundle\Entity\Venta', 'v')                          
-                ->innerJoin('v.unidadNegocio', 'un')                
+        $query->select('c')
+                ->from('VentasBundle\Entity\Cobro', 'c')                          
+                ->innerJoin('c.unidadNegocio', 'un')                
                 ->where("un.id=" . $unidneg);              
         if ($desde) {
-            $cadena = " v.fechaVenta >= '" . UtilsController::toAnsiDate($desde) . "'";
+            $cadena = " c.fechaCobro >= '" . UtilsController::toAnsiDate($desde) . "'";
             $query->andWhere($cadena);
         }   
         if ($hasta) {
-            $cadena = " v.fechaVenta <= '" . UtilsController::toAnsiDate($hasta) . "'";
+            $cadena = " c.fechaCobro <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $query->andWhere($cadena);
         }
         if($userId){
-            $query->innerJoin( 'v.createdBy','u' );
+            $query->innerJoin( 'c.createdBy','u' );
             $cadena = " u.id = " . $userId;
             $query->andWhere($cadena);
         }
@@ -33,8 +33,8 @@ class CobroRepository extends EntityRepository {
     public function getUsers() {
         $query = $this->_em->createQueryBuilder();
         $query->select('u.id,u.nombre,u.username')
-                ->from('VentasBundle\Entity\Venta', 'v')                          
-                ->innerJoin('v.createdBy', 'u')
+                ->from('VentasBundle\Entity\Cobro', 'c')
+                ->innerJoin('c.createdBy', 'u')
                 ->distinct();        
         return $query->getQuery()->getArrayResult();
     }

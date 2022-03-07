@@ -1,0 +1,40 @@
+<style type="text/css">
+    #ventasxcobrar tbody tr td:focus,td.operacion a:focus,.paginate_button:focus,
+    .selectedline td {
+        color:red !important;
+        font-weight:bold;
+    }
+    #ventasxcobrar tbody tr td{
+        padding:2px 10px;    
+    }
+    
+</style>
+<div style="text-align:center;margin-bottom: 10px">
+<a href="{{ path('ventas_cobro_new')}}" class="btn btn_blue btn_dollartag ">
+                <span>OTRO COBRO</span>
+            </a>
+</div>
+<table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="ventasxcobrar">
+    <thead>
+        <tr>
+            <th># Venta</th>
+            <th>Fecha / Hora</th>
+            <th class="nosort">Cliente</th>
+            <th class="nosort">Forma de Pago</th>
+            <th class="nosort">Total</th>                
+            <th>Usuario</th>            
+        </tr>
+    </thead>
+    <tbody>
+        {% for entity in ventas %}
+        <tr>                
+            <td class="alignright operacion"><a href="{{ path('ventas_cobro_new')}}?id={{entity.id}}" title="Cobrar esta venta">#{{entity.nroOperacion}}</a></td>
+            <td>{{ entity.fechaVenta|date('d-m-Y H:i') }}</td>
+            <td>{{ entity.cliente }}</td>
+            <td>{{ entity.formaPago }}</td>
+            <td class="alignright">{{ entity.getTotal|number_format(3,'.',',') }}</td>                          
+            <td>{{entity.createdBy.nombre|upper }}</td>                
+        </tr>
+        {% endfor %}
+    </tbody>
+</table> 

@@ -49,6 +49,27 @@ class Cobro {
      */
     protected $cliente;
 
+    /**
+     * @var string $nombreCliente
+     * @ORM\Column(name="nombre_cliente", type="string", nullable=true)     
+     */ 
+    protected $nombreCliente;
+    /**
+     * @var string $tipoDocumentoCliente
+     * @ORM\Column(name="tipo_documento_cliente", type="integer", nullable=true)
+     */
+    protected $tipoDocumentoCliente;    
+    /**
+     * @var string $nroDocumentoCliente
+     * @ORM\Column(name="nro_documento_cliente", type="string", length=13, nullable=true)
+     */
+    protected $nroDocumentoCliente;    
+    /**
+     * @var string $direccionCliente
+     * @ORM\Column(name="direccion_cliente", type="string", nullable=true)
+     */
+    protected $direccionCliente;
+
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
@@ -382,5 +403,97 @@ class Cobro {
     public function getUpdatedBy()
     {
         return $this->updatedBy;
+    }
+
+    /**
+     * Set nombreCliente
+     *
+     * @param string $nombreCliente
+     * @return Cobro
+     */
+    public function setNombreCliente($nombreCliente)
+    {
+        $this->nombreCliente = $nombreCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get nombreCliente
+     *
+     * @return string 
+     */
+    public function getNombreCliente()
+    {
+        return $this->nombreCliente;
+    }
+
+    /**
+     * Set tipoDocumentoCliente
+     *
+     * @param integer $tipoDocumentoCliente
+     * @return Cobro
+     */
+    public function setTipoDocumentoCliente($tipoDocumentoCliente)
+    {
+        $this->tipoDocumentoCliente = $tipoDocumentoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoDocumentoCliente
+     *
+     * @return integer 
+     */
+    public function getTipoDocumentoCliente()
+    {
+        return $this->tipoDocumentoCliente;
+    }
+
+    /**
+     * Set nroDocumentoCliente
+     *
+     * @param string $nroDocumentoCliente
+     * @return Cobro
+     */
+    public function setNroDocumentoCliente($nroDocumentoCliente)
+    {
+        $this->nroDocumentoCliente = $nroDocumentoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get nroDocumentoCliente
+     *
+     * @return string 
+     */
+    public function getNroDocumentoCliente()
+    {
+        return $this->nroDocumentoCliente;
+    }
+
+    /**
+     * Set direccionCliente
+     *
+     * @param string $direccionCliente
+     * @return Cobro
+     */
+    public function setDireccionCliente($direccionCliente)
+    {
+        $this->direccionCliente = $direccionCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get direccionCliente
+     *
+     * @return string 
+     */
+    public function getDireccionCliente()
+    {
+        return $this->direccionCliente;
     }
 }

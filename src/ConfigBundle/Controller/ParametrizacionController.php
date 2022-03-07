@@ -25,9 +25,10 @@ class ParametrizacionController extends Controller
      */
     public function renderVentasAction()
     {        
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_parametrizacion');
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_parametrizacion');
         $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
+        $entity = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if (!$entity) {
             throw $this->createNotFoundException('No existe parametrización para el sistema. Consulte al administrador!');
         }
@@ -59,9 +60,10 @@ class ParametrizacionController extends Controller
      */
     public function updateAction(Request $request,$route)
     {
-       UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_parametrizacion');
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_parametrizacion');
         $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
+        $entity = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if (!$entity) {
             throw $this->createNotFoundException('No existe parametrización para el sistema. Consulte al administrador!');
         }

@@ -21,6 +21,7 @@ class HomeController extends Controller {
     public function indexAction(Request $request) {
         if ($this->isGranted('IS_AUTHENTICATED_FULLY')) {
             $session = $this->get('session');
+            $em = $this->getDoctrine()->getManager();
             if (!$session->has('equipo')) {
                 //$accesstype = $this->container->getParameter('accesstype');
                 // if( $accesstype == '1' ){
@@ -29,13 +30,16 @@ class HomeController extends Controller {
                 // }else{
                 //equipo cliente con base local
                 //    $nombreEquipo = gethostbyaddr($_SERVER['REMOTE_ADDR']);
-                // }
-                $em = $this->getDoctrine()->getManager();
+                // }                
                 $equipo = $em->getRepository('ConfigBundle:Equipo')->findOneByNombre($nombreEquipo);
                 if ($equipo) {
                     $session->set('equipo', $equipo->getId());
                 }
             }
+            // CAJA=1
+            $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
+            $session->set('caja_abierta', $caja->getAbierta());
+
             return $this->render('AppBundle:Home:inicio.html.twig');
         }
         else {

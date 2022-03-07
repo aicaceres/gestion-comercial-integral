@@ -40,5 +40,4 @@ class VentaRepository extends EntityRepository {
     }
 
 
-
 }
