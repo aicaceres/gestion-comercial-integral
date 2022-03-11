@@ -10,26 +10,29 @@ class PedidoRepository extends EntityRepository
         $query->select('p')
               ->from('ComprasBundle\Entity\Pedido', 'p')
               ->where("p.estado='PENDIENTE'")
-              ->orderBy('p.fechaPedido')  ;  
+              ->orderBy('p.fechaPedido')  ;
         return $query->getQuery()->getResult();
     }
     public function getCountPendientes(){
         $query = $this->_em->createQueryBuilder();
         $query->select('COUNT(p.id)')
               ->from('ComprasBundle\Entity\Pedido', 'p')
-              ->where("p.estado='PENDIENTE'");  
+              ->where("p.estado='PENDIENTE'");
         return $query->getQuery()->getSingleScalarResult();
     }
-    
-    public function findByCriteria($unidneg, $provId=NULL, $desde=NULL, $hasta=NULL){
+
+    public function findByCriteria($unidneg, $provId=NULL,$estado=NULL, $desde=NULL, $hasta=NULL){
         $query = $this->_em->createQueryBuilder();
         $query->select('p')
               ->from('ComprasBundle\Entity\Pedido', 'p')
-              ->innerJoin('p.unidadNegocio', 'u')                
-              ->where("u.id=".$unidneg) ;  
+              ->innerJoin('p.unidadNegocio', 'u')
+              ->where("u.id=".$unidneg) ;
         if($provId){
             $query->innerJoin('p.proveedor', 'pr')
                     ->andWhere('pr.id='.$provId);
+        }
+        if($estado){
+            $query->andWhere("p.estado='".$estado."'");
         }
         if($desde){
           $cadena = " p.fechaPedido >= '".UtilsController::toAnsiDate($desde)."'";
@@ -40,7 +43,7 @@ class PedidoRepository extends EntityRepository
           $query->andWhere($cadena);
       }
         return $query->getQuery()->getResult();
-        
+
     }
-    
+
 }

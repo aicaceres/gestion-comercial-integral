@@ -34,6 +34,7 @@ class PedidoController extends Controller {
         UtilsController::haveAccess($this->getUser(), $unidneg, 'compras_pedido');
         $em = $this->getDoctrine()->getManager();
         $provId = $request->get('provId');
+        $estado = $request->get('estado');
 
         /* $hoy = new \DateTime();
           $inicio = date("d-m-Y",strtotime($hoy->format('d-m-Y')."- 30 days"));
@@ -41,12 +42,13 @@ class PedidoController extends Controller {
           $hasta = ($request->get('hasta')) ? $request->get('hasta') : $hoy->format('d-m-Y'); */
         $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
-        $entities = $em->getRepository('ComprasBundle:Pedido')->findByCriteria($unidneg, $provId, $periodo['ini'], $periodo['fin']);
+        $entities = $em->getRepository('ComprasBundle:Pedido')->findByCriteria($unidneg, $provId,$estado, $periodo['ini'], $periodo['fin']);
 
         return $this->render('ComprasBundle:Pedido:index.html.twig', array(
                     'entities' => $entities, 'title' => 'Pedidos a Proveedores', 'tipo' => 'P',
                     'proveedores' => $proveedores,
                     'provId' => $provId,
+                    'estado' => $estado,
                     'desde' => $periodo['ini'],
                     'hasta' => $periodo['fin']
         ));
@@ -306,10 +308,11 @@ class PedidoController extends Controller {
         $items = $request->get('datalist');
         $tipo = $request->get('tipo');
         $proveedorId = $request->get('proveedorid');
+        $estado = $request->get('estado');
         $fdesde = $request->get('fdesde');
         $fhasta = $request->get('fhasta');
         $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
-        $textoFiltro = array($proveedor ? $proveedor->getNombre() : 'Todos', $fdesde ? $fdesde : '', $fhasta ? $fhasta : '');
+        $textoFiltro = array($proveedor ? $proveedor->getNombre() : 'Todos', $fdesde ? $fdesde : '', $fhasta ? $fhasta : '', $estado ? $estado : 'Todos');
 
         //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
         //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';

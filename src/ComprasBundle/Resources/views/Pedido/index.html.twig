@@ -17,6 +17,7 @@
     <form id="printform" name="printform" target="_blank"  action="{{ urlprint }}" method="post">
         <input type="hidden" id="tipo" name="tipo" value="{{tipo}}"/>
         <input type="hidden" id="proveedorid" name="proveedorid"/>
+        <input type="hidden" id="estado" name="estado"/>
         <input type="hidden" id="fdesde" name="fdesde"/>
         <input type="hidden" id="fhasta" name="fhasta"/>
         <input type="hidden" id="searchterm" name="searchterm"/>
@@ -34,6 +35,18 @@
             {% endfor %}
             </select>
         </div>
+        {% if tipo=='P'%}
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Estado:</strong></label>
+            <select class="select2" id="selectEstado" name="estado">
+                <option value="0">Todos</option>
+                <option value="NUEVO" {% if estado== 'NUEVO' %} selected="selected" {% endif %}> NUEVO</option>
+                <option value="PENDIENTE" {% if estado== 'PENDIENTE' %} selected="selected" {% endif %}> PENDIENTE</option>
+                <option value="RECIBIDO" {% if estado== 'RECIBIDO' %} selected="selected" {% endif %}> RECIBIDO</option>
+            </select>
+        </div>
+        {% endif %}
         <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Fecha Pedido: </strong></label>
@@ -101,7 +114,7 @@
 <script type="text/javascript">
 var $tipo = '{{tipo}}';
 jQuery(document).ready(function($){
-    $('#selectProveedor').change(function(){
+    $('#selectProveedor,#selectEstado').change(function(){
         $('#searchform').submit();
     });
     $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
@@ -111,6 +124,7 @@ jQuery(document).ready(function($){
 
      $('#printform').on('submit',function(){
         $('#proveedorid').val($('#selectProveedor').val());
+        $('#estado').val($('#selectEstado').val());
         $('#fdesde').val($('#desde').val());
         $('#fhasta').val($('#hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
