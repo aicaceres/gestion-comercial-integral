@@ -1,0 +1,27 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> PRESUPUESTO</h2>
+
+    </dynamic-page>
+</pdf>

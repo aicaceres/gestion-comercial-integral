@@ -31,7 +31,7 @@ class MonedaController extends Controller
             'entities' => $entities,
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_moneda_create")
      * @Method("POST")
@@ -70,7 +70,7 @@ class MonedaController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/new", name="sistema_moneda_new")
      * @Method("GET")
@@ -86,7 +86,7 @@ class MonedaController extends Controller
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_moneda_edit")
      * @Method("GET")
@@ -123,7 +123,7 @@ class MonedaController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_moneda_update")
      * @Method("PUT")
@@ -152,18 +152,18 @@ class MonedaController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_moneda_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
+    {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_moneda_delete');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Moneda')->find($id);
         try{
-            $em->remove($entity); 
+            $em->remove($entity);
             $em->flush();
             $msg ='OK';
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }
@@ -183,6 +183,7 @@ class MonedaController extends Controller
             'VentasBundle:Venta:_partial-datos-moneda.html.twig',
             array('item' => $entity)
         );
-        return new Response($partial);
+        $datos = array('partial' => $partial, 'simbolo' => $entity->getSimbolo(), 'cotizacion' => $entity->getCotizacion());
+        return new Response( json_encode($datos) );
     }
 }

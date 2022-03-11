@@ -33,15 +33,15 @@ class Pedido
      * @var date $fechaPedido
      * @ORM\Column(name="fecha_pedido", type="date", nullable=false)
      */
-    private $fechaPedido ;    
-    
+    private $fechaPedido ;
+
     /**
      * @var date $fechaEntrega
      * @ORM\Column(name="fecha_entrega", type="date", nullable=true)
      */
-    private $fechaEntrega;    
-    
-    /** 
+    private $fechaEntrega;
+
+    /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
      */
@@ -49,38 +49,38 @@ class Pedido
 
      /**
      *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pedidos")
-     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id") 
-     * @ORM\OrderBy({"nombre" = "ASC"}) 
+     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
+     * @ORM\OrderBy({"nombre" = "ASC"})
      */
     protected $proveedor;
-    
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
-    protected $unidadNegocio;   
-    
+    protected $unidadNegocio;
+
      /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
-    protected $deposito;      
+    protected $deposito;
 
     /**
      * @ORM\OneToMany(targetEntity="ComprasBundle\Entity\PedidoDetalle", mappedBy="pedido",cascade={"persist", "remove"})
      */
     protected $detalles;
-    
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="calificacion_proveedor_id", referencedColumnName="id")
-     **/  
-    protected $calificacionProveedor;    
+     **/
+    protected $calificacionProveedor;
     /**
      * @ORM\Column(name="obs_recepcion", type="text", nullable=true)
      */
-    protected $obsRecepcion;    
-    
+    protected $obsRecepcion;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -94,7 +94,7 @@ class Pedido
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -109,7 +109,7 @@ class Pedido
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;     
+    private $updatedBy;
 /**
  * Estados: NUEVO - PENDIENTE - ENTREGADO - CANCELADO
  */
@@ -119,13 +119,13 @@ class Pedido
     public function __construct()
     {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->fechaPedido = new \DateTime();  
+        $this->fechaPedido = new \DateTime();
         $this->estado = 'NUEVO';
-    }    
+    }
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -140,14 +140,14 @@ class Pedido
     public function setPrefijoNro($prefijoNro)
     {
         $this->prefijoNro = $prefijoNro;
-    
+
         return $this;
     }
 
     /**
      * Get prefijoNro
      *
-     * @return string 
+     * @return string
      */
     public function getPrefijoNro()
     {
@@ -163,24 +163,24 @@ class Pedido
     public function setPedidoNro($pedidoNro)
     {
         $this->pedidoNro = $pedidoNro;
-    
+
         return $this;
     }
 
     /**
      * Get pedidoNro
      *
-     * @return string 
+     * @return string
      */
     public function getPedidoNro()
     {
         return $this->pedidoNro;
     }
-    
+
     /**
      * Get nroPedido
      *
-     * @return string 
+     * @return string
      */
     public function getNroPedido()
     {
@@ -196,14 +196,14 @@ class Pedido
     public function setFechaEntrega($fechaEntrega)
     {
         $this->fechaEntrega = $fechaEntrega;
-    
+
         return $this;
     }
 
     /**
      * Get fechaEntrega
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaEntrega()
     {
@@ -218,14 +218,14 @@ class Pedido
     public function setFechaPedido($fechaPedido)
     {
         $this->fechaPedido = $fechaPedido;
-    
+
         return $this;
     }
 
     /**
      * Get fechaPedido
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaPedido()
     {
@@ -241,14 +241,14 @@ class Pedido
     public function setEstado($estado)
     {
         $this->estado = $estado;
-    
+
         return $this;
     }
 
     /**
      * Get estado
      *
-     * @return string 
+     * @return string
      */
     public function getEstado()
     {
@@ -264,14 +264,14 @@ class Pedido
     public function setCreated($created)
     {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -287,14 +287,14 @@ class Pedido
     public function setUpdated($updated)
     {
         $this->updated = $updated;
-    
+
         return $this;
     }
 
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -310,14 +310,14 @@ class Pedido
     public function setProveedor(\ComprasBundle\Entity\Proveedor $proveedor = null)
     {
         $this->proveedor = $proveedor;
-    
+
         return $this;
     }
 
     /**
      * Get proveedor
      *
-     * @return \ComprasBundle\Entity\Proveedor 
+     * @return \ComprasBundle\Entity\Proveedor
      */
     public function getProveedor()
     {
@@ -333,14 +333,14 @@ class Pedido
     public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
     {
         $this->createdBy = $createdBy;
-    
+
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -356,20 +356,20 @@ class Pedido
     public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
     {
         $this->updatedBy = $updatedBy;
-    
+
         return $this;
     }
 
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {
         return $this->updatedBy;
     }
-    
+
     /**
      * Add detalles
      *
@@ -396,7 +396,7 @@ class Pedido
     /**
      * Get detalles
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getDetalles()
     {
@@ -419,16 +419,16 @@ class Pedido
     /**
      * Get unidadNegocio
      *
-     * @return \ConfigBundle\Entity\UnidadNegocio 
+     * @return \ConfigBundle\Entity\UnidadNegocio
      */
     public function getUnidadNegocio()
     {
         return $this->unidadNegocio;
     }
-    
+
 /**
  *  Calculos
- */    
+ */
 
     /**
      * Calcula monto total del pedido
@@ -451,9 +451,9 @@ class Pedido
         }
         return $tot;
     }
-    
 
-    
+
+
  /*   public function getPendientes(){
         $cant = 0;
         foreach ($this->detalles as $detalle) {
@@ -479,7 +479,7 @@ class Pedido
     /**
      * Get deposito
      *
-     * @return \AppBundle\Entity\Deposito 
+     * @return \AppBundle\Entity\Deposito
      */
     public function getDeposito()
     {
@@ -502,7 +502,7 @@ class Pedido
     /**
      * Get obsRecepcion
      *
-     * @return string 
+     * @return string
      */
     public function getObsRecepcion()
     {
@@ -525,7 +525,7 @@ class Pedido
     /**
      * Get calificacion_proveedor
      *
-     * @return \ConfigBundle\Entity\Parametro 
+     * @return \ConfigBundle\Entity\Parametro
      */
     public function getCalificacionProveedor()
     {

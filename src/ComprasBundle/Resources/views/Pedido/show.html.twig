@@ -17,7 +17,7 @@
                 <div><label for="nroPedido">Fecha Pedido:</label>
                     <input type="text" value="{{entity.fechaPedido|date('d/m/Y')}}" disabled="disabled" class="width100">
                 </div>
-            </div> 
+            </div>
             <div class="two_fields">
                 <div><label for="nroPedido">Proveedor:</label>
                     <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="smallinput">
@@ -25,15 +25,15 @@
                 <div><label for="nroPedido" style="width: 100px;">Estado:</label>
                     <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
                 </div>
-            </div> 
+            </div>
             <div class="two_fields">
                 <div><label for="nroPedido">Depósito:</label>
                     <input type="text" value="{{entity.deposito}}" disabled="disabled" class="smallinput">
                 </div>
-                <div><label for="nroPedido">Fecha Entrega:</label>
+                <div><label for="nroPedido">{% if entity.estado in ['NUEVO','PENDIENTE'] %} Entrega Estimada: {% else %}Fecha Entrega: {% endif %}</label>
                     <input type="text" value="{%if entity.fechaEntrega%} {{entity.fechaEntrega|date('d/m/Y')}} {%endif%}" disabled="disabled" class="width100">
                 </div>
-            </div>     
+            </div>
             <div class="two_fields">
                 <div style="vertical-align:top; "><label for="nroPedido">Clasificación:</label>
                     <input type="text" value="{{entity.calificacionProveedor}}" disabled="disabled" class="smallinput">
@@ -41,7 +41,7 @@
                 <div><label for="nroPedido">Observaciones:</label>
                     <textarea disabled="disabled" class="mediuminput">{{entity.obsRecepcion}}</textarea>
                 </div>
-            </div>     
+            </div>
             <div style="padding-top: 20px; margin-left: 50px; width: 80%;">
                 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
@@ -64,16 +64,16 @@
                             <td class="alignright">{%if entity.estado=='RECIBIDO' and ('x' in det.entregadoItemTxt) and det.entregado>0 %} {{det.entregadoItemTxt}}{%endif%}</td>
                             <td class="alignright" {% if det.hayDiferencia %} style="color:red" {% endif %} >{%if entity.estado=='RECIBIDO' %} {{ det.entregadoItemTotalTxt }}{%endif%}</td>
                         </tr>
-                    {% endfor %}           
+                    {% endfor %}
                     </tbody>
-                </table>    
-            </div>                
-            <br clear="all" /> 
+                </table>
+            </div>
+            <br clear="all" />
             <div class="actionbutton">
                 <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
             </div>
         </fieldset>
     </form>
-</div>    
+</div>
 </div>
 {% endblock %}

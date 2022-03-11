@@ -21,20 +21,21 @@ class VentaDetalleType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $builder->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:'))
-                ->add('bulto', null, array('required' => false))
-                ->add('cantidadxBulto', null, array('required' => false))
-                ->add('precio', null, array('label' => 'Costo:', 'required' => true)) 
-        ;    
+                //->add('bulto', null, array('required' => false))
+                //->add('cantidadxBulto', null, array('required' => false))
+                ->add('precio', 'hidden')
+                ->add('iva', 'hidden')
+        ;
         if($this->type=='new'){
             $builder->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
                     'class' => 'AppBundle\\Entity\\Producto',
                     'query_builder' => function(EntityRepository $repository){
-                        return $qb = $repository->createQueryBuilder('c')                                
+                        return $qb = $repository->createQueryBuilder('c')
                                 ->where("c.id=0");
                     }
-            ));  
+            ));
         }else{
             $builder->add('producto', 'entity', array(
                     'required' => true,
@@ -44,8 +45,8 @@ class VentaDetalleType extends AbstractType {
                     'query_builder' => function(ProductoRepository $em) {
                         return $em->getProductosFacturables();
                     }));
-        }           
-                        
+        }
+
     }
 
     /**

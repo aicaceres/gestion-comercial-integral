@@ -1,0 +1,163 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Presupuestos de Clientes</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >PRESUPUESTO:  #{{ entity.nroPresupuesto }} <span class="floatright">{{entity.fechaPresupuesto|date('d/m/Y H:i')}} &nbsp; | &nbsp; {{app.user.username}}</span></h1>
+<div class="divEdicion">
+<style type="text/css">
+    fieldset label{
+        font-weight: bold;
+    }
+    .vtafields label{
+        display: inline-block;
+        width:100%;
+    }
+    .datos-cf {
+        width:100%;
+        vertical-align: top;
+        margin:2px 0px 10px 0px;
+    }
+    .datos-cliente{
+        width:100%;
+        vertical-align: top;
+        margin-bottom:10px;
+    }
+</style>
+
+<form id="form-venta" name="ventasbundle_venta" class="form-horizontal">
+    <fieldset>
+        <div style="display:inline-block; width: 60%;">
+            <div class="vtafields">
+                <label class="required">DATOS DEL CLIENTE: </label>
+                <select style="width:80%">
+                    <option>{{entity.cliente.nombre}}</option>
+                </select>
+            </div>
+            {% if entity.nombreCliente is null %}
+            <div class="datos-cliente">
+                {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+            </div>
+            {% else %}
+            <div class="datos-cf">
+                <input type="text" disabled="disabled" value="{{ entity.nombreCliente}}">
+            </div>
+            {% endif %}
+        </div>
+        <div style="display:inline-block; width: 25%;vertical-align: top; ">
+            <div class="vtafields">
+                <label class="required">FORMA DE PAGO: </label>
+                <select disabled="disabled">
+                    <option>{{ entity.formaPago.nombre }}</option>
+                </select>
+            </div>
+            <div class="datos-formapago" style="display:inline-block; width: 100%; vertical-align: top;">
+                {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
+            </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <div style="display:inline-block; width: 25%; ">
+            <label class="required">LISTA DE PRECIOS:</label>
+            <select disabled="disabled">
+                <option>{{ entity.precioLista.nombre }}</option>
+            </select>
+        </div>
+        <div style="display:inline-block; width: 25%;">
+            <div>
+                <label class="required">DEPÓSITO: </label>
+                <select disabled="disabled">
+                    <option>{{ entity.deposito.nombre }}</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:inline-block; width: 25%; display: none;">
+            <div>
+                <label>VALIDEZ [días]:</label>
+                <input type="number" value="{{ entity.validez }}" /></div>
+        </div>
+        <div style="display:inline-block; width: 20%;">
+            <div>
+                <label>DESCONTAR:</label>
+                <input type="checkbox" disabled="disabled" {% if entity.descuentaStock %}checked="checked"{% endif %} />
+            </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <div style="padding-top: 20px; margin:auto; width: 90%;">
+            <table cellpadding="0" cellspacing="0" border="0" class="venta stdtable noaction">
+                <thead>
+                    <tr>
+                        <th style="width:3%;">#</th>
+                        <th>Producto</th>
+                        <th style="width:12%;">Cant.</th>
+                        <th style="width:10%;">Precio Unit.</th>
+                        <th style="width:10%;">SubTotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+                {% for detalle in entity.detalles %}
+                    <tr class="item" divdata="item_items">
+                        <td class="ordTd">{{loop.index}}</td>
+                        <td class="prodTd">
+                            <label>{{detalle.producto.nombre}}</label>
+                        </td>
+                        <td class="cantTd">{{detalle.cantidad}}
+                        </td>
+                        <td class="precTd alignright">{{detalle.precio|number_format(3,'.',',')}}
+                        </td>
+                        <td class="itmSubtotalTd alignright">{{ detalle.total }}</td>
+                    </tr>
+                {% endfor %}
+                <tfoot>
+                    <tr>
+                        <th colspan="4" style="text-align:right">&nbsp; </th>
+                        <th class="cktotal red alignright" id="subtotalTh">
+                            <span style="float:left">$</span>&nbsp; {{ entity.getSubTotal|number_format(3,'.',',') }}
+                        </th>
+                    </tr>
+                </tfoot>
+
+            </table>
+        </div>
+    </fieldset>
+    <fieldset>
+        <div style="margin:auto; width: 90%;">
+            <table cellpadding="0" cellspacing="0" border="0" class="venta stdtable noaction">
+                <thead>
+                    <tr class="resumen">
+                    <th id="gralSubtotalTd">
+                        Subtotal: $&nbsp; {{ entity.getSubTotal|number_format(3,'.',',') }}.-
+                    </th>
+                    <th>
+                        Descuento/Recargo [<span class="porcentajeRecargo">
+                        {{ entity.formapago.porcentajeRecargo }}
+                        </span>%]: $&nbsp; {{ entity.getDescuento|number_format(3,'.',',') }}.-
+                    </th>
+                    <th class="gralTotalTd">
+                        Neto a Pagar: $&nbsp; {{ entity.getTotal|number_format(3,'.',',') }}.-
+                    </th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </fieldset>
+
+        <fieldset>
+            <br clear="all">
+            <div class="actionbutton">
+                <button class="guardar btn_print" type="button" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" >Imprimir</button>
+                <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
+            </div>
+        </fieldset>
+    </form>
+
+
+
+</div>
+</div>
+{% endblock %}

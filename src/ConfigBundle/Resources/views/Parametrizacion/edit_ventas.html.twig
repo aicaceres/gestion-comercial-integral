@@ -12,36 +12,46 @@
 <div class="divEdicion">
     {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
     <fieldset >
-        <div class="one_half">            
+        <div class="one_half">
         {{ form_row(form.ventasClienteBydefault) }}
-        </div>              
-    </fieldset>            
+        </div>
+    </fieldset>
     <fieldset style="margin-top:10px" >
-        <div class="one_half">            
+        <div class="one_half">
         {{ form_row(form.ventasDepositoBydefault) }}
-        </div>              
-    </fieldset>            
+        </div>
+    </fieldset>
     <fieldset style="margin-top:10px" >
-        <div class="one_half">            
+        <div class="one_half">
         {{ form_row(form.ultimoNroOperacionVenta) }}
-        </div>              
-    </fieldset>            
-    <fieldset >            
-        <br clear="all" /> 
+        </div>
+    </fieldset>
+    <fieldset style="margin-top:10px" >
+        <div class="one_half">
+        {{ form_row(form.ultimoNroPresupuesto) }}
+        </div>
+    </fieldset>
+    <fieldset style="margin-top:10px; display:none;" >
+        <div class="one_half">
+        {{ form_row(form.validezPresupuesto) }}
+        </div>
+    </fieldset>
+    <fieldset >
+        <br clear="all" />
         <div class="actionbutton">
             <button class="guardar" type="submit" >Guardar</button>
             <a class="cancelar" type="button" href="{{ path('ventas')}}">Cancelar</a>
         </div>
     </fieldset>
 {{ form_end(form) }}
-</div>    
-</div> 
+</div>
+</div>
 {% endblock %}
 {% block extra_javascripts %}
 <script type="text/javascript">
 jQuery(function ($) {
-    $(window).on('load', function () {        
+    $(window).on('load', function () {
     });
 });
-</script>  
+</script>
 {% endblock %}

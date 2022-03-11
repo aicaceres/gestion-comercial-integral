@@ -20,109 +20,51 @@ class FacturaElectronica
     protected $id;
 
     /**
-     * @var integer $tipoComp
-     * @ORM\Column(name="tipo_comp", type="string",nullable=true)
-     */    
-    protected $tipoComp;    
+     * @var integer $puntoVenta
+     * @ORM\Column(name="punto_venta", type="integer")
+     */
+    protected $puntoVenta;
     /**
-     * @var integer $nroComp
-     * @ORM\Column(name="nro_comp", type="string",nullable=true)
-     */    
-    protected $nroComp;    
+     * @var integer $tipoComprobante
+     * @ORM\Column(name="tipo_comprobante", type="string")
+     */
+    protected $tipoComprobante;
+    /**
+     * @var integer $nroComprobante
+     * voucher_number
+     * @ORM\Column(name="nro_comprobante", type="integer")
+     */
+    protected $nroComprobante;
     /**
      * @var integer $cae
-     * @ORM\Column(name="cae", type="string",nullable=true)
-     */    
-    protected $cae;    
+     * @ORM\Column(name="cae", type="string", length=14)
+     */
+    protected $cae;
     /**
      * @var integer $caeVto
-     * @ORM\Column(name="cae_vto", type="string",nullable=true)
-     */    
-    protected $caeVto;    
-    /**
-     * @var integer $facturadoDesde
-     * @ORM\Column(name="facturado_desde", type="string",nullable=true)
-     */    
-    protected $facturadoDesde;    
-    /**
-     * @var integer $facturadoHasta
-     * @ORM\Column(name="facturado_hasta", type="string",nullable=true)
-     */    
-    protected $facturadoHasta;    
-    /**
-     * @var integer $pagoVto
-     * @ORM\Column(name="pago_vto", type="string",nullable=true)
-     */    
-    protected $pagoVto;    
-    
-    /**
-     * @var integer $resultado
-     * @ORM\Column(name="resultado", type="string",nullable=true)
-     */    
-    protected $resultado;            
-    /**
-     * @var integer $motivoObs
-     * @ORM\Column(name="motivo_obs", type="string",nullable=true)
-     */    
-    protected $motivoObs;       
-    /**
-     * @var integer $mensajeError
-     * @ORM\Column(name="mensaje_error", type="string",nullable=true)
-     */    
-    protected $mensajeError;       
-    /**
-     * @var integer $reproceso
-     * @ORM\Column(name="reproceso", type="string",nullable=true)
-     */    
-    protected $reproceso;       
-
-     /**
-     * @var integer $total
-     * @ORM\Column(name="total", type="decimal", scale=3 )
+     * CAEFchVto
+     * @ORM\Column(name="cae_vto", type="string", length=10)
      */
-    protected $total=0;    
-     /**
-     * @var integer $neto
-     * @ORM\Column(name="neto", type="decimal", scale=3 )
-     */
-    protected $neto=0;    
-     /**
-     * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", scale=3 )
-     */
-    protected $iva=0;    
+    protected $caeVto;
 
     /**
-    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Factura", inversedBy="facturaElectronica")
-    * @ORM\JoinColumn(name="ventas_factura_id", referencedColumnName="id")
+    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Cobro", inversedBy="facturaElectronica")
+    * @ORM\JoinColumn(name="ventas_cobro_id", referencedColumnName="id")
+    * Registro del cobro por el cual se genero el voucher
     */
-    protected $factura;
-    /**
-     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred", inversedBy="notaElectronica")
-     * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
-     */
-    protected $notaDebCred;
+    protected $cobro;
 
-    /** 
-     * @var string $prefijoCompAsoc
-     * @ORM\Column(name="prefijo_comp_asoc", type="string", nullable=true)
-     */
-    protected $prefijoCompAsoc;
-    /** 
-     * @var string $tipoCompAsoc
-     * @ORM\Column(name="tipo_comp_asoc", type="string", nullable=true)
-     */
-    protected $tipoCompAsoc;
-    /** 
-     * @var string $nroCompAsoc
-     * @ORM\Column(name="nro_comp_asoc", type="string", nullable=true)
-     */
-    protected $nroCompAsoc;    
+    /**
+    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred", inversedBy="notaElectronica")
+    * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
+    * Registro de la nota de deb/cred por el cual se genero el voucher
+    */
+    protected $notaDebCred;
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -130,49 +72,72 @@ class FacturaElectronica
     }
 
     /**
-     * Set tipoComp
+     * Set puntoVenta
      *
-     * @param string $tipoComp
+     * @param integer $puntoVenta
      * @return FacturaElectronica
      */
-    public function setTipoComp($tipoComp)
+    public function setPuntoVenta($puntoVenta)
     {
-        $this->tipoComp = $tipoComp;
-    
+        $this->puntoVenta = $puntoVenta;
+
         return $this;
     }
 
     /**
-     * Get tipoComp
+     * Get puntoVenta
      *
-     * @return string 
+     * @return integer
      */
-    public function getTipoComp()
+    public function getPuntoVenta()
     {
-        return $this->tipoComp;
+        return $this->puntoVenta;
     }
 
     /**
-     * Set nroComp
+     * Set tipoComprobante
      *
-     * @param string $nroComp
+     * @param string $tipoComprobante
      * @return FacturaElectronica
      */
-    public function setNroComp($nroComp)
+    public function setTipoComprobante($tipoComprobante)
     {
-        $this->nroComp = $nroComp;
-    
+        $this->tipoComprobante = $tipoComprobante;
+
         return $this;
     }
 
     /**
-     * Get nroComp
+     * Get tipoComprobante
      *
-     * @return string 
+     * @return string
      */
-    public function getNroComp()
+    public function getTipoComprobante()
     {
-        return $this->nroComp;
+        return $this->tipoComprobante;
+    }
+
+    /**
+     * Set nroComprobante
+     *
+     * @param integer $nroComprobante
+     * @return FacturaElectronica
+     */
+    public function setNroComprobante($nroComprobante)
+    {
+        $this->nroComprobante = $nroComprobante;
+
+        return $this;
+    }
+
+    /**
+     * Get nroComprobante
+     *
+     * @return integer
+     */
+    public function getNroComprobante()
+    {
+        return $this->nroComprobante;
     }
 
     /**
@@ -184,14 +149,14 @@ class FacturaElectronica
     public function setCae($cae)
     {
         $this->cae = $cae;
-    
+
         return $this;
     }
 
     /**
      * Get cae
      *
-     * @return string 
+     * @return string
      */
     public function getCae()
     {
@@ -207,14 +172,14 @@ class FacturaElectronica
     public function setCaeVto($caeVto)
     {
         $this->caeVto = $caeVto;
-    
+
         return $this;
     }
 
     /**
      * Get caeVto
      *
-     * @return string 
+     * @return string
      */
     public function getCaeVto()
     {
@@ -222,187 +187,26 @@ class FacturaElectronica
     }
 
     /**
-     * Set resultado
+     * Set cobro
      *
-     * @param string $resultado
+     * @param \VentasBundle\Entity\Cobro $cobro
      * @return FacturaElectronica
      */
-    public function setResultado($resultado)
+    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null)
     {
-        $this->resultado = $resultado;
-    
+        $this->cobro = $cobro;
+
         return $this;
     }
 
     /**
-     * Get resultado
+     * Get cobro
      *
-     * @return string 
+     * @return \VentasBundle\Entity\Cobro
      */
-    public function getResultado()
+    public function getCobro()
     {
-        return $this->resultado;
-    }
-
-    /**
-     * Set motivoObs
-     *
-     * @param string $motivoObs
-     * @return FacturaElectronica
-     */
-    public function setMotivoObs($motivoObs)
-    {
-        $this->motivoObs = $motivoObs;
-    
-        return $this;
-    }
-
-    /**
-     * Get motivoObs
-     *
-     * @return string 
-     */
-    public function getMotivoObs()
-    {
-        return $this->motivoObs;
-    }
-
-    /**
-     * Set mensajeError
-     *
-     * @param string $mensajeError
-     * @return FacturaElectronica
-     */
-    public function setMensajeError($mensajeError)
-    {
-        $this->mensajeError = $mensajeError;
-    
-        return $this;
-    }
-
-    /**
-     * Get mensajeError
-     *
-     * @return string 
-     */
-    public function getMensajeError()
-    {
-        return $this->mensajeError;
-    }
-
-    /**
-     * Set reproceso
-     *
-     * @param string $reproceso
-     * @return FacturaElectronica
-     */
-    public function setReproceso($reproceso)
-    {
-        $this->reproceso = $reproceso;
-    
-        return $this;
-    }
-
-    /**
-     * Get reproceso
-     *
-     * @return string 
-     */
-    public function getReproceso()
-    {
-        return $this->reproceso;
-    }
-
-    /**
-     * Set total
-     *
-     * @param string $total
-     * @return FacturaElectronica
-     */
-    public function setTotal($total)
-    {
-        $this->total = $total;
-    
-        return $this;
-    }
-
-    /**
-     * Get total
-     *
-     * @return string 
-     */
-    public function getTotal()
-    {
-        return $this->total;
-    }
-
-    /**
-     * Set neto
-     *
-     * @param string $neto
-     * @return FacturaElectronica
-     */
-    public function setNeto($neto)
-    {
-        $this->neto = $neto;
-    
-        return $this;
-    }
-
-    /**
-     * Get neto
-     *
-     * @return string 
-     */
-    public function getNeto()
-    {
-        return $this->neto;
-    }
-
-    /**
-     * Set iva
-     *
-     * @param string $iva
-     * @return FacturaElectronica
-     */
-    public function setIva($iva)
-    {
-        $this->iva = $iva;
-    
-        return $this;
-    }
-
-    /**
-     * Get iva
-     *
-     * @return string 
-     */
-    public function getIva()
-    {
-        return $this->iva;
-    }
-
-    /**
-     * Set factura
-     *
-     * @param \VentasBundle\Entity\Factura $factura
-     * @return FacturaElectronica
-     */
-    public function setFactura(\VentasBundle\Entity\Factura $factura = null)
-    {
-        $this->factura = $factura;
-    
-        return $this;
-    }
-
-    /**
-     * Get factura
-     *
-     * @return \VentasBundle\Entity\Factura 
-     */
-    public function getFactura()
-    {
-        return $this->factura;
+        return $this->cobro;
     }
 
     /**
@@ -414,7 +218,7 @@ class FacturaElectronica
     public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
     {
         $this->notaDebCred = $notaDebCred;
-    
+
         return $this;
     }
 
@@ -426,143 +230,5 @@ class FacturaElectronica
     public function getNotaDebCred()
     {
         return $this->notaDebCred;
-    }
-
-    /**
-     * Set prefijoCompAsoc
-     *
-     * @param string $prefijoCompAsoc
-     * @return FacturaElectronica
-     */
-    public function setPrefijoCompAsoc($prefijoCompAsoc)
-    {
-        $this->prefijoCompAsoc = $prefijoCompAsoc;
-    
-        return $this;
-    }
-
-    /**
-     * Get prefijoCompAsoc
-     *
-     * @return string 
-     */
-    public function getPrefijoCompAsoc()
-    {
-        return $this->prefijoCompAsoc;
-    }
-
-    /**
-     * Set tipoCompAsoc
-     *
-     * @param string $tipoCompAsoc
-     * @return FacturaElectronica
-     */
-    public function setTipoCompAsoc($tipoCompAsoc)
-    {
-        $this->tipoCompAsoc = $tipoCompAsoc;
-    
-        return $this;
-    }
-
-    /**
-     * Get tipoCompAsoc
-     *
-     * @return string 
-     */
-    public function getTipoCompAsoc()
-    {
-        return $this->tipoCompAsoc;
-    }
-
-    /**
-     * Set nroCompAsoc
-     *
-     * @param string $nroCompAsoc
-     * @return FacturaElectronica
-     */
-    public function setNroCompAsoc($nroCompAsoc)
-    {
-        $this->nroCompAsoc = $nroCompAsoc;
-    
-        return $this;
-    }
-
-    /**
-     * Get nroCompAsoc
-     *
-     * @return string 
-     */
-    public function getNroCompAsoc()
-    {
-        return $this->nroCompAsoc;
-    }
-
-    /**
-     * Set facturadoDesde
-     *
-     * @param string $facturadoDesde
-     * @return FacturaElectronica
-     */
-    public function setFacturadoDesde($facturadoDesde)
-    {
-        $this->facturadoDesde = $facturadoDesde;
-
-        return $this;
-    }
-
-    /**
-     * Get facturadoDesde
-     *
-     * @return string 
-     */
-    public function getFacturadoDesde()
-    {
-        return $this->facturadoDesde;
-    }
-
-    /**
-     * Set facturadoHasta
-     *
-     * @param string $facturadoHasta
-     * @return FacturaElectronica
-     */
-    public function setFacturadoHasta($facturadoHasta)
-    {
-        $this->facturadoHasta = $facturadoHasta;
-
-        return $this;
-    }
-
-    /**
-     * Get facturadoHasta
-     *
-     * @return string 
-     */
-    public function getFacturadoHasta()
-    {
-        return $this->facturadoHasta;
-    }
-
-    /**
-     * Set pagoVto
-     *
-     * @param string $pagoVto
-     * @return FacturaElectronica
-     */
-    public function setPagoVto($pagoVto)
-    {
-        $this->pagoVto = $pagoVto;
-
-        return $this;
-    }
-
-    /**
-     * Get pagoVto
-     *
-     * @return string 
-     */
-    public function getPagoVto()
-    {
-        return $this->pagoVto;
     }
 }

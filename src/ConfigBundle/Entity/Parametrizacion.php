@@ -29,15 +29,28 @@ class Parametrizacion {
 
     /**
      * @var integer $ultimoNroOperacionVenta
-     * @ORM\Column(name="ultimo_nro_operacion_venta", type="integer")     
+     * @ORM\Column(name="ultimo_nro_operacion_venta", type="integer")
      */
     protected $ultimoNroOperacionVenta = 0;
 
     /**
      * @var integer $ultimoNroOperacionCobro
-     * @ORM\Column(name="ultimo_nro_operacion_cobro", type="integer")     
+     * @ORM\Column(name="ultimo_nro_operacion_cobro", type="integer")
      */
     protected $ultimoNroOperacionCobro = 0;
+
+    /**
+     * @var integer $ultimoNroPresupuesto
+     * @ORM\Column(name="ultimo_nro_presupuesto", type="integer")
+     */
+    protected $ultimoNroPresupuesto = 0;
+
+    /**
+     * @var integer $validezPresupuesto
+     * validez en dias
+     * @ORM\Column(name="validez_presupuesto", type="integer")
+     */
+    protected $validezPresupuesto = 7;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
@@ -48,7 +61,7 @@ class Parametrizacion {
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -71,7 +84,7 @@ class Parametrizacion {
     /**
      * Get ventasClienteBydefault
      *
-     * @return \VentasBundle\Entity\Cliente 
+     * @return \VentasBundle\Entity\Cliente
      */
     public function getVentasClienteBydefault()
     {
@@ -95,7 +108,7 @@ class Parametrizacion {
     /**
      * Get ventasDepositoBydefault
      *
-     * @return \AppBundle\Entity\Deposito 
+     * @return \AppBundle\Entity\Deposito
      */
     public function getVentasDepositoBydefault()
     {
@@ -118,7 +131,7 @@ class Parametrizacion {
     /**
      * Get ultimoNroOperacionVenta
      *
-     * @return integer 
+     * @return integer
      */
     public function getUltimoNroOperacionVenta()
     {
@@ -141,7 +154,7 @@ class Parametrizacion {
     /**
      * Get ultimoNroOperacionCobro
      *
-     * @return integer 
+     * @return integer
      */
     public function getUltimoNroOperacionCobro()
     {
@@ -164,10 +177,56 @@ class Parametrizacion {
     /**
      * Get unidadNegocio
      *
-     * @return \ConfigBundle\Entity\UnidadNegocio 
+     * @return \ConfigBundle\Entity\UnidadNegocio
      */
     public function getUnidadNegocio()
     {
         return $this->unidadNegocio;
+    }
+
+    /**
+     * Set ultimoNroPresupuesto
+     *
+     * @param integer $ultimoNroPresupuesto
+     * @return Parametrizacion
+     */
+    public function setUltimoNroPresupuesto($ultimoNroPresupuesto)
+    {
+        $this->ultimoNroPresupuesto = $ultimoNroPresupuesto;
+
+        return $this;
+    }
+
+    /**
+     * Get ultimoNroPresupuesto
+     *
+     * @return integer
+     */
+    public function getUltimoNroPresupuesto()
+    {
+        return $this->ultimoNroPresupuesto;
+    }
+
+    /**
+     * Set validezPresupuesto
+     *
+     * @param integer $validezPresupuesto
+     * @return Parametrizacion
+     */
+    public function setValidezPresupuesto($validezPresupuesto)
+    {
+        $this->validezPresupuesto = $validezPresupuesto;
+
+        return $this;
+    }
+
+    /**
+     * Get validezPresupuesto
+     *
+     * @return integer 
+     */
+    public function getValidezPresupuesto()
+    {
+        return $this->validezPresupuesto;
     }
 }

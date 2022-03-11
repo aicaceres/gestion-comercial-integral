@@ -1,9 +1,11 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <style type="text/css">
+    .pagetitle span{
+        font-size:20px;
+    }
     #form-venta-rapida label{
         font-weight: bold;
-        padding: 0px 2px 0px 8px;
     }
     .vtafields label{
         display: inline-block;
@@ -13,6 +15,9 @@
         color:blue ;
         font-weight:bold ;
         background-color: gainsboro;
+    }
+    #ventasbundle_presupuesto_descuentaStock:focus{
+        opacity:1 !important;
     }
     #form-venta-rapida span.add-item-button, #form-venta-rapida span.del-item-button{
         font-size: 20px;
@@ -30,153 +35,183 @@
         padding: 4px 10px;
     }
 
-    #clientes_table .nombre-cliente:focus, #clientes_table .nombre-cliente:hover,
-    #formapago_table .nombre-formapago:focus , #formapago_table .nombre-formapago:hover,
-    #productos_table .nombre-producto:focus, #productos_table .nombre-producto:hover,
-    .paginate_button:focus{
+    #clientes_table .nombre-cliente:focus, #clientes_table .nombre-cliente:hover{
         color:red !important;
         font-weight:bold;
     }
 
-    .resumen th{
-        font-size:12px;
-        width:30%;
+    .datos-cf {
+        width:100%;
+        vertical-align: top;
+        margin:2px 0px 10px 0px;
     }
-    .resumen th.gralTotalTd{
-        font-size:14px;
+    .datos-cliente{
+        width:100%;
+        vertical-align: top;
+        margin-bottom:10px;
+        display:none;
     }
 
 </style>
 <div class="pageheader notab">
-    <h1 class="pagetitle">VENTA:
-        <span style="margin-left:10px" class="nroOperacion">#{{entity.nroOperacion}}</span>
-        <span style="margin-left:40px">{{app.user.username}}</span>
-        <span style="font-size:20px" class="floatright fechahora">{{entity.fechaVenta|date('d/m/Y H:i')}}</span>
+    <h1 class="pagetitle">PRESUPUESTO:
+            <span style="margin-left:10px" class="nroOperacion">#{{entity.nroPresupuesto}}</span>
+            <span class="floatright">{{entity.fechaPresupuesto|date('d/m/Y H:i')}} &nbsp; | &nbsp; {{app.user.username}}</span>
     </h1>
-</div><!--pageheader-->
+</div>
+
 {% endblock %}
+
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
 {% include "AppBundle::notificacion.html.twig" %}
-    <div id="form-venta-rapida">
+<div id="form-venta-rapida">
+   {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_presupuesto'}}) }}
+        <fieldset>
+            <div id="selectorCliente" style="display:inline-block; width: 60%;">
+                <div class="vtafields">
+                    {{ form_label(form.cliente) }}
+                    {{ form_widget(form.cliente,{'attr':{'style':'width:80%','url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente' }}) }}
+                    <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
 
-        {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_venta'}}) }}
-
-        <fieldset class="vtafields" >
-            <div id="selectorCliente" style="display:inline-block; width: 50%;">
-                {{ form_label(form.cliente) }}
-                {{ form_widget(form.cliente,{'attr':{'style':'width:80%','url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente'}}) }}
-                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
+                </div>
+                <div class="datos-cliente">
+                    {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+                </div>
+                <div class="datos-cf">
+                    {{ form_widget(form.nombreCliente)}}
+                </div>
             </div>
-            <div style="display:inline-block; width: 20%;">
+
+            <div style="display:inline-block; width: 25%;vertical-align: top; ">
+                <div class="vtafields">
+                    {{ form_label(form.formaPago)}}
+                    {{ form_widget(form.formaPago,{'attr':{'style':'width:80%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}}) }}
+                    <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
+                </div>
+                <div class="datos-formapago" style="display:inline-block; width: 100%; vertical-align: top;">
+                    {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
+                </div>
+            </div>
+        </fieldset>
+
+<fieldset class="vtafields" >
+            <div style="display:inline-block; width: 25%; ">
                 {{ form_label(form.precioLista)}}
-                {{ form_widget(form.precioLista,{'attr':{'style':'width:100%','tabindex':-1}}) }}
+                {{ form_widget(form.precioLista) }}
             </div>
             <div style="display:inline-block; width: 25%;">
-                {{ form_label(form.transporte)}}
-                {{ form_widget(form.transporte,{'attr':{'style':'width:100%','tabindex':-1}}) }}
+                {{ form_row(form.deposito)}}
             </div>
-        </fieldset>
-        <fieldset >
-            <div class="datos-cliente" style="display:inline-block; width:100%; vertical-align: top;margin-bottom:10px">
-                {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
-            </div>
-        </fieldset>
-
-        <fieldset class="vtafields" >
-            <div style="display:inline-block; width: 35%; ">
-                {{ form_label(form.formaPago)}}
-                {{ form_widget(form.formaPago,{'attr':{'style':'width:80%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}}) }}
-                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
+            <div style="display:inline-block; width: 25%; display: none;">
+                {{ form_row(form.validez)}}
             </div>
             <div style="display:inline-block; width: 20%;">
-                {{ form_label(form.moneda)}}
-                {{ form_widget(form.moneda,{'attr':{'style':'width:100%'}}) }}
-                {{ form_widget(form.cotizacion) }}
-            </div>
-            <div style="display:inline-block; width: 25%;">
-                {{ form_label(form.deposito)}}
-                {{ form_widget(form.deposito,{'attr':{'style':'width:100%','tabindex':-1}}) }}
+                {{ form_row(form.descuentaStock)}}
             </div>
         </fieldset>
 
-        <fieldset >
-            <div class="datos-formapago" style="display:inline-block; width: 35%; vertical-align: top;">
-                {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
-            </div>
-            <div class="datos-moneda" style="display:inline-block; width: 25%; vertical-align: top;">
-                {% include "VentasBundle:Venta:_partial-datos-moneda.html.twig" with {'item':entity.moneda}  %}
-            </div>
-        </fieldset>
-
-        <fieldset>
-            <div style="padding-top: 20px; margin:auto; width: 100%;">
+            <div style="padding-top: 20px; margin:auto; width: 90%;">
                 {{ form_errors(form.detalles) }}
-                {% include "VentasBundle:Venta:_partial-detalle.html.twig" %}
+                {% include "VentasBundle:Presupuesto:_partial-detalle.html.twig" %}
             </div>
         </fieldset>
         <fieldset>
-            <div style="margin:auto; width: 100%;">
-                {% include "VentasBundle:Venta:_partial-resumen.html.twig" %}
+            <div style="margin:auto; width: 90%;">
+                {% include "VentasBundle:Presupuesto:_partial-resumen.html.twig" %}
             </div>
         </fieldset>
-
         <fieldset>
             <br clear="all" />
             <div class="actionbutton">
-                <button class="guardar tabbable" type="submit" >Guardar</button>
-                <a class="cancelar tabbable" type="button" href="{{ path('ventas_venta')}}">Cancelar</a>
+                <button class="guardar" type="button" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
         </fieldset>
-
-        <div name="rest" class="hiddenformrest"> {{ form_rest(form) }} </div>
-        {{ form_end(form) }}
-
-    </div>
-    <div class="notifmsg info png_bg" style="margin-top:10px">
-        <a href="#" class="close"></a>
-        <div><small>Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong> Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong> Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong> + = Agregar producto <strong class="divnotif">|</strong> Ctrl+Alt+G = Guardar  </small>
-        </div>
-    </div>
+        <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
+  {{ form_end(form) }}
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
-<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
 
 <script type="text/javascript">
-let checklogin = "{{ app.session.get('checkrequired') }}";
-if( checklogin == '1' ){
-    checkLoginVentas("{{ path('ventas_login')}}" ,"{{ path('ventas_venta')}}" );
-}
 jQuery(function ($) {
     $(window).on('load', function () {
         $('.cancelar').on('blur', function(e){
-            $('#ventasbundle_venta_cliente').select2('focus')
+            $('#ventasbundle_presupuesto_cliente').select2('focus')
             e.stopPropagation();
         })
-        $(document).on('keydown',function(e){ detectarControles(e); })
-       // $('.togglemenu').click();
-        $('.select2').select2({ width:'style' });
-        $('#ventasbundle_venta_cliente').focus();
+        $(document).on('keydown',function(e){ detectarControles(e); });
 
-        // al presionar ctrl+enter abrir popup
+        if('{{entity.cliente.consumidorfinal}}'){
+            $('.datos-cliente').hide();
+            $('.datos-cf').show();
+            $('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
+        }else{
+            $('.datos-cf').hide();
+            $('#ventasbundle_presupuesto_nombreCliente').attr('required', false);
+            $('.datos-cliente').show();
+        }
+        // crea select2 via ajax para cliente
+        $('#ventasbundle_presupuesto_cliente').select2({
+            ajax: {
+            url: "{{path('get_autocomplete_clientes')}}",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                searchTerm: params.term // search term
+                };
+            },
+            processResults: function (response) {
+                return {
+                    results: response
+                };
+            },
+            cache: true
+            },
+            minimumInputLength: 3
+        }).on('change', function() {
+            id = $(this).val();
+            $.getJSON( "{{ path('get_datos_venta_cliente')}}" , {'id': id}).done(function(data){
+                // actualizar partial datos
+                if(data){
+                    if( data.consumidorfinal ){
+                        $('.datos-cliente').hide();
+                        $('.datos-cf').show();
+                        $('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
+                        $('#ventasbundle_presupuesto_nombreCliente').focus();
+                    }else{
+                        $('.datos-cf').hide();
+                        $('#ventasbundle_presupuesto_nombreCliente').val('');
+                        $('#ventasbundle_presupuesto_nombreCliente').attr('required', false);
+                        $('.datos-cliente').html(data.partial);
+                        $('.datos-cliente').show();
+                    }
+                }
+            });
+        });
+        $('#ventasbundle_presupuesto_cliente').select2('focus');
+
+// al presionar ctrl+enter abrir popup
         $(document).on('click change keydown',
-            '#ventasbundle_venta_cliente,#ventasbundle_venta_formaPago,[name*="producto"]', function(e) {
+            '#ventasbundle_presupuesto_cliente,#ventasbundle_presupuesto_formaPago,[name*="producto"]', function(e) {
             if (e.keyCode == 13 && e.ctrlKey ) {
                 e.preventDefault();
                 openModal($(this))
             }
         });
-        // en buscar abrir popup correspondiente
+// en buscar abrir popup correspondiente
         $(document).on('click','.btn_search',function(e) {
             obj = $(this).parent().find('select');
             e.preventDefault();
             openModal(obj)
         })
-
-        // al modificar forma de pago actualizar datos del partial
-        $('#ventasbundle_venta_formaPago').on('change', function() {
+// al modificar forma de pago actualizar datos del partial
+        $('#ventasbundle_presupuesto_formaPago').on('change', function() {
             $('.datos-formapago').html('');
             id = $(this).val();
             $.get( "{{ path('get_datos_formapago')}}" , {'id': id}).done(function(data){
@@ -188,69 +223,46 @@ jQuery(function ($) {
                 }
             });
         });
-        // al modificar moneda actualizar datos del partial
-        $('#ventasbundle_venta_moneda').on('change', function() {
-            $('.datos-moneda').html('');
-            id = $(this).val();
-            $.getJSON( "{{ path('get_datos_moneda')}}" , {'id': id}).done(function(data){
-                // actualizar datos
-                if(data){
-                    $('.datos-moneda').html(data.partial);
-                    $('.simbolo').html( data.simbolo );
-                    $('#ventasbundle_venta_cotizacion').val( data.cotizacion );
-                    actualizaTotales();
-                }
-            });
-        });
-        // al modificar cliente actualizar datos del partial
-        $('#ventasbundle_venta_cliente').on('change', function() {
-            $('.datos-cliente').html('');
-            id = $(this).val();
-            $.getJSON( "{{ path('get_datos_venta_cliente')}}" , {'id': id}).done(function(data){
-                // actualizar datos
-                if(data){
-                    $('.datos-cliente').html(data.partial);
-                    $('#ventasbundle_venta_precioLista').val(data.listaprecio);
-                    $('#ventasbundle_venta_transporte').val(data.transporte);
-                    $('#ventasbundle_venta_formaPago').val(data.formapago);
-                    $('#ventasbundle_venta_formaPago').change();
-                }
-            });
-
-        });
 
 // Get the container who holds the collection
-    $collectionHolder = $('table.venta tbody');
-    $collectionHolder.find('.delTd').each(function() {
-        addItemFormDeleteLink($(this));
-    });
-    $collectionHolder.find('.ordTd').each(function(i) {
-        $(this).html(i + 1);
-    });
-    $('#linkAdd').on('click', function(e) {
-        e.preventDefault();
-        addNewItem();
-        e.stopPropagation();
-        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
-    });
+        $collectionHolder = $('table.venta tbody');
+        $collectionHolder.find('.delTd').each(function() {
+            addItemFormDeleteLink($(this));
+        });
+        $collectionHolder.find('.ordTd').each(function(i) {
+            $(this).html(i + 1);
+        });
+        $('#linkAdd').on('click', function(e) {
+            e.preventDefault();
+            addNewItem();
+            e.stopPropagation();
+        });
 
-    // confirm on submit
-    $('#ventasbundle_venta').on('submit', function(){
-        if( !validlogin ){
-            alert('No posee login válido para realizar ventas!');
-            window.location.href = "{{ path('ventas_venta')}}";
-        }
-        // controlar que haya items cargados
-        let txt = 'VENTA:   #'+$('#ventasbundle_venta_nroOperacion').val();
-        txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
-        if( $('tbody tr.item').length > 0 ){
-            if (!confirm(txt)) {
-               return false;
+// confirm on submit
+        $('.guardar').on('click', function(){
+            // controlar que haya items cargados
+            let txt = 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
+            txt = txt + '\n\n' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
+            if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") ){
+                txt = txt + '\n' +'Se realizará el descuento de los productos en el stock!';
             }
-        }else{  alert('Debe ingresar items a la venta'); return false;}
+            // detectar inputs invalidos
+            if( $(':invalid').length > 0 ){
+                $(':invalid').focus();
+                return false;
+            }
+            if( $('tbody tr.item').length > 0 ){
+                if (!confirm(txt)) {
+                return false;
+                }
+                $('#ventasbundle_presupuesto').submit();
+            }else{
+                alert('Debe ingresar items al presupuesto');
+                return false;
+            }
+        });
 
-    })
-});
+    });
 // funciones personalizas para el formulario
  function addNewItem() {
     var prototype = $collectionHolder.data('prototype');
@@ -290,21 +302,16 @@ function addItemFormDeleteLink($itemFormTd) {
 }
 function actualizaTotales(){
     let Total=0;
-    const cotizacion = parseFloat($('#ventasbundle_venta_cotizacion').val()) ;
     $("tr.item").each(function(){
         let item = $(this);
-        const cant =  checknumero( item.find('.cantTd input') ) ;
-        //checknumero( item.find('.precTd input[type=text]') ) ;
-        let prec = item.find('.precTd span').data('orig');
-        // calcular la cotización si es distinta a 1
-        prec = prec / cotizacion;
-        item.find('.precTd span').html( prec.toFixed(3) );
+        const cant = checknumero( item.find('.cantTd input') ) ;
+        const prec = checknumero( item.find('.precTd input') ) ;
 
         let sbtotItm = prec * cant;
         Total += sbtotItm;
         item.find('.itmSubtotalTd').text( sbtotItm.toFixed(3));
     });
-    $('#subtotalTh').html(Total.toFixed(3));
+    $('#subtotalTh').html('$ '+ Total.toFixed(3));
     $('#gralSubtotalTd').find('span.valor').html(Total.toFixed(3));
     // porcentaje de descuento/recargo
     const porcentaje = checknumero( $('#porcentajeRecargo') ) ;
@@ -312,6 +319,8 @@ function actualizaTotales(){
     const totalgral = Total + descrec;
     $('#importeRecargo').text(descrec.toFixed(3));
     $('#totalGral').text(totalgral.toFixed(3));
+    $('#ventasbundle_presupuesto_total').val(totalgral.toFixed(3));
+    $('#ventasbundle_presupuesto_descuento').val(descrec.toFixed(3));
 
     $collectionHolder.find('.ordTd').each(function(index) {
         $(this).html(index+1);
@@ -347,12 +356,14 @@ function openModalCliente(){
                 "rowCallback": function (row, data) {
                     // seleccionar on click
                     $(row).find('a').on('click', function(){
-                        optCliente = $('#ventasbundle_venta_cliente option:first');
-                        optCliente.val($(this).data('id'));
-                        optCliente.text($(this).text());
+                        var data = {
+                            id: $(this).data('id'),
+                            text: $(this).text()
+                        };
+                        var newOption = new Option(data.text, data.id, true, true);
+                        $('#ventasbundle_presupuesto_cliente').append(newOption).trigger('change');
                         $('#popup').dialog("destroy");
-                        $('#ventasbundle_venta_cliente').change();
-                        $('#ventasbundle_venta_cliente').focus();
+                        $('#ventasbundle_presupuesto_cliente').focus();
                     })
                  },
                 // Server-side parameters
@@ -403,10 +414,10 @@ function openModalFormaPago(){
                 "rowCallback": function (row, data) {
                     // seleccionar on click
                     $(row).find('a').on('click', function(){
-                        $('#ventasbundle_venta_formaPago').val($(this).data('id'));
+                        $('#ventasbundle_presupuesto_formaPago').val($(this).data('id'));
                         $('#popup').dialog("destroy");
-                        $('#ventasbundle_venta_formaPago').change();
-                        $('#ventasbundle_venta_formaPago').focus();
+                        $('#ventasbundle_presupuesto_formaPago').change();
+                        $('#ventasbundle_presupuesto_formaPago').focus();
                     })
                  },
 		"sPaginationType": "full_numbers",
@@ -431,9 +442,9 @@ function openModalFormaPago(){
 }
 // PRODUCTOS
 function openModalProducto(obj){
-    const listaprecio = $('#ventasbundle_venta_precioLista').val();
-    const deposito = $('#ventasbundle_venta_deposito').val();
-    const cotizacion = $('#ventasbundle_venta_cotizacion').val();
+    const listaprecio = $('#ventasbundle_presupuesto_precioLista').val();
+    const deposito = $('#ventasbundle_presupuesto_deposito').val();
+    const cotizacion = 1;
     var oTable = $('#productos_table').dataTable({
                 "columnDefs": [
                     // These are the column name variables that will be sent to the server
@@ -514,17 +525,17 @@ function detectarControles(e) {
         // ctrl + alt + C
         if( e.keyCode == 67 ){
             e.preventDefault();
-            openModal($('#ventasbundle_venta_cliente'))
+            openModal($('#ventasbundle_presupuesto_cliente'))
         }
         // ctrl + alt + J
         if( e.keyCode == 70 ){
             e.preventDefault();
-            openModal($('#ventasbundle_venta_formapago'))
+            openModal($('#ventasbundle_presupuesto_formapago'))
         }
         // ctrl + alt + G
         if( e.keyCode == 71 ){
             e.preventDefault();
-            $('#ventasbundle_venta').submit();
+            $('#ventasbundle_presupuesto').submit();
         }
     }
     // tecla + agrega item
@@ -532,6 +543,7 @@ function detectarControles(e) {
         e.preventDefault();
         $('#linkAdd').click();
     }
+
 }
 });
 </script>{% endblock %}

@@ -20,7 +20,7 @@ class Venta {
     protected $id;
     /**
      * @var integer $nroOperacion
-     * @ORM\Column(name="nro_operacion", type="integer")     
+     * @ORM\Column(name="nro_operacion", type="integer")
      */
     protected $nroOperacion = '';
     /**
@@ -51,8 +51,8 @@ class Venta {
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
-     **/  
-    protected $formaPago;    
+     **/
+    protected $formaPago;
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
@@ -63,6 +63,13 @@ class Venta {
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
      */
     protected $moneda;
+
+    /**
+     * @var string $cotizacion
+     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     */
+    protected $cotizacion = 0;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Transporte")
      * @ORM\JoinColumn(name="transporte_id", referencedColumnName="id")
@@ -73,7 +80,7 @@ class Venta {
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
-    protected $deposito;  
+    protected $deposito;
 
     /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\VentaDetalle", mappedBy="venta",cascade={"persist", "remove"})
@@ -110,7 +117,42 @@ class Venta {
      */
     private $updatedBy;
 
-    public function getTotal() {
+    /**
+     *  TOTALIZADOS DE LA VENTA
+     */
+    public function totalesDiscriminados() {
+        $precio = $iva = 0;
+        foreach ($this->detalles as $item) {
+            $precio = $precio + $item->getPrecio();
+            $iva = $iva + $item->getIva();
+        }
+        $totales = array('precio' => $precio, 'iva' => $iva);
+        return $totales;
+    }
+
+    public function totalDescuentoRecargo(){
+        $porcentaje = $this->getFormaPago()->getPorcentajeRecargo();
+        $totales = $this->totalesDiscriminados();
+        return ($totales['precio'] + $totales['iva']) * ($porcentaje/100);
+    }
+    /****/
+
+
+    /**
+     *  VALORES TOTALES ORIGINALES
+     */
+    public function getPrecioDiscriminado() {
+        $precio = $iva = 0;
+        $cotiz = $this->cotizacion;
+        foreach ($this->detalles as $item) {
+            $precio = $precio + $item->getPrecio();
+            $iva = $iva + $item->getIva();
+        }
+        $totales = array('precio' => $precio/$cotiz, 'iva' => $iva/$cotiz);
+        return $totales;
+    }
+
+    public function getSubTotal() {
         $total = 0;
         foreach ($this->detalles as $item) {
             $total = $total + $item->getTotal();
@@ -118,11 +160,19 @@ class Venta {
         return $total;
     }
 
+    public function getTotalDescuentoRecargo(){
+        $porcentaje = $this->getFormaPago()->getPorcentajeRecargo();
+        return $this->getSubTotal() * ($porcentaje/100);
+    }
+
+    public function getTotal(){
+        return $this->getSubTotal() + $this->getTotalDescuentoRecargo();
+    }
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -145,7 +195,7 @@ class Venta {
     /**
      * Get fechaVenta
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaVenta()
     {
@@ -168,7 +218,7 @@ class Venta {
     /**
      * Get estado
      *
-     * @return string 
+     * @return string
      */
     public function getEstado()
     {
@@ -191,7 +241,7 @@ class Venta {
     /**
      * Get cliente
      *
-     * @return \VentasBundle\Entity\Cliente 
+     * @return \VentasBundle\Entity\Cliente
      */
     public function getCliente()
     {
@@ -214,7 +264,7 @@ class Venta {
     /**
      * Get formaPago
      *
-     * @return \ConfigBundle\Entity\FormaPago 
+     * @return \ConfigBundle\Entity\FormaPago
      */
     public function getFormaPago()
     {
@@ -237,7 +287,7 @@ class Venta {
     /**
      * Get precioLista
      *
-     * @return \AppBundle\Entity\PrecioLista 
+     * @return \AppBundle\Entity\PrecioLista
      */
     public function getPrecioLista()
     {
@@ -260,7 +310,7 @@ class Venta {
     /**
      * Get transporte
      *
-     * @return \ConfigBundle\Entity\Transporte 
+     * @return \ConfigBundle\Entity\Transporte
      */
     public function getTransporte()
     {
@@ -283,7 +333,7 @@ class Venta {
     /**
      * Get moneda
      *
-     * @return \ConfigBundle\Entity\Moneda 
+     * @return \ConfigBundle\Entity\Moneda
      */
     public function getMoneda()
     {
@@ -305,7 +355,7 @@ class Venta {
      */
     public function addDetalle(\VentasBundle\Entity\VentaDetalle $detalles)
     {
-        $detalles->setVenta($this);        
+        $detalles->setVenta($this);
         $this->detalles[] = $detalles;
         return $this;
     }
@@ -323,7 +373,7 @@ class Venta {
     /**
      * Get detalles
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getDetalles()
     {
@@ -346,7 +396,7 @@ class Venta {
     /**
      * Get nroOperacion
      *
-     * @return integer 
+     * @return integer
      */
     public function getNroOperacion()
     {
@@ -369,7 +419,7 @@ class Venta {
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -392,7 +442,7 @@ class Venta {
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -415,7 +465,7 @@ class Venta {
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -438,7 +488,7 @@ class Venta {
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {
@@ -461,7 +511,7 @@ class Venta {
     /**
      * Get deposito
      *
-     * @return \AppBundle\Entity\Deposito 
+     * @return \AppBundle\Entity\Deposito
      */
     public function getDeposito()
     {
@@ -487,5 +537,28 @@ class Venta {
      */
     public function getUnidadNegocio() {
         return $this->unidadNegocio;
+    }
+
+    /**
+     * Set cotizacion
+     *
+     * @param string $cotizacion
+     * @return Venta
+     */
+    public function setCotizacion($cotizacion)
+    {
+        $this->cotizacion = $cotizacion;
+
+        return $this;
+    }
+
+    /**
+     * Get cotizacion
+     *
+     * @return string
+     */
+    public function getCotizacion()
+    {
+        return $this->cotizacion;
     }
 }

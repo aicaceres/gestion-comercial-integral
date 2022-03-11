@@ -34,12 +34,12 @@ class Localidad
      * @ORM\Column(name="codpostal", type="string", nullable=true)
      */
     protected $codpostal;
-    
+
     /**
      * @ORM\Column(name="by_default", type="boolean", nullable=true)
      */
     protected $byDefault = false;
-    
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Provincia", inversedBy="localidades")
      * @ORM\JoinColumn(name="provincia_id", referencedColumnName="id")
@@ -47,12 +47,12 @@ class Localidad
     protected $provincia;
 
     public function __toString() {
-        return $this->name;
-    } 
+        return ($this->name) ? $this->name : '';
+    }
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -68,14 +68,14 @@ class Localidad
     public function setName($name)
     {
         $this->name = $name;
-    
+
         return $this;
     }
 
     /**
      * Get name
      *
-     * @return string 
+     * @return string
      */
     public function getName()
     {
@@ -91,14 +91,14 @@ class Localidad
     public function setShortName($shortname)
     {
         $this->shortname = $shortname;
-    
+
         return $this;
     }
 
     /**
      * Get shortname
      *
-     * @return string 
+     * @return string
      */
     public function getShortName()
     {
@@ -114,14 +114,14 @@ class Localidad
     public function setProvincia(\ConfigBundle\Entity\Provincia $provincia = null)
     {
         $this->provincia = $provincia;
-    
+
         return $this;
     }
 
     /**
      * Get provincia
      *
-     * @return \ConfigBundle\Entity\Provincia 
+     * @return \ConfigBundle\Entity\Provincia
      */
     public function getProvincia()
     {
@@ -137,14 +137,14 @@ class Localidad
     public function setCodpostal($codpostal)
     {
         $this->codpostal = $codpostal;
-    
+
         return $this;
     }
 
     /**
      * Get codpostal
      *
-     * @return string 
+     * @return string
      */
     public function getCodpostal()
     {
@@ -167,7 +167,7 @@ class Localidad
     /**
      * Get byDefault
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getByDefault()
     {

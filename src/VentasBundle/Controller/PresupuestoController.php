@@ -9,10 +9,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 //use Doctrine\Common\Collections\ArrayCollection;
 use ConfigBundle\Controller\UtilsController;
-use VentasBundle\Entity\Factura;
-use VentasBundle\Form\FacturaType;
-use VentasBundle\Entity\FacturaElectronica;
-
+use VentasBundle\Entity\Presupuesto;
+use VentasBundle\Form\PresupuestoType;
+use AppBundle\Entity\Stock;
+use AppBundle\Entity\StockMovimiento;
 /**
  * @Route("/presupuestoVentas")
  */
@@ -27,254 +27,183 @@ class PresupuestoController extends Controller {
         $unidneg = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_venta');
         $em = $this->getDoctrine()->getManager();
-        $cliId = $request->get('cliId');
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
-        /*$clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array('activo' => 1), array('nombre' => 'ASC'));*/
-        $entities = $em->getRepository('VentasBundle:Factura')->findByCriteria($unidneg, $cliId, $desde, $hasta);
-        //$entities = $em->getRepository('VentasBundle:Factura')->findByUnidadNegocio($this->get('session')->get('unidneg_id'));
-        return $this->render('VentasBundle:Factura:index.html.twig', array(
+
+        $cliId = $request->get('cliId');
+        $cliente = null;
+        if($cliId){
+            $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
+        }
+        $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $desde, $hasta);
+
+        return $this->render('VentasBundle:Presupuesto:index.html.twig', array(
                     'entities' => $entities,
-                    //'clientes' => $clientes,
                     'cliId' => $cliId,
+                    'cliente' => $cliente,
                     'desde' => $desde,
                     'hasta' => $hasta
         ));
     }
 
     /**
-     * @Route("/new", name="ventas_factura_new")
+     * @Route("/new", name="ventas_presupuesto_new")
      * @Method("GET")
-     * @Template("VentasBundle:Factura:edit.html.twig")
+     * @Template("VentasBundle:Presupuesto:edit.html.twig")
      */
     public function newAction() {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura_new');
-        $entity = new Factura();
-        //   $em = $this->getDoctrine()->getManager();
-        // sacar cuando se implemente factura electrónica
-        //  $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
-        //  $entity->setNroFactura( sprintf("%03d", $equipo->getPrefijo()).'-'.sprintf("%08d", $equipo->getNroFacturaVentaA()+1) );
-        //
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
+        $em = $this->getDoctrine()->getManager();
+        $entity = new Presupuesto();
+        $entity->setFechaPresupuesto( new \DateTime() );
 
-        $form = $this->createCreateForm($entity);
-        return $this->render('VentasBundle:Factura:edit.html.twig', array(
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+        if($param){
+            // cargar datos parametrizados por defecto
+            $entity->setNroPresupuesto( $param->getUltimoNroPresupuesto() + 1 );
+            $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
+            $entity->setCliente($cliente);
+            $entity->setFormaPago( $cliente->getFormaPago() );
+            $entity->setPrecioLista( $cliente->getPrecioLista() );
+            $entity->setValidez( $param->getValidezPresupuesto());
+        }
+
+        $form = $this->createCreateForm($entity,'new');
+        return $this->render('VentasBundle:Presupuesto:edit.html.twig', array(
                     'entity' => $entity,
                     'form' => $form->createView(),
         ));
     }
 
     /**
-     * Creates a form to create a Factura entity.
-     * @param Factura $entity The entity
+     * Creates a form to create a Presupuesto entity.
+     * @param Presupuesto $entity The entity
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createCreateForm(Factura $entity) {
-        $form = $this->createForm(new FacturaType(), $entity, array(
-            'action' => $this->generateUrl('ventas_factura_create'),
+    private function createCreateForm(Presupuesto $entity,$type) {
+        $form = $this->createForm(new PresupuestoType(), $entity, array(
+            'action' => $this->generateUrl('ventas_presupuesto_create'),
             'method' => 'POST',
+            'attr' => array('type'=>$type ) ,
         ));
         return $form;
     }
 
     /**
-     * @Route("/", name="ventas_factura_create")
+     * @Route("/", name="ventas_presupuesto_create")
      * @Method("POST")
-     * @Template("VentasBundle:Factura:edit.html.twig")
+     * @Template("VentasBundle:Presupuesto:edit.html.twig")
      */
     public function createAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura_new');
-        $entity = new Factura();
-        $form = $this->createCreateForm($entity);
+        $em = $this->getDoctrine()->getManager();
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
+        $entity = new Presupuesto();
+        $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
         if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
             try {
-                $entity->setEstado('PENDIENTE');
-                $entity->setIva($entity->getTotalIva());
-                //$entity->setTotal( $entity->getMontoTotal() );
-                $entity->setTotal($entity->getTotal());
-                $entity->setSaldo($entity->getTotal());
+                $entity->setEstado('EMITIDO');
                 // set Unidad de negocio
-                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
+                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
                 $entity->setUnidadNegocio($unidneg);
                 // set numeracion
-                // $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
-                // $entity->setNroFactura( sprintf("%03d", $equipo->getPrefijo()).'-'.sprintf("%08d", $equipo->getNroFacturaVentaA()+1) );
-                /* Guardar ultimo nro */
-                // $equipo->setNroFacturaVentaA($equipo->getNroFacturaVentaA()+1);
-                if (intval($entity->getAfipPuntoVenta()) == 0 || intval($entity->getAfipNroComprobante()) == 0) {
-                    $this->addFlash('error', 'Debe ingresar punto de venta y número de comprobante!');
-                    $em->getConnection()->rollback();
-                    return $this->render('VentasBundle:Factura:edit.html.twig', array(
-                                'entity' => $entity,
-                                'form' => $form->createView(),
-                    ));
+                $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+                if($param){
+                    // cargar datos parametrizados por defecto
+                    $entity->setNroPresupuesto( $param->getUltimoNroPresupuesto() + 1 );
+                    $param->setUltimoNroPresupuesto( $entity->getNroPresupuesto() );
+                    $em->persist($param);
+                }
+                $em->persist($entity);
+                $em->flush();
+                if( $entity->getDescuentaStock() ){
+                    // Descuento de stock
+                    $deposito = $entity->getDeposito();
+                    foreach ($entity->getDetalles() as $detalle){
+                        $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                        if ($stock) {
+                            $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
+                        }else {
+                            $stock = new Stock();
+                            $stock->setProducto($detalle->getProducto());
+                            $stock->setDeposito($deposito);
+                            $stock->setCantidad( 0 - $detalle->getCantidad());
+                        }
+                        $em->persist($stock);
+
+        // Cargar movimiento
+                        $movim = new StockMovimiento();
+                        $movim->setFecha($entity->getFechaPresupuesto());
+                        $movim->setTipo('ventas_presupuesto');
+                        $movim->setSigno('-');
+                        $movim->setMovimiento($entity->getId());
+                        $movim->setProducto($detalle->getProducto());
+                        $movim->setCantidad($detalle->getCantidad());
+                        $movim->setDeposito($deposito);
+                        $em->persist($movim);
+                        $em->flush();
+
+                    }
+
                 }
 
-                $em->persist($entity);
-                // $em->persist($equipo);
-                $em->flush();
-
-                $datos = $request->get('ventasbundle_factura');
-                $electronica = new FacturaElectronica();
-                $electronica->setCae($datos['cae']);
-                $electronica->setCaeVto($datos['caeVto']);
-                $electronica->setFacturadoDesde($datos['facturadoDesde']);
-                $electronica->setFacturadoHasta($datos['facturadoHasta']);
-                $electronica->setPagoVto($datos['pagoVto']);
-                $electronica->setFactura($entity);
-                $electronica->setIva($entity->getIva());
-                $electronica->setNeto($entity->getSubTotal());
-                $em->persist($electronica);
-                $em->flush();
-
                 $em->getConnection()->commit();
-                return $this->redirect($this->generateUrl('ventas_factura'));
+                return $this->redirect($this->generateUrl('ventas_presupuesto'));
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());
                 $em->getConnection()->rollback();
             }
         }
-        return $this->render('VentasBundle:Factura:edit.html.twig', array(
+        return $this->render('VentasBundle:Presupuesto:edit.html.twig', array(
                     'entity' => $entity,
                     'form' => $form->createView(),
         ));
     }
 
     /**
-     * @Route("/{id}/show", name="ventas_factura_show")
+     * @Route("/{id}/show", name="ventas_presupuesto_show")
      * @Method("GET")
      * @Template()
      */
     public function showAction($id) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta');
         $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('VentasBundle:Factura')->find($id);
+        $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
         if (!$entity) {
-            throw $this->createNotFoundException('Unable to find Factura entity.');
+            throw $this->createNotFoundException('Unable to find Presupuesto entity.');
         }
-        return $this->render('VentasBundle:Factura:show.html.twig', array(
+        return $this->render('VentasBundle:Presupuesto:show.html.twig', array(
                     'entity' => $entity));
     }
 
-    /**
-     * Deletes a Factura entity.
-     *
-     */
-    public function deleteAction(Request $request, $id) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_factura_delete');
-        $form = $this->createDeleteForm($id);
-        $form->handleRequest($request);
-
-        if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $entity = $em->getRepository('ComprasBundle:Factura')->find($id);
-
-            if (!$entity) {
-                throw $this->createNotFoundException('Unable to find Factura entity.');
-            }
-
-            $em->remove($entity);
-            $em->flush();
-        }
-
-        return $this->redirect($this->generateUrl('factura'));
-    }
 
     /**
-     * Creates a form to delete a Factura entity by id.
-     *
-     * @param mixed $id The entity id
-     *
-     * @return \Symfony\Component\Form\Form The form
-     */
-    private function createDeleteForm($id) {
-        return $this->createFormBuilder()
-                        ->setAction($this->generateUrl('factura_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->add('submit', 'submit', array('label' => 'Delete'))
-                        ->getForm()
-        ;
-    }
-
-    /**
-     * @Route("/{id}/cancelar", name="ventas_factura_cancel")
-     * @Method("POST")
-     * @Template()
-     */
-    public function cancelarFacturaAction() {
-        // redireccionar a nota de credito
-        $id = $this->getRequest()->get('id');
-        $em = $this->getDoctrine()->getManager();
-        try {
-            $entity = $em->getRepository('ComprasBundle:Factura')->find($id);
-            $entity->setEstado('CANCELADO');
-            $em->persist($entity);
-            $em->flush();
-            return new Response('OK');
-        }
-        catch (\Exception $ex) {
-            return new Response($ex);
-        }
-    }
-
-    /**
-     * @Route("/proximoNumeroFactura", name="proximo_numero_fact")
-     * @Method("GET")
-     * @Template()
-     */
-    public function getProximoNumeroAction($letra = null) {
-        if ($this->getRequest()->get('letra'))
-            $letra = $this->getRequest()->get('letra');
-        $em = $this->getDoctrine()->getManager();
-        $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
-        switch ($letra) {
-            case 'A':
-                $nro = $equipo->getNroFacturaVentaA();
-                break;
-            case 'B':
-                $nro = $equipo->getNroFacturaVentaB();
-                break;
-        }
-        $nro = sprintf("%03d", $equipo->getPrefijo()) . '-' . sprintf("%08d", $nro + 1);
-        return new Response($nro);
-    }
-
-    /**
-     * IMPRESION DE listado
-     */
-
-    /**
-     * @Route("/printVentasFactura.{_format}",
+     * @Route("/{id}/printPresupuesto.{_format}",
      * defaults = { "_format" = "pdf" },
-     * name="print_ventas_factura")
-     * @Method("POST")
+     * name="ventas_presupuesto_print")
+     * @Method("GET")
      */
-    public function printVentasFacturaAction(Request $request) {
+    public function printPresupuestoAction(Request $request,$id){
         $em = $this->getDoctrine()->getManager();
-        $items = $request->get('datalist');
-        $clienteId = $request->get('clienteid');
-        $fdesde = $request->get('fdesde');
-        $fhasta = $request->get('fhasta');
-        $cliente = $em->getRepository('VentasBundle:Cliente')->find($clienteId);
-        $textoFiltro = array($cliente ? $cliente->getNombre() : 'Todos', $fdesde ? $fdesde : '', $fhasta ? $fhasta : '');
+        $presupuesto = $em->getRepository('VentasBundle:Presupuesto')->find($id);
 
-        //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
-        //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
+    //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
+    //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
-        $this->render('VentasBundle:Factura:pdf-facturas.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro,
-                    'search' => $request->get('searchterm')), $response);
+        $this->render('VentasBundle:Presupuesto:presupuesto.pdf.twig',
+                      array( 'presupuesto' => $presupuesto ), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
         $hoy = new \DateTime();
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition' => 'filename=listado_ventas_facturas_' . $hoy->format('dmY_Hi') . '.pdf'));
+            'Content-Disposition'=>'filename=presupuesto_'.$presupuesto->getNroPresupuesto().'_'.$hoy->format('dmY_Hi').'.pdf'));
     }
 
 }

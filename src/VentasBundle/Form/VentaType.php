@@ -14,19 +14,19 @@ class VentaType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $type = $options['attr']['type'];       
+        $type = $options['attr']['type'];
         $builder
             ->add('nroOperacion', 'hidden')
             ->add('estado', 'hidden')
             ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago', 'required' => true, 'label' => 'FORMA DE PAGO: '))
             ->add('precioLista', 'entity', array(
                 'class' => 'AppBundle:PrecioLista',
-                'required' => true, 'label' => 'LISTA DE PRECIOS: ', 
+                'required' => true, 'label' => 'LISTA DE PRECIOS: ',
                 'choice_label' => 'nombre'
             ))
             ->add('deposito', 'entity', array(
                 'class' => 'AppBundle:Deposito',
-                'required' => true, 'label' => 'DEPÓSITO: ', 
+                'required' => true, 'label' => 'DEPÓSITO: ',
                 'choice_label' => 'nombre'
             ))
             ->add('transporte', 'entity', array(
@@ -37,7 +37,7 @@ class VentaType extends AbstractType {
                 'class' => 'ConfigBundle:Moneda',
                 'required' => true, 'label' => 'MONEDA: '
             ))
-
+            ->add('cotizacion','hidden')
             ->add('detalles', 'collection', array(
                 'type' => new VentaDetalleType($type),
                 'by_reference' => false,
@@ -49,7 +49,7 @@ class VentaType extends AbstractType {
                 )
             ));
         if ($type == 'new') {
-            // en render de nueva venta solo traer cliente por defecto 
+            // en render de nueva venta solo traer cliente por defecto
             $data = $options['data'];
             $cliente = $data->getCliente()->getId();
             $builder->add('cliente', 'entity', array(
@@ -67,7 +67,7 @@ class VentaType extends AbstractType {
                 'required' => true
             ));
         }
-    }    
+    }
 
     /**
      * @param OptionsResolverInterface $resolver

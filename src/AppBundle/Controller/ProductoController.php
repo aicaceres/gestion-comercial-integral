@@ -312,7 +312,7 @@ class ProductoController extends Controller {
     public function exportProductosAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
         $search =  $request->get('searchterm');
-        $proveedorId = $request->get('proveedorid');        
+        $proveedorId = $request->get('proveedorid');
         $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
         $items = $em->getRepository('AppBundle:Producto')->getProductosForExportXls($proveedorId,$search);
 
@@ -683,7 +683,7 @@ class ProductoController extends Controller {
      */
     public function getListasSinPrecioPorProducto(Request $request) {
         $id = $request->get('id');
-        $em = $this->getDoctrine()->getManager();  
+        $em = $this->getDoctrine()->getManager();
         if($id){
             $listas = $em->getRepository('AppBundle:Producto')->findListasSinPrecioPorProducto($id);
         }else{
@@ -692,7 +692,7 @@ class ProductoController extends Controller {
             /*foreach($aux as $lista){
 
             }*/
-        }      
+        }
         return new Response(json_encode($listas));
     }
 
@@ -794,7 +794,7 @@ class ProductoController extends Controller {
      */
     public function productoListDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();        
+        $this->entityManager = $this->getDoctrine()->getManager();
         $this->repository = $this->entityManager->getRepository('AppBundle:Producto');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
@@ -806,7 +806,7 @@ class ProductoController extends Controller {
             $columns = $request->get('columns');
 
             $listaprecio = $request->get('listaprecio');
-            $deposito = $request->get('deposito');            
+            $deposito = $request->get('deposito');
             $cotizacion = $request->get('cotizacion');
 
         }
@@ -814,7 +814,7 @@ class ProductoController extends Controller {
             die;
 
         // Process Parameters
-        // Orders       
+        // Orders
 
         foreach ($orders as $key => $order) {
             // Orders does not contain the name of the column, but its number,
@@ -854,34 +854,36 @@ class ProductoController extends Controller {
             foreach ($columns as $key => $column) {
                 // In all cases where something does not exist or went wrong, return -
                 $responseTemp = $precioTemp = "-";
-                $precio = $producto->getPrecios()[0];
-                if ($precio !== null) {
-                    $precioiva = $precio->getPrecio() * ( 1 + ( $producto->getIva()/100 ) );
-                    $precioOrig = round($precioiva,3);
-                    $precioConv = round( ($precioOrig / $cotizacion) ,3);
+                $rowPrecio = $producto->getPrecios()[0];
+                if ($rowPrecio !== null) {
+                    $iva = $producto->getIva();
+                    $precio = $rowPrecio->getPrecio();
+                    $montoIva = round( ($precio * ( $iva/100 )) ,3);
+                    $total = round( ($precio + $montoIva) ,3);
+                    $precioConv = round( ($total / $cotizacion) ,3);
                     $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv ));
                 }
-                switch ($column['name']) {                    
+                switch ($column['name']) {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
-                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precioOrig."' href='javascript:void(0);'>".$name."</a>";                            
+                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precio."' data-iva='".$montoIva."' data-total='".$precioConv."' href='javascript:void(0);'>".$name."</a>";
                             break;
-                        }                    
+                        }
                     case 'codigo': {
                             $codigo = $producto->getCodigo();
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $codigo));
                             break;
-                        } 
+                        }
                     case 'precio': {
                             $responseTemp = $precioTemp;
                             break;
-                        }                                       
+                        }
                     case 'stock': {
                             $stock = $producto->getStockActualxDeposito($deposito);
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $stock));
                             break;
-                        }                                       
+                        }
                 }
 
                 // Add the found data to the json
@@ -911,7 +913,7 @@ class ProductoController extends Controller {
      */
     public function productoIndexDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();        
+        $this->entityManager = $this->getDoctrine()->getManager();
         $this->repository = $this->entityManager->getRepository('AppBundle:Producto');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
@@ -928,7 +930,7 @@ class ProductoController extends Controller {
             die;
 
         // Process Parameters
-        // Orders       
+        // Orders
 
         foreach ($orders as $key => $order) {
             // Orders does not contain the name of the column, but its number,
@@ -969,18 +971,18 @@ class ProductoController extends Controller {
             $nbColumn = count($columns);
             foreach ($columns as $key => $column) {
                 // In all cases where something does not exist or went wrong, return -
-                switch ($column['name']) {                    
+                switch ($column['name']) {
                     case 'codigo': {
                             $codigo = $producto->getCodigo();
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $codigo));
                             break;
-                        } 
+                        }
                     case 'producto': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = $producto->getNombre();
-                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $name));                            
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $name));
                             break;
-                        }                    
+                        }
                     case 'proveedor': {
                             $prov = $producto->getProveedor();
                             // This cannot happen if inner join is used
@@ -1004,24 +1006,24 @@ class ProductoController extends Controller {
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $costo));
                             break;
                         }
-                    case 'activo': {                
-                            $activo = ($producto->getActivo()) ? " checked='checked'" : "";           
-                            $title = ($producto->getActivo()) ? " title='Activo'" : " title='Inactivo'";           
-                            $responseTemp = "<input type='checkbox' disabled='disabled' ".$activo.$title. " />" ;                            
-                           break;                        
-                    }                                       
+                    case 'activo': {
+                            $activo = ($producto->getActivo()) ? " checked='checked'" : "";
+                            $title = ($producto->getActivo()) ? " title='Activo'" : " title='Inactivo'";
+                            $responseTemp = "<input type='checkbox' disabled='disabled' ".$activo.$title. " />" ;
+                           break;
+                    }
                     case 'actions': {
                             $user = $this->getUser();
-                            $responseTemp = "<a href='" . $this->generateUrl('stock_producto_show', array('id' => $producto->getId())) . "' class='editar btn btnaction btn_folder' title='Ver' ></a>&nbsp;";                            
+                            $responseTemp = "<a href='" . $this->generateUrl('stock_producto_show', array('id' => $producto->getId())) . "' class='editar btn btnaction btn_folder' title='Ver' ></a>&nbsp;";
                             if ($user->getAccess($unidNeg, 'stock_producto_edit')) {
-                                $linkEdit = "<a href='" . $this->generateUrl('stock_producto_edit', array('id' => $producto->getId())) . "' class='editar btn btnaction btn_pencil' title='Editar' ></a>&nbsp;";     
+                                $linkEdit = "<a href='" . $this->generateUrl('stock_producto_edit', array('id' => $producto->getId())) . "' class='editar btn btnaction btn_pencil' title='Editar' ></a>&nbsp;";
                                 $responseTemp = $responseTemp . $linkEdit;
-                            }                            
+                            }
                             if ($user->getAccess($unidNeg, 'stock_producto_delete')) {
-                                $linkDel = "<a href url='" . $this->generateUrl('stock_producto_delete', array('id' => $producto->getId())) . "' class='delete btn btnaction btn_trash' title='Borrar' ></a>&nbsp;";     
+                                $linkDel = "<a href url='" . $this->generateUrl('stock_producto_delete', array('id' => $producto->getId())) . "' class='delete btn btnaction btn_trash' title='Borrar' ></a>&nbsp;";
                                 $responseTemp = $responseTemp . $linkDel;
-                            }                             
-                        }                                       
+                            }
+                        }
                 }
 
                 // Add the found data to the json

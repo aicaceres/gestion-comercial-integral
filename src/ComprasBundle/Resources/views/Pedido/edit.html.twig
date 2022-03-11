@@ -11,25 +11,63 @@
 <div class="divEdicion">
     {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >
+        {% if entity.estado == 'PENDIENTE' %}
+        <div class="two_fields">
+                <div><label for="nroPedido">Nº pedido:</label>
+                    <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
+                </div>
+                <div><label for="nroPedido">Fecha Pedido:</label>
+                    <input type="text" value="{{entity.fechaPedido|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div>
+            <div class="two_fields">
+                <div><label for="nroPedido">Proveedor:</label>
+                    <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="smallinput">
+                </div>
+                <div><label for="nroPedido" style="width: 100px;">Estado:</label>
+                    <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
+                </div>
+            </div>
+            <div class="two_fields">
+                <div><label for="nroPedido">Depósito:</label>
+                    <input type="text" value="{{entity.deposito}}" disabled="disabled" class="smallinput">
+                </div>
+                {{ form_row(form.fechaEntrega, { 'attr': {'class' : 'datepicker','tabindex':'2', 'autofocus':true } }) }}
+            </div>
+            <div class="two_fields">
+                <div class="alignright">
+                    <button type="button" class="stdbtn print">Imprimir Pedido</button>
+                </div>
+            </div>
+
+        {% else %}
+
             <div class="two_fields">
                 <div><label for="nroPedido">Nº pedido:</label>
                     <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
                 </div>
-                {{ form_row(form.fechaPedido, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+                {{ form_row(form.fechaPedido, { 'attr': {'class' : 'datepicker','tabindex':'2' } }) }}
                {{ form_row(form.estado) }}
-            </div> 
+            </div>
             <div class="two_fields">
-                {{ form_row(form.proveedor, { 'attr': {'class' : 'select2'} }) }}  
+                {{ form_row(form.proveedor, { 'attr': {'class' : 'select2'} }) }}
                 <div><label for="estado" style="width: 100px;">Estado:</label>
                     <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
                 </div>
-            </div>  
+            </div>
             <div class="two_fields">
                 {{ form_row(form.deposito) }}
-                {% if entity.estado=='NUEVO' %}{{ form_row(form.cerrado,{'label': 'Enviado al Proveedor','label_attr':{'style':'width:130px'},'attr': {'title':'Marcar cuando se envía el pedido al Proveedor. Hasta que no se marque se podrán agregar o modificar items del pedido.'} }) }}
-                {% else%}<div class="aligncenter"><button type="button" class="stdbtn print">Imprimir Pedido</button></div>{%endif%}
-            </div> 
-            <div style="padding-top: 20px;" id="divItems">                
+                {{ form_row(form.fechaEntrega, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+            </div>
+            <div class="two_fields">
+                <div style="float:right;padding-bottom:10px">
+                {{ form_row(form.cerrado,{'label': 'Enviado al Proveedor','label_attr':{'style':'width:130px'},'attr': {'title':'Marcar cuando se envía el pedido al Proveedor. Hasta que no se marque se podrán agregar o modificar items del pedido.'} }) }}
+                </div>
+            </div>
+
+        {% endif %}
+
+            <div style="padding-top: 20px;" id="divItems">
                 <table style="width:80%;margin: 0 auto;" cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
                         <tr>
@@ -42,35 +80,37 @@
                         </tr>
                     </thead>
                      <tbody>
-                         {% for item in entity.detalles %}    
-                       {% include "ComprasBundle:Pedido:partial-items.html.twig" %}    
-                       {% endfor %} 
+                         {% for item in entity.detalles %}
+                       {% include "ComprasBundle:Pedido:partial-items.html.twig" %}
+                       {% endfor %}
                     </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="5"></th>
                             <th colspan="2" style="text-align:center;">
-                                <a href="javascript:void(0)" id="linkAdd" data-url="{{path('compras_render_item_pedido')}}" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>                                
+                                {% if entity.estado == 'NUEVO' %}
+                                <a href="javascript:void(0)" id="linkAdd" data-url="{{path('compras_render_item_pedido')}}" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                                {% endif %}
                             </th>
                         </tr>
                     </tfoot>
-                </table>    
-            </div>                
-            <br clear="all" /> 
+                </table>
+            </div>
+            <br clear="all" />
             <div class="actionbutton">
                  {% if entity.id and entity.estado in ['NUEVO','PENDIENTE'] %}
                         <a type="button" class="cancelar floatleft delete" href="javascript:void(0)">Eliminar</a>
-                 {%endif%}              
+                 {%endif%}
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('compras_pedido')}}">Cancelar</a>
             </div>
         </fieldset>
-        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+        <div class="hiddenformrest" name="rest" style="display:none">{{ form_rest(form) }}</div>
     {{ form_end(form) }}
       {% if entity.id and app.user.access(app.session.get('unidneg_id'),'compras_pedido_delete')  %}
         {{ form(delete_form) }}
       {%endif%}
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
@@ -82,7 +122,7 @@ jQuery(document).ready(function($) {
     $('.select2.select2-container').css('width','60%');
     $(".chzn-select").chosen();
     $(document).keypress(function(e) {
-        if (e.which == 43) { 
+        if (e.which == 43) {
             e.preventDefault();
             $('#linkAdd').click();
         }
@@ -96,7 +136,7 @@ jQuery(document).ready(function($) {
     $('.guardar').click(function() {
         if( !$('#comprasbundle_pedido_proveedor').val() ){
             alert('Debe seleccionar un Proveedor');
-            return false;  
+            return false;
         };
         if( $('#comprasbundle_pedido_cerrado').is(':checked')){
             if( $('tbody tr.item').length > 0 ){
@@ -106,20 +146,20 @@ jQuery(document).ready(function($) {
             }else{
                 alert('Debe ingresar items al pedido para enviar!'); return false;
             }
-        }     
+        }
     });
     // si cambia el depósito cambiar el stock
-    $('#comprasbundle_pedido_deposito').on('change',function(){     
+    $('#comprasbundle_pedido_deposito').on('change',function(){
         var id = '{{entity.id}}';
         var dep = $(this).val();
         $.ajax({
             url: "{{ path("get_compras_partial_items") }}",
             data: 'id='+ id +'&dep='+dep,
-            success: function(data) { 
+            success: function(data) {
                 $('table').find('tbody').html(data);
             }
         });
-    });    
+    });
     $(document).on('click','.delTd', function(e) {
         var res = true;
         res = confirm('Desea eliminar este item?');
@@ -145,7 +185,7 @@ jQuery(document).ready(function($) {
         }
     });
     $('#linkAdd').on('click',function(){
-        var partialurl =  $(this).data('url');    
+        var partialurl =  $(this).data('url');
         $('#popup').dialog('open');
         // width: '70%', minHeight: 400,
         $('#popup')
@@ -153,7 +193,7 @@ jQuery(document).ready(function($) {
             .load(partialurl, function() {
                 var form = $("[name='comprasbundle_pedidodetalle']");
                 form.find('#pedidoid').val('{{entity.id}}');
-                var prod = form.find("#comprasbundle_pedidodetalle_producto");              
+                var prod = form.find("#comprasbundle_pedidodetalle_producto");
                 prod.chosen({no_results_text: "Sin resultados", search_contains: true});
                 prod.change(function () {
                    changeProducto($(this));
@@ -167,8 +207,8 @@ jQuery(document).ready(function($) {
             .dialog({
             modal: true, autoOpen: true, title: 'Agregar items al pedido',width: '50%', minHeight: 200,
             buttons: [{text: "Agregar", class: 'closePopup additem',
-                    click: function() { 
-                        var form = $("[name='comprasbundle_pedidodetalle']");  
+                    click: function() {
+                        var form = $("[name='comprasbundle_pedidodetalle']");
                         if(!form.find("#comprasbundle_pedidodetalle_producto").val()){
                             alert('Debe ingresar un producto!');
                             form.find('.chzn-container').last().trigger('mousedown');
@@ -184,7 +224,7 @@ jQuery(document).ready(function($) {
                             form.find("#comprasbundle_pedidodetalle_cantidadxBulto").focus();
                             return false;
                         }
-                        // guardar item en detalle 
+                        // guardar item en detalle
                          $.post( "{{path('compras_item_pedido_create')}}" , form.serialize(),function(data){
                              if(data.msg==='OK'){
                                  // insertar en la tabla
@@ -193,7 +233,7 @@ jQuery(document).ready(function($) {
                              /*    ord = $('.stdtable tbody tr').length + 1;
                                 $('.stdtable tbody').append('<tr class="item" style="height:30px;"><td class="ordTd">'+
                                         ord+'</td><td>'+ data.prod +'</td><td class="stockTd alignright">'+data.stock+'</td><td class="alignright">'+data.cant+'</td>'+
-                                        '<td class="alignright">'+data.total+'</td><td><a class="delTd" href="javascript:void(0)" title="Quitar" data-id="'+data.id+'" tabIndex="-1"><span class="minus"></span></a></td> </tr>'); 
+                                        '<td class="alignright">'+data.total+'</td><td><a class="delTd" href="javascript:void(0)" title="Quitar" data-id="'+data.id+'" tabIndex="-1"><span class="minus"></span></a></td> </tr>');
 */
                                     $('.item').find('.ordTd').each(function(index) {
                                       $(this).html(index+1);
@@ -211,11 +251,11 @@ jQuery(document).ready(function($) {
             });
         });
 
- // EDITAR ITEM    
+ // EDITAR ITEM
     $(document).on('click','.editTd',function(){
-        var partialurl =  $(this).data('url'); 
-        var actionurl = $(this).data('actionurl');  
-        var tr = $(this).parent().parent();                
+        var partialurl =  $(this).data('url');
+        var actionurl = $(this).data('actionurl');
+        var tr = $(this).parent().parent();
         $('#popup').dialog('open');
         $('#popup')
             .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
@@ -233,8 +273,8 @@ jQuery(document).ready(function($) {
             .dialog({
             modal: true, autoOpen: true, title: 'Detalle del item',width: '50%', minHeight: 200,
             buttons: [{text: 'Guardar', class: 'closePopup additem',
-                    click: function() { 
-                        var form = $("[name='comprasbundle_pedidodetalle']");  
+                    click: function() {
+                        var form = $("[name='comprasbundle_pedidodetalle']");
                         if(!form.find("#comprasbundle_pedidodetalle_cantidad").val()){
                             alert('Debe ingresar una cantidad!');
                             form.find("#comprasbundle_pedidodetalle_cantidad").focus();
@@ -245,7 +285,7 @@ jQuery(document).ready(function($) {
                             form.find("#comprasbundle_pedidodetalle_cantidadxBulto").focus();
                             return false;
                         }
-                        // guardar item en detalle 
+                        // guardar item en detalle
                          $.post( actionurl , form.serialize(),function(data){
                              if(data.msg==='OK'){
                                  // reemplazar en la tabla
@@ -260,10 +300,7 @@ jQuery(document).ready(function($) {
                             $(this).dialog("destroy");
                         }}]
             });
-        });  
-       
-
-
+        });
 
     {% if entity.id  %}
     $('button.print').click(function(){
@@ -272,8 +309,8 @@ jQuery(document).ready(function($) {
         myWindow.focus();
     });
   //  $('#comprasbundle_pedido_deposito').change();
-    {%endif%}   
-});    
+    {%endif%}
+});
 function changeProducto(producto) {
         var form = jQuery("[name='comprasbundle_pedidodetalle']");
         form.find('.loaders').show();
@@ -288,7 +325,7 @@ function changeProducto(producto) {
             //async:false,
             dataType: "json",
             data: 'prod=' + producto.val() + '&dep=' + jQuery('#comprasbundle_pedido_deposito').val(),
-            success: function (data) {                
+            success: function (data) {
                 form.find('#comprasbundle_pedidodetalle_cantidad').val(1);
                 form.find('.unidmed').text(data.unidmed);
                 if (data.bulto) {
@@ -301,10 +338,10 @@ function changeProducto(producto) {
                 form.find('#comprasbundle_pedidodetalle_bulto').prop('checked', data.bulto);
                 jQuery.uniform.update();
                 if (data.stock) {
-                    txt = 'Cantidad en stock: ' + data.stock + ' ' + data.unidmed;                    
+                    txt = 'Cantidad en stock: ' + data.stock + ' ' + data.unidmed;
                     form.find('#comprasbundle_pedidodetalle_cantidadStock').val(data.stock);
-                }else{ 
-                    txt ='NO HAY EN STOCK'; 
+                }else{
+                    txt ='NO HAY EN STOCK';
                     form.find('#comprasbundle_pedidodetalle_cantidadStock').val(0);
                 }
                 form.find('.prodPedPendiente').text(txt);

@@ -1,4 +1,4 @@
-<label> CUIT: </label> {{item.cuit}}  
-<label> IVA: </label> {% if item.categoriaIva %} {{item.categoriaIva.descripcion|upper}} {% else %} No definido {% endif %} 
-<label> RENTAS: </label> {% if item.categoriaRentas %} {{item.categoriaRentas.nombre|upper}}{% else %} No definido  {% endif %} 
-<label> DIRECCIÓN: </label>  {{item.domicilioCompleto|upper}}
+<label> CUIT: </label> {{item.cuit}}
+<label> IVA: </label> {% if item.categoriaIva %} {{item.categoriaIva.descripcion|upper}} {% else %} No definido {% endif %}
+<label> RENTAS: </label> {% if item.categoriaRentas %} {{item.categoriaRentas.nombre|upper}}{% else %} No definido  {% endif %}
+<label> DIRECCIÓN: </label> {{item.domicilioCompleto|upper}}

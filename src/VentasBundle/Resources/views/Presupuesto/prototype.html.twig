@@ -8,8 +8,7 @@
         <span class="unidmed floatleft" style="padding-left: 5px"></span>
     </td>
     <td class="precTd alignright">
-        <span data-orig=''> 0</span>
-        {{ form_widget(item.precio) }}  {{ form_widget(item.iva) }}
+        {{ form_widget(item.precio,{ 'attr': {'readonly' : true}}) }}
     </td>
     <td class="itmSubtotalTd alignright"></td>
     <td class="delTd" style="text-align:center;"></td>

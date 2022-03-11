@@ -34,13 +34,6 @@ class CobroController extends Controller
         $user = $this->getUser();
         UtilsController::haveAccess($user, $unidneg, 'ventas_factura');
         $em = $this->getDoctrine()->getManager();
-        $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
- $tipos = $afip->ElectronicBilling->getDocumentTypes();
-echo '<pre>';
-var_dump($afipTipos);
-echo '</pre>';
-die;
-
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
 
@@ -65,11 +58,11 @@ die;
     }
 
     /**
-     * @Route("/newCobro", name="ventas_cobro_new")
+     * @Route("/facturarVenta/{id}", name="ventas_cobro_facturar")
      * @Method("GET")
      * @Template()
      */
-    public function newCobroAction(Request $request)
+    public function facturarVentaAction(Request $request, $id)
     {
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
@@ -82,37 +75,45 @@ die;
             return $this->redirect( $request->headers->get('referer') );
         }
 
-        $id_venta = $request->get('id');
         $entity = new Cobro();
         $entity->setFechaCobro( new \DateTime() );
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if($param){
-            $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             // ultimo nro de operacion de cobro
             $entity->setNroOperacion( $param->getUltimoNroOperacionCobro() + 1 );
         }
-        if( $id_venta ){
-            // cobro de la ventas
-            $venta = $em->getRepository('VentasBundle:Venta')->find($id_venta);
-            $entity->setVenta($venta);
-            $entity->setCliente($venta->getCliente());
-            $entity->setMoneda( $venta->getMoneda() );
-            $entity->setFormaPago( $venta->getFormaPago() );
-        }else{
-            // otro cobro
-            $entity->setCliente($cliente);
-            // moneda
-            $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneBy(array('byDefault'=>true ));
-            $entity->setMoneda($moneda);
+        $venta = $em->getRepository('VentasBundle:Venta')->find($id);
+        if (!$venta) {
+            throw $this->createNotFoundException('No se encuentra la venta.');
         }
-
+        $entity->setVenta($venta);
+        $entity->setCliente($venta->getCliente());
+        $entity->setMoneda( $venta->getMoneda() );
+        $entity->setFormaPago( $venta->getFormaPago() );
 
         $form = $this->createCreateForm($entity,'new');
-        return $this->render('VentasBundle:Cobro:new.html.twig', array(
+        return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
     }
+
+    /**
+     * @Route("/newCobro", name="ventas_cobro_new")
+     * @Method("GET")
+     * @Template()
+     */
+    public function newCobroAction(Request $request)
+    {
+        return false;
+    }
+
+/****
+
+VIEJO DE VENTA - CAMBIAR POR PROCESOS PARA COBROS
+
+ */
+
 
     /**
      * @Route("/", name="ventas_venta_create")
@@ -231,5 +232,45 @@ die;
         ));
     }
 
+
+/*
+$afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
+$data = array(
+	'CantReg' 	=> 1,  // Cantidad de comprobantes a registrar
+	'PtoVta' 	=> 1,  // Punto de venta
+	'CbteTipo' 	=> 6,  // Tipo de comprobante (ver tipos disponibles)
+	'Concepto' 	=> 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
+	'DocTipo' 	=> 99, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+	'DocNro' 	=> 0,  // Número de documento del comprador (0 consumidor final)
+	'CbteDesde' 	=> 0,  // Número de comprobante o numero del primer comprobante en caso de ser mas de uno
+	'CbteHasta' 	=> 0,  // Número de comprobante o numero del último comprobante en caso de ser mas de uno
+	'CbteFch' 	=> intval(date('Ymd')), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
+	'ImpTotal' 	=> 121, // Importe total del comprobante
+	'ImpTotConc' 	=> 0,   // Importe neto no gravado
+	'ImpNeto' 	=> 100, // Importe neto gravado
+	'ImpOpEx' 	=> 0,   // Importe exento de IVA
+	'ImpIVA' 	=> 21,  //Importe total de IVA
+	'ImpTrib' 	=> 0,   //Importe total de tributos
+	'MonId' 	=> 'PES', //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
+	'MonCotiz' 	=> 1,     // Cotización de la moneda usada (1 para pesos argentinos)
+	'Iva' 		=> array( // (Opcional) Alícuotas asociadas al comprobante
+		array(
+			'Id' 		=> 5, // Id del tipo de IVA (5 para 21%)(ver tipos disponibles)
+			'BaseImp' 	=> 100, // Base imponible
+			'Importe' 	=> 21 // Importe
+		)
+	),
+);
+$res = $afip->ElectronicBilling->CreateNextVoucher($data);
+
+
+ $tipos = $afip->ElectronicBilling->GetVoucherTypes();
+echo '<pre>';
+var_dump($tipos);
+echo '</pre>';
+
+
+die;
+*/
 
 }

@@ -51,6 +51,9 @@
     .venta-fieldset input{
         font-weight:bold;
     }
+    .datos-moneda label{
+        width:80%;
+    }
     .datos-moneda small label{
         width: fit-content;
     }
@@ -67,7 +70,6 @@
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
-{% if entity.venta %}
     <fieldset class="venta-fieldset">
 
         <div>
@@ -79,12 +81,12 @@
             <input type="text" disabled="disabled" class="width100" value="{{entity.venta.fechaVenta|date('d-m-Y H:i')}}"/>
         </div>
         <div>
-            <label>USUARIO: </label>
+            <label>VENDEDOR: </label>
             <input type="text" disabled="disabled" class="width100" value="{{entity.venta.createdBy.username}}"/>
         </div>
 
     </fieldset>
-{% endif %}
+
 <div id="contentwrapper" class="contentwrapper" style="padding-top:10px">
 {% include "AppBundle::notificacion.html.twig" %}
     <div id="form-venta-rapida">
@@ -99,18 +101,9 @@
             </div>
             <div class="datos-moneda" style="display:inline-block; width: 20%;">
                 {{ form_label(form.moneda)}}
-                {{ form_widget(form.moneda,{'attr':{'style':'width:100%'}}) }}
+                {{ form_widget(form.moneda,{'attr':{'style':'width:80%'}}) }}
+                {{ form_widget(form.cotizacion)}}
             </div>
-        </fieldset>
-        <fieldset >
-            <div class="datos-cliente" style="display:inline-block; width:100%; vertical-align: top;margin-bottom:10px">
-                {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
-            </div>
-            <div class="datos-cf" style="display:inline-block; width:100%; vertical-align: top;margin-bottom:10px">
-                {% include "VentasBundle:Cobro:_partial-datos-cf.html.twig" %}
-            </div>
-        </fieldset>
-        <fieldset class="vtafields" >
             <div style="display:inline-block; width: 25%; ">
                 {{ form_label(form.formaPago)}}
                 {{ form_widget(form.formaPago,{'attr':{'style':'width:80%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}}) }}
@@ -118,18 +111,29 @@
             </div>
         </fieldset>
         <fieldset >
-            <div class="datos-formapago" style="display:inline-block; width: 35%; vertical-align: top;">
+            <div class="datos-cliente" style="display:inline-block; width:70%; vertical-align: top;margin-bottom:10px">
+                {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+            </div>
+            <div class="datos-cf" style="display:inline-block; width:70%; vertical-align: top;margin-bottom:10px">
+                {% include "VentasBundle:Cobro:_partial-datos-cf.html.twig" %}
+            </div>
+            <div class="datos-formapago" style="display:inline-block; width: 25%; vertical-align: top;">
                 {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
             </div>
         </fieldset>
+        <fieldset class="vtafields" >
 
+        </fieldset>
 
+        <fieldset >
+            {% include "VentasBundle:Cobro:_partial-detalle.html.twig" with {'venta':entity.venta}  %}
+        </fieldset>
 
 
         <fieldset>
             <br clear="all" />
             <div class="actionbutton">
-                <button class="guardar tabbable" type="submit" >Guardar</button>
+                <button class="guardar tabbable" type="submit">FACTURAR</button>
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -138,7 +142,7 @@
         {{ form_end(form) }}
 
     </div>
-    <div class="notifmsg info png_bg" style="margin-top:10px">
+    <div class="notifmsg info png_bg" style="margin-top:50px">
         <a href="#" class="close"></a>
         <div><small>Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong> Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong> Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong> Ctrl+Alt+G = Guardar  </small>
         </div>
@@ -152,6 +156,8 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
+        $('.togglemenu').click();
+
         if('{{entity.cliente.consumidorfinal}}'){
             $('.datos-cliente').hide();
             $('.datos-cf').show();
@@ -159,14 +165,17 @@ jQuery(function ($) {
             $('.datos-cf').hide();
             $('.datos-cliente').show();
         }
-
+        $('#ventasbundle_cobro_nombreCliente,#ventasbundle_cobro_direccionCliente').css('width', '95%')
         $('.cancelar').on('blur', function(e){
             $('#ventasbundle_cobro_cliente').select2('focus')
             e.stopPropagation();
         })
         $(document).on('keydown',function(e){ detectarControles(e); })
-       // $('.togglemenu').click();
         $('.select2').select2({ width:'style' });
+
+        $(".btn_list").click(function(){
+            $(".detalle-venta").toggle();
+        });
 
         $('#ventasbundle_cobro_cliente').select2({
             ajax: {
@@ -215,8 +224,17 @@ jQuery(function ($) {
                 // actualizar datos
                 if(data){
                     $('.datos-formapago').html(data);
-                   // $('.porcentajeRecargo').text( $('#porcentajeRecargo').val() )
-                   // actualizaTotales();
+                    const porcentaje = $('#porcentajeRecargo').val();
+                    $('.porcentajeRecargo').text( porcentaje );
+                    const spanValor = $('#porcentajeRecargoTd').find('.valor');
+                    const subtotal = $('#subtotalTh').find('.valor').data('valor');
+                    const nuevoValor = subtotal * (porcentaje/100);
+                    // nuevo valor de descuento/recargo
+                    spanValor.data('valor',nuevoValor);
+                    // nuevo valor a pagar
+                    const total = $('#totalTd').find('.valor')
+                    total.data('valor',subtotal + nuevoValor);
+                    actualizaTotales();
                 }
             });
         });
@@ -239,21 +257,21 @@ jQuery(function ($) {
             openModal(obj)
         });
     $('#ventasbundle_cobro_moneda').on('change',function(){
-        label =  $(this).prev('label');
+        label = $(this).prev('label');
         label.find('small').remove();
         id = $(this).val();
-        $.get( "{{ path('get_datos_moneda')}}" , {'id': id}).done(function(data){
+        $.getJSON( "{{ path('get_datos_moneda')}}" , {'id': id}).done(function(data){
             // actualizar datos
             if(data){
-                span = $('<small></small>');
-                span.html(data);
+                span = $('<small></small>').html(data.partial);
                 label.append(span);
-                $('.simbolo').html($('#simbolo').val());
-                //actualizaTotales();
+                $('.simbolo').html(data.simbolo);
+                $('#ventasbundle_cobro_cotizacion').val( data.cotizacion );
+                actualizaTotales();
             }
         });
     });
-
+    $('#ventasbundle_cobro_moneda').change();
     // confirm on submit
     $('#ventasbundle_cobro').on('submit', function(){
 
@@ -335,6 +353,44 @@ function openModalCliente(){
      // focus en buscar
     $('#clientes_table_filter input').focus();
 }
+// FORMAS DE PAGO
+function openModalFormaPago(){
+    var fTable= $('#formapago_table').dataTable({
+                "bAutoWidth": false,
+                "bRetrieve" : true,
+                "columnDefs": [ {
+                    "targets"  : 'nosort',
+                    "orderable": false
+                  }],
+                "rowCallback": function (row, data) {
+                    // seleccionar on click
+                    $(row).find('a').on('click', function(){
+                        $('#ventasbundle_cobro_formaPago').val($(this).data('id'));
+                        $('#popup').dialog("destroy");
+                        $('#ventasbundle_cobro_formaPago').change();
+                        $('#ventasbundle_cobro_formaPago').focus();
+                    })
+                 },
+		"sPaginationType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": "<<",
+                        "sNext": ">",
+                        "sLast": ">>",
+                        "sPrevious": "<"
+                    },
+			"sLengthMenu": "Mostrar _MENU_ registros ",
+			"sZeroRecords": "Sin datos",
+			"sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+			"sInfoEmpty": "Sin coincidencias",
+			"sInfoFiltered": "(filtrado de _MAX_ registros)",
+                        "sSearch": "Buscar:",
+                        "sSelect": "%d seleccionados"
+		}
+	});
+     // focus en buscar
+    $('#formapago_table_filter input').focus();
+}
 
 function detectarControles(e) {
     if( e.ctrlKey && e.altKey ){
@@ -349,6 +405,14 @@ function detectarControles(e) {
             $('#ventasbundle_cobro').submit();
         }
     }
+}
+
+function actualizaTotales(){
+    const cotizacion = parseFloat($('#ventasbundle_cobro_cotizacion').val()) ;
+    $('.valor').each(function(){
+        valor = $(this).data('valor')/cotizacion;
+        $(this).html(valor.toFixed(3));
+    });
 }
 });
 </script>{% endblock %}

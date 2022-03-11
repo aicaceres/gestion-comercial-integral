@@ -164,30 +164,6 @@ class Factura {
      */
     private $updatedBy;
 
-    /**
-     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="factura")
-     */
-    private $facturaElectronica;
-
-    public function getCae() {
-        return $this->getFacturaElectronica()->getCae();
-    }
-
-    public function getCaeVto() {
-        return $this->getFacturaElectronica()->getCaeVto();
-    }
-
-    public function getFacturadoDesde() {
-        return $this->getFacturaElectronica()->getFacturadoDesde();
-    }
-
-    public function getFacturadoHasta() {
-        return $this->getFacturaElectronica()->getFacturadoHasta();
-    }
-
-    public function getPagoVto() {
-        return $this->getFacturaElectronica()->getPagoVto();
-    }
 
     /**
      * Constructor
@@ -658,25 +634,6 @@ class Factura {
         return $this->impresiones;
     }
 
-    /**
-     * Set facturaElectronica
-     *
-     * @param \VentasBundle\Entity\FacturaElectronica $facturaElectronica
-     * @return Factura
-     */
-    public function setFacturaElectronica(\VentasBundle\Entity\FacturaElectronica $facturaElectronica = null) {
-        $this->facturaElectronica = $facturaElectronica;
-        return $this;
-    }
-
-    /**
-     * Get facturaElectronica
-     *
-     * @return \VentasBundle\Entity\FacturaElectronica
-     */
-    public function getFacturaElectronica() {
-        return $this->facturaElectronica;
-    }
 
     /**
      * Set comisionado

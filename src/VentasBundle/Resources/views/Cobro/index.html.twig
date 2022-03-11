@@ -1,15 +1,15 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Cobro de Ventas</h1>       
+    <h1 class="pagetitle">Cobro de Ventas</h1>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
 {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-<div>    
-    <form id="searchform" action="{{ path('ventas_cobro') }}" method="get">   
-        {% if not owns %}     
+<div>
+    <form id="searchform" action="{{ path('ventas_cobro') }}" method="get">
+        {% if not owns %}
         <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Usuario:</strong></label>
@@ -18,25 +18,26 @@
             {% for user in users %}
                 <option value="{{user.id}}" {% if user.id==id %} selected="selected" {% endif %}> {{user.nombre}}</option>
             {% endfor %}
-            </select>  
-        </div>    
+            </select>
+        </div>
         {% endif %}
-        <div style="display: inline-block; margin-right: 30px;">     
+        <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Fecha Venta: </strong></label>
-            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
-            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
-            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>            
-        </div>     
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>
 {% if app.session.get('caja_abierta') %}
-    {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %} 
-            <a href="javascript:void(0)" data-url="{{ path('ventas_cobro_new') }}" class="btn btn_blue btn_dollartag floatright cobro-launcher" title="ctrl + alt + C">
+    {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
+        {% set urlxCobrar = path('ventas_por_cobrar') %}
+            <a href="javascript:void(0)" onclick="partialVentasPorCobrar('{{ urlxCobrar }}')"  class="btn btn_blue btn_dollartag floatright" title="ctrl + alt + C">
                 <span style="font-size: 14px;">COBRAR VENTAS</span>
             </a>
     {% endif %}
 {% else %}
-    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %} 
-            {% set urlApertura = path('ventas_apertura_new') %} 
+    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
+            {% set urlApertura = path('ventas_apertura_new') %}
             <a href="javascript:void(0)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')" class="btn btn_orange btn_lock floatright " title="Debe abrir la caja para realizar cobros">
                 <span style="font-size: 14px;">APERTURA DE CAJA</span>
             </a>
@@ -46,9 +47,9 @@
 
 {% endif %}
 
-    </form>   
+    </form>
 
-</div><!-- button -->     
+</div><!-- button -->
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -66,23 +67,23 @@
         </thead>
         <tbody>
            {% for entity in entities %}
-            <tr>                
+            <tr>
                 <td>{{entity.nroOperacion}}</td>
                 <td><span class="hidden">{{ entity.fechaCobro|date('YmdHi') }}</span>{{ entity.fechaCobro|date('d-m-Y H:i') }}</td>
                 <td>{{ entity.cliente }}</td>
                 <td>{{ entity.formaPago }}</td>
-                <td class="alignright">0</td>                
+                <td class="alignright">0</td>
                 <td class="estado">{{ entity.estado }}</td>
                 {% if not owns  %}
                 <td>{{entity.createdBy.nombre|upper }}</td>
                 {% endif %}
-                <td class="buttons">                    
+                <td class="buttons">
                      <a href="{{ path('ventas_venta_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Cobro"></a>
                 </td>
             </tr>
            {% endfor %}
         </tbody>
-    </table>     
+    </table>
 </div>
  {% endblock %}
 {% block extra_javascripts %}
@@ -90,20 +91,20 @@
 <script type="text/javascript">
 jQuery(document).ready(function($){
     $(document).on('keydown',function(e){ detectarControles(e); })
-    $('#selectUser').change(function(){ 
+    $('#selectUser').change(function(){
         $('#searchform').submit();
-    }); 
-    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});    
+    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
-    
+
     function detectarControles(e) {
     // ctrl + alt + C
-    if( e.ctrlKey && e.altKey && e.keyCode == 67 ){     
+    if( e.ctrlKey && e.altKey && e.keyCode == 67 ){
         window.location.href = "{{ path('ventas_cobro_new') }}";
-    }     
+    }
 }
 });
-</script>        
+</script>
 {% endblock %}

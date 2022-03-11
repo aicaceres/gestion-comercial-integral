@@ -4,11 +4,11 @@ namespace VentasBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * VentasBundle\Entity\VentaDetalle
- * @ORM\Table(name="ventas_venta_detalle")
+ * VentasBundle\Entity\PresupuestoDetalle
+ * @ORM\Table(name="ventas_presupuesto_detalle")
  * @ORM\Entity()
  */
-class VentaDetalle {
+class PresupuestoDetalle {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -51,39 +51,15 @@ class VentaDetalle {
      * @ORM\Column(name="precio", type="decimal", scale=3 )
      */
     protected $precio;
-    /**
-     * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", scale=3 )
-     */
-    protected $iva;
 
     /**
-     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Venta", inversedBy="detalles")
-     * @ORM\JoinColumn(name="ventas_venta_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Presupuesto", inversedBy="detalles")
+     * @ORM\JoinColumn(name="ventas_presupuesto_id", referencedColumnName="id")
      */
-    protected $venta;
-
-    /** TOTALES DEL ITEM  */
-    public function precioConIva(){
-        return $this->getPrecio() + $this->getIva();
-    }
-    public function total(){
-        return $this->getCantidad() * $this->precioConIva();
-    }
-    /***/
-
-
-    public function precioTotal(){
-        return $this->getPrecio() + $this->getIva();
-    }
+    protected $presupuesto;
 
     public function getTotal() {
-        $precio = $this->precioConv();
-        return $precio * $this->getCantidad();
-    }
-
-    public function precioConv() {
-        return $this->precioTotal() / $this->getVenta()->getCotizacion();
+        return $this->getPrecio() * $this->getCantidad();
     }
 
     /**
@@ -100,7 +76,7 @@ class VentaDetalle {
      * Set orden
      *
      * @param integer $orden
-     * @return VentaDetalle
+     * @return PresupuestoDetalle
      */
     public function setOrden($orden)
     {
@@ -123,7 +99,7 @@ class VentaDetalle {
      * Set cantidad
      *
      * @param string $cantidad
-     * @return VentaDetalle
+     * @return PresupuestoDetalle
      */
     public function setCantidad($cantidad)
     {
@@ -146,7 +122,7 @@ class VentaDetalle {
      * Set bulto
      *
      * @param boolean $bulto
-     * @return VentaDetalle
+     * @return PresupuestoDetalle
      */
     public function setBulto($bulto)
     {
@@ -169,7 +145,7 @@ class VentaDetalle {
      * Set cantidadxBulto
      *
      * @param integer $cantidadxBulto
-     * @return VentaDetalle
+     * @return PresupuestoDetalle
      */
     public function setCantidadxBulto($cantidadxBulto)
     {
@@ -192,7 +168,7 @@ class VentaDetalle {
      * Set precio
      *
      * @param string $precio
-     * @return VentaDetalle
+     * @return PresupuestoDetalle
      */
     public function setPrecio($precio)
     {
@@ -215,7 +191,7 @@ class VentaDetalle {
      * Set producto
      *
      * @param \AppBundle\Entity\Producto $producto
-     * @return VentaDetalle
+     * @return PresupuestoDetalle
      */
     public function setProducto(\AppBundle\Entity\Producto $producto = null)
     {
@@ -235,48 +211,25 @@ class VentaDetalle {
     }
 
     /**
-     * Set venta
+     * Set presupuesto
      *
-     * @param \VentasBundle\Entity\Venta $venta
-     * @return VentaDetalle
+     * @param \VentasBundle\Entity\Presupuesto $presupuesto
+     * @return PresupuestoDetalle
      */
-    public function setVenta(\VentasBundle\Entity\Venta $venta = null)
+    public function setPresupuesto(\VentasBundle\Entity\Presupuesto $presupuesto = null)
     {
-        $this->venta = $venta;
+        $this->presupuesto = $presupuesto;
 
         return $this;
     }
 
     /**
-     * Get venta
+     * Get presupuesto
      *
-     * @return \VentasBundle\Entity\Venta
+     * @return \VentasBundle\Entity\Presupuesto
      */
-    public function getVenta()
+    public function getPresupuesto()
     {
-        return $this->venta;
-    }
-
-    /**
-     * Set iva
-     *
-     * @param string $iva
-     * @return VentaDetalle
-     */
-    public function setIva($iva)
-    {
-        $this->iva = $iva;
-
-        return $this;
-    }
-
-    /**
-     * Get iva
-     *
-     * @return string
-     */
-    public function getIva()
-    {
-        return $this->iva;
+        return $this->presupuesto;
     }
 }

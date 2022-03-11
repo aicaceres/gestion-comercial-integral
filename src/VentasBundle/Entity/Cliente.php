@@ -22,7 +22,7 @@ class Cliente
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
      * @Assert\NotBlank()
-     */    
+     */
     protected $nombre;
     /**
      * @var string $dni
@@ -38,7 +38,7 @@ class Cliente
      * @var string $nroInscripcion
      * @ORM\Column(name="nro_inscripcion", type="string", nullable=true)
      */
-    protected $nroInscripcion;    
+    protected $nroInscripcion;
     /**
      * @var string $direccion
      * @ORM\Column(name="direccion", type="string", nullable=true)
@@ -58,39 +58,39 @@ class Cliente
     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
     * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
     */
-    protected $localidad;    
+    protected $localidad;
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
      */
-    protected $observaciones;      
+    protected $observaciones;
      /**
      * @var integer $saldoInicial
      * @ORM\Column(name="saldo_inicial", type="decimal", scale=2, nullable=true )
      */
-    protected $saldoInicial; 
+    protected $saldoInicial;
     /**
      * @var integer $limiteCredito
      * @ORM\Column(name="limite_credito", type="decimal", scale=2, nullable=true )
      */
-    protected $limiteCredito;    
+    protected $limiteCredito;
     /**
      * @var date $ultVerificacionCuit
      * @ORM\Column(name="ult_verificacion_cuit", type="date", nullable=true)
      */
-    private $ultVerificacionCuit ;     
+    private $ultVerificacionCuit ;
     /**
      * @ORM\Column(name="consumidor_final", type="boolean",nullable=true)
      */
-    protected $consumidorFinal = false;        
+    protected $consumidorFinal = false;
     /**
      * @ORM\Column(name="activo", type="boolean",nullable=true)
      */
-    protected $activo = true;    
-    
+    protected $activo = true;
+
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="categoria_iva_id", referencedColumnName="id")
-     **/  
+     **/
     protected $categoria_iva;
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Escalas")
@@ -100,8 +100,8 @@ class Cliente
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
-     **/  
-    protected $formaPago;    
+     **/
+    protected $formaPago;
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
@@ -112,7 +112,7 @@ class Cliente
      * @ORM\JoinColumn(name="transporte_id", referencedColumnName="id")
      */
     protected $transporte;
-    
+
     /**
     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Provincia")
     * @ORM\JoinColumn(name="provincia_rentas_id", referencedColumnName="id")
@@ -152,13 +152,13 @@ class Cliente
     /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PagoCliente", mappedBy="cliente")
      */
-    protected $pagos;   
-  
+    protected $pagos;
+
     /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\NotaDebCred", mappedBy="cliente")
      */
     protected $notasDebCredVenta;
- 
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -172,7 +172,7 @@ class Cliente
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -187,9 +187,9 @@ class Cliente
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;     
+    private $updatedBy;
 
-    
+
     /**
      * Constructor
      */
@@ -200,15 +200,15 @@ class Cliente
         $this->consumidorFinal = false;
         $this->saldoInicial = 0;
     }
-        
+
     public function __toString() {
         return $this->nombre;
-    } 
+    }
 
-    public function getDomicilioCompleto(){        
+    public function getDomicilioCompleto(){
         return $this->direccion.', '.$this->getLocalidad().', '.$this->getLocalidad()->getProvincia();
     }
-    
+
     public function getSaldo(){
         $facturas = $this->facturasVenta;
         $pagos = $this->pagos;
@@ -229,8 +229,8 @@ class Cliente
             $saldo -= $pag->getTotal();
         }
         return $saldo;
-    }    
- 
+    }
+
     public function getFechaUltimaCompra(){
         $facturas = $this->facturasVenta;
         $fecha=null;
@@ -243,7 +243,7 @@ class Cliente
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -266,7 +266,7 @@ class Cliente
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -289,7 +289,7 @@ class Cliente
     /**
      * Get dni
      *
-     * @return string 
+     * @return string
      */
     public function getDni()
     {
@@ -312,7 +312,7 @@ class Cliente
     /**
      * Get cuit
      *
-     * @return string 
+     * @return string
      */
     public function getCuit()
     {
@@ -335,7 +335,7 @@ class Cliente
     /**
      * Get nroInscripcion
      *
-     * @return string 
+     * @return string
      */
     public function getNroInscripcion()
     {
@@ -358,7 +358,7 @@ class Cliente
     /**
      * Get direccion
      *
-     * @return string 
+     * @return string
      */
     public function getDireccion()
     {
@@ -381,7 +381,7 @@ class Cliente
     /**
      * Get telefono
      *
-     * @return string 
+     * @return string
      */
     public function getTelefono()
     {
@@ -404,7 +404,7 @@ class Cliente
     /**
      * Get email
      *
-     * @return string 
+     * @return string
      */
     public function getEmail()
     {
@@ -427,7 +427,7 @@ class Cliente
     /**
      * Get observaciones
      *
-     * @return string 
+     * @return string
      */
     public function getObservaciones()
     {
@@ -450,7 +450,7 @@ class Cliente
     /**
      * Get saldoInicial
      *
-     * @return string 
+     * @return string
      */
     public function getSaldoInicial()
     {
@@ -473,7 +473,7 @@ class Cliente
     /**
      * Get limiteCredito
      *
-     * @return string 
+     * @return string
      */
     public function getLimiteCredito()
     {
@@ -496,7 +496,7 @@ class Cliente
     /**
      * Get ultVerificacionCuit
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUltVerificacionCuit()
     {
@@ -519,7 +519,7 @@ class Cliente
     /**
      * Get consumidorFinal
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getConsumidorFinal()
     {
@@ -542,7 +542,7 @@ class Cliente
     /**
      * Get activo
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getActivo()
     {
@@ -565,7 +565,7 @@ class Cliente
     /**
      * Get trabajo
      *
-     * @return string 
+     * @return string
      */
     public function getTrabajo()
     {
@@ -588,7 +588,7 @@ class Cliente
     /**
      * Get direccionTrabajo
      *
-     * @return string 
+     * @return string
      */
     public function getDireccionTrabajo()
     {
@@ -611,7 +611,7 @@ class Cliente
     /**
      * Get telefonoTrabajo
      *
-     * @return string 
+     * @return string
      */
     public function getTelefonoTrabajo()
     {
@@ -634,7 +634,7 @@ class Cliente
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -657,7 +657,7 @@ class Cliente
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -680,7 +680,7 @@ class Cliente
     /**
      * Get localidad
      *
-     * @return \ConfigBundle\Entity\Localidad 
+     * @return \ConfigBundle\Entity\Localidad
      */
     public function getLocalidad()
     {
@@ -703,7 +703,7 @@ class Cliente
     /**
      * Get categoria_iva
      *
-     * @return \ConfigBundle\Entity\Parametro 
+     * @return \ConfigBundle\Entity\Parametro
      */
     public function getCategoriaIva()
     {
@@ -726,7 +726,7 @@ class Cliente
     /**
      * Get categoriaRentas
      *
-     * @return \ConfigBundle\Entity\Escalas 
+     * @return \ConfigBundle\Entity\Escalas
      */
     public function getCategoriaRentas()
     {
@@ -749,7 +749,7 @@ class Cliente
     /**
      * Get formaPago
      *
-     * @return \ConfigBundle\Entity\FormaPago 
+     * @return \ConfigBundle\Entity\FormaPago
      */
     public function getFormaPago()
     {
@@ -772,7 +772,7 @@ class Cliente
     /**
      * Get precioLista
      *
-     * @return \AppBundle\Entity\PrecioLista 
+     * @return \AppBundle\Entity\PrecioLista
      */
     public function getPrecioLista()
     {
@@ -795,7 +795,7 @@ class Cliente
     /**
      * Get transporte
      *
-     * @return \ConfigBundle\Entity\Transporte 
+     * @return \ConfigBundle\Entity\Transporte
      */
     public function getTransporte()
     {
@@ -818,7 +818,7 @@ class Cliente
     /**
      * Get provinciaRentas
      *
-     * @return \ConfigBundle\Entity\Provincia 
+     * @return \ConfigBundle\Entity\Provincia
      */
     public function getProvinciaRentas()
     {
@@ -841,7 +841,7 @@ class Cliente
     /**
      * Get localidadTrabajo
      *
-     * @return \ConfigBundle\Entity\Localidad 
+     * @return \ConfigBundle\Entity\Localidad
      */
     public function getLocalidadTrabajo()
     {
@@ -874,7 +874,7 @@ class Cliente
     /**
      * Get facturasVenta
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getFacturasVenta()
     {
@@ -907,7 +907,7 @@ class Cliente
     /**
      * Get pagos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getPagos()
     {
@@ -940,7 +940,7 @@ class Cliente
     /**
      * Get notasDebCredVenta
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getNotasDebCredVenta()
     {
@@ -963,7 +963,7 @@ class Cliente
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -986,7 +986,7 @@ class Cliente
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {

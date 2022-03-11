@@ -1,0 +1,41 @@
+<table cellpadding="0" cellspacing="0" border="0" class="venta stdtable noaction">
+    <thead>
+        <tr>
+            <th style="width:3%;">#</th>
+            <th>Producto</th>
+            <th style="width:12%;">Cant.</th>
+            <th style="width:10%;">Precio Unit.</th>
+            <th style="width:10%;">SubTotal</th>
+            <th style="width:3%;"><a href="#" id="linkAdd" tabindex="0"  title="Agregar"><span class="add-item-button">+</span></a></th>
+        </tr>
+    </thead>
+    <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'VentasBundle:Presupuesto:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+    {% for det in form.detalles %}
+        <tr class="item" divdata="item_{{loop.index-1}}">
+            <td class="ordTd"></td>
+            <td class="prodTd">
+                {{ form_widget(det.producto,{'attr':{'style':'width:80%','url':path('get_lista_productos'), 'fnc':'openModalProducto', 'mtitle':'Seleccionar Producto'}}) }}
+                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
+            </td>
+            <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
+                              <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
+                            </td>
+            <td class="precTd  alignright">
+                <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'mediuminput','style':'text-align:right;','readonly':'readonly' } }) }} </span>
+            </td>
+            <td class="itmSubtotalTd alignright">{{ det.vars.data.getTotal|number_format(2,'.','') }}</td>
+            <td class="delTd" style="text-align:center;"></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <th colspan="4" style="text-align:right">&nbsp; </th>
+            <th class="cktotal red alignright" id="subtotalTh"></th>
+            <th style="text-align:center;"></th>
+        </tr>
+    </tfoot>
+
+</table>
+

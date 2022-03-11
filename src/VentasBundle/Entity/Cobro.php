@@ -20,7 +20,7 @@ class Cobro {
     protected $id;
     /**
      * @var integer $nroOperacion
-     * @ORM\Column(name="nro_operacion", type="integer")     
+     * @ORM\Column(name="nro_operacion", type="integer")
      */
     protected $nroOperacion = '';
     /**
@@ -51,19 +51,19 @@ class Cobro {
 
     /**
      * @var string $nombreCliente
-     * @ORM\Column(name="nombre_cliente", type="string", nullable=true)     
-     */ 
+     * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     */
     protected $nombreCliente;
     /**
      * @var string $tipoDocumentoCliente
      * @ORM\Column(name="tipo_documento_cliente", type="integer", nullable=true)
      */
-    protected $tipoDocumentoCliente;    
+    protected $tipoDocumentoCliente;
     /**
      * @var string $nroDocumentoCliente
      * @ORM\Column(name="nro_documento_cliente", type="string", length=13, nullable=true)
      */
-    protected $nroDocumentoCliente;    
+    protected $nroDocumentoCliente;
     /**
      * @var string $direccionCliente
      * @ORM\Column(name="direccion_cliente", type="string", nullable=true)
@@ -73,14 +73,20 @@ class Cobro {
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
-     **/  
-    protected $formaPago;    
+     **/
+    protected $formaPago;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
      */
     protected $moneda;
+
+    /**
+     * @var string $cotizacion
+     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     */
+    protected $cotizacion = 0;
 
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Venta")
@@ -118,11 +124,15 @@ class Cobro {
      */
     private $updatedBy;
 
+     /**
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="cobro")
+     */
+    protected $facturaElectronica;
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -145,7 +155,7 @@ class Cobro {
     /**
      * Get nroOperacion
      *
-     * @return integer 
+     * @return integer
      */
     public function getNroOperacion()
     {
@@ -168,7 +178,7 @@ class Cobro {
     /**
      * Get fechaCobro
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaCobro()
     {
@@ -191,7 +201,7 @@ class Cobro {
     /**
      * Get estado
      *
-     * @return string 
+     * @return string
      */
     public function getEstado()
     {
@@ -214,7 +224,7 @@ class Cobro {
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -237,7 +247,7 @@ class Cobro {
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -260,7 +270,7 @@ class Cobro {
     /**
      * Get unidadNegocio
      *
-     * @return \ConfigBundle\Entity\UnidadNegocio 
+     * @return \ConfigBundle\Entity\UnidadNegocio
      */
     public function getUnidadNegocio()
     {
@@ -283,7 +293,7 @@ class Cobro {
     /**
      * Get cliente
      *
-     * @return \VentasBundle\Entity\Cliente 
+     * @return \VentasBundle\Entity\Cliente
      */
     public function getCliente()
     {
@@ -306,7 +316,7 @@ class Cobro {
     /**
      * Get formaPago
      *
-     * @return \ConfigBundle\Entity\FormaPago 
+     * @return \ConfigBundle\Entity\FormaPago
      */
     public function getFormaPago()
     {
@@ -329,7 +339,7 @@ class Cobro {
     /**
      * Get moneda
      *
-     * @return \ConfigBundle\Entity\Moneda 
+     * @return \ConfigBundle\Entity\Moneda
      */
     public function getMoneda()
     {
@@ -352,7 +362,7 @@ class Cobro {
     /**
      * Get venta
      *
-     * @return \VentasBundle\Entity\Venta 
+     * @return \VentasBundle\Entity\Venta
      */
     public function getVenta()
     {
@@ -375,7 +385,7 @@ class Cobro {
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -398,7 +408,7 @@ class Cobro {
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {
@@ -421,7 +431,7 @@ class Cobro {
     /**
      * Get nombreCliente
      *
-     * @return string 
+     * @return string
      */
     public function getNombreCliente()
     {
@@ -444,7 +454,7 @@ class Cobro {
     /**
      * Get tipoDocumentoCliente
      *
-     * @return integer 
+     * @return integer
      */
     public function getTipoDocumentoCliente()
     {
@@ -467,7 +477,7 @@ class Cobro {
     /**
      * Get nroDocumentoCliente
      *
-     * @return string 
+     * @return string
      */
     public function getNroDocumentoCliente()
     {
@@ -490,10 +500,56 @@ class Cobro {
     /**
      * Get direccionCliente
      *
-     * @return string 
+     * @return string
      */
     public function getDireccionCliente()
     {
         return $this->direccionCliente;
+    }
+
+    /**
+     * Set cotizacion
+     *
+     * @param string $cotizacion
+     * @return Cobro
+     */
+    public function setCotizacion($cotizacion)
+    {
+        $this->cotizacion = $cotizacion;
+
+        return $this;
+    }
+
+    /**
+     * Get cotizacion
+     *
+     * @return string
+     */
+    public function getCotizacion()
+    {
+        return $this->cotizacion;
+    }
+
+    /**
+     * Set facturaElectronica
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $facturaElectronica
+     * @return Cobro
+     */
+    public function setFacturaElectronica(\VentasBundle\Entity\FacturaElectronica $facturaElectronica = null)
+    {
+        $this->facturaElectronica = $facturaElectronica;
+
+        return $this;
+    }
+
+    /**
+     * Get facturaElectronica
+     *
+     * @return \VentasBundle\Entity\FacturaElectronica 
+     */
+    public function getFacturaElectronica()
+    {
+        return $this->facturaElectronica;
     }
 }

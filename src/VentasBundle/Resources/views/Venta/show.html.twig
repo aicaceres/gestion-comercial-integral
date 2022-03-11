@@ -1,7 +1,7 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Administración de Facturas de Clientes</h1>
+    <h1 class="pagetitle">Ventas a Clientes</h1>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -15,83 +15,88 @@
     }
 </style>
 
-<form id="form-venta" name="ventasbundle_venta" class="form-horizontal">     
-    <fieldset style="padding:10px 0;margin:0 0 10px 0; width: 100%; background-color:gainsboro">    
-             
-        <div style="display:inline-block; width: 24%;">                                 
+<form id="form-venta" name="ventasbundle_venta" class="form-horizontal">
+    <fieldset style="padding:10px 0;margin:0 0 10px 0; width: 100%; background-color:gainsboro">
+
+        <div style="display:inline-block; width: 24%;">
             <label>OPERACIÓN: </label>
-            <input type="text" disabled="disabled" class="width100" value="#{{entity.nroOperacion}}"/>          
-        </div>     
-        <div style="display:inline-block; width: 24%;">                                 
+            <input type="text" disabled="disabled" class="width100" value="#{{entity.nroOperacion}}"/>
+        </div>
+        <div style="display:inline-block; width: 24%;">
             <label>FECHA/HORA: </label>
-            <input type="text" disabled="disabled" class="width100" value="{{entity.fechaVenta|date('d-m-Y H:i')}}"/>          
-        </div>                    
-        <div style="display:inline-block; width: 24%;">                                 
+            <input type="text" disabled="disabled" class="width100" value="{{entity.fechaVenta|date('d-m-Y H:i')}}"/>
+        </div>
+        <div style="display:inline-block; width: 24%;">
             <label>USUARIO: </label>
-            <input type="text" disabled="disabled" class="width100" value="{{entity.createdBy.username}}"/>          
-        </div>                    
-                           
-    </fieldset>                                        
-    <fieldset>                                        
-        <div style="display:inline-block; width: 50%;">                                 
+            <input type="text" disabled="disabled" class="width100" value="{{entity.createdBy.username}}"/>
+        </div>
+
+    </fieldset>
+    <fieldset>
+        <div style="display:inline-block; width: 50%;">
             <label>CLIENTE: </label>
             <select style="width:100%" disabled="disabled">
                 <option value="{{entity.cliente.id}}" selected="selected">{{entity.cliente.nombre}}</option>
-            </select>          
+            </select>
         </div>
-        <div style="display:inline-block; width: 20%;"> 
+        <div style="display:inline-block; width: 20%;">
             <label>LISTA DE PRECIOS: </label>
             <select style="width:100%" disabled="disabled">
                 <option value="{{entity.precioLista.id}}">{{entity.precioLista.nombre}}</option>
             </select>
-        </div> 
-        <div style="display:inline-block; width: 25%;"> 
+        </div>
+        <div style="display:inline-block; width: 25%;">
             <label>TRANSPORTE: </label>
             <select style="width:100%" disabled="disabled">
                 <option value="{{entity.transporte.id}}">{{entity.transporte.nombre}}</option>
             </select>
         </div>
-    </fieldset> 
+    </fieldset>
     <fieldset>
-    <div class="datos-cliente" style="display:inline-block; width:100%; vertical-align: top;">  
-        {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %} 
-    </fieldset> 
-    <fieldset> 
-            <div style="display:inline-block; width: 35%;"> 
+    <div class="datos-cliente" style="display:inline-block; width:100%; vertical-align: top;">
+        {% include "VentasBundle:Venta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+    </fieldset>
+    <fieldset>
+            <div style="display:inline-block; width: 35%;">
                 <label>FORMA DE PAGO: </label>
                 <select style="width:100%" disabled="disabled">
                     <option value="{{entity.formaPago.id}}">{{entity.formaPago.nombre}}</option>
                 </select>
             </div>
-            <div style="display:inline-block; width: 20%;"> 
+            <div style="display:inline-block; width: 20%;">
                 <label>MONEDA: </label>
                 <select style="width:100%" disabled="disabled">
                     <option value="{{entity.moneda.id}}">{{entity.moneda.nombre}}</option>
                 </select>
             </div>
-            <div style="display:inline-block; width: 25%;"> 
+            <div style="display:inline-block; width: 25%;">
                 <label>DEPÓSITO: </label>
                 <select style="width:100%" disabled="disabled">
                     <option value="{{entity.deposito.id}}">{{entity.deposito.nombre}}</option>
                 </select>
             </div>
-        </fieldset> 
-        <fieldset>                    
-            <div class="datos-formapago" style="display:inline-block; width: 55%; vertical-align: top;">  
-                {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
-            </div>                                                                                   
         </fieldset>
         <fieldset>
-            <div style="padding-top: 20px; margin:auto; width: 100%;">                
-                
+            <div class="datos-formapago" style="display:inline-block; width: 35%; vertical-align: top;">
+                {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
+            </div>
+            <div class="datos-moneda" style="display:inline-block; width: 20%; vertical-align: top;">
+                {% if entity.cotizacion != 1 %}
+                    <label> TIPO DE CAMBIO: </label> {{entity.cotizacion }}
+                {% endif %}
+            </div>
+        </fieldset>
+        <fieldset>
+            <div style="padding-top: 20px; margin:auto; width: 100%;">
+
                 <table class="venta stdtable noaction" cellspacing="0" cellpadding="0" border="0">
                     <thead>
                         <tr>
                             <th style="width:3%;">#</th>
-                            <th>Producto</th>            
+                            <th>Producto</th>
                             <th style="width:12%;">Cant.</th>
                             <th style="width:10%;">Precio Unit.</th>
-                            <th style="width:10%;">SubTotal</th>                                        
+                            <th style="width:10%;">SubTotal</th>
                         </tr>
                     </thead>
                 <tbody>
@@ -99,51 +104,51 @@
                         <tr class="item">
                             <td class="ordTd">{{loop.index}}</td>
                             <td class="prodTd">
-                                <label>{{detalle.producto.nombre}}</label> 
-                            </td>    
-                            <td class="cantTd alignright">{{ detalle.cantidad }}</td>                            
-                            <td class="precTd alignright">{{ detalle.precio|number_format(3,'.',',') }}</td>    
-                            <td class="itmSubtotalTd alignright">{{ detalle.getTotal|number_format(3,'.',',') }}</td>    
-                        </tr>           
+                                <label>{{detalle.producto.nombre}}</label>
+                            </td>
+                            <td class="cantTd alignright">{{ detalle.cantidad }}</td>
+                            <td class="precTd alignright">{{ detalle.precioConv|number_format(3,'.',',') }}</td>
+                            <td class="itmSubtotalTd alignright">{{ detalle.getTotal|number_format(3,'.',',') }}</td>
+                        </tr>
                     {% endfor %}
                 </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="4" style="text-align:right">&nbsp; </th>                                        
-                            <th class="cktotal red alignright" id="subtotalTh">{{entity.getTotal|number_format(3,'.',',') }}</th>            
-                        </tr>                        
-                    </tfoot>    
-            </table>   
-                                         
+                            <th colspan="4" style="text-align:right">&nbsp; </th>
+                            <th class="cktotal red alignright" id="subtotalTh">{{entity.getSubTotal|number_format(3,'.',',') }}</th>
+                        </tr>
+                    </tfoot>
+            </table>
+
             </div>
         </fieldset>
         <fieldset>
-            <div style="margin:auto; width: 100%;">                                
-                <table class="stdtable noaction" cellspacing="0" cellpadding="0" border="0">    
-    <thead>    
+            <div style="margin:auto; width: 100%;">
+                <table class="stdtable noaction" cellspacing="0" cellpadding="0" border="0">
+    <thead>
         <tr class="resumen">
-            <th id="gralSubtotalTd">Subtotal: &nbsp;$&nbsp;<span>123.450</span>.-</th>                      
-            <th>Descuento/Recargo [<span class="porcentajeRecargo">-20.00</span>%]: &nbsp;$&nbsp; <span id="importeRecargo">-24.690</span>.-</th>                
-            <th class="gralTotalTd">Neto a Pagar: &nbsp;$&nbsp;<span id="totalGral">98.760</span>.-</th> 
+            <th id="gralSubtotalTd">Subtotal: &nbsp;{{entity.moneda.simbolo}}&nbsp;<span>{{entity.getSubTotal|number_format(3,'.',',') }}</span>.-</th>
+            <th>Descuento/Recargo [<span class="porcentajeRecargo">{{ entity.formaPago.porcentajeRecargo }}</span>%]: &nbsp;{{entity.moneda.simbolo}}&nbsp; <span id="importeRecargo">{{entity.getTotalDescuentoRecargo|number_format(3,'.',',')}}</span>.-</th>
+            <th class="gralTotalTd">Neto a Pagar: &nbsp;{{entity.moneda.simbolo}}&nbsp;<span id="totalGral">{{entity.getTotal|number_format(3,'.',',')}}</span>.-</th>
         </tr>
     </thead>
-</table>   
-                       
-                  
+</table>
+
+
             </div>
         </fieldset>
 
 
-        <fieldset>          
-            <br clear="all"> 
-            <div class="actionbutton">                
+        <fieldset>
+            <br clear="all">
+            <div class="actionbutton">
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_venta')}}">Cancelar</a>
             </div>
-        </fieldset>                        
+        </fieldset>
     </form>
 
 
 
-</div>    
+</div>
 </div>
 {% endblock %}

@@ -16,7 +16,7 @@ class PedidoType extends AbstractType
         $builder
             ->add('fechaPedido','date',array('widget' => 'single_text', 'label'=>'Fecha Pedido:',
                 'format' => 'dd-MM-yyyy', 'required' => true))
-            ->add('fechaEntrega','date',array('widget' => 'single_text', 'label'=>'Fecha Entrega:',
+            ->add('fechaEntrega','date',array('widget' => 'single_text', 'label'=>'Entrega Estimada:',
                 'format' => 'dd-MM-yyyy', 'required' => false))
             ->add('estado','hidden')
             ->add('proveedor','entity',array('label'=>'Proveedor:',
@@ -27,8 +27,8 @@ class PedidoType extends AbstractType
                             ->where('p.activo=1')
                             ->orderBy('p.nombre');
                     }
-                ))                 
-            ->add('cerrado','checkbox',array('mapped' => false,'required' => false))          
+                ))
+            ->add('cerrado','checkbox',array('mapped' => false,'required' => false))
         ;
         $opunidneg = $options['data']->getUnidadNegocio()->getId();
         $builder->add('deposito', 'entity', array(
@@ -41,9 +41,9 @@ class PedidoType extends AbstractType
                     ->andWhere('deposito.central = 1')
                     ->setParameter('unidadNegocio', $opunidneg);
                 return $qb;
-          },));  
+          },));
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */

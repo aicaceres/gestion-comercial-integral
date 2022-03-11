@@ -13,7 +13,7 @@ class ParametrizacionType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder            
+        $builder
             ->add('ventasClienteBydefault', 'entity', array('label' => 'Cliente por defecto en ventas:',
                     'label_attr' => array('style'=>'width:200px'),
                     'class' => 'VentasBundle:Cliente', 'required' => true,
@@ -24,9 +24,13 @@ class ParametrizacionType extends AbstractType
                     'attr' => array('class' => 'smallinput chzn-select')))
             ->add('ultimoNroOperacionVenta',null,array('label' => 'Último N° de Operación de Venta:',
                     'label_attr' => array('style'=>'width:200px')))
+            ->add('ultimoNroPresupuesto',null,array('label' => 'Último N° de Presupuesto:',
+                    'label_attr' => array('style'=>'width:200px')))
+            ->add('validezPresupuesto',null,array('label' => 'Validez del presupuesto en días:',
+                    'label_attr' => array('style'=>'width:200px')))
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */
@@ -35,7 +39,7 @@ class ParametrizacionType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'ConfigBundle\Entity\Parametrizacion'
         ));
-    }    
+    }
 
     /**
      * @return string
