@@ -20,6 +20,8 @@
         <input type="hidden" id="estado" name="estado"/>
         <input type="hidden" id="fdesde" name="fdesde"/>
         <input type="hidden" id="fhasta" name="fhasta"/>
+        <input type="hidden" id="edesde" name="edesde"/>
+        <input type="hidden" id="ehasta" name="ehasta"/>
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
         <button class="stdbtn floatright" type="submit" >Imprimir</button>
@@ -46,6 +48,14 @@
                 <option value="RECIBIDO" {% if estado== 'RECIBIDO' %} selected="selected" {% endif %}> RECIBIDO</option>
             </select>
         </div>
+        {% if estado == 'PENDIENTE' %}
+        <div style="display: inline-block; margin-right: 30px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Fecha Entrega: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{entrega_desde}}" name="entrega_desde" id="entrega_desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{entrega_hasta}}" name="entrega_hasta" id="entrega_hasta" />
+        </div>
+        {% endif %}
         {% endif %}
         <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
@@ -127,6 +137,8 @@ jQuery(document).ready(function($){
         $('#estado').val($('#selectEstado').val());
         $('#fdesde').val($('#desde').val());
         $('#fhasta').val($('#hasta').val());
+        $('#edesde').val($('#entrega_desde').val());
+        $('#ehasta').val($('#entrega_hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
         var datos = [];
         oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {

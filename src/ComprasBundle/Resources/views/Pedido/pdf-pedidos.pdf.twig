@@ -23,17 +23,20 @@
         </placeholders>
         {% if tipo=='P'%}
         <h2 text-align="center"> Compras a Proveedores - Pedidos</h2>
-        <h4><strong>Estado:</strong> {{ filtro[3] }}  </h4>
+        <h4 height="20px"><strong>Estado:</strong> {{ filtro[3] }}  </h4>
+        {% if filtro[4] or filtro[5] %}
+        <h4 height="20px"><strong>Fecha Entrega:</strong> {{ filtro[4] }} al {{ filtro[5] }} </h4>
+        {% endif %}
         {%else%}
         <h2 text-align="center"> Compras a Proveedores - Pedidos para Recepción</h2>
         {%endif%}
-        <h4><strong>Proveedor:</strong> {{ filtro[0] }}  </h4>
+        <h4 height="20px"><strong>Proveedor:</strong> {{ filtro[0] }}  </h4>
         {% if filtro[1] or filtro[2] %}
-        <h4><strong>Período:</strong> {{ filtro[1] }} al {{ filtro[2] }} </h4>
+        <h4 height="20px"><strong>Período:</strong> {{ filtro[1] }} al {{ filtro[2] }} </h4>
         {% endif %}
         <div height="10px"></div>
         {% if search %}
-            <h4> Término de Búsqueda: "{{search}}" </h4>
+            <h4 height="20px"> Término de Búsqueda: "{{search}}" </h4>
             <div height="10px"></div>
         {%endif%}
         <table font-size="9px">

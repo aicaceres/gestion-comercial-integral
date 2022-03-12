@@ -21,7 +21,7 @@ class PedidoRepository extends EntityRepository
         return $query->getQuery()->getSingleScalarResult();
     }
 
-    public function findByCriteria($unidneg, $provId=NULL,$estado=NULL, $desde=NULL, $hasta=NULL){
+    public function findByCriteria($unidneg, $provId=NULL,$estado=NULL, $desde=NULL, $hasta=NULL,$entregaDesde=NULL, $entregaHasta=NULL){
         $query = $this->_em->createQueryBuilder();
         $query->select('p')
               ->from('ComprasBundle\Entity\Pedido', 'p')
@@ -37,11 +37,19 @@ class PedidoRepository extends EntityRepository
         if($desde){
           $cadena = " p.fechaPedido >= '".UtilsController::toAnsiDate($desde)."'";
           $query->andWhere($cadena);
-      }
-      if($hasta){
+        }
+        if($hasta){
           $cadena = " p.fechaPedido <= '". UtilsController::toAnsiDate($hasta)."'";
           $query->andWhere($cadena);
-      }
+        }
+        if($entregaDesde){
+          $cadena = " p.fechaEntrega >= '".UtilsController::toAnsiDate($entregaDesde)."'";
+          $query->andWhere($cadena);
+        }
+        if($entregaHasta){
+          $cadena = " p.fechaEntrega <= '". UtilsController::toAnsiDate($entregaHasta)."'";
+          $query->andWhere($cadena);
+        }
         return $query->getQuery()->getResult();
 
     }
