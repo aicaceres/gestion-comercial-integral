@@ -10,15 +10,15 @@ class VentaRepository extends EntityRepository {
     public function findByCriteria($unidneg, $desde = NULL, $hasta = NULL, $userId = NULL) {
         $query = $this->_em->createQueryBuilder();
         $query->select('v')
-                ->from('VentasBundle\Entity\Venta', 'v')                          
-                ->innerJoin('v.unidadNegocio', 'un')                
-                ->where("un.id=" . $unidneg);              
+                ->from('VentasBundle\Entity\Venta', 'v')
+                ->innerJoin('v.unidadNegocio', 'un')
+                ->where("un.id=" . $unidneg);
         if ($desde) {
-            $cadena = " v.fechaVenta >= '" . UtilsController::toAnsiDate($desde) . "'";
+            $cadena = " v.fechaVenta >= '" . UtilsController::toAnsiDate($desde) . " 00:00'";
             $query->andWhere($cadena);
-        }   
+        }
         if ($hasta) {
-            $cadena = " v.fechaVenta <= '" . UtilsController::toAnsiDate($hasta) . "'";
+            $cadena = " v.fechaVenta <= '" . UtilsController::toAnsiDate($hasta) . " 23:59'";
             $query->andWhere($cadena);
         }
         if($userId){
@@ -33,9 +33,9 @@ class VentaRepository extends EntityRepository {
     public function getUsers() {
         $query = $this->_em->createQueryBuilder();
         $query->select('u.id,u.nombre,u.username')
-                ->from('VentasBundle\Entity\Venta', 'v')                          
+                ->from('VentasBundle\Entity\Venta', 'v')
                 ->innerJoin('v.createdBy', 'u')
-                ->distinct();        
+                ->distinct();
         return $query->getQuery()->getArrayResult();
     }
 

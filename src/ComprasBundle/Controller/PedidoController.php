@@ -41,7 +41,8 @@ class PedidoController extends Controller {
           $desde = ($request->get('desde')) ? $request->get('desde') : $inicio;
           $hasta = ($request->get('hasta')) ? $request->get('hasta') : $hoy->format('d-m-Y'); */
         $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
-        $periodoEntrega = UtilsController::ultimoMesParaFiltro($request->get('entrega_desde'), $request->get('entrega_hasta'));
+        $periodoEntrega = array('ini' => $request->get('entrega_desde'), 'fin'=> $request->get('entrega_hasta'));
+        //UtilsController::ultimoMesParaFiltro($request->get('entrega_desde'), $request->get('entrega_hasta'));
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         $entities = $em->getRepository('ComprasBundle:Pedido')->findByCriteria($unidneg, $provId,$estado, $periodo['ini'], $periodo['fin'], $periodoEntrega['ini'], $periodoEntrega['fin']);
 
@@ -783,4 +784,69 @@ class PedidoController extends Controller {
         return new Response($msg);
     }
 
+    /**
+     * @Route("/informe/pendientes", name="compras_informe_pendientes")
+     * @Method("GET")
+     * @Template()
+     */
+    public function pendientesAction(Request $request) {
+        $unidneg = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg, 'compras_informe_comprado');
+        $em = $this->getDoctrine()->getManager();
+        $provId = $request->get('provId');
+        $prodId = $request->get('prodId');
+        $hoy = new \DateTime();
+        $inicio = date("d-m-Y", strtotime($hoy->format('d-m-Y') . "- 30 days"));
+        $desde = ($request->get('desde')) ? $request->get('desde') : $inicio;
+        $hasta = ($request->get('hasta')) ? $request->get('hasta') : $hoy->format('d-m-Y');
+        $periodo = array('desde' => $desde, 'hasta' => $hasta);
+        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo'=>'1'),array('nombre'=>'ASC'));
+        $productos = $em->getRepository('AppBundle:Producto')->findBy(array(),array('nombre'=>'ASC'));
+
+        $entities = $em->getRepository('ComprasBundle:Pedido')->findPendientesEntregaByCriteria($unidneg, $provId, $prodId, $periodo);
+
+        return $this->render('ComprasBundle:Informe:pendientes.html.twig', array(
+                    'entities' => $entities,
+                    'proveedores' => $proveedores,
+                    'productos' => $productos,
+                    'provId' => $provId,
+                    'prodId' => $prodId,
+                    'desde' => $desde,
+                    'hasta' => $hasta
+        ));
+    }
+    /**
+     * @Route("/printInformePendientes.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="print_informe_pendientes")
+     * @Method("POST")
+     */
+    public function printInformePendientesAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $items = $request->get('datalist');
+        $tipo = $request->get('tipo');
+        $proveedorId = $request->get('proveedorid');
+        $productoId = $request->get('productoid');
+        $fdesde = $request->get('fdesde');
+        $fhasta = $request->get('fhasta');
+        $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
+        $producto = $em->getRepository('AppBundle:Producto')->find($productoId);
+        $textoFiltro = array($proveedor ? $proveedor->getNombre() : 'TODOS', $fdesde ? $fdesde : '', $fhasta ? $fhasta : '',
+            $producto ? $producto->getCodigoNombre() : 'TODOS');
+
+        //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
+        //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('ComprasBundle:Informe:pdf-pendientes.pdf.twig',
+                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'tipo' => $tipo,
+                    'search' => $request->get('searchterm')), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        $hoy = new \DateTime();
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=informe_productos_pendientes_' . $hoy->format('dmY_Hi') . '.pdf'));
+    }
 }

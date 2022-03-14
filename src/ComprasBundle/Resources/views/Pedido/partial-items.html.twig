@@ -5,14 +5,14 @@
     <td class="cantTd alignright">{{ item.cantidadItemTxt }} </td>
     <td class="totalTd alignright">{{item.cantidadTotal|number_format(3,'.','')~' '~item.producto.unidadmedida.nombre}}</td>
     <td style="text-align:center;width:20px;">
-        {% if entity.estado == 'NUEVO' %}
+        {% if item.pedido.estado == 'NUEVO' %}
         <a class="editTd" href="javascript:void(0)" title="Editar" tabIndex="-1"
            data-url="{{path('compras_render_item_pedido',{'id':item.id})}}" data-actionurl="{{path('compras_item_pedido_create',{'id':item.id})}}">
             <img src="{{asset('assets/images/icons/editor.png')}}" /></a>
         {% endif %}
     </td>
     <td style="text-align:center;">
-        {% if entity.estado == 'NUEVO' %}
+        {% if item.pedido.estado == 'NUEVO' %}
         <a class="delTd" href="javascript:void(0)" data-id="{{item.id}}"  title="Quitar" tabIndex="-1"><span class="minus"></span></a>
         {% endif %}
     </td>

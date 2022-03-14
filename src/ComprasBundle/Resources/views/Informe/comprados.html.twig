@@ -16,44 +16,42 @@
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
         <button class="stdbtn floatright" type="submit" >Imprimir</button>
-    </form> 
+    </form>
     <form class="deposito_selector" id="searchform" action="{{ path('compras_informe_comprado') }}" method="get">
         <div>
             <div style="display: inline-block; margin:10px;">
-               
+
                 <label style="width: 90px;display: inline-block;"><strong>PRODUCTO:</strong></label>
                 <select class="select2" id="selectProducto" name="prodId">
                     <option value="0" >TODOS</option>
                     {% for prod in productos %}
                         <option value="{{prod.id}}" {% if prod.id==prodId %} selected="selected" {% endif %}> {{prod.codigoNombre}}</option>
                     {% endfor %}
-                </select> 
+                </select>
             </div>
         </div>
-
-
         <div>
             <div style="display: inline-block; margin:10px;">
-          
+
                 <label style="width: 90px;display: inline-block;"><strong>PROVEEDOR:</strong></label>
-                <select class="select2" id="selectProveedor" name="provId">
+                <select class="select" id="selectProveedor" name="provId">
                     <option value="0" >TODOS</option>
                     {% for dep in proveedores %}
                         <option value="{{dep.id}}" {% if dep.id==provId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
                     {% endfor %}
-                </select>  
-            </div>    
-            <div style="display: inline-block; margin:10px;">     
+                </select>
+            </div>
+            <div style="display: inline-block; margin:10px;">
                 &nbsp;&nbsp;&nbsp;
                 <label><strong>Período: </strong></label>
-                <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
-                <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+                <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+                <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
                 <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
             </div>
         </div>
 
-    </form>     
-          
+    </form>
+
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -67,15 +65,15 @@
         </thead>
         <tbody>
             {% set total = 0%}
-        {% for entity in entities %} 
+        {% for entity in entities %}
             <tr>
                   {% set total = total + entity.total%}
                 <td> {{ entity.codigo}}</td>
                 <td>{{ entity.producto}}</td>
                 {% if provId==0 %} <td>{{ entity.proveedor}}</td> {% endif %}
                 <td style="text-align: right">{{ entity.preciounit|number_format(3,'.','')}}</td>
-                <td style="text-align: right">{{ entity.cant|number_format(3,'.','') }} {{entity.unidadMedida}}</td> 
-                <td style="text-align: right">{{ entity.total|number_format(3,'.','') }} </td>     
+                <td style="text-align: right">{{ entity.cant|number_format(3,'.','') }} {{entity.unidadMedida}}</td>
+                <td style="text-align: right">{{ entity.total|number_format(3,'.','') }} </td>
         </tr>
            {% endfor %}
         </tbody>
@@ -85,22 +83,22 @@
                 <th style="text-align: right">$ {{total|number_format(3,'.','')}}</th>
             </tr>
         </tfoot>
-    </table>     
+    </table>
 </div>
  {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
-jQuery(document).ready(function($){    
+jQuery(document).ready(function($){
     var oTable = $('#dyntable2').dataTable();
-     oTable.fnSort( [ [1,'asc'] ] );     
-    $('#selectProveedor').change(function(){ 
+     oTable.fnSort( [ [1,'asc'] ] );
+    $('#selectProveedor').change(function(){
         $('#searchform').submit();
-    }); 
-    $('#selectProducto').change(function(){ 
+    });
+    $('#selectProducto').change(function(){
         $('#searchform').submit();
-    }); 
-    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'}); 
+    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 $('#printform').on('submit',function(){
         $('#proveedorid').val($('#selectProveedor').val());
         $('#productoid').val($('#selectProducto').val());
@@ -108,7 +106,7 @@ $('#printform').on('submit',function(){
         $('#fhasta').val($('#hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
         var datos = [];
-       oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {  
+       oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
           /*  var i = value[1].indexOf('</span>');
             if( i >-1 ){
                 var fecha = value[1].substr(i+7);
@@ -118,7 +116,7 @@ $('#printform').on('submit',function(){
             datos[index] = value;
         });
         $('#datalist').val(JSON.stringify(datos));
-    });      
+    });
 });
-</script>   
+</script>
 {% endblock %}

@@ -525,8 +525,8 @@ class FacturaController extends Controller {
         $desde = ($request->get('desde')) ? $request->get('desde') : $inicio;
         $hasta = ($request->get('hasta')) ? $request->get('hasta') : $hoy->format('d-m-Y');
         $periodo = array('desde' => $desde, 'hasta' => $hasta);
-        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findAll();
-        $productos = $em->getRepository('AppBundle:Producto')->findAll();
+        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo'=>'1'),array('nombre'=>'ASC'));
+        $productos = $em->getRepository('AppBundle:Producto')->findBy(array(),array('nombre'=>'ASC'));
         /* if (!$provId) {
           $provId = $proveedores[0]->getId();
           } */

@@ -1,23 +1,23 @@
 <div class="vernav2 iconmenu">
     <ul>
         {% if app.user.access(app.session.get('unidneg_id'),'compras_pedido') %}
-        <li><a href="#item_pedido" class="elements">Pedidos</a>        
+        <li><a href="#item_pedido" class="elements">Pedidos</a>
             <span class="arrow"></span>
             <ul id="item_pedido">
                 <li id="pedido"><a href="{{path('compras_pedido')}}">Pedidos a Proveedores</a></li>
                 <li id="recepcion"><a href="{{path('compras_pedido_recepcion')}}">Recepción de Pedidos</a></li>
             </ul>
-        </li> 
+        </li>
         {% endif %}
-        {% if app.user.access(app.session.get('unidneg_id'),'compras_factura') %}        
-        <li><a href="#item_facturacion" class="elements">Facturación</a>        
+        {% if app.user.access(app.session.get('unidneg_id'),'compras_factura') %}
+        <li><a href="#item_facturacion" class="elements">Facturación</a>
             <span class="arrow"></span>
             <ul id="item_facturacion">
                 <li id="factura"><a href="{{path('compras_factura')}}">Facturas de Compra</a></li>
                 <li id="notadebcred"><a href="{{path('compras_notadebcred')}}">Notas de Debito/Crédito</a></li>
             </ul>
-        </li>    
-        {% endif %}        
+        </li>
+        {% endif %}
         {% if app.user.access(app.session.get('unidneg_id'),'compras_proveedor') %}
         <li><a href="#item_proveedor" class="elements">Proveedores</a>
             <span class="arrow"></span>
@@ -31,24 +31,25 @@
         {% if app.user.access(app.session.get('unidneg_id'),'compras_informe') %}
         <li><a href="#informe" class="elements">Informes</a>
             <span class="arrow"></span>
-            <ul id="informe">                
-                <li id="comprado"><a href="{{ path('compras_informe_comprado') }}">Productos comprados</a></li>                                              
-                <li id="centrocosto"><a href="{{ path('compras_informe_centrocosto') }}">Centro de Costos</a></li>              
-                <li id="iibbchaco"><a href="{{ path('compras_informe_iibbchaco') }}">IIBB Chaco</a></li>               
-                <li id="controlpago"><a href="{{ path('compras_informe_controlpago') }}">Control de Pagos</a></li>               
-                <li id="economico"><a href="{{ path('compras_informe_economico') }}">Informes Económicos</a></li>               
+            <ul id="informe">
+                <li id="pendientes"><a href="{{ path('compras_informe_pendientes') }}">Productos pendientes</a></li>
+                <li id="comprado"><a href="{{ path('compras_informe_comprado') }}">Productos comprados</a></li>
+                <li id="centrocosto"><a href="{{ path('compras_informe_centrocosto') }}">Centro de Costos</a></li>
+                <li id="iibbchaco"><a href="{{ path('compras_informe_iibbchaco') }}">IIBB Chaco</a></li>
+                <li id="controlpago"><a href="{{ path('compras_informe_controlpago') }}">Control de Pagos</a></li>
+                <li id="economico"><a href="{{ path('compras_informe_economico') }}">Informes Económicos</a></li>
             </ul>
         </li>
-        {% endif %}        
+        {% endif %}
     {% if app.user.access(app.session.get('unidneg_id'),'compras_libroiva') %}
         <li><a href="#impuestos" class="elements">Impuestos AFIP</a>
             <span class="arrow"></span>
-            <ul id="impuestos">                
-                <li id="libroiva"><a href="{{path('compras_libroiva')}}">Libro de IVA</a></li>                                 
-                <li id="informeafip"><a href="{{path('compras_informeafip')}}">Régimen de Información</a></li>                
+            <ul id="impuestos">
+                <li id="libroiva"><a href="{{path('compras_libroiva')}}">Libro de IVA</a></li>
+                <li id="informeafip"><a href="{{path('compras_informeafip')}}">Régimen de Información</a></li>
             </ul>
-        </li>        
-    {% endif %}   
+        </li>
+    {% endif %}
     </ul>
     <a class="togglemenu"></a>
     <br /><br />

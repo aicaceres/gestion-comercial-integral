@@ -8,14 +8,14 @@
 {% include "AppBundle::notificacion.html.twig" %}
 
 <div id="contentwrapper" class="contentwrapper">
-    <div>  
+    <div>
     <form id="printform" name="printform" target="_blank"  action="{{ path("stock_precio_export") }}" method="post">
         <input type="hidden" id="listaid" name="listaid"/>
         <input type="hidden" id="rubroid" name="rubroid"/>
         <input type="hidden" id="proveedorid" name="proveedorid"/>
-        <input type="hidden" id="searchterm" name="searchterm"/>        
+        <input type="hidden" id="searchterm" name="searchterm"/>
         <button class="stdbtn print floatright" type="submit" >Exportar</button>
-    </form>             
+    </form>
         <form id="searchform" action="{{ path('stock_precio_new') }}" method="post">
             <div style="display: inline-block;">
                 <label><strong>Seleccionar Lista:</strong></label>
@@ -24,7 +24,7 @@
                     <option value="{{lista.id}}" {% if lista.id==listaId %} selected="selected" {% endif %}>
                     {{lista}}</option>
                 {% endfor %}
-                </select>  
+                </select>
             </div>
             &nbsp;&nbsp;&nbsp;
             <label><strong>Rubro:</strong></label>
@@ -33,7 +33,7 @@
             {% for rubro in rubros %}
                 <option value="{{rubro.id}}" {% if rubro.id==rubroId %} selected="selected" {% endif %}> {{rubro.codigo}}</option>
             {% endfor %}
-            </select>  
+            </select>
             &nbsp;&nbsp;&nbsp;
             <label><strong>Proveedor:</strong></label>
             <select class="uniformselect" id="selectProveedor" name="provId">
@@ -41,10 +41,10 @@
             {% for prov in proveedores %}
                 <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
             {% endfor %}
-            </select>     
+            </select>
         </form>
-    </div><!-- button --> 
-     <br clear="all" /> 
+    </div><!-- button -->
+     <br clear="all" />
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -57,22 +57,22 @@
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'stock_precio_new') %}
                         <button onclick=" jQuery('#searchform').submit();" class="guardar create">Agregar Precio</button>
-                    {% else %} &nbsp; {% endif %} 
+                    {% else %} &nbsp; {% endif %}
                 </th>
-                
+
             </tr>
         </thead>
         <tbody>
            {% include "AppBundle:Precio:listado-row.html.twig" %}
         </tbody>
-    </table> 
+    </table>
 </div>
  {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    $('#selectLista,#selectRubro,#selectProveedor').change(function(){ 
+    $('#selectLista,#selectRubro,#selectProveedor').change(function(){
         form = $('form').serialize();
         window.location.href= "{{ path('stock_precio_listado') }}?"+form ;
     });
@@ -83,6 +83,6 @@ jQuery(document).ready(function($) {
         $('#rubroid').val($('#selectRubro').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
     });
-});    
-</script>    
+});
+</script>
 {% endblock %}

@@ -214,12 +214,12 @@ class ProductoController extends Controller {
         $provId = $request->get('provId');
         $depId = $request->get('depId');
         $em = $this->getDoctrine()->getManager();
-        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findByActivo(1);
+        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         $unidneg = $this->get('session')->get('unidneg_id');
         $depositos = $this->getUser()->getDepositos($unidneg);
 
         if (count($depositos) > 0) {
-            $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findByActivo(1);
+            //$proveedores = $em->getRepository('ComprasBundle:Proveedor')->findByActivo(1);
             $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId);
         }
         else {
@@ -391,7 +391,7 @@ class ProductoController extends Controller {
           } else {
           $this->addFlash('error', 'No posee permiso para ver datos del depósito central');
           } */
-        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findByActivo(1);
+        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         $entities = $em->getRepository('AppBundle:Producto')->findBajoMinimo($provId, $depId);
         return $this->render('AppBundle:Producto:bajominimo.html.twig', array(
                     'entities' => $entities,
@@ -445,8 +445,8 @@ class ProductoController extends Controller {
         // control de depositos
         $unidneg = $this->get('session')->get('unidneg_id');
         $depositos = $this->getUser()->getDepositos($unidneg);
+        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         if (count($depositos) > 0) {
-            $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findByActivo(1);
             $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId);
         }
         else {
