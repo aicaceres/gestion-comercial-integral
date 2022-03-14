@@ -29,22 +29,27 @@ class ProveedorController extends Controller {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_proveedor');
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
+        $rubroId = $request->get('rubroId');
         $em = $this->getDoctrine()->getManager();
-        //$entities = $em->getRepository('ComprasBundle:Proveedor')->findAllByFechas($desde,$hasta);
-        $entities = $em->getRepository('ComprasBundle:Proveedor')->findAll();
+        $rubros = $em->getRepository('ConfigBundle:RubroCompras')->findBy(array(),array('tipo'=> 'ASC'));
+        if( $rubroId ){
+            $entities = $em->getRepository('ComprasBundle:Proveedor')->findByRubroCompras($rubroId);
+        }else{
+            $entities = $em->getRepository('ComprasBundle:Proveedor')->findAll();
+        }
         foreach ($entities as $prov) {
             $saldo = $prov->getSaldoInicial();
             // Facturas
-            $facturas = $em->getRepository('ComprasBundle:Proveedor')->getFacturasCompraxFecha($prov->getId(), $desde, $hasta);
+            $facturas = $em->getRepository('ComprasBundle:Proveedor')->getFacturasCompraxFecha($prov->getId(), $desde, $hasta, $rubroId);
             $saldo = $saldo + $facturas;
             // Notas debito
-            $notaDebito = $em->getRepository('ComprasBundle:Proveedor')->getNotasCompraxFecha($prov->getId(), $desde, $hasta, '+');
+            $notaDebito = $em->getRepository('ComprasBundle:Proveedor')->getNotasCompraxFecha($prov->getId(), $desde, $hasta, '+', $rubroId);
             $saldo = $saldo + $notaDebito;
             // Notas crédito
-            $notaCredito = $em->getRepository('ComprasBundle:Proveedor')->getNotasCompraxFecha($prov->getId(), $desde, $hasta, '-');
+            $notaCredito = $em->getRepository('ComprasBundle:Proveedor')->getNotasCompraxFecha($prov->getId(), $desde, $hasta, '-', $rubroId);
             $saldo = $saldo - $notaCredito;
             // Pagos
-            $pagos = $em->getRepository('ComprasBundle:Proveedor')->getPagosxFecha($prov->getId(), $desde, $hasta);
+            $pagos = $em->getRepository('ComprasBundle:Proveedor')->getPagosxFecha($prov->getId(), $desde, $hasta, $rubroId);
             foreach ($pagos as $pago) {
                 $saldo -= $pago->getTotal();
             }
@@ -52,7 +57,11 @@ class ProveedorController extends Controller {
             $prov->setSaldoxFechas($saldo);
         }
         return $this->render('ComprasBundle:Proveedor:index.html.twig', array(
-                    'entities' => $entities, 'desde' => $desde, 'hasta' => $hasta
+                    'entities' => $entities,
+                    'desde' => $desde,
+                    'hasta' => $hasta,
+                    'rubroId' => $rubroId,
+                    'rubros' => $rubros
         ));
     }
 

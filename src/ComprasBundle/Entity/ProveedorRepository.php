@@ -197,7 +197,7 @@ class ProveedorRepository extends EntityRepository {
         return $query->getQuery()->getArrayResult();
     }
 
-    public function getFacturasCompraxFecha($id, $desde, $hasta) {
+    public function getFacturasCompraxFecha($id, $desde, $hasta, $rubro) {
         $facturas = $this->_em->createQueryBuilder();
         $facturas->select("sum(f.total) total")
                 ->from('ComprasBundle\Entity\Factura', 'f')
@@ -214,10 +214,14 @@ class ProveedorRepository extends EntityRepository {
             $cadena = " f.fechaFactura <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $facturas->andWhere($cadena);
         }
+        if($rubro){
+            $facturas->innerJoin('p.rubroCompras','r')
+                     ->andWhere('r.id = '.$rubro);
+        }
         return $facturas->getQuery()->getSingleScalarResult();
     }
 
-    public function getNotasCompraxFecha($id, $desde, $hasta, $signo = '-') {
+    public function getNotasCompraxFecha($id, $desde, $hasta, $signo = '-', $rubro) {
         $facturas = $this->_em->createQueryBuilder();
         $facturas->select("sum(f.total) total")
                 ->from('ComprasBundle\Entity\NotaDebCred', 'f')
@@ -234,10 +238,14 @@ class ProveedorRepository extends EntityRepository {
             $cadena = " f.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $facturas->andWhere($cadena);
         }
+        if($rubro){
+            $facturas->innerJoin('p.rubroCompras','r')
+                     ->andWhere('r.id = '.$rubro);
+        }
         return $facturas->getQuery()->getSingleScalarResult();
     }
 
-    public function getPagosxFecha($id, $desde, $hasta) {
+    public function getPagosxFecha($id, $desde, $hasta, $rubro) {
         $facturas = $this->_em->createQueryBuilder();
         $facturas->select("f")
                 ->from('ComprasBundle\Entity\PagoProveedor', 'f')
@@ -251,6 +259,10 @@ class ProveedorRepository extends EntityRepository {
         if ($hasta) {
             $cadena = " f.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $facturas->andWhere($cadena);
+        }
+        if($rubro){
+            $facturas->innerJoin('p.rubroCompras','r')
+                     ->andWhere('r.id = '.$rubro);
         }
         return $facturas->getQuery()->getResult();
     }
