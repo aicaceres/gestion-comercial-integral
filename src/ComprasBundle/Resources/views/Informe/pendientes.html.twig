@@ -1,0 +1,107 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Productos Pendientes de Entrega</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_informe_pendientes") }}" method="post">
+        <input type="hidden" id="proveedorid" name="proveedorid"/>
+        <input type="hidden" id="productoid" name="productoid"/>
+        <input type="hidden" id="fdesde" name="fdesde"/>
+        <input type="hidden" id="fhasta" name="fhasta"/>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+    </form>
+    <form class="deposito_selector" id="searchform" action="{{ path('compras_informe_pendientes') }}" method="get">
+        <div>
+            <div style="display: inline-block; margin:10px;">
+
+                <label style="width: 90px;display: inline-block;"><strong>PRODUCTO:</strong></label>
+                <select class="select2" id="selectProducto" name="prodId">
+                    <option value="0" >TODOS</option>
+                    {% for prod in productos %}
+                        <option value="{{prod.id}}" {% if prod.id==prodId %} selected="selected" {% endif %}> {{prod.codigoNombre}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div>
+            <div style="display: inline-block; margin:10px;">
+
+                <label style="width: 90px;display: inline-block;"><strong>PROVEEDOR:</strong></label>
+                <select class="select2" id="selectProveedor" name="provId">
+                    <option value="0" >TODOS</option>
+                    {% for dep in proveedores %}
+                        <option value="{{dep.id}}" {% if dep.id==provId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="display: inline-block; margin:10px;">
+                &nbsp;&nbsp;&nbsp;
+                <label><strong>Fecha Pedido: </strong></label>
+                <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+                <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
+                <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+            </div>
+        </div>
+
+    </form>
+
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Producto</th>
+                {% if provId==0 %} <th>Proveedor</th> {% endif %}
+                <th>Cantidad</th>
+                <th>Entrega Estimada</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% set total = 0%}
+        {% for entity in entities %}
+            <tr>
+                <td> {{ entity.codigo}}</td>
+                <td>{{ entity.producto}}</td>
+                {% if provId==0 %} <td>{{ entity.proveedor}}</td> {% endif %}
+                <td style="text-align: right">{{ entity.cant|number_format(3,'.','') }} {{entity.unidadMedida}}</td>
+                <td style="text-align: right">{{ entity.fechaEntrega|date('d-m-Y') }}</td>
+        </tr>
+           {% endfor %}
+        </tbody>
+    </table>
+</div>
+ {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($){
+    var oTable = $('#dyntable2').dataTable();
+     oTable.fnSort( [ [1,'asc'] ] );
+    $('#selectProveedor').change(function(){
+        $('#searchform').submit();
+    });
+    $('#selectProducto').change(function(){
+        $('#searchform').submit();
+    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+$('#printform').on('submit',function(){
+        $('#proveedorid').val($('#selectProveedor').val());
+        $('#productoid').val($('#selectProducto').val());
+        $('#fdesde').val($('#desde').val());
+        $('#fhasta').val($('#hasta').val());
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+       oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            datos[index] = value;
+        });
+        $('#datalist').val(JSON.stringify(datos));
+    });
+});
+</script>
+{% endblock %}

@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use ConfigBundle\Controller\UtilsController;
 use AppBundle\Entity\Producto;
 use AppBundle\Form\ProductoType;
-//use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use ComprasBundle\Entity\LoteProducto;
 
 class ProductoController extends Controller {
@@ -1045,5 +1045,37 @@ class ProductoController extends Controller {
         // Send all this stuff back to DataTables
         return new Response($response);
     }
+
+    /**
+     * @Route("/getAutocompleteProductos", name="get_autocomplete_productos")
+     * @Method("POST")
+     */
+    public function getAutocompleteProductosAction( Request $request) {
+        $term = $request->get('searchTerm');
+        $em = $this->getDoctrine()->getManager();
+        $results = $em->getRepository('AppBundle:Producto')->filterByTerm($term);
+        return new JsonResponse($results);
+    }
+    /**
+     * @Route("/getDatosProductoVenta", name="get_datos_venta_producto")
+     * @Method("GET")
+     */
+    public function getDatosProductoVentaAction(Request $request) {
+        $id = $request->get('id');
+        $lista = $request->get('listaprecio');
+        $em = $this->getDoctrine()->getManager();
+        $producto = $em->getRepository('AppBundle:Producto')->find($id);
+        $precio = $producto->getPrecioByLista($lista);
+        $iva = $producto->getIva();
+        $montoIva = round( ($precio * ( $iva/100 )) ,3);
+        $total = round( ($precio + $montoIva) ,3);
+        $data = array(
+            'precio' => $precio,
+            'iva' => $montoIva,
+            'total' => $total
+        );
+        return new Response( json_encode($data));
+    }
+
 
 }

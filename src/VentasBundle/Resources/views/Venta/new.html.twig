@@ -231,7 +231,6 @@ jQuery(function ($) {
         e.preventDefault();
         addNewItem();
         e.stopPropagation();
-        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
     });
 
     // confirm on submit
@@ -269,7 +268,45 @@ jQuery(function ($) {
 
     // abrir modal de producto en select
     const newProd = $collectionHolder.find('[name*="producto"]').last();
-    openModal(newProd);
+
+    productolast = $('[id*="_producto"]').last();
+    productolast.select2({
+            ajax: {
+            url: "{{path('get_autocomplete_productos')}}",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                searchTerm: params.term // search term
+                };
+            },
+            processResults: function (response) {
+                return {
+                    results: response
+                };
+            },
+            cache: true
+            },
+            minimumInputLength: 3
+        }).on('change', function() {
+            obj = $(this);
+            var data = {
+                id: $(this).val(),
+                listaprecio: $('#ventasbundle_venta_precioLista').val(),
+            };
+            $.getJSON( "{{ path('get_datos_venta_producto')}}" , data).done(function(data){
+                // actualizar datos
+                objprecio = obj.parent().siblings('.precTd');
+                objprecio.find('span').data('orig', data.total );
+                objprecio.find('[id*="_precio"]').val( data.precio );
+                objprecio.find('[id*="_iva"]').val( data.iva );
+                actualizaTotales();
+
+            });
+        });
+        productolast.select2('focus');
+
 }
 function addItemFormDeleteLink($itemFormTd) {
     var $removeFormA = jQuery('<a href="#" class="delItem" title="Quitar"><span class="del-item-button">-</span></a>');
@@ -448,23 +485,14 @@ function openModalProducto(obj){
                     $(row).find('td:nth-child(3n),td:nth-child(4n)').addClass('alignright');
                     $(row).find('a').on('click', function(e){
                         e.preventDefault();
-                        // cargar option
-                        opt = obj.find('option:first');
-                        opt.val($(this).data('id'));
-                        opt.text($(this).text());
-                        // cargar precio
-                        objprecio = obj.parent().siblings('.precTd');
-                        precio = $(this).data('precio');
-                        iva = $(this).data('iva');
-                        totalconv = $(this).data('total');
-                        objprecio.find('span').html( totalconv );
-                        objprecio.find('span').data('orig', precio+iva );
-                        objprecio.find('[id*="_precio"]').val( precio );
-                        objprecio.find('[id*="_iva"]').val( iva );
-
-                        actualizaTotales();
+                        var data = {
+                            id: $(this).data('id'),
+                            text: $(this).text()
+                        };
+                        var newOption = new Option(data.text, data.id, true, true);
+                        obj.append(newOption).trigger('change');
                         $('#popup').dialog("destroy");
-                        obj.focus();
+                        obj.select2('focus');
                     })
                  },
                 // Server-side parameters
@@ -533,5 +561,6 @@ function detectarControles(e) {
         $('#linkAdd').click();
     }
 }
+
 });
 </script>{% endblock %}

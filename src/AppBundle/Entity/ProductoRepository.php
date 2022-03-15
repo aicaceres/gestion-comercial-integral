@@ -19,7 +19,7 @@ class ProductoRepository extends EntityRepository {
              ->where($qb2->expr()->notIn('p.id', $nots->getDQL()));
         return $prod;
     }
-    
+
     public function getProductosFacturables(){
         $query = $this->_em->createQueryBuilder('p')
                 ->select('p')
@@ -28,7 +28,7 @@ class ProductoRepository extends EntityRepository {
                 ->andWhere('p.activo=1');
         return $query;
     }
-    
+
     public function findBajoMinimo($id,$dep){
        $query = $this->_em->createQueryBuilder('p')
                 ->select(" p.codigo,p.nombre,u.nombre unidadMedida,pr.nombre proveedor, r.nombre rubro, CASE WHEN (s.stockMinimo is not null) THEN s.stockMinimo ELSE p.stockMinimo END stockMinimo, s.cantidad stockActual  ")
@@ -39,23 +39,23 @@ class ProductoRepository extends EntityRepository {
                 ->leftJoin('p.unidadMedida', 'u')
                 ->leftJoin('p.proveedor', 'pr')
                 ->where('d.id='.$dep)
-               ->andWhere('CASE WHEN (s.stockMinimo is not null) THEN s.stockMinimo ELSE p.stockMinimo END >= s.cantidad');  
-        
+               ->andWhere('CASE WHEN (s.stockMinimo is not null) THEN s.stockMinimo ELSE p.stockMinimo END >= s.cantidad');
+
        /*$query = $this->_em->createQueryBuilder('s')
                 ->select('s')
                 ->from('AppBundle\Entity\Stock', 's')
                 ->leftJoin('s.producto', 'p')
                 ->innerJoin('s.deposito','d')
-                ->andWhere('d.id='.$dep);  */ 
+                ->andWhere('d.id='.$dep);  */
         if($id){
             $query->innerJoin('p.proveedor', 'pv')
                     ->andWhere('pv.id='.$id  );
         }
 
-        return $query->getQuery()->getResult();                
+        return $query->getQuery()->getResult();
     }
 
-    
+
     public function findProductosPorDepositoyProveedor($unidneg,$prov,$dep){
         $query = $this->_em->createQueryBuilder('s')
                 ->select('s')
@@ -74,7 +74,7 @@ class ProductoRepository extends EntityRepository {
         }
         return $query->getQuery()->getResult();
     }
-    
+
     public function getProductosByTerm($term)
     {
         $query = $this->getEntityManager()->createQuery("
@@ -86,25 +86,25 @@ class ProductoRepository extends EntityRepository {
 
         return $query->getResult();
     }
-    
+
     public function findDepositosSinstockPorProducto($id,$unidneg){
         $qb=$this->_em->createQueryBuilder();
         $qb2=$this->_em->createQueryBuilder();
 
         $nots= $qb2->select('d.id')
                 ->from('AppBundle\Entity\Stock','s')
-                ->innerJoin('s.deposito', 'd')   
-                ->innerJoin('s.producto', 'p')   
+                ->innerJoin('s.deposito', 'd')
+                ->innerJoin('s.producto', 'p')
                 ->where('d.activo=1')
                 ->andWhere( 'p.id='.$id );
-        
+
         $stk = $qb->select('d2.id, upper(d2.nombre) nombre ')
              ->from('AppBundle\Entity\Deposito', 'd2')
              ->innerJoin('d2.unidadNegocio' , 'u')
-             ->where('u.id='.$unidneg)   
+             ->where('u.id='.$unidneg)
              ->andWhere($qb2->expr()->notIn('d2.id', $nots->getDQL()))
              ->orderBy('d2.nombre')   ;
-        return $stk->getQuery()->getArrayResult();        
+        return $stk->getQuery()->getArrayResult();
     }
 
     public function findListasSinPrecioPorProducto($id){
@@ -113,23 +113,23 @@ class ProductoRepository extends EntityRepository {
 
         $nots= $qb2->select('l.id')
                 ->from('AppBundle\Entity\Precio','pr')
-                ->innerJoin('pr.precioLista', 'l')   
-                ->innerJoin('pr.producto', 'p')   
-                ->where('p.id='.$id );       
+                ->innerJoin('pr.precioLista', 'l')
+                ->innerJoin('pr.producto', 'p')
+                ->where('p.id='.$id );
 
         $lista = $qb->select('l2.id, upper(l2.nombre) nombre ')
-             ->from('AppBundle\Entity\PrecioLista', 'l2')  
+             ->from('AppBundle\Entity\PrecioLista', 'l2')
              ->where($qb2->expr()->notIn('l2.id', $nots->getDQL()))
              ->orderBy('l2.nombre')   ;
-        return $lista->getQuery()->getArrayResult();        
+        return $lista->getQuery()->getArrayResult();
     }
 
     public function getProductosForExportXls($provId=null, $search=null){
         $query = $this->_em->createQueryBuilder();
         $query->select("p")
                 ->from('AppBundle\Entity\Producto', 'p')
-                ->leftJoin('p.proveedor', 'pr')                
-                ->leftJoin('p.rubro', 'r') 
+                ->leftJoin('p.proveedor', 'pr')
+                ->leftJoin('p.rubro', 'r')
                 ->orderBy('p.nombre')    ;
         if($provId){
             $query->andWhere('pr.id='.$provId);
@@ -161,16 +161,16 @@ class ProductoRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select("e")
                 ->from('AppBundle\Entity\Producto', 'e');
-         
+
         // Create Count Query
         $countQuery = $this->_em->createQueryBuilder();
         $countQuery->select("count(e.id)")
-                ->from('AppBundle\Entity\Producto', 'e');          
-        
+                ->from('AppBundle\Entity\Producto', 'e');
+
         // Create inner joins
         $query->leftJoin('e.precios', 'p')
-              ->leftJoin('p.precioLista','l')  ;  
-        
+              ->leftJoin('p.precioLista','l')  ;
+
         $countQuery->leftJoin('e.precios', 'p')
                    ->leftJoin('p.precioLista','l')  ;
 
@@ -178,9 +178,9 @@ class ProductoRepository extends EntityRepository {
             $searchQuery = 'l.id=' . $listaprecio;
             $query->andWhere($searchQuery);
             $countQuery->andWhere($searchQuery);
-        }        
+        }
 
-        // Other conditions than the ones sent by the Ajax call ?        
+        // Other conditions than the ones sent by the Ajax call ?
         if ($otherConditions === null)
         {
             // No
@@ -194,17 +194,17 @@ class ProductoRepository extends EntityRepository {
             $query->where($otherConditions);
             $countQuery->where($otherConditions);
         }
- 
+
         if( $search['value'] ){
             $searchItem = trim($search['value']);
-            $searchQuery =  ' e.nombre LIKE \'%'.$searchItem.'%\' OR e.codigo LIKE \'%'.$searchItem.'%\' '; 
+            $searchQuery =  ' e.nombre LIKE \'%'.$searchItem.'%\' OR e.codigo LIKE \'%'.$searchItem.'%\' ';
             $query->andWhere($searchQuery);
             $countQuery->andWhere($searchQuery);
         }
-                        
+
         // Limit
         $query->setFirstResult($start)->setMaxResults($length);
-        
+
         // Order
         foreach ($orders as $key => $order)
         {
@@ -212,7 +212,7 @@ class ProductoRepository extends EntityRepository {
             if ($order['name'] != '')
             {
                 $orderColumn = null;
-            
+
                 switch($order['name'])
                 {
                     case 'nombre':
@@ -224,20 +224,20 @@ class ProductoRepository extends EntityRepository {
                     {
                         $orderColumn = 'e.codigo';
                         break;
-                    }                                      
+                    }
                 }
-        
+
                 if ($orderColumn !== null)
                 {
                     $query->orderBy($orderColumn, $order['dir']);
                 }
             }
         }
-        
-        // Execute       
+
+        // Execute
         $results = $query->getQuery()->getResult();
         $countResult = $countQuery->getQuery()->getSingleScalarResult();
-        
+
         return array(
             "results" 		=> $results,
             "countResult"	=> $countResult
@@ -326,7 +326,7 @@ class ProductoRepository extends EntityRepository {
                     case 'rubro': {
                             $orderColumn = 'r.nombre';
                             break;
-                        }                                     
+                        }
                 }
 
                 if ($orderColumn !== null) {
@@ -343,6 +343,20 @@ class ProductoRepository extends EntityRepository {
             "results" => $results,
             "countResult" => $countResult
         );
+    }
+
+    // para autocompletar
+    public function filterByTerm($key) {
+        $query = $this->_em->createQueryBuilder();
+            $query->select("p.id,p.nombre text")
+                    ->from('AppBundle:Producto', 'p')
+                    ->where('p.nombre LIKE :key')
+                    ->orWhere('p.codigo LIKE :key')
+                    ->orWhere('p.codigoBarra LIKE :key')
+                    ->orderBy('p.nombre')
+                    ->setParameter('key', '%' . $key . '%')
+                    ->setMaxResults(5);
+        return $query->getQuery()->getArrayResult();
     }
 
 }
