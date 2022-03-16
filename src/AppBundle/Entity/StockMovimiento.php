@@ -17,49 +17,49 @@ class StockMovimiento
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
-    
+
     /**
      * @var date $fecha
      * @ORM\Column(name="fecha", type="date", nullable=false)
      */
-    private $fecha;     
-    
+    private $fecha;
+
     /**
      * @var string $tipo
      * @ORM\Column(name="tipo", type="string", nullable=false)
      */
     // Nombre de la tabla de donde se guarda el id de movimiento.
-    private $tipo;     
-    
+    private $tipo;
+
     /**
      * @var integer $movimiento
      * @ORM\Column(name="movimiento", type="integer")
      */
-    private $movimiento; 
-    
+    private $movimiento;
+
     /**
      * @var string $signo
      * @ORM\Column(name="signo", type="string")
      */
-    private $signo='+'; 
-    
+    private $signo='+';
+
      /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3 )
      */
     protected $cantidad;
-    
+
      /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
-    protected $deposito; 
-    
+    protected $deposito;
+
      /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="stock")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
-    protected $producto; 
+    protected $producto;
 
     /**
      * @var datetime $created
@@ -67,7 +67,7 @@ class StockMovimiento
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -90,11 +90,13 @@ class StockMovimiento
                 return 'Nota débito/crédito de Compras';
             case 'ventas_venta':
                 return 'Venta';
+            case 'ventas_presupuesto':
+                return 'Venta';
             default:
                 return NULL;
         }
     }
-    public function getEntidadMovimiento(){
+    /*public function getEntidadMovimiento(){
         switch ($this->getTipo()) {
             case 'AJUSTE':
                 return 'AppBundle:StockAjuste';
@@ -109,13 +111,13 @@ class StockMovimiento
             default:
                 return NULL;
         }
-    }
-    
-    
+    }*/
+
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -131,14 +133,14 @@ class StockMovimiento
     public function setFecha($fecha)
     {
         $this->fecha = $fecha;
-    
+
         return $this;
     }
 
     /**
      * Get fecha
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFecha()
     {
@@ -154,14 +156,14 @@ class StockMovimiento
     public function setTipo($tipo)
     {
         $this->tipo = $tipo;
-    
+
         return $this;
     }
 
     /**
      * Get tipo
      *
-     * @return string 
+     * @return string
      */
     public function getTipo()
     {
@@ -177,14 +179,14 @@ class StockMovimiento
     public function setMovimiento($movimiento)
     {
         $this->movimiento = $movimiento;
-    
+
         return $this;
     }
 
     /**
      * Get movimiento
      *
-     * @return integer 
+     * @return integer
      */
     public function getMovimiento()
     {
@@ -200,14 +202,14 @@ class StockMovimiento
     public function setSigno($signo)
     {
         $this->signo = $signo;
-    
+
         return $this;
     }
 
     /**
      * Get signo
      *
-     * @return string 
+     * @return string
      */
     public function getSigno()
     {
@@ -223,14 +225,14 @@ class StockMovimiento
     public function setCantidad($cantidad)
     {
         $this->cantidad = $cantidad;
-    
+
         return $this;
     }
 
     /**
      * Get cantidad
      *
-     * @return integer 
+     * @return integer
      */
     public function getCantidad()
     {
@@ -246,14 +248,14 @@ class StockMovimiento
     public function setCreated($created)
     {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -269,14 +271,14 @@ class StockMovimiento
     public function setDeposito(\AppBundle\Entity\Deposito $deposito = null)
     {
         $this->deposito = $deposito;
-    
+
         return $this;
     }
 
     /**
      * Get deposito
      *
-     * @return \AppBundle\Entity\Deposito 
+     * @return \AppBundle\Entity\Deposito
      */
     public function getDeposito()
     {
@@ -292,14 +294,14 @@ class StockMovimiento
     public function setProducto(\AppBundle\Entity\Producto $producto = null)
     {
         $this->producto = $producto;
-    
+
         return $this;
     }
 
     /**
      * Get producto
      *
-     * @return \AppBundle\Entity\Producto 
+     * @return \AppBundle\Entity\Producto
      */
     public function getProducto()
     {
@@ -315,14 +317,14 @@ class StockMovimiento
     public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
     {
         $this->createdBy = $createdBy;
-    
+
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {

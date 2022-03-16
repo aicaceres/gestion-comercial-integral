@@ -255,5 +255,51 @@ class VentaController extends Controller
         return new Response( json_encode($result));
     }
 
+    /**
+     * @Route("/anularVenta", name="ventas_venta_anular")
+     * @Method("POST")
+     */
+    public function anularVentaAction(Request $request) {
+        $id = $request->get('id');
+        $em = $this->get('doctrine')->getEntityManager();
+        $entity = $em->getRepository('VentasBundle:Venta')->find($id);
+        try {
+            $em->getConnection()->beginTransaction();
+            $entity->setEstado('ANULADO');
+            $em->persist($entity);
+            $em->flush();
+
+            // Revertir descuento de stock
+            $deposito = $entity->getDeposito();
+            foreach ($entity->getDetalles() as $detalle){
+                $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                if ($stock) {
+                    $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
+                }else{
+                    $em->getConnection()->rollback();
+                    return new Response('ERROR');
+                }
+                $em->persist($stock);
+
+            // Cargar movimiento
+                $movim = new StockMovimiento();
+                $movim->setFecha($entity->getUpdated());
+                $movim->setTipo('ventas_venta');
+                $movim->setSigno('+');
+                $movim->setMovimiento($entity->getId());
+                $movim->setProducto($detalle->getProducto());
+                $movim->setCantidad($detalle->getCantidad());
+                $movim->setDeposito($deposito);
+                $em->persist($movim);
+                $em->flush();
+            }
+            $em->getConnection()->commit();
+            $this->addFlash('success', 'Se ha anulado la venta #'.$entity->getNroOperacion());
+            return new Response('OK');
+        }catch (\Exception $ex) {
+            $em->getConnection()->rollback();
+            return new Response($ex->getMessage());
+        }
+    }
 
 }

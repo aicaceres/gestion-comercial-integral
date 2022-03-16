@@ -27,7 +27,7 @@
         margin-bottom:10px;
     }
 </style>
-
+{% include "AppBundle::notificacion.html.twig" %}
 <form id="form-venta" name="ventasbundle_venta" class="form-horizontal">
     <fieldset>
         <div style="display:inline-block; width: 60%;">
@@ -85,6 +85,13 @@
                 <input type="checkbox" disabled="disabled" {% if entity.descuentaStock %}checked="checked"{% endif %} />
             </div>
         </div>
+{% if entity.estado == 'ANULADO' %}
+        <div style="display:inline-block; width: 20%;">
+            <div>
+                <label style="padding:10px" class="red">ANULADO: {{ entity.updated|date('d-m-Y H:i:s') }} | {{ entity.updatedBy.username }}</label>
+            </div>
+        </div>
+{% endif %}
     </fieldset>
     <fieldset>
         <div style="padding-top: 20px; margin:auto; width: 90%;">
@@ -150,7 +157,10 @@
         <fieldset>
             <br clear="all">
             <div class="actionbutton">
+                {% if entity.estado == 'EMITIDO' %}
+                <a type="button" class="floatleft delete_button" href="{{ path('ventas_presupuesto_anular', { 'id': entity.id })}}">ANULAR</a>
                 <button class="guardar btn_print" type="button" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" >Imprimir</button>
+                {% endif %}
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -161,3 +171,21 @@
 </div>
 </div>
 {% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+
+<script type="text/javascript">
+jQuery(function ($) {
+    $(window).on('load', function () {
+        $('.delete_button').on('click', function(e){
+            e.stopPropagation();
+            const txt = "Confirma la anulación del presupuesto? ";
+            const txt2 = ( '{{ entity.descuentaStock }}' ) ? '\nLos productos se reingresarán al stock!' : '';
+            if( !confirm(txt + txt2)){
+                return false;
+            }
+        })
+
+    });
+});
+</script>{% endblock %}

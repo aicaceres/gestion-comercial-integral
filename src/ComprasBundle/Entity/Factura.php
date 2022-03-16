@@ -97,6 +97,11 @@ class Factura {
      */
     protected $unidadNegocio;
 
+    /**
+     * @ORM\Column(name="modifica_stock", type="boolean",nullable=true)
+     */
+    protected $modificaStock = false;
+
 // TOTALES DE LA FACTURA
 
     /**
@@ -913,4 +918,27 @@ class Factura {
         return $this->getIva();
     }
 
+
+    /**
+     * Set modificaStock
+     *
+     * @param boolean $modificaStock
+     * @return Factura
+     */
+    public function setModificaStock($modificaStock)
+    {
+        $this->modificaStock = $modificaStock;
+
+        return $this;
+    }
+
+    /**
+     * Get modificaStock
+     *
+     * @return boolean 
+     */
+    public function getModificaStock()
+    {
+        return $this->modificaStock;
+    }
 }

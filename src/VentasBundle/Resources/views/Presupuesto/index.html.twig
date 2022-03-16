@@ -51,8 +51,12 @@
                 <td>{% if entity.nombreCliente %} {{ entity.nombreCliente }} {% else %}  {{ entity.cliente }} {% endif %}</td>
                 <td class="alignright">{{ entity.getTotal|number_format(3,'.',',') }}</td>
                 <td class="buttons">
+                    {% if entity.estado == 'ANULADO' %}
+                        <strong style="height:26px;display:block;"> ANULADO: {{ entity.updated|date('d-m-Y H:i:s') }} | {{ entity.updatedBy.username }} </strong>
+                    {% else %}
                      <a href="{{ path('ventas_presupuesto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Presupuesto"></a>
                      <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" title="Imprimir Presupuesto"></a>
+                    {% endif %}
                 </td>
             </tr>
            {% endfor %}

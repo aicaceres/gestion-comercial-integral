@@ -206,4 +206,57 @@ class PresupuestoController extends Controller {
             'Content-Disposition'=>'filename=presupuesto_'.$presupuesto->getNroPresupuesto().'_'.$hoy->format('dmY_Hi').'.pdf'));
     }
 
+    /**
+     * @Route("/anularPresupuesto", name="ventas_presupuesto_anular")
+     * @Method("GET")
+     */
+    public function anularPresupuestoAction(Request $request) {
+        $id = $request->get('id');
+        $em = $this->get('doctrine')->getEntityManager();
+        $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        try {
+            $em->getConnection()->beginTransaction();
+            $entity->setEstado('ANULADO');
+            $em->persist($entity);
+            $em->flush();
+            if( $entity->getDescuentaStock() ){
+                // Revertir descuento de stock
+                $deposito = $entity->getDeposito();
+                foreach ($entity->getDetalles() as $detalle){
+                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                    if ($stock) {
+                        $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
+                    }else{
+                        $em->getConnection()->rollback();
+                        $this->addFlash('error', 'No se ha podido anular el presupuesto');
+                        return $this->redirect($this->generateUrl('ventas_presupuesto_show', array('id' => $entity->getId())));
+                    }
+                    $em->persist($stock);
+
+                // Cargar movimiento
+                    $movim = new StockMovimiento();
+                    $movim->setFecha($entity->getUpdated());
+                    $movim->setTipo('ventas_presupuesto');
+                    $movim->setSigno('+');
+                    $movim->setMovimiento($entity->getId());
+                    $movim->setProducto($detalle->getProducto());
+                    $movim->setCantidad($detalle->getCantidad());
+                    $movim->setDeposito($deposito);
+                    $em->persist($movim);
+                    $em->flush();
+                }
+            }
+
+            $em->getConnection()->commit();
+            $this->addFlash('success', 'Se ha anulado el Presupuesto #'.$entity->getNroPresupuesto());
+
+        }catch (\Exception $ex) {
+            $em->getConnection()->rollback();
+            $this->addFlash('error', 'No se ha podido anular el presupuesto. '.$ex->getMessage());
+            return $this->redirect($this->generateUrl('ventas_presupuesto_show', array('id' => $entity->getId())));
+        }
+        return $this->redirect($this->generateUrl('ventas_presupuesto'));
+    }
+
+
 }

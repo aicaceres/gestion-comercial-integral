@@ -30,7 +30,11 @@
             <label>USUARIO: </label>
             <input type="text" disabled="disabled" class="width100" value="{{entity.createdBy.username}}"/>
         </div>
-
+        {% if entity.estado == 'ANULADO' %}
+        <div style="display:inline-block; width: 24%;">
+            <label>ANULADO: <span style="color:red; font-size:14px"> &nbsp; {{entity.updated|date('d-m-Y H:i:s') }} | {{entity.updatedBy.username}}</span></label>
+        </div>
+        {% endif %}
     </fieldset>
     <fieldset>
         <div style="display:inline-block; width: 50%;">
@@ -137,6 +141,29 @@
 
             </div>
         </fieldset>
+
+{% if entity.estado == 'FACTURADO' %}
+<fieldset style="padding:10px 0;margin:10px 0 10px 0; width: 100%; background-color:khaki">
+
+        <div style="display:inline-block; width: 20%;">
+            <label>COBRO: </label>
+            <input type="text" disabled="disabled" class="width100" value="#XX"/>
+        </div>
+        <div style="display:inline-block; width: 20%;">
+            <label>FECHA/HORA: </label>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.fechaVenta|date('d-m-Y H:i')}}"/>
+        </div>
+        <div style="display:inline-block; width: 18%;">
+            <label>USUARIO: </label>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.createdBy.username}}"/>
+        </div>
+        <div style="display:inline-block; width: 40%;">
+            <label>FACTURA A 0001-00006305 | Cae:7285462613007 | VtoCae: 04/03/2022 </label>
+        </div>
+
+    </fieldset>
+{% endif %}
+
 
 
         <fieldset>

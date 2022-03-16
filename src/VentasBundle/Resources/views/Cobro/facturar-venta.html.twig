@@ -46,7 +46,7 @@
     }
     .venta-fieldset div{
         display:inline-block;
-        width: 30%;
+        width: 28%;
     }
     .venta-fieldset input{
         font-weight:bold;
@@ -83,6 +83,9 @@
         <div>
             <label>VENDEDOR: </label>
             <input type="text" disabled="disabled" class="width100" value="{{entity.venta.createdBy.username}}"/>
+        </div>
+        <div style="width:10%">
+            <button class="stdbtn btn_red js-anular-venta" data-venta="{{entity.venta.id}}"> Anular Venta </button>
         </div>
 
     </fieldset>
@@ -175,6 +178,24 @@ jQuery(function ($) {
 
         $(".btn_list").click(function(){
             $(".detalle-venta").toggle();
+        });
+
+        $('.js-anular-venta').on('click', function(e){
+            const id = $(this).data('venta');
+            if( confirm('Confirma la anulación de esta venta? Los productos se reingresarán al stock!')){
+                $.post( "{{ path('ventas_venta_anular')}}" , {'id': id})
+                    .done(function(data){
+                        // redireccionar a cobros
+                        if(data=='OK'){
+                            window.location.href = '{{ path("ventas_cobro")}}';
+                        }else{
+                            alert('No se ha podido anular la venta!')
+                        }
+                    })
+                    .fail(function(){
+                        alert('No se ha podido anular la venta!')
+                    });
+            }
         });
 
         $('#ventasbundle_cobro_cliente').select2({
