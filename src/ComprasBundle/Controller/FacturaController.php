@@ -140,7 +140,7 @@ class FacturaController extends Controller {
                 }
                 else {
                     $actcostos = $request->get('actualizarCosto') === 'SI' ? true : false;
-                    $actstock = $request->get('agregarStock') === 'SI' ? true : false;
+                    $actstock = $entity->getModificaStock();
                     if ($actcostos || $actstock) {
                         $this->actualizarCostoyStock($em, $entity, $actstock, $actcostos);
                     }
@@ -451,20 +451,50 @@ class FacturaController extends Controller {
      * @Method("GET")
      * @Template()
      */
-    public function cancelarFacturaAction() {
-        $id = $this->getRequest()->get('id');
+    public function cancelarFacturaAction(Request $request) {
+        $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         try {
+            $em->getConnection()->beginTransaction();
             $entity = $em->getRepository('ComprasBundle:Factura')->find($id);
             $entity->setEstado('CANCELADO');
             $em->persist($entity);
             $em->flush();
+            if( $entity->getModificaStock()){
+                // Reingresar al stock
+                $deposito = $em->getRepository('AppBundle:Deposito')->findOneBy(array("central" => "1", "pordefecto" => "1", "unidadNegocio" => $this->get('session')->get('unidneg_id')));
+                foreach ($entity->getDetalles() as $detalle) {
+                    $producto = $detalle->getProducto();
+                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito->getId());
+                    if ($stock) {
+                        $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
+                    }else {
+                        throw $this->createNotFoundException('Unable to find Stock entity.');
+                    }
+                    $em->persist($stock);
+                    // Cargar movimiento
+                    $movim = new StockMovimiento();
+                    $movim->setFecha($entity->getFechaFactura());
+                    $movim->setTipo('compras_factura');
+                    $movim->setSigno('-');
+                    $movim->setMovimiento($entity->getId());
+                    $movim->setProducto($producto);
+                    $movim->setCantidad($detalle->getCantidad());
+                    $movim->setDeposito($deposito);
+                    $em->persist($movim);
+                    $em->flush();
+                }
+            }
+
+            $em->getConnection()->commit();
             return new Response('OK');
         }
         catch (\Exception $ex) {
+            $em->getConnection()->rollback();
             return new Response($ex);
         }
     }
+
 
     public function getFormaPagoProveedorAction() {
         $id = $this->getRequest()->get('id');

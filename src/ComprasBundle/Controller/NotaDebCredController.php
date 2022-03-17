@@ -88,8 +88,8 @@ class NotaDebCredController extends Controller {
         $form = $this->createCreateForm($entity);
         //$modificaStock = ($request->get('modificaStock') == 'SI') ? true : false;
         $form->handleRequest($request);
-
         if ($form->isValid()) {
+$this->addFlash('success', 'valid!');
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
             try {
@@ -104,7 +104,7 @@ class NotaDebCredController extends Controller {
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
                 $entity->setUnidadNegocio($unidneg);
 
-                $existe = $em->getRepository('ComprasBundle:NotaDebCred')->isDuplicado($entity);              
+                $existe = $em->getRepository('ComprasBundle:NotaDebCred')->isDuplicado($entity);
                 if ($existe) {
                     $this->addFlash('error', 'Ya existe este nro de comprobante para este proveedor!');
                     $em->getConnection()->rollback();
@@ -173,7 +173,7 @@ class NotaDebCredController extends Controller {
             }
         }
 
-
+$this->addFlash('error', ' not valid!');
         $errors = array();
 
         if ($form->count() > 0) {
@@ -183,7 +183,8 @@ class NotaDebCredController extends Controller {
                 }
             }
         }
-
+var_dump( $entity->getNroComprobante());
+var_dump( $errors ); die;
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
                     'entity' => $entity,
                     'form' => $form->createView(),
@@ -306,13 +307,12 @@ class NotaDebCredController extends Controller {
      * @Route("/deleteAjax/{id}", name="compras_notadebcred_delete_ajax")
      * @Method("POST")
      */
-    public function deleteAjaxAction() {
+    public function deleteAjaxAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_notadebcred');
-        $id = $this->getRequest()->get('id');
+        $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ComprasBundle:NotaDebCred')->find($id);
         try {
-            // si es credito y modificó el stock ver si hay que reingresar los articulos
             // si es debito y ya tuvo pagos ver que hacer con los pagos
             if ($entity->getSigno() == '-') {
                 if (COUNT($entity->getFacturas()) > 0) {
@@ -326,6 +326,12 @@ class NotaDebCredController extends Controller {
                         $em->persist($fact);
                         $em->flush();
                     }
+                }
+                if( $entity->getModificaStock() ){
+                // si modifico stock volver a reingresar
+                /*        if ($entity->getModificaStock()) {
+                            $this->registrarDevolucion($entity,'+');
+                        }*/
                 }
             }
             $em->remove($entity);
@@ -341,7 +347,7 @@ class NotaDebCredController extends Controller {
     /**
      *  Reingreso al stock y registro de movimiento
      */
-    private function registrarDevolucion($nota) {
+    private function registrarDevolucion($nota,$signo='-') {
         $em = $this->getDoctrine()->getManager();
         $deposito = $em->getRepository('AppBundle:Deposito')->findOneBy(array("central" => "1", "pordefecto" => "1", "unidadNegocio" => $this->get('session')->get('unidneg_id')));
         foreach ($nota->getDetalles() as $item) {
@@ -349,14 +355,17 @@ class NotaDebCredController extends Controller {
 
             $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito->getId());
             if ($stock) {
-                $stock->setCantidad($stock->getCantidad() - $item->getCantidadTotal());
+                $cantidad = ( $signo == '-' ) ?
+                        ($stock->getCantidad() - $item->getCantidadTotal()) :
+                         ($stock->getCantidad() + $item->getCantidadTotal());
+                $stock->setCantidad($cantidad);
                 $em->persist($stock);
             }
             // Cargar movimiento
             $movim = new StockMovimiento();
             $movim->setFecha($nota->getFecha());
             $movim->setTipo('COMPRAS_NOTADEBCRED');
-            $movim->setSigno('-');
+            $movim->setSigno($signo);
             $movim->setMovimiento($nota->getId());
             $movim->setProducto($producto);
             $movim->setCantidad($item->getCantidad());

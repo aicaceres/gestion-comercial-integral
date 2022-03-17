@@ -913,6 +913,9 @@ class Factura {
             return $this->getNroComprobante();
         }
     }
+    public function getNroTipoComprobante(){
+        return  $this->getTipoFactura() . $this->getNroComprobante();
+    }
 
     public function getImpuestoTotal() {
         return $this->getIva();
@@ -935,7 +938,7 @@ class Factura {
     /**
      * Get modificaStock
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getModificaStock()
     {

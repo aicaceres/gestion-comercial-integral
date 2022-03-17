@@ -41,6 +41,8 @@ class FacturaType extends AbstractType {
                                 ->orderBy('p.nombre');
                     }
                 ))
+                ->add('modificaStock', 'choice', array('label' => 'MODIFICA STOCK:',
+                    'choices' => array( 1 => 'SI',0 => 'NO'), 'expanded' => true))
                 ->add('pedidoId', 'hidden', array('mapped' => false))
                 ->add('pagadoContado', 'checkbox', array('mapped' => false, 'required' => false))
                 /* ->add('condicion_venta', 'entity', $optionsCond) */

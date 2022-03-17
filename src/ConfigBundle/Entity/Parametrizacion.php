@@ -53,6 +53,17 @@ class Parametrizacion {
     protected $validezPresupuesto = 7;
 
     /**
+     * @var string $puntoVentaFactura
+     * @ORM\Column(name="punto_venta_factura", type="string", nullable=false)
+     */
+    protected $puntoVentaFactura = '0012';
+    /**
+     * @var string $puntoVentaTicket
+     * @ORM\Column(name="punto_venta_ticket", type="string", nullable=false)
+     */
+    protected $puntoVentaTicket = '0011';
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
@@ -223,10 +234,56 @@ class Parametrizacion {
     /**
      * Get validezPresupuesto
      *
-     * @return integer 
+     * @return integer
      */
     public function getValidezPresupuesto()
     {
         return $this->validezPresupuesto;
+    }
+
+    /**
+     * Set puntoVentaFactura
+     *
+     * @param string $puntoVentaFactura
+     * @return Parametrizacion
+     */
+    public function setPuntoVentaFactura($puntoVentaFactura)
+    {
+        $this->puntoVentaFactura = $puntoVentaFactura;
+
+        return $this;
+    }
+
+    /**
+     * Get puntoVentaFactura
+     *
+     * @return string 
+     */
+    public function getPuntoVentaFactura()
+    {
+        return $this->puntoVentaFactura;
+    }
+
+    /**
+     * Set puntoVentaTicket
+     *
+     * @param string $puntoVentaTicket
+     * @return Parametrizacion
+     */
+    public function setPuntoVentaTicket($puntoVentaTicket)
+    {
+        $this->puntoVentaTicket = $puntoVentaTicket;
+
+        return $this;
+    }
+
+    /**
+     * Get puntoVentaTicket
+     *
+     * @return string 
+     */
+    public function getPuntoVentaTicket()
+    {
+        return $this->puntoVentaTicket;
     }
 }

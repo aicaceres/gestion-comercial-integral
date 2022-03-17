@@ -31,7 +31,7 @@ class NotaDebCredType extends AbstractType {
                   'choices' => array('Motivo 1' => 'Motivo 1', 'Motivo 2' => 'Motivo 2'), 'expanded' => false)) */
                 ->add('proveedor', 'entity', array('label' => 'Proveedor:',
                     'class' => 'ComprasBundle:Proveedor', 'required' => false,
-                    'attr' => array('class' => 'mediuminput chzn-select'),
+                    'attr' => array('class' => 'mediuminput'),
                     'query_builder' => function(EntityRepository $repository) {
                         return $qb = $repository->createQueryBuilder('p')
                                 ->where('p.activo=1')
@@ -41,7 +41,7 @@ class NotaDebCredType extends AbstractType {
                 ->add('facturas', 'entity', array(
                     'class' => 'ComprasBundle:Factura',
                     'label' => 'Facturas:',
-                    'choice_label' => 'nroFactura',
+                    'choice_label' => 'nroTipoComprobante',
                     'multiple' => true,
                     'required' => false,
                     'query_builder' => function(EntityRepository $repository) {

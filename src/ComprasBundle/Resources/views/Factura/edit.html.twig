@@ -9,43 +9,43 @@
 <h1 id="popup_title" >{{ (entity.id) ? 'Editar Factura ' : 'Alta de Nueva Factura' }}</h1>
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
-   {{ form_start(form, {'attr': {'class': 'stdform'}}) }}     
+   {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >
             <div class="formrows">
             <div class="two_fields">
-                {{ form_row(form.afipComprobante) }} 
+                {{ form_row(form.afipComprobante) }}
                 {{ form_row(form.fechaFactura, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
-            </div>     
-            <div class="two_fields nrofactura">                 
-                {{ form_row(form.afipPuntoVenta, { 'attr': {'class' : 'width50', 'maxlength':'5', 'title':'Punto de venta'} }) }} 
-                {{ form_widget(form.afipNroComprobante, { 'attr': {'class' : 'mininput','tabindex':'0','maxlength':'20', 'title':'N° de comprobante'} }) }}  
-            </div>     
+            </div>
+            <div class="two_fields nrofactura">
+                {{ form_row(form.afipPuntoVenta, { 'attr': {'class' : 'width50', 'maxlength':'5', 'title':'Punto de venta'} }) }}
+                {{ form_widget(form.afipNroComprobante, { 'attr': {'class' : 'mininput','tabindex':'0','maxlength':'20', 'title':'N° de comprobante'} }) }}
+            </div>
 
             <div class="two_fields" style="margin-bottom:0">
-                {{ form_row(form.proveedor, { 'attr': {'tabindex':'0'} }) }}          
+                {{ form_row(form.proveedor, { 'attr': {'tabindex':'0'} }) }}
                 <div style="font-weight:bold; vertical-align: middle">
                     <span style="padding-right:10px">CUIT:</span><span id="nrocuit"> {% if form.vars.data.proveedor %} {{ form.vars.data.proveedor.cuit }} {% endif %}<span>
-                 </div>                            
+                 </div>
                 <div style="color:red">
-                    {{ form_errors(form.nroComprobante) }}  
-                </div>                
-            </div>     
-                
-                {{ form_row(form.descripcion, { 'attr': {'class' : 'mediuminput'  } }) }}                      
-            {% if not entity.id and not form.pedidoId.vars.value  %}      
+                    {{ form_errors(form.nroComprobante) }}
+                </div>
+            </div>
+
+                {{ form_row(form.descripcion, { 'attr': {'class' : 'mediuminput'  } }) }}
+            {% if not entity.id and not form.pedidoId.vars.value  %}
                 <div class="two_fields">
                     <div>
                         <label  style="padding-top:2px;" >ACTUALIZAR COSTOS:</label>
                         <span >
                             <input type="radio" name="actualizarCosto" tabindex="0" checked="checked" value="SI"/> SI &nbsp; &nbsp;
-                            <input type="radio" name="actualizarCosto" tabindex="0" value="NO" /> NO 
+                            <input type="radio" name="actualizarCosto" tabindex="0" value="NO" /> NO
                         </span>
                     </div>
                     <div>
                         <label style="width:130px;padding-top:2px;">ACTUALIZAR STOCK:</label>
-                        <span >
-                            <input type="radio" name="agregarStock" tabindex="0" value="SI"/> SI &nbsp; &nbsp;
-                            <input type="radio" name="agregarStock" tabindex="0" checked="checked" value="NO" /> NO 
+                        <span>
+                            {{ form_widget(form.modificaStock.0) }} SI &nbsp; &nbsp;
+                            {{ form_widget(form.modificaStock.1) }} NO
                         </span>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                 </div>
                 <div>
                     <label style="width:180px">Pago Contado/Efectivo</label>
-                    {{ form_widget(form.pagadoContado) }} 
+                    {{ form_widget(form.pagadoContado) }}
                 </div>
             </div>
             <div style="padding-top: 20px; margin:auto; width: 100%;" id="divItems">
@@ -77,7 +77,7 @@
                             <th style="width:12%;">Cant.</th>
                             <th style="width:10%;" colspan="2">Bulto</th>
                             <th style="width:10%;">Costo Unit.</th>
-                            <th style="width:10%;">SubTotal</th>                            
+                            <th style="width:10%;">SubTotal</th>
                             <th style="width:8%;"></th>
                         </tr>
                     </thead>
@@ -98,11 +98,11 @@
                             <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(3,'.','') }}</td>
                             <td class="delTd" style="text-align:center;"></td>
                         </tr>
-                        
-                        <tr class="ccTr" style="display:none; background-color:gainsboro;">         
-                            <td colspan="9"> 
+
+                        <tr class="ccTr" style="display:none; background-color:gainsboro;">
+                            <td colspan="9">
                                 <div class="widgetbox" style="width:50%;margin:0 auto;">
-                                    <div class="widgetcontent">                                        
+                                    <div class="widgetcontent">
                                         {{ form_errors(det.centroCostoDetalle) }}
                                         <table class="stdtable" cellspacing="0" cellpadding="0" border="0">
                                             <thead>
@@ -110,104 +110,104 @@
                                                     <th>Centro de Costo</th>
                                                     <th style="width:30%">Monto</th>
                                                     <th style="width:5%">
-                                                        <a href="javascript:void(0)" class="addCC" title="Agregar otro centro de costo" tabIndex="-1"><img src="{{asset('assets/images/icons/add.png')}}" /></a>                                                        
+                                                        <a href="javascript:void(0)" class="addCC" title="Agregar otro centro de costo" tabIndex="-1"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
                                                     </th>
                                                 </tr>
                                             </thead>
-                                            <tbody class="holder"  data-index="{{det.centroCostoDetalle | length }}" 
+                                            <tbody class="holder"  data-index="{{det.centroCostoDetalle | length }}"
                                                    data-prototype="{% filter escape %}{% include 'ComprasBundle:Factura:cc-prototype.html.twig' with {'cc':det.centroCostoDetalle.vars.prototype} %}{% endfilter %}">
-                                                {% for cc in det.centroCostoDetalle %} 
+                                                {% for cc in det.centroCostoDetalle %}
                                                     <tr class="ccitem" style="height:30px;background-color: white" divdata="item_{{loop.index-1}}">
                                                         <td class="unegTd">{{ form_widget(cc.centroCosto) }}</td>
-                                                        <td class="costoTd">{{ form_widget(cc.costo, { 'attr': {'class' : 'ccerror mediuminput' } }) }}</td>                            
-                                                        <td class="lnkTd"><a href="javascript:void(0)" class="delCC" title="Eliminar este elemento" tabIndex="-1"><img style="width:14px" src="{{asset('assets/images/icons/trash.png')}}" /></a></td>                                                                                    
+                                                        <td class="costoTd">{{ form_widget(cc.costo, { 'attr': {'class' : 'ccerror mediuminput' } }) }}</td>
+                                                        <td class="lnkTd"><a href="javascript:void(0)" class="delCC" title="Eliminar este elemento" tabIndex="-1"><img style="width:14px" src="{{asset('assets/images/icons/trash.png')}}" /></a></td>
                                                     </tr>
-                                                 {% endfor %}           
+                                                 {% endfor %}
                                             </tbody>
                                         </table>
 
                                     </div><!--widgetcontent-->
                                  </div>
-                           </td>  
+                           </td>
                         </tr>
-                                                                                                
-                    {% endfor %}           
+
+                    {% endfor %}
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="7" style="text-align:right"> SubTotal</th>                            
+                            <th colspan="7" style="text-align:right"> SubTotal</th>
                             <th class="cktotal red" id="Total">{{ form_widget(form.subtotal, { 'attr': {'style':'text-align:right;'} }) }}</th>
                             <th style="text-align:center;">
                                 <a href="javascript:void(0)" id="linkAdd" tabindex="0"  title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
                             </th>
-                        </tr>                        
+                        </tr>
                     </tfoot>
-                </table>   
-                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">   
+                </table>
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
                         <tr>
-                            <th>Subtotal Neto </th>                                                       
-                            <th>Impuesto Interno </th>                                                       
-                            <th>IVA </th>                                                       
-                            <th>Percep. IVA </th>                                                       
-                            <th>Percep. DGR </th>                                                       
-                            <th>Percep. Muni </th>                                                       
-                            <th>Total Bonif. </th>                                                       
-                            <th>No Grav.</th> 
-                            <th>TOTAL</th> 
+                            <th>Subtotal Neto </th>
+                            <th>Impuesto Interno </th>
+                            <th>IVA </th>
+                            <th>Percep. IVA </th>
+                            <th>Percep. DGR </th>
+                            <th>Percep. Muni </th>
+                            <th>Total Bonif. </th>
+                            <th>No Grav.</th>
+                            <th>TOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'readonly':'readonly', 'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                        </tr> 
+                            <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'readonly':'readonly', 'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                        </tr>
                     </tbody>
-                </table>            
+                </table>
             </div>
-            <br clear="all" /> 
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('compras_factura')}}">Cancelar</a>
             </div>
-        </fieldset>        
+        </fieldset>
         <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
   {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 <script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
 <script type="text/javascript">
-jQuery(document).ready(function($) {    
+jQuery(document).ready(function($) {
     $('.togglemenu').click();
-    
+
     $(document).on('keypress',function(e){
         var keycode = (e.keyCode ? e.keyCode : e.which);
         if(keycode == '13'){ e.preventDefault(); }
     });
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
-    
+
     $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
     $("#comprasbundle_factura_afipComprobante").change(function(){
-        $.getJSON( "{{path('get_afip_letra_comprobante')}}" ,{id: $(this).val() } , function( data ) {       
-            $('#comprasbundle_factura_tipoFactura').val(data.letra); 
+        $.getJSON( "{{path('get_afip_letra_comprobante')}}" ,{id: $(this).val() } , function( data ) {
+            $('#comprasbundle_factura_tipoFactura').val(data.letra);
             actualizaTotales();
             //$('#comprasbundle_factura_tipoFactura').change();
         });
     });
-    $('#comprasbundle_factura_proveedor').change(function(){            
-        $('#nrocuit').text(''); 
+    $('#comprasbundle_factura_proveedor').change(function(){
+        $('#nrocuit').text('');
         if($(this).val()){
-            $.getJSON( "{{path('get_cuit_proveedor')}}" ,{id: $(this).val() } , function( data ) {            
-                $('#nrocuit').text( data.cuit);    
+            $.getJSON( "{{path('get_cuit_proveedor')}}" ,{id: $(this).val() } , function( data ) {
+                $('#nrocuit').text( data.cuit);
                 if(data.valido){
                     color = '#666';
                 }else{
@@ -217,71 +217,71 @@ jQuery(document).ready(function($) {
                 $('#nrocuit').css('color',color);
             });
         }
-    });     
+    });
     $('#comprasbundle_factura_proveedor').change();
-    
+
 // Get the container who holds the collection
-    $collectionHolder = $('table.factura tbody.main');   
+    $collectionHolder = $('table.factura tbody.main');
     $collectionHolder.find('.delTd').each(function() {
         addItemFormCentroCostoLink($(this));
         addItemFormDeleteLink($(this));
     });
     $collectionHolder.find('.ordTd').each(function(i) {
         $(this).html(i + 1);
-    });    
-    $('#linkAdd').on('click', function(e) {  
-        e.preventDefault();            
+    });
+    $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
         addNewItem();
         e.stopPropagation();
-        $collectionHolder.find('.chzn-container').last().trigger('mousedown');       
-    });    
-   $(".prodTd .chzn-select").change(function(){ changeProducto( $(this) ) }); 
-   $('.cantTd input, .precTd input[type=text]').change(function(){ 
+        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
+    });
+   $(".prodTd .chzn-select").change(function(){ changeProducto( $(this) ) });
+   $('.cantTd input, .precTd input[type=text]').change(function(){
        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
-   $('.cktotal input').change(function(){ 
-        if(isNaN( parseFloat(jQuery(this).val()) )) 
-            jQuery(this).val(0);  
-        totales( ( jQuery(this).attr('id')==='comprasbundle_factura_total' ) ? 0 : 1 ); 
+   $('.cktotal input').change(function(){
+        if(isNaN( parseFloat(jQuery(this).val()) ))
+            jQuery(this).val(0);
+        totales( ( jQuery(this).attr('id')==='comprasbundle_factura_total' ) ? 0 : 1 );
     });
     $(document).on('change','.ivaTd select',function(){
         actualizaTotales();
     })
-    
+
    $().keypress(function(e) {
-        if (e.which == 43) { 
+        if (e.which == 43) {
             e.preventDefault();
             $('#linkAdd').click();
         }
     });
-    
+
     $('.guardar').click(function() {
         if( $(document).find('.ccred').length >0 ){
             alert('Debe corregir los errores en centro de costo para guardar los cambios!');
-            return false; 
+            return false;
         }
         if( !$('#comprasbundle_factura_proveedor').val() ){
             alert('Debe seleccionar un Proveedor');
-            return false;  
-        };        
+            return false;
+        };
         if( $('tbody tr.item').length > 0 ){
             if (!confirm('Confirma la registración?')) {
                return false;
-            }                                   
+            }
         }else{  alert('Debe ingresar items a la factura'); return false;}
-     
+
     });
    /* $('[name*="proveedor"]').change(function(){
         $.get( " path('get_forma_pago_proveedor') ",{id: $(this).val() } , function( data ) {
             $('[name*="condicion_venta"]').val(data);
         });
-    });    
+    });
     $('[name*="proveedor"]').change();*/
     $('[name*="tipoFactura"]').focus();
     $(".bulto input").change(function(){ changeBulto( $(this) );  });
     $(".bulto input").each(function() {
         changeBulto( $(this) );
     });
-    
+
     /*$('#comprasbundle_factura_tipoFactura').on('change',function(){
         actualizaTotales();
     });*/
@@ -289,58 +289,58 @@ jQuery(document).ready(function($) {
         $(this).data('old', $(this).val());
     });
     $('#comprasbundle_factura_totalBonificado').on('change',function(){
-        var old = $(this).data('old'); 
-        var now = $(this).val(); 
+        var old = $(this).data('old');
+        var now = $(this).val();
         var subtot = $('#comprasbundle_factura_subtotal').val() - (now-old);
         $('#comprasbundle_factura_subtotal').val( subtot.toFixed(3) );
         $('#comprasbundle_factura_subtotalNeto').val( subtot.toFixed(3) );
     });
-            
+
         $('.nrofactura > div:first-of-type').css('width','22%');
-        $('.nrofactura > div:first-of-type > div').css('width','22%');        
-        $('.nrofactura input').change(function(){ 
+        $('.nrofactura > div:first-of-type > div').css('width','22%');
+        $('.nrofactura input').change(function(){
             ptovta = $('#comprasbundle_factura_afipPuntoVenta');
-            ptovta.val( ptovta.val().padStart( 5 , '0')) ;            
+            ptovta.val( ptovta.val().padStart( 5 , '0')) ;
             nro = $('#comprasbundle_factura_afipPuntoVenta').val() + '-' + $('#comprasbundle_factura_afipNroComprobante').val();
-            $('#comprasbundle_factura_nroComprobante').val(nro);            
+            $('#comprasbundle_factura_nroComprobante').val(nro);
         });
-        
+
     $('.formrows input[type="text"]').css('height','20px');
     actualizaTotales();
-    
-    $('body').on('click','.addCC',function(e) {        
+
+    $('body').on('click','.addCC',function(e) {
         e.preventDefault();
         var table = $(this).closest('table');
-        addNewCC( table.find('.holder') );        
-        e.stopPropagation();        
-    });    
-    $('body').on('click','.delCC',function(e) { 
+        addNewCC( table.find('.holder') );
+        e.stopPropagation();
+    });
+    $('body').on('click','.delCC',function(e) {
         e.preventDefault();
         delCC( $(this) );
     });
-    $('body').on('change','.unegTd select',function(e) {    
-        changeCentroCosto($(this))     
-    }); 
+    $('body').on('change','.unegTd select',function(e) {
+        changeCentroCosto($(this))
+    });
     $('[name*="costo"]').on('blur', function(e) {
-        checkCosto($(this).closest('.holder'))     
-    });  
+        checkCosto($(this).closest('.holder'))
+    });
     $('[name*="costo"]').blur();
-    
+
     // check si hay items sin cc
    /* $('tbody tr.item').each(function() {
         if( $(this).find('.empty' ) ){
-           $(this).find('.delTd H5' ).addClass('ccred')            
-        }        
-    }); */   
-    
+           $(this).find('.delTd H5' ).addClass('ccred')
+        }
+    }); */
+
     // set cc en items sin cc
     $('#setcc').on('click',function(){
         if( $('#centrocosto-default').val() ){
-            $('.holder').each( function(){        
+            $('.holder').each( function(){
                 if( $(this).find('.ccitem').length==0 ){
                     addNewCC($(this));
-                    var last = $(this).find('tr').last();    
-                    last.find('[name*="centroCosto"]').val( jQuery('#centrocosto-default').val() )                    
+                    var last = $(this).find('tr').last();
+                    last.find('[name*="centroCosto"]').val( jQuery('#centrocosto-default').val() )
                     var precio = parseFloat( $(this).closest('.ccTr').prev('.item').find('.totalTd').html() );
                     last.find('[name*="costo"]').val( precio.toFixed(3) )
                     checkCosto( $(this) );
@@ -348,8 +348,8 @@ jQuery(document).ready(function($) {
             });
         }
     });
-    
-});    
+
+});
  // funciones personalizas para el formulario
  function addNewItem() {
     var prototype = $collectionHolder.data('prototype');
@@ -362,32 +362,32 @@ jQuery(document).ready(function($) {
     $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
     jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
     jQuery('input').on('focus',function(){ jQuery(this).select(); });
-    jQuery(".prodTd .chzn-select").change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery(".prodTd .chzn-select").change(function(){ changeProducto( jQuery(this) ); });
     jQuery(".bulto input").last().uniform();
     jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
-    jQuery('.cantTd input, .precTd input[type=text]').change(function(e){          
-        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0); 
-        actualizaTotales(); 
-        // si se modifica el precio                
+    jQuery('.cantTd input, .precTd input[type=text]').change(function(e){
+        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);
+        actualizaTotales();
+        // si se modifica el precio
         var ccTr = jQuery(this).closest('tr').next('.ccTr');
         var hold = ccTr.find('.holder');
-        if( e.target.id.endsWith("_precio") && hold.find('tr').length == 0 ){  
+        if( e.target.id.endsWith("_precio") && hold.find('tr').length == 0 ){
             if(jQuery('#centrocosto-default').val() ){
                 addNewCC(hold);
-                var last = hold.find('tr').last();    
-                last.find('[name*="centroCosto"]').val( jQuery('#centrocosto-default').val() )                
+                var last = hold.find('tr').last();
+                last.find('[name*="centroCosto"]').val( jQuery('#centrocosto-default').val() )
                 var precio = parseFloat( jQuery(this).closest('.precTd').siblings('.totalTd').html());
                 last.find('[name*="costo"]').val( precio.toFixed(3) )
                 checkCosto( hold );
-            }            
+            }
         }
-        
+
     });
 }
-function addNewCC($holder){       
+function addNewCC($holder){
     // verificar que no haya algun item sin cargar antes de agregar
     vacio = false;
-    $holder.find('[name*="centroCosto"]').each( function(){        
+    $holder.find('[name*="centroCosto"]').each( function(){
         if( jQuery(this).val()==0 ){
             vacio = true;
             return false;
@@ -395,21 +395,21 @@ function addNewCC($holder){
     });
     if( vacio ) return false;
     else $holder.closest('.ccTr').prev().find('.linkcc').removeClass('empty')
-    
+
     var ccprototype = $holder.data('prototype');
     var index = $holder.data('index');
     var newForm = ccprototype.replace(/cctds/g, index);
     $holder.append(newForm);
-    $holder.data('index', index + 1);   
+    $holder.data('index', index + 1);
     $holder.find('[name*="costo"]').on('blur', function(e) {
-        checkCosto( jQuery(this).closest('.holder') )     
-    });         
+        checkCosto( jQuery(this).closest('.holder') )
+    });
    /*  $holder.find('[name*="unidadNegocio"]').on('change', function(e) {
-        changeUnidadNegocio( jQuery(this))     
-    });   
+        changeUnidadNegocio( jQuery(this))
+    });
    $holder.find('.delCC').last().on('click', function(e) {
-        delCC( jQuery(this) );    
-    }); */  
+        delCC( jQuery(this) );
+    }); */
     checkCosto( $holder );
 }
 function delCC(item){
@@ -419,33 +419,33 @@ function delCC(item){
         // si aun quedan items controlar
         if( holder.find('tr').length > 0 ){
              checkCosto(holder);
-        }else{            
+        }else{
             holder.closest('.ccTr').prev().find('.delTd H5').removeClass('ccred');
             holder.closest('.ccTr').prev().find('.linkcc').addClass('empty');
             holder.closest('.ccTr').hide();
         }
     }
 }
-function changeCentroCosto(item){    
+function changeCentroCosto(item){
     //recorrer para verificar que no sea repetido
     var value = item.val();
     if( item.val() != 0 ){
         var array = item.closest('.holder').find('[name*="centroCosto"]');
-        array.each( function(e){         
+        array.each( function(e){
             if( (jQuery(this).attr('id') !== item.attr('id')) && (jQuery(this).val()==item.val()) ){
                 alert('Centro de Costo duplicado!');
-                item.val(0); 
+                item.val(0);
                 return false;
-            }                
-        }); 
+            }
+        });
     }
 }
-function checkCosto(holder){    
+function checkCosto(holder){
     // total para validar
-    var total = parseFloat(holder.closest('.ccTr').prev().find('.totalTd').html());    
-    // recorrer cc para sumar 
-    var suma = 0;                    
-    
+    var total = parseFloat(holder.closest('.ccTr').prev().find('.totalTd').html());
+    // recorrer cc para sumar
+    var suma = 0;
+
     holder.find('[name*="costo"]').each( function(){
         var item = jQuery(this);
         // verificar que centro de costo no esté vacío
@@ -453,23 +453,23 @@ function checkCosto(holder){
             alert('Debe ingresar un centro de costo!');
             item.val('');
         }
-        var val = checknumero(item)        
+        var val = checknumero(item)
         if( val > 0 ){
-            item.val( val.toFixed(3) )   
+            item.val( val.toFixed(3) )
             suma = suma + val ;
         }else{
             suma = 0;
-        }        
+        }
     });
-    if( suma !== total ){            
+    if( suma !== total ){
         holder.find('[name*="costo"]').addClass('ccerror');
-        holder.closest('.ccTr').prev().find('.delTd H5').addClass('ccred');        
+        holder.closest('.ccTr').prev().find('.delTd H5').addClass('ccred');
     }else{
         holder.find('[name*="costo"]').removeClass('ccerror');
-        holder.closest('.ccTr').prev().find('.delTd H5').removeClass('ccred');        
-    }  
+        holder.closest('.ccTr').prev().find('.delTd H5').removeClass('ccred');
+    }
 }
-function addItemFormDeleteLink($itemFormTd) {          
+function addItemFormDeleteLink($itemFormTd) {
     var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
     $itemFormTd.append($removeFormA);
     $removeFormA.on('click', function(e) {
@@ -484,19 +484,19 @@ function addItemFormDeleteLink($itemFormTd) {
         }
     });
 }
-function addItemFormCentroCostoLink($itemFormTd) {   
-    var $linkCC = jQuery('<a href="javascript:void(0)" class="linkcc empty" title="Centro Costo" tabIndex="-1"><h5 style="display:inline;margin-right:15px">CC</h5></a>');    
+function addItemFormCentroCostoLink($itemFormTd) {
+    var $linkCC = jQuery('<a href="javascript:void(0)" class="linkcc empty" title="Centro Costo" tabIndex="-1"><h5 style="display:inline;margin-right:15px">CC</h5></a>');
     var holder = $itemFormTd.parent().next('.ccTr').find('.holder');
     if (holder.find('tr').length > 0){
         $linkCC.removeClass('empty');
     }
     $itemFormTd.append($linkCC);
     $linkCC.on('click', function(e) {
-        var ccTr = $itemFormTd.parent().next('.ccTr');            
+        var ccTr = $itemFormTd.parent().next('.ccTr');
         var prod = $itemFormTd.parent().find('.prodTd [name*="producto"]').val();
         var cant = $itemFormTd.parent().find(".cantTd input").val();
-        var costo = $itemFormTd.parent().find(".precTd input").val();        
-        if( prod && cant>0 && costo>0){             
+        var costo = $itemFormTd.parent().find(".precTd input").val();
+        if( prod && cant>0 && costo>0){
            // si no está visible mostrar, sino ocultar
            if( ccTr.is(":visible") ){
                ccTr.hide();
@@ -504,10 +504,10 @@ function addItemFormCentroCostoLink($itemFormTd) {
                ccTr.show();
                var hold = ccTr.find('.holder');
                if( hold.find('tr').length == 0 ){
-                    addNewCC(hold);                   
+                    addNewCC(hold);
                 }
-           }                            
-            
+           }
+
         }else{
             alert('Debe completar los datos para cargar el centro de costos');
         }
@@ -520,9 +520,9 @@ function changeProducto(producto){
                //async:false,
                dataType:"json",
                data: 'prod='+ producto.val(),
-               success: function(data) { 
-                   trIndex = producto.parent().parent();   
-                   trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);                                    
+               success: function(data) {
+                   trIndex = producto.parent().parent();
+                   trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);
                    trIndex.find('.cantTd input').val(1);
                    trIndex.find('span.unidmed').html(data.unidmed);
                    if(data.bulto){
@@ -532,7 +532,7 @@ function changeProducto(producto){
                        trIndex.find('span.unidmed').show();
                        trIndex.find('.cantxBulto input').val('');
                    }
-                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   trIndex.find('.bulto input').prop('checked', data.bulto);
                    jQuery.uniform.update();
                    trIndex.find('.cantTd input').focus();
                    actualizaTotales();
@@ -540,60 +540,60 @@ function changeProducto(producto){
            });
     }
 }
-function changeBulto(item){ 
-    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+function changeBulto(item){
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed');
         var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
         if( item.is(':checked') ){
             unidmed.hide();
-            cantxbulto.prop('readonly',false);     
+            cantxbulto.prop('readonly',false);
             cantxbulto.css('color','#666');
             cantxbulto.focus();
         }else{
-           unidmed.show(); 
+           unidmed.show();
            cantxbulto.prop('readonly',true);
-           cantxbulto.css('color','#fff');           
-        }   
+           cantxbulto.css('color','#fff');
+        }
 }
 function actualizaTotales(){
         var Total=0;
         var IvaTotal=0;
         jQuery("tr.item").each(function(){
-            var item = jQuery(this);            
+            var item = jQuery(this);
             var cant =  checknumero( item.find('.cantTd input') ) ;
             var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
             var arr = ['A','M'];
-            let iva = item.find('.ivaTd [name*="afipAlicuota"] option:selected').text();  
-            iva = parseFloat(iva.replace('%', '') /100);           
+            let iva = item.find('.ivaTd [name*="afipAlicuota"] option:selected').text();
+            iva = parseFloat(iva.replace('%', '') /100);
             sbtotItm = prec * cant;
             Total += sbtotItm;
             IvaTotal += (sbtotItm * iva);
-            item.find('.totalTd').text( sbtotItm.toFixed(3));                
+            item.find('.totalTd').text( sbtotItm.toFixed(3));
         });
         jQuery('#Total input[type=text]').val(Total.toFixed(3));
         //var iva = Total * 0.21;
-        jQuery('#comprasbundle_factura_iva').val(  IvaTotal.toFixed(3)  ); 
-        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));      
+        jQuery('#comprasbundle_factura_iva').val(  IvaTotal.toFixed(3)  );
+        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));
         totales(1);
         $collectionHolder.find('.ordTd').each(function(index) {
             jQuery(this).html(index+1);
-        }); 
+        });
     }
 function totales(suma){
-    var neto = checknumero(jQuery('#comprasbundle_factura_subtotal'));    
-    jQuery('#comprasbundle_factura_subtotalNeto').val(  neto.toFixed(3)  ); 
+    var neto = checknumero(jQuery('#comprasbundle_factura_subtotal'));
+    jQuery('#comprasbundle_factura_subtotalNeto').val(  neto.toFixed(3)  );
     var impuesto = checknumero( jQuery('#comprasbundle_factura_impuestoInterno') );
     var iva = checknumero( jQuery('#comprasbundle_factura_iva') );
     var perciva = checknumero( jQuery('#comprasbundle_factura_percepcionIva') );
     var percdgr = checknumero( jQuery('#comprasbundle_factura_percepcionDgr') );
     var percmun = checknumero( jQuery('#comprasbundle_factura_percepcionMunicipal') );
     var totbon = checknumero( jQuery('#comprasbundle_factura_totalBonificado') );
-    var tmc = checknumero( jQuery('#comprasbundle_factura_tmc') ); 
-    if(suma){ 
+    var tmc = checknumero( jQuery('#comprasbundle_factura_tmc') );
+    if(suma){
         var subtot = neto - totbon;
-        var totales = subtot  +  impuesto + iva + perciva + percdgr + percmun +  tmc ;  
-         jQuery('#comprasbundle_factura_total').val( totales.toFixed(3) );   
+        var totales = subtot  +  impuesto + iva + perciva + percdgr + percmun +  tmc ;
+         jQuery('#comprasbundle_factura_total').val( totales.toFixed(3) );
      }else{
-         checknumero( jQuery('#comprasbundle_factura_total') ); 
+         checknumero( jQuery('#comprasbundle_factura_total') );
      }
 }
 
