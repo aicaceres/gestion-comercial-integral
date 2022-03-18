@@ -140,6 +140,10 @@ class Presupuesto {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    public function getNroPresupuestoTxt(){
+        return str_pad( $this->nroPresupuesto, 8, "0", STR_PAD_LEFT) ;
+    }
+
     public function getSubTotal(){
         $subtotal = 0;
         foreach ($this->detalles as $item) {

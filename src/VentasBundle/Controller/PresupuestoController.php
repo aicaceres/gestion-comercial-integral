@@ -190,14 +190,15 @@ class PresupuestoController extends Controller {
     public function printPresupuestoAction(Request $request,$id){
         $em = $this->getDoctrine()->getManager();
         $presupuesto = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
 
-    //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
+        $logo = __DIR__.'/../../../web/assets/images/logo_comprobante.png';
     //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:Presupuesto:presupuesto.pdf.twig',
-                      array( 'presupuesto' => $presupuesto ), $response);
+                      array( 'presupuesto' => $presupuesto, 'empresa'=>$empresa, 'logo' => $logo ), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

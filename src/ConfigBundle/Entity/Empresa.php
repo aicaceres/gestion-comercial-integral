@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="empresa")
  * @ORM\Entity()
  */
-class Empresa               
+class Empresa
 {
     /**
      * @var integer $id
@@ -58,31 +58,52 @@ class Empresa
      */
     protected $telefono;
     /**
+     * @var string $email
+     * @ORM\Column(name="email", type="string", nullable=true)
+     */
+    protected $email;
+    /**
+     * @var string $iibb
+     * @ORM\Column(name="iibb", type="string", nullable=true)
+     */
+    protected $iibb;
+    /**
+     * @var string $inicioActividades
+     * @ORM\Column(name="inicio_actividades", type="string", nullable=true)
+     */
+    protected $inicioActividades;
+    /**
+     * @var string $condicionIva
+     * @ORM\Column(name="condicion_iva", type="string", nullable=true)
+     */
+    protected $condicionIva;
+
+    /**
      * @var string $responsable
      * @ORM\Column(name="responsable", type="string", nullable=true)
      */
-    protected $responsable;    
+    protected $responsable;
     /**
      * @ORM\Column(name="activo", type="boolean")
      */
-    protected $activo = true;    
-    
+    protected $activo = true;
+
     /**
      * @var string $label1
      * @ORM\Column(name="label1", type="string", nullable=true)
      */
-    protected $label1;    
+    protected $label1;
     /**
      * @var string $label2
      * @ORM\Column(name="label2", type="string", nullable=true)
      */
-    protected $label2;    
+    protected $label2;
     /**
      * @var string $estilo
      * @ORM\Column(name="estilo", type="string", nullable=true)
      */
-    protected $estilo;    
-    
+    protected $estilo;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -95,14 +116,14 @@ class Empresa
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
-    private $createdBy;    
-    
+    private $createdBy;
+
     /**
      * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\UnidadNegocio", mappedBy="empresa",cascade={"persist"})
      */
     protected $unidades;
-    
-    
+
+
 /**
  * MANEJO DE FOTO
  */
@@ -157,11 +178,11 @@ class Empresa
         // se deshace del __DIR__ para no meter la pata
         // al mostrar el documento/imagen cargada en la vista.
         return 'uploads';
-    } 
+    }
 
     /**
-     * @Assert\File(maxSize="2M", mimeTypes={"image/jpeg", "image/pjpeg", "image/png", "image/x-png"}, 
-     *              mimeTypesMessage="El tipo de imagen no es válido. Debe ser .png o .jpg") 
+     * @Assert\File(maxSize="2M", mimeTypes={"image/jpeg", "image/pjpeg", "image/png", "image/x-png"},
+     *              mimeTypesMessage="El tipo de imagen no es válido. Debe ser .png o .jpg")
      */
     private $file;
     private $filenameForRemove;
@@ -175,7 +196,7 @@ class Empresa
     }
 
     private $temp;
-    
+
     /**
      * Sets file.
      * @param UploadedFile $file
@@ -249,7 +270,7 @@ class Empresa
 
     /*
     * FIN MANEJO DE FOTO
-    */            
+    */
     /**
      * Constructor
      */
@@ -261,7 +282,7 @@ class Empresa
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -284,7 +305,7 @@ class Empresa
     /**
      * Get nombre_corto
      *
-     * @return string 
+     * @return string
      */
     public function getNombreCorto()
     {
@@ -307,7 +328,7 @@ class Empresa
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -330,7 +351,7 @@ class Empresa
     /**
      * Get leyenda
      *
-     * @return string 
+     * @return string
      */
     public function getLeyenda()
     {
@@ -353,7 +374,7 @@ class Empresa
     /**
      * Get leyendaFactura
      *
-     * @return string 
+     * @return string
      */
     public function getLeyendaFactura()
     {
@@ -376,7 +397,7 @@ class Empresa
     /**
      * Get cuit
      *
-     * @return string 
+     * @return string
      */
     public function getCuit()
     {
@@ -399,7 +420,7 @@ class Empresa
     /**
      * Get direccion
      *
-     * @return string 
+     * @return string
      */
     public function getDireccion()
     {
@@ -422,7 +443,7 @@ class Empresa
     /**
      * Get telefono
      *
-     * @return string 
+     * @return string
      */
     public function getTelefono()
     {
@@ -445,7 +466,7 @@ class Empresa
     /**
      * Get responsable
      *
-     * @return string 
+     * @return string
      */
     public function getResponsable()
     {
@@ -468,7 +489,7 @@ class Empresa
     /**
      * Get activo
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getActivo()
     {
@@ -491,7 +512,7 @@ class Empresa
     /**
      * Get label1
      *
-     * @return string 
+     * @return string
      */
     public function getLabel1()
     {
@@ -514,7 +535,7 @@ class Empresa
     /**
      * Get label2
      *
-     * @return string 
+     * @return string
      */
     public function getLabel2()
     {
@@ -537,7 +558,7 @@ class Empresa
     /**
      * Get estilo
      *
-     * @return string 
+     * @return string
      */
     public function getEstilo()
     {
@@ -560,7 +581,7 @@ class Empresa
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -583,7 +604,7 @@ class Empresa
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -617,10 +638,125 @@ class Empresa
     /**
      * Get unidades
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getUnidades()
     {
         return $this->unidades;
+    }
+
+    /**
+     * Set email
+     *
+     * @param string $email
+     * @return Empresa
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * Get email
+     *
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * Set iibb
+     *
+     * @param string $iibb
+     * @return Empresa
+     */
+    public function setIibb($iibb)
+    {
+        $this->iibb = $iibb;
+
+        return $this;
+    }
+
+    /**
+     * Get iibb
+     *
+     * @return string
+     */
+    public function getIibb()
+    {
+        return $this->iibb;
+    }
+
+    /**
+     * Set inicioActividades
+     *
+     * @param string $inicioActividades
+     * @return Empresa
+     */
+    public function setInicioActividades($inicioActividades)
+    {
+        $this->inicioActividades = $inicioActividades;
+
+        return $this;
+    }
+
+    /**
+     * Get inicioActividades
+     *
+     * @return string
+     */
+    public function getInicioActividades()
+    {
+        return $this->inicioActividades;
+    }
+
+    /**
+     * Set condicionIva
+     *
+     * @param string $condicionIva
+     * @return Empresa
+     */
+    public function setCondicionIva($condicionIva)
+    {
+        $this->condicionIva = $condicionIva;
+
+        return $this;
+    }
+
+    /**
+     * Get condicionIva
+     *
+     * @return string
+     */
+    public function getCondicionIva()
+    {
+        return $this->condicionIva;
+    }
+
+    /**
+     * Add unidades
+     *
+     * @param \ConfigBundle\Entity\UnidadNegocio $unidades
+     * @return Empresa
+     */
+    public function addUnidade(\ConfigBundle\Entity\UnidadNegocio $unidades)
+    {
+        $this->unidades[] = $unidades;
+
+        return $this;
+    }
+
+    /**
+     * Remove unidades
+     *
+     * @param \ConfigBundle\Entity\UnidadNegocio $unidades
+     */
+    public function removeUnidade(\ConfigBundle\Entity\UnidadNegocio $unidades)
+    {
+        $this->unidades->removeElement($unidades);
     }
 }

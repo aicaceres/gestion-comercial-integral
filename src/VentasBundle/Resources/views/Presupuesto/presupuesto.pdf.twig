@@ -1,27 +1,138 @@
 <pdf>
-    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+    <dynamic-page page-size="A4" margin-left="30px" margin-right="30px" margin-top="30px" >
         <placeholders>
             <header>
-                <div height="60px" width="100%" >
-                    <table>
+                <div height="180px" width="100%" >
+                    <table font-size="11px">
                         <tr>
-                            <td border.type="none" vertical-align="middle">
-                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            <td border.type="none" >
+                                <div width="100%">
+                                    <img ignore-error="true" src="{{logo}}" width="80%" />
+                                </div>
+                            </td>
+                            <td border.color="#555555" width="50px" vertical-align="middle" text-align="center">
+                                <div font-size="23px"><strong>X</strong> </div>
+                            </td>
+                            <td border.type="none" text-align="center" vertical-align="middle">
+                                <div width="100%" font-size="16px" padding-bottom="10px">
+                                    <strong>PRESUPUESTO</strong>
+                                </div>
+                                <div font-size="11px" padding-bottom="5px">
+                                    <strong>Número: {{presupuesto.nroPresupuestoTxt}} </strong>
+                                </div>
+                                <div font-size="11px">
+                                    <strong>Fecha: {{ presupuesto.fechaPresupuesto| date('d-m-Y') }} </strong>
+                                    </div>
                             </td>
                         </tr>
+                        <tr>
+                            <td colspan="2" border.type="none" padding-top="20px">
+                                <div padding-left="10px">
+                                    <div padding-bottom="10px">{{ empresa.direccion }} </div>
+                                    <div padding-bottom="10px">{{ empresa.telefono }} </div>
+                                    <div padding-bottom="10px" href="mailto:{{empresa.email}}">{{ empresa.email }} </div>
+                                    <div padding-bottom="10px">{{ empresa.condicionIva }} </div>
+                                </div>
+                            </td>
+                            <td border.type="none" padding-top="20px">
+                                <div padding-left="40px">
+                                    <div>
+                                        <div padding-bottom="10px"> CUIT: {{ empresa.cuit }} </div>
+                                        <div padding-bottom="10px"> INGRESOS BRUTOS: {{ empresa.iibb }} </div>
+                                        <div padding-bottom="10px"> INICIO ACTIVIDADES: {{ empresa.inicioActividades }} </div>
+
+                                    </div>
+
+                                </div>
+                            </td>
+                        </tr>
+
                     </table>
-                    <div border.color="#F5C98F" height="2px" ></div>
+
                     <div height="5px"></div>
-                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+
                 </div>
             </header>
             <footer>
-                <div height="30px" width="100%" text-align="right">
-                    <page-number />
+                <div height="100px" width="100%">
+                    <div border.color="#555555" height="1px" ></div>
+                    <div font-size="7px" padding="10px"> Op: {{app.user|upper}} -- {{'now'|date('d-m-Y H:i')}} </div>
                 </div>
             </footer>
         </placeholders>
-        <h2 text-align="center"> PRESUPUESTO</h2>
+        <div border.color="#555555" height="1px" ></div>
+        <table font-size="11px" padding-bottom="10px">
+            <tr>
+                <td border.type="none" padding-top="10px">
+                    <strong>CLIENTE:</strong> {{presupuesto.cliente}}
+                </td>
+                <td border.type="none" padding-top="10px">
+                    {% if presupuesto.nombreCliente %}
+                        {{presupuesto.nombreCliente}}
+                    {% else %}
+                        Dirección: {{presupuesto.cliente.direccion}}
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" border.type="none" padding-top="10px">
+                    Condición de Venta: {{presupuesto.formaPago}}
+                </td>
+            </tr>
+        </table>
+
+        <table font-size="9px" padding-top="10px">
+            <tr margin-bottom="8px">
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                    Cantidad
+                </td>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm">
+                    Código
+                </td>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                    Descripción
+                </td>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm">
+                    Unitario
+                </td>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm">
+                    Total
+                </td>
+            </tr>
+            {% for item in presupuesto.detalles %}
+            <tr>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                    {{item.cantidad}} {{ item.producto.unidadmedida.nombre }}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="center">
+                    {{item.producto.codigo}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" padding-left="10px">
+                    {{item.producto.nombre}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                    {{item.precio|number_format(3,'.',',')}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                    {{item.total|number_format(3,'.',',')}}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <table font-size="9px" padding-top="100px">
+            <tr margin-bottom="8px">
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                    Subtotal: $ {{presupuesto.subTotal|number_format(3,'.',',')}}
+                </td>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                    Descuento/Recargo [{{presupuesto.formaPago.porcentajeRecargo}}%]: $ {{presupuesto.descuento|number_format(3,'.',',')}}
+                </td>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                    TOTAL: $ {{presupuesto.total|number_format(3,'.',',')}}
+                </td>
+            </tr>
+        </table>
 
     </dynamic-page>
 </pdf>
