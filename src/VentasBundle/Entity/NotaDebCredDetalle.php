@@ -57,12 +57,11 @@ class NotaDebCredDetalle {
      * @ORM\Column(name="precio", type="decimal", scale=3 )
      */
     protected $precio;
-
     /**
-     * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", scale=2 )
+     * @var integer $alicuota
+     * @ORM\Column(name="alicuota", type="decimal", scale=3 )
      */
-    protected $iva = 21;
+    protected $alicuota;
 
     /**
      * @var integer $descuento
@@ -76,186 +75,17 @@ class NotaDebCredDetalle {
      */
     protected $notaDebCred;
 
-    /*
-     * DATOS PARA AFIP
-     */
-
-    /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipAlicuota")
-     * @ORM\JoinColumn(name="afip_alicuota_id", referencedColumnName="id")
-     * */
-    protected $afipAlicuota;
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId() {
-        return $this->id;
-    }
-
-    /**
-     * Set orden
-     *
-     * @param integer $orden
-     * @return NotaDebCredDetalle
-     */
-    public function setOrden($orden) {
-        $this->orden = $orden;
-
-        return $this;
-    }
-
-    /**
-     * Get orden
-     *
-     * @return integer
-     */
-    public function getOrden() {
-        return $this->orden;
-    }
-
-    /**
-     * Set cantidad
-     *
-     * @param integer $cantidad
-     * @return NotaDebCredDetalle
-     */
-    public function setCantidad($cantidad) {
-        $this->cantidad = $cantidad;
-
-        return $this;
-    }
-
-    /**
-     * Get cantidad
-     *
-     * @return integer
-     */
-    public function getCantidad() {
-        return $this->cantidad;
-    }
-
-    /**
-     * Set precio
-     *
-     * @param string $precio
-     * @return NotaDebCredDetalle
-     */
-    public function setPrecio($precio) {
-        $this->precio = $precio;
-
-        return $this;
-    }
-
-    /**
-     * Get precio
-     *
-     * @return string
-     */
-    public function getPrecio() {
-        return $this->precio;
-    }
-
-    /**
-     * Set iva
-     *
-     * @param string $iva
-     * @return NotaDebCredDetalle
-     */
-    public function setIva($iva) {
-        $this->iva = $iva;
-
-        return $this;
-    }
-
-    /**
-     * Get iva
-     *
-     * @return string
-     */
-    public function getIva() {
-        return $this->iva;
-    }
-
-    /**
-     * Set descuento
-     *
-     * @param string $descuento
-     * @return NotaDebCredDetalle
-     */
-    public function setDescuento($descuento) {
-        $this->descuento = $descuento;
-
-        return $this;
-    }
-
-    /**
-     * Get descuento
-     *
-     * @return string
-     */
-    public function getDescuento() {
-        return $this->descuento;
-    }
-
-    /**
-     * Set producto
-     *
-     * @param \AppBundle\Entity\Producto $producto
-     * @return NotaDebCredDetalle
-     */
-    public function setProducto(\AppBundle\Entity\Producto $producto = null) {
-        $this->producto = $producto;
-        return $this;
-    }
-
-    /**
-     * Get producto
-     *
-     * @return \AppBundle\Entity\Producto
-     */
-    public function getProducto() {
-        return $this->producto;
-    }
-
-    /**
-     * Set notaDebCred
-     *
-     * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
-     * @return NotaDebCredDetalle
-     */
-    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null) {
-        $this->notaDebCred = $notaDebCred;
-
-        return $this;
-    }
-
-    /**
-     * Get notaDebCred
-     *
-     * @return \VentasBundle\Entity\NotaDebCred
-     */
-    public function getNotaDebCred() {
-        return $this->notaDebCred;
-    }
-
     /** Calculos * */
     public function getSubTotal() {
         return $this->precio * $this->cantidad;
     }
 
-    public function getMontoDescuento() {
-        return $this->getSubTotal() * ($this->descuento / 100);
-    }
-
     public function getMontoIva() {
-        return ( $this->getSubTotal() - $this->getMontoDescuento() ) * ($this->iva / 100);
+        return ($this->getSubTotal() + $this->getDescuento()) * ( $this->getAlicuota()/100 );
     }
 
     public function getTotal() {
-        return ($this->getSubTotal() - $this->getMontoDescuento()) + $this->getMontoIva();
+        return ($this->getSubTotal() + $this->getDescuento()) + $this->getMontoIva();
     }
 
     // Cantidad para mostrar como texto
@@ -269,45 +99,36 @@ class NotaDebCredDetalle {
     }
 
     /**
-     * Set bulto
-     *
-     * @param boolean $bulto
-     * @return NotaDebCredDetalle
-     */
-    public function setBulto($bulto) {
-        $this->bulto = $bulto;
-
-        return $this;
-    }
-
-    /**
-     * Get bulto
-     *
-     * @return boolean
-     */
-    public function getBulto() {
-        return $this->bulto;
-    }
-
-    /**
-     * Set cantidadxBulto
-     *
-     * @param integer $cantidadxBulto
-     * @return NotaDebCredDetalle
-     */
-    public function setCantidadxBulto($cantidadxBulto) {
-        $this->cantidadxBulto = $cantidadxBulto;
-
-        return $this;
-    }
-
-    /**
-     * Get cantidadxBulto
+     * Get id
      *
      * @return integer
      */
-    public function getCantidadxBulto() {
-        return $this->cantidadxBulto;
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set orden
+     *
+     * @param integer $orden
+     * @return NotaDebCredDetalle
+     */
+    public function setOrden($orden)
+    {
+        $this->orden = $orden;
+
+        return $this;
+    }
+
+    /**
+     * Get orden
+     *
+     * @return integer
+     */
+    public function getOrden()
+    {
+        return $this->orden;
     }
 
     /**
@@ -316,7 +137,8 @@ class NotaDebCredDetalle {
      * @param string $textoProducto
      * @return NotaDebCredDetalle
      */
-    public function setTextoProducto($textoProducto) {
+    public function setTextoProducto($textoProducto)
+    {
         $this->textoProducto = $textoProducto;
 
         return $this;
@@ -327,29 +149,192 @@ class NotaDebCredDetalle {
      *
      * @return string
      */
-    public function getTextoProducto() {
+    public function getTextoProducto()
+    {
         return $this->textoProducto;
     }
 
     /**
-     * Set afipAlicuota
+     * Set cantidad
      *
-     * @param \ConfigBundle\Entity\AfipAlicuota $afipAlicuota
+     * @param string $cantidad
      * @return NotaDebCredDetalle
      */
-    public function setAfipAlicuota(\ConfigBundle\Entity\AfipAlicuota $afipAlicuota = null) {
-        $this->afipAlicuota = $afipAlicuota;
+    public function setCantidad($cantidad)
+    {
+        $this->cantidad = $cantidad;
 
         return $this;
     }
 
     /**
-     * Get afipAlicuota
+     * Get cantidad
      *
-     * @return \ConfigBundle\Entity\AfipAlicuota
+     * @return string
      */
-    public function getAfipAlicuota() {
-        return $this->afipAlicuota;
+    public function getCantidad()
+    {
+        return $this->cantidad;
     }
 
+    /**
+     * Set bulto
+     *
+     * @param boolean $bulto
+     * @return NotaDebCredDetalle
+     */
+    public function setBulto($bulto)
+    {
+        $this->bulto = $bulto;
+
+        return $this;
+    }
+
+    /**
+     * Get bulto
+     *
+     * @return boolean
+     */
+    public function getBulto()
+    {
+        return $this->bulto;
+    }
+
+    /**
+     * Set cantidadxBulto
+     *
+     * @param integer $cantidadxBulto
+     * @return NotaDebCredDetalle
+     */
+    public function setCantidadxBulto($cantidadxBulto)
+    {
+        $this->cantidadxBulto = $cantidadxBulto;
+
+        return $this;
+    }
+
+    /**
+     * Get cantidadxBulto
+     *
+     * @return integer
+     */
+    public function getCantidadxBulto()
+    {
+        return $this->cantidadxBulto;
+    }
+
+    /**
+     * Set precio
+     *
+     * @param string $precio
+     * @return NotaDebCredDetalle
+     */
+    public function setPrecio($precio)
+    {
+        $this->precio = $precio;
+
+        return $this;
+    }
+
+    /**
+     * Get precio
+     *
+     * @return string
+     */
+    public function getPrecio()
+    {
+        return $this->precio;
+    }
+
+    /**
+     * Set descuento
+     *
+     * @param string $descuento
+     * @return NotaDebCredDetalle
+     */
+    public function setDescuento($descuento)
+    {
+        $this->descuento = $descuento;
+
+        return $this;
+    }
+
+    /**
+     * Get descuento
+     *
+     * @return string
+     */
+    public function getDescuento()
+    {
+        return $this->descuento;
+    }
+
+    /**
+     * Set producto
+     *
+     * @param \AppBundle\Entity\Producto $producto
+     * @return NotaDebCredDetalle
+     */
+    public function setProducto(\AppBundle\Entity\Producto $producto = null)
+    {
+        $this->producto = $producto;
+
+        return $this;
+    }
+
+    /**
+     * Get producto
+     *
+     * @return \AppBundle\Entity\Producto
+     */
+    public function getProducto()
+    {
+        return $this->producto;
+    }
+
+    /**
+     * Set notaDebCred
+     *
+     * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
+     * @return NotaDebCredDetalle
+     */
+    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
+    {
+        $this->notaDebCred = $notaDebCred;
+
+        return $this;
+    }
+
+    /**
+     * Get notaDebCred
+     *
+     * @return \VentasBundle\Entity\NotaDebCred
+     */
+    public function getNotaDebCred()
+    {
+        return $this->notaDebCred;
+    }
+
+    /**
+     * Set alicuota
+     *
+     * @param string $alicuota
+     * @return NotaDebCredDetalle
+     */
+    public function setAlicuota($alicuota)
+    {
+        $this->alicuota = $alicuota;
+
+        return $this;
+    }
+
+    /**
+     * Get alicuota
+     *
+     * @return string
+     */
+    public function getAlicuota()
+    {
+        return $this->alicuota;
+    }
 }

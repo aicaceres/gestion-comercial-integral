@@ -13,87 +13,62 @@ class NotaDebCredType extends AbstractType {
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        $optionsCond = array(
-            'class' => 'ConfigBundle:Parametro',
-            'required' => true,
-            'label' => 'Condición de Venta:',
-            'choice_label' => 'descripcion',
-            'query_builder' => function (EntityRepository $repository) {
-                return $qb = $repository->createQueryBuilder('p')
-                        ->where('p.activo=1 and p.agrupador = :val ')
-                        ->setParameter('val', NotaDebCredType::getTablaId($repository, 'condicion-pago'));
-            });
+        $type = $options['attr']['type'];
+        $docType = json_decode($options['attr']['docType'],true)  ;
         $builder
-                ->add('tipoNota', 'choice', array('choices' => array('A' => 'A', 'B' => 'B', 'C' => 'C'),
-                    'label' => 'Tipo y Nº'))
-                ->add('nroNotaDebCred')
+                ->add('signo', 'hidden')
                 ->add('fecha', 'date', array('widget' => 'single_text', 'label' => 'Fecha Nota:',
                     'format' => 'dd-MM-yyyy', 'required' => true))
-                //->add('estado','hidden')
-                ->add('condicionPago', 'entity', $optionsCond)
-                ->add('signo', 'choice', array('label' => 'Tipo Nota:',
-                    'choices' => array('+' => 'DEBITO', '-' => 'CREDITO'), 'expanded' => false))
-                //->add('concepto','choice', array('label'=>'Motivo:',
-                //      'choices'   => array('Motivo 1'=>'Motivo 1', 'Motivo 2' => 'Motivo 2'),'expanded'=>false))
-                ->add('cliente', 'entity', array('label' => 'Cliente:',
-                    'class' => 'VentasBundle:Cliente', 'required' => false,
-                    'attr' => array('class' => 'smallinput chzn-select')))
+                ->add('nombreCliente',null, array('label' => 'Nombre:'))
+                ->add('tipoDocumentoCliente','choice', array('label'=>'Tipo Documento:', 'required' => false,
+                   'choices' => $docType, 'expanded' => false))
+                ->add('nroDocumentoCliente',null, array('label'=>'N° Documento:'))
+                ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
+                    'required' => true, 'label' => 'FORMA DE PAGO: '))
                 ->add('precioLista', 'entity', array('label' => 'Lista de Precios:',
                     'class' => 'AppBundle:PrecioLista', 'required' => true))
+                ->add('moneda', 'entity', array(
+                    'class' => 'ConfigBundle:Moneda',
+                    'required' => true, 'label' => 'MONEDA: '
+                ))
+                ->add('cotizacion','hidden')
                 ->add('facturas', 'entity', array(
-                    'class' => 'VentasBundle:Factura',
+                    'class' => 'VentasBundle:FacturaElectronica',
                     'label' => 'Facturas:',
-                    'choice_label' => 'nroFactura',
+                    'choice_label' => 'comprobanteTxt',
                     'multiple' => true,
                     'required' => false,
                 ))
                 ->add('detalles', 'collection', array(
-                    'type' => new NotaDebCredDetalleType(),
+                    'type' => new NotaDebCredDetalleType($type),
                     'by_reference' => false,
                     'allow_delete' => true,
                     'allow_add' => true,
                     'prototype_name' => 'items',
                     'attr' => array(
                         'class' => 'row item'
-            )))
-
-// Items adicionales
-                ->add('total')
-                ->add('cae', 'text', array('label' => 'CAE:', 'required' => true, 'mapped' => false))
-                ->add('caeVto', 'date', array('widget' => 'single_text', 'label' => 'Vto. CAE:',
-                    'format' => 'dd-MM-yyyy', 'required' => true, 'mapped' => false))
-                ->add('facturadoDesde', 'date', array('widget' => 'single_text', 'label' => 'Período Facturado Desde:',
-                    'format' => 'dd-MM-yyyy', 'required' => true, 'mapped' => false))
-                ->add('facturadoHasta', 'date', array('widget' => 'single_text', 'label' => 'Hasta:',
-                    'format' => 'dd-MM-yyyy', 'required' => true, 'mapped' => false))
-                ->add('pagoVto', 'date', array('widget' => 'single_text', 'label' => 'Vto. para el pago:',
-                    'format' => 'dd-MM-yyyy', 'required' => true, 'mapped' => false))
-
-// afip
-                ->add('afipComprobante', 'entity', array('label' => 'Comprobante:',
-                    'class' => 'ConfigBundle:AfipComprobante', 'required' => true,
-                    'attr' => array('class' => 'mediuminput chzn-select'),
-                    'query_builder' => function(EntityRepository $repository) {
-                        return $qb = $repository->createQueryBuilder('c')
-                                ->where('c.activo=1')
-                                ->andWhere('c.valor like :param1')
-                                ->setParameter('param1', '%DEB%')
-                                ->orWhere('c.valor like :param2')
-                                ->setParameter('param2', '%CRE%')
-                                ->orderBy('c.codigo');
-                    }
-                ))
-                ->add('afipPuntoVenta', null, array('label' => 'N° Comprobante', 'required' => true))
-                ->add('afipNroComprobante', null, array('required' => true))
+                )))
+                ->add('notaElectronica', new NotaElectronicaType())
         ;
-    }
 
-    public function getTablaId(EntityRepository $repository, $table) {
-        $tablaid = $repository->createQueryBuilder('g')->select('g.id')
-                        ->where('g.nombre = :tabla ')
-                        ->setParameter('tabla', $table)
-                        ->getQuery()->getSingleScalarResult();
-        return $tablaid;
+        if ($type == 'new') {
+            // en render de nuev presupuesto solo traer cliente por defecto
+            $data = $options['data'];
+            $cliente = $data->getCliente()->getId();
+            $builder->add('cliente', 'entity', array('required' => true,
+                'class' => 'VentasBundle:Cliente', 'label' => 'DATOS DEL CLIENTE: ',
+                'query_builder' => function (EntityRepository $repository) use ($cliente) {
+                    return $qb = $repository->createQueryBuilder('c')
+                        ->where("c.id=" . $cliente);
+                }
+            ));
+        } else if ($type == 'create') {
+            // al crear traer objeto completo para match del cliente
+            $builder->add('cliente', 'entity', array(
+                'class' => 'VentasBundle:Cliente',
+                'required' => true
+            ));
+        }
     }
 
     /**

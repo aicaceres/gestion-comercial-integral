@@ -246,12 +246,15 @@ class ClienteController extends Controller {
         $lista = ($entity->getPrecioLista()) ? $entity->getPrecioLista()->getId() : 1;
         $transporte = ($entity->getTransporte()) ? $entity->getTransporte()->getId() : 0;
         $formapago = ($entity->getFormaPago()) ? $entity->getFormaPago()->getId() : 1;
+        $cuit = $entity->getCuit();
+        $valido = UtilsController::validarCuit($cuit);
         $data = array(
-            'partial' => $partial, 
+            'partial' => $partial,
             'listaprecio' => $lista,
-            'formapago' => $formapago, 
+            'formapago' => $formapago,
             'transporte' => $transporte,
-            'consumidorfinal' => $entity->getConsumidorFinal(),
+            'categoriaIva' => ($entity->getCategoriaIva() ) ?  $entity->getCategoriaIva()->getNombre() : null,
+            'cuitValido' => $valido,
         );
         return new Response( json_encode($data));
     }
@@ -410,7 +413,7 @@ class ClienteController extends Controller {
      * @Route("/selectClientesAjax", name="select_clientes_ajax")
      * @Method("GET")
      */
-    public function selectClientesAjaxAction(Request $request) {        
+    public function selectClientesAjaxAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
         $facturas = $em->getRepository('VentasBundle:Factura')->findByClienteId(0);
         return new JsonResponse($facturas);
@@ -756,10 +759,10 @@ class ClienteController extends Controller {
      * @Method("POST")
      */
     public function getAutocompleteClientesAction( Request $request) {
-        $term = $request->get('searchTerm');        
+        $term = $request->get('searchTerm');
         $em = $this->getDoctrine()->getManager();
-        $results = $em->getRepository('VentasBundle:Cliente')->filterByTerm($term);    
-        return new JsonResponse($results);  
+        $results = $em->getRepository('VentasBundle:Cliente')->filterByTerm($term);
+        return new JsonResponse($results);
     }
 
     /**
@@ -769,7 +772,7 @@ class ClienteController extends Controller {
      */
     public function clienteListDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();        
+        $this->entityManager = $this->getDoctrine()->getManager();
         $this->repository = $this->entityManager->getRepository('VentasBundle:Cliente');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
@@ -784,7 +787,7 @@ class ClienteController extends Controller {
             die;
 
         // Process Parameters
-        // Orders       
+        // Orders
 
         foreach ($orders as $key => $order) {
             // Orders does not contain the name of the column, but its number,
@@ -825,7 +828,7 @@ class ClienteController extends Controller {
                 // In all cases where something does not exist or went wrong, return -
                 $responseTemp = "-";
 
-                switch ($column['name']) {                    
+                switch ($column['name']) {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $cliente->getNombre()));
@@ -846,12 +849,12 @@ class ClienteController extends Controller {
                               $responseTemp = $name;
                               } */
                             break;
-                        }                    
+                        }
                     case 'cuit': {
                             $cuit = $cliente->getCuit();
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $cuit));
                             break;
-                        }                                        
+                        }
                 }
 
                 // Add the found data to the json
@@ -910,7 +913,7 @@ class ClienteController extends Controller {
      */
     public function clienteIndexDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();        
+        $this->entityManager = $this->getDoctrine()->getManager();
         $this->repository = $this->entityManager->getRepository('VentasBundle:Cliente');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
@@ -925,7 +928,7 @@ class ClienteController extends Controller {
             die;
 
         // Process Parameters
-        // Orders       
+        // Orders
 
         foreach ($orders as $key => $order) {
             // Orders does not contain the name of the column, but its number,
@@ -934,7 +937,7 @@ class ClienteController extends Controller {
         }
 
         // Further filtering can be done in the Repository by passing necessary arguments
-        $otherConditions = "array or whatever is needed";        
+        $otherConditions = "array or whatever is needed";
 
         // Get results from the Repository
         $results = $this->repository->getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions = null);
@@ -962,26 +965,26 @@ class ClienteController extends Controller {
             $response .= '["';
 
             $j = 0;
-            $nbColumn = count($columns);            
+            $nbColumn = count($columns);
             foreach ($columns as $key => $column) {
                 // In all cases where something does not exist or went wrong, return -
                 $responseTemp = '';
-                switch ($column['name']) {                    
+                switch ($column['name']) {
                     case 'nombre': {
                             $nombre = $cliente->getNombre();
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $nombre));
                             break;
-                        } 
-                    case 'cuit': {                            
+                        }
+                    case 'cuit': {
                             $cuit = $cliente->getCuit();
-                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $cuit));                            
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $cuit));
                             break;
-                        }                    
+                        }
                     case 'direccion': {
                             $direccion = $cliente->getDireccion();
-                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $direccion));                            
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $direccion));
                             break;
-                        }                    
+                        }
                     case 'localidad': {
                             $localidad = $cliente->getLocalidad();
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $localidad));
@@ -989,32 +992,32 @@ class ClienteController extends Controller {
                         }
                     case 'telefono': {
                             $telefono = $cliente->getTelefono();
-                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $telefono));  
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $telefono));
                             break;
                         }
                     case 'saldo': {
                             $saldo = $cliente->getSaldo();
-                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $saldo));  
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $saldo));
                             break;
                         }
-                    case 'activo': {                
-                            $activo = ($cliente->getActivo()) ? " checked='checked'" : "";           
-                            $title = ($cliente->getActivo()) ? " title='Activo'" : " title='Inactivo'";           
-                            $responseTemp = "<input type='checkbox' disabled='disabled' ".$activo.$title. " />" ;                            
-                           break;                        
-                    }                                       
+                    case 'activo': {
+                            $activo = ($cliente->getActivo()) ? " checked='checked'" : "";
+                            $title = ($cliente->getActivo()) ? " title='Activo'" : " title='Inactivo'";
+                            $responseTemp = "<input type='checkbox' disabled='disabled' ".$activo.$title. " />" ;
+                           break;
+                    }
                     case 'actions': {
-                            $user = $this->getUser();                                                       
+                            $user = $this->getUser();
                             if ($user->getAccess($unidNeg, 'ventas_cliente_edit')) {
-                                $linkEdit = "<a href='" . $this->generateUrl('ventas_cliente_edit', array('id' => $cliente->getId())) . "' class='editar btn btnaction btn_pencil' title='Editar' ></a>&nbsp;";     
+                                $linkEdit = "<a href='" . $this->generateUrl('ventas_cliente_edit', array('id' => $cliente->getId())) . "' class='editar btn btnaction btn_pencil' title='Editar' ></a>&nbsp;";
                                 $responseTemp = $responseTemp . $linkEdit;
-                            }                            
+                            }
                             if ($user->getAccess($unidNeg, 'ventas_cliente_delete')) {
-                                $linkDel = "<a href url='" . $this->generateUrl('ventas_cliente_delete_ajax', array('id' => $cliente->getId())) . "' class='delete btn btnaction btn_trash' title='Borrar' ></a>&nbsp;";     
+                                $linkDel = "<a href url='" . $this->generateUrl('ventas_cliente_delete_ajax', array('id' => $cliente->getId())) . "' class='delete btn btnaction btn_trash' title='Borrar' ></a>&nbsp;";
                                 $responseTemp = $responseTemp . $linkDel;
-                            } 
-                            break;                            
-                        }                                       
+                            }
+                            break;
+                        }
                 }
 
                 // Add the found data to the json
@@ -1044,9 +1047,9 @@ class ClienteController extends Controller {
      */
     public function exportClientesAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
-        $search =  $request->get('searchterm');       
+        $search =  $request->get('searchterm');
         $items = $em->getRepository('VentasBundle:Cliente')->getClientesForExportXls($search);
-    
+
         $partial = $this->renderView('VentasBundle:Cliente:export-xls.html.twig',
                 array('items' => $items, 'search' => $search));
         $hoy = new \DateTime();

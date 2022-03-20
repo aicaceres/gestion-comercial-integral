@@ -1055,7 +1055,7 @@ form textarea.error { border: 1px solid #f00; }
 form textarea.error { border: 1px solid #f00; }
 form select.error { border: 1px solid #f00; }
 form label.error { float: none; color: #f00; font-size: 11px; display: block; text-align: left; font-weight: bold; }
-
+form input.number{ text-align: right;}
 .stdform p, .stdform div.par { margin: 10px 0; }
 .stdform div.par { overflow: hidden; }
 .stdform span.field, .stdform div.field { margin-left: 220px; display: block; position: relative; }

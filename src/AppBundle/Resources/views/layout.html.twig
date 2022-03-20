@@ -4,10 +4,10 @@
 {% if app.session.get('theme') =='contrast'%}
 <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.contrast.css') }}" type="text/css">
 {% elseif app.session.get('theme') =='blueline' %}
-<link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.blueline.css') }}" type="text/css">    
+<link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.blueline.css') }}" type="text/css">
 {% elseif app.session.get('theme') =='greenline' %}
-<link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.greenline.css') }}" type="text/css">    
-{% endif %} 
+<link id="addonstyle" rel="stylesheet" href="{{ asset('assets/css/style.greenline.css') }}" type="text/css">
+{% endif %}
 <script type="text/javascript">
 ///// VALORES DE VENTAS Y COMPRAS EN HEADER
         jQuery.get("{{ path('datos_header') }}",function(data){
@@ -18,8 +18,9 @@
         	jQuery('#porcobrar').html('$'+data.porcobrar.toLocaleString());
         	jQuery('#porpagar').html('$'+data.porpagar.toLocaleString());*/
 	});
-</script> 
-{% endblock %} 
+</script>
+{% endblock %}
+{% block extra_css %}{% endblock %}
 {% block body %}
 <div id="popup"></div>
 <body class="withvernav">
@@ -27,14 +28,14 @@
         {% include "AppBundle::header.html.twig" %}
         <div class="centercontent">
             {% block pageheader %}
-           
+
             {% endblock %}
-            {% block contentwrapper %}  
-            
+            {% block contentwrapper %}
+
             {% endblock %}
         </div>
     </div>
-</body>        
+</body>
 {% endblock %}
 {% block page_javascripts %}
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.slimscroll.js') }}"></script>

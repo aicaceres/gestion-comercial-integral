@@ -1071,8 +1071,9 @@ class ProductoController extends Controller {
         $total = round( ($precio + $montoIva) ,3);
         $data = array(
             'precio' => $precio,
+            'alicuota' => $iva,
             'iva' => $montoIva,
-            'total' => $total
+            'total' => $total,
         );
         return new Response( json_encode($data));
     }

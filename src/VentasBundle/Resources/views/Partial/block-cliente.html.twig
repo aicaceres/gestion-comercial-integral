@@ -1,0 +1,8 @@
+<div class="selectorCliente">
+    {{ form_label(form.cliente) }}
+
+    {{ form_widget(form.cliente,{'attr':{'style':'width:80%','url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente' }}) }}
+
+    <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
+    <input type="hidden" value="" id="categoriaIva"/>
+</div>

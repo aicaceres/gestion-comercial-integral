@@ -25,9 +25,9 @@ class FacturaElectronica
      */
     protected $puntoVenta;
     /**
-     * @var integer $tipoComprobante
-     * @ORM\Column(name="tipo_comprobante", type="string")
-     */
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipComprobante")
+     * @ORM\JoinColumn(name="afip_comprobante_id", referencedColumnName="id")
+     * */
     protected $tipoComprobante;
     /**
      * @var integer $nroComprobante
@@ -61,6 +61,19 @@ class FacturaElectronica
     */
     protected $notaDebCred;
 
+    public function getNroComprobanteTxt(){
+        return str_pad($this->getPuntoVenta(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getNroComprobante(), 8, "0", STR_PAD_LEFT);
+    }
+
+    public function getComprobanteTxt(){
+        return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt();
+    }
+
+    public function getCodigoComprobante(){
+        return intval( $this->getTipoComprobante()->getCodigo() );
+    }
+
+
     /**
      * Get id
      *
@@ -92,29 +105,6 @@ class FacturaElectronica
     public function getPuntoVenta()
     {
         return $this->puntoVenta;
-    }
-
-    /**
-     * Set tipoComprobante
-     *
-     * @param string $tipoComprobante
-     * @return FacturaElectronica
-     */
-    public function setTipoComprobante($tipoComprobante)
-    {
-        $this->tipoComprobante = $tipoComprobante;
-
-        return $this;
-    }
-
-    /**
-     * Get tipoComprobante
-     *
-     * @return string
-     */
-    public function getTipoComprobante()
-    {
-        return $this->tipoComprobante;
     }
 
     /**
@@ -225,10 +215,33 @@ class FacturaElectronica
     /**
      * Get notaDebCred
      *
-     * @return \VentasBundle\Entity\NotaDebCred 
+     * @return \VentasBundle\Entity\NotaDebCred
      */
     public function getNotaDebCred()
     {
         return $this->notaDebCred;
+    }
+
+    /**
+     * Set tipoComprobante
+     *
+     * @param \ConfigBundle\Entity\AfipComprobante $tipoComprobante
+     * @return FacturaElectronica
+     */
+    public function setTipoComprobante(\ConfigBundle\Entity\AfipComprobante $tipoComprobante = null)
+    {
+        $this->tipoComprobante = $tipoComprobante;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoComprobante
+     *
+     * @return \ConfigBundle\Entity\AfipComprobante
+     */
+    public function getTipoComprobante()
+    {
+        return $this->tipoComprobante;
     }
 }

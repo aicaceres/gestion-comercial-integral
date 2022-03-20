@@ -10,11 +10,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * VentasBundle\Entity\NotaDebCred
  * @ORM\Table(name="ventas_nota_debcred")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\NotaDebCredRepository")
- * @UniqueEntity(
- *     fields={"cliente","signo","nroNotaDebCred"},
- *     errorPath="nroComprobante",
- *     message="El N° de Comprobante ya existe para este Cliente."
- * )
  */
 class NotaDebCred {
     /**
@@ -24,18 +19,6 @@ class NotaDebCred {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
-
-    /**
-     * @var integer $tipoNota
-     * @ORM\Column(name="tipo_nota", type="string", length=1)
-     */
-    protected $tipoNota;
-
-    /**
-     * @var integer $nroNotaDebCred
-     * @ORM\Column(name="nro_nota_debcred", type="string", length=30)
-     */
-    protected $nroNotaDebCred;
 
     /**
      * @var datetime $fecha
@@ -57,15 +40,27 @@ class NotaDebCred {
     protected $signo = '+';
 
     /**
-     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="notaDebCred")
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="notaDebCred", cascade={"persist"})
      */
     private $notaElectronica;
+
+    /**
+     * @var integer $descuentoRecargo
+     * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
+     */
+    protected $descuentoRecargo;
 
     /**
      * @var integer $iva
      * @ORM\Column(name="iva", type="decimal", scale=2,nullable=true )
      */
     protected $iva;
+
+    /**
+     * @var integer $percIibb
+     * @ORM\Column(name="perc_iibb", type="decimal", scale=2,nullable=true )
+     */
+    protected $percIibb;
 
     /**
      * @var integer $total
@@ -79,11 +74,11 @@ class NotaDebCred {
      */
     protected $saldo;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
-     * @ORM\JoinColumn(name="condicion_pago_id", referencedColumnName="id")
-     * */
-    protected $condicionPago;
+     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
+     * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
+     **/
+    protected $formaPago;
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
@@ -92,16 +87,42 @@ class NotaDebCred {
     protected $precioLista;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
+     * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     */
+    protected $moneda;
+
+    /**
+     * @var string $cotizacion
+     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     */
+    protected $cotizacion = 0;
+
+    /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="notasDebCredVenta")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      */
     protected $cliente;
-
     /**
-     * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\Factura")
+     * @var string $nombreCliente
+     * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     */
+    protected $nombreCliente;
+    /**
+     * @var string $tipoDocumentoCliente
+     * @ORM\Column(name="tipo_documento_cliente", type="integer", nullable=true)
+     */
+    protected $tipoDocumentoCliente;
+    /**
+     * @var string $nroDocumentoCliente
+     * @ORM\Column(name="nro_documento_cliente", type="string", length=13, nullable=true)
+     */
+    protected $nroDocumentoCliente;
+    /**
+     * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\FacturaElectronica")
      * @ORM\JoinTable(name="facturas_x_notadebcred_ventas",
      *      joinColumns={@ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="ventas_factura_id", referencedColumnName="id")}
+     *      inverseJoinColumns={@ORM\JoinColumn(name="ventas_factura_electronica_id", referencedColumnName="id")}
      * )
      */
     protected $facturas;
@@ -113,36 +134,9 @@ class NotaDebCred {
     protected $unidadNegocio;
 
     /**
-     * @ORM\Column(name="concepto", type="text", nullable=true)
-     */
-    protected $concepto;
-
-    /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\NotaDebCredDetalle", mappedBy="notaDebCred",cascade={"persist", "remove"})
      */
     protected $detalles;
-
-    /*
-     * DATOS PARA AFIP
-     */
-
-    /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipComprobante")
-     * @ORM\JoinColumn(name="afip_comprobante_id", referencedColumnName="id")
-     * */
-    protected $afipComprobante;
-
-    /**
-     * @var integer $afipPuntoVenta
-     * @ORM\Column(name="afip_punto_venta", type="string", length=5)
-     */
-    protected $afipPuntoVenta;
-
-    /**
-     * @var integer $afipNroComprobante
-     * @ORM\Column(name="afip_nro_comprobante", type="string", length=20)
-     */
-    protected $afipNroComprobante;
 
     /**
      * @var datetime $created
@@ -181,35 +175,22 @@ class NotaDebCred {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->signo = '+';
         $this->estado = 'ACREDITADO';
-        $this->tipoNota = 'A';
     }
 
     public function __toString() {
-        return $this->tipoNota . ' ' . $this->nroNotaDebCred;
+        return $this->getNotaElectronica();
     }
 
     public function getSignoNota() {
         return ($this->signo == '-') ? 'Crédito' : 'Débito';
     }
 
-    public function getCae() {
-        return $this->getNotaElectronica()->getCae();
-    }
-
-    public function getCaeVto() {
-        return $this->getNotaElectronica()->getCaeVto();
-    }
-
-    public function getFacturadoDesde() {
-        return $this->getNotaElectronica()->getFacturadoDesde();
-    }
-
-    public function getFacturadoHasta() {
-        return $this->getNotaElectronica()->getFacturadoHasta();
-    }
-
-    public function getPagoVto() {
-        return $this->getNotaElectronica()->getPagoVto();
+    public function getClienteTxt(){
+        $nombre = $this->getCliente()->getNombre();
+        if( $this->nombreCliente ){
+            $nombre = $nombre . ' - ' . $this->nombreCliente;
+        }
+        return $nombre;
     }
 
     public function getSubTotal() {
@@ -219,25 +200,23 @@ class NotaDebCred {
         }
         return $subtotal;
     }
-
-    public function getTotalIva() {
+    public function getDescTotal() {
         $subtotal = 0;
         foreach ($this->detalles as $item) {
-            $subtotal = $subtotal + $item->getIva();
+            $subtotal = $subtotal + $item->getDescuento();
         }
         return $subtotal;
     }
 
-    public function getNroComprobante() {
-        return $this->__toString();
-    }
+
 
     /**
      * Get id
      *
      * @return integer
      */
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
@@ -247,7 +226,8 @@ class NotaDebCred {
      * @param \DateTime $fecha
      * @return NotaDebCred
      */
-    public function setFecha($fecha) {
+    public function setFecha($fecha)
+    {
         $this->fecha = $fecha;
 
         return $this;
@@ -258,7 +238,8 @@ class NotaDebCred {
      *
      * @return \DateTime
      */
-    public function getFecha() {
+    public function getFecha()
+    {
         return $this->fecha;
     }
 
@@ -268,7 +249,8 @@ class NotaDebCred {
      * @param string $estado
      * @return NotaDebCred
      */
-    public function setEstado($estado) {
+    public function setEstado($estado)
+    {
         $this->estado = $estado;
 
         return $this;
@@ -279,143 +261,9 @@ class NotaDebCred {
      *
      * @return string
      */
-    public function getEstado() {
+    public function getEstado()
+    {
         return $this->estado;
-    }
-
-    /**
-     * Set created
-     *
-     * @param \DateTime $created
-     * @return NotaDebCred
-     */
-    public function setCreated($created) {
-        $this->created = $created;
-
-        return $this;
-    }
-
-    /**
-     * Get created
-     *
-     * @return \DateTime
-     */
-    public function getCreated() {
-        return $this->created;
-    }
-
-    /**
-     * Set updated
-     *
-     * @param \DateTime $updated
-     * @return NotaDebCred
-     */
-    public function setUpdated($updated) {
-        $this->updated = $updated;
-
-        return $this;
-    }
-
-    /**
-     * Get updated
-     *
-     * @return \DateTime
-     */
-    public function getUpdated() {
-        return $this->updated;
-    }
-
-    /**
-     * Add detalles
-     *
-     * @param \VentasBundle\Entity\NotaDebCredDetalle $detalles
-     * @return NotaDebCred
-     */
-    public function addDetalle(\VentasBundle\Entity\NotaDebCredDetalle $detalles) {
-        $detalles->setNotaDebCred($this);
-        $this->detalles[] = $detalles;
-        return $this;
-    }
-
-    /**
-     * Remove detalles
-     *
-     * @param \VentasBundle\Entity\NotaDebCredDetalle $detalles
-     */
-    public function removeDetalle(\VentasBundle\Entity\NotaDebCredDetalle $detalles) {
-        $this->detalles->removeElement($detalles);
-    }
-
-    /**
-     * Get detalles
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getDetalles() {
-        return $this->detalles;
-    }
-
-    /**
-     * Set createdBy
-     *
-     * @param \ConfigBundle\Entity\Usuario $createdBy
-     * @return NotaDebCred
-     */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    /**
-     * Get createdBy
-     *
-     * @return \ConfigBundle\Entity\Usuario
-     */
-    public function getCreatedBy() {
-        return $this->createdBy;
-    }
-
-    /**
-     * Set updatedBy
-     *
-     * @param \ConfigBundle\Entity\Usuario $updatedBy
-     * @return NotaDebCred
-     */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    /**
-     * Get updatedBy
-     *
-     * @return \ConfigBundle\Entity\Usuario
-     */
-    public function getUpdatedBy() {
-        return $this->updatedBy;
-    }
-
-    /**
-     * Set concepto
-     *
-     * @param string $concepto
-     * @return NotaDebCred
-     */
-    public function setConcepto($concepto) {
-        $this->concepto = $concepto;
-
-        return $this;
-    }
-
-    /**
-     * Get concepto
-     *
-     * @return string
-     */
-    public function getConcepto() {
-        return $this->concepto;
     }
 
     /**
@@ -424,7 +272,8 @@ class NotaDebCred {
      * @param string $signo
      * @return NotaDebCred
      */
-    public function setSigno($signo) {
+    public function setSigno($signo)
+    {
         $this->signo = $signo;
 
         return $this;
@@ -435,7 +284,8 @@ class NotaDebCred {
      *
      * @return string
      */
-    public function getSigno() {
+    public function getSigno()
+    {
         return $this->signo;
     }
 
@@ -445,18 +295,21 @@ class NotaDebCred {
      * @param string $iva
      * @return NotaDebCred
      */
-    public function setIva($iva) {
+    public function setIva($iva)
+    {
         $this->iva = $iva;
 
         return $this;
     }
 
-    public function getIva() {
-        $iva = 0;
-        foreach ($this->detalles as $item) {
-            $iva = $iva + $item->getIva();
-        }
-        return $iva;
+    /**
+     * Get iva
+     *
+     * @return string
+     */
+    public function getIva()
+    {
+        return $this->iva;
     }
 
     /**
@@ -465,7 +318,8 @@ class NotaDebCred {
      * @param string $total
      * @return NotaDebCred
      */
-    public function setTotal($total) {
+    public function setTotal($total)
+    {
         $this->total = $total;
 
         return $this;
@@ -476,37 +330,9 @@ class NotaDebCred {
      *
      * @return string
      */
-    public function getTotal() {
+    public function getTotal()
+    {
         return $this->total;
-    }
-
-    /**
-     * Add facturas
-     *
-     * @param \VentasBundle\Entity\Factura $facturas
-     * @return NotaDebCred
-     */
-    public function addFactura(\VentasBundle\Entity\Factura $facturas) {
-        $this->facturas[] = $facturas;
-        return $this;
-    }
-
-    /**
-     * Remove facturas
-     *
-     * @param \VentasBundle\Entity\Factura $facturas
-     */
-    public function removeFactura(\VentasBundle\Entity\Factura $facturas) {
-        $this->facturas->removeElement($facturas);
-    }
-
-    /**
-     * Get facturas
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getFacturas() {
-        return $this->facturas;
     }
 
     /**
@@ -515,7 +341,8 @@ class NotaDebCred {
      * @param string $saldo
      * @return NotaDebCred
      */
-    public function setSaldo($saldo) {
+    public function setSaldo($saldo)
+    {
         $this->saldo = $saldo;
 
         return $this;
@@ -526,29 +353,147 @@ class NotaDebCred {
      *
      * @return string
      */
-    public function getSaldo() {
+    public function getSaldo()
+    {
         return $this->saldo;
     }
 
     /**
-     * Set cliente
+     * Set cotizacion
      *
-     * @param \VentasBundle\Entity\Cliente $cliente
+     * @param string $cotizacion
      * @return NotaDebCred
      */
-    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null) {
-        $this->cliente = $cliente;
+    public function setCotizacion($cotizacion)
+    {
+        $this->cotizacion = $cotizacion;
 
         return $this;
     }
 
     /**
-     * Get cliente
+     * Get cotizacion
      *
-     * @return \VentasBundle\Entity\Cliente
+     * @return string
      */
-    public function getCliente() {
-        return $this->cliente;
+    public function getCotizacion()
+    {
+        return $this->cotizacion;
+    }
+
+    /**
+     * Set nombreCliente
+     *
+     * @param string $nombreCliente
+     * @return NotaDebCred
+     */
+    public function setNombreCliente($nombreCliente)
+    {
+        $this->nombreCliente = $nombreCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get nombreCliente
+     *
+     * @return string
+     */
+    public function getNombreCliente()
+    {
+        return $this->nombreCliente;
+    }
+
+    /**
+     * Set tipoDocumentoCliente
+     *
+     * @param integer $tipoDocumentoCliente
+     * @return NotaDebCred
+     */
+    public function setTipoDocumentoCliente($tipoDocumentoCliente)
+    {
+        $this->tipoDocumentoCliente = $tipoDocumentoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoDocumentoCliente
+     *
+     * @return integer
+     */
+    public function getTipoDocumentoCliente()
+    {
+        return $this->tipoDocumentoCliente;
+    }
+
+    /**
+     * Set nroDocumentoCliente
+     *
+     * @param string $nroDocumentoCliente
+     * @return NotaDebCred
+     */
+    public function setNroDocumentoCliente($nroDocumentoCliente)
+    {
+        $this->nroDocumentoCliente = $nroDocumentoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get nroDocumentoCliente
+     *
+     * @return string
+     */
+    public function getNroDocumentoCliente()
+    {
+        return $this->nroDocumentoCliente;
+    }
+
+    /**
+     * Set created
+     *
+     * @param \DateTime $created
+     * @return NotaDebCred
+     */
+    public function setCreated($created)
+    {
+        $this->created = $created;
+
+        return $this;
+    }
+
+    /**
+     * Get created
+     *
+     * @return \DateTime
+     */
+    public function getCreated()
+    {
+        return $this->created;
+    }
+
+    /**
+     * Set updated
+     *
+     * @param \DateTime $updated
+     * @return NotaDebCred
+     */
+    public function setUpdated($updated)
+    {
+        $this->updated = $updated;
+
+        return $this;
+    }
+
+    /**
+     * Get updated
+     *
+     * @return \DateTime
+     */
+    public function getUpdated()
+    {
+        return $this->updated;
     }
 
     /**
@@ -557,7 +502,8 @@ class NotaDebCred {
      * @param \VentasBundle\Entity\FacturaElectronica $notaElectronica
      * @return NotaDebCred
      */
-    public function setNotaElectronica(\VentasBundle\Entity\FacturaElectronica $notaElectronica = null) {
+    public function setNotaElectronica(\VentasBundle\Entity\FacturaElectronica $notaElectronica = null)
+    {
         $this->notaElectronica = $notaElectronica;
 
         return $this;
@@ -568,62 +514,32 @@ class NotaDebCred {
      *
      * @return \VentasBundle\Entity\FacturaElectronica
      */
-    public function getNotaElectronica() {
+    public function getNotaElectronica()
+    {
         return $this->notaElectronica;
     }
 
     /**
-     * Set tipoNota
+     * Set formaPago
      *
-     * @param string $tipoNota
+     * @param \ConfigBundle\Entity\FormaPago $formaPago
      * @return NotaDebCred
      */
-    public function setTipoNota($tipoNota) {
-        $this->tipoNota = $tipoNota;
+    public function setFormaPago(\ConfigBundle\Entity\FormaPago $formaPago = null)
+    {
+        $this->formaPago = $formaPago;
 
         return $this;
     }
 
     /**
-     * Set nroNotaDebCred
+     * Get formaPago
      *
-     * @param string $nroNotaDebCred
-     * @return NotaDebCred
+     * @return \ConfigBundle\Entity\FormaPago
      */
-    public function setNroNotaDebCred($nroNotaDebCred) {
-        $this->nroNotaDebCred = $nroNotaDebCred;
-
-        return $this;
-    }
-
-    /**
-     * Get nroNotaDebCred
-     *
-     * @return string
-     */
-    public function getNroNotaDebCred() {
-        return $this->nroNotaDebCred;
-    }
-
-    /**
-     * Set condicionPago
-     *
-     * @param \ConfigBundle\Entity\Parametro $condicionPago
-     * @return NotaDebCred
-     */
-    public function setCondicionPago(\ConfigBundle\Entity\Parametro $condicionPago = null) {
-        $this->condicionPago = $condicionPago;
-
-        return $this;
-    }
-
-    /**
-     * Get condicionPago
-     *
-     * @return \ConfigBundle\Entity\Parametro
-     */
-    public function getCondicionPago() {
-        return $this->condicionPago;
+    public function getFormaPago()
+    {
+        return $this->formaPago;
     }
 
     /**
@@ -632,7 +548,8 @@ class NotaDebCred {
      * @param \AppBundle\Entity\PrecioLista $precioLista
      * @return NotaDebCred
      */
-    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null) {
+    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null)
+    {
         $this->precioLista = $precioLista;
 
         return $this;
@@ -643,8 +560,88 @@ class NotaDebCred {
      *
      * @return \AppBundle\Entity\PrecioLista
      */
-    public function getPrecioLista() {
+    public function getPrecioLista()
+    {
         return $this->precioLista;
+    }
+
+    /**
+     * Set moneda
+     *
+     * @param \ConfigBundle\Entity\Moneda $moneda
+     * @return NotaDebCred
+     */
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
+    {
+        $this->moneda = $moneda;
+
+        return $this;
+    }
+
+    /**
+     * Get moneda
+     *
+     * @return \ConfigBundle\Entity\Moneda
+     */
+    public function getMoneda()
+    {
+        return $this->moneda;
+    }
+
+    /**
+     * Set cliente
+     *
+     * @param \VentasBundle\Entity\Cliente $cliente
+     * @return NotaDebCred
+     */
+    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
+    {
+        $this->cliente = $cliente;
+
+        return $this;
+    }
+
+    /**
+     * Get cliente
+     *
+     * @return \VentasBundle\Entity\Cliente
+     */
+    public function getCliente()
+    {
+        return $this->cliente;
+    }
+
+    /**
+     * Add facturas
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $facturas
+     * @return NotaDebCred
+     */
+    public function addFactura(\VentasBundle\Entity\FacturaElectronica $facturas)
+    {
+        $this->facturas[] = $facturas;
+
+        return $this;
+    }
+
+    /**
+     * Remove facturas
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $facturas
+     */
+    public function removeFactura(\VentasBundle\Entity\FacturaElectronica $facturas)
+    {
+        $this->facturas->removeElement($facturas);
+    }
+
+    /**
+     * Get facturas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFacturas()
+    {
+        return $this->facturas;
     }
 
     /**
@@ -653,7 +650,8 @@ class NotaDebCred {
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
      * @return NotaDebCred
      */
-    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null) {
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
+    {
         $this->unidadNegocio = $unidadNegocio;
 
         return $this;
@@ -664,89 +662,134 @@ class NotaDebCred {
      *
      * @return \ConfigBundle\Entity\UnidadNegocio
      */
-    public function getUnidadNegocio() {
+    public function getUnidadNegocio()
+    {
         return $this->unidadNegocio;
     }
 
     /**
-     * Get tipoNota
+     * Add detalles
      *
-     * @return string
-     */
-    public function getTipoNota() {
-        return $this->tipoNota;
-    }
-
-    /**
-     * Set afipPuntoVenta
-     *
-     * @param string $afipPuntoVenta
+     * @param \VentasBundle\Entity\NotaDebCredDetalle $detalles
      * @return NotaDebCred
      */
-    public function setAfipPuntoVenta($afipPuntoVenta) {
-        $this->afipPuntoVenta = $afipPuntoVenta;
+    public function addDetalle(\VentasBundle\Entity\NotaDebCredDetalle $detalles)
+    {
+        $detalles->setNotaDebCred($this);
+        $this->detalles[] = $detalles;
 
         return $this;
     }
 
     /**
-     * Get afipPuntoVenta
+     * Remove detalles
      *
-     * @return string
+     * @param \VentasBundle\Entity\NotaDebCredDetalle $detalles
      */
-    public function getAfipPuntoVenta() {
-        return $this->afipPuntoVenta;
+    public function removeDetalle(\VentasBundle\Entity\NotaDebCredDetalle $detalles)
+    {
+        $this->detalles->removeElement($detalles);
     }
 
     /**
-     * Set afipNroComprobante
+     * Get detalles
      *
-     * @param string $afipNroComprobante
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDetalles()
+    {
+        return $this->detalles;
+    }
+
+    /**
+     * Set createdBy
+     *
+     * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return NotaDebCred
      */
-    public function setAfipNroComprobante($afipNroComprobante) {
-        $this->afipNroComprobante = $afipNroComprobante;
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
+    {
+        $this->createdBy = $createdBy;
 
         return $this;
     }
 
     /**
-     * Get afipNroComprobante
+     * Get createdBy
      *
-     * @return string
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getAfipNroComprobante() {
-        return $this->afipNroComprobante;
+    public function getCreatedBy()
+    {
+        return $this->createdBy;
     }
 
     /**
-     * Set afipComprobante
+     * Set updatedBy
      *
-     * @param \ConfigBundle\Entity\AfipComprobante $afipComprobante
+     * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return NotaDebCred
      */
-    public function setAfipComprobante(\ConfigBundle\Entity\AfipComprobante $afipComprobante = null) {
-        $this->afipComprobante = $afipComprobante;
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
+    {
+        $this->updatedBy = $updatedBy;
 
         return $this;
     }
 
     /**
-     * Get afipComprobante
+     * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\AfipComprobante
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getAfipComprobante() {
-        return $this->afipComprobante;
+    public function getUpdatedBy()
+    {
+        return $this->updatedBy;
     }
 
-    public function getNuevoNroComprobante() {
-        if ($this->getAfipPuntoVenta() && $this->getAfipNroComprobante()) {
-            return $this->getAfipPuntoVenta() . '-' . $this->getAfipNroComprobante();
-        }
-        else {
-            return $this->getNroNotaDebCred();
-        }
+    /**
+     * Set percIibb
+     *
+     * @param string $percIibb
+     * @return NotaDebCred
+     */
+    public function setPercIibb($percIibb)
+    {
+        $this->percIibb = $percIibb;
+
+        return $this;
     }
 
+    /**
+     * Get percIibb
+     *
+     * @return string
+     */
+    public function getPercIibb()
+    {
+        return $this->percIibb;
+    }
+
+    /**
+     * Set descuentoRecargo
+     *
+     * @param string $descuentoRecargo
+     * @return NotaDebCred
+     */
+    public function setDescuentoRecargo($descuentoRecargo)
+    {
+        $this->descuentoRecargo = $descuentoRecargo;
+
+        return $this;
+    }
+
+    /**
+     * Get descuentoRecargo
+     *
+     * @return string
+     */
+    public function getDescuentoRecargo()
+    {
+        return $this->descuentoRecargo;
+    }
 }

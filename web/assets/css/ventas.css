@@ -1,0 +1,95 @@
+/**
+* Estilos para los formularios de venta - presupuesto - cobro - notas deb/cred
+**/
+    .divForm label{
+        font-weight: bold;
+        padding: 0px 2px 0px 8px;
+    }
+    .pagetitle span{
+        font-size:20px;
+    }
+    .fields label{
+        display: inline-block;
+        width:100%;
+    }
+    /* botones para busqueda */
+    a.btn_search{
+        margin:0;
+    }
+    /* botones de items */
+    .divForm span.add-item-button, .divForm span.del-item-button{
+        font-size: 20px;
+        font-family: courier;
+        font-weight: bold;
+    }
+    /* Estilo para focus */
+    .divForm select:focus, .divForm input:focus, .divForm button:focus, .divForm a:focus, .divForm .select2-container *:focus{
+        color:blue ;
+        font-weight:bold ;
+        background-color: gainsboro;
+    }
+    .divnotif{
+        padding: 0 10px;
+    }
+    /* block-cliente */
+    .selectorCliente{
+        display:inline-block;
+        width: 50%;
+    }
+    /* block-formapago */
+    .selectFormaPago{
+        display:inline-block;
+        width: 25%;
+    }
+    /* block-moneda */
+    .datos-moneda{
+        display:inline-block;
+        width: 20%;
+    }
+    .datos-moneda label{
+        width:80%;
+    }
+    .datos-moneda small label{
+        width: fit-content;
+    }
+    .datos-moneda small{
+        font-size:9px;
+        float:right;
+    }
+    /* Bloque con datos del cliente */
+    .datos-cliente{
+        display:inline-block;
+        width:70%;
+        min-width: 70%;
+        vertical-align:top;
+        margin-bottom:10px;
+    }
+    /* Bloque con datos si es consumidor final */
+    .datos-cf{
+        display:inline-block;
+        vertical-align:top;
+        margin-bottom:10px;
+        width:70%;
+        min-width: 70%;
+    }
+    .datos-cf div{
+        display: inline-block;
+    }
+    /* Bloque con datos de forma de pago */
+    .datos-formapago{
+        display:inline-block;
+        width: 25%;
+        vertical-align: top;
+    }
+    /* tabla de items */
+    .stdtable.noaction tbody tr.item td{
+        padding: 4px 10px;
+    }
+    /* destacado al focus en tablas modal */
+    #clientes_table .nombre-cliente:focus, #clientes_table .nombre-cliente:hover,
+    #formapago_table .nombre-formapago:focus , #formapago_table .nombre-formapago:hover,
+    #productos_table .nombre-producto:focus, #productos_table .nombre-producto:hover,
+    .paginate_button:focus{
+        color:red !important;
+        font-weight:bold;
+    }
