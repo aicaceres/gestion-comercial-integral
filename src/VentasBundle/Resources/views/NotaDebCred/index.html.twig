@@ -15,7 +15,7 @@
 
 <div id="contentwrapper" class="contentwrapper">
 <div>
-    <form id="printform" name="printform" target="_blank"  action="{{ path("print_ventas_notadebcred") }}" method="post">
+    <form id="printform" name="printform" target="_blank"  action="{{ path("print_ventas_list_notadebcred") }}" method="post">
         <input type="hidden" id="clienteid" name="clienteid"/>
         <input type="hidden" id="fdesde" name="fdesde"/>
         <input type="hidden" id="fhasta" name="fhasta"/>
@@ -52,9 +52,24 @@
                 <th>Total</th>
                 <th>Usuario</th>
                 <th class="nosort actionbutton addbutton">
-                   {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
-                    <a class="editar create" href="{{ path('ventas_notadebcred_new') }}">Nueva Nota</a>
-                    {% else %} &nbsp; {% endif %}
+
+                    {% if app.session.get('caja_abierta') %}
+                        {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
+                            <a class="editar create" href="{{ path('ventas_notadebcred_new') }}">Nueva Nota</a>
+                        {% else %} &nbsp;
+                        {% endif %}
+                    {% else %}
+                        {% if  app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
+                                {% set urlApertura = path('ventas_apertura_new') %}
+                                <a href="javascript:void(0)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')" class="btn btn_orange btn_lock" title="Debe abrir la caja para realizar cobros">
+                                    <span style="font-size: 14px;">APERTURA DE CAJA</span>
+                                </a>
+                        {% else %}
+                            <div class="external-event" style="background-color:orangered;cursor:pointer" title="Debe abrir la caja para realizar cobros">CAJA CERRADA</div>
+                        {% endif %}
+
+                    {% endif %}
+
                 </th>
             </tr>
         </thead>
@@ -70,7 +85,7 @@
                 <td class="buttons">
                     {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
                     <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Nota"></a>
-                    <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" title="Imprimir Presupuesto"></a>
+                    <a href="#" url="{{ path('print_notadebcred_ventas', { 'id': entity.id })}}" class="editar btn btnaction btn_print" title="Imprimir Comprobante"></a>
                     {% endif %}
                 </td>
             </tr>
@@ -84,27 +99,27 @@
 <script type="text/javascript">
 jQuery(document).ready(function($){
     $('#selectCliente').select2({
-            minimumInputLength: 3,
-            placeholder: ' ',
-			allowClear: true,
             ajax: {
-                url: "{{path('get_autocomplete_clientes')}}",
-                type: "post",
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    return {
-                    searchTerm: params.term // search term
-                    };
-                },
-                processResults: function (response) {
-                    return {
-                        results: response
-                    };
-                },
-                cache: true
-            }
-        }).val(null).select2('change');
+            url: "{{path('get_autocomplete_clientes')}}",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                searchTerm: params.term // search term
+                };
+            },
+            processResults: function (response) {
+                return {
+                    results: response
+                };
+            },
+            cache: true
+            },
+            minimumInputLength: 3
+        }).on('change', function(){
+            $('#searchform').submit();
+        });
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
     var oTable = $('#dyntable2').dataTable();

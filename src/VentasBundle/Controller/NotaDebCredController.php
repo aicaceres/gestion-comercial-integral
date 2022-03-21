@@ -116,6 +116,7 @@ class NotaDebCredController extends Controller {
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
+            $notaElectronica = $entity->getNotaElectronica();
             $docTipo = 99 ;
             $docNro = 0;
             if( $entity->getCliente()->getCuit() ){
@@ -203,8 +204,8 @@ class NotaDebCredController extends Controller {
 
                 $data = array(
                     'CantReg' 	=> 1,  // Cantidad de comprobantes a registrar
-                    'PtoVta' 	=> $entity->getNotaElectronica()->getPuntoVenta(),  // Punto de venta
-                    'CbteTipo' 	=> $entity->getNotaElectronica()->getCodigoComprobante(),  // Tipo de comprobante (ver tipos disponibles)
+                    'PtoVta' 	=> $notaElectronica->getPuntoVenta(),  // Punto de venta
+                    'CbteTipo' 	=> $notaElectronica->getCodigoComprobante(),  // Tipo de comprobante (ver tipos disponibles)
                     'Concepto' 	=> 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
                     'DocTipo' 	=> $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
                     'DocNro' 	=> $docNro,  // Número de documento del comprador (0 consumidor final)
@@ -234,8 +235,10 @@ class NotaDebCredController extends Controller {
                 $entity->setSaldo($impTotal);
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
                 $entity->setUnidadNegocio($unidneg);
-
-                $notaElectronica = $entity->getNotaElectronica();
+                // signo
+                $signo = ( substr($notaElectronica->getTipoComprobante()->getValor(),0,3) == 'DEB'  ) ? '+' : '-';
+                $entity->setSigno($signo);
+                // Guardar datos en factura electronica
                 $notaElectronica->setNotaDebCred($entity);
                 $notaElectronica->setCae($wsResult['CAE']);
                 $notaElectronica->setCaeVto($wsResult['CAEFchVto']);
@@ -372,12 +375,40 @@ class NotaDebCredController extends Controller {
      */
 
     /**
-     * @Route("/printVentasNotaDebCred.{_format}",
+     * @Route("/{id}/printNotaDebCredVentas.{_format}",
      * defaults = { "_format" = "pdf" },
-     * name="print_ventas_notadebcred")
-     * @Method("POST")
+     * name="print_notadebcred_ventas")
+     * @Method("GET")
      */
-    public function printVentasNotaDebCredAction(Request $request) {
+    public function printNotaDebCredAction(Request $request,$id){
+        $em = $this->getDoctrine()->getManager();
+        $nota = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
+        $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
+
+        $logo = __DIR__.'/../../../web/assets/images/logo_comprobante.png';
+        $qr = __DIR__.'/../../../web/assets/images/qr.jpg';
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('VentasBundle:NotaDebCred:comprobante.pdf.twig',
+                      array( 'nota' => $nota, 'empresa'=>$empresa, 'logo' => $logo, 'qr' => $qr ), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        $hoy = new \DateTime();
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition'=>'filename='.$nota->getNotaElectronica()->getComprobanteTxt().'.pdf'));
+    }
+
+
+
+    /**
+     * @Route("/printVentasListNotaDebCred.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="print_ventas_list_notadebcred")
+     * @Method("POST")
+    */
+    public function printVentasListNotaDebCredAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
         $items = $request->get('datalist');
         $clienteId = $request->get('clienteid');

@@ -79,6 +79,9 @@ class NotaDebCredDetalle {
     public function getSubTotal() {
         return $this->precio * $this->cantidad;
     }
+    public function getPrecioMasIva(){
+        return $this->precio * (1 + ($this->alicuota/100));
+    }
 
     public function getMontoIva() {
         return ($this->getSubTotal() + $this->getDescuento()) * ( $this->getAlicuota()/100 );

@@ -73,6 +73,21 @@ class FacturaElectronica
         return intval( $this->getTipoComprobante()->getCodigo() );
     }
 
+    public function getLetra() {
+        return substr($this->getTipoComprobante()->getValor(),4,1);
+    }
+    public function getTituloPdf() {
+        $tipo = substr($this->getTipoComprobante()->getValor(),0,3);
+        switch ($tipo) {
+            case 'FAC':
+                return 'FACTURADO';
+            case 'DEB':
+                return 'NOTA DE DEBITO';
+            case 'CRE':
+                return 'NOTA DE CREDITO';
+        }
+        return false;
+    }
 
     /**
      * Get id

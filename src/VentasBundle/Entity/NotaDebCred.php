@@ -200,6 +200,14 @@ class NotaDebCred {
         }
         return $subtotal;
     }
+    public function getSubTotalMasIva() {
+        $subtotal = 0;
+        foreach ($this->detalles as $item) {
+            $subtotal = $subtotal + ($item->getPrecioMasIva() * $item->getCantidad() ) ;
+        }
+        return $subtotal;
+    }
+
     public function getDescTotal() {
         $subtotal = 0;
         foreach ($this->detalles as $item) {
