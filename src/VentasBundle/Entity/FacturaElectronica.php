@@ -61,6 +61,17 @@ class FacturaElectronica
     */
     protected $notaDebCred;
 
+    protected $qr;
+    public function getQr()
+    {
+        return $this->qr;
+    }
+    public function setQr($qr)
+    {
+        $this->qr = $qr;
+        return $this;
+    }
+
     public function getNroComprobanteTxt(){
         return str_pad($this->getPuntoVenta(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getNroComprobante(), 8, "0", STR_PAD_LEFT);
     }

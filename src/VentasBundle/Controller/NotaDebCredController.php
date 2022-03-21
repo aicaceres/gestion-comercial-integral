@@ -38,6 +38,12 @@ class NotaDebCredController extends Controller {
         $hasta = $request->get('hasta');
 
         $entities = $em->getRepository('VentasBundle:NotaDebCred')->findByCriteria($unidneg, $cliId, $desde, $hasta);
+        foreach( $entities as $entity ){
+            $url = 'https://www.afip.gob.ar/fe/qr/?p=';
+            $data = array("ver" => 1,"fecha" => "2020-10-13","cuit" => 30000000007,"ptoVta" => 10,"tipoCmp" => 1,"nroCmp" => 94,"importe" => 12100,"moneda" => "DOL","ctz" => 65,"tipoDocRec" => 80,"nroDocRec" => 20000000001,"tipoCodAut" => "E","codAut" => 70417054367476);
+            $base64 = base64_encode( json_encode($data) );
+            $entity->getNotaElectronica()->setQr( $url.$base64 );
+        }
         return $this->render('VentasBundle:NotaDebCred:index.html.twig', array(
                     'entities' => $entities,
                     'cliente' => $cliente,

@@ -35,7 +35,10 @@
         padding: 4px 10px;
     }
 
-    #clientes_table .nombre-cliente:focus, #clientes_table .nombre-cliente:hover{
+    #clientes_table .nombre-cliente:focus, #clientes_table .nombre-cliente:hover,
+    #formapago_table .nombre-formapago:focus , #formapago_table .nombre-formapago:hover,
+    #productos_table .nombre-producto:focus, #productos_table .nombre-producto:hover,
+    .paginate_button:focus{
         color:red !important;
         font-weight:bold;
     }
@@ -128,6 +131,11 @@
                 <a class="cancelar" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
         </fieldset>
+        <div class="notifmsg info png_bg" style="margin-top:50px">
+            <a href="#" class="close"></a>
+            <div><small>Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong> Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong> Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong> + = Agregar producto <strong class="divnotif">|</strong> Ctrl+Alt+G = Guardar  </small>
+            </div>
+        </div>
         <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
   {{ form_end(form) }}
 </div>
@@ -280,8 +288,48 @@ jQuery(function ($) {
     });
 
     // abrir modal de producto en select
+    //const newProd = $collectionHolder.find('[name*="producto"]').last();
+    //openModal(newProd);
     const newProd = $collectionHolder.find('[name*="producto"]').last();
-    openModal(newProd);
+
+    productolast = $('[id*="_producto"]').last();
+    productolast.select2({
+            ajax: {
+            url: "{{path('get_autocomplete_productos')}}",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                searchTerm: params.term // search term
+                };
+            },
+            processResults: function (response) {
+                return {
+                    results: response
+                };
+            },
+            cache: true
+            },
+            minimumInputLength: 3
+        }).on('change', function() {
+            obj = $(this);
+            var data = {
+                id: $(this).val(),
+                listaprecio: $('#ventasbundle_presupuesto_precioLista').val(),
+            };
+            $.getJSON( "{{ path('get_datos_venta_producto')}}" , data).done(function(data){
+                // actualizar datos
+                objprecio = obj.parent().siblings('.precTd');
+                objprecio.find('[id*="_precio"]').val( data.precio );
+                objprecio.find('[id*="_alicuota"]').val( data.alicuota );
+                actualizaTotales();
+            });
+        });
+        productolast.select2('focus');
+
+
+
 }
 function addItemFormDeleteLink($itemFormTd) {
     var $removeFormA = jQuery('<a href="#" class="delItem" title="Quitar"><span class="del-item-button">-</span></a>');

@@ -21,58 +21,58 @@ jQuery(function($){
         showMonthAfterYear: false,
         yearSuffix: ''
     };
-    $.datepicker.setDefaults($.datepicker.regional['es']);      
-    
+    $.datepicker.setDefaults($.datepicker.regional['es']);
+
 });
 
 // variable global para definir si es valido el login en venta
-let validlogin = false;  
-// lanza popup para login de ventas  
-function checkLoginVentas(url_login,referer) {        
-    jQuery('#popup').html('');        
-    jQuery('#popup')            
-        .load(url_login, function () {            
-            // foco en password         
-            jQuery('#password').focus();    
-            const url_check = jQuery('#login').attr('action');                                
+let validlogin = false;
+// lanza popup para login de ventas
+function checkLoginVentas(url_login,referer) {
+    jQuery('#popup').html('');
+    jQuery('#popup')
+        .load(url_login, function () {
+            // foco en password
+            jQuery('#password').focus();
+            const url_check = jQuery('#login').attr('action');
             jQuery('#login').on('submit', function (e) {
-                e.preventDefault();    
+                e.preventDefault();
                 data = { username: jQuery('#username').val(), password: jQuery('#password').val() };
-                // validar usuario y password                      
-                jQuery.getJSON(url_check, data, function (data) {               
+                // validar usuario y password
+                jQuery.getJSON(url_check, data, function (data) {
                     if (data.msg == 'OK') {
                         validlogin = true;
                         jQuery('#popup').dialog('close');
                         if(data.reload) {
                             window.location.reload();
                         }
-                        jQuery('#ventasbundle_venta_cliente').focus();                        
+                        jQuery('#ventasbundle_venta_cliente').focus();
                     } else {
                         jQuery('.loginmsg').html(data.msg);
-                        jQuery('.notiflogin').removeClass('hidden'); 
+                        jQuery('.notiflogin').removeClass('hidden');
                         jQuery('#' + data.field).focus();
-                        return false;                           
-                    }                            
+                        return false;
+                    }
                 });
-            })                    
-        })        
+            })
+        })
         .dialog({
             modal: true, autoOpen: false, title: "INGRESO A VENTAS", width: '450px', minHeight: 380,
             close: function (event, ui) {
-                event.preventDefault();                
+                event.preventDefault();
                 if (!validlogin) {
                     window.location.href = referer;
-                }     
-            }           
-        }); 
+                }
+            }
+        });
     jQuery('#popup').dialog('open');
 }
 // lanza popup para ver listado de ventas
-function partialVentasPorCobrar(url) {        
+function partialVentasPorCobrar(url) {
     jQuery('#popup')
-        .html('')        
-        .load(url, function () { 
-            jQuery('#ventasxcobrar').dataTable({                      
+        .html('')
+        .load(url, function () {
+            jQuery('#ventasxcobrar').dataTable({
                         "bSort": false,
                         "sPaginationType": "full_numbers",
                             "oLanguage": {
@@ -97,86 +97,86 @@ function partialVentasPorCobrar(url) {
             jQuery(document).on('focus', '.operacion', function (e) {
                 jQuery('#ventasxcobrar tbody tr').removeClass('selectedline');
                 jQuery(this).parent().addClass('selectedline');
-            })    
-                 
-        })                
+            })
+
+        })
         .dialog({
-            modal: true, autoOpen: false, title: "VENTAS PENDIENTES POR COBRAR", width: "80%",minHeight: 380,    
-        }); 
-jQuery('#popup').dialog('open');    
+            modal: true, autoOpen: false, title: "VENTAS PENDIENTES POR COBRAR", width: "70%",minHeight: 380,
+        });
+jQuery('#popup').dialog('open');
 }
 
-// lanza popup para apertura de caja 
+// lanza popup para apertura de caja
 // CAJA=1
-function aperturaCajaVentas(url, cobro=false, caja=1 ) {    
+function aperturaCajaVentas(url, cobro=false, caja=1 ) {
     let horaRefresh = null;
-    data = { 'id': caja };    
-    jQuery('#popup').html('');        
-    jQuery('#popup')            
-        .load(url, data, function () {      
-            // refresca la hora en un campo fecha-hora            
+    data = { 'id': caja };
+    jQuery('#popup').html('');
+    jQuery('#popup')
+        .load(url, data, function () {
+            // refresca la hora en un campo fecha-hora
             horaRefresh = setInterval(function () {
                 jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
-            }, 1000);            
-            // foco en monto         
-            jQuery('#ventasbundle_apertura_montoApertura').focus();      
-            jQuery('#ir_a_cobro').val(cobro);         
-        })                
+            }, 1000);
+            // foco en monto
+            jQuery('#ventasbundle_apertura_montoApertura').focus();
+            jQuery('#ir_a_cobro').val(cobro);
+        })
     .dialog({
-        modal: true, autoOpen: false, title: "APERTURA DE CAJA", width: '450px',          
+        modal: true, autoOpen: false, title: "APERTURA DE CAJA", width: '450px',
         close: function (event, ui) {
-            event.preventDefault();    
-            clearInterval(horaRefresh);            
-            if( reload )               
-                window.location.href = referer;   
-        }           
-    }); 
+            event.preventDefault();
+            clearInterval(horaRefresh);
+            if( reload )
+                window.location.href = referer;
+        }
+    });
     jQuery('#popup').dialog('open');
 }
-// lanza popup para cierre de caja 
+// lanza popup para cierre de caja
 // CAJA=1
-function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {    
+function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
     let horaRefresh = null;
-    data = { 'id': caja };    
-    jQuery('#popup').html('');        
-    jQuery('#popup')            
-        .load(url, data, function () {      
-            // refresca la hora en un campo fecha-hora            
+    data = { 'id': caja };
+    jQuery('#popup').html('');
+    jQuery('#popup')
+        .load(url, data, function () {
+            // refresca la hora en un campo fecha-hora
             horaRefresh = setInterval(function () {
                 jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
-            }, 1000);            
+            }, 1000);
             // confirm para el cierre
             jQuery('#ventasbundle_cierre').on('submit', function () {
                 if (!confirm('CONFIRMA EL CIERRE DE CAJA!\n\n Este movimiento no puede ser modificado!'))
-                    return false;                    
+                    return false;
             })
-            // foco en monto         
-            jQuery('#ventasbundle_cierre_montoCierre').focus();      
-            //reload = true;           
-        })                
+            // foco en monto
+            jQuery('#ventasbundle_cierre_montoCierre').focus();
+            //reload = true;
+        })
     .dialog({
-        modal: true, autoOpen: false, title: "CIERRE DE CAJA", width: '450px',          
+        modal: true, autoOpen: false, title: "CIERRE DE CAJA", width: '450px',
         close: function (event, ui) {
-            event.preventDefault();    
-            clearInterval(horaRefresh);            
-            if( reload )               
-                window.location.href = referer;   
-        }           
-    }); 
+            event.preventDefault();
+            clearInterval(horaRefresh);
+            if( reload )
+                window.location.href = referer;
+        }
+    });
     jQuery('#popup').dialog('open');
 }
 
-function checknumero(obj){    
+function checknumero(obj){
     num = obj.val().replace(',','.');
     num = ( isNaN(num) || num==='' )  ? 0 : parseFloat(num).toFixed(3);
     obj.val( num );
     return num*1;
 }
-jQuery(document).ready(function(){   
+jQuery(document).ready(function(){
    jQuery('#tabs').tabs();
 
    jQuery('.select2').select2();;
-       
+
 	///// SHOW/HIDE USERDATA WHEN USERINFO IS CLICKED /////
 	jQuery('.userinfo').click(function(){
 		if(!jQuery(this).hasClass('active')) {
@@ -189,7 +189,7 @@ jQuery(document).ready(function(){
 		//remove notification box if visible
 		jQuery('.notification').removeClass('active');
 		jQuery('.noticontent').remove();
-		
+
 		return false;
 	});
 
@@ -216,8 +216,8 @@ jQuery(document).ready(function(){
 		var ud = jQuery('.userinfodrop');
 		var nb = jQuery('.noticontent');
 		//hide user drop menu when clicked outside of this element
-		if(!jQuery(event.target).is('.userinfodrop') 
-			&& !jQuery(event.target).is('.userdata') 
+		if(!jQuery(event.target).is('.userinfodrop')
+			&& !jQuery(event.target).is('.userdata')
 			&& ud.is(':visible')) {
 				ud.hide();
 				jQuery('.userinfo').removeClass('active');
@@ -228,19 +228,19 @@ jQuery(document).ready(function(){
 			jQuery('.notification').removeClass('active');
 		}
 	});
-	
+
 	///// NOTIFICATION CONTENT /////
 	jQuery('.notitab a').live('click', function(){
 		var id = jQuery(this).attr('href');
-		jQuery('.notitab li').removeClass('current'); //reset current 
+		jQuery('.notitab li').removeClass('current'); //reset current
 		jQuery(this).parent().addClass('current');
 		if(id == '#messages')   jQuery('#activities').hide();
-		else                    jQuery('#messages').hide();		
+		else                    jQuery('#messages').hide();
 		jQuery(id).show();
 		return false;
 	});
-	
-	///// SHOW/HIDE VERTICAL SUB MENU /////	
+
+	///// SHOW/HIDE VERTICAL SUB MENU /////
 	jQuery('.vernav > ul li a, .vernav2 > ul li a').each(function(){
 		var url = jQuery(this).attr('href');
 		jQuery(this).click(function(){
@@ -257,22 +257,22 @@ jQuery(document).ready(function(){
 					   !jQuery(this).parents('div').hasClass('menucoll2'))
 							jQuery(url).slideDown();
 				}
-				return false;	
+				return false;
 			}
 		});
 	});
-	
+
 	///// SHOW/HIDE SUB MENU WHEN MENU COLLAPSED /////
 	jQuery('.menucoll > ul > li, .menucoll2 > ul > li').live('mouseenter mouseleave',function(e){
 		if(e.type == 'mouseenter') {
 			jQuery(this).addClass('hover');
-			jQuery(this).find('ul').show();	
+			jQuery(this).find('ul').show();
 		} else {
-			jQuery(this).removeClass('hover').find('ul').hide();	
+			jQuery(this).removeClass('hover').find('ul').hide();
 		}
 	});
-	
-	///// HORIZONTAL NAVIGATION (AJAX/INLINE DATA) /////	
+
+	///// HORIZONTAL NAVIGATION (AJAX/INLINE DATA) /////
 	jQuery('.hornav a').click(function(){
 		//this is only applicable when window size below 450px
 		if(jQuery(this).parents('.more').length == 0)
@@ -282,7 +282,7 @@ jQuery(document).ready(function(){
 			jQuery(this).removeClass('current');
 		});
 		jQuery(this).parent().addClass('current');	// set as current menu
-		
+
 		var url = jQuery(this).attr('href');
 		if(jQuery(url).length > 0) {
 			jQuery('.contentwrapper .subcontent').hide();
@@ -295,18 +295,18 @@ jQuery(document).ready(function(){
 		}
 		return false;
 	});
-	
+
 	///// NOTIFICATION CLOSE BUTTON /////
 	jQuery('.notibar .close,.notifmsg .close').click(function(){
 		jQuery(this).parent().fadeOut(function(){
 			jQuery(this).remove();
 		});
 	});
-	
+
 	///// COLLAPSED/EXPAND LEFT MENU /////
 	jQuery('.togglemenu').click(function(){
 		if(!jQuery(this).hasClass('togglemenu_collapsed')) {
-			
+
 			//if(jQuery('.iconmenu').hasClass('vernav')) {
 			if(jQuery('.vernav').length > 0) {
 				if(jQuery('.vernav').hasClass('iconmenu')) {
@@ -321,16 +321,16 @@ jQuery(document).ready(function(){
 				jQuery('body').addClass('withmenucoll2');
 				jQuery('.iconmenu').addClass('menucoll2');
 			}
-			
+
 			jQuery(this).addClass('togglemenu_collapsed');
-			
+
 			jQuery('.iconmenu > ul > li > a').each(function(){
 				var label = jQuery(this).text();
 				jQuery('<li><span>'+label+'</span></li>')
 					.insertBefore(jQuery(this).parent().find('ul li:first-child'));
 			});
 		} else {
-			
+
 			//if(jQuery('.iconmenu').hasClass('vernav')) {
 			if(jQuery('.vernav').length > 0) {
 				if(jQuery('.vernav').hasClass('iconmenu')) {
@@ -340,13 +340,13 @@ jQuery(document).ready(function(){
 					jQuery('body').removeClass('withmenucoll');
 					jQuery('.vernav').removeClass('menucoll').find('ul').show();
 				}
-			} else if(jQuery('.vernav2').length > 0) {	
+			} else if(jQuery('.vernav2').length > 0) {
 			//} else {
 				jQuery('body').removeClass('withmenucoll2');
 				jQuery('.iconmenu').removeClass('menucoll2');
 			}
-			jQuery(this).removeClass('togglemenu_collapsed');	
-			
+			jQuery(this).removeClass('togglemenu_collapsed');
+
 			jQuery('.iconmenu ul ul li:first-child').remove();
 		}
 	});
@@ -355,7 +355,7 @@ jQuery(document).ready(function(){
 	if(jQuery(document).width() < 640) {
 		jQuery('.togglemenu').addClass('togglemenu_collapsed');
 		if(jQuery('.vernav').length > 0) {
-			
+
 			jQuery('.iconmenu').addClass('menucoll');
 			jQuery('body').addClass('withmenucoll');
 			jQuery('.centercontent').css({marginLeft: '56px'});
@@ -366,28 +366,28 @@ jQuery(document).ready(function(){
 					var label = jQuery(this).text();
 					jQuery('<li><span>'+label+'</span></li>')
 						.insertBefore(jQuery(this).parent().find('ul li:first-child'));
-				});		
+				});
 			}
 
 		} else {
-			
+
 			jQuery('.iconmenu').addClass('menucoll2');
 			jQuery('body').addClass('withmenucoll2');
 			jQuery('.centercontent').css({marginLeft: '36px'});
-			
+
 			jQuery('.iconmenu > ul > li > a').each(function(){
 				var label = jQuery(this).text();
 				jQuery('<li><span>'+label+'</span></li>')
 					.insertBefore(jQuery(this).parent().find('ul li:first-child'));
-			});		
+			});
 		}
 	}
-	
-	
+
+
 	jQuery('.searchicon').live('click',function(){
 		jQuery('.searchinner').show();
 	});
-	
+
 	jQuery('.searchcancel').live('click',function(){
 		jQuery('.searchinner').hide();
 	});
@@ -410,29 +410,29 @@ jQuery(document).ready(function(){
 	///// ON RESIZE WINDOW /////
 	jQuery(window).resize(function(){
 		if(jQuery(window).width() > 640)
-			jQuery('.centercontent').removeAttr('style');  
+			jQuery('.centercontent').removeAttr('style');
 		//reposSearch();
-	});        
-        
+	});
+
     // BOTON DE ELIMINAR EN FORMULARIOS DE EDICION
     jQuery('.delete').on('click',function(){
         jConfirm('Está seguro de eliminar este registro?', 'Borrar registro', function(r) {
             if (r) {
                jQuery("form input[value='DELETE']").parent('form').submit();
-                return true; 
+                return true;
             }
             return false;
         });
     });
-            
-        
+
+
  /// Cancelar edición
   /*  jQuery(document).keyup(function(e) {
         if (e.which === 27) {
             url=jQuery('a.cancelar').attr('href');
             if(url)  location.href=url;
-        }  // esc   
-        
+        }  // esc
+
     });*/
-    
+
 });

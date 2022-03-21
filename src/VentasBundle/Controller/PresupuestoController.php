@@ -42,7 +42,8 @@ class PresupuestoController extends Controller {
                     'cliId' => $cliId,
                     'cliente' => $cliente,
                     'desde' => $desde,
-                    'hasta' => $hasta
+                    'hasta' => $hasta,
+                    'printpdf' => $request->get('printpdf')
         ));
     }
 

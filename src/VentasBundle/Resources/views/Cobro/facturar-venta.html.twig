@@ -124,12 +124,11 @@
                 {% include "VentasBundle:Venta:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
             </div>
         </fieldset>
-        <fieldset class="vtafields" >
 
-        </fieldset>
-
-        <fieldset >
-            {% include "VentasBundle:Cobro:_partial-detalle.html.twig" with {'venta':entity.venta}  %}
+        <fieldset style=" text-align:center">
+            <div style="display:inline-block; width:80%; margin:0 auto;" >
+                {% include "VentasBundle:Cobro:_partial-detalle.html.twig" with {'venta':entity.venta}  %}
+            </div>
         </fieldset>
 
 
@@ -159,7 +158,7 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
-        $('.togglemenu').click();
+        //$('.togglemenu').click();
 
         if('{{entity.cliente.consumidorfinal}}'){
             $('.datos-cliente').hide();

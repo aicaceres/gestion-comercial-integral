@@ -1,4 +1,4 @@
-<table style="width:80%; margin:auto"  cellpadding="0" cellspacing="0" border="0" class="resumen-venta stdtable noaction">
+<table style="width:100%"  cellpadding="0" cellspacing="0" border="0" class="resumen-venta stdtable noaction">
   <thead>
     <tr class="resumen">
       {% set subtotal = venta.totalesDiscriminados %}
@@ -9,20 +9,20 @@
                     {{ (subtotal.precio/venta.cotizacion)|number_format(3,'.',',') }}
                   </span>.-
       </th>
-      <th id="ivaTd">
-        IVA: <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
-             <span data-valor="{{ subtotal.iva }}" class="valor">
-                {{ (subtotal.iva/venta.cotizacion)|number_format(3,'.',',') }}
-             </span>.-
-      </th>
       <th id="porcentajeRecargoTd">
-        Descuento/Recargo [<span class="porcentajeRecargo">
+        Desc./Rec. [<span class="porcentajeRecargo">
                     {{ entity.formapago.porcentajeRecargo }}
                 </span>%]:
             <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
             <span data-valor="{{ venta.totalDescuentoRecargo }}" class="valor">
                 {{ (venta.totalDescuentoRecargo/venta.cotizacion)|number_format(3,'.',',') }}
             </span>.-
+      </th>
+      <th id="ivaTd">
+        IVA: <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
+             <span data-valor="{{ subtotal.iva }}" class="valor">
+                {{ (subtotal.iva/venta.cotizacion)|number_format(3,'.',',') }}
+             </span>.-
       </th>
       <th id="totalTd" class="red">
         A PAGAR: <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
@@ -35,14 +35,14 @@
   </thead>
 </table>
 
-<table style="width:80%; margin:auto" cellspacing="0" border="0" class="detalle-venta hidden stdtable noaction">
+<table style="width:100%;" cellspacing="0" border="0" class="detalle-venta hidden stdtable noaction">
     <thead>
         <tr>
             <th style="width:3%;">#</th>
             <th>Producto</th>
-            <th style="width:12%;">Cant.</th>
-            <th style="width:10%;">Precio Unit.</th>
-            <th style="width:10%;">SubTotal</th>
+            <th style="width:10%;">Cant.</th>
+            <th style="width:15%;">Precio Unit.</th>
+            <th style="width:15%;">SubTotal</th>
         </tr>
     </thead>
     <tbody>
@@ -51,7 +51,7 @@
         {% set neto = (neto + item.total) %}
         <tr class="item" divdata="item_{{loop.index-1}}">
             <td class="ordTd">{{loop.index}}</td>
-            <td class="prodTd">
+            <td class="prodTd" style="text-align:left">
                 {{ item.producto.nombre }}
             </td>
             <td class="cantTd"> {{ item.cantidad }}    </td>
