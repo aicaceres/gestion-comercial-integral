@@ -12,7 +12,8 @@ use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\NotaDebCred;
 use VentasBundle\Form\NotaDebCredType;
 use VentasBundle\Entity\FacturaElectronica;
-
+use AppBundle\Entity\Stock;
+use AppBundle\Entity\StockMovimiento;
 use VentasBundle\Afip\src\Afip;
 /**
  * @Route("/notadebcredVentas")
@@ -247,6 +248,36 @@ class NotaDebCredController extends Controller {
                 $em->persist($notaElectronica);
                 $em->persist($entity);
                 $em->flush();
+
+                if( $entity->getSigno() == '-' && $entity->getDetalles()){
+                        // Reponer de stock si es credito
+                    $deposito = $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
+                    foreach ($entity->getDetalles() as $detalle){
+                        $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                        if ($stock) {
+                            $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
+                        }else {
+                            $stock = new Stock();
+                            $stock->setProducto($detalle->getProducto());
+                            $stock->setDeposito($deposito);
+                            $stock->setCantidad( 0 - $detalle->getCantidad());
+                        }
+                        $em->persist($stock);
+
+                // Cargar movimiento
+                        $movim = new StockMovimiento();
+                        $movim->setFecha($entity->getFecha());
+                        $movim->setTipo('ventas_notadebcred');
+                        $movim->setSigno('+');
+                        $movim->setMovimiento($entity->getId());
+                        $movim->setProducto($detalle->getProducto());
+                        $movim->setCantidad($detalle->getCantidad());
+                        $movim->setDeposito($deposito);
+                        $em->persist($movim);
+                        $em->flush();
+                    }
+                }
+
                 $em->getConnection()->commit();
                 $this->addFlash('success', 'El comprobante fue registrado correctamente.');
 

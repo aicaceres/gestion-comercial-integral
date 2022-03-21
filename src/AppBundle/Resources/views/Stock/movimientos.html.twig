@@ -68,6 +68,8 @@
                             {% set url = path('ventas_venta_show', { 'id': entity.movimiento }) %}
                         {% elseif entity.tipo=='ventas_presupuesto' %}
                             {% set url = path('ventas_presupuesto_show', { 'id': entity.movimiento }) %}
+                        {% elseif entity.tipo=='ventas_notadebcred' %}
+                            {% set url = path('ventas_notadebcred_show', { 'id': entity.movimiento }) %}
                         {%endif%}
                    <a href="{{url}}" target="_blank" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                    </td>

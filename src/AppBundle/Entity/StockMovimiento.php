@@ -92,6 +92,8 @@ class StockMovimiento
                 return 'Venta';
             case 'ventas_presupuesto':
                 return 'Venta';
+            case 'ventas_notadebcred':
+                return 'Nota débito/crédito de Ventas';
             default:
                 return NULL;
         }

@@ -160,7 +160,11 @@
                     <div padding-left="54px" padding-top="5px" > {{ nota.cliente.localidad }}</div>
                 </td>
                 <td border.type="none" padding-top="10px">
-                    {{ nota.cliente.categoriaIva.descripcion }}
+                    {% if nota.cliente.categoriaIva %}
+                        {{ nota.cliente.categoriaIva.descripcion }}
+                    {% else %}
+                        Consumidor Final
+                    {% endif %}
                 </td>
                 <td border.type="none" padding-top="10px">
                     CUIT N°: {{ nota.cliente.cuit }}
