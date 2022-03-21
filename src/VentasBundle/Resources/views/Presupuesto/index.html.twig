@@ -55,7 +55,7 @@
                         <strong style="height:26px;display:block;"> ANULADO: {{ entity.updated|date('d-m-Y H:i:s') }} | {{ entity.updatedBy.username }} </strong>
                     {% else %}
                      <a href="{{ path('ventas_presupuesto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Presupuesto"></a>
-                     <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" title="Imprimir Presupuesto"></a>
+                     <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" presid="{{entity.id}}"  title="Imprimir Presupuesto"></a>
                     {% endif %}
                 </td>
             </tr>
@@ -114,6 +114,10 @@ jQuery(document).ready(function($){
         $('#datalist').val(JSON.stringify(datos));
     });
 
+    const printpdf = '{{printpdf}}';
+    if( printpdf ){
+        $('[presid="'+printpdf+'"]').click()
+    }
 });
 </script>
 {% endblock %}

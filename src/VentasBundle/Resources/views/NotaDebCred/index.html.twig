@@ -142,7 +142,7 @@ jQuery(document).ready(function($){
         });
         $('#datalist').val(JSON.stringify(datos));
     });
-    let printpdf = '{{printpdf}}';
+    const printpdf = '{{printpdf}}';
     if( printpdf ){
         $('[notaid="'+printpdf+'"]').click()
     }

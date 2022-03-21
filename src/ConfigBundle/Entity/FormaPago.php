@@ -24,18 +24,23 @@ class FormaPago {
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false, unique=true)
-     */    
+     */
     protected $nombre;
     /**
      * @var string $cuentaCorriente
      * @ORM\Column(name="cuenta_corriente", type="boolean", nullable=true)
      */
-    protected $cuentaCorriente = false;  
+    protected $cuentaCorriente = false;
     /**
      * @var string $tarjeta
      * @ORM\Column(name="tarjeta", type="boolean", nullable=true)
      */
-    protected $tarjeta = false;      
+    protected $tarjeta = false;
+    /**
+     * @var string $contado
+     * @ORM\Column(name="contado", type="boolean", nullable=true)
+     */
+    protected $contado = false;
     /**
      * @var integer $cuotas
      * @ORM\Column(name="cuotas", type="integer", nullable=true)
@@ -44,7 +49,7 @@ class FormaPago {
     /**
      * @var string $vencimiento
      * @ORM\Column(name="vencimiento", type="string", nullable=false)
-     */    
+     */
     protected $vencimiento = 'M';
     /**
      * @var integer $plazo
@@ -84,7 +89,7 @@ class FormaPago {
 
     public function __toString() {
         return $this->nombre;
-    }    
+    }
 
     public function getTextSelect(){
         return $this->nombre.' [%'.$this->porcentajeRecargo.']';
@@ -93,7 +98,7 @@ class FormaPago {
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -116,7 +121,7 @@ class FormaPago {
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -139,7 +144,7 @@ class FormaPago {
     /**
      * Get cuentaCorriente
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getCuentaCorriente()
     {
@@ -162,7 +167,7 @@ class FormaPago {
     /**
      * Get tarjeta
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getTarjeta()
     {
@@ -185,7 +190,7 @@ class FormaPago {
     /**
      * Get cuotas
      *
-     * @return integer 
+     * @return integer
      */
     public function getCuotas()
     {
@@ -208,7 +213,7 @@ class FormaPago {
     /**
      * Get vencimiento
      *
-     * @return string 
+     * @return string
      */
     public function getVencimiento()
     {
@@ -231,7 +236,7 @@ class FormaPago {
     /**
      * Get plazo
      *
-     * @return integer 
+     * @return integer
      */
     public function getPlazo()
     {
@@ -254,7 +259,7 @@ class FormaPago {
     /**
      * Get tipoRecargo
      *
-     * @return string 
+     * @return string
      */
     public function getTipoRecargo()
     {
@@ -277,7 +282,7 @@ class FormaPago {
     /**
      * Get porcentajeRecargo
      *
-     * @return string 
+     * @return string
      */
     public function getPorcentajeRecargo()
     {
@@ -300,7 +305,7 @@ class FormaPago {
     /**
      * Get descuentoPagoAnticipado
      *
-     * @return integer 
+     * @return integer
      */
     public function getDescuentoPagoAnticipado()
     {
@@ -323,7 +328,7 @@ class FormaPago {
     /**
      * Get mora
      *
-     * @return string 
+     * @return string
      */
     public function getMora()
     {
@@ -346,7 +351,7 @@ class FormaPago {
     /**
      * Get diasMora
      *
-     * @return integer 
+     * @return integer
      */
     public function getDiasMora()
     {
@@ -369,10 +374,33 @@ class FormaPago {
     /**
      * Get copiasComprobante
      *
-     * @return integer 
+     * @return integer
      */
     public function getCopiasComprobante()
     {
         return $this->copiasComprobante;
+    }
+
+    /**
+     * Set contado
+     *
+     * @param boolean $contado
+     * @return FormaPago
+     */
+    public function setContado($contado)
+    {
+        $this->contado = $contado;
+
+        return $this;
+    }
+
+    /**
+     * Get contado
+     *
+     * @return boolean 
+     */
+    public function getContado()
+    {
+        return $this->contado;
     }
 }
