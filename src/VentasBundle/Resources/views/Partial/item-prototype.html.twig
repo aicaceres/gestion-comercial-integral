@@ -1,7 +1,18 @@
 <tr class="item" divdata="item_items">
     <td class="ordTd"></td>
     <td class="prodTd">
-        {{ form_widget(item.producto,{'attr':{'style':'width:80%','url':path('get_lista_productos'), 'fnc':'openModalProducto', 'mtitle':'Seleccionar Producto'}}) }}
+        {{ form_widget(item.producto,
+            {'attr':
+                {'style':'width:80%',
+                 'url':path('get_lista_productos'),
+                 'url_autocomplete' : path('get_autocomplete_productos'),
+                 'url_datos' : path('get_datos_venta_producto'),
+                 'url_list' : path('producto_list_datatables'),
+                 'fnc':'openModalProducto',
+                 'mtitle':'Seleccionar Producto'
+                }
+            })
+        }}
         <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
     </td>
     <td class="cantTd">
@@ -12,6 +23,6 @@
         <span>0</span>
         {{ form_widget(item.precio) }}  {{ form_widget(item.alicuota) }}
     </td>
-    <td class="itmSubtotalTd alignright"></td>
+    <td class="itmSubtotalTd alignright">0</td>
     <td class="delTd" style="text-align:center;"></td>
 </tr>

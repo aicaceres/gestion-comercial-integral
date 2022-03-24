@@ -18,32 +18,32 @@ class Precio
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
-    
+
     /**
      * @var string $costo
      * @ORM\Column(name="costo", type="decimal", scale=3,  nullable=true)
      */
-    protected $costo;    
-    
+    protected $costo;
+
     /**
      * @var string $precio
      * @ORM\Column(name="precio", type="decimal", scale=3,  nullable=false)
      */
-    protected $precio;    
+    protected $precio;
 
      /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista", inversedBy="precios")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
      */
-    protected $precioLista; 
+    protected $precioLista;
 
      /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="precios")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
-    protected $producto; 
-    
-    
+    protected $producto;
+
+
     /**
      * @var datetime $updated
      * @Gedmo\Timestampable(on="update")
@@ -57,12 +57,16 @@ class Precio
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;      
+    private $updatedBy;
+
+    public function getPrecioConIva(){
+        return $this->precio * ( 1 + $this->getProducto()->getIva()/100);
+    }
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -72,7 +76,7 @@ class Precio
     /**
      * Get precio
      *
-     * @return string 
+     * @return string
      */
     public function getPrecio()
     {
@@ -87,7 +91,7 @@ class Precio
      */
     public function setPrecio($precio)
     {
-        $this->precio = $precio;    
+        $this->precio = $precio;
         return $this;
     }
 
@@ -100,14 +104,14 @@ class Precio
     public function setUpdated($updated)
     {
         $this->updated = $updated;
-    
+
         return $this;
     }
 
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -122,14 +126,14 @@ class Precio
      */
     public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null)
     {
-        $this->precioLista = $precioLista;    
+        $this->precioLista = $precioLista;
         return $this;
     }
 
     /**
      * Get precioLista
      *
-     * @return \AppBundle\Entity\PrecioLista 
+     * @return \AppBundle\Entity\PrecioLista
      */
     public function getPrecioLista()
     {
@@ -145,14 +149,14 @@ class Precio
     public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
     {
         $this->updatedBy = $updatedBy;
-    
+
         return $this;
     }
 
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {
@@ -167,14 +171,14 @@ class Precio
      */
     public function setProducto(\AppBundle\Entity\Producto $producto = null)
     {
-        $this->producto = $producto;   
+        $this->producto = $producto;
         return $this;
     }
 
     /**
      * Get producto
      *
-     * @return \AppBundle\Entity\Producto 
+     * @return \AppBundle\Entity\Producto
      */
     public function getProducto()
     {
@@ -190,14 +194,14 @@ class Precio
     public function setCosto($costo)
     {
         $this->costo = $costo;
-    
+
         return $this;
     }
 
     /**
      * Get costo
      *
-     * @return string 
+     * @return string
      */
     public function getCosto()
     {

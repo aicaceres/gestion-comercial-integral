@@ -18,7 +18,13 @@ class PresupuestoType extends AbstractType {
                 ->add('nroPresupuesto')
                 ->add('fechaPresupuesto', 'date', array('widget' => 'single_text',
                     'format' => 'dd-MM-yyyy', 'required' => true))
-                //->add('estado')
+                ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
+                    'required' => true, 'label' => 'FORMA DE PAGO: '))
+                ->add('precioLista', 'entity', array(
+                    'class' => 'AppBundle:PrecioLista',
+                    'required' => true, 'label' => 'LISTA DE PRECIOS: ',
+                    'choice_label' => 'nombre'
+                ))
                 ->add('deposito', 'entity', array(
                     'class' => 'AppBundle:Deposito',
                     'required' => true, 'label' => 'DEPÓSITO: ',
@@ -27,12 +33,8 @@ class PresupuestoType extends AbstractType {
                 ->add('descuentaStock',null,array('label' => 'DESCONTAR:','required'=>false))
                 ->add('nombreCliente')
                 ->add('validez',null,array('label' => 'VALIDEZ [días]:','required'=>false))
-                ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
-                    'required' => true, 'label' => 'FORMA DE PAGO: '))
-                ->add('precioLista', 'entity', array('label' => 'LISTA DE PRECIOS:',
-                    'class' => 'AppBundle:PrecioLista', 'required' => true))
                 ->add('detalles', 'collection', array(
-                    'type' => new PresupuestoDetalleType(),
+                    'type' => new PresupuestoDetalleType($type),
                     'by_reference' => false,
                     'allow_delete' => true,
                     'allow_add' => true,
@@ -40,8 +42,7 @@ class PresupuestoType extends AbstractType {
                     'attr' => array(
                         'class' => 'row item'
             )))
-                ->add('total','hidden',array('required'=>false))
-                ->add('descuento','hidden',array('required'=>false))
+                ->add('descuentoRecargo','hidden')
         ;
         if ($type == 'new') {
             // en render de nuev presupuesto solo traer cliente por defecto

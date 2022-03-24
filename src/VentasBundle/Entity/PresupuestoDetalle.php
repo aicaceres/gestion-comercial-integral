@@ -51,16 +51,43 @@ class PresupuestoDetalle {
      * @ORM\Column(name="precio", type="decimal", scale=3 )
      */
     protected $precio;
-
+    /**
+     * @var integer $alicuota
+     * @ORM\Column(name="alicuota", type="decimal", scale=3 )
+     */
+    protected $alicuota=0;
+    /**
+     * @var integer $dtoRec
+     * monto descuento o recargo
+     * @ORM\Column(name="dtoRec", type="decimal", scale=3 )
+     */
+    protected $dtoRec=0;
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Presupuesto", inversedBy="detalles")
      * @ORM\JoinColumn(name="ventas_presupuesto_id", referencedColumnName="id")
      */
     protected $presupuesto;
 
-    public function getTotal() {
-        return $this->getPrecio() * $this->getCantidad();
+    /** VALORES ITEM  */
+    // valor del precio unitario 
+    public function getPrecioUnitarioItem(){
+        $precio = $this->getPrecio();
+        return round( $precio, 3);
     }
+    // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
+    public function getDtoRecItem(){
+        $porcDtoRec = $this->getPresupuesto()->getDescuentoRecargo();
+        return ($this->getPrecio() * ($porcDtoRec / 100) ) ;
+    }
+    // monto del iva del item para sumariar total si categoriaIva I o M
+    public function getIvaItem(){
+        return ($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100);
+    }
+    // total del item
+    public function getTotalItem(){
+        return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
+    }
+    /** FIN VALORES ITEM */
 
     /**
      * Get id
@@ -231,5 +258,51 @@ class PresupuestoDetalle {
     public function getPresupuesto()
     {
         return $this->presupuesto;
+    }
+
+    /**
+     * Set alicuota
+     *
+     * @param string $alicuota
+     * @return PresupuestoDetalle
+     */
+    public function setAlicuota($alicuota)
+    {
+        $this->alicuota = $alicuota;
+
+        return $this;
+    }
+
+    /**
+     * Get alicuota
+     *
+     * @return string
+     */
+    public function getAlicuota()
+    {
+        return $this->alicuota;
+    }
+
+    /**
+     * Set dtoRec
+     *
+     * @param string $dtoRec
+     * @return PresupuestoDetalle
+     */
+    public function setDtoRec($dtoRec)
+    {
+        $this->dtoRec = $dtoRec;
+
+        return $this;
+    }
+
+    /**
+     * Get dtoRec
+     *
+     * @return string
+     */
+    public function getDtoRec()
+    {
+        return $this->dtoRec;
     }
 }

@@ -6,12 +6,12 @@
 {% endblock %}
 
 <div class="pageheader notab">
-    <h1 class="pagetitle">VENTA:
-        <span style="margin-left:10px" class="nroOperacion">#{{entity.nroOperacion}}</span>
-        <span style="margin-left:40px">{{app.user.username}}</span>
+    <h1 class="pagetitle">PRESUPUESTO:
+        <span style="margin-left:10px" class="nroOperacion">#{{entity.nroPresupuesto}}</span>
         <span class="floatright fechahora">
-            {{entity.fechaVenta|date('d/m/Y')}}
-            <span class="js-hora"> {{entity.fechaVenta|date('H:i:s')}}</span> &nbsp; </span>
+            {{entity.fechaPresupuesto|date('d/m/Y')}}
+            <span class="js-hora"> {{entity.fechaPresupuesto|date('H:i:s')}}</span> &nbsp; | &nbsp; {{app.user.username}}
+        </span>
     </h1>
 </div><!--pageheader-->
 {% endblock %}
@@ -21,21 +21,25 @@
 {% include "AppBundle::notificacion.html.twig" %}
     <div class="divForm">
 
-        {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_venta'}}) }}
+        {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_presupuesto'}}) }}
 
         <fieldset class="fields" >
 
             {% include "VentasBundle:Partial:block-cliente.html.twig" %}
-
-            {% include "VentasBundle:Partial:block-moneda.html.twig" %}
-
+            <div class="datos-moneda">
+                <!-- mantiene el formato en pantalla -->
+                <input type="hidden" id="ventasbundle_presupuesto_cotizacion" value="1" />
+            </div>
             {% include "VentasBundle:Partial:block-formapago.html.twig" %}
 
         </fieldset>
 
         <fieldset>
-            <div class="datos-cliente">
+            <div class="datos-cliente" style="display:none" >
                 {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+            </div>
+            <div class="datos-cf">
+                {{ form_widget(form.nombreCliente)}}
             </div>
             <div class="datos-formapago">
                 {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
@@ -52,11 +56,9 @@
                 {{ form_label(form.deposito)}}
                 {{ form_widget(form.deposito,{'attr':{'style':'width:80%','tabindex':-1}}) }}
             </div>
-            <div style="display:inline-block; width: 30%;">
-                {{ form_label(form.transporte)}}
-                {{ form_widget(form.transporte,{'attr':{'style':'width:80%','tabindex':-1}}) }}
+            <div style="display:inline-block; width: 20%;">
+                {{ form_row(form.descuentaStock)}}
             </div>
-
         </fieldset>
 
         <fieldset>
@@ -75,7 +77,7 @@
             <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar tabbable" type="submit" >Guardar</button>
-                <a class="cancelar tabbable" type="button" href="{{ path('ventas_venta')}}">Cancelar</a>
+                <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
         </fieldset>
 
@@ -92,30 +94,37 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript" src="{{ asset('assets/js/custom/ventas.js') }}"></script>
 <script type="text/javascript">
-let checklogin = "{{ app.session.get('checkrequired') }}";
-if( checklogin == '1' ){
-    checkLoginVentas("{{ path('ventas_login')}}" ,"{{ path('ventas_venta')}}" );
-}
+
 jQuery(function ($) {
     $(window).on('load', function () {
+        $('.datos-cliente').hide();
+        $('.datos-cf').show();
+        $('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
 
         // confirm on submit
-        $('#ventasbundle_venta').on('submit', function(){
-            if( !validlogin ){
-                alert('No posee login válido para realizar ventas!');
-                window.location.href = "{{ path('ventas_venta')}}";
+        $('.guardar').on('click', function(){
+            // controlar que haya items cargados
+            let txt = 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
+            txt = txt + '\n\n' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
+            if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") ){
+                txt = txt + '\n' +'Se realizará el descuento de los productos en el stock!';
+            }
+            // detectar inputs invalidos
+            if( $(':invalid').length > 0 ){
+                $(':invalid').focus();
                 return false;
             }
-            // controlar que haya items cargados
-            let txt = 'VENTA:   #'+$('#ventasbundle_venta_nroOperacion').val();
-            txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
             if( $('tbody tr.item').length > 0 ){
                 if (!confirm(txt)) {
                 return false;
                 }
-            }else{  alert('Debe ingresar items a la venta'); return false;}
+                $('#ventasbundle_presupuesto').submit();
+            }else{
+                alert('Debe ingresar items al presupuesto');
+                return false;
+            }
+        });
 
-        })
     });
 
 });

@@ -24,7 +24,7 @@ class VentaDetalleType extends AbstractType {
                 //->add('bulto', null, array('required' => false))
                 //->add('cantidadxBulto', null, array('required' => false))
                 ->add('precio', 'hidden')
-                ->add('iva', 'hidden')
+                ->add('alicuota', 'hidden')
         ;
         if($this->type=='new'){
             $builder->add('producto', 'entity', array(
@@ -46,7 +46,6 @@ class VentaDetalleType extends AbstractType {
                         return $em->getProductosFacturables();
                     }));
         }
-
     }
 
     /**

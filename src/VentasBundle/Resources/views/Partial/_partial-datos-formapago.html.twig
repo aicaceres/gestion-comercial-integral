@@ -1,0 +1,12 @@
+{% if item.porcentajeRecargo > 0 %}
+    <label> RECARGO: </label> {{item.porcentajeRecargo ~ ' %' }}
+{% else %}
+    <label> DESCUENTO: </label> {{item.porcentajeRecargo|abs ~ ' %' }}
+{% endif %}
+{% if item.cuotas > 0 %}
+    <label> CUOTAS: </label> {{item.cuotas}}
+{% endif %}
+{% if item.plazo > 0 %}
+    <label> PLAZO: </label>  {{item.plazo ~ ' ' ~ item.vencimiento|upper }}
+{% endif %}
+<input type="hidden" id="porcentajeRecargo" name="porcentaje" value="{{item.porcentajeRecargo}}" />

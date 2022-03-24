@@ -20,10 +20,10 @@
                     <input type="text" value="{{entity.createdBy.username}}" disabled="disabled" class="width100">
                 </div>
             </div>
-                <div><label for="nroPedido">Cliente:</label>
-                    <input type="text" value="{{entity.clienteTxt}}" disabled="disabled" class="smallinput">
-                    {% if entity.cliente %} &nbsp;&nbsp;<strong>CUIT: {{ entity.cliente.cuit }}</strong> {% endif %}
-                </div>
+            <div><label>Cliente:</label>
+                <input type="text" value="{{entity.clienteTxt}}" disabled="disabled" class="smallinput">
+                {% if entity.cliente %} &nbsp;&nbsp;<strong>CUIT: {{ entity.cliente.cuit }}</strong> {% endif %}
+            </div>
 
             <div class="two_fields">
                 <div><label for="nroPedido">CAE:</label>
@@ -34,47 +34,39 @@
                     <input type="text" value="{{entity.notaElectronica.caeVto|date('d/m/Y')}}" disabled="disabled" class="width100">
                 </div>
             </div>
-            <div style="padding-top: 20px; margin-left: 50px; width: 80%;" >
-                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
-                    <thead>
-                        <tr>
-                            <th style="width:3%;">#</th>
-                            <th>Producto</th>
-                            <th style="width:15%;">Cantidad</th>
-                            <th style="width:15%;">Precio Unit.</th>
-                            <th style="width:10%;">SubTotal</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for det in entity.detalles %}
-                       <tr>
-                            <td>{{loop.index}}</td>
-                            <td>{{det.producto.codigoNombre}} - {{det.textoProducto}}  </td>
-                            <td class="alignright">{{ det.cantidadTxt }}</td>
-                            <td class="alignright">{{ (det.precio/entity.cotizacion)|number_format(2,'.',',')}}</td>
-                            <td class="alignright">{{ (det.subTotal/entity.cotizacion)|number_format(2,'.',',') }}</td>
-                        </tr>
+            {% if entity.facturas %}
+                    {% set facturas = '' %}
+                    {% for factura in entity.facturas %}
+                        {% if loop.first %}
+                            {% set facturas = factura.comprobanteTxt  %}
+                        {% else %}
+                            {% set facturas = facturas ~' - '~ factura.comprobanteTxt  %}
+                        {% endif %}
                     {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th class="head1" colspan="4" style="text-align:right">Total</th>
-                            <th class="head1" style="text-align:right;padding-right: 10px;">
-                                <span style="float:left" >{{entity.moneda.simbolo}}</span>
-                                 {{ (entity.subTotal/entity.cotizacion)|number_format(2,'.',',') }}
-                            </th>
-                        </tr>
-                    </tfoot>
-                </table>
-
-            <fieldset>
-            {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
-            {% set showiva = (cativa != 'C') %}
-            {% set showiibb = (cativa == 'I') %}
-                <div style="margin:auto; width: 100%;">
-                    {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': showiva, 'showiibb': showiibb } %}
+                <div><label>Comprob. Asociados:</label>
+                    <input type="text" value="{{facturas}}" disabled="disabled" class="mediuminput">
                 </div>
-            </fieldset>
+            {% endif %}
+            
+        </fieldset>
+        <fieldset>
+
+            <div style="padding-top: 20px; margin:auto; width: 90%;">
+
+                {% include "VentasBundle:Partial:_partial-show-detalle.html.twig" %}
+
+            </div>
+        </fieldset>
+        <fieldset>
+            <div style="margin:auto; width: 90%;">
+                {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
+                {% set showiva = (cativa != 'C') %}
+                {% set showiibb = (cativa == 'I') %}
+                {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': showiva, 'showiibb': showiibb } %}
+
+            </div>
+        </fieldset>
+        <fieldset>
 
             </div>
             <br clear="all" />
@@ -85,13 +77,4 @@
     </form>
 </div>
 </div>
-{% endblock %}
-{% block extra_javascripts %}
-<script type="text/javascript">
-jQuery(function ($) {
-    $(window).on('load', function () {
-
-    });
-});
-</script>
 {% endblock %}

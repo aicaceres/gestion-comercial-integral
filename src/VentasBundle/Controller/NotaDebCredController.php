@@ -15,6 +15,8 @@ use VentasBundle\Entity\FacturaElectronica;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
 use VentasBundle\Afip\src\Afip;
+
+use Endroid\QrCode\QrCode;
 /**
  * @Route("/notadebcredVentas")
  */
@@ -38,12 +40,7 @@ class NotaDebCredController extends Controller {
         $hasta = $request->get('hasta');
 
         $entities = $em->getRepository('VentasBundle:NotaDebCred')->findByCriteria($unidneg, $cliId, $desde, $hasta);
-        foreach( $entities as $entity ){
-            $url = 'https://www.afip.gob.ar/fe/qr/?p=';
-            $data = array("ver" => 1,"fecha" => "2020-10-13","cuit" => 30000000007,"ptoVta" => 10,"tipoCmp" => 1,"nroCmp" => 94,"importe" => 12100,"moneda" => "DOL","ctz" => 65,"tipoDocRec" => 80,"nroDocRec" => 20000000001,"tipoCodAut" => "E","codAut" => 70417054367476);
-            $base64 = base64_encode( json_encode($data) );
-            $entity->getNotaElectronica()->setQr( $url.$base64 );
-        }
+
         return $this->render('VentasBundle:NotaDebCred:index.html.twig', array(
                     'entities' => $entities,
                     'cliente' => $cliente,
@@ -71,6 +68,7 @@ class NotaDebCredController extends Controller {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
             $entity->setFormaPago( $cliente->getFormaPago() );
+            $entity->setDescuentoRecargo( $cliente->getFormaPago()->getPorcentajeRecargo() );
             $entity->setPrecioLista( $cliente->getPrecioLista() );
             $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneBy(array('byDefault' =>1));
             $entity->setMoneda( $moneda );
@@ -423,12 +421,45 @@ class NotaDebCredController extends Controller {
         $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
 
         $logo = __DIR__.'/../../../web/assets/images/logo_comprobante.png';
-        $qr = __DIR__.'/../../../web/assets/images/qr.jpg';
+        $qr = __DIR__.'/../../../web/assets/imagesafip/qr.png';
+        $logoafip = __DIR__.'/../../../web/assets/imagesafip/logoafip.png';
+
+        $url =$this->getParameter('url_qr_afip');
+        $cuit =$this->getParameter('cuit_afip');
+        $ptovta =$this->getParameter('ptovta_ws_afip');
+
+        $data = array(
+                "ver" => 1,
+                "fecha" => $nota->getFecha()->format('Y-m-d'),
+                "cuit" => $cuit,
+                "ptoVta" => $ptovta,
+                "tipoCmp" => $nota->getNotaElectronica()->getCodigoComprobante(),
+                "nroCmp" => $nota->getNotaElectronica()->getNroComprobante(),
+                "importe" => round($nota->getTotal(),2) ,
+                "moneda" => $nota->getMoneda()->getCodigoAfip(),
+                "ctz" => $nota->getCotizacion(),
+                "tipoDocRec" => 0,
+                "nroDocRec" => 0,
+                "tipoDocRec" => 80,
+                "nroDocRec" => 20000000001,
+                "tipoCodAut" => "E",
+                "codAut" => $nota->getNotaElectronica()->getCae() );
+        $base64 = base64_encode( json_encode($data) );
+
+        $qrCode = new QrCode();
+        $qrCode
+            ->setText($url.$base64)
+            ->setSize(120)
+            ->setPadding(5)
+            ->setErrorCorrection('low')
+            ->setImageType(QrCode::IMAGE_TYPE_PNG)
+        ;
+        $qrCode->render($qr);
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:NotaDebCred:comprobante.pdf.twig',
-                      array( 'nota' => $nota, 'empresa'=>$empresa, 'logo' => $logo, 'qr' => $qr ), $response);
+                      array( 'nota' => $nota, 'empresa'=>$empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip'=> $logoafip ), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

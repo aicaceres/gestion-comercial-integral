@@ -79,8 +79,6 @@ class VentaController extends Controller
      */
     public function newVentaAction(Request $request)
     {
-//var_dump(gethostname());
-
         $unidneg_id = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta_new');
         $entity = new Venta();
@@ -94,6 +92,7 @@ class VentaController extends Controller
             $entity->setDeposito($deposito);
             // set datos asociados al cliente con su definicion por defecto
             $entity->setFormaPago( $cliente->getFormaPago() );
+            $entity->setDescuentoRecargo( $cliente->getFormaPago()->getPorcentajeRecargo() );
             $entity->setPrecioLista( $cliente->getPrecioLista() );
             $entity->setTransporte( $cliente->getTransporte() );
             // ultimo nro de operacion de venta

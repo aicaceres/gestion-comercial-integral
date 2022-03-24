@@ -50,7 +50,7 @@ class PresupuestoController extends Controller {
     /**
      * @Route("/new", name="ventas_presupuesto_new")
      * @Method("GET")
-     * @Template("VentasBundle:Presupuesto:edit.html.twig")
+     * @Template("VentasBundle:Presupuesto:new.html.twig")
      */
     public function newAction() {
         $unidneg_id = $this->get('session')->get('unidneg_id');
@@ -66,12 +66,13 @@ class PresupuestoController extends Controller {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
             $entity->setFormaPago( $cliente->getFormaPago() );
+            $entity->setDescuentoRecargo( $cliente->getFormaPago()->getPorcentajeRecargo() );
             $entity->setPrecioLista( $cliente->getPrecioLista() );
             $entity->setValidez( $param->getValidezPresupuesto());
         }
 
         $form = $this->createCreateForm($entity,'new');
-        return $this->render('VentasBundle:Presupuesto:edit.html.twig', array(
+        return $this->render('VentasBundle:Presupuesto:new.html.twig', array(
                     'entity' => $entity,
                     'form' => $form->createView(),
         ));

@@ -18,7 +18,8 @@ class VentaType extends AbstractType {
         $builder
             ->add('nroOperacion', 'hidden')
             ->add('estado', 'hidden')
-            ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago', 'required' => true, 'label' => 'FORMA DE PAGO: '))
+            ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
+                 'required' => true, 'label' => 'FORMA DE PAGO: '))
             ->add('precioLista', 'entity', array(
                 'class' => 'AppBundle:PrecioLista',
                 'required' => true, 'label' => 'LISTA DE PRECIOS: ',
@@ -38,6 +39,7 @@ class VentaType extends AbstractType {
                 'required' => true, 'label' => 'MONEDA: '
             ))
             ->add('cotizacion','hidden')
+            ->add('descuentoRecargo','hidden')
             ->add('detalles', 'collection', array(
                 'type' => new VentaDetalleType($type),
                 'by_reference' => false,

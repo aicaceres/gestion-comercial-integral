@@ -50,12 +50,18 @@ class VentaDetalle {
      * @var integer $precio
      * @ORM\Column(name="precio", type="decimal", scale=3 )
      */
-    protected $precio;
+    protected $precio = 0;
     /**
-     * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", scale=3 )
+     * @var integer $alicuota
+     * @ORM\Column(name="alicuota", type="decimal", scale=3 )
      */
-    protected $iva;
+    protected $alicuota=0;
+    /**
+     * @var integer $dtoRec
+     * monto descuento o recargo
+     * @ORM\Column(name="dtoRec", type="decimal", scale=3 )
+     */
+    protected $dtoRec=0;
 
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Venta", inversedBy="detalles")
@@ -63,28 +69,33 @@ class VentaDetalle {
      */
     protected $venta;
 
-    /** TOTALES DEL ITEM  */
-    public function precioConIva(){
-        return $this->getPrecio() + $this->getIva();
+    /** VALORES ITEM  */
+    // valor del precio unitario segun categoria de iva
+    public function getPrecioUnitarioItem(){
+        $categIva = $this->getVenta()->getCliente()->getCategoriaIva()->getNombre();
+        if( $categIva == 'I' || $categIva == 'M'){
+            // precio sin iva convertido a la cotizacion
+            $precio = $this->getPrecio() / $this->getVenta()->getCotizacion();
+        }else{
+            // precio con iva incluido convertido a la cotizacion
+            $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $this->getVenta()->getCotizacion();
+        }
+        return round( $precio, 3);
     }
-    public function total(){
-        return $this->getCantidad() * $this->precioConIva();
+    // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
+    public function getDtoRecItem(){
+        $porcDtoRec = $this->getVenta()->getDescuentoRecargo();
+        return ($this->getPrecio() * ($porcDtoRec / 100) ) ;
     }
-    /***/
-
-
-    public function precioTotal(){
-        return $this->getPrecio() + $this->getIva();
+    // monto del iva del item para sumariar total si categoriaIva I o M
+    public function getIvaItem(){
+        return ($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100);
     }
-
-    public function getTotal() {
-        $precio = $this->precioConv();
-        return $precio * $this->getCantidad();
+    // total del item
+    public function getTotalItem(){
+        return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
     }
-
-    public function precioConv() {
-        return $this->precioTotal() / $this->getVenta()->getCotizacion();
-    }
+    /** FIN VALORES ITEM */
 
     /**
      * Get id
@@ -258,25 +269,48 @@ class VentaDetalle {
     }
 
     /**
-     * Set iva
+     * Set dtoRec
      *
-     * @param string $iva
+     * @param string $dtoRec
      * @return VentaDetalle
      */
-    public function setIva($iva)
+    public function setDtoRec($dtoRec)
     {
-        $this->iva = $iva;
+        $this->dtoRec = $dtoRec;
 
         return $this;
     }
 
     /**
-     * Get iva
+     * Get dtoRec
      *
      * @return string
      */
-    public function getIva()
+    public function getDtoRec()
     {
-        return $this->iva;
+        return $this->dtoRec;
+    }
+
+    /**
+     * Set alicuota
+     *
+     * @param string $alicuota
+     * @return VentaDetalle
+     */
+    public function setAlicuota($alicuota)
+    {
+        $this->alicuota = $alicuota;
+
+        return $this;
+    }
+
+    /**
+     * Get alicuota
+     *
+     * @return string
+     */
+    public function getAlicuota()
+    {
+        return $this->alicuota;
     }
 }

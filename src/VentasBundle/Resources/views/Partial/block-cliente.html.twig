@@ -1,8 +1,19 @@
 <div class="selectorCliente">
     {{ form_label(form.cliente) }}
 
-    {{ form_widget(form.cliente,{'attr':{'style':'width:80%','url':path('get_lista_clientes'), 'fnc':'openModalCliente', 'mtitle':'Seleccionar Cliente' }}) }}
+    {{ form_widget(form.cliente,
+        {'attr':
+            {'style':'width:80%',
+             'url': path('get_lista_clientes'),
+             'url_autocomplete' : path('get_autocomplete_clientes'),
+             'url_datos' : path('get_datos_venta_cliente'),
+             'url_list' : path('cliente_list_datatables'),
+             'fnc':'openModalCliente',
+             'mtitle':'Seleccionar Cliente'
+            }
+        })
+    }}
 
     <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
-    <input type="hidden" value="" id="categoriaIva"/>
+    <input type="hidden" value="{% if entity.cliente.categoriaIva %}{{entity.cliente.categoriaIva.nombre}}{% endif %}" id="categoriaIva"/>
 </div>

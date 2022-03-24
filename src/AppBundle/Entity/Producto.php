@@ -26,13 +26,13 @@ class Producto
      * @Assert\NotBlank()
      */
     protected $codigo;
-    
+
     /**
      * @var string $codigoBarra
      * @ORM\Column(name="codigo_barra", type="string", length=16, nullable=true)
      */
     protected $codigoBarra;
-    
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
@@ -58,63 +58,63 @@ class Producto
      * @var string $stock_minimo
      * @ORM\Column(name="stock_minimo", type="decimal", scale=3,  nullable=true)
      */
-    protected $stockMinimo;  
+    protected $stockMinimo;
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="rubro_id", referencedColumnName="id", onDelete="SET NULL")
-     **/  
-    protected $rubro;    
+     **/
+    protected $rubro;
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="unidad_medida_id", referencedColumnName="id")
-     **/  
-    protected $unidadMedida;    
+     **/
+    protected $unidadMedida;
     /**
      *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="productos")
-     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
      */
-    protected $proveedor;     
-    
+    protected $proveedor;
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Precio", mappedBy="producto",cascade={"persist"})
      */
     protected $precios;
-    
+
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Stock", mappedBy="producto",cascade={"persist"})
      */
     protected $stock;
-    
+
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
      */
-    protected $observaciones;  
+    protected $observaciones;
     /**
      * @ORM\Column(name="activo", type="boolean", nullable=true)
      */
-    protected $activo = true;    
-    
+    protected $activo = true;
+
     /**
      * @ORM\Column(name="facturable", type="boolean", nullable=true)
      */
-    protected $facturable = false;    
-    
+    protected $facturable = false;
+
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
      */
-    protected $bulto = false;   
-   
+    protected $bulto = false;
+
      /**
      * @var integer $cantidadxBulto
      * @ORM\Column(name="cantidad_x_bulto", type="decimal", scale=2, nullable=true )
      */
-    protected $cantidadxBulto;    
-    
+    protected $cantidadxBulto;
+
      /**
      * @ORM\OneToMany(targetEntity="ComprasBundle\Entity\LoteProducto", mappedBy="producto",cascade={"persist", "remove"})
      */
-    protected $lotes;    
-    
+    protected $lotes;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -128,7 +128,7 @@ class Producto
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -144,13 +144,13 @@ class Producto
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
     private $updatedBy;
-    
+
     public function __toString() {
         return $this->codigo.' - '.$this->nombre;
-    } 
+    }
     public function getCodigoNombreBarcode() {
         return $this->codigo.' - '.$this->nombre.' - '.$this->codigoBarra;
-    } 
+    }
     public function getCodigoNombre(){
         return $this->codigo.' - '.$this->nombre;
     }
@@ -158,7 +158,7 @@ class Producto
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -174,14 +174,14 @@ class Producto
     public function setCodigo($codigo)
     {
         $this->codigo = $codigo;
-    
+
         return $this;
     }
 
     /**
      * Get codigo
      *
-     * @return string 
+     * @return string
      */
     public function getCodigo()
     {
@@ -197,14 +197,14 @@ class Producto
     public function setNombre($nombre)
     {
         $this->nombre = $nombre;
-    
+
         return $this;
     }
 
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -220,14 +220,14 @@ class Producto
     public function setDescripcion($descripcion)
     {
         $this->descripcion = $descripcion;
-    
+
         return $this;
     }
 
     /**
      * Get descripcion
      *
-     * @return string 
+     * @return string
      */
     public function getDescripcion()
     {
@@ -243,14 +243,14 @@ class Producto
     public function setAlto($alto)
     {
         $this->alto = $alto;
-    
+
         return $this;
     }
 
     /**
      * Get alto
      *
-     * @return integer 
+     * @return integer
      */
     public function getAlto()
     {
@@ -266,14 +266,14 @@ class Producto
     public function setAncho($ancho)
     {
         $this->ancho = $ancho;
-    
+
         return $this;
     }
 
     /**
      * Get ancho
      *
-     * @return integer 
+     * @return integer
      */
     public function getAncho()
     {
@@ -289,14 +289,14 @@ class Producto
     public function setLargo($largo)
     {
         $this->largo = $largo;
-    
+
         return $this;
     }
 
     /**
      * Get largo
      *
-     * @return integer 
+     * @return integer
      */
     public function getLargo()
     {
@@ -312,14 +312,14 @@ class Producto
     public function setDensidad($densidad)
     {
         $this->densidad = $densidad;
-    
+
         return $this;
     }
 
     /**
      * Get densidad
      *
-     * @return string 
+     * @return string
      */
     public function getDensidad()
     {
@@ -339,7 +339,7 @@ class Producto
 
     /**
      * Get stock_minimo
-     * @return string 
+     * @return string
      */
     public function getStockMinimo()
     {
@@ -354,14 +354,14 @@ class Producto
      */
     public function setObservaciones($observaciones)
     {
-        $this->observaciones = $observaciones;    
+        $this->observaciones = $observaciones;
         return $this;
     }
 
     /**
      * Get observaciones
      *
-     * @return string 
+     * @return string
      */
     public function getObservaciones()
     {
@@ -377,20 +377,20 @@ class Producto
     public function setActivo($activo)
     {
         $this->activo = $activo;
-    
+
         return $this;
     }
 
     /**
      * Get activo
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getActivo()
     {
         return $this->activo;
     }
-    
+
     /**
      * Set facturable
      *
@@ -400,14 +400,14 @@ class Producto
     public function setFacturable($facturable)
     {
         $this->facturable = $facturable;
-    
+
         return $this;
     }
 
     /**
      * Get facturable
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getFacturable()
     {
@@ -423,14 +423,14 @@ class Producto
     public function setCreated($created)
     {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -446,14 +446,14 @@ class Producto
     public function setUpdated($updated)
     {
         $this->updated = $updated;
-    
+
         return $this;
     }
 
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -469,14 +469,14 @@ class Producto
     public function setRubro(\ConfigBundle\Entity\Parametro $rubro = null)
     {
         $this->rubro = $rubro;
-    
+
         return $this;
     }
 
     /**
      * Get rubro
      *
-     * @return \ConfigBundle\Entity\Parametro 
+     * @return \ConfigBundle\Entity\Parametro
      */
     public function getRubro()
     {
@@ -492,14 +492,14 @@ class Producto
     public function setProveedor(\ComprasBundle\Entity\Proveedor $proveedor = null)
     {
         $this->proveedor = $proveedor;
-    
+
         return $this;
     }
 
     /**
      * Get proveedor
      *
-     * @return \ComprasBundle\Entity\Proveedor 
+     * @return \ComprasBundle\Entity\Proveedor
      */
     public function getProveedor()
     {
@@ -515,14 +515,14 @@ class Producto
     public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
     {
         $this->createdBy = $createdBy;
-    
+
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -538,23 +538,23 @@ class Producto
     public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
     {
         $this->updatedBy = $updatedBy;
-    
+
         return $this;
     }
 
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {
         return $this->updatedBy;
     }
-    
+
 /**
  * MANEJO DE FOTOS
- */    
+ */
     /**
      * @ORM\Column(name="path", type="string", length=255, nullable=true)
      */
@@ -573,13 +573,13 @@ class Producto
 
     /**
      * Get path
-     * @return string 
+     * @return string
      */
     public function getPath()
     {
         return $this->path;
     }
-    
+
     public function getAbsolutePath()
     {
         return null === $this->path
@@ -606,8 +606,8 @@ class Producto
         // se deshace del __DIR__ para no meter la pata
         // al mostrar el documento/imagen cargada en la vista.
         return 'uploads';
-    }  
-       
+    }
+
     /**
      * @Assert\File(maxSize="150k")
      */
@@ -695,7 +695,7 @@ class Producto
             unlink($this->filenameForRemove);
         }
     }
-   
+
     /**
      * Constructor
      */
@@ -703,7 +703,7 @@ class Producto
     {
         $this->precios = new \Doctrine\Common\Collections\ArrayCollection();
     }
-    
+
     /**
      * Add precios
      *
@@ -730,7 +730,7 @@ class Producto
     /**
      * Get precios
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getPrecios()
     {
@@ -749,6 +749,16 @@ class Producto
         }
         return $precio;
     }
+    public function getPrecioConIvaByLista($lista)
+    {
+        $precio = 0;
+        foreach ($this->getPrecios() as $item){
+            if($item->getPrecioLista()->getId()==$lista){
+                $precio = $item->getPrecioConIva();
+            }
+        }
+        return $precio;
+    }
 
     /**
      * Set iva
@@ -759,14 +769,14 @@ class Producto
     public function setIva($iva)
     {
         $this->iva = $iva;
-    
+
         return $this;
     }
 
     /**
      * Get iva
      *
-     * @return string 
+     * @return string
      */
     public function getIva()
     {
@@ -782,7 +792,7 @@ class Producto
     public function addStock(\AppBundle\Entity\Stock $stock)
     {
         $stock->setProducto($this);
-        $this->stock[] = $stock;   
+        $this->stock[] = $stock;
         return $this;
     }
 
@@ -799,13 +809,13 @@ class Producto
     /**
      * Get stock
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getStock()
     {
         return $this->stock;
     }
-        
+
     /**
      * Stock actual x depósito
      */
@@ -822,7 +832,7 @@ class Producto
      */
     public function getStockActual(){
         $actual = 0;
-        foreach ($this->getStock() as $stock) {            
+        foreach ($this->getStock() as $stock) {
             $actual = $actual + $stock->getCantidad();
         }
         return number_format((float)$actual, 3, '.', '');
@@ -847,14 +857,14 @@ class Producto
      */
     public function setCodigoBarra($codigoBarra)
     {
-        $this->codigoBarra = $codigoBarra;  
+        $this->codigoBarra = $codigoBarra;
         return $this;
     }
 
     /**
      * Get codigoBarra
      *
-     * @return string 
+     * @return string
      */
     public function getCodigoBarra()
     {
@@ -869,14 +879,14 @@ class Producto
      */
     public function setCosto($costo)
     {
-        $this->costo = $costo;    
+        $this->costo = $costo;
         return $this;
     }
 
     /**
      * Get costo
      *
-     * @return string 
+     * @return string
      */
     public function getCosto()
     {
@@ -899,7 +909,7 @@ class Producto
     /**
      * Get unidadMedida
      *
-     * @return \ConfigBundle\Entity\Parametro 
+     * @return \ConfigBundle\Entity\Parametro
      */
     public function getUnidadMedida()
     {
@@ -922,7 +932,7 @@ class Producto
     /**
      * Get bulto
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getBulto()
     {
@@ -945,7 +955,7 @@ class Producto
     /**
      * Get cantidadxBulto
      *
-     * @return string 
+     * @return string
      */
     public function getCantidadxBulto()
     {
@@ -977,11 +987,11 @@ class Producto
     /**
      * Get lotes
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getLotes()
     {
         return $this->lotes;
     }
-    
+
 }

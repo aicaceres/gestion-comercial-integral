@@ -240,7 +240,7 @@ class ClienteController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('VentasBundle:Cliente')->find($id);
         $partial = $this->renderView(
-            'VentasBundle:Venta:_partial-datos-cliente.html.twig',
+            'VentasBundle:Partial:_partial-datos-cliente.html.twig',
             array('item' => $entity)
         );
         $lista = ($entity->getPrecioLista()) ? $entity->getPrecioLista()->getId() : 1;
@@ -255,6 +255,7 @@ class ClienteController extends Controller {
             'transporte' => $transporte,
             'categoriaIva' => ($entity->getCategoriaIva() ) ?  $entity->getCategoriaIva()->getNombre() : null,
             'cuitValido' => $valido,
+            'esConsumidorFinal' => $entity->getConsumidorFinal(),
         );
         return new Response( json_encode($data));
     }

@@ -71,6 +71,12 @@ class Venta {
     protected $cotizacion = 0;
 
     /**
+     * @var integer $descuentoRecargo
+     * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
+     */
+    protected $descuentoRecargo;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Transporte")
      * @ORM\JoinColumn(name="transporte_id", referencedColumnName="id")
      */
@@ -118,56 +124,61 @@ class Venta {
     private $updatedBy;
 
     /**
-     *  TOTALIZADOS DE LA VENTA
+     *  TOTALIZADOS DE LA OPERACION
      */
-    public function totalesDiscriminados() {
-        $precio = $iva = 0;
-        foreach ($this->detalles as $item) {
-            $precio = $precio + $item->getPrecio();
-            $iva = $iva + $item->getIva();
-        }
-        $totales = array('precio' => $precio, 'iva' => $iva);
-        return $totales;
-    }
-
-    public function totalDescuentoRecargo(){
-        $porcentaje = $this->getFormaPago()->getPorcentajeRecargo();
-        $totales = $this->totalesDiscriminados();
-        return ($totales['precio'] + $totales['iva']) * ($porcentaje/100);
-    }
-    /****/
-
-
-    /**
-     *  VALORES TOTALES ORIGINALES
-     */
-    public function getPrecioDiscriminado() {
-        $precio = $iva = 0;
-        $cotiz = $this->cotizacion;
-        foreach ($this->detalles as $item) {
-            $precio = $precio + $item->getPrecio();
-            $iva = $iva + $item->getIva();
-        }
-        $totales = array('precio' => $precio/$cotiz, 'iva' => $iva/$cotiz);
-        return $totales;
-    }
-
     public function getSubTotal() {
         $total = 0;
         foreach ($this->detalles as $item) {
-            $total = $total + $item->getTotal();
+            $total = $total + $item->getTotalItem();
         }
         return $total;
     }
-
-    public function getTotalDescuentoRecargo(){
-        $porcentaje = $this->getFormaPago()->getPorcentajeRecargo();
-        return $this->getSubTotal() * ($porcentaje/100);
+    public function getTotalDescuentoRecargo() {
+        $total = 0;
+        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        if( $categIva == 'I' || $categIva == 'M'){
+            // suma de descuentos x item
+            foreach ($this->detalles as $item) {
+                $total = $total + $item->getDtoRecItem();
+            }
+            $total = $total / $this->getCotizacion();
+        }else{
+            // descuento sobre el subtotal
+            $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
+        }
+        return round( ($total ) ,3);
+    }
+    public function getTotalIva(){
+        $total = 0;
+        foreach ($this->detalles as $item) {
+            $total = $total + $item->getIvaItem();
+        }
+        return round( ($total / $this->getCotizacion()) ,3);
+    }
+    public function getTotalIibb(){
+        $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
+        return $monto * 0.035;
+    }
+    public function getMontoTotal(){
+        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        if( $categIva == 'I' || $categIva == 'M'){
+            // total con iva e iibb
+            $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo() + $this->getTotalIva();
+            if( $categIva == 'I' ){
+                $total = $total + $this->getTotalIibb();
+            }
+        }else{
+            // subtotal +/- descuentoRecargo
+            $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
+            $total = $this->getSubTotal() + $descRec  ;
+        }
+        return round($total,2) ;
     }
 
-    public function getTotal(){
-        return $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-    }
+    /**
+     *  FIN TOTALIZADOS
+     */
+
 
     /**
      * Get id
@@ -560,5 +571,28 @@ class Venta {
     public function getCotizacion()
     {
         return $this->cotizacion;
+    }
+
+    /**
+     * Set descuentoRecargo
+     *
+     * @param string $descuentoRecargo
+     * @return Venta
+     */
+    public function setDescuentoRecargo($descuentoRecargo)
+    {
+        $this->descuentoRecargo = $descuentoRecargo;
+
+        return $this;
+    }
+
+    /**
+     * Get descuentoRecargo
+     *
+     * @return string
+     */
+    public function getDescuentoRecargo()
+    {
+        return $this->descuentoRecargo;
     }
 }

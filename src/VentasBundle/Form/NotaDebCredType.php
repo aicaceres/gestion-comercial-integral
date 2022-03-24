@@ -32,6 +32,7 @@ class NotaDebCredType extends AbstractType {
                     'required' => true, 'label' => 'MONEDA: '
                 ))
                 ->add('cotizacion','hidden')
+                ->add('descuentoRecargo','hidden')
                 ->add('facturas', 'entity', array(
                     'class' => 'VentasBundle:FacturaElectronica',
                     'label' => 'Comprobantes Asociados:',

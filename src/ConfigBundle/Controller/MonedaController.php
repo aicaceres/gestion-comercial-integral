@@ -180,7 +180,7 @@ class MonedaController extends Controller
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Moneda')->find($id);
         $partial = $this->renderView(
-            'VentasBundle:Venta:_partial-datos-moneda.html.twig',
+            'VentasBundle:Partial:_partial-datos-moneda.html.twig',
             array('item' => $entity)
         );
         $datos = array('partial' => $partial, 'simbolo' => $entity->getSimbolo(), 'cotizacion' => $entity->getCotizacion());

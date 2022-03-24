@@ -9,24 +9,43 @@ use Doctrine\ORM\EntityRepository;
 
 class PresupuestoDetalleType extends AbstractType {
 
+    private $type;
+    public function __construct($type)
+    {
+        $this->type= $type;
+    }
+
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
-        $builder->add('producto', 'entity', array(
+        $builder->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:'))
+                //->add('bulto', null, array('required' => false))
+                //->add('cantidadxBulto', null, array('required' => false))
+                ->add('precio', 'hidden')
+                ->add('alicuota', 'hidden')
+        ;
+        if($this->type=='new'){
+            $builder->add('producto', 'entity', array(
+                    'required' => true,
+                    'placeholder' => 'Seleccionar Producto...',
+                    'class' => 'AppBundle\\Entity\\Producto',
+                    'query_builder' => function(EntityRepository $repository){
+                        return $qb = $repository->createQueryBuilder('c')
+                                ->where("c.id=0");
+                    }
+            ));
+        }else{
+            $builder->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
                     'class' => 'AppBundle\\Entity\\Producto',
                     'attr' => array('class' => 'chzn-select', 'label' => 'Producto:'),
                     'query_builder' => function(ProductoRepository $em) {
                         return $em->getProductosFacturables();
-                    }))
-                ->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:'))
-                ->add('bulto', null, array('required' => false))
-                ->add('cantidadxBulto', null, array('required' => false))
-                ->add('precio', null, array('label' => 'Costo:', 'required' => true))
-        ;
+                    }));
+        }
     }
 
     /**

@@ -38,19 +38,13 @@ class Presupuesto {
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
      */
-    protected $estado;
+    protected $estado = 'EMITIDO';
 
     /**
-     * @var integer $total
-     * @ORM\Column(name="total", type="decimal", scale=3 )
+     * @var integer $descuentoRecargo
+     * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
      */
-    protected $total;
-
-    /**
-     * @var integer $descuento
-     * @ORM\Column(name="descuento", type="decimal", scale=3 )
-     */
-    protected $descuento = 0;
+    protected $descuentoRecargo;
 
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="facturasVenta")
@@ -144,13 +138,39 @@ class Presupuesto {
         return str_pad( $this->nroPresupuesto, 8, "0", STR_PAD_LEFT) ;
     }
 
-    public function getSubTotal(){
-        $subtotal = 0;
+    /**
+     *  TOTALIZADOS DE LA OPERACION
+     */
+    public function getSubTotal() {
+        $total = 0;
         foreach ($this->detalles as $item) {
-            $subtotal = $subtotal + $item->getTotal();
+            $total = $total + $item->getTotalItem();
         }
-        return $subtotal;
+        return $total;
     }
+    public function getTotalDescuentoRecargo() {
+        $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
+        return round( ($total ) ,3);
+    }
+    public function getTotalIva(){
+        $total = 0;
+        foreach ($this->detalles as $item) {
+            $total = $total + $item->getIvaItem();
+        }
+        return round( $total ,3);
+    }
+    public function getTotalIibb(){
+        $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
+        return $monto * 0.035;
+    }
+    public function getMontoTotal(){
+        $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo()  ;
+        return round($total,2) ;
+    }
+
+    /**
+     *  FIN TOTALIZADOS
+     */
 
     /**
      * Get id
@@ -232,49 +252,26 @@ class Presupuesto {
     }
 
     /**
-     * Set total
+     * Set descuentoRecargo
      *
-     * @param string $total
+     * @param string $descuentoRecargo
      * @return Presupuesto
      */
-    public function setTotal($total)
+    public function setDescuentoRecargo($descuentoRecargo)
     {
-        $this->total = $total;
+        $this->descuentoRecargo = $descuentoRecargo;
 
         return $this;
     }
 
     /**
-     * Get total
+     * Get descuentoRecargo
      *
      * @return string
      */
-    public function getTotal()
+    public function getDescuentoRecargo()
     {
-        return $this->total;
-    }
-
-    /**
-     * Set descuento
-     *
-     * @param string $descuento
-     * @return Presupuesto
-     */
-    public function setDescuento($descuento)
-    {
-        $this->descuento = $descuento;
-
-        return $this;
-    }
-
-    /**
-     * Get descuento
-     *
-     * @return string
-     */
-    public function getDescuento()
-    {
-        return $this->descuento;
+        return $this->descuentoRecargo;
     }
 
     /**

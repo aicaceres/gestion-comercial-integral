@@ -49,7 +49,7 @@
                 <td>{{entity.nroPresupuesto}}</td>
                 <td><span class="hidden">{{ entity.fechaPresupuesto|date('Ymd') }}</span>{{ entity.fechaPresupuesto|date('d-m-Y') }}</td>
                 <td>{% if entity.nombreCliente %} {{ entity.nombreCliente }} {% else %}  {{ entity.cliente }} {% endif %}</td>
-                <td class="alignright">{{ entity.getTotal|number_format(3,'.',',') }}</td>
+                <td class="alignright">{{ entity.montoTotal|number_format(3,'.',',') }}</td>
                 <td class="buttons">
                     {% if entity.estado == 'ANULADO' %}
                         <strong style="height:26px;display:block;"> ANULADO: {{ entity.updated|date('d-m-Y H:i:s') }} | {{ entity.updatedBy.username }} </strong>

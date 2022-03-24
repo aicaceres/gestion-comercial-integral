@@ -1,0 +1,30 @@
+<table class="stdtable noaction" cellspacing="0" cellpadding="0" border="0">
+    <thead>
+        <tr>
+            <th style="width:3%;">#</th>
+            <th>Producto</th>
+            <th style="width:12%;">Cant.</th>
+            <th style="width:10%;">Precio Unit.</th>
+            <th style="width:10%;">SubTotal</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for detalle in entity.detalles %}
+        <tr class="item">
+            <td class="ordTd">{{loop.index}}</td>
+            <td class="prodTd">
+                <strong>{{detalle.producto.nombre}}</strong>
+            </td>
+            <td class="cantTd alignright">{{ detalle.cantidad }} {{detalle.producto.unidadmedida.nombre}}</td>
+            <td class="precTd alignright">{{ detalle.precioUnitarioItem|number_format(3,'.',',') }}</td>
+            <td class="itmSubtotalTd alignright">{{ detalle.totalItem|number_format(3,'.',',') }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4" style="text-align:right">&nbsp; </th>
+            <th class="cktotal red alignright" id="subtotalTh">{{entity.subTotal|number_format(3,'.',',') }}</th>
+        </tr>
+    </tfoot>
+</table>

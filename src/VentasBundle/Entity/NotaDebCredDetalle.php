@@ -39,7 +39,7 @@ class NotaDebCredDetalle {
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3)
      */
-    protected $cantidad;
+    protected $cantidad = 1;
 
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
@@ -56,12 +56,12 @@ class NotaDebCredDetalle {
      * @var integer $precio
      * @ORM\Column(name="precio", type="decimal", scale=3 )
      */
-    protected $precio;
+    protected $precio = 0;
     /**
      * @var integer $alicuota
      * @ORM\Column(name="alicuota", type="decimal", scale=3 )
      */
-    protected $alicuota;
+    protected $alicuota = 0;
 
     /**
      * @var integer $descuento
@@ -74,6 +74,34 @@ class NotaDebCredDetalle {
      * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
      */
     protected $notaDebCred;
+
+    /** VALORES ITEM  */
+    // valor del precio unitario segun categoria de iva
+    public function getPrecioUnitarioItem(){
+        $categIva = $this->getNotaDebCred()->getCliente()->getCategoriaIva()->getNombre();
+        if( $categIva == 'I' || $categIva == 'M'){
+            // precio sin iva convertido a la cotizacion
+            $precio = $this->getPrecio() / $this->getNotaDebCred()->getCotizacion();
+        }else{
+            // precio con iva incluido convertido a la cotizacion
+            $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $this->getNotaDebCred()->getCotizacion();
+        }
+        return round( $precio, 3);
+    }
+    // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
+    public function getDtoRecItem(){
+        $porcDtoRec = $this->getNotaDebCred()->getDescuentoRecargo();
+        return ($this->getPrecio() * ($porcDtoRec / 100) ) ;
+    }
+    // monto del iva del item para sumariar total si categoriaIva I o M
+    public function getIvaItem(){
+        return ($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100);
+    }
+    // total del item
+    public function getTotalItem(){
+        return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
+    }
+    /** FIN VALORES ITEM */
 
     /** Calculos * */
     public function getSubTotal() {

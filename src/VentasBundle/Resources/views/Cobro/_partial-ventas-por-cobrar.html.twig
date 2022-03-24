@@ -32,7 +32,7 @@
             <td>{{ entity.fechaVenta|date('d-m-Y H:i') }}</td>
             <td>{{ entity.cliente }}</td>
             <td>{{ entity.formaPago }}</td>
-            <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span>{{ entity.getTotal|number_format(3,'.',',') }}</td>
+            <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(3,'.',',') }}</td>
             <td>{{entity.createdBy.nombre|upper }}</td>
         </tr>
         {% endfor %}

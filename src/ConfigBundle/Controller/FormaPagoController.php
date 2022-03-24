@@ -183,7 +183,7 @@ class FormaPagoController extends Controller
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:FormaPago')->find($id);
         $partial = $this->renderView(
-            'VentasBundle:Venta:_partial-datos-formapago.html.twig',
+            'VentasBundle:Partial:_partial-datos-formapago.html.twig',
             array('item' => $entity)
         );
         return new Response($partial);

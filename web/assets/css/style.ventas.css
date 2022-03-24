@@ -5,7 +5,7 @@
         font-weight: bold;
         padding: 0px 2px 0px 8px;
     }
-    .pagetitle span{
+    .pagetitle.notadebcred span{
         font-size:20px;
     }
     .fields label{
@@ -91,5 +91,24 @@
     #productos_table .nombre-producto:focus, #productos_table .nombre-producto:hover,
     .paginate_button:focus{
         color:red !important;
+        font-weight:bold;
+    }
+
+    .fechahora{
+        font-size: 20px;
+    }
+
+    .venta-fieldset{
+        padding:10px 0px;
+        width: 100%;
+        background-color:gainsboro;
+        font-weight:bold;
+        text-align: center;
+    }
+    .venta-fieldset div{
+        display:inline-block;
+        width: 28%;
+    }
+    .venta-fieldset input{
         font-weight:bold;
     }

@@ -1,7 +1,15 @@
 <div class="selectFormaPago">
     {{ form_label(form.formaPago)}}
 
-    {{ form_widget(form.formaPago,{'attr':{'style':'width:80%','url':path('get_lista_formapago'), 'fnc':'openModalFormaPago', 'mtitle':'Seleccionar Forma de Pago'}}) }}
+    {{ form_widget(form.formaPago,
+        {'attr':
+            {'style':'width:80%',
+             'url':path('get_lista_formapago'),
+             'url_datos' : path('get_datos_formapago'),
+             'fnc':'openModalFormaPago',
+             'mtitle':'Seleccionar Forma de Pago'}
+        })
+    }}
 
     <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
 </div>

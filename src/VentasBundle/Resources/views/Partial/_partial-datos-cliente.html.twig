@@ -1,6 +1,6 @@
-<div class="datos-cliente">
-    <label> CUIT: </label><span class="cuitcliente"> {{item.cuit}} </span>
-    <label> IVA: </label> {% if item.categoriaIva %} {{item.categoriaIva.descripcion|upper}} {% else %} No definido {% endif %}
-    <label> RENTAS: </label> {% if item.categoriaRentas %} {{item.categoriaRentas.nombre|upper}}{% else %} No definido  {% endif %}
-    <label> DIRECCIÓN: </label> {{item.domicilioCompleto|upper}}
-</div>
+<label> CUIT: </label><span class="cuitcliente"> {{item.cuit}} </span>
+<label> IVA: </label> {% if item.categoriaIva %} {{item.categoriaIva.descripcion|upper}} {% else %} No definido {% endif %}
+<label> RENTAS: </label> {% if item.categoriaRentas %} {{item.categoriaRentas.nombre|upper}}{% else %} No definido  {% endif %}
+{% if item.direccion is defined %}
+<label> DIRECCIÓN: </label> {{item.domicilioCompleto|upper}}
+{% endif %}

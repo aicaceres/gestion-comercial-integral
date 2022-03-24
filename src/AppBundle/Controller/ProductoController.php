@@ -808,6 +808,8 @@ class ProductoController extends Controller {
             $listaprecio = $request->get('listaprecio');
             $deposito = $request->get('deposito');
             $cotizacion = $request->get('cotizacion');
+            $categoriaIva = $request->get('categoriaIva');
+            $esPresupuesto = json_decode( $request->get('esPresupuesto') );
 
         }
         else // If the request is not a POST one, die hard
@@ -856,18 +858,26 @@ class ProductoController extends Controller {
                 $responseTemp = $precioTemp = "-";
                 $rowPrecio = $producto->getPrecios()[0];
                 if ($rowPrecio !== null) {
-                    $iva = $producto->getIva();
-                    $precio = $rowPrecio->getPrecio();
-                    $montoIva = round( ($precio * ( $iva/100 )) ,3);
-                    $total = round( ($precio + $montoIva) ,3);
-                    $precioConv = round( ($total / $cotizacion) ,3);
+                    if( $esPresupuesto ){
+                        $precio = $precioConv = $rowPrecio->getPrecio();
+                        $alicuota = 0;
+                    }else{
+                        $alicuota = $producto->getIva();
+                        $precio = $rowPrecio->getPrecio();
+                        if( in_array( $categoriaIva , array('I','M') ) ){
+                            $precioConv = round( ($precio / $cotizacion) ,3);
+                        }else{
+                            $precioConv = round( ( $precio * ( 1 + $alicuota/100) ) / $cotizacion ,3);
+                        }
+                    }
+
                     $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv ));
                 }
                 switch ($column['name']) {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
-                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precio."' data-iva='".$montoIva."' data-total='".$precioConv."' href='javascript:void(0);'>".$name."</a>";
+                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precio."' data-alicuota='".$alicuota."' href='javascript:void(0);'>".$name."</a>";
                             break;
                         }
                     case 'codigo': {

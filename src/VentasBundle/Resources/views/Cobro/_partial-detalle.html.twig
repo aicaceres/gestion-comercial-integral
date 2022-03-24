@@ -1,35 +1,30 @@
+{% set simbolo = ( entity.moneda is defined ) ? entity.moneda.simbolo : '$' %}
 <table style="width:100%"  cellpadding="0" cellspacing="0" border="0" class="resumen-venta stdtable noaction">
   <thead>
     <tr class="resumen">
-      {% set subtotal = venta.totalesDiscriminados %}
-      {% set total = subtotal.precio + subtotal.iva + venta.totalDescuentoRecargo %}
-      <th id="subtotalTd">
-        Subtotal: <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
-                  <span data-valor="{{ subtotal.precio }}" class="valor">
-                    {{ (subtotal.precio/venta.cotizacion)|number_format(3,'.',',') }}
-                  </span>.-
-      </th>
-      <th id="porcentajeRecargoTd">
-        Desc./Rec. [<span class="porcentajeRecargo">
-                    {{ entity.formapago.porcentajeRecargo }}
-                </span>%]:
-            <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
-            <span data-valor="{{ venta.totalDescuentoRecargo }}" class="valor">
-                {{ (venta.totalDescuentoRecargo/venta.cotizacion)|number_format(3,'.',',') }}
-            </span>.-
-      </th>
-      <th id="ivaTd">
-        IVA: <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
-             <span data-valor="{{ subtotal.iva }}" class="valor">
-                {{ (subtotal.iva/venta.cotizacion)|number_format(3,'.',',') }}
-             </span>.-
-      </th>
-      <th id="totalTd" class="red">
-        A PAGAR: <span class="simbolo">{{venta.moneda.simbolo}}</span>&nbsp;
-                 <span data-valor="{{ total }} " class="valor">
-                    {{ (total/venta.cotizacion)|number_format(3,'.',',') }}
-                 </span>.-
-      </th>
+        <th style="width:18%">
+            Subtotal: <span class="simbolo">{{simbolo}}</span>&nbsp;
+                <span id="importeSubtotal" >{{ (venta.subTotal)|number_format(3,'.',',')}}</span>.-
+        </th>
+        <th>
+            Desc./Rec. [<span class="descuentoRecargo">
+            {{ venta.descuentoRecargo }}
+            </span>%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+            <span id="importeRecargo">{{ venta.totalDescuentoRecargo|number_format(3,'.',',') }}</span>.-
+        </th>
+        <th id="ivaTd" style=" {% if not showiva %} display:none; {% endif %} width:16%">
+        IVA: <span class="simbolo">{{simbolo}}</span>&nbsp;
+        <span id="importeIVA">{{ venta.totalIva|number_format(3,'.',',') }}</span>.-
+        </th>
+        <th id="iibbTd" style="{% if not showiibb %} display:none; {% endif %}width:20%">
+            Perc.IIBB [3.50%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+            <span id="importeIIBB">{{ venta.totalIibb|number_format(3,'.',',') }}</span>.-
+        </th>
+        <th style="width:18%" class="gralTotalTd red">
+            A PAGAR: <span class="simbolo">{{simbolo}}</span>&nbsp;
+                <span id="importeTotal"> {{ venta.montoTotal|number_format(2,'.',',')}} </span>.-
+        </th>
+
       <th style="width:34px"><a href="javascript:void(0)" title="Ver Detalle de Artículos" class="btn btnaction btn_list"></a></th>
     </tr>
   </thead>
@@ -46,17 +41,15 @@
         </tr>
     </thead>
     <tbody>
-    {% set neto = 0 %}
     {% for item in venta.detalles %}
-        {% set neto = (neto + item.total) %}
         <tr class="item" divdata="item_{{loop.index-1}}">
             <td class="ordTd">{{loop.index}}</td>
             <td class="prodTd" style="text-align:left">
                 {{ item.producto.nombre }}
             </td>
-            <td class="cantTd"> {{ item.cantidad }}    </td>
-            <td data-valor="{{item.precioConIva}}" class="precTd alignright valor"> {{ item.precioConv|number_format(3,'.',',') }}     </td>
-            <td data-valor="{{item.total}}" class="itmSubtotalTd alignright valor">{{ item.getTotal|number_format(3,'.',',') }}
+            <td class="cantTd"> {{ item.cantidad }}  {{item.producto.unidadmedida.nombre}}   </td>
+            <td data-valor="{{item.precio}}" class="precTd alignright valor"> {{ item.precioUnitarioItem|number_format(3,'.',',') }} </td>
+            <td data-valor="{{item.totalItem}}" class="itmSubtotalTd alignright valor">{{ item.totalItem|number_format(3,'.',',') }}
             </td>
         </tr>
     {% endfor %}
@@ -65,9 +58,9 @@
         <tr>
             <th colspan="4" style="text-align:right">&nbsp; </th>
             <th class="cktotal alignright" id="subtotalTh">
-                <span class="simbolo" style="float:left">{{venta.moneda.simbolo}}</span>
-                <span data-valor="{{ neto }} " class="valor">
-                    {{ (neto/venta.cotizacion)|number_format(3,'.',',') }}
+                <span class="simbolo" style="float:left">{{simbolo}}</span>
+                <span data-valor="{{ venta.subTotal }} " class="valor">
+                    {{ venta.subTotal|number_format(3,'.',',') }}
                  </span>
             </th>
         </tr>

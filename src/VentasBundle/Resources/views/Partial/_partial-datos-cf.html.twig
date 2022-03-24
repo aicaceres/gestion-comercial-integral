@@ -1,15 +1,15 @@
 <div class="datos-cf">
-    <div style="width: 33%; ">
+    <div style="width: 50%; ">
         {{ form_label(form.nombreCliente)}}
         {{ form_widget(form.nombreCliente)}}
     </div>
     <div style="width: 18%;">
         {{ form_row(form.tipoDocumentoCliente, { 'attr': {'class' : 'select2','style':'width:100%','data-allow-clear':'true','data-placeholder':'' } })}}
     </div>
-    <div style="width: 14%;">
+    <div style="width: 18%;">
         {{ form_row(form.nroDocumentoCliente)}}
     </div>
-    {% if form.direccionCliente is defined %}
+    {% if form.direccionCliente is defined and false %}
     <div style="width: 33%;">
         {{ form_row(form.direccionCliente)}}
     </div>
