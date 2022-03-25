@@ -18,13 +18,12 @@ class CobroType extends AbstractType {
 
         $builder
                 ->add('nroOperacion', 'hidden')
-                ->add('fechaCobro', 'date', array('widget' => 'single_text', 'label' => 'Fecha Cobro:',
-                    'format' => 'dd-MM-yyyy', 'required' => true))
+                ->add('fechaCobro','datetime')
                 ->add('nombreCliente',null, array('label' => 'Nombre:'))
                 ->add('tipoDocumentoCliente','choice', array('label'=>'Tipo Documento:', 'required' => false,
                    'choices' => $docType, 'expanded' => false))
                 ->add('nroDocumentoCliente',null, array('label'=>'N° Documento:'))
-                ->add('direccionCliente',null, array('label'=>'Dirección:'))
+                //->add('direccionCliente',null, array('label'=>'Dirección:'))
 
                 ->add('moneda', 'entity', array(
                     'class' => 'ConfigBundle:Moneda',
@@ -33,6 +32,8 @@ class CobroType extends AbstractType {
                 ->add('cotizacion','hidden')
                 ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
                     'required' => true, 'label' => 'FORMA DE PAGO: '))
+                ->add('venta', 'entity', array('class' => 'VentasBundle:Venta'))
+                ->add('facturaElectronica', new FacturaElectronicaType())
         ;
         if ($type == 'new') {
             // en render de nueva venta solo traer cliente por defecto

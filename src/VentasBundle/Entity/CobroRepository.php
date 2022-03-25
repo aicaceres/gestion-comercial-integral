@@ -10,13 +10,13 @@ class CobroRepository extends EntityRepository {
     public function findByCriteria($unidneg, $desde = NULL, $hasta = NULL, $userId = NULL) {
         $query = $this->_em->createQueryBuilder();
         $query->select('c')
-                ->from('VentasBundle\Entity\Cobro', 'c')                          
-                ->innerJoin('c.unidadNegocio', 'un')                
-                ->where("un.id=" . $unidneg);              
+                ->from('VentasBundle\Entity\Cobro', 'c')
+                ->innerJoin('c.unidadNegocio', 'un')
+                ->where("un.id=" . $unidneg);
         if ($desde) {
             $cadena = " c.fechaCobro >= '" . UtilsController::toAnsiDate($desde) . "'";
             $query->andWhere($cadena);
-        }   
+        }
         if ($hasta) {
             $cadena = " c.fechaCobro <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $query->andWhere($cadena);
@@ -35,10 +35,20 @@ class CobroRepository extends EntityRepository {
         $query->select('u.id,u.nombre,u.username')
                 ->from('VentasBundle\Entity\Cobro', 'c')
                 ->innerJoin('c.createdBy', 'u')
-                ->distinct();        
+                ->distinct();
         return $query->getQuery()->getArrayResult();
     }
 
-
+    public function filterByCliente($cliente) {
+        $query = $this->_em->createQueryBuilder();
+            $query->select("f")
+                    ->from('VentasBundle:FacturaElectronica', 'f')
+                    ->innerJoin('f.cobro','c')
+                    ->innerJoin('c.cliente','cl')
+                    ->where('cl.id= :cli')
+                    ->orderBy('c.fechaCobro')
+                    ->setParameter('cli', $cliente );
+        return $query->getQuery()->getResult();
+    }
 
 }

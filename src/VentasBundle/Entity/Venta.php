@@ -94,6 +94,11 @@ class Venta {
     protected $detalles;
 
     /**
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Cobro", mappedBy="venta")
+     */
+    protected $cobro;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -122,6 +127,10 @@ class Venta {
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
     private $updatedBy;
+
+    public function __toString(){
+        return strval($this->getNroOperacion());
+    }
 
     /**
      *  TOTALIZADOS DE LA OPERACION
@@ -594,5 +603,28 @@ class Venta {
     public function getDescuentoRecargo()
     {
         return $this->descuentoRecargo;
+    }
+
+    /**
+     * Set cobro
+     *
+     * @param \VentasBundle\Entity\Cobro $cobro
+     * @return Venta
+     */
+    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null)
+    {
+        $this->cobro = $cobro;
+
+        return $this;
+    }
+
+    /**
+     * Get cobro
+     *
+     * @return \VentasBundle\Entity\Cobro 
+     */
+    public function getCobro()
+    {
+        return $this->cobro;
     }
 }

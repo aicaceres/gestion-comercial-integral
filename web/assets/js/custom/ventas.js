@@ -34,7 +34,7 @@ jQuery(function ($) {
             },
             cache: true
             },
-            minimumInputLength: 3
+            minimumInputLength: 3,
         }).on('change', function() {
             id = $(this).val();
             urlDatosCliente = $(this).attr('url_datos');
@@ -75,7 +75,19 @@ jQuery(function ($) {
                         }
                     }
                     color = (data.cuitValido) ? '#666666' : 'orangered';
-                    $('.cuitcliente').css('color',color);
+                    $('.cuitcliente').css('color', color);
+                    if ($('#ventasbundle_notadebcred_facturas').length > 0) {
+                        // recargar facturas segun cliente
+                        objfact = $('#ventasbundle_notadebcred_facturas');
+                        //objfact.select2({data:{}}).trigger('change');
+                        url_fact = objfact.attr('url_autocomplete');
+                        $.getJSON( url_fact , {'id': cliente.val()}).done(function(data){
+                            // actualizar datos
+                            if(data){
+                                objfact.select2('destroy').empty().select2({ data: data }).trigger('change');
+                            }
+                        });
+                    }
                 }
             });
         });
@@ -146,6 +158,7 @@ jQuery(function ($) {
         });
 
         cliente.select2('focus');
+
     });
 // funciones
 

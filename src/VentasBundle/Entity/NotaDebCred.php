@@ -177,6 +177,10 @@ class NotaDebCred {
         $this->estado = 'ACREDITADO';
     }
 
+    public function getPagoTxt(){
+        return ($this->getFormaPago()->getCuentaCorriente()) ? '' : $this->getFormaPago()->getNombre();
+    }
+
     public function __toString() {
         return $this->getNotaElectronica()->getComprobanteTxt();
     }

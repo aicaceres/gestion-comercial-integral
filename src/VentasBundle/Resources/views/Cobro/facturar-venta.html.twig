@@ -60,12 +60,11 @@
         </fieldset>
 
         <fieldset style=" text-align:center">
-            <div style="display:inline-block; width:90%; margin:0 auto;" >
+            <div style="display:inline-block; width:85%; margin:0 auto;" >
                 {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
                 {% set showiva = (cativa != 'C') %}
                 {% set showiibb = (cativa == 'I') %}
                 {% include "VentasBundle:Cobro:_partial-detalle.html.twig" with {'venta':entity.venta,'showiva': showiva, 'showiibb': showiibb } %}
-
             </div>
         </fieldset>
 
@@ -73,8 +72,8 @@
         <fieldset>
             <br clear="all" />
             <div class="actionbutton">
-                <button class="guardar tabbable" type="submit">FACTURAR</button>
-                <a class="cancelar tabbable" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
+                <button class="guardar disabled" id="guardar" type="button">FACTURAR</button>
+                <a class="cancelar" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
             </div>
         </fieldset>
 
@@ -89,7 +88,17 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(function ($) {
+    const datosCompletos = false;
     $(window).on('load', function () {
+
+// eliminar estas linea
+// revisar detectarControles para descomentar llamadas a openmodal
+// habilitar los change de cliente, formapago y moneda
+        $('.btn_search').remove();
+        $('#ventasbundle_cobro_cliente').attr('disabled', true);
+        $('#ventasbundle_cobro_formaPago').attr('disabled', true);
+///************
+
         if('{{entity.cliente.consumidorfinal}}'){
             $('.datos-cliente').hide();
             $('.datos-cf').show();
@@ -112,6 +121,7 @@ jQuery(function ($) {
         $(".btn_list").click(function(){
             $(".detalle-venta").toggle();
         });
+
         $(document).on('keydown', (e) => { detectarControles(e); })
 
         $('#ventasbundle_cobro_nombreCliente,#ventasbundle_cobro_direccionCliente').css('width', '95%')
@@ -136,7 +146,7 @@ jQuery(function ($) {
 
         cliente = $('#ventasbundle_cobro_cliente');
         url_cliente_autocomplete = cliente.attr('url_autocomplete')
-        cliente.select2({
+        /*cliente.select2({
             ajax: {
             url: url_cliente_autocomplete,
             type: "post",
@@ -192,7 +202,7 @@ jQuery(function ($) {
                     $('.cuitcliente').css('color',color);
                 }
             });
-        });
+        });*/
 
         // al modificar forma de pago actualizar datos del partial
         $('#ventasbundle_cobro_formaPago').on('change', function () {
@@ -206,6 +216,17 @@ jQuery(function ($) {
                     descuentoRecargo = $('#porcentajeRecargo').val();
                     $('.descuentoRecargo').text( descuentoRecargo )
                     $('[id*="_descuentoRecargo"]').val( descuentoRecargo )
+                    if( $('#tipoPago').val() == 'C' || datosCompletos ){
+                       $('#guardar').removeClass('disabled');
+                        var btn = document.getElementById('guardar');
+                        btn.removeAttribute('type');
+                        btn.setAttribute('type', 'submit');
+                    }else{
+                        $('#guardar').addClass('disabled');
+                        var btn = document.getElementById('guardar');
+                        btn.removeAttribute('type');
+                        btn.setAttribute('type', 'button');
+                    }
                     //actualizaTotales();
                 }
             });
@@ -227,7 +248,9 @@ jQuery(function ($) {
                 }
             });
         });
+
         $('#ventasbundle_cobro_moneda').change();
+        $('#ventasbundle_cobro_formaPago').change();
 
         // al presionar ctrl+enter abrir popup
         $(document).on('click change keydown',
@@ -373,12 +396,12 @@ function detectarControles(e) {
         // ctrl + alt + C
         if( e.keyCode == 67 ){
             e.preventDefault();
-            openModal($('[id*="_cliente"]'))
+            //openModal($('[id*="_cliente"]'))
         }
         // ctrl + alt + F
         if( e.keyCode == 70 ){
             e.preventDefault();
-            openModal($('[id*="_formapago"]'))
+            //openModal($('[id*="_formapago"]'))
         }
         // ctrl + alt + G
         if( e.keyCode == 71 ){
@@ -386,7 +409,7 @@ function detectarControles(e) {
             $('.form-horizontal').submit();
         }
     }
-    // tecla + agrega item
+    // tecla + ver detalle venta
     if (e.keyCode == 171) {
         e.preventDefault();
         $('.btn_list').click();

@@ -49,7 +49,13 @@
         <div style="display:inline-block; width: 50%;">
             <div>
             {{ form_label(form.facturas)  }}
-            {{ form_widget(form.facturas, { 'attr': { 'class' : 'select2', 'tabindex':'0', 'style':'width:90%'} }) }}
+            {{ form_widget(form.facturas,
+                {'attr':
+                    {'style':'width:90%',
+                     'url_autocomplete' : path('get_autocomplete_facturas')
+                    }
+                })
+            }}
             </div>
         </div>
         <div style="display:inline-block; width:20%;">

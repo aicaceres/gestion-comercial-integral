@@ -112,3 +112,10 @@
     .venta-fieldset input{
         font-weight:bold;
     }
+
+.actionbutton .guardar.disabled{
+    background: #eeeeee !important;
+    color: #666 !important;
+    border: 1px solid #ddd;
+    cursor: no-drop !important;
+}

@@ -112,7 +112,7 @@
 
         <div style="display:inline-block; width: 20%;">
             <label>COBRO: </label>
-            <input type="text" disabled="disabled" class="width100" value="#XX"/>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.cobro.nroOperacion}}"/>
         </div>
         <div style="display:inline-block; width: 20%;">
             <label>FECHA/HORA: </label>
@@ -123,7 +123,7 @@
             <input type="text" disabled="disabled" class="width100" value="{{entity.createdBy.username}}"/>
         </div>
         <div style="display:inline-block; width: 40%;">
-            <label>FACTURA A 0001-00006305 | Cae:7285462613007 | VtoCae: 04/03/2022 </label>
+            <label>{{ entity.cobro.facturaElectronica.comprobanteTxt }} | Cae: {{ entity.cobro.facturaElectronica.cae }} | VtoCae: {{ entity.cobro.facturaElectronica.caeVto|date('d-m-Y') }} </label>
         </div>
 
     </fieldset>

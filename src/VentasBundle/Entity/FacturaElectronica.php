@@ -91,7 +91,7 @@ class FacturaElectronica
         $tipo = substr($this->getTipoComprobante()->getValor(),0,3);
         switch ($tipo) {
             case 'FAC':
-                return 'FACTURADO';
+                return 'FACTURA';
             case 'DEB':
                 return 'NOTA DE DEBITO';
             case 'CRE':

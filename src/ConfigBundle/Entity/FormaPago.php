@@ -87,6 +87,18 @@ class FormaPago {
      */
     protected $copiasComprobante;
 
+    public function getTipoPago(){
+        $tipo = 'X';
+        if( $this->cuentaCorriente ){
+            $tipo = 'C';
+        }elseif( $this->tarjeta ){
+            $tipo = 'T';
+        }elseif( $this->contado ){
+            $tipo = 'E';
+        }
+        return $tipo;
+    }
+
     public function __toString() {
         return $this->nombre;
     }
@@ -397,7 +409,7 @@ class FormaPago {
     /**
      * Get contado
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getContado()
     {

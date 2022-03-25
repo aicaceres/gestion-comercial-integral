@@ -33,13 +33,6 @@ class NotaDebCredType extends AbstractType {
                 ))
                 ->add('cotizacion','hidden')
                 ->add('descuentoRecargo','hidden')
-                ->add('facturas', 'entity', array(
-                    'class' => 'VentasBundle:FacturaElectronica',
-                    'label' => 'Comprobantes Asociados:',
-                    'choice_label' => 'comprobanteTxt',
-                    'multiple' => true,
-                    'required' => false,
-                ))
                 ->add('detalles', 'collection', array(
                     'type' => new NotaDebCredDetalleType($type),
                     'by_reference' => false,
@@ -56,19 +49,45 @@ class NotaDebCredType extends AbstractType {
             // en render de nuev presupuesto solo traer cliente por defecto
             $data = $options['data'];
             $cliente = $data->getCliente()->getId();
-            $builder->add('cliente', 'entity', array('required' => true,
-                'class' => 'VentasBundle:Cliente', 'label' => 'DATOS DEL CLIENTE: ',
-                'query_builder' => function (EntityRepository $repository) use ($cliente) {
-                    return $qb = $repository->createQueryBuilder('c')
-                        ->where("c.id=" . $cliente);
-                }
-            ));
+            $builder
+                ->add('cliente', 'entity', array(
+                        'required' => true,
+                        'class' => 'VentasBundle:Cliente',
+                        'label' => 'DATOS DEL CLIENTE: ',
+                        'query_builder' => function (EntityRepository $repository) use ($cliente) {
+                            return $qb = $repository->createQueryBuilder('c')
+                                                    ->where("c.id=" . $cliente);
+                        }
+                ))
+                ->add('facturas', 'entity', array(
+                        'class' => 'VentasBundle:FacturaElectronica',
+                        'label' => 'Comprobantes Asociados:',
+                        'choice_label' => 'comprobanteTxt',
+                        'multiple' => true,
+                        'required' => false,
+                        'attr'=> array('class' => 'select2'),
+                        'query_builder' => function (EntityRepository $repository) use ($cliente) {
+                                return $qb = $repository->createQueryBuilder('f')
+                                                        ->innerJoin('f.cobro','c')
+                                                        ->innerJoin('c.cliente','cl')
+                                                        ->where("cl.id=" . $cliente);
+                            }
+                    ))
+            ;
         } else if ($type == 'create') {
             // al crear traer objeto completo para match del cliente
             $builder->add('cliente', 'entity', array(
-                'class' => 'VentasBundle:Cliente',
-                'required' => true
-            ));
+                            'class' => 'VentasBundle:Cliente',
+                            'required' => true
+                            ))
+                    ->add('facturas', 'entity', array(
+                        'class' => 'VentasBundle:FacturaElectronica',
+                        'label' => 'Comprobantes Asociados:',
+                        'choice_label' => 'comprobanteTxt',
+                        'multiple' => true,
+                        'required' => false,
+                    ))
+                ;
         }
     }
 

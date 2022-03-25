@@ -8,14 +8,15 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use ConfigBundle\Controller\UtilsController;
 
 use VentasBundle\Entity\Cobro;
 use VentasBundle\Form\CobroType;
+use VentasBundle\Entity\FacturaElectronica;
 
 use VentasBundle\Afip\src\Afip;
+use Endroid\QrCode\QrCode;
 // $afip = new Afip(array('CUIT'=> '30714151971'));
 
 /**
@@ -53,7 +54,8 @@ class CobroController extends Controller
                     'owns' => $owns,
                     'users' => $users,
                     'desde' => $desde,
-                    'hasta' => $hasta
+                    'hasta' => $hasta,
+                    'printpdf' => $request->get('printpdf')
         ));
     }
 
@@ -68,7 +70,7 @@ class CobroController extends Controller
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
         $em = $this->getDoctrine()->getManager();
-        // CAJA=1
+        // Verificar si la caja está abierta CAJA=1
         $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
         if( !$caja->getAbierta()){
             $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
@@ -90,6 +92,19 @@ class CobroController extends Controller
         $entity->setCliente($venta->getCliente());
         $entity->setMoneda( $venta->getMoneda() );
         $entity->setFormaPago( $venta->getFormaPago() );
+        $facturaElectronica = new FacturaElectronica();
+        $facturaElectronica->setPuntoVenta( $param->getPuntoVentaFactura() );
+        // definir tipo de factura segun cliente
+        $categoriaIva = $entity->getCliente()->getCategoriaIva()->getNombre();
+        $tipo = 'FAC-B';
+        if( $categoriaIva =='I' || $categoriaIva == 'M' ){
+            $tipo = 'FAC-A';
+        }elseif( $categoriaIva == 'C' && $entity->getFormaPago()->getContado()){
+            $tipo = 'TIQUE';
+        }
+        $tipoFactura = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($tipo);
+        $facturaElectronica->setTipoComprobante($tipoFactura);
+        $entity->setFacturaElectronica($facturaElectronica);
 
         $form = $this->createCreateForm($entity,'new');
         return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
@@ -98,106 +113,178 @@ class CobroController extends Controller
         ));
     }
 
-    /**
-     * @Route("/newCobro", name="ventas_cobro_new")
-     * @Method("GET")
-     * @Template()
-     */
-    public function newCobroAction(Request $request)
-    {
-        return false;
-    }
-
-/****
-
-VIEJO DE VENTA - CAMBIAR POR PROCESOS PARA COBROS
-
- */
-
 
     /**
-     * @Route("/", name="ventas_venta_create")
+     * @Route("/", name="ventas_cobro_create")
      * @Method("POST")
-     * @Template("VentasBundle:Venta:new.html.twig")
+     * @Template("VentasBundle:Cobro:new.html.twig")
      */
     public function createAction(Request $request) {
         $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_venta');
+        $unidneg_id = $session->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
+        $em = $this->getDoctrine()->getManager();
+        // Verificar si la caja está abierta CAJA=1
+        $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
+        if( !$caja->getAbierta()){
+            $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+            return $this->redirect( $request->headers->get('referer') );
+        }
 
-        $entity = new Venta();
+        $entity = new Cobro();
         $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
-        $em = $this->getDoctrine()->getManager();
+
+// SACAR SI DESPUES SE HABILITA MODIFICAR CLIENTE Y FORMA DE PAGO
+        $entity->setCliente( $entity->getVenta()->getCliente() );
+        $entity->setFormaPago( $entity->getVenta()->getFormaPago() );
+
+////////////////////////////////
+
         if ($form->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
-                // set fecha de operacion
-                $entity->setFechaVenta( new \DateTime() );
-                // set unidad negocio desde session
-                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($session->get('unidneg_id'));
-                $entity->setUnidadNegocio($unidneg);
-                // set nro operacion
-                $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
-                $nroOperacion = $param->getUltimoNroOperacionVenta() + 1;
-                $entity->setNroOperacion( $nroOperacion );
-                // update ultimoNroOperacion en parametrizacion
-                $param->setUltimoNroOperacionVenta($nroOperacion);
 
-                $em->persist($entity);
-                $em->persist($param);
-                $em->flush();
+                $facturaElectronica = $entity->getFacturaElectronica();
+                $docTipo = 99 ;
+                $docNro = 0;
+                if( $entity->getCliente()->getCuit() ){
+                    $docTipo = 80 ;
+                    $docNro = trim($entity->getCliente()->getCuit());
+                }elseif ($entity->getTipoDocumentoCliente() ) {
+                    $docTipo = $entity->getTipoDocumentoCliente();
+                    $docNro = $entity->getNroDocumentoCliente();
+                }
 
-                // Descuento de stock
-                $deposito = $entity->getDeposito();
-                foreach ($entity->getDetalles() as $detalle){
-                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
-                    if ($stock) {
-                        $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
-                    }else {
-                        $stock = new Stock();
-                        $stock->setProducto($detalle->getProducto());
-                        $stock->setDeposito($deposito);
-                        $stock->setCantidad( 0 - $detalle->getCantidad());
+                $catIva = ( $entity->getCliente()->getCategoriaIva() ) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
+                //$entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo()) ;
+                $iva = $tributos = array();
+                if( $entity->getVenta()->getDetalles() ){
+                    $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
+                    foreach( $entity->getVenta()->getDetalles() as $item ){
+                        $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array   ('valor'=>$item->getProducto()->getIva()));
+                        $codigo = intval($alicuota->getCodigo());
+                        $dtoRec = $item->getPrecio() * ($entity->getVenta()->getDescuentoRecargo()/100);
+                        $baseImp = $item->getPrecio() + $dtoRec;
+                        $importe = $baseImp * ( $alicuota->getValor() / 100 );
+                        $key = array_search($codigo, array_column($iva, 'Id'));
+                        // IVA
+                        /*  array(
+                            'Id' 		=> 5, // Id del tipo de IVA (ver tipos disponibles)
+                            'BaseImp' 	=> 100, // Base imponible
+                            'Importe' 	=> 21 // Importe
+                        )*/
+                        if( $key === false){
+                            $iva[] = array( 'Id' => $codigo,
+                                            'BaseImp' => round($baseImp, 2) ,
+                                            'Importe' => round($importe,2) );
+                        }else{
+                            $iva[$key] = array( 'Id' => $codigo,
+                                            'BaseImp' => round( $iva[$key]['BaseImp'] + $baseImp ,2) ,
+                                            'Importe' => round( $iva[$key]['Importe'] + $importe ,2) );
+                        }
+                        // TOTALES
+                        $impDtoRec += $dtoRec;
+                        $impNeto += $baseImp;
+                        $impIVA += $importe;
+                        $impTotal += ($baseImp + $importe );
+                        //$item->setDescuento($dtoRec);
                     }
-                    $em->persist($stock);
-
-    // Cargar movimiento
-                    $movim = new StockMovimiento();
-                    $movim->setFecha($entity->getFechaVenta());
-                    $movim->setTipo('ventas_venta');
-                    $movim->setSigno('-');
-                    $movim->setMovimiento($entity->getId());
-                    $movim->setProducto($detalle->getProducto());
-                    $movim->setCantidad($detalle->getCantidad());
-                    $movim->setDeposito($deposito);
-                    $em->persist($movim);
-                    $em->flush();
+                    // TRIBUTOS
+                    /*array(
+                        'Id' 		=>  99, // Id del tipo de tributo (ver tipos disponibles)
+                        'Desc' 		=> 'Ingresos Brutos', // (Opcional) Descripcion
+                        'BaseImp' 	=> 150, // Base imponible para el tributo
+                        'Alic' 		=> 5.2, // Alícuota
+                        'Importe' 	=> 7.8 // Importe del tributo
+                    )*/
+                    $impTrib = 0;
+                    if( $catIva == 'I' ){
+                        $neto = round($impNeto,2);
+                        $iibb = round( ($neto * 0.035) ,2);
+                        $impTrib = $iibb;
+                        $tributos = array(
+                            'Id' => 7,
+                            'BaseImp' => $neto,
+                            'Alic' => 3.5,
+                            'Importe' => $iibb );
+                    }
+                    $impTotal += $impTrib;
 
                 }
 
+
+                // realizar nota electronica
+                $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
+
+                $data = array(
+                    'CantReg' 	=> 1,  // Cantidad de comprobantes a registrar
+                    'PtoVta' 	=> $facturaElectronica->getPuntoVenta(),  // Punto de venta
+                    'CbteTipo' 	=> $facturaElectronica->getCodigoComprobante(),  // Tipo de comprobante (ver tipos disponibles)
+                    'Concepto' 	=> 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
+                    'DocTipo' 	=> $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+                    'DocNro' 	=> $docNro,  // Número de documento del comprador (0 consumidor final)
+                    'CbteFch' 	=> intval( $entity->getFechaCobro()->format('Ymd') ), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
+                    'ImpTotal' 	=> round($impTotal,2) , // Importe total del comprobante
+                    'ImpTotConc' 	=> 0,   // Importe neto no gravado
+                    'ImpNeto' 	=> round($impNeto,2) , // Importe neto gravado
+                    'ImpOpEx' 	=> 0,   // Importe exento de IVA
+                    'ImpIVA' 	=> round($impIVA,2),  //Importe total de IVA
+                    'ImpTrib' 	=> round($impTrib,2),   //Importe total de tributos
+                    'MonId' 	=> $entity->getMoneda()->getCodigoAfip(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
+                    'MonCotiz' 	=> $entity->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
+                    'Tributos' => $tributos,
+                    'Iva' 			=> $iva,
+                );
+                // si no hay tributos
+                if( empty($tributos) ){
+                    unset( $data['Tributos'] );
+                }
+
+                $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
+
+                //$entity->setIva($impIVA);
+                //$entity->setPercIibb($impTrib);
+                //$entity->setTotal($impTotal);
+                //$entity->setSaldo($impTotal);
+                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
+                $entity->setUnidadNegocio($unidneg);
+
+                // Guardar datos en factura electronica
+                $facturaElectronica->setCobro($entity);
+                $facturaElectronica->setCae($wsResult['CAE']);
+                $facturaElectronica->setCaeVto($wsResult['CAEFchVto']);
+                $facturaElectronica->setNroComprobante($wsResult['voucher_number']);
+
+                $em->persist($facturaElectronica);
+                // set numeracion
+                $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+                if($param){
+                    // cargar datos parametrizados por defecto
+                    $entity->setNroOperacion( $param->getUltimoNroOperacionCobro() + 1 );
+                    $param->setUltimoNroOperacionCobro( $entity->getNroOperacion() );
+                    $em->persist($param);
+                }
+
+                $entity->getVenta()->setEstado('FACTURADO');
+                $entity->setEstado('FINALIZADO');
+                $em->persist($entity);
+                $em->flush();
                 $em->getConnection()->commit();
-                //$this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
-                // requiere login al volver a ingresar a venta
-                $this->get('session')->set('checkrequired','1');
-                return $this->redirect($this->generateUrl('ventas_venta_new'));
+
+                $this->addFlash('success', 'Emitido el comprobante '. $entity->getFacturaElectronica()->getComprobanteTxt());
+                return $this->redirect($this->generateUrl('ventas_cobro', array('printpdf' => $entity->getId())));
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());
                 $em->getConnection()->rollback();
             }
         }
-        // Set cliente segun parametrizacion
-        $param = $em->getRepository('ConfigBundle:Parametrizacion')->find(1);
-        if($param){
-            $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
-            $entity->setCliente($cliente);
-        }
-        // no requiere login si vuelve con error
-        $this->get('session')->set('checkrequired','0');
-        return $this->render('VentasBundle:Venta:new.html.twig', array(
+        return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
         ));
+
     }
 
     /**
@@ -213,7 +300,7 @@ VIEJO DE VENTA - CAMBIAR POR PROCESOS PARA COBROS
             return $array;
         });
         $form = $this->createForm(new CobroType(), $entity, array(
-            'action' => $this->generateUrl('ventas_venta_create'),
+            'action' => $this->generateUrl('ventas_cobro_create'),
             'method' => 'POST' ,
             'attr' => array('type'=>$type, 'docType'=> json_encode($docType) ) ,
         ));
@@ -230,6 +317,80 @@ VIEJO DE VENTA - CAMBIAR POR PROCESOS PARA COBROS
         return $this->render('VentasBundle:Cobro:_partial-ventas-por-cobrar.html.twig', array(
             'ventas' => $ventas
         ));
+    }
+
+    /**
+     * @Route("/{id}/printCobroVentas.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="ventas_cobro_print")
+     * @Method("GET")
+     */
+    public function printCobroVentasAction(Request $request,$id){
+        $em = $this->getDoctrine()->getManager();
+        $cobro = $em->getRepository('VentasBundle:Cobro')->find($id);
+        $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
+
+        $logo = __DIR__.'/../../../web/assets/images/logo_comprobante.png';
+        $qr = __DIR__.'/../../../web/assets/imagesafip/qr.png';
+        $logoafip = __DIR__.'/../../../web/assets/imagesafip/logoafip.png';
+
+        $url =$this->getParameter('url_qr_afip');
+        $cuit =$this->getParameter('cuit_afip');
+        $ptovta =$this->getParameter('ptovta_ws_afip');
+
+        $data = array(
+                "ver" => 1,
+                "fecha" => $cobro->getFechaCobro()->format('Y-m-d'),
+                "cuit" => $cuit,
+                "ptoVta" => $ptovta,
+                "tipoCmp" => $cobro->getFacturaElectronica()->getCodigoComprobante(),
+                "nroCmp" => $cobro->getFacturaElectronica()->getNroComprobante(),
+                "importe" => round($cobro->getVenta()->getMontoTotal(),2) ,
+                "moneda" => $cobro->getMoneda()->getCodigoAfip(),
+                "ctz" => $cobro->getCotizacion(),
+                "tipoDocRec" => 0,
+                "nroDocRec" => 0,
+                "tipoCodAut" => "E",
+                "codAut" => $cobro->getFacturaElectronica()->getCae() );
+        $base64 = base64_encode( json_encode($data) );
+
+        $qrCode = new QrCode();
+        $qrCode
+            ->setText($url.$base64)
+            ->setSize(120)
+            ->setPadding(5)
+            ->setErrorCorrection('low')
+            ->setImageType(QrCode::IMAGE_TYPE_PNG)
+        ;
+        $qrCode->render($qr);
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('VentasBundle:Cobro:comprobante.pdf.twig',
+                      array( 'cobro' => $cobro, 'venta' => $cobro->getVenta(), 'empresa'=>$empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip'=> $logoafip ), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        $hoy = new \DateTime();
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition'=>'filename='.$cobro->getFacturaElectronica()->getComprobanteTxt().'.pdf'));
+    }
+
+    /**
+     * @Route("/getAutocompleteFacturas", name="get_autocomplete_facturas")
+     * @Method("GET")
+     */
+    public function getAutocompleteFacturasAction( Request $request) {
+        $cliente = $request->get('id');
+        $em = $this->getDoctrine()->getManager();
+        $results = $em->getRepository('VentasBundle:Cobro')->filterByCliente($cliente);
+        $facturas = array();
+        if( $results){
+            foreach($results as $row){
+                $facturas[] = array('id' => $row->getId(), 'text' => $row->getComprobanteTxt());
+            }
+        }
+        return new JsonResponse($facturas);
     }
 
 

@@ -89,7 +89,7 @@ class Cobro {
     protected $cotizacion = 0;
 
     /**
-     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Venta")
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Venta", inversedBy="cobro")
      * @ORM\JoinColumn(name="venta_id", referencedColumnName="id")
      */
     protected $venta;
@@ -125,9 +125,13 @@ class Cobro {
     private $updatedBy;
 
      /**
-     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="cobro")
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="cobro", cascade={"persist"})
      */
     protected $facturaElectronica;
+
+    public function getPagoTxt(){
+        return ($this->getFormaPago()->getCuentaCorriente()) ? '' : $this->getFormaPago()->getNombre();
+    }
 
     /**
      * Get id
@@ -546,7 +550,7 @@ class Cobro {
     /**
      * Get facturaElectronica
      *
-     * @return \VentasBundle\Entity\FacturaElectronica 
+     * @return \VentasBundle\Entity\FacturaElectronica
      */
     public function getFacturaElectronica()
     {

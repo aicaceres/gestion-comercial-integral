@@ -31,7 +31,7 @@
 {% if app.session.get('caja_abierta') %}
     {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
         {% set urlxCobrar = path('ventas_por_cobrar') %}
-            <a href="javascript:void(0)" onclick="partialVentasPorCobrar('{{ urlxCobrar }}')"  class="btn btn_blue btn_dollartag floatright" title="ctrl + alt + C">
+            <a href="javascript:void(0)" onclick="partialVentasPorCobrar('{{ urlxCobrar }}')"  class="btn btn_blue btn_dollartag floatright facturarVentas" title="ctrl + alt + C">
                 <span style="font-size: 14px;">COBRAR VENTAS</span>
             </a>
     {% endif %}
@@ -58,7 +58,7 @@
                 <th>Cliente</th>
                 <th>Forma de Pago</th>
                 <th>Total</th>
-                <th>Estado</th>
+                <th>Comprobante</th>
                 {% if not owns %}
                 <th>Usuario</th>
                 {% endif %}
@@ -72,13 +72,14 @@
                 <td><span class="hidden">{{ entity.fechaCobro|date('YmdHi') }}</span>{{ entity.fechaCobro|date('d-m-Y H:i') }}</td>
                 <td>{{ entity.cliente }}</td>
                 <td>{{ entity.formaPago }}</td>
-                <td class="alignright">0</td>
-                <td class="estado">{{ entity.estado }}</td>
+                <td class="alignright"><span class="floatleft">{{entity.moneda.simbolo}}</span> {{ entity.venta.montoTotal|number_format(2,'.',',') }}</td>
+                <td class="estado">{{ entity.facturaElectronica.comprobanteTxt }}</td>
                 {% if not owns  %}
                 <td>{{entity.createdBy.nombre|upper }}</td>
                 {% endif %}
                 <td class="buttons">
                      <a href="{{ path('ventas_venta_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Cobro"></a>
+                    <a href="#" url="{{ path('ventas_cobro_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
                 </td>
             </tr>
            {% endfor %}
@@ -90,6 +91,12 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($){
+
+    const printpdf = '{{printpdf}}';
+    if( printpdf ){
+        $('[facid="'+printpdf+'"]').click()
+    }
+
     $(document).on('keydown',function(e){ detectarControles(e); })
     $('#selectUser').change(function(){
         $('#searchform').submit();
@@ -102,8 +109,9 @@ jQuery(document).ready(function($){
     function detectarControles(e) {
     // ctrl + alt + C
     if( e.ctrlKey && e.altKey && e.keyCode == 67 ){
-        window.location.href = "{{ path('ventas_cobro_new') }}";
+        $('.facturarVentas').click();
     }
+
 }
 });
 </script>

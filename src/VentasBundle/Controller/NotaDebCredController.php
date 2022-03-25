@@ -435,13 +435,11 @@ class NotaDebCredController extends Controller {
                 "ptoVta" => $ptovta,
                 "tipoCmp" => $nota->getNotaElectronica()->getCodigoComprobante(),
                 "nroCmp" => $nota->getNotaElectronica()->getNroComprobante(),
-                "importe" => round($nota->getTotal(),2) ,
+                "importe" => round($nota->getMontoTotal(),2) ,
                 "moneda" => $nota->getMoneda()->getCodigoAfip(),
                 "ctz" => $nota->getCotizacion(),
                 "tipoDocRec" => 0,
                 "nroDocRec" => 0,
-                "tipoDocRec" => 80,
-                "nroDocRec" => 20000000001,
                 "tipoCodAut" => "E",
                 "codAut" => $nota->getNotaElectronica()->getCae() );
         $base64 = base64_encode( json_encode($data) );
