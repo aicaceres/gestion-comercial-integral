@@ -23,6 +23,9 @@ jQuery(function($){
     };
     $.datepicker.setDefaults($.datepicker.regional['es']);
 
+
+
+
 });
 
 // variable global para definir si es valido el login en venta
@@ -175,7 +178,42 @@ function checknumero(obj){
 jQuery(document).ready(function(){
    jQuery('#tabs').tabs();
 
-   jQuery('.select2').select2();;
+    jQuery('.select2').select2();
+
+// select clientes para index
+    let selectClienteIndex = jQuery('#selectClienteIndex');
+    let url_selectClienteIndex = selectClienteIndex.attr('url');
+    selectClienteIndex.select2({
+        ajax: {
+        url: url_selectClienteIndex,
+        type: "post",
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return {
+            searchTerm: params.term // search term
+            };
+        },
+        processResults: function (response) {
+            return {
+                results: response
+            };
+        },
+        cache: true
+        },
+        minimumInputLength: 3
+    }).on('change', function(){
+        jQuery('#searchform').submit();
+    });
+// limpia select2
+    jQuery('#select2clear').on('click', function (e) {
+        objselect = jQuery(this).siblings('select');
+        if (objselect.val()) {
+            objselect.html('').trigger('change');
+        }
+    })
+
+
 
 	///// SHOW/HIDE USERDATA WHEN USERINFO IS CLICKED /////
 	jQuery('.userinfo').click(function(){

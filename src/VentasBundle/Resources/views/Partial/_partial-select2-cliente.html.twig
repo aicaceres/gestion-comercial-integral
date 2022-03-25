@@ -1,0 +1,14 @@
+<div style="display: inline-block; margin-bottom: 10px;width:40%">
+    &nbsp;&nbsp;&nbsp;
+    <label><strong>Cliente:</strong></label>
+    <select class="select2" id="selectClienteIndex" name="cliId"
+            url="{{path('get_autocomplete_clientes')}}"
+            style="width:75%" >
+        {% if cliente %}
+            <option value="{{cliente.id}}"> {{cliente.nombre }} </option>
+        {% endif %}
+    </select>
+    {% if allowclear %}
+    <a id="select2clear" href="javascript:void(0)">x</a>
+    {% endif %}
+</div>

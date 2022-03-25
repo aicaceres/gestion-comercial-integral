@@ -11,15 +11,9 @@
 <div id="contentwrapper" class="contentwrapper">
 <div>
     <form id="searchform" action="{{ path('ventas_presupuesto') }}" method="get">
-        <div style="display: inline-block; margin-bottom: 10px;width:30%">
-            &nbsp;&nbsp;&nbsp;
-            <label><strong>Cliente:</strong></label>
-            <select class="select2" id="selectCliente" name="cliId" style="width:80%">
-                {% if cliente %}
-                    <option value="{{cliente.id}}"> {{cliente.nombre }} </option>
-                {% endif %}
-            </select>
-        </div>
+
+        {% include "VentasBundle:Partial:_partial-select2-cliente.html.twig" with { 'allowclear':true }  %}
+
         <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Fecha Presupuesto: </strong></label>
@@ -69,29 +63,6 @@
 <script type="text/javascript">
 jQuery(document).ready(function($){
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
-
-    $('#selectCliente').select2({
-            ajax: {
-            url: "{{path('get_autocomplete_clientes')}}",
-            type: "post",
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                return {
-                searchTerm: params.term // search term
-                };
-            },
-            processResults: function (response) {
-                return {
-                    results: response
-                };
-            },
-            cache: true
-            },
-            minimumInputLength: 3
-        }).on('change', function(){
-            $('#searchform').submit();
-        });
 
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );

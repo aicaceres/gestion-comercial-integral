@@ -267,14 +267,14 @@ class ClienteController extends Controller {
      */
     public function ctacteAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente_ctacte');
-        $id = $request->get('clienteId');
+        $cliId = $request->get('cliId');
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
         $em = $this->getDoctrine()->getManager();
         $clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array(), array('nombre' => 'ASC'));
         if ($clientes) {
-            if ($id)
-                $cliente = $em->getRepository('VentasBundle:Cliente')->find($id);
+            if ($cliId)
+                $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
             else
                 $cliente = $clientes[0];
 
@@ -336,7 +336,7 @@ class ClienteController extends Controller {
             $ctacte = NULL;
         }
         return $this->render('VentasBundle:Cliente:ctacte.html.twig', array(
-                    'entities' => $ctacte, 'clientes' => $clientes, 'cliente' => $cliente,
+                    'entities' => $ctacte, 'cliente' => $cliente,'cliId' => $cliId,
                     'desde' => $desde, 'hasta' => $hasta
         ));
     }
