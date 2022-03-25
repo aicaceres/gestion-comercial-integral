@@ -129,6 +129,8 @@
 <script type="text/javascript">
 jQuery(document).ready(function($) {
 
+    $('.togglemenu').click();
+
     $("#comprasbundle_notadebcred_afipComprobante").change(function(){
         $.getJSON( "{{path('get_afip_letra_comprobante')}}" ,{id: $(this).val() } , function( data ) {
             $('#comprasbundle_notadebcred_signo').val(data.signo);

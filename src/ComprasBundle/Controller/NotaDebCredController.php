@@ -89,7 +89,7 @@ class NotaDebCredController extends Controller {
         //$modificaStock = ($request->get('modificaStock') == 'SI') ? true : false;
         $form->handleRequest($request);
         if ($form->isValid()) {
-$this->addFlash('success', 'valid!');
+//$this->addFlash('success', 'valid!');
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
             try {
@@ -173,7 +173,7 @@ $this->addFlash('success', 'valid!');
             }
         }
 
-$this->addFlash('error', ' not valid!');
+//$this->addFlash('error', ' not valid!');
         $errors = array();
 
         if ($form->count() > 0) {
@@ -183,8 +183,8 @@ $this->addFlash('error', ' not valid!');
                 }
             }
         }
-var_dump( $entity->getNroComprobante());
-var_dump( $errors ); die;
+//var_dump( $entity->getNroComprobante());
+//var_dump( $errors ); die;
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
                     'entity' => $entity,
                     'form' => $form->createView(),

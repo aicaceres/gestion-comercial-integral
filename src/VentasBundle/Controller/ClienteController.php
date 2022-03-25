@@ -435,12 +435,12 @@ class ClienteController extends Controller {
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
         $em = $this->getDoctrine()->getManager();
-        $clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
-        if (!$cliId) {
-            $cliId = $clientes[0]->getId();
+        $cliente = null;
+        if($cliId){
+            $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
         $entities = $em->getRepository('VentasBundle:Cliente')->findPagosByCriteria($cliId, $desde, $hasta);
-        if ($clientes) {
+        /*if ($clientes) {
             foreach ($entities as $pago) {
                 /* $text = '';
                   $conceptos = json_decode($pago->getConcepto());
@@ -448,7 +448,7 @@ class ClienteController extends Controller {
                   $factura = $em->getRepository('ComprasBundle:Factura')->find($item->id);
                   $text = $text.' [FAC '.$factura->getTipoFactura().$factura->getNroFactura().' $'.$item->monto.'] ';
                   } */
-                $texto = UtilsController::textoListaFacturasAction($pago->getConcepto(), $em);
+               /* $texto = UtilsController::textoListaFacturasAction($pago->getConcepto(), $em);
                 $pago->setConceptoTxt(UtilsController::myTruncate($texto, 30));
                 $pago->setConcepto($texto);
                 $detalle = UtilsController::myTruncate($pago->getDetalle(), 30);
@@ -458,10 +458,10 @@ class ClienteController extends Controller {
         else {
             $cliente = NULL;
             $entities = NULL;
-        }
+        }*/
 
         return $this->render('VentasBundle:Cliente:pago_index.html.twig', array(
-                    'entities' => $entities, 'clientes' => $clientes, 'cliId' => $cliId,
+                    'entities' => $entities, 'cliId' => $cliId, 'cliente'=>$cliente,
                     'desde' => $desde, 'hasta' => $hasta
         ));
     }

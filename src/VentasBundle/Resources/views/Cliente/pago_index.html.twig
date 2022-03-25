@@ -7,7 +7,7 @@
 {% block contentwrapper %}
 {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-    <div class="deposito_selector" style="margin-bottom: 15px;"> 
+    <div class="deposito_selector" style="margin-bottom: 15px;">
     <form id="printform" name="printform" target="_blank"  action="{{ path("print_cliente_pagos") }}" method="post">
         <input type="hidden" id="clienteid" name="clienteid"/>
         <input type="hidden" id="fdesde" name="fdesde"/>
@@ -15,27 +15,27 @@
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
         <button class="stdbtn floatright" type="submit" >Imprimir</button>
-    </form>    
+    </form>
     <form id="searchform" action="{{ path('ventas_cliente_pagos') }}" method="get">
-        <div style="display: inline-block; margin-bottom: 10px;">
+        <div style="display: inline-block; margin-bottom: 10px;width:40%">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Cliente:</strong></label>
-            <select class="uniformselect" id="selectClientePagos" name="cliId">
-            {% for cli in clientes %}
-                <option value="{{cli.id}}" {% if cli.id==cliId %} selected="selected" {% endif %}> {{cli.nombre}}</option>
-            {% endfor %}
-            </select>  
-        </div>    
-        <div style="display: inline-block; margin-right: 30px;">     
+            <select class="select2" id="selectCliente" name="cliId" style="width:80%">
+                {% if cliente %}
+                    <option value="{{cliente.id}}"> {{cliente.nombre }} </option>
+                {% endif %}
+            </select>
+        </div>
+        <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Fecha Pago: </strong></label>
-            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
-            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
-        </div>        
-    </form>        
+        </div>
+    </form>
     </div>
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">        
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
                 <th>Fecha</th>
@@ -46,7 +46,7 @@
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_pagos') and cliId %}
                     <a class="editar create" href="{{ path('ventas_cliente_pagos_new', { 'id': cliId }) }}">Nuevo Pago</a>
-                    {% else %} &nbsp; {% endif %} 
+                    {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
         </thead>
@@ -60,12 +60,12 @@
                 <td style="text-align: right">{{ entity.getTotal|number_format(2,'.',',') }}</td>
                 <td class="buttons">
                    <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
-                   <a href url="{{ path('ventas_cliente_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a> 
+                   <a href url="{{ path('ventas_cliente_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a>
                 </td>
             </tr>
            {% endfor %}
         </tbody>
-    </table>     
+    </table>
 </div>
  {% endblock %}
 {% block extra_javascripts %}
@@ -76,24 +76,43 @@ jQuery(document).ready(function($) {
         var keycode = (e.keyCode ? e.keyCode : e.which);
         if(keycode == '13'){ e.preventDefault(); }
     });
-    $('#selectClientePagos').change(function(){ 
-        $('#searchform').submit();
-    }); 
+    $('#selectCliente').select2({
+            ajax: {
+            url: "{{path('get_autocomplete_clientes')}}",
+            type: "post",
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                return {
+                searchTerm: params.term // search term
+                };
+            },
+            processResults: function (response) {
+                return {
+                    results: response
+                };
+            },
+            cache: true
+            },
+            minimumInputLength: 3
+        }).on('change', function(){
+            $('#searchform').submit();
+        });
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     var oTable = $('#dyntable2').dataTable();
     $('#printform').on('submit',function(){
-        $('#clienteid').val($('#selectClientePagos').val());
+        $('#clienteid').val($('#selectCliente').val());
         $('#fdesde').val($('#desde').val());
         $('#fhasta').val($('#hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
         var datos = [];
-        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             //fecha
             var i = value[0].indexOf('</span>');
             if( i >-1 ){
                 var fecha = value[0].substr(i+7);
                 value[0]=fecha;
-            }         
+            }
             //concepto
             var a = value[2].indexOf('<span class="hidden">');
             var b = value[2].indexOf('</span>');
@@ -103,9 +122,9 @@ jQuery(document).ready(function($) {
             }
             value.splice(5);
             datos[index] = value;
-        }); 
+        });
         $('#datalist').val(JSON.stringify(datos));
-    });        
-});    
-</script>    
+    });
+});
+</script>
 {% endblock %}
