@@ -203,6 +203,28 @@
                 </td>
             </tr>
             {% endfor %}
+            {% if nota.concepto %}
+            <tr>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
+                     {{ 1|number_format(3,'.',',')}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="center" padding-top="5px">
+                    999999
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" padding-left="10px" padding-top="5px">
+                    {{nota.concepto}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
+                    {{0|number_format(3,'.',',')}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
+                    {{21|number_format(2,'.',',')}}%
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
+                    {{ 0|number_format(2,'.',',')}}
+                </td>
+            </tr>
+            {% endif %}
         </table>
 
     </dynamic-page>

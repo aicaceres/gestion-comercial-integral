@@ -34,6 +34,7 @@
                     <input type="text" value="{{entity.notaElectronica.caeVto|date('d/m/Y')}}" disabled="disabled" class="width100">
                 </div>
             </div>
+            <div>
             {% if entity.facturas %}
                     {% set facturas = '' %}
                     {% for factura in entity.facturas %}
@@ -47,8 +48,15 @@
                     <input type="text" value="{{facturas}}" disabled="disabled" class="mediuminput">
                 </div>
             {% endif %}
-            
+            </div>
+            <div  class="two_fields">
+                <label>Concepto:</label>
+                <input type="text" disabled="disabled"  class="mediuminput" value="{{entity.concepto}}">
+            </div>
+
         </fieldset>
+
+
         <fieldset>
 
             <div style="padding-top: 20px; margin:auto; width: 90%;">

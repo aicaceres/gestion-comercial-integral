@@ -31,6 +31,7 @@ class NotaDebCredType extends AbstractType {
                     'class' => 'ConfigBundle:Moneda',
                     'required' => true, 'label' => 'MONEDA: '
                 ))
+                ->add('concepto','text',array('label' => 'Concepto:','required' => false))
                 ->add('cotizacion','hidden')
                 ->add('descuentoRecargo','hidden')
                 ->add('detalles', 'collection', array(

@@ -118,6 +118,12 @@ class NotaDebCred {
      * @ORM\Column(name="nro_documento_cliente", type="string", length=13, nullable=true)
      */
     protected $nroDocumentoCliente;
+
+    /**
+     * @ORM\Column(name="concepto", type="text", nullable=true)
+     */
+    protected $concepto;
+
     /**
      * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\FacturaElectronica")
      * @ORM\JoinTable(name="facturas_x_notadebcred_ventas",
@@ -836,5 +842,28 @@ class NotaDebCred {
     public function getDescuentoRecargo()
     {
         return $this->descuentoRecargo;
+    }
+
+    /**
+     * Set concepto
+     *
+     * @param string $concepto
+     * @return NotaDebCred
+     */
+    public function setConcepto($concepto)
+    {
+        $this->concepto = $concepto;
+
+        return $this;
+    }
+
+    /**
+     * Get concepto
+     *
+     * @return string 
+     */
+    public function getConcepto()
+    {
+        return $this->concepto;
     }
 }

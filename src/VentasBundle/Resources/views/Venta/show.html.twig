@@ -40,19 +40,21 @@
         <div style="display:inline-block; width: 50%;">
             <label>CLIENTE: </label>
             <select style="width:100%" disabled="disabled">
-                <option value="{{entity.cliente.id}}" selected="selected">{{entity.cliente.nombre}}</option>
+                <option>{{entity.cliente.nombre}}</option>
             </select>
         </div>
         <div style="display:inline-block; width: 20%;">
             <label>LISTA DE PRECIOS: </label>
             <select style="width:100%" disabled="disabled">
-                <option value="{{entity.precioLista.id}}">{{entity.precioLista.nombre}}</option>
+                <option>{{entity.precioLista.nombre}}</option>
             </select>
         </div>
         <div style="display:inline-block; width: 25%;">
             <label>TRANSPORTE: </label>
             <select style="width:100%" disabled="disabled">
-                <option value="{{entity.transporte.id}}">{{entity.transporte.nombre}}</option>
+                {% if entity.transporte %}
+                <option >{{entity.transporte.nombre}}</option>
+                {% endif %}
             </select>
         </div>
     </fieldset>
@@ -64,19 +66,19 @@
             <div style="display:inline-block; width: 35%;">
                 <label>FORMA DE PAGO: </label>
                 <select style="width:100%" disabled="disabled">
-                    <option value="{{entity.formaPago.id}}">{{entity.formaPago.nombre}}</option>
+                    <option>{{entity.formaPago.nombre}}</option>
                 </select>
             </div>
             <div style="display:inline-block; width: 20%;">
                 <label>MONEDA: </label>
                 <select style="width:100%" disabled="disabled">
-                    <option value="{{entity.moneda.id}}">{{entity.moneda.nombre}}</option>
+                    <option>{{entity.moneda.nombre}}</option>
                 </select>
             </div>
             <div style="display:inline-block; width: 25%;">
                 <label>DEPÓSITO: </label>
                 <select style="width:100%" disabled="disabled">
-                    <option value="{{entity.deposito.id}}">{{entity.deposito.nombre}}</option>
+                    <option>{{entity.deposito.nombre}}</option>
                 </select>
             </div>
         </fieldset>
