@@ -54,10 +54,10 @@ class Cobro {
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
      */
     protected $nombreCliente;
-    /**
-     * @var string $tipoDocumentoCliente
-     * @ORM\Column(name="tipo_documento_cliente", type="integer", nullable=true)
-     */
+     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
+     * @ORM\JoinColumn(name="tipo_documento_cliente", referencedColumnName="id")
+     **/
     protected $tipoDocumentoCliente;
     /**
      * @var string $nroDocumentoCliente
@@ -87,6 +87,11 @@ class Cobro {
      * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
      */
     protected $cotizacion = 0;
+
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="cobro",cascade={"persist", "remove"})
+     */
+    protected $detalles;
 
     /**
      * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Venta", inversedBy="cobro")
@@ -131,6 +136,26 @@ class Cobro {
 
     public function getPagoTxt(){
         return ($this->getFormaPago()->getCuentaCorriente()) ? '' : $this->getFormaPago()->getNombre();
+    }
+
+    public function getTextoPagosParaFactura(){
+        $txt = '';
+        foreach( $this->detalles as $det){
+            $aux = ($txt) ? ' - ' : '';
+            $monto = $det->getMoneda()->getSimbolo() . ' ' .  $det->getImporte();
+            switch ($det->getTipoPago()){
+                case 'EFECTIVO':
+                    $txt = $txt . $aux . 'EFECTIVO: '. $monto;
+                    break;
+                case 'CHEQUE':
+                    $txt = $txt . $aux . 'CHEQUE: '. $monto;
+                    break;
+                case 'TARJETA':
+                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() .': ' . $monto;
+                    break;
+            }
+        }
+        return $txt;
     }
 
     /**
@@ -443,29 +468,6 @@ class Cobro {
     }
 
     /**
-     * Set tipoDocumentoCliente
-     *
-     * @param integer $tipoDocumentoCliente
-     * @return Cobro
-     */
-    public function setTipoDocumentoCliente($tipoDocumentoCliente)
-    {
-        $this->tipoDocumentoCliente = $tipoDocumentoCliente;
-
-        return $this;
-    }
-
-    /**
-     * Get tipoDocumentoCliente
-     *
-     * @return integer
-     */
-    public function getTipoDocumentoCliente()
-    {
-        return $this->tipoDocumentoCliente;
-    }
-
-    /**
      * Set nroDocumentoCliente
      *
      * @param string $nroDocumentoCliente
@@ -555,5 +557,69 @@ class Cobro {
     public function getFacturaElectronica()
     {
         return $this->facturaElectronica;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add detalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $detalles
+     * @return Cobro
+     */
+    public function addDetalle(\VentasBundle\Entity\CobroDetalle $detalles)
+    {
+        $detalles->setCobro($this);
+        $this->detalles[] = $detalles;
+        return $this;
+    }
+
+    /**
+     * Remove detalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $detalles
+     */
+    public function removeDetalle(\VentasBundle\Entity\CobroDetalle $detalles)
+    {
+        $detalles->setCobro($this);
+        $this->detalles->removeElement($detalles);
+    }
+
+    /**
+     * Get detalles
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getDetalles()
+    {
+        return $this->detalles;
+    }
+
+    /**
+     * Set tipoDocumentoCliente
+     *
+     * @param \ConfigBundle\Entity\Parametro $tipoDocumentoCliente
+     * @return Cobro
+     */
+    public function setTipoDocumentoCliente(\ConfigBundle\Entity\Parametro $tipoDocumentoCliente = null)
+    {
+        $this->tipoDocumentoCliente = $tipoDocumentoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoDocumentoCliente
+     *
+     * @return \ConfigBundle\Entity\Parametro 
+     */
+    public function getTipoDocumentoCliente()
+    {
+        return $this->tipoDocumentoCliente;
     }
 }

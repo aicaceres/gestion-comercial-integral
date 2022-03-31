@@ -29,21 +29,23 @@ class PresupuestoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
-
+        $printpdf = null;
         $cliId = $request->get('cliId');
         $cliente = null;
         if($cliId){
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
         $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $desde, $hasta);
-
+        if( $this->getUser()->getAccess($unidneg, 'ventas_presupuesto_print') ){
+            $printpdf = $request->get('printpdf');
+        }
         return $this->render('VentasBundle:Presupuesto:index.html.twig', array(
                     'entities' => $entities,
                     'cliId' => $cliId,
                     'cliente' => $cliente,
                     'desde' => $desde,
                     'hasta' => $hasta,
-                    'printpdf' => $request->get('printpdf')
+                    'printpdf' => $printpdf
         ));
     }
 
@@ -190,6 +192,7 @@ class PresupuestoController extends Controller {
      * @Method("GET")
      */
     public function printPresupuestoAction(Request $request,$id){
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_presupuesto_print');
         $em = $this->getDoctrine()->getManager();
         $presupuesto = $em->getRepository('VentasBundle:Presupuesto')->find($id);
         $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);

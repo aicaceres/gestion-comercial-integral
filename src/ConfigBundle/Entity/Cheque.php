@@ -18,121 +18,121 @@ class Cheque {
     /**
      * @var string $tipo
      * @ORM\Column(name="tipo", type="string", nullable=false)
-     */    
+     */
     // P:propio - T:tercero
     protected $tipo = 'T';
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string", nullable=false)
-     */    
+     */
     // C:cartera - U:usado - D:devuelto
     protected $estado = 'C';
     /**
      * @var string $nroCheque
      * @ORM\Column(name="nro_cheque", type="string", nullable=false)
-     */    
+     */
     protected $nroCheque;
     /**
      * @var integer $prefijoNro
-     * @ORM\Column(name="prefijo_nro", type="string", length=3)
+     * @ORM\Column(name="prefijo_nro", type="string", length=3, nullable=true)
      */
     protected $prefijoNro;
     /**
      * @var integer $chequeNro
-     * @ORM\Column(name="cheque_nro", type="string", length=6)
+     * @ORM\Column(name="cheque_nro", type="string", length=6, nullable=true)
      */
-    protected $chequeNro;    
+    protected $chequeNro;
     /**
      * @var date $tomado
      * @ORM\Column(name="tomado", type="date", nullable=true)
-     */    
-    protected $tomado;        
-    
+     */
+    protected $tomado;
+
     /**
      * @var string $dador
      * @ORM\Column(name="dador", type="string", nullable=false)
-     */    
-    protected $dador;    
+     */
+    protected $dador;
     /**
      * @var string $telefono
      * @ORM\Column(name="telefono", type="string", nullable=true)
      */
-    protected $telefono;    
+    protected $telefono;
     /**
      * @var date $fecha
      * @ORM\Column(name="fecha", type="date", nullable=true)
-     */    
-    protected $fecha;    
+     */
+    protected $fecha;
     /**
      * @var string $valor
      * @ORM\Column(name="valor", type="decimal", scale=3, nullable=false)
      */
     protected $valor;
-    
+
     /**
      * @ORM\Column(name="devuelto", type="boolean", nullable=true)
      */
-    protected $devuelto = false;  
+    protected $devuelto = false;
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
      */
-    protected $observaciones; 
-    
+    protected $observaciones;
+
     /**
      * @ORM\Column(name="usado", type="boolean", nullable=true)
      */
-    protected $usado = false;  
-    
+    protected $usado = false;
+
      /**
      *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\TitularCheque", inversedBy="cheques")
-     *@ORM\JoinColumn(name="titular_cheque_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="titular_cheque_id", referencedColumnName="id")
      */
-    protected $titularCheque;    
+    protected $titularCheque;
 
     /**
      *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Banco", inversedBy="cheques")
      *@ORM\JoinColumn(name="banco_id", referencedColumnName="id")
      */
     protected $banco;
-    
+
     /**
      * @var string $sucursal
      * @ORM\Column(name="sucursal", type="string", nullable=true)
-     */    
-    protected $sucursal;       
+     */
+    protected $sucursal;
 
     /**
     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
     * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
     */
     protected $localidad;
-    
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
-    private $createdBy; 
-    
+    private $createdBy;
+
      /**
      *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\PagoProveedor", inversedBy="chequesPagados")
-     *@ORM\JoinColumn(name="compras_pago_proveedor_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="compras_pago_proveedor_id", referencedColumnName="id")
      */
-    private $pagoProveedor;  
+    private $pagoProveedor;
      /**
      *@ORM\ManyToOne(targetEntity="VentasBundle\Entity\PagoCliente", inversedBy="chequesRecibidos")
-     *@ORM\JoinColumn(name="ventas_pago_cliente_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="ventas_pago_cliente_id", referencedColumnName="id")
      */
-    private $pagoCliente;  
- 
+    private $pagoCliente;
+
     /*
      * Cheque toString
      */
@@ -142,17 +142,17 @@ class Cheque {
 
     /**
      * Get nroInterno
-     * @return string 
+     * @return string
      */
     public function getNroInterno()
     {
         return $this->prefijoNro.'-'.$this->chequeNro;
-    }    
+    }
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -168,10 +168,10 @@ class Cheque {
     public function setId($id)
     {
         $this->id = $id;
-    
+
         return $this;
     }
-    
+
     /**
      * Set tipo
      *
@@ -181,14 +181,14 @@ class Cheque {
     public function setTipo($tipo)
     {
         $this->tipo = $tipo;
-    
+
         return $this;
     }
 
     /**
      * Get tipo
      *
-     * @return string 
+     * @return string
      */
     public function getTipo()
     {
@@ -204,14 +204,14 @@ class Cheque {
     public function setEstado($estado)
     {
         $this->estado = $estado;
-    
+
         return $this;
     }
 
     /**
      * Get estado
      *
-     * @return string 
+     * @return string
      */
     public function getEstado()
     {
@@ -227,14 +227,14 @@ class Cheque {
     public function setNroCheque($nroCheque)
     {
         $this->nroCheque = $nroCheque;
-    
+
         return $this;
     }
 
     /**
      * Get nroCheque
      *
-     * @return string 
+     * @return string
      */
     public function getNroCheque()
     {
@@ -250,14 +250,14 @@ class Cheque {
     public function setPrefijoNro($prefijoNro)
     {
         $this->prefijoNro = $prefijoNro;
-    
+
         return $this;
     }
 
     /**
      * Get prefijoNro
      *
-     * @return string 
+     * @return string
      */
     public function getPrefijoNro()
     {
@@ -273,14 +273,14 @@ class Cheque {
     public function setChequeNro($chequeNro)
     {
         $this->chequeNro = $chequeNro;
-    
+
         return $this;
     }
 
     /**
      * Get chequeNro
      *
-     * @return string 
+     * @return string
      */
     public function getChequeNro()
     {
@@ -296,14 +296,14 @@ class Cheque {
     public function setTomado($tomado)
     {
         $this->tomado = $tomado;
-    
+
         return $this;
     }
 
     /**
      * Get tomado
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getTomado()
     {
@@ -319,14 +319,14 @@ class Cheque {
     public function setDador($dador)
     {
         $this->dador = $dador;
-    
+
         return $this;
     }
 
     /**
      * Get dador
      *
-     * @return string 
+     * @return string
      */
     public function getDador()
     {
@@ -342,14 +342,14 @@ class Cheque {
     public function setTelefono($telefono)
     {
         $this->telefono = $telefono;
-    
+
         return $this;
     }
 
     /**
      * Get telefono
      *
-     * @return string 
+     * @return string
      */
     public function getTelefono()
     {
@@ -365,14 +365,14 @@ class Cheque {
     public function setFecha($fecha)
     {
         $this->fecha = $fecha;
-    
+
         return $this;
     }
 
     /**
      * Get fecha
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFecha()
     {
@@ -388,14 +388,14 @@ class Cheque {
     public function setValor($valor)
     {
         $this->valor = $valor;
-    
+
         return $this;
     }
 
     /**
      * Get valor
      *
-     * @return string 
+     * @return string
      */
     public function getValor()
     {
@@ -411,14 +411,14 @@ class Cheque {
     public function setDevuelto($devuelto)
     {
         $this->devuelto = $devuelto;
-    
+
         return $this;
     }
 
     /**
      * Get devuelto
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getDevuelto()
     {
@@ -434,14 +434,14 @@ class Cheque {
     public function setObservaciones($observaciones)
     {
         $this->observaciones = $observaciones;
-    
+
         return $this;
     }
 
     /**
      * Get observaciones
      *
-     * @return string 
+     * @return string
      */
     public function getObservaciones()
     {
@@ -457,14 +457,14 @@ class Cheque {
     public function setUsado($usado)
     {
         $this->usado = $usado;
-    
+
         return $this;
     }
 
     /**
      * Get usado
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getUsado()
     {
@@ -480,14 +480,14 @@ class Cheque {
     public function setSucursal($sucursal)
     {
         $this->sucursal = $sucursal;
-    
+
         return $this;
     }
 
     /**
      * Get sucursal
      *
-     * @return string 
+     * @return string
      */
     public function getSucursal()
     {
@@ -503,14 +503,14 @@ class Cheque {
     public function setCreated($created)
     {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -526,14 +526,14 @@ class Cheque {
     public function setTitularCheque(\ConfigBundle\Entity\TitularCheque $titularCheque = null)
     {
         $this->titularCheque = $titularCheque;
-    
+
         return $this;
     }
 
     /**
      * Get titularCheque
      *
-     * @return \ConfigBundle\Entity\TitularCheque 
+     * @return \ConfigBundle\Entity\TitularCheque
      */
     public function getTitularCheque()
     {
@@ -549,14 +549,14 @@ class Cheque {
     public function setBanco(\ConfigBundle\Entity\Banco $banco = null)
     {
         $this->banco = $banco;
-    
+
         return $this;
     }
 
     /**
      * Get banco
      *
-     * @return \ConfigBundle\Entity\Banco 
+     * @return \ConfigBundle\Entity\Banco
      */
     public function getBanco()
     {
@@ -572,14 +572,14 @@ class Cheque {
     public function setLocalidad(\ConfigBundle\Entity\Localidad $localidad = null)
     {
         $this->localidad = $localidad;
-    
+
         return $this;
     }
 
     /**
      * Get localidad
      *
-     * @return \ConfigBundle\Entity\Localidad 
+     * @return \ConfigBundle\Entity\Localidad
      */
     public function getLocalidad()
     {
@@ -595,14 +595,14 @@ class Cheque {
     public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
     {
         $this->createdBy = $createdBy;
-    
+
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -618,14 +618,14 @@ class Cheque {
     public function setPagoProveedor(\ComprasBundle\Entity\PagoProveedor $pagoProveedor = null)
     {
         $this->pagoProveedor = $pagoProveedor;
-    
+
         return $this;
     }
 
     /**
      * Get pagoProveedor
      *
-     * @return ComprasBundle\Entity\PagoProveedor 
+     * @return ComprasBundle\Entity\PagoProveedor
      */
     public function getPagoProveedor()
     {
@@ -640,18 +640,18 @@ class Cheque {
     public function setPagoCliente(\VentasBundle\Entity\PagoCliente $pagoCliente = null)
     {
         $this->pagoCliente = $pagoCliente;
-    
+
         return $this;
     }
 
     /**
      * Get pagoCliente
      *
-     * @return \VentasBundle\Entity\PagoCliente 
+     * @return \VentasBundle\Entity\PagoCliente
      */
     public function getPagoCliente()
     {
         return $this->pagoCliente;
     }
-        
+
 }

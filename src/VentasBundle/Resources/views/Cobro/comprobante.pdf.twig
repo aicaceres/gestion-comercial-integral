@@ -65,7 +65,7 @@
                     {% set final = 0 %}
                     <table font-size="11px">
                         <tr>
-                            <td border.type="none" padding-top="3px" font-size="8px">{{cobro.pagoTxt}}</td>
+                            <td border.type="none" padding-top="3px" font-size="8px">{{cobro.textoPagosParaFactura}}</td>
                             <td border.type="none"></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="3px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="3px">
@@ -75,7 +75,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td border.type="none" font-size="8px">Op: {{app.user|upper}} -- {{'now'|date('d-m-Y H:i')}} </td>
+                            <td border.type="none" font-size="8px">Op: {{app.user|upper}} - Ref. #{{venta.nroOperacion}} - {{'now'|date('d-m-Y H:i')}} </td>
                             <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{venta.descuentoRecargo}}%]: {{cobro.moneda.simbolo}} {{venta.totalDescuentoRecargo|number_format(3,'.',',')}}</td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
@@ -203,6 +203,28 @@
                 </td>
             </tr>
             {% endfor %}
+            {% if cobro.venta.concepto %}
+            <tr>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                    {{ 1|number_format(3,'.',',')}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="center">
+                    999999
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" padding-left="10px">
+                    {{cobro.venta.concepto}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                    {{0|number_format(3,'.',',')}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                    {{21|number_format(2,'.',',')}}%
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                     {{ 0|number_format(2,'.',',')}}
+                </td>
+            </tr>
+            {% endif %}
         </table>
 
     </dynamic-page>

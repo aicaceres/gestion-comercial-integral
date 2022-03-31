@@ -31,7 +31,7 @@ class ChequeController extends Controller
             'entities' => $entities,
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_cheque_create")
      * @Method("POST")
@@ -47,7 +47,7 @@ class ChequeController extends Controller
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
-           
+
             $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
             $entity->setChequeNro(sprintf("%06d", $equipo->getNroInternoCheque() + 1));
             $em->persist($entity);
@@ -74,7 +74,7 @@ class ChequeController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/new", name="sistema_cheque_new")
      * @Method("GET")
@@ -90,7 +90,7 @@ class ChequeController extends Controller
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_cheque_edit")
      * @Method("GET")
@@ -127,7 +127,7 @@ class ChequeController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_cheque_update")
      * @Method("PUT")
@@ -156,18 +156,18 @@ class ChequeController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_cheque_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
+    {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Cheque')->find($id);
         try{
-            $em->remove($entity); 
+            $em->remove($entity);
             $em->flush();
             $msg ='OK';
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }

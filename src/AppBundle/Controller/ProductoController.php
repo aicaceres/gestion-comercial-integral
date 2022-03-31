@@ -1084,6 +1084,7 @@ class ProductoController extends Controller {
             'alicuota' => $iva,
             'iva' => $montoIva,
             'total' => $total,
+            'comodin' => $producto->getComodin(),
         );
         return new Response( json_encode($data));
     }

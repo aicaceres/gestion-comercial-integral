@@ -97,6 +97,9 @@ class VentaDetalle {
     }
     /** FIN VALORES ITEM */
 
+    public function getNombreProducto(){
+        return $this->getProducto()->getNombre();
+    }
     /**
      * Get id
      *

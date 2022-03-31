@@ -101,7 +101,10 @@
     </fieldset>
     <fieldset>
         <div style="margin:auto; width: 90%;">
-            {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': false, 'showiibb': false } %}
+                {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
+                {% set showiva = (cativa != 'C') %}
+                {% set showiibb = (cativa == 'I') %}
+                {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': showiva, 'showiibb': showiibb } %}
         </div>
     </fieldset>
 
@@ -110,7 +113,9 @@
             <div class="actionbutton">
                 {% if entity.estado == 'EMITIDO' %}
                 <a type="button" class="floatleft delete_button" href="{{ path('ventas_presupuesto_anular', { 'id': entity.id })}}">ANULAR</a>
+                {% if app.user.access(app.session.get('unidneg_id'),'ventas_presupuesto_print') %}
                 <button class="guardar btn_print" type="button" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" >Imprimir</button>
+                {% endif %}
                 {% endif %}
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>

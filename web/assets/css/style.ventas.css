@@ -113,9 +113,23 @@
         font-weight:bold;
     }
 
+/** formulario de cobros */
 .actionbutton .guardar.disabled{
     background: #eeeeee !important;
     color: #666 !important;
     border: 1px solid #ddd;
     cursor: no-drop !important;
+}
+.tabla-pagos{
+    border-collapse: collapse;
+}
+.tabla-pagos tr{
+    background-color: lightblue !important;
+    border-bottom: 6px solid white;
+}
+#dialog-tipo form{
+    text-align: center;
+}
+#dialog-tipo form button{
+    margin:4px 10px;
 }

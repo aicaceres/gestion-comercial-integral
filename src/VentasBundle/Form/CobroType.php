@@ -5,6 +5,9 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
+use ConfigBundle\Entity\ParametroRepository;
+use ConfigBundle\Form\ParametroType;
+
 
 class CobroType extends AbstractType {
 
@@ -14,14 +17,11 @@ class CobroType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $type = $options['attr']['type'];
-        $docType = json_decode($options['attr']['docType'],true)  ;
 
         $builder
                 ->add('nroOperacion', 'hidden')
                 ->add('fechaCobro','datetime')
                 ->add('nombreCliente',null, array('label' => 'Nombre:'))
-                ->add('tipoDocumentoCliente','choice', array('label'=>'Tipo Documento:', 'required' => false,
-                   'choices' => $docType, 'expanded' => false))
                 ->add('nroDocumentoCliente',null, array('label'=>'N° Documento:'))
                 //->add('direccionCliente',null, array('label'=>'Dirección:'))
 
@@ -33,7 +33,16 @@ class CobroType extends AbstractType {
                 ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
                     'required' => true, 'label' => 'FORMA DE PAGO: '))
                 ->add('venta', 'entity', array('class' => 'VentasBundle:Venta'))
-                ->add('facturaElectronica', new FacturaElectronicaType())
+                //->add('facturaElectronica', new FacturaElectronicaType())
+                ->add('detalles', 'collection', array(
+                    'type' => new CobroDetalleType($type),
+                    'by_reference' => false,
+                    'allow_delete' => true,
+                    'allow_add' => true,
+                    'prototype_name' => 'items',
+                    'attr' => array(
+                        'class' => 'row item'
+                )))
         ;
         if ($type == 'new') {
             // en render de nueva venta solo traer cliente por defecto
@@ -53,6 +62,21 @@ class CobroType extends AbstractType {
                 'required' => true
             ));
         }
+
+        $optionsDoc = array(
+            'class'         => 'ConfigBundle:Parametro',
+            'placeholder'   => 'Seleccionar...',
+            'required'      => false,
+            'choice_label' => 'nombre',
+            'mapped'=>false,
+            'label'         => 'Tipo Documento:',
+            'query_builder' => function (ParametroRepository $repository) {
+                return $qb = $repository->createQueryBuilder('p')
+                    ->where('p.activo=1 and p.agrupador = :val ')
+                    ->setParameter('val', ParametroType::getTablaId($repository, 'tipo-documento'));
+            });
+        $builder->add('tipoDocumentoCliente','entity' , $optionsDoc);
+
     }
 
     /**

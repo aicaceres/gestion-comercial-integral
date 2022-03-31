@@ -98,6 +98,10 @@ class Producto
      * @ORM\Column(name="facturable", type="boolean", nullable=true)
      */
     protected $facturable = false;
+    /**
+     * @ORM\Column(name="comodin", type="boolean", nullable=true)
+     */
+    protected $comodin = false;
 
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
@@ -994,4 +998,27 @@ class Producto
         return $this->lotes;
     }
 
+
+    /**
+     * Set comodin
+     *
+     * @param boolean $comodin
+     * @return Producto
+     */
+    public function setComodin($comodin)
+    {
+        $this->comodin = $comodin;
+
+        return $this;
+    }
+
+    /**
+     * Get comodin
+     *
+     * @return boolean 
+     */
+    public function getComodin()
+    {
+        return $this->comodin;
+    }
 }

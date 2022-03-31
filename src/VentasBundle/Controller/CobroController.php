@@ -13,6 +13,8 @@ use ConfigBundle\Controller\UtilsController;
 
 use VentasBundle\Entity\Cobro;
 use VentasBundle\Form\CobroType;
+use VentasBundle\Entity\CobroDetalle;
+use VentasBundle\Entity\CobroDetalleTarjeta;
 use VentasBundle\Entity\FacturaElectronica;
 
 use VentasBundle\Afip\src\Afip;
@@ -46,7 +48,6 @@ class CobroController extends Controller
             $owns = false;
         }
         $entities = $em->getRepository('VentasBundle:Cobro')->findByCriteria($unidneg,$desde,$hasta,$id);
-
         $users = $em->getRepository('VentasBundle:Cobro')->getUsers();
         return $this->render('VentasBundle:Cobro:index.html.twig', array(
                     'entities' => $entities,
@@ -92,19 +93,20 @@ class CobroController extends Controller
         $entity->setCliente($venta->getCliente());
         $entity->setMoneda( $venta->getMoneda() );
         $entity->setFormaPago( $venta->getFormaPago() );
-        $facturaElectronica = new FacturaElectronica();
-        $facturaElectronica->setPuntoVenta( $param->getPuntoVentaFactura() );
+        //$facturaElectronica = new FacturaElectronica();
+        //$facturaElectronica->setPuntoVenta( $param->getPuntoVentaFactura() );
         // definir tipo de factura segun cliente
-        $categoriaIva = $entity->getCliente()->getCategoriaIva()->getNombre();
+        /*$categoriaIva = $entity->getCliente()->getCategoriaIva()->getNombre();
         $tipo = 'FAC-B';
         if( $categoriaIva =='I' || $categoriaIva == 'M' ){
             $tipo = 'FAC-A';
-        }elseif( $categoriaIva == 'C' && $entity->getFormaPago()->getContado()){
+        }
+        /*elseif( $categoriaIva == 'C' && $entity->getFormaPago()->getContado()){
             $tipo = 'TIQUE';
         }
         $tipoFactura = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($tipo);
-        $facturaElectronica->setTipoComprobante($tipoFactura);
-        $entity->setFacturaElectronica($facturaElectronica);
+        $facturaElectronica->setTipoComprobante($tipoFactura);*/
+        //$entity->setFacturaElectronica($facturaElectronica);
 
         $form = $this->createCreateForm($entity,'new');
         return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
@@ -135,24 +137,26 @@ class CobroController extends Controller
         $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
 
-// SACAR SI DESPUES SE HABILITA MODIFICAR CLIENTE Y FORMA DE PAGO
+// SACAR SI DESPUES SE HABILITA MODIFICAR CLIENTE, FORMA DE PAGO Y MONEDA
         $entity->setCliente( $entity->getVenta()->getCliente() );
         $entity->setFormaPago( $entity->getVenta()->getFormaPago() );
+        $entity->setMoneda( $entity->getVenta()->getMoneda() );
 
 ////////////////////////////////
 
         if ($form->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
+                $facturaElectronica = new FacturaElectronica();
 
-                $facturaElectronica = $entity->getFacturaElectronica();
+                // armar datos para webservice
                 $docTipo = 99 ;
                 $docNro = 0;
                 if( $entity->getCliente()->getCuit() ){
                     $docTipo = 80 ;
                     $docNro = trim($entity->getCliente()->getCuit());
                 }elseif ($entity->getTipoDocumentoCliente() ) {
-                    $docTipo = $entity->getTipoDocumentoCliente();
+                    $docTipo = $entity->getTipoDocumentoCliente()->getCodigo();
                     $docNro = $entity->getNroDocumentoCliente();
                 }
 
@@ -213,36 +217,96 @@ class CobroController extends Controller
 
                 }
 
+                // completar datos de detalles
+                $efectivo = true;
+                if( count($entity->getDetalles()) == 0 ){
+                    if( $entity->getFormaPago()->getTipoPago() == 'CTACTE' ){
+                    // insertar un detalle para ctacte
+                        $detalle = new CobroDetalle();
+                        $detalle->setTipoPago('CTACTE');
+                        $detalle->setMoneda($entity->getMoneda());
+                        $detalle->setImporte($impTotal);
+                        $entity->addDetalle($detalle);
+                        $efectivo = false;
+                    }
+                }else{
+                    foreach( $entity->getDetalles() as $detalle ){
+                        if(!$detalle->getMoneda()){
+                            $detalle->setMoneda($entity->getMoneda());
+                        }
+                        $tipoPago = $detalle->getTipoPago();
+                        if( $tipoPago != 'CHEQUE' ){
+                            $detalle->setChequeRecibido(null);
+                        }
+                        if( $tipoPago != 'TARJETA' ){
+                            $detalle->setDatosTarjeta(null);
+                        }
+                        if( $tipoPago != 'EFECTIVO' ){
+                            $efectivo = false;
+                        }
+                    }
+                }
+                // definir tipo de factura segun cliente
 
-                // realizar nota electronica
-                $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
-
-                $data = array(
-                    'CantReg' 	=> 1,  // Cantidad de comprobantes a registrar
-                    'PtoVta' 	=> $facturaElectronica->getPuntoVenta(),  // Punto de venta
-                    'CbteTipo' 	=> $facturaElectronica->getCodigoComprobante(),  // Tipo de comprobante (ver tipos disponibles)
-                    'Concepto' 	=> 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
-                    'DocTipo' 	=> $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
-                    'DocNro' 	=> $docNro,  // Número de documento del comprador (0 consumidor final)
-                    'CbteFch' 	=> intval( $entity->getFechaCobro()->format('Ymd') ), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
-                    'ImpTotal' 	=> round($impTotal,2) , // Importe total del comprobante
-                    'ImpTotConc' 	=> 0,   // Importe neto no gravado
-                    'ImpNeto' 	=> round($impNeto,2) , // Importe neto gravado
-                    'ImpOpEx' 	=> 0,   // Importe exento de IVA
-                    'ImpIVA' 	=> round($impIVA,2),  //Importe total de IVA
-                    'ImpTrib' 	=> round($impTrib,2),   //Importe total de tributos
-                    'MonId' 	=> $entity->getMoneda()->getCodigoAfip(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
-                    'MonCotiz' 	=> $entity->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
-                    'Tributos' => $tributos,
-                    'Iva' 			=> $iva,
-                );
-                // si no hay tributos
-                if( empty($tributos) ){
-                    unset( $data['Tributos'] );
+                $tipoComprobante = 'FAC-B';
+                $ptovta =$this->getParameter('ptovta_ws_factura');
+                if( $catIva =='I' || $catIva == 'M' ){
+                    $tipoComprobante = 'FAC-A';
+                }
+                if( $efectivo && $catIva =='C' && $entity->getMoneda()->getCodigoAfip()=='PES' ){
+                    $ptovta =$this->getParameter('ptovta_ws_ticket');
+                    //$tipoComprobante = 'TIQUE';
                 }
 
-                $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
+                $tipoFactura = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($tipoComprobante);
+                $facturaElectronica->setTipoComprobante($tipoFactura);
+                $facturaElectronica->setPuntoVenta( $ptovta );
+                $entity->setFacturaElectronica($facturaElectronica);
 
+                // emitir comprobante electronico si no es tique
+                if( $tipoComprobante != 'TIQUE' ){
+                    /**  INICIO EMISION FACTURA WEBSERVICE */
+                    $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
+
+                    $data = array(
+                        'CantReg' 	=> 1,  // Cantidad de comprobantes a registrar
+                        'PtoVta' 	=> $facturaElectronica->getPuntoVenta(),  // Punto de venta
+                        'CbteTipo' 	=> $facturaElectronica->getCodigoComprobante(),  // Tipo de comprobante (ver tipos disponibles)
+                        'Concepto' 	=> 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
+                        'DocTipo' 	=> $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+                        'DocNro' 	=> $docNro,  // Número de documento del comprador (0 consumidor final)
+                        'CbteFch' 	=> intval( $entity->getFechaCobro()->format('Ymd') ), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
+                        'ImpTotal' 	=> round($impTotal,2) , // Importe total del comprobante
+                        'ImpTotConc' 	=> 0,   // Importe neto no gravado
+                        'ImpNeto' 	=> round($impNeto,2) , // Importe neto gravado
+                        'ImpOpEx' 	=> 0,   // Importe exento de IVA
+                        'ImpIVA' 	=> round($impIVA,2),  //Importe total de IVA
+                        'ImpTrib' 	=> round($impTrib,2),   //Importe total de tributos
+                        'MonId' 	=> $entity->getMoneda()->getCodigoAfip(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
+                        'MonCotiz' 	=> $entity->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
+                        'Tributos' => $tributos,
+                        'Iva' 			=> $iva,
+                    );
+                    // si no hay tributos
+                    if( empty($tributos) ){
+                        unset( $data['Tributos'] );
+                    }
+
+                    $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
+                    $facturaElectronica->setCae($wsResult['CAE']);
+                    $facturaElectronica->setCaeVto($wsResult['CAEFchVto']);
+                    $facturaElectronica->setNroComprobante($wsResult['voucher_number']);
+                    /**  FIN EMISION FACTURA WEBSERVICE */
+                    $comprobante = $entity->getFacturaElectronica()->getComprobanteTxt();
+                }else{
+                    /** EMISIÓN A TIQUEADORA */
+                    //$afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
+
+                    $facturaElectronica->setCae('CAE');
+                    $facturaElectronica->setCaeVto('2022-01-01');
+                    $facturaElectronica->setNroComprobante('voucher_number');
+                    $comprobante = 'TICKET ';
+                }
                 //$entity->setIva($impIVA);
                 //$entity->setPercIibb($impTrib);
                 //$entity->setTotal($impTotal);
@@ -252,11 +316,9 @@ class CobroController extends Controller
 
                 // Guardar datos en factura electronica
                 $facturaElectronica->setCobro($entity);
-                $facturaElectronica->setCae($wsResult['CAE']);
-                $facturaElectronica->setCaeVto($wsResult['CAEFchVto']);
-                $facturaElectronica->setNroComprobante($wsResult['voucher_number']);
-
+                $facturaElectronica->setTotal($impTotal);
                 $em->persist($facturaElectronica);
+
                 // set numeracion
                 $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
                 if($param){
@@ -272,7 +334,11 @@ class CobroController extends Controller
                 $em->flush();
                 $em->getConnection()->commit();
 
-                $this->addFlash('success', 'Emitido el comprobante '. $entity->getFacturaElectronica()->getComprobanteTxt());
+                $this->addFlash('success', 'Emitido el comprobante '. $comprobante );
+                if( $tipoComprobante == 'TIQUE' ){
+                    // EMITIDO TICKET NO FACTURA
+                    return $this->redirect($this->generateUrl('ventas_cobro'));
+                }
                 return $this->redirect($this->generateUrl('ventas_cobro', array('printpdf' => $entity->getId())));
             }
             catch (\Exception $ex) {
@@ -280,6 +346,7 @@ class CobroController extends Controller
                 $em->getConnection()->rollback();
             }
         }
+        $this->addFlash('error', 'invalid');
         return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
             'entity' => $entity,
             'form' => $form->createView(),
@@ -293,18 +360,40 @@ class CobroController extends Controller
      * @return \Symfony\Component\Form\Form The form
      */
     private function createCreateForm(Cobro $entity,$type) {
-        $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
-        $afipDocType = $afip->ElectronicBilling->getDocumentTypes();
-        $docType = array_reduce( $afipDocType , function($array,$item){
-            $array[ $item->Id ] = $item->Desc;
-            return $array;
-        });
         $form = $this->createForm(new CobroType(), $entity, array(
             'action' => $this->generateUrl('ventas_cobro_create'),
             'method' => 'POST' ,
-            'attr' => array('type'=>$type, 'docType'=> json_encode($docType) ) ,
+            'attr' => array('type'=>$type ) ,
         ));
         return $form;
+    }
+
+    /**
+     * @Route("/{id}/showVenta", name="ventas_cobro_showventa")
+     * @Method("GET")
+     * @Template()
+     */
+    public function showVentaAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:FacturaElectronica')->find($id);
+        $venta = $entity->getCobro()->getVenta();
+        return $this->redirectToRoute('ventas_venta_show', array('id' => $venta->getId()));
+    }
+    /**
+     * @Route("/{id}/show", name="ventas_cobro_show")
+     * @Method("GET")
+     * @Template()
+     */
+    public function showAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Cobro')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Cobro entity.');
+        }
+        return $this->render('VentasBundle:Cobro:show.html.twig', array(
+                    'entity' => $entity));
     }
 
     /**
@@ -336,7 +425,7 @@ class CobroController extends Controller
 
         $url =$this->getParameter('url_qr_afip');
         $cuit =$this->getParameter('cuit_afip');
-        $ptovta =$this->getParameter('ptovta_ws_afip');
+        $ptovta =$this->getParameter('ptovta_ws_factura');
 
         $data = array(
                 "ver" => 1,

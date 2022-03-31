@@ -72,16 +72,16 @@
                     {% endif %}
                 </td>
                 <td class="con0">{{ entity.fecha|date('d-m-Y') }}</td>
+                <td>{{entity.concepto|raw }}</td>
                 <td class="con0">{{entity.comprobante }}
                 {% if entity.tipo=='1' %}
-                    <a href="{{path('ventas_factura_show', { 'id': entity.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
+                    <a href="{{path('ventas_cobro_showventa', { 'id': entity.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                 {% elseif entity.tipo in ['2','4'] %}
                     <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" style="float:right"><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                 {% else %}
                     <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.id }) }}" style="float:right"><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                 {% endif %}
                 </td>
-                <td>{{entity.concepto|raw }}</td>
                 <td class="alignright debe">{% if entity.tipo in ['0','1','4'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
                 <td class="alignright haber">{% if entity.tipo in ['3','2'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
                 <td class="alignright">{{saldo|number_format(2,'.',',')}}</td>

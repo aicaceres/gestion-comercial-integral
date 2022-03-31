@@ -281,22 +281,18 @@ class ClienteController extends Controller {
             $ctacte = $em->getRepository('VentasBundle:Cliente')->getDetalleCtaCte($cliente->getId(), $desde, $hasta);
             foreach ($ctacte as $key => &$var) {
                 if ($var['tipo'] == 1) {
-                    $fact = $em->getRepository('VentasBundle:Factura')->find($var['id']);
+                    $fact = $em->getRepository('VentasBundle:FacturaElectronica')->find($var['id']);
                     //$concepto = $fact->getCantidadItems() . ' Art.';
-                    $var['concepto'] = 'Factura ' . $fact->getTipoFactura();
-                    $var['comprobante'] = 'FAC ' . $fact->getTipoFactura() . $fact->getNroFactura();
+                    $var['concepto'] = $fact->getTituloPdf();
+                    $var['comprobante'] = $fact->getComprobanteTXT();
                 }
                 elseif ($var['tipo'] == 2) {
                     $cred = $em->getRepository('VentasBundle:NotaDebCred')->find($var['id']);
                     if ($cred->getSigno() == '+') {
                         $var['tipo'] = 4;
-                        $var['comprobante'] = 'DEB ' . $cred->getNroNotaDebCred();
-                        $var['concepto'] = 'Nota de Débito';
                     }
-                    else {
-                        $var['comprobante'] = 'CRE ' . $cred->getNroNotaDebCred();
-                        $var['concepto'] = 'Nota de Crédito';
-                    }
+                    $var['comprobante'] = $cred->getNotaElectronica()->getComprobanteTXT();
+                    $var['concepto'] = $cred->getNotaElectronica()->getTituloPdf();
                 }
                 elseif ($var['tipo'] == 3) {
                     $pago = $em->getRepository('VentasBundle:PagoCliente')->find($var['id']);

@@ -75,6 +75,10 @@ class Venta {
      * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
      */
     protected $descuentoRecargo;
+    /**
+     * @ORM\Column(name="concepto", type="text", nullable=true)
+     */
+    protected $concepto;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Transporte")
@@ -621,10 +625,33 @@ class Venta {
     /**
      * Get cobro
      *
-     * @return \VentasBundle\Entity\Cobro 
+     * @return \VentasBundle\Entity\Cobro
      */
     public function getCobro()
     {
         return $this->cobro;
+    }
+
+    /**
+     * Set concepto
+     *
+     * @param string $concepto
+     * @return Venta
+     */
+    public function setConcepto($concepto)
+    {
+        $this->concepto = $concepto;
+
+        return $this;
+    }
+
+    /**
+     * Get concepto
+     *
+     * @return string 
+     */
+    public function getConcepto()
+    {
+        return $this->concepto;
     }
 }

@@ -31,7 +31,7 @@ class BancoController extends Controller
             'entities' => $entities,
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_banco_create")
      * @Method("POST")
@@ -70,7 +70,7 @@ class BancoController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/new", name="sistema_banco_new")
      * @Method("GET")
@@ -86,7 +86,7 @@ class BancoController extends Controller
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_banco_edit")
      * @Method("GET")
@@ -123,7 +123,7 @@ class BancoController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_banco_update")
      * @Method("PUT")
@@ -152,21 +152,38 @@ class BancoController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_banco_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
+    {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco_delete');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Banco')->find($id);
         try{
-            $em->remove($entity); 
+            $em->remove($entity);
             $em->flush();
             $msg ='OK';
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }
         return new Response(json_encode($msg));
     }
+
+    /**
+     * @Route("/add", name="sistema_banco_add")
+     * @Method("GET")
+     */
+    public function addBancoAction(Request $request){
+        $em = $this->getDoctrine()->getManager();
+        $banco = new Banco();
+        try{
+            $banco->setNombre( strtoupper($request->get('nombre')) );
+            $em->persist($banco);
+            $em->flush();
+            $msg = array( 'id'=>$banco->getId(), 'text'=>$banco->getNombre() ) ;
+        } catch (\Exception $ex) {  $msg= $ex->getMessage();     }
+        return new Response(json_encode($msg));
+    }
+
 }

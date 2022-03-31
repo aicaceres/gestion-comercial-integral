@@ -77,10 +77,15 @@ class Tarjeta {
      */
     protected $comisionTarjeta;
 
+    public function __toString() {
+        return $this->getNombre();
+    }
+
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -103,7 +108,7 @@ class Tarjeta {
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -126,7 +131,7 @@ class Tarjeta {
     /**
      * Get maximoCuotas
      *
-     * @return integer 
+     * @return integer
      */
     public function getMaximoCuotas()
     {
@@ -149,7 +154,7 @@ class Tarjeta {
     /**
      * Get limiteSinAutorizacion
      *
-     * @return string 
+     * @return string
      */
     public function getLimiteSinAutorizacion()
     {
@@ -172,7 +177,7 @@ class Tarjeta {
     /**
      * Get presentarAlFacturar
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getPresentarAlFacturar()
     {
@@ -195,7 +200,7 @@ class Tarjeta {
     /**
      * Get presentar
      *
-     * @return string 
+     * @return string
      */
     public function getPresentar()
     {
@@ -218,7 +223,7 @@ class Tarjeta {
     /**
      * Get diaPresentar
      *
-     * @return integer 
+     * @return integer
      */
     public function getDiaPresentar()
     {
@@ -241,7 +246,7 @@ class Tarjeta {
     /**
      * Get tipoCobro
      *
-     * @return string 
+     * @return string
      */
     public function getTipoCobro()
     {
@@ -264,7 +269,7 @@ class Tarjeta {
     /**
      * Get cuenta
      *
-     * @return string 
+     * @return string
      */
     public function getCuenta()
     {
@@ -287,7 +292,7 @@ class Tarjeta {
     /**
      * Get diaParaCobrar
      *
-     * @return integer 
+     * @return integer
      */
     public function getDiaParaCobrar()
     {
@@ -310,7 +315,7 @@ class Tarjeta {
     /**
      * Get comisionTarjeta
      *
-     * @return integer 
+     * @return integer
      */
     public function getComisionTarjeta()
     {
@@ -333,7 +338,7 @@ class Tarjeta {
     /**
      * Get banco
      *
-     * @return \ConfigBundle\Entity\Banco 
+     * @return \ConfigBundle\Entity\Banco
      */
     public function getBanco()
     {

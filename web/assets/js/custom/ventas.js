@@ -66,14 +66,14 @@ jQuery(function ($) {
                     $('[id*="_formaPago"]').val(data.formapago);
                     $('[id*="_formaPago"]').change();
                      // mostrar iva e iibb si corresponde
-                    if( !esPresupuesto){
+                    //if( !esPresupuesto){
                         if (data.categoriaIva == 'M' || data.categoriaIva == 'I') {
                             $('#ivaTd').show();
                             if( data.categoriaIva == 'I'){
                                 $('#iibbTd').show();
                             }
                         }
-                    }
+                    //}
                     color = (data.cuitValido) ? '#666666' : 'orangered';
                     $('.cuitcliente').css('color', color);
                     if ($('#ventasbundle_notadebcred_facturas').length > 0) {
@@ -102,7 +102,7 @@ jQuery(function ($) {
                 if(data){
                     $('.datos-formapago').html(data);
                     descuentoRecargo = $('#porcentajeRecargo').val();
-                    $('.descuentoRecargo').text( descuentoRecargo )
+                    //$('.descuentoRecargo').text( descuentoRecargo.toFixed(2) )
                     $('[id*="_descuentoRecargo"]').val( descuentoRecargo )
                     actualizaTotales();
                 }
@@ -126,6 +126,11 @@ jQuery(function ($) {
             });
         });
         $('[id*="_moneda"]').change();
+
+        // al modificar el descuento o recargo si posee permiso
+        $('[id*="_descuentoRecargo"]').on('change', function () {
+               actualizaTotales();
+        });
 
         // al presionar ctrl+enter abrir popup
         $(document).on('click change keydown',
@@ -287,7 +292,6 @@ function openModalProducto(obj){
     const categoriaIva = $('#categoriaIva').val();
     const url_list = obj.attr('url_list');
 
-    console.log(esPresupuesto)
     var oTable = $('#productos_table').dataTable({
                 "columnDefs": [
                     // These are the column name variables that will be sent to the server
@@ -323,7 +327,7 @@ function openModalProducto(obj){
                                 'deposito' : deposito,
                                 'cotizacion': cotizacion,
                                 'categoriaIva' : categoriaIva,
-                                'esPresupuesto' : esPresupuesto,
+                                //'esPresupuesto' : esPresupuesto,
                             },
                 },
                 // Classic DataTables parameters
@@ -404,7 +408,18 @@ function openModalProducto(obj){
                 // actualizar datos
                 objprecio = obj.parent().siblings('.precTd');
                 objprecio.find('[id*="_precio"]').val( data.precio );
-                objprecio.find('[id*="_alicuota"]').val( data.alicuota );
+                objprecio.find('[id*="_alicuota"]').val(data.alicuota);
+                textoComodin = obj.siblings('[id*="_textoComodin"]')
+                if (esPresupuesto && data.comodin) {
+                    textoComodin.show();
+                    textoComodin.focus();
+                } else {
+                    textoComodin.hide();
+                    objcant = obj.parent().siblings('.cantTd');
+                    console.log( objcant.find('[id*="_cantidad"]'))
+                    objcant.find('[id*="_cantidad"]').focus();
+                }
+
                 actualizaTotales();
             });
         });
@@ -435,13 +450,14 @@ function openModalProducto(obj){
         let subTotal = totalIVA = totalIIBB = 0;
         const cotizacion = parseFloat($('[id*="_cotizacion"]').val());
         const categoriaIva = $('#categoriaIva').val();
-        const porcentaje = checknumero( $('[id*="_descuentoRecargo"]') ) ;
+        const porcentaje = checknumero($('[id*="_descuentoRecargo"]'));
+        $('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(2));
         $("tr.item").each(function(){
             let item = $(this);
             const cant = checknumero(item.find('.cantTd input'));
             let precio = checknumero( item.find('[id*="_precio"]') );
             let alicuota = checknumero(item.find('[id*="_alicuota"]'));
-            if (!esPresupuesto) {
+            //if (!esPresupuesto) {
                 if( categoriaIva == 'I' || categoriaIva == 'M'  ){
                     // aplicar dto para calcular el iva
                     dto = precio * (porcentaje/100)
@@ -455,7 +471,7 @@ function openModalProducto(obj){
                     // precio + iva
                     precio = precio * ( 1 + (alicuota/100));
                 }
-            }
+            //}
             // calcular la cotización si es distinta a 1
             precUnit = precio / cotizacion;
             precTot = (precio * cant) / cotizacion;
@@ -472,7 +488,7 @@ function openModalProducto(obj){
         $('#subtotalTh').html( subTotalResumen.toFixed(3));
         $('#importeSubtotal').html(subTotalResumen.toFixed(3));
 
-        if( (categoriaIva != 'I' && categoriaIva != 'M') || esPresupuesto ){
+        if( (categoriaIva != 'I' && categoriaIva != 'M') ){
             descrec = subTotalResumen * (porcentaje/100);
         }
         const totalgral = subTotalResumen + descrec + totalIvaResumen + totalIibbResumen;

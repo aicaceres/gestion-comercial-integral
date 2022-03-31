@@ -1,9 +1,16 @@
 <div class="notifmsg info png_bg" style="margin-top:50px; background-position:10px 7px !important">
     <div style="padding: 5px 10px 5px 36px">
-        <small>Ctrl+Enter = Abrir búsqueda <strong class="divnotif">
-        |</strong> Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">
-        |</strong> Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">
-        |</strong> {% if 'cobro' in app.request.attributes.get('_route') %} + = Ver Detalle de Items {% else %} + = Agregar producto {% endif %}  <strong class="divnotif">
-        |</strong> Ctrl+Alt+G = Guardar  </small>
+        <small>
+        Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong>
+        Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong>
+        Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong>
+        {% if 'cobro' in app.request.attributes.get('_route') %}
+        Ctrl+Alt+D = Ver Detalle de Items <strong class="divnotif">|</strong>
+        + = Agregar pago
+        {% else %}
+        + = Agregar producto
+        {% endif %}
+        <strong class="divnotif">|</strong>
+        Ctrl+Alt+G = Guardar  </small>
     </div>
 </div>

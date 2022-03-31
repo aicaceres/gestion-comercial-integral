@@ -28,7 +28,11 @@ class PresupuestoDetalle {
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
     protected $producto;
-
+    /**
+     * @var string $textoComodin
+     * @ORM\Column(name="texto_comodin", type="string", nullable=true)
+     */
+    protected $textoComodin;
     /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3)
@@ -69,7 +73,7 @@ class PresupuestoDetalle {
     protected $presupuesto;
 
     /** VALORES ITEM  */
-    // valor del precio unitario 
+    // valor del precio unitario
     public function getPrecioUnitarioItem(){
         $precio = $this->getPrecio();
         return round( $precio, 3);
@@ -88,6 +92,10 @@ class PresupuestoDetalle {
         return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
     }
     /** FIN VALORES ITEM */
+
+    public function getNombreProducto(){
+        return ( $this->getProducto()->getComodin() ) ? $this->getTextoComodin() : $this->getProducto()->getNombre();
+    }
 
     /**
      * Get id
@@ -304,5 +312,28 @@ class PresupuestoDetalle {
     public function getDtoRec()
     {
         return $this->dtoRec;
+    }
+
+    /**
+     * Set textoComodin
+     *
+     * @param string $textoComodin
+     * @return PresupuestoDetalle
+     */
+    public function setTextoComodin($textoComodin)
+    {
+        $this->textoComodin = $textoComodin;
+
+        return $this;
+    }
+
+    /**
+     * Get textoComodin
+     *
+     * @return string
+     */
+    public function getTextoComodin()
+    {
+        return $this->textoComodin;
     }
 }

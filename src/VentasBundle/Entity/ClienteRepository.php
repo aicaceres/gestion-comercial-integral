@@ -30,19 +30,22 @@ class ClienteRepository extends EntityRepository {
     public function getDetalleCtaCte($id, $desde = null, $hasta = null) {
         $cli = $this->find($id);
         $facturas = $this->_em->createQueryBuilder('f')
-                ->select('f.id,1 tipo,f.fechaFactura fecha, 0 comprobante,f.created fechaemi, 0 concepto , f.total importe')
-                ->from('VentasBundle\Entity\Factura', 'f')
-                ->innerJoin('f.cliente', 'p')
-                ->where('p.id=:agr')
-                ->andWhere("f.estado!='ANULADO'")
+                ->select('f.id,1 tipo,c.fechaCobro fecha, 0 comprobante,0 concepto , f.total importe')
+                ->from('VentasBundle\Entity\FacturaElectronica', 'f')
+                ->innerJoin('f.cobro', 'c')
+                ->innerJoin('c.formaPago','p')
+                ->innerJoin('c.cliente', 'cl')
+                ->where('cl.id=:agr')
+                ->andWhere("p.cuentaCorriente = 1")
                 ->setParameter('agr', $cli);
 
         $notadeb = $this->_em->createQueryBuilder('c')
-                ->select('c.id,2 tipo,c.fecha, 0 comprobante, c.created fechaemi, 0 concepto , c.total importe')
-                ->from('VentasBundle\Entity\NotaDebCred', 'c')
-                ->innerJoin('c.cliente', 'p')
-                ->where('p.id=:agr')
-                ->andWhere("c.estado!='ANULADO'")
+                ->select('n.id,2 tipo,n.fecha, 0 comprobante, 0 concepto , n.total importe')
+                ->from('VentasBundle\Entity\NotaDebCred', 'n')
+                ->innerJoin('n.cliente', 'c')
+                ->innerJoin('n.formaPago','p')
+                ->where('c.id=:agr')
+                ->andWhere("p.cuentaCorriente = 1")
                 ->setParameter('agr', $cli);
 
         $pagos = $this->_em->createQueryBuilder('f')
@@ -53,17 +56,17 @@ class ClienteRepository extends EntityRepository {
                 ->setParameter('agr', $cli);
 
         if ($desde) {
-            $cadfactura = " f.fechaFactura >= '" . UtilsController::toAnsiDate($desde) . "'";
+            $cadfactura = " c.fechaCobro >= '" . UtilsController::toAnsiDate($desde) . "'";
             $facturas->andWhere($cadfactura);
-            $cadnotacred = " c.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";
+            $cadnotacred = " n.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";
             $notadeb->andWhere($cadnotacred);
             $cadpagos = " g.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";
             $pagos->andWhere($cadpagos);
         }
         if ($hasta) {
-            $cadfactura = " f.fechaFactura <= '" . UtilsController::toAnsiDate($hasta) . "'";
+            $cadfactura = " c.fechaCobro <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $facturas->andWhere($cadfactura);
-            $cadnotacred = " c.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
+            $cadnotacred = " n.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $notadeb->andWhere($cadnotacred);
             $cadpagos = " g.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $pagos->andWhere($cadpagos);
@@ -134,58 +137,6 @@ class ClienteRepository extends EntityRepository {
                 'concepto' => 'Saldo Inicial', 'importe' => $saldoInicial));
         }
         return $datos;
-
-        /* if($saldoInicial) array_push($datos,array('id'=>0,'tipo'=>0,'fecha'=>$inicial,'comprobante'=>0,
-          'concepto'=>'Saldo Inicial','importe'=>$saldoInicial));
-
-          $ord = usort($datos, function($a1, $a2) {
-          $value1 = strtotime($a1['fecha']->format('Y-m-d H:i'));
-          $value2 = strtotime($a2['fecha']->format('Y-m-d H:i'));
-          return $value1 - $value2;
-          });*
-
-          return $datos;/
-          /*
-          $facturas = $this->_em->createQueryBuilder('f')
-          ->select('f.id,1 tipo,f.fechaFactura fecha, f.nroFactura comprobante, 0 concepto , f.total importe')
-          ->from('CM\VentasBundle\Entity\Factura', 'f')
-          ->innerJoin('f.cliente', 'p')
-          ->where('p.id=:agr')
-          ->setParameter('agr', $cli);
-          if( defined($desde) ){
-          echo $desde;
-          $facturas->andWhere('f.fechaFactura>=:desde')
-          ->setParameter('desde', $fechaDesde);
-          }
-          if(defined($hasta)){
-          echo $hasta;
-          $facturas->andWhere('f.fechaFactura<=:hasta')
-          ->setParameter('hasta', $fechaHasta);
-          }
-
-          $pagos = $this->_em->createQueryBuilder('f')
-          ->select('g.id,2 tipo,g.fecha, g.nroComprobante comprobante , g.concepto, g.importe')
-          ->from('CM\VentasBundle\Entity\PagoCliente', 'g')
-          ->innerJoin('g.cliente', 'p')
-          ->where('p.id=:agr')
-          ->setParameter('agr', $cli);
-          if(defined($desde)){
-          $pagos->andWhere('g.fecha>=:desde')
-          ->setParameter('desde', $fechaDesde);
-          }
-          if(defined($hasta)){
-          $pagos->andWhere('g.fecha<=:hasta')
-          ->setParameter('hasta', $fechaHasta);
-          }
-          $datos = array_merge($facturas->getQuery()->getArrayResult(), $pagos->getQuery()->getArrayResult());
-
-          $ord = usort($datos, function($a1, $a2) {
-          $value1 = strtotime($a1['fecha']->format('Y-m-d'));
-          $value2 = strtotime($a2['fecha']->format('Y-m-d'));
-          return $value1 - $value2;
-          });
-
-          return $datos; */
     }
 
     public function getFacturasImpagas($id) {
@@ -277,13 +228,13 @@ class ClienteRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select("e")
                 ->from('VentasBundle\Entity\Cliente', 'e');
-         
+
         // Create Count Query
         $countQuery = $this->_em->createQueryBuilder();
         $countQuery->select("count(e.id)")
-                ->from('VentasBundle\Entity\Cliente', 'e');          
-        
-        // Other conditions than the ones sent by the Ajax call ?        
+                ->from('VentasBundle\Entity\Cliente', 'e');
+
+        // Other conditions than the ones sent by the Ajax call ?
         if ($otherConditions === null)
         {
             // No
@@ -297,17 +248,17 @@ class ClienteRepository extends EntityRepository {
             $query->where($otherConditions);
             $countQuery->where($otherConditions);
         }
- 
+
         if( $search['value'] ){
             $searchItem = trim($search['value']);
-            $searchQuery =  ' e.nombre LIKE \'%'.$searchItem.'%\' OR e.cuit LIKE \'%'.$searchItem.'%\' '; 
+            $searchQuery =  ' e.nombre LIKE \'%'.$searchItem.'%\' OR e.cuit LIKE \'%'.$searchItem.'%\' ';
             $query->andWhere($searchQuery);
             $countQuery->andWhere($searchQuery);
         }
-                        
+
         // Limit
         $query->setFirstResult($start)->setMaxResults($length);
-        
+
         // Order
         foreach ($orders as $key => $order)
         {
@@ -315,7 +266,7 @@ class ClienteRepository extends EntityRepository {
             if ($order['name'] != '')
             {
                 $orderColumn = null;
-            
+
                 switch($order['name'])
                 {
                     case 'nombre':
@@ -327,25 +278,25 @@ class ClienteRepository extends EntityRepository {
                     {
                         $orderColumn = 'e.cuit';
                         break;
-                    }                    
+                    }
                 }
-        
+
                 if ($orderColumn !== null)
                 {
                     $query->orderBy($orderColumn, $order['dir']);
                 }
             }
         }
-        
-        // Execute       
+
+        // Execute
         $results = $query->getQuery()->getResult();
         $countResult = $countQuery->getQuery()->getSingleScalarResult();
-        
+
         return array(
             "results" 		=> $results,
             "countResult"	=> $countResult
         );
-    }   
+    }
 
 
 /**
@@ -354,7 +305,7 @@ class ClienteRepository extends EntityRepository {
     public function indexCount($provId = null) {
         $query = $this->_em->createQueryBuilder();
         $query->select("count(c.id)")
-                ->from('VentasBundle\Entity\Cliente', 'c');        
+                ->from('VentasBundle\Entity\Cliente', 'c');
         return $query->getQuery()->getSingleScalarResult();
     }
 
@@ -385,7 +336,7 @@ class ClienteRepository extends EntityRepository {
             // Add condition
             $query->where($otherConditions);
             $countQuery->where($otherConditions);
-        }*/        
+        }*/
 
         if ($search['value']) {
             $searchItem = trim($search['value']);
@@ -420,15 +371,15 @@ class ClienteRepository extends EntityRepository {
                     case 'localidad': {
                             $orderColumn = 'l.name';
                             break;
-                        }                                     
+                        }
                     case 'telefono': {
                             $orderColumn = 'c.telefono';
                             break;
-                        }                                     
+                        }
                     case 'activo': {
                             $orderColumn = 'c.activo';
                             break;
-                        }                                     
+                        }
                 }
 
                 if ($orderColumn !== null) {
@@ -451,18 +402,18 @@ class ClienteRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select("c")
                 ->from('VentasBundle\Entity\Cliente', 'c')
-                ->leftJoin('c.localidad', 'l')                
-                ->orderBy('c.nombre')    ;        
+                ->leftJoin('c.localidad', 'l')
+                ->orderBy('c.nombre')    ;
         if ($search) {
             $searchItem = trim($search);
             $searchQuery = ' c.nombre LIKE \'%' . $searchItem . '%\' OR c.cuit LIKE \'%' . $searchItem . '%\' ' .
-                    ' OR c.direccion LIKE \'%' . $searchItem . '%\'  OR  c.telefono LIKE \'%' . $searchItem . '%\' '. ' OR l.name LIKE \'%' . $searchItem . '%\'' ;            
+                    ' OR c.direccion LIKE \'%' . $searchItem . '%\'  OR  c.telefono LIKE \'%' . $searchItem . '%\' '. ' OR l.name LIKE \'%' . $searchItem . '%\'' ;
             $query->andWhere($searchQuery);
         }
         return $query->getQuery()->getResult();
     }
 
-    public function filterByTerm($key) {      
+    public function filterByTerm($key) {
         $query = $this->_em->createQueryBuilder();
             $query->select("c.id,c.nombre text")
                     ->from('VentasBundle:Cliente', 'c')
@@ -470,7 +421,7 @@ class ClienteRepository extends EntityRepository {
                     ->orderBy('c.nombre')
                     ->setParameter('key', '%' . $key . '%')
                     ->setMaxResults(5);
-        return $query->getQuery()->getArrayResult();                
+        return $query->getQuery()->getArrayResult();
     }
 
 }

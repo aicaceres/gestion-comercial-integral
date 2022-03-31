@@ -245,6 +245,7 @@ class NotaDebCredController extends Controller {
                 $entity->setSigno($signo);
                 // Guardar datos en factura electronica
                 $notaElectronica->setNotaDebCred($entity);
+                $notaElectronica->setTotal(round($impTotal,2));
                 $notaElectronica->setCae($wsResult['CAE']);
                 $notaElectronica->setCaeVto($wsResult['CAEFchVto']);
                 $notaElectronica->setNroComprobante($wsResult['voucher_number']);
@@ -426,7 +427,7 @@ class NotaDebCredController extends Controller {
 
         $url =$this->getParameter('url_qr_afip');
         $cuit =$this->getParameter('cuit_afip');
-        $ptovta =$this->getParameter('ptovta_ws_afip');
+        $ptovta =$this->getParameter('ptovta_ws_factura');
 
         $data = array(
                 "ver" => 1,

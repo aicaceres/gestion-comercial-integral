@@ -13,7 +13,7 @@
         <tr class="item">
             <td class="ordTd">{{loop.index}}</td>
             <td class="prodTd">
-                <strong>{{detalle.producto.nombre}}</strong>
+                <strong>{{ detalle.nombreProducto }}</strong>
             </td>
             <td class="cantTd alignright">{{ detalle.cantidad }} {{detalle.producto.unidadmedida.nombre}}</td>
             <td class="precTd alignright">{{ detalle.precioUnitarioItem|number_format(3,'.',',') }}</td>

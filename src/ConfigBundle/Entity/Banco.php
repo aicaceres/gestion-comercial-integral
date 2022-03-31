@@ -2,10 +2,16 @@
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 /**
  * ConfigBundle\Entity\Banco
  * @ORM\Table(name="banco")
  * @ORM\Entity()
+ * @UniqueEntity(
+ *     fields={"nombre"},
+ *     errorPath="nombre",
+ *     message="Registro duplicado."
+ * )
  */
 class Banco {
     /**
@@ -17,25 +23,25 @@ class Banco {
     protected $id;
     /**
      * @var string $nombre
-     * @ORM\Column(name="nombre", type="string", nullable=false)
-     */    
+     * @ORM\Column(name="nombre", type="string", nullable=false, unique=true)
+     */
     protected $nombre;
     /**
      * @var string $activo
      * @ORM\Column(name="activo", type="boolean", nullable=true)
      */
-    protected $activo = true;  
+    protected $activo = true;
 
     /**
      * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\Cheque", mappedBy="banco")
      */
     protected $cheques;
-    
+
     /**
      * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\CuentaBancaria", mappedBy="banco")
      */
     protected $cuentas;
-    
+
     /**
      * Constructor
      */
@@ -46,11 +52,11 @@ class Banco {
     }
     public function __toString() {
         return $this->nombre;
-    } 
+    }
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -66,14 +72,14 @@ class Banco {
     public function setNombre($nombre)
     {
         $this->nombre = $nombre;
-    
+
         return $this;
     }
 
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -89,7 +95,7 @@ class Banco {
     public function addCheque(\ConfigBundle\Entity\Cheque $cheques)
     {
         $this->cheques[] = $cheques;
-    
+
         return $this;
     }
 
@@ -106,7 +112,7 @@ class Banco {
     /**
      * Get cheques
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getCheques()
     {
@@ -122,7 +128,7 @@ class Banco {
     public function addCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas)
     {
         $this->cuentas[] = $cuentas;
-    
+
         return $this;
     }
 
@@ -139,7 +145,7 @@ class Banco {
     /**
      * Get cuentas
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getCuentas()
     {
@@ -155,14 +161,14 @@ class Banco {
     public function setActivo($activo)
     {
         $this->activo = $activo;
-    
+
         return $this;
     }
 
     /**
      * Get activo
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getActivo()
     {

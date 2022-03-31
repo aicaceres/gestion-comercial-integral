@@ -1,4 +1,4 @@
-<div class="datos-cf">
+<div class="datos-cf" {% if not entity.cliente.consumidorfinal %} style="display:none" {% endif %} >
     <div style="width: 50%; ">
         {{ form_label(form.nombreCliente)}}
         {{ form_widget(form.nombreCliente)}}

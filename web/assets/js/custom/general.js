@@ -106,7 +106,7 @@ function partialVentasPorCobrar(url) {
         .dialog({
             modal: true, autoOpen: false, title: "VENTAS PENDIENTES POR COBRAR", width: "70%",minHeight: 380,
         });
-jQuery('#popup').dialog('open');
+        jQuery('#popup').dialog('open');
 }
 
 // lanza popup para apertura de caja
@@ -175,8 +175,9 @@ function checknumero(obj){
     obj.val( num );
     return num*1;
 }
-jQuery(document).ready(function(){
-   jQuery('#tabs').tabs();
+// document ready
+jQuery(document).ready(function($){
+    jQuery('#tabs').tabs();
 
     jQuery('.select2').select2();
 
@@ -213,6 +214,43 @@ jQuery(document).ready(function(){
         }
     })
 
+/**
+CODIGO PARA AGREGAR BANCO EN CHEQUES*/
+    selectBanco = $('.selectBanco');
+    selectBanco.select2({
+        tags: true,
+        createTag: function (params) {
+            var term = $.trim(params.term).toUpperCase();
+            if (term === '') {
+                return null;
+            }
+            return {
+            id: term,
+            text: term,
+            newTag: true // add additional parameters
+            }
+        }
+    });
+    jQuery(document).on('select2:selecting', '.selectBanco',function (e) {
+        var data = e.params.args.data;
+        if (data.newTag) {
+            if (confirm('Desea crear el banco ' + data.text + ' ?')) {
+                let url = $(this).data('url');
+                $.getJSON(url, { 'nombre': data.text }, function (res) {
+                    var datos = {
+                                id: res.id,
+                                text: res.text
+                            };
+                    var newOption = new Option(datos.text, datos.id, true, true);
+                    $(e.target).append(newOption);
+                    return true;
+                })
+            } else {
+                $(this).select2('close');
+                return false;
+            }
+        }
+    })
 
 
 	///// SHOW/HIDE USERDATA WHEN USERINFO IS CLICKED /////

@@ -1,0 +1,49 @@
+<tr class="item" divdata="item_items">
+    <td class="monedaTd" style="text-align:right;">
+        {{ form_label(item.moneda,'EFECTIVO: ') }}
+    </td>
+    <td class="tarjetaTd">
+        {% set tarjeta = item.datosTarjeta %}
+        <div style="margin:5px 0">
+        {{ form_label(tarjeta.tarjeta,'TARJETA:') }}
+        {{ form_widget(tarjeta.tarjeta, { 'attr': {'class':'mininput'} }) }}
+        {{ form_label(tarjeta.numero, 'Número: ') }}
+        {{ form_widget(tarjeta.numero, { 'attr': {'class':'mininput creditcard'} }) }}
+        {{ form_label(tarjeta.cupon, 'Cupón: ') }}
+        {{ form_widget(tarjeta.cupon, { 'attr': {'maxlength' : '10','class':'mininput'} }) }}
+        </div>
+        <div style="margin:5px 0">
+        {{ form_label(tarjeta.cuota,'Cuotas: ') }}
+        {{ form_widget(tarjeta.cuota) }}
+        {{ form_label(tarjeta.firmante, 'Firmante: ') }}
+        {{ form_widget(tarjeta.firmante, { 'attr': {'class':'mininput'} }) }}
+        {{ form_label(tarjeta.codigoAutorizacion, 'Código Autorización: ') }}
+        {{ form_widget(tarjeta.codigoAutorizacion, { 'attr': {'class':'mininput'} }) }}
+        </div>
+    </td>
+    <td class="chequeTd">
+        {% set cheque = item.chequeRecibido %}
+        <div style="margin:5px 0">
+        {{ form_label(cheque.nroCheque, 'CHEQUE N°') }}
+        {{ form_widget(cheque.nroCheque, { 'attr': {'maxlength' : '10','class':'width100'} }) }}
+        {{ form_label(cheque.fecha) }}
+        {{ form_widget(cheque.fecha, { 'attr': {'class' : 'datepicker'} }) }}
+        {{ form_label(cheque.dador) }}
+        {{ form_widget(cheque.dador, { 'attr': {'class':'smallinput'} }) }}
+        </div>
+        <div style="margin:5px 0">
+        {{ form_label(cheque.banco) }}
+        {{ form_widget(cheque.banco, { 'attr': {'class' : 'mininput selectBanco',
+                    'data-url': path("sistema_banco_add") } }) }}
+        {{ form_label(cheque.sucursal) }}
+        {{ form_widget(cheque.sucursal, { 'attr': {'class':'smallinput'} }) }}
+        {{ form_row(cheque.valor)}}
+        </div>
+    </td>
+    <td width="160px" class="importeTd alignright">
+        <span class="simbolo" style="font-size:16px;">{{ entity.moneda.simbolo }}</span>
+        {{ form_widget(item.importe, {'attr': {'class':'mediuminput alignright', 'style': 'font-size:16px;font-weight:bold'}}) }}
+        {{ form_widget(item.tipoPago) }}
+    </td>
+    <td width="30px" class="delTd" style="text-align:center;"></td>
+</tr>

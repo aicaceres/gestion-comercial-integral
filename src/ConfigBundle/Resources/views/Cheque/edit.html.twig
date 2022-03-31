@@ -15,48 +15,49 @@
         <fieldset >
             <div class="two_fields">
             {{ form_row(form.nroCheque, { 'attr': {'class' : 'smallinput' } }) }}
-            {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }} 
-            </div> 
+            {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
+            </div>
             <div class="two_fields">
-            {{ form_row(form.banco, { 'attr': {'class' : 'uniformselect'  } }) }}
-            {{ form_row(form.sucursal, { 'attr': {'class' : 'smallinput'} }) }} 
-            </div> 
+            {{ form_row(form.banco, { 'attr': {'class' : 'select2 selectBanco',
+                    'data-url': path("sistema_banco_add") } }) }}
+            {{ form_row(form.sucursal, { 'attr': {'class' : 'smallinput'} }) }}
+            </div>
             <div class="locate">
-            {{ form_row(form.pais, { 'attr': {'class' : 'uniformselect'  } }) }}   
-            {{ form_row(form.provincia, { 'attr': {'class' : 'uniformselect'  } }) }}   
-            {{ form_row(form.localidad, { 'attr': {'class' : 'uniformselect'  } }) }}   
-            </div>                    
+            {{ form_row(form.pais, { 'attr': {'class' : 'uniformselect'  } }) }}
+            {{ form_row(form.provincia, { 'attr': {'class' : 'uniformselect'  } }) }}
+            {{ form_row(form.localidad, { 'attr': {'class' : 'uniformselect'  } }) }}
+            </div>
             <p>{{ form_row(form.titularCheque, { 'attr': {'class' : 'chzn-select'  } }) }}</p>
             <div class="two_fields">
             {{ form_row(form.dador, { 'attr': {'style' : 'width:50%'} }) }}
-            {{ form_row(form.telefono, { 'attr': {'class' : 'smallinput'} }) }}  
-            </div>                
+            {{ form_row(form.telefono, { 'attr': {'class' : 'smallinput'} }) }}
+            </div>
             <div class="two_fields">
-            {{ form_row(form.tomado, { 'attr': {'class' : 'datepicker'} }) }} 
-            {{ form_row(form.valor, { 'attr': {'class' : 'mininput'} }) }}  
-            </div>                                                
+            {{ form_row(form.tomado, { 'attr': {'class' : 'datepicker'} }) }}
+            {{ form_row(form.valor, { 'attr': {'class' : 'mininput'} }) }}
+            </div>
             <div class="two_fields">
-            {{ form_row(form.devuelto) }}                 
-            {{ form_row(form.usado) }}                 
-            </div>                      
-            <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p> 
-            <br clear="all" /> 
+            {{ form_row(form.devuelto) }}
+            {{ form_row(form.usado) }}
+            </div>
+            <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('sistema_cheque')}}">Cancelar</a>
             </div>
         </fieldset>
 {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
-{% block extra_javascripts %} 
-    {% include "ConfigBundle::block-locate-js.html.twig" %} 
+{% block extra_javascripts %}
+    {% include "ConfigBundle::block-locate-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
-});   
+});
 
-</script>    
+</script>
 {% endblock %}

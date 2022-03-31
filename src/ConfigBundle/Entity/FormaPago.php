@@ -90,11 +90,11 @@ class FormaPago {
     public function getTipoPago(){
         $tipo = 'X';
         if( $this->cuentaCorriente ){
-            $tipo = 'C';
+            $tipo = 'CTACTE';
         }elseif( $this->tarjeta ){
-            $tipo = 'T';
+            $tipo = 'TARJETA';
         }elseif( $this->contado ){
-            $tipo = 'E';
+            $tipo = 'EFECTIVO';
         }
         return $tipo;
     }

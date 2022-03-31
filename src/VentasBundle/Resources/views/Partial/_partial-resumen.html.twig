@@ -7,9 +7,15 @@
             <span id="importeSubtotal" >{{ (entity.subTotal)|number_format(3,'.',',')}}</span>.-
       </th>
       <th >
-        Descuento/Recargo [<span class="descuentoRecargo">
-          {{ entity.descuentoRecargo }}
-        </span>%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+        Descuento/Recargo [
+            {% if form is defined %}
+                {% set disabledDescuentoRecargo = app.user.access(app.session.get('unidneg_id'),'ventas_venta_descuento') ? false : true %}
+                {{ form_widget(form.descuentoRecargo, {'attr': {'disabled': disabledDescuentoRecargo, 'class':'width50'} }) }}
+            {% else %}
+                {{ entity.descuentoRecargo|number_format(2,'.',',') }}
+            {% endif %}
+        %]:
+        <span class="simbolo">{{simbolo}}</span>&nbsp;
         <span id="importeRecargo">{{ entity.totalDescuentoRecargo|number_format(3,'.',',') }}</span>.-
       </th>
       <th id="ivaTd" style=" {% if not showiva %} display:none; {% endif %} width:16%">

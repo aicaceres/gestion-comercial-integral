@@ -48,7 +48,7 @@
 
         </fieldset>
         <fieldset >
-            <div class="datos-cliente">
+            <div class="datos-cliente" {% if entity.cliente.consumidorfinal %} style="display: none" {% endif %} >
                 {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
             </div>
 
@@ -59,8 +59,44 @@
             </div>
         </fieldset>
 
-        <fieldset style=" text-align:center">
-            <div style="display:inline-block; width:85%; margin:0 auto;" >
+        <fieldset class="detalle_pago" {% if entity.formaPago.tipoPago == 'CTACTE' %} style="display:none" {% endif %} >
+            <div style="display:inline-block; width:85%; margin:0 0 10px 5%;" >
+                <h5>DETALLE DEL PAGO:</h5>
+                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
+                    {% set prototype = form.detalles.vars.prototype %}
+                    <tbody data-index="{{form.detalles | length }}"
+                        data-prototype="{% filter escape %}{% include 'VentasBundle:Cobro:prototype.html.twig' with {'item':prototype} %}{% endfilter %}"
+                    >
+                    {% for det in form.detalles %}
+                        <tr>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="text-align:right">
+                                IMPORTE: &nbsp;
+                                <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                                <span class="pago" style="font-size:16px" >0</span>.-
+                            </th>
+                            <th width="150px" class="red">
+                                VUELTO: &nbsp;
+                                <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                                <span class="vuelto" style="font-size:16px"></span>
+                            </th>
+                            <th width="30px" style="text-align:center;"><a href="javascript:void(0)" id="linkAdd" tabindex="0" title="Agregar"><span class="add-item-button">+</span></th>
+                        </tr>
+                    </thead>
+                </table>
+
+            </div>
+        </fieldset>
+
+        <fieldset style=" text-align:center; margin-top:10px">
+            <div style="display:inline-block; width:85%;" >
                 {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
                 {% set showiva = (cativa != 'C') %}
                 {% set showiibb = (cativa == 'I') %}
@@ -72,7 +108,7 @@
         <fieldset>
             <br clear="all" />
             <div class="actionbutton">
-                <button class="guardar disabled" id="guardar" type="button">FACTURAR</button>
+                <button class="guardar disabled" disabled="disabled" id="guardar" type="button">Guardar y <span>Facturar</span></button>
                 <a class="cancelar" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -83,18 +119,35 @@
     </div>
     {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" %}
 </div>
+<div id="dialog-tipo" title="Elegir Pago" style="display:none">
+<form>
+    <button type="button" class="stdbtn btn_black" data-tipo="EFECTIVO">EFECTIVO</button>
+    <button type="button" class="stdbtn btn_black" data-tipo="CHEQUE">CHEQUE</button>
+    <button type="button" class="stdbtn btn_black" data-tipo="TARJETA">TARJETA</button>
+</form>
+</div>
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
-    const datosCompletos = false;
+    let datosCompletos = false;
+    let vuelto = -1;
     $(window).on('load', function () {
+
+        $( "#dialog-tipo" ).dialog({
+            autoOpen: false,
+            height: 100,
+            width: 350,
+            modal: true
+        });
 
 // eliminar estas linea
 // revisar detectarControles para descomentar llamadas a openmodal
 // habilitar los change de cliente, formapago y moneda
         $('.btn_search').remove();
+        $('#ventasbundle_cobro_moneda').attr('disabled', true);
         $('#ventasbundle_cobro_cliente').attr('disabled', true);
         $('#ventasbundle_cobro_formaPago').attr('disabled', true);
 ///************
@@ -216,17 +269,7 @@ jQuery(function ($) {
                     descuentoRecargo = $('#porcentajeRecargo').val();
                     $('.descuentoRecargo').text( descuentoRecargo )
                     $('[id*="_descuentoRecargo"]').val( descuentoRecargo )
-                    if( $('#tipoPago').val() == 'C' || datosCompletos ){
-                       $('#guardar').removeClass('disabled');
-                        var btn = document.getElementById('guardar');
-                        btn.removeAttribute('type');
-                        btn.setAttribute('type', 'submit');
-                    }else{
-                        $('#guardar').addClass('disabled');
-                        var btn = document.getElementById('guardar');
-                        btn.removeAttribute('type');
-                        btn.setAttribute('type', 'button');
-                    }
+
                     //actualizaTotales();
                 }
             });
@@ -250,7 +293,12 @@ jQuery(function ($) {
         });
 
         $('#ventasbundle_cobro_moneda').change();
-        $('#ventasbundle_cobro_formaPago').change();
+        //$('#ventasbundle_cobro_formaPago').change();
+
+        $('#ventasbundle_cobro_tipoDocumentoCliente').on('change', function() {
+            $('#ventasbundle_cobro_nroDocumentoCliente').attr('required', $(this).val()!='' )
+        })
+
 
         // al presionar ctrl+enter abrir popup
         $(document).on('click change keydown',
@@ -268,12 +316,200 @@ jQuery(function ($) {
             openModal(obj)
         });
 
-    $('#ventasbundle_cobro_cliente').focus();
-    // confirm on submit
-    $('#ventasbundle_cobro').on('submit', function(){
+    $collectionHolder = $('table.tabla-pagos tbody');
+    $collectionHolder.find('.delTd').each(function() {
+        addItemFormDeleteLink($(this));
+    });
+    $collectionHolder.find('.ordTd').each(function(i) {
+        $(this).html(i + 1);
+    });
+    $('#linkAdd').on('click', function(e) {
+        e.preventDefault();
+        if( $('#tipoPago').val() != 'CTACTE' ){
+            $( "#dialog-tipo" ).dialog('open');
+            $('#dialog-tipo button').first().focus();
+        }
+    });
 
+    $('#dialog-tipo button').on('click', function(){
+        tipo = $(this).data('tipo');
+        $( "#dialog-tipo" ).dialog('close');
+        addNewItem(tipo);
+    })
+
+    detallePago();
+    //$('#ventasbundle_cobro_cliente').focus();
+    // confirm on submit
+    $('#guardar').on('click', function(){
+        if( $('#tipoPago').val() != 'CTACTE' ){
+            if(  $(':invalid').length>0 || vuelto<0 ){
+                alert( 'Completar todos los datos para facturar!' );
+                return false;
+            }
+        }
+       if( !confirm('Comfirma la registración del pago y la emisión de la factura?')){
+            return false;
+        }
+        $('#ventasbundle_cobro').submit();
     })
 });
+
+function detallePago(){
+    $collectionHolder.html('')
+    const tipoPago = $('#tipoPago').val();
+    const categoriaIva = $('#categoriaIva').val();
+
+    //$('#guardar').find('span').html('FACTURA');
+    // si no es cta cte se habilita detalle de pago
+    $('.detalle_pago').toggle( tipoPago!='CTACTE' );
+    // si es cta cte habilitar facturar sin mas datos
+    if( tipoPago == 'CTACTE' ){
+        setBotonGuardar(true);
+        return true;
+    }else{
+        //if( categoriaIva == 'C' && tipoPago == 'EFECTIVO'){
+            // se emite ticket
+            //$('#guardar').find('span').html('TICKET');
+        //}
+        setBotonGuardar(false);
+        addNewItem(tipoPago);
+    }
+}
+
+function addNewItem( tipo){
+    const prototype = $collectionHolder.data('prototype');
+    const index = $collectionHolder.data('index');
+    const newForm = prototype.replace(/items/g, index);
+
+    $collectionHolder.append(newForm);
+    $collectionHolder.data('index', index + 1);
+    lastTr = $collectionHolder.find('tr').last();
+    addItemFormDeleteLink(lastTr.find('.delTd'));
+    lastTr.find('[id*="_tipoPago"]').val(tipo);
+    importe = lastTr.find('[id*="_importe"]');
+    importe.val(0)
+    importe.on('focus',function(e) {
+        $(this).select();
+    })
+    importe.on('change', function() {
+        if( $(this).siblings('[id*="_tipoPago"]').val() == 'CHEQUE' ){
+            // cargar valor al cheque
+            chequeTd = $(this).parent().parent().find('td.chequeTd');
+            chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
+        }
+        actualizarSuma();
+    });
+
+    if(tipo != 'TARJETA'){
+       lastTr.find('.tarjetaTd').remove();
+    }else{
+        // tarjeta
+        lastTr.find('[id*="_datosTarjeta_tarjeta"]').attr('required', true);
+        lastTr.find('[id*="_datosTarjeta_numero"]').inputmask(
+            {"mask": "9999 9999 9999 9999",
+                onincomplete: function() {
+                    if( $(this).val() ){
+                        $(this).addClass('error');
+                    }else{
+                        $(this).removeClass('error');
+                    }
+                },
+                oncomplete: function() {
+                    $(this).removeClass('error');
+                }
+            }
+            );
+        lastTr.find('[id*="_datosTarjeta_cuota"]').val(1);
+        // chequetd required false
+        lastTr.find('.chequeTd :required').each(function() {
+            $(this).attr('required',false) ;
+        })
+        lastTr.find('[id*="_datosTarjeta_tarjeta"]').focus();
+    }
+    if( tipo != 'CHEQUE'){
+        lastTr.find('.chequeTd').remove();
+    }else{
+        lastTr.find('[id*="_chequeRecibido_fecha"]').datepicker({dateFormat: 'dd-mm-yy'});
+        // tarjetaTd required false
+        lastTr.find('.tarjetaTd :required').each(function() {
+            $(this).attr('required',false) ;
+        })
+        selectBanco = lastTr.find('.selectBanco');
+        selectBanco.select2({
+            tags: true,
+            createTag: function (params) {
+                var term = $.trim(params.term).toUpperCase();
+                if (term === '') {
+                    return null;
+                }
+                return {
+                    id: term,
+                    text: term,
+                    newTag: true // add additional parameters
+                }
+            }
+        });
+        lastTr.find('[id*="_chequeRecibido_nroCheque"]').focus();
+    }
+    if( tipo != 'EFECTIVO'){
+        lastTr.find('.monedaTd').hide();
+    }else{
+        lastTr.find('.tarjetaTd :required, .chequeTd :required').each(function() {
+            $(this).attr('required',false) ;
+        })
+        importe.focus();
+    }
+}
+
+function addItemFormDeleteLink($itemFormTd) {
+    var $removeFormA = $('<a href="#" class="delItem" title="Quitar"><span class="del-item-button">-</span></a>');
+    $itemFormTd.append($removeFormA);
+    $removeFormA.on('click', function(e) {
+        if ( confirm('Desea eliminar este item?')) {
+            e.preventDefault();
+            $itemFormTd.parent().remove();
+            actualizarSuma();
+        }
+    });
+    $removeFormA.on('blur', function(e) {
+        $('#linkAdd').focus();
+    });
+}
+
+function actualizarSuma(){
+    total = parseFloat( $('#importeTotal').data('total') );
+    pagos = 0;
+    items = $(".tabla-pagos tbody tr.item");
+    items.each(function(){
+        importe = checknumero( $(this).find('[id*="_importe"]') );
+        pagos += importe
+    });
+    $('.pago').html(pagos.toFixed(2));
+    vuelto = pagos.toFixed(2) - total.toFixed(2);
+    $('.vuelto').html(vuelto.toFixed(2))
+    $('#linkAdd').toggle( (vuelto < 0) )
+
+    // verificar datos faltantes
+    if( $(':invalid').length=0 || vuelto>=0 ){
+        setBotonGuardar(true);
+    }else{
+        setBotonGuardar(false);
+    }
+}
+
+function setBotonGuardar(valid){
+    if( valid ){
+        $('#guardar').removeClass('disabled');
+        $('#guardar').attr('disabled',false);
+    }else{
+        $('#guardar').addClass('disabled');
+        $('#guardar').attr('disabled',true);
+    }
+}
+
+function actualizaTotales(){
+
+}
 
 function openModal(obj){
     const url = obj.attr('url');
@@ -403,17 +639,24 @@ function detectarControles(e) {
             e.preventDefault();
             //openModal($('[id*="_formapago"]'))
         }
-        // ctrl + alt + G
-        if( e.keyCode == 71 ){
+        // ctrl + alt + D
+        if( e.keyCode == 68 ){
             e.preventDefault();
-            $('.form-horizontal').submit();
+            $('.btn_list').click();
+        }
+        // ctrl + alt + G
+        if( e.keyCode == 71  ){
+            e.preventDefault();
+            $('#guardar').click();
         }
     }
     // tecla + ver detalle venta
     if (e.keyCode == 171) {
         e.preventDefault();
-        $('.btn_list').click();
+        if( $('#linkAdd').is(':visible') )
+            $('#linkAdd').click();
     }
+
 }
 
 /*function actualizaTotales(){

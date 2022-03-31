@@ -42,7 +42,7 @@ class PresupuestoType extends AbstractType {
                     'attr' => array(
                         'class' => 'row item'
             )))
-                ->add('descuentoRecargo','hidden')
+                ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
         ;
         if ($type == 'new') {
             // en render de nuev presupuesto solo traer cliente por defecto

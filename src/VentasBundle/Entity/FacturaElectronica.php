@@ -48,6 +48,12 @@ class FacturaElectronica
     protected $caeVto;
 
     /**
+     * @var integer $total
+     * @ORM\Column(name="total", type="decimal", scale=2 )
+     */
+    protected $total;
+
+    /**
     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Cobro", inversedBy="facturaElectronica")
     * @ORM\JoinColumn(name="ventas_cobro_id", referencedColumnName="id")
     * Registro del cobro por el cual se genero el voucher
@@ -269,5 +275,28 @@ class FacturaElectronica
     public function getTipoComprobante()
     {
         return $this->tipoComprobante;
+    }
+
+    /**
+     * Set total
+     *
+     * @param string $total
+     * @return FacturaElectronica
+     */
+    public function setTotal($total)
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    /**
+     * Get total
+     *
+     * @return string 
+     */
+    public function getTotal()
+    {
+        return $this->total;
     }
 }

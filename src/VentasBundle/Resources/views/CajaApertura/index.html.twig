@@ -2,7 +2,7 @@
 {% block pageheader %}
 <div class="pageheader notab">
     <h1 class="pagetitle">Apertura / Cierre de Caja</h1>
-<span class="pagedesc">Listado de Aperturas y Cierres de Cajas</span> 
+<span class="pagedesc">Listado de Aperturas y Cierres de Cajas</span>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -10,42 +10,42 @@
 
 <div id="contentwrapper" class="contentwrapper">
 {# fomulario para filtros #}
-    <form id="searchform" action="{{ path('ventas_apertura') }}" method="get" style="margin-bottom:10px">            
+    <form id="searchform" action="{{ path('ventas_apertura') }}" method="get" style="margin-bottom:10px">
         <div style="display: none; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Caja:</strong></label>
-            <select class="uniformselect" id="selectCaja" name="cajaId">                
+            <select class="uniformselect" id="selectCaja" name="cajaId">
             {% for cj in cajas %}
                 <option value="{{cj.id}}" {% if cj.id==cajaId %} selected="selected" {% endif %}> {{cj.nombre}}</option>
             {% endfor %}
-            </select>  
-        </div>    
-        <div style="display: inline-block; margin-right: 30px;">     
+            </select>
+        </div>
+        <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Fecha: </strong></label>
-            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
-            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
-            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>            
-        </div>           
-    </form> 
-  
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>
+    </form>
+
 {# Banner con estado de la caja #}
 {% if caja %}
     {% if caja.abierta %}
-        {% set msg, txt = 'msgsuccess', caja.nombre ~ ' ABIERTA' %}  
+        {% set msg, txt = 'msgsuccess', caja.nombre ~ ' ABIERTA' %}
         {% set btn = '<button title="Realizar el Cierre de Caja" class="js-cierre stdbtn btn_black floatright" > Cierre de Caja </button>'  %}
     {% else %}
-        {% set msg, txt = 'msgerror', caja.nombre ~ ' CERRADA' %}  
-        {% set btn = '<button title="Realizar la Apertura de Caja" class="js-apertura stdbtn btn_black floatright" > Apertura de Caja </button>'  %}  
+        {% set msg, txt = 'msgerror', caja.nombre ~ ' CERRADA' %}
+        {% set btn = '<button title="Realizar la Apertura de Caja" class="js-apertura stdbtn btn_black floatright" > Apertura de Caja </button>'  %}
     {% endif %}
-    <div class="notibar {{msg}}">                
+    <div class="notibar {{msg}}">
         <p>
             <strong> {{txt}} </strong> {{ btn|raw }}
         </p>
-    </div>    
+    </div>
 {% endif %}
 
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="ccaja_apertura_table">       
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="ccaja_apertura_table">
         <thead>
             <tr>
                 <th class="nosort">#</th>
@@ -74,14 +74,14 @@
                         <td>{% if apertura.fechaCierre %}{{ apertura.updatedBy.username }}{% endif %}</td>
                         <td class="{% if apertura.diferencia<0 %} rojo {% endif %}" >{% if apertura.fechaCierre %}{{apertura.diferencia|number_format(2,'.',',')}}{% endif %}</td>
                         <td>{% if apertura.fechaCierre %}
-                            <a href="#" title="Ver informe de Cierre" class="btn mini purple"> <i class="icon-file"></i></a>
+                            <a href="#" title="Ver informe de Cierre" class="btn btnaction btn_folder"> <i class="icon-file"></i></a>
                             {% endif %}
                         </td>
                     </tr>
                 {% endif %}
-            {% endfor %}           
+            {% endfor %}
         </tbody>
-    </table> 
+    </table>
 </div>
 
 {% endblock %}
@@ -89,21 +89,21 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($){
-    $('#selectCaja').change(function(){ 
+    $('#selectCaja').change(function(){
         $('#searchform').submit();
-    }); 
-    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});    
+    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
     $('.js-apertura').on('click', function(){
         //caja_id = $('#selectCaja').val();  id de caja
-        url = '{{ path("ventas_apertura_new")}}'; // url del partial a cargar en modal        
+        url = '{{ path("ventas_apertura_new")}}'; // url del partial a cargar en modal
         aperturaCajaVentas(url)
     });
     $('.js-cierre').on('click', function(){
         //caja_id = $('#selectCaja').val();  id de caja
-        url = '{{ path("ventas_cierre_new")}}'; // url del partial a cargar en modal        
+        url = '{{ path("ventas_cierre_new")}}'; // url del partial a cargar en modal
         cierreCajaVentas(url)
     });
 });
-</script>     
+</script>
 {% endblock %}

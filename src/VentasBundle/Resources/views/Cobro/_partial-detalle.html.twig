@@ -22,7 +22,7 @@
         </th>
         <th style="width:18%" class="gralTotalTd red">
             A PAGAR: <span class="simbolo">{{simbolo}}</span>&nbsp;
-                <span id="importeTotal"> {{ venta.montoTotal|number_format(2,'.',',')}} </span>.-
+                <span id="importeTotal" data-total="{{ venta.montoTotal}}"> {{ venta.montoTotal|number_format(2,'.',',')}} </span>.-
         </th>
 
       <th style="width:34px"><a href="javascript:void(0)" title="Ver Detalle de Artículos" class="btn btnaction btn_list"></a></th>
