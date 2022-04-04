@@ -1073,8 +1073,19 @@ class ProductoController extends Controller {
     public function getDatosProductoVentaAction(Request $request) {
         $id = $request->get('id');
         $lista = $request->get('listaprecio');
+        $deposito = $request->get('deposito');
         $em = $this->getDoctrine()->getManager();
         $producto = $em->getRepository('AppBundle:Producto')->find($id);
+        $bajominimo = false;
+        if( $deposito){
+            $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito);
+            if($stock){
+                $minimo =  $stock->getStockMinimo() ? $stock->getStockMinimo() : $producto->getStockMinimo();
+                $dif = $stock->getCantidad() - $minimo;
+                $bajominimo = ( $dif < 0 );
+            }
+        }
+
         $precio = $producto->getPrecioByLista($lista);
         $iva = $producto->getIva();
         $montoIva = round( ($precio * ( $iva/100 )) ,3);
@@ -1084,6 +1095,7 @@ class ProductoController extends Controller {
             'alicuota' => $iva,
             'iva' => $montoIva,
             'total' => $total,
+            'bajominimo' => $bajominimo,
             'comodin' => $producto->getComodin(),
         );
         return new Response( json_encode($data));

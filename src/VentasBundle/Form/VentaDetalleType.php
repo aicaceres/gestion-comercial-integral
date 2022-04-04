@@ -10,9 +10,11 @@ use Doctrine\ORM\EntityRepository;
 class VentaDetalleType extends AbstractType {
 
     private $type;
-    public function __construct($type)
+    private $data;
+    public function __construct($type,$data)
     {
         $this->type= $type;
+        $this->data= $data;
     }
 
     /**
@@ -20,28 +22,33 @@ class VentaDetalleType extends AbstractType {
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
+
         $builder->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:'))
                 //->add('bulto', null, array('required' => false))
                 //->add('cantidadxBulto', null, array('required' => false))
                 ->add('precio', 'hidden')
                 ->add('alicuota', 'hidden')
         ;
+
         if($this->type=='new'){
+            $vta = ($this->data->getId() ) ? $this->data->getId() : '0';
+
             $builder->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
-                    'class' => 'AppBundle\\Entity\\Producto',
-                    'query_builder' => function(EntityRepository $repository){
-                        return $qb = $repository->createQueryBuilder('c')
-                                ->where("c.id=0");
+                    'class' => 'AppBundle:Producto',
+                    'query_builder' => function(EntityRepository $repository)use($vta){
+                        $qb = $repository->createQueryBuilder('p')
+                                ->innerJoin('p.ventas','d')
+                                ->innerJoin('d.venta','v')
+                                ->where("v.id=".$vta);
+                        return $qb;
                     }
             ));
         }else{
             $builder->add('producto', 'entity', array(
                     'required' => true,
-                    'placeholder' => 'Seleccionar Producto...',
-                    'class' => 'AppBundle\\Entity\\Producto',
-                    'attr' => array('class' => 'chzn-select', 'label' => 'Producto:'),
+                    'class' => 'AppBundle:Producto',
                     'query_builder' => function(ProductoRepository $em) {
                         return $em->getProductosFacturables();
                     }));

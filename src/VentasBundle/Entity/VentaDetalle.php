@@ -24,7 +24,7 @@ class VentaDetalle {
     protected $orden;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="ventas")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
     protected $producto;

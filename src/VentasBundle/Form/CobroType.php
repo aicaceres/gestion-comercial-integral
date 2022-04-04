@@ -17,7 +17,6 @@ class CobroType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $type = $options['attr']['type'];
-
         $builder
                 ->add('nroOperacion', 'hidden')
                 ->add('fechaCobro','datetime')

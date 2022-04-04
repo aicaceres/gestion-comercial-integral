@@ -29,6 +29,10 @@
                     })
                 }}
                 <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
+                {% if det.textoComodin is defined %}
+                    {% set display = det.vars.data.textoComodin ? ''  : 'display:none' %}
+                    {{ form_widget(det.textoComodin, {'attr': {'class':'largeinput', 'style': display }}) }}
+                {% endif %}
             </td>
             <td class="cantTd">
                 {{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0'} }) }}

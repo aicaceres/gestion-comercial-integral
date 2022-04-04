@@ -5,6 +5,8 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
+use ConfigBundle\Entity\ParametroRepository;
+use ConfigBundle\Form\ParametroType;
 
 class NotaDebCredType extends AbstractType {
 
@@ -14,14 +16,11 @@ class NotaDebCredType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $type = $options['attr']['type'];
-        $docType = json_decode($options['attr']['docType'],true)  ;
         $builder
                 ->add('signo', 'hidden')
                 ->add('fecha', 'date', array('widget' => 'single_text', 'label' => 'Fecha Nota:',
                     'format' => 'dd-MM-yyyy', 'required' => true))
                 ->add('nombreCliente',null, array('label' => 'Nombre:'))
-                ->add('tipoDocumentoCliente','choice', array('label'=>'Tipo Documento:', 'required' => false,
-                   'choices' => $docType, 'expanded' => false))
                 ->add('nroDocumentoCliente',null, array('label'=>'N° Documento:'))
                 ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
                     'required' => true, 'label' => 'FORMA DE PAGO: '))
@@ -31,7 +30,7 @@ class NotaDebCredType extends AbstractType {
                     'class' => 'ConfigBundle:Moneda',
                     'required' => true, 'label' => 'MONEDA: '
                 ))
-                ->add('concepto','text',array('label' => 'Concepto:','required' => false))
+                ->add('concepto','text',array('label' => 'Concepto Adicional:','required' => false))
                 ->add('cotizacion','hidden')
                 ->add('descuentoRecargo','hidden')
                 ->add('detalles', 'collection', array(
@@ -42,6 +41,15 @@ class NotaDebCredType extends AbstractType {
                     'prototype_name' => 'items',
                     'attr' => array(
                         'class' => 'row item'
+                )))
+                ->add('cobroDetalles', 'collection', array(
+                    'type' => new CobroDetalleType($type),
+                    'by_reference' => false,
+                    'allow_delete' => true,
+                    'allow_add' => true,
+                    'prototype_name' => 'citems',
+                    'attr' => array(
+                        'class' => 'row citem'
                 )))
                 ->add('notaElectronica', new NotaElectronicaType())
         ;
@@ -60,11 +68,10 @@ class NotaDebCredType extends AbstractType {
                                                     ->where("c.id=" . $cliente);
                         }
                 ))
-                ->add('facturas', 'entity', array(
+                ->add('comprobanteAsociado', 'entity', array(
                         'class' => 'VentasBundle:FacturaElectronica',
-                        'label' => 'Comprobantes Asociados:',
-                        'choice_label' => 'comprobanteTxt',
-                        'multiple' => true,
+                        'label' => 'Comprobante Asociado:',
+                        'choice_label' => 'selectComprobanteTxt',
                         'required' => false,
                         'attr'=> array('class' => 'select2'),
                         'query_builder' => function (EntityRepository $repository) use ($cliente) {
@@ -81,15 +88,27 @@ class NotaDebCredType extends AbstractType {
                             'class' => 'VentasBundle:Cliente',
                             'required' => true
                             ))
-                    ->add('facturas', 'entity', array(
+                    ->add('comprobanteAsociado', 'entity', array(
                         'class' => 'VentasBundle:FacturaElectronica',
-                        'label' => 'Comprobantes Asociados:',
-                        'choice_label' => 'comprobanteTxt',
-                        'multiple' => true,
+                        'label' => 'Comprobante Asociado:',
+                        'choice_label' => 'selectComprobanteTxt',
                         'required' => false,
                     ))
                 ;
         }
+        $optionsDoc = array(
+            'class'         => 'ConfigBundle:Parametro',
+            'placeholder'   => 'Seleccionar...',
+            'required'      => false,
+            'choice_label' => 'nombre',
+            'mapped'=>false,
+            'label'         => 'Tipo Documento:',
+            'query_builder' => function (ParametroRepository $repository) {
+                return $qb = $repository->createQueryBuilder('p')
+                    ->where('p.activo=1 and p.agrupador = :val ')
+                    ->setParameter('val', ParametroType::getTablaId($repository, 'tipo-documento'));
+            });
+        $builder->add('tipoDocumentoCliente','entity' , $optionsDoc);
     }
 
     /**

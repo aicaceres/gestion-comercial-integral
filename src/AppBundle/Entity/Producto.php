@@ -120,6 +120,18 @@ class Producto
     protected $lotes;
 
     /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\VentaDetalle", mappedBy="producto")
+     * @ORM\JoinColumn(name="ventas_venta_detalle_id", referencedColumnName="id")
+     */
+    protected $ventas;
+
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PresupuestoDetalle", mappedBy="producto")
+     * @ORM\JoinColumn(name="ventas_presupuesto_detalle_id", referencedColumnName="id")
+     */
+    protected $presupuestos;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -1015,10 +1027,76 @@ class Producto
     /**
      * Get comodin
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getComodin()
     {
         return $this->comodin;
+    }
+
+    /**
+     * Get ventas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getVentas()
+    {
+        return $this->ventas;
+    }
+
+    /**
+     * Add ventas
+     *
+     * @param \VentasBundle\Entity\VentaDetalle $ventas
+     * @return Producto
+     */
+    public function addVenta(\VentasBundle\Entity\VentaDetalle $ventas)
+    {
+        $this->ventas[] = $ventas;
+
+        return $this;
+    }
+
+    /**
+     * Remove ventas
+     *
+     * @param \VentasBundle\Entity\VentaDetalle $ventas
+     */
+    public function removeVenta(\VentasBundle\Entity\VentaDetalle $ventas)
+    {
+        $this->ventas->removeElement($ventas);
+    }
+
+    /**
+     * Add presupuestos
+     *
+     * @param \VentasBundle\Entity\PresupuestoDetalle $presupuestos
+     * @return Producto
+     */
+    public function addPresupuesto(\VentasBundle\Entity\PresupuestoDetalle $presupuestos)
+    {
+        $this->presupuestos[] = $presupuestos;
+
+        return $this;
+    }
+
+    /**
+     * Remove presupuestos
+     *
+     * @param \VentasBundle\Entity\PresupuestoDetalle $presupuestos
+     */
+    public function removePresupuesto(\VentasBundle\Entity\PresupuestoDetalle $presupuestos)
+    {
+        $this->presupuestos->removeElement($presupuestos);
+    }
+
+    /**
+     * Get presupuestos
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getPresupuestos()
+    {
+        return $this->presupuestos;
     }
 }

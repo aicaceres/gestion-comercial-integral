@@ -176,7 +176,8 @@ function checknumero(obj){
     return num*1;
 }
 // document ready
-jQuery(document).ready(function($){
+jQuery(document).ready(function ($) {
+
     jQuery('#tabs').tabs();
 
     jQuery('.select2').select2();

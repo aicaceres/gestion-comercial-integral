@@ -10,9 +10,11 @@ use Doctrine\ORM\EntityRepository;
 class PresupuestoDetalleType extends AbstractType {
 
     private $type;
-    public function __construct($type)
+    private $id;
+    public function __construct($type,$id)
     {
         $this->type= $type;
+        $this->id= $id;
     }
 
     /**
@@ -28,20 +30,26 @@ class PresupuestoDetalleType extends AbstractType {
                 ->add('alicuota', 'hidden')
         ;
         if($this->type=='new'){
+            $pres = ($this->id ) ? $this->id : '0';
+
             $builder->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
-                    'class' => 'AppBundle\\Entity\\Producto',
-                    'query_builder' => function(EntityRepository $repository){
-                        return $qb = $repository->createQueryBuilder('c')
-                                ->where("c.id=0");
+                    'class' => 'AppBundle:Producto',
+                    'query_builder' => function(EntityRepository $repository)use($pres){
+                        $qb = $repository->createQueryBuilder('p')
+                                ->innerJoin('p.presupuestos','d')
+                                ->innerJoin('d.presupuesto','v')
+                                ->where("v.id=".$pres);
+                        return $qb;
                     }
             ));
+
         }else{
             $builder->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
-                    'class' => 'AppBundle\\Entity\\Producto',
+                    'class' => 'AppBundle:Producto',
                     'attr' => array('class' => 'chzn-select', 'label' => 'Producto:'),
                     'query_builder' => function(ProductoRepository $em) {
                         return $em->getProductosFacturables();

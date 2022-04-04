@@ -15,6 +15,7 @@ class VentaType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $type = $options['attr']['type'];
+        $data = $options['data'];
         $builder
             ->add('nroOperacion', 'hidden')
             ->add('estado', 'hidden')
@@ -44,7 +45,7 @@ class VentaType extends AbstractType {
                           'attr'=>array('rows'=>'1','cols'=>'1', 'required'=>false, 'class'=>'mediuminput')))
             ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
             ->add('detalles', 'collection', array(
-                'type' => new VentaDetalleType($type),
+                'type' => new VentaDetalleType($type,$data),
                 'by_reference' => false,
                 'allow_delete' => true,
                 'allow_add' => true,

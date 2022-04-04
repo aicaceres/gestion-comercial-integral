@@ -168,6 +168,67 @@ class PresupuestoController extends Controller {
         ));
     }
 
+
+    /**
+     * @Route("/{id}/edit", name="ventas_presupuesto_edit")
+     * @Method("GET")
+     * @Template()
+     */
+    public function editAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta_new');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No se encuentra el Presupuesto.');
+        }
+        $editForm = $this->createEditForm($entity,'new');
+
+        return $this->render('VentasBundle:Presupuesto:new.html.twig', array(
+                    'entity' => $entity,
+                    'form' => $editForm->createView(),
+        ));
+    }
+
+    /**
+     * Creates a form to edit a Presupuesto entity.
+     * @param Presupuesto $entity The entity
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createEditForm(Presupuesto $entity, $type) {
+        $form = $this->createForm(new PresupuestoType(), $entity, array(
+            'action' => $this->generateUrl('ventas_presupuesto_update', array('id' => $entity->getId())),
+            'method' => 'PUT',
+            'attr' => array('type'=>$type) ,
+        ));
+        return $form;
+    }
+
+    /**
+     * @Route("/{id}", name="ventas_presupuesto_update")
+     * @Method("PUT")
+     * @Template("VentasBundle:Presupuesto:new.html.twig")
+     */
+    public function updateAction(Request $request, $id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta_new');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No se encuentra Presupuesto.');
+        }
+
+        $editForm = $this->createEditForm($entity,'new');
+        $editForm->handleRequest($request);
+        if ($editForm->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Los datos fueron modificados con éxito!');
+            return $this->redirect($this->generateUrl('ventas_presupuesto'));
+        }
+        return $this->render('VentasBundle:Presupuesto:new.html.twig', array(
+                    'entity' => $entity,
+                    'form' => $editForm->createView(),
+        ));
+    }
+
     /**
      * @Route("/{id}/show", name="ventas_presupuesto_show")
      * @Method("GET")

@@ -207,6 +207,67 @@ class VentaController extends Controller
         return $form;
     }
 
+    /**
+     * @Route("/{id}/edit", name="ventas_venta_edit")
+     * @Method("GET")
+     * @Template()
+     */
+    public function editAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta_new');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Venta')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No se encuentra la Venta.');
+        }
+        $editForm = $this->createEditForm($entity,'new');
+
+        return $this->render('VentasBundle:Venta:new.html.twig', array(
+                    'entity' => $entity,
+                    'form' => $editForm->createView(),
+        ));
+    }
+
+    /**
+     * Creates a form to edit a Venta entity.
+     * @param Venta $entity The entity
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createEditForm(Venta $entity, $type) {
+        $form = $this->createForm(new VentaType(), $entity, array(
+            'action' => $this->generateUrl('ventas_venta_create'),
+            'method' => 'POST',
+            'attr' => array('type'=>$type) ,
+        ));
+        return $form;
+    }
+
+    /**
+     * @Route("/{id}", name="ventas_venta_update")
+     * @Method("PUT")
+     * @Template("VentasBundle:Venta:new.html.twig")
+     */
+    public function updateAction(Request $request, $id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta_new');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Venta')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No se encuentra la Venta.');
+        }
+
+        $editForm = $this->createEditForm($entity,'update');
+        $editForm->handleRequest($request);
+        if ($editForm->isValid()) {
+            $em->flush();
+            $this->addFlash('success', 'Los datos fueron modificados con éxito!');
+            return $this->redirect($this->generateUrl('ventas_venta'));
+        }
+        return $this->render('VentasBundle:Venta:new.html.twig', array(
+                    'entity' => $entity,
+                    'form' => $editForm->createView(),
+        ));
+    }
+
+
 /**
 * LOGIN PARA VENTAS
  */

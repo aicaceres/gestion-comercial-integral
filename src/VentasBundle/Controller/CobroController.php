@@ -476,11 +476,37 @@ class CobroController extends Controller
         $facturas = array();
         if( $results){
             foreach($results as $row){
-                $facturas[] = array('id' => $row->getId(), 'text' => $row->getComprobanteTxt());
+                $facturas[] = array('id' => $row->getId(), 'text' => $row->getSelectComprobanteTxt());
             }
         }
         return new JsonResponse($facturas);
     }
+
+    /**
+     * @Route("/getItemsComprobante", name="get_items_comprobante")
+     * @Method("GET")
+     *
+     */
+    public function getItemsComprobanteAction( Request $request) {
+        $id = $request->get('id');
+        $em = $this->getDoctrine()->getManager();
+        $comprobante = $em->getRepository('VentasBundle:FacturaElectronica')->find($id);
+        $items = array();
+        if( $comprobante){
+            $detalle = ( $comprobante->getCobro() )
+                ? $comprobante->getCobro()->getVenta()->getDetalles()
+                : $comprobante->getNotaDebCred()->getDetalles();
+
+            foreach($detalle as $row){
+                $items[] = array(
+                    'id' => $row->getProducto()->getId(),
+                    'text' => $row->getProducto()->getNombre(),
+                    'cant' => $row->getCantidad());
+            }
+        }
+        return new JsonResponse($items);
+    }
+
 
 
 /*

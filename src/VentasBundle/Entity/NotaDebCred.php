@@ -108,10 +108,10 @@ class NotaDebCred {
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
      */
     protected $nombreCliente;
-    /**
-     * @var string $tipoDocumentoCliente
-     * @ORM\Column(name="tipo_documento_cliente", type="integer", nullable=true)
-     */
+     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
+     * @ORM\JoinColumn(name="tipo_documento_cliente", referencedColumnName="id")
+     **/
     protected $tipoDocumentoCliente;
     /**
      * @var string $nroDocumentoCliente
@@ -125,13 +125,10 @@ class NotaDebCred {
     protected $concepto;
 
     /**
-     * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\FacturaElectronica")
-     * @ORM\JoinTable(name="facturas_x_notadebcred_ventas",
-     *      joinColumns={@ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="ventas_factura_electronica_id", referencedColumnName="id")}
-     * )
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\FacturaElectronica")
+     * @ORM\JoinColumn(name="ventas_factura_electronica_id", referencedColumnName="id")
      */
-    protected $facturas;
+    protected $comprobanteAsociado;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
@@ -143,6 +140,11 @@ class NotaDebCred {
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\NotaDebCredDetalle", mappedBy="notaDebCred",cascade={"persist", "remove"})
      */
     protected $detalles;
+
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="notaDebCred",cascade={"persist", "remove"})
+     */
+    protected $cobroDetalles;
 
     /**
      * @var datetime $created
@@ -456,29 +458,6 @@ class NotaDebCred {
     }
 
     /**
-     * Set tipoDocumentoCliente
-     *
-     * @param integer $tipoDocumentoCliente
-     * @return NotaDebCred
-     */
-    public function setTipoDocumentoCliente($tipoDocumentoCliente)
-    {
-        $this->tipoDocumentoCliente = $tipoDocumentoCliente;
-
-        return $this;
-    }
-
-    /**
-     * Get tipoDocumentoCliente
-     *
-     * @return integer
-     */
-    public function getTipoDocumentoCliente()
-    {
-        return $this->tipoDocumentoCliente;
-    }
-
-    /**
      * Set nroDocumentoCliente
      *
      * @param string $nroDocumentoCliente
@@ -663,39 +642,6 @@ class NotaDebCred {
     }
 
     /**
-     * Add facturas
-     *
-     * @param \VentasBundle\Entity\FacturaElectronica $facturas
-     * @return NotaDebCred
-     */
-    public function addFactura(\VentasBundle\Entity\FacturaElectronica $facturas)
-    {
-        $this->facturas[] = $facturas;
-
-        return $this;
-    }
-
-    /**
-     * Remove facturas
-     *
-     * @param \VentasBundle\Entity\FacturaElectronica $facturas
-     */
-    public function removeFactura(\VentasBundle\Entity\FacturaElectronica $facturas)
-    {
-        $this->facturas->removeElement($facturas);
-    }
-
-    /**
-     * Get facturas
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getFacturas()
-    {
-        return $this->facturas;
-    }
-
-    /**
      * Set unidadNegocio
      *
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
@@ -860,10 +806,89 @@ class NotaDebCred {
     /**
      * Get concepto
      *
-     * @return string 
+     * @return string
      */
     public function getConcepto()
     {
         return $this->concepto;
+    }
+
+    /**
+     * Add cobroDetalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
+     * @return NotaDebCred
+     */
+    public function addCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
+    {
+        $cobroDetalles->setNotaDebCred($this);
+        $this->cobroDetalles[] = $cobroDetalles;
+        return $this;
+    }
+
+    /**
+     * Remove cobroDetalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
+     */
+    public function removeCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
+    {
+        $this->cobroDetalles->removeElement($cobroDetalles);
+    }
+
+    /**
+     * Get cobroDetalles
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCobroDetalles()
+    {
+        return $this->cobroDetalles;
+    }
+
+    /**
+     * Set comprobanteAsociado
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $comprobanteAsociado
+     * @return NotaDebCred
+     */
+    public function setComprobanteAsociado(\VentasBundle\Entity\FacturaElectronica $comprobanteAsociado = null)
+    {
+        $this->comprobanteAsociado = $comprobanteAsociado;
+
+        return $this;
+    }
+
+    /**
+     * Get comprobanteAsociado
+     *
+     * @return \VentasBundle\Entity\FacturaElectronica
+     */
+    public function getComprobanteAsociado()
+    {
+        return $this->comprobanteAsociado;
+    }
+
+    /**
+     * Set tipoDocumentoCliente
+     *
+     * @param \ConfigBundle\Entity\Parametro $tipoDocumentoCliente
+     * @return NotaDebCred
+     */
+    public function setTipoDocumentoCliente(\ConfigBundle\Entity\Parametro $tipoDocumentoCliente = null)
+    {
+        $this->tipoDocumentoCliente = $tipoDocumentoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoDocumentoCliente
+     *
+     * @return \ConfigBundle\Entity\Parametro
+     */
+    public function getTipoDocumentoCliente()
+    {
+        return $this->tipoDocumentoCliente;
     }
 }

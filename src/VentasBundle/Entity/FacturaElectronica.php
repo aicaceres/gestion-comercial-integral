@@ -8,6 +8,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * VentasBundle\Entity\FacturaElectronica
  * @ORM\Table(name="ventas_factura_electronica")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\FacturaRepository")
+ * COMPROBANTE ELECTRONICO
  */
 class FacturaElectronica
 {
@@ -84,6 +85,17 @@ class FacturaElectronica
 
     public function getComprobanteTxt(){
         return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt();
+    }
+    public function getSelectComprobanteTxt(){
+        if( $this->getCobro() ){
+            $fecha = $this->getCobro()->getFechaCobro()->format('d/m/Y');
+            $simbolo = $this->getCobro()->getMoneda()->getSimbolo();
+        }else{
+            $fecha = $this->getNotaDebCred()->getFecha()->format('d/m/Y');
+            $simbolo = $this->getNotaDebCred()->getMoneda()->getSimbolo();
+        }
+        return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt().
+        ' | '. $fecha . ' | '. $simbolo . $this->getTotal();
     }
 
     public function getCodigoComprobante(){
@@ -293,7 +305,7 @@ class FacturaElectronica
     /**
      * Get total
      *
-     * @return string 
+     * @return string
      */
     public function getTotal()
     {

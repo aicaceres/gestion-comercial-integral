@@ -1,5 +1,6 @@
 jQuery(function ($) {
     const esPresupuesto = $(location).attr('pathname').includes('presupuesto');
+    const esNotaDebCred = $(location).attr('pathname').includes('notadebcred');
     $(window).on('load', function () {
         // si la pantalla es chica expandir
         if ( $('#contentwrapper').width() < 1000) {
@@ -76,15 +77,16 @@ jQuery(function ($) {
                     //}
                     color = (data.cuitValido) ? '#666666' : 'orangered';
                     $('.cuitcliente').css('color', color);
-                    if ($('#ventasbundle_notadebcred_facturas').length > 0) {
+
+                    if (esNotaDebCred) {
                         // recargar facturas segun cliente
-                        objfact = $('#ventasbundle_notadebcred_facturas');
-                        //objfact.select2({data:{}}).trigger('change');
+                        objfact = $('#ventasbundle_notadebcred_comprobanteAsociado');
                         url_fact = objfact.attr('url_autocomplete');
                         $.getJSON( url_fact , {'id': cliente.val()}).done(function(data){
                             // actualizar datos
-                            if(data){
-                                objfact.select2('destroy').empty().select2({ data: data }).trigger('change');
+                            if (data) {
+                                objfact.html('<option></option>')
+                                    .select2({ data: data });
                             }
                         });
                     }
@@ -103,7 +105,8 @@ jQuery(function ($) {
                     $('.datos-formapago').html(data);
                     descuentoRecargo = $('#porcentajeRecargo').val();
                     //$('.descuentoRecargo').text( descuentoRecargo.toFixed(2) )
-                    $('[id*="_descuentoRecargo"]').val( descuentoRecargo )
+                    $('[id*="_descuentoRecargo"]').val(descuentoRecargo);
+                    detallePago();
                     actualizaTotales();
                 }
             });
@@ -155,15 +158,98 @@ jQuery(function ($) {
 
         // Get the container who holds the collection
         $collectionHolder = $('table.detalle tbody');
-        $collectionHolder.find('.delTd').each(function() {
-            addItemFormDeleteLink($(this));
+        $collectionHolder.find('tr.item').each(function (i) {
+            addItemFormDeleteLink($(this).find('.delTd'));
+            $(this).find('.ordTd').html(i + 1)
+            $(this).find('.cantTd input').change(function () {
+                actualizaTotales();
+            });
+            $(this).find('.prodTd input').attr('required', $(this).find('.prodTd input').is(':visible') ) ;
+            productolast = $(this).find('[name*="[producto]"]');
+
+            url_producto_autocomplete = productolast.attr('url_autocomplete')
+            productolast.select2({
+                    ajax: {
+                    url: url_producto_autocomplete,
+                    type: "post",
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                        searchTerm: params.term // search term
+                        };
+                    },
+                    processResults: function (response) {
+                        return {
+                            results: response
+                        };
+                    },
+                    cache: true
+                    },
+                    minimumInputLength: 3
+                }).on('change', function() {
+                    obj = $(this);
+                    var data = {
+                        id: obj.val(),
+                        listaprecio: $('[id*="_precioLista"]').val(),
+                        deposito: $('[id*="_deposito"]').val(),
+                    };
+                    urlDatosProducto = obj.attr('url_datos');
+                    $.getJSON( urlDatosProducto , data).done(function(data){
+                        // actualizar datos
+                        objprecio = obj.parent().siblings('.precTd');
+                        objprecio.find('[id*="_precio"]').val( data.precio );
+                        objprecio.find('[id*="_alicuota"]').val(data.alicuota);
+                        textoComodin = obj.siblings('[id*="_textoComodin"]')
+                        if (esPresupuesto && data.comodin) {
+                            textoComodin.attr('required', true);
+                            textoComodin.show();
+                            textoComodin.focus();
+                        } else {
+                            textoComodin.attr('required', false);
+                            textoComodin.hide();
+                            objcant = obj.parent().siblings('.cantTd');
+                            objcant.find('[id*="_cantidad"]').focus();
+                        }
+                        obj.siblings('.bajominimo').toggle( data.bajominimo )
+                        actualizaTotales();
+                    });
+                });
+
         });
-        $collectionHolder.find('.ordTd').each(function(i) {
-            $(this).html(i + 1);
-        });
+
+        actualizaTotales();
+
+        if (esNotaDebCred) {
+            $('#ventasbundle_notadebcred_comprobanteAsociado').on('change', function () {
+                cargarItems( $(this) );
+            });
+
+            $pagosHolder = $('table.tabla-pagos tbody');
+            $pagosHolder.find('.delTd').each(function() {
+                addPagoDeleteLink($(this));
+            });
+            $pagosHolder.find('.ordTd').each(function(i) {
+                $(this).html(i + 1);
+            });
+            $('#linkAddPago').on('click', function(e) {
+                e.preventDefault();
+                if( $('#tipoPago').val() != 'CTACTE' ){
+                    $( "#dialog-tipo" ).dialog('open');
+                    $('#dialog-tipo button').first().focus();
+                }
+            });
+
+            $('#dialog-tipo button').on('click', function(){
+                tipo = $(this).data('tipo');
+                $( "#dialog-tipo" ).dialog('close');
+                addNewPago(tipo);
+            })
+
+            detallePago();
+        }
 
         cliente.select2('focus');
-
     });
 // funciones
 
@@ -400,10 +486,11 @@ function openModalProducto(obj){
         }).on('change', function() {
             obj = $(this);
             var data = {
-                id: $(this).val(),
+                id: obj.val(),
                 listaprecio: $('[id*="_precioLista"]').val(),
+                deposito: $('[id*="_deposito"]').val(),
             };
-            urlDatosProducto = $(this).attr('url_datos');
+            urlDatosProducto = obj.attr('url_datos');
             $.getJSON( urlDatosProducto , data).done(function(data){
                 // actualizar datos
                 objprecio = obj.parent().siblings('.precTd');
@@ -411,20 +498,20 @@ function openModalProducto(obj){
                 objprecio.find('[id*="_alicuota"]').val(data.alicuota);
                 textoComodin = obj.siblings('[id*="_textoComodin"]')
                 if (esPresupuesto && data.comodin) {
+                    textoComodin.attr('required',true);
                     textoComodin.show();
                     textoComodin.focus();
                 } else {
+                    textoComodin.attr('required',false);
                     textoComodin.hide();
                     objcant = obj.parent().siblings('.cantTd');
-                    console.log( objcant.find('[id*="_cantidad"]'))
                     objcant.find('[id*="_cantidad"]').focus();
                 }
-
+                obj.siblings('.bajominimo').toggle( data.bajominimo )
                 actualizaTotales();
             });
         });
         productolast.select2('focus');
-
     }
 
     function addItemFormDeleteLink($itemFormTd) {
@@ -452,7 +539,8 @@ function openModalProducto(obj){
         const categoriaIva = $('#categoriaIva').val();
         const porcentaje = checknumero($('[id*="_descuentoRecargo"]'));
         $('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(2));
-        $("tr.item").each(function(){
+        const table = $('table.detalle')
+        table.find("tr.item").each(function(){
             let item = $(this);
             const cant = checknumero(item.find('.cantTd input'));
             let precio = checknumero( item.find('[id*="_precio"]') );
@@ -501,6 +589,9 @@ function openModalProducto(obj){
         $collectionHolder.find('.ordTd').each(function(index) {
             $(this).html(index+1);
         });
+        if (esNotaDebCred) {
+            actualizarSuma();
+        }
     }
 
     function detectarControles(e) {
@@ -527,4 +618,172 @@ function openModalProducto(obj){
             $('#linkAdd').click();
         }
     }
+
+    // FUNCIONES NOTAS DEBCRED
+    function cargarItems(obj) {
+        $.getJSON(obj.attr('url_items_comprobante'), { 'id': obj.val() }, function (data) {
+            $.each(data, function(i,item) {
+                addNewItem();
+                $('[name*="[cantidad]"]').last().val( item.cant );
+                var newOption = new Option(item.text, item.id, true, true);
+                $('[name*="[producto]"]').last().append(newOption).trigger('change');
+            });
+            actualizaTotales();
+        });
+    }
+
+    function actualizarSuma() {
+        if (tipoPago == 'CTACTE') {
+            vuelto = 0;
+        } else {
+            total = parseFloat( $('#importeTotal').html() );
+            pagos = 0;
+            items = $(".tabla-pagos tbody tr.item");
+            items.each(function(){
+                importe = checknumero( $(this).find('[id*="_importe"]') );
+                pagos += importe
+            });
+            $('.pago').html(pagos.toFixed(2));
+            vuelto = pagos.toFixed(2) - total.toFixed(2);
+            $('.vuelto').html(vuelto.toFixed(2))
+            $('#linkAddPago').toggle( (vuelto < 0) )
+        }
+        // verificar datos faltantes
+        /*if( $(':invalid').length=0 || vuelto>=0 ){
+            setBotonGuardar(true);
+        }else{
+            setBotonGuardar(false);
+        }*/
+    }
+
+    function setBotonGuardar(valid){
+        if( valid ){
+            $('#guardar').removeClass('disabled');
+            $('#guardar').attr('disabled',false);
+        }else{
+            $('#guardar').addClass('disabled');
+            $('#guardar').attr('disabled',true);
+        }
+    }
+
+    function detallePago(){
+        $pagosHolder.html('')
+        const tipoPago = $('#tipoPago').val();
+
+        //$('#guardar').find('span').html('FACTURA');
+        // si no es cta cte se habilita detalle de pago
+        $('.detalle_pago').toggle( tipoPago!='CTACTE' );
+        // si es cta cte habilitar facturar sin mas datos
+        if (tipoPago == 'CTACTE') {
+            //setBotonGuardar(true);
+            return true;
+        }else{
+            //if( categoriaIva == 'C' && tipoPago == 'EFECTIVO'){
+                // se emite ticket
+                //$('#guardar').find('span').html('TICKET');
+            //}
+            //setBotonGuardar(false);
+            addNewPago(tipoPago);
+        }
+    }
+
+    function addNewPago( tipo){
+        const prototype = $pagosHolder.data('prototype');
+        const index = $pagosHolder.data('index');
+        const newForm = prototype.replace(/items/g, index);
+
+        $pagosHolder.append(newForm);
+        $pagosHolder.data('index', index + 1);
+        lastTr = $pagosHolder.find('tr').last();
+        addPagoDeleteLink(lastTr.find('.delTd'));
+        lastTr.find('[id*="_tipoPago"]').val(tipo);
+        importe = lastTr.find('[id*="_importe"]');
+        importe.val(0)
+        importe.on('focus',function(e) {
+            $(this).select();
+        })
+        importe.on('change', function() {
+            if( $(this).siblings('[id*="_tipoPago"]').val() == 'CHEQUE' ){
+                // cargar valor al cheque
+                chequeTd = $(this).parent().parent().find('td.chequeTd');
+                chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
+            }
+            actualizarSuma();
+        });
+
+        if(tipo != 'TARJETA'){
+        lastTr.find('.tarjetaTd').remove();
+        }else{
+            // tarjeta
+            lastTr.find('[id*="_datosTarjeta_tarjeta"]').attr('required', true);
+            lastTr.find('[id*="_datosTarjeta_numero"]').inputmask(
+                {"mask": "9999 9999 9999 9999",
+                    onincomplete: function() {
+                        if( $(this).val() ){
+                            $(this).addClass('error');
+                        }else{
+                            $(this).removeClass('error');
+                        }
+                    },
+                    oncomplete: function() {
+                        $(this).removeClass('error');
+                    }
+                }
+                );
+            lastTr.find('[id*="_datosTarjeta_cuota"]').val(1);
+            // chequetd required false
+            lastTr.find('.chequeTd :required').each(function() {
+                $(this).attr('required',false) ;
+            })
+            lastTr.find('[id*="_datosTarjeta_tarjeta"]').focus();
+        }
+        if( tipo != 'CHEQUE'){
+            lastTr.find('.chequeTd').remove();
+        }else{
+            lastTr.find('[id*="_chequeRecibido_fecha"]').datepicker({dateFormat: 'dd-mm-yy'});
+            // tarjetaTd required false
+            lastTr.find('.tarjetaTd :required').each(function() {
+                $(this).attr('required',false) ;
+            })
+            selectBanco = lastTr.find('.selectBanco');
+            selectBanco.select2({
+                tags: true,
+                createTag: function (params) {
+                    var term = $.trim(params.term).toUpperCase();
+                    if (term === '') {
+                        return null;
+                    }
+                    return {
+                        id: term,
+                        text: term,
+                        newTag: true // add additional parameters
+                    }
+                }
+            });
+            lastTr.find('[id*="_chequeRecibido_nroCheque"]').focus();
+        }
+        if( tipo != 'EFECTIVO'){
+            lastTr.find('.monedaTd').hide();
+        }else{
+            lastTr.find('.tarjetaTd :required, .chequeTd :required').each(function() {
+                $(this).attr('required',false) ;
+            })
+            importe.focus();
+        }
+    }
+    function addPagoDeleteLink($itemFormTd) {
+        var $removeFormA = $('<a href="#" class="delItem" title="Quitar"><span class="del-item-button">-</span></a>');
+        $itemFormTd.append($removeFormA);
+        $removeFormA.on('click', function(e) {
+            if ( confirm('Desea eliminar este item?')) {
+                e.preventDefault();
+                $itemFormTd.parent().remove();
+                actualizarSuma();
+            }
+        });
+        $removeFormA.on('blur', function(e) {
+            $('#linkAddPago').focus();
+        });
+    }
+
 });

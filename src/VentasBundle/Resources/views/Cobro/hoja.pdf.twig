@@ -1,4 +1,4 @@
-<pdf>
+
     <dynamic-page page-size="A4" margin-left="20px" margin-right="20px" margin-top="20px" >
         <placeholders>
             <header>
@@ -12,19 +12,19 @@
                             </td>
                             <td border.color="#555555" width="50px" vertical-align="middle" text-align="center">
                                 <div>
-                                    <strong font-size="23px"> {{nota.notaElectronica.letra}} </strong>
-                                    <span font-size="8px">COD. {{nota.notaElectronica.tipoComprobante.codigo}}</span>
+                                    <strong font-size="23px"> {{cobro.FacturaElectronica.letra}} </strong>
+                                    <span font-size="8px">COD. {{cobro.FacturaElectronica.tipoComprobante.codigo}}</span>
                                  </div>
                             </td>
                             <td border.type="none" text-align="center" vertical-align="middle">
                                 <div width="100%" font-size="16px" padding-bottom="10px">
-                                    <strong>{{ nota.notaElectronica.tituloPdf }}</strong>
+                                    <strong>{{ cobro.FacturaElectronica.tituloPdf }}</strong>
                                 </div>
                                 <div font-size="14px" padding-bottom="5px">
-                                    <strong>Número: {{nota.notaElectronica.nroComprobanteTxt}} </strong>
+                                    <strong>Número: {{cobro.FacturaElectronica.nroComprobanteTxt}} </strong>
                                 </div>
                                 <div font-size="14px" padding-bottom="10px">
-                                    <strong>Fecha: {{ nota.fecha| date('d-m-Y') }} </strong>
+                                    <strong>Fecha: {{ cobro.fechaCobro| date('d-m-Y') }} </strong>
                                 </div>
                             </td>
                         </tr>
@@ -38,7 +38,7 @@
                                 </div>
                             </td>
                             <td border.type="none">
-                                <div font-size="16px" padding-bottom="8px" text-align="center"> <strong>ORIGINAL</strong> </div>
+                                <div font-size="16px" padding-bottom="8px" text-align="center"> <strong>{{texto}}</strong> </div>
                                 <div padding-left="40px">
                                     <div>
                                         <div padding-bottom="8px"> CUIT: {{ empresa.cuit }} </div>
@@ -56,7 +56,7 @@
             </header>
             <footer>
                 <div height="180px" width="100%">
-                    {% if nota.cliente.categoriaIva == 'M' %}
+                    {% if cobro.cliente.categoriaIva == 'M' %}
                     <div font-size="8px" padding="10px">
                     Crédito fiscal discriminado en el presente comprobante sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes Ley 27618
                     </div>
@@ -65,39 +65,39 @@
                     {% set final = 0 %}
                     <table font-size="11px">
                         <tr>
-                            <td border.type="none" padding-top="3px" font-size="8px">{{nota.pagoTxt}}</td>
+                            <td border.type="none" padding-top="3px" font-size="8px">{{cobro.textoPagosParaFactura}}</td>
                             <td border.type="none"></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="3px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="3px">
-                                <span> {{nota.moneda.simbolo}}
-                                {{(nota.subTotal)|number_format(2,'.',',')}}
+                                <span> {{cobro.moneda.simbolo}}
+                                {{(venta.subTotal)|number_format(2,'.',',')}}
                                 </span>
                             </td>
                         </tr>
                         <tr>
-                            <td border.type="none" font-size="8px">Op: {{app.user|upper}} - {{'now'|date('d-m-Y H:i')}} </td>
-                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{nota.descuentoRecargo}}%]: {{nota.moneda.simbolo}} {{nota.totalDescuentoRecargo|number_format(3,'.',',')}}</td>
+                            <td border.type="none" font-size="8px">Op: {{app.user|upper}} - Ref. #{{venta.nroOperacion}} - {{'now'|date('d-m-Y H:i')}} </td>
+                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{venta.descuentoRecargo}}%]: {{cobro.moneda.simbolo}} {{venta.totalDescuentoRecargo|number_format(3,'.',',')}}</td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
-                                <span>{{nota.moneda.simbolo}} {{ (nota.subTotal + nota.totalDescuentoRecargo)|number_format(2,'.',',') }}</span>
+                                <span>{{cobro.moneda.simbolo}} {{ (venta.subTotal + venta.totalDescuentoRecargo)|number_format(2,'.',',') }}</span>
                             </td>
                         </tr>
-                        {% if nota.notaElectronica.letra == 'A' %}
+                        {% if cobro.FacturaElectronica.letra == 'A' %}
                         <tr>
                             <td border.type="none"></td>
                             <td border.type="none"></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>IVA:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
-                                <span>{{nota.moneda.simbolo}} {{ nota.totalIva|number_format(2,'.',',')}}</span>
+                                <span>{{cobro.moneda.simbolo}} {{ venta.totalIva|number_format(2,'.',',')}}</span>
                             </td>
                         </tr>
-                            {% if nota.cliente.categoriaIva == 'I' %}
+                            {% if cobro.cliente.categoriaIva == 'I' %}
                             <tr>
                                 <td border.type="none"></td>
                                 <td border.type="none"></td>
                                 <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Perc. IIBB 3.50%:</span></td>
                                 <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
-                                    <span>{{nota.moneda.simbolo}} {{ (nota.percIibb/nota.cotizacion)|number_format(2,'.',',')}}</span>
+                                    <span>{{cobro.moneda.simbolo}} {{ (venta.totalIibb)|number_format(2,'.',',')}}</span>
                                 </td>
                             </tr>
                             {% endif %}
@@ -109,7 +109,7 @@
                             <td border.color="#555555" height="30px" vertical-align="middle"  width="4 cm" text-align="center" font-size="9px">Dirección de Comercio Interior 0800-444-3346</td>
                             <td border.type="none"></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" margin-top="8px" font-size="18px"><strong>Total:</strong></td>
-                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ nota.montoTotal|number_format(2,'.',',')}}</strong>
+                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ venta.montoTotal|number_format(2,'.',',')}}</strong>
                             </td>
                         </tr>
                     </table>
@@ -118,8 +118,8 @@
                             <td border.type="none" width="90"><img ignore-error="true" src="{{qr}}" width="84" height="84"  /></td>
                             <td border.type="none" vertical-align="bottom" text-align="left" ><img ignore-error="true" src="{{logoafip}}" height="70"  /></td>
                             <td border.type="none" vertical-align="middle" width="4 cm" font-size="12px">
-                                <div padding-bottom="5px">CAE: {{ nota.notaElectronica.cae }}</div>
-                                <div>Venc. CAE: {{ nota.notaElectronica.caeVto|date('d/m/Y') }}</div>
+                                <div padding-bottom="5px">CAE: {{ cobro.FacturaElectronica.cae }}</div>
+                                <div>Venc. CAE: {{ cobro.FacturaElectronica.caeVto|date('d/m/Y') }}</div>
                             </td>
                         </tr>
                     </table>
@@ -133,29 +133,29 @@
                 <td border.type="none" padding-top="10px">
                     <div>
                     <strong>CLIENTE:</strong>
-                    {% if nota.nombreCliente %}
-                        {{nota.nombreCliente}}
+                    {% if cobro.nombreCliente %}
+                        {{cobro.nombreCliente}}
                     {% else %}
-                        {{nota.cliente.nombre}}
+                        {{cobro.cliente.nombre}}
                     {% endif %}
                     </div>
-                    <div padding-left="54px" padding-top="5px" > {{ nota.cliente.direccion }}</div>
-                    <div padding-left="54px" padding-top="5px" > {{ nota.cliente.localidad }}</div>
+                    <div padding-left="54px" padding-top="5px" > {{ cobro.cliente.direccion }}</div>
+                    <div padding-left="54px" padding-top="5px" > {{ cobro.cliente.localidad }}</div>
                 </td>
                 <td border.type="none" padding-top="10px">
-                    {% if nota.cliente.categoriaIva %}
-                        {{ nota.cliente.categoriaIva.descripcion }}
+                    {% if cobro.cliente.categoriaIva %}
+                        {{ cobro.cliente.categoriaIva.descripcion }}
                     {% else %}
                         Consumidor Final
                     {% endif %}
                 </td>
                 <td border.type="none" padding-top="10px">
-                    CUIT N°: {{ nota.cliente.cuit }}
+                    CUIT N°: {{ cobro.cliente.cuit }}
                 </td>
             </tr>
             <tr>
                 <td colspan="2" border.type="none" padding-top="10px">
-                    <strong>Condición de Venta:</strong> {{nota.formaPago}}
+                    <strong>Condición de Venta:</strong> {{cobro.formaPago}}
                 </td>
             </tr>
         </table>
@@ -181,7 +181,7 @@
                     Total
                 </td>
             </tr>
-            {% for item in nota.detalles %}
+            {% for item in cobro.venta.detalles %}
             <tr>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
                     {{item.cantidad}} {{ item.producto.unidadmedida.nombre }}
@@ -202,17 +202,18 @@
                     {{ item.totalItem|number_format(2,'.',',')}}
                 </td>
             </tr>
+
             {% endfor %}
-            {% if nota.concepto %}
+            {% if cobro.venta.concepto %}
             <tr>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                     {{ 1|number_format(3,'.',',')}}
+                    {{ 1|number_format(3,'.',',')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="center" padding-top="5px">
                     999999
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" padding-left="10px" padding-top="5px">
-                    {{nota.concepto|nl2br}}
+                    {{cobro.venta.concepto|nl2br}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
                     {{0|number_format(3,'.',',')}}
@@ -221,11 +222,10 @@
                     {{21|number_format(2,'.',',')}}%
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{ 0|number_format(2,'.',',')}}
+                     {{ 0|number_format(2,'.',',')}}
                 </td>
             </tr>
             {% endif %}
         </table>
 
     </dynamic-page>
-</pdf>

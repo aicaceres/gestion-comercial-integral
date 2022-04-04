@@ -14,6 +14,7 @@ class PresupuestoType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $type = $options['attr']['type'];
+        $data = $options['data'];
         $builder
                 ->add('nroPresupuesto')
                 ->add('fechaPresupuesto', 'date', array('widget' => 'single_text',
@@ -34,7 +35,7 @@ class PresupuestoType extends AbstractType {
                 ->add('nombreCliente')
                 ->add('validez',null,array('label' => 'VALIDEZ [días]:','required'=>false))
                 ->add('detalles', 'collection', array(
-                    'type' => new PresupuestoDetalleType($type),
+                    'type' => new PresupuestoDetalleType($type,$data->getId()),
                     'by_reference' => false,
                     'allow_delete' => true,
                     'allow_add' => true,
@@ -46,7 +47,6 @@ class PresupuestoType extends AbstractType {
         ;
         if ($type == 'new') {
             // en render de nuev presupuesto solo traer cliente por defecto
-            $data = $options['data'];
             $cliente = $data->getCliente()->getId();
             $builder->add('cliente', 'entity', array('required' => true,
                 'class' => 'VentasBundle:Cliente', 'label' => 'DATOS DEL CLIENTE: ',

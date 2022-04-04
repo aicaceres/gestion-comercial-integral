@@ -72,10 +72,16 @@ class PresupuestoDetalle {
      */
     protected $presupuesto;
 
-    /** VALORES ITEM  */
-    // valor del precio unitario
+
     public function getPrecioUnitarioItem(){
-        $precio = $this->getPrecio();
+        $categIva = $this->getPresupuesto()->getCliente()->getCategoriaIva()->getNombre();
+        if( $categIva == 'I' || $categIva == 'M'){
+            // precio sin iva convertido a la cotizacion
+            $precio = $this->getPrecio();
+        }else{
+            // precio con iva incluido convertido a la cotizacion
+            $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) ;
+        }
         return round( $precio, 3);
     }
     // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
@@ -91,6 +97,8 @@ class PresupuestoDetalle {
     public function getTotalItem(){
         return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
     }
+
+
     /** FIN VALORES ITEM */
 
     public function getNombreProducto(){

@@ -140,7 +140,7 @@ class Presupuesto {
 
     /**
      *  TOTALIZADOS DE LA OPERACION
-     */
+     *
     public function getSubTotal() {
         $total = 0;
         foreach ($this->detalles as $item) {
@@ -165,6 +165,56 @@ class Presupuesto {
     }
     public function getMontoTotal(){
         $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo()  ;
+        return round($total,2) ;
+    }*/
+    /**
+     *  TOTALIZADOS DE LA OPERACION
+     */
+    public function getSubTotal() {
+        $total = 0;
+        foreach ($this->detalles as $item) {
+            $total = $total + $item->getTotalItem();
+        }
+        return $total;
+    }
+    public function getTotalDescuentoRecargo() {
+        $total = 0;
+        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        if( $categIva == 'I' || $categIva == 'M'){
+            // suma de descuentos x item
+            foreach ($this->detalles as $item) {
+                $total = $total + $item->getDtoRecItem();
+            }
+        }else{
+            // descuento sobre el subtotal
+            $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
+        }
+        return round( ($total ) ,3);
+    }
+    public function getTotalIva(){
+        $total = 0;
+        foreach ($this->detalles as $item) {
+            $total = $total + $item->getIvaItem();
+        }
+        return round( ($total) ,3);
+    }
+    public function getTotalIibb(){
+        $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
+        return $monto * 0.035;
+    }
+    public function getMontoTotal(){
+        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        if( $categIva == 'I' || $categIva == 'M'){
+            // total con iva e iibb
+            $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo() + $this->getTotalIva();
+            if( $categIva == 'I' ){
+                $total = $total + $this->getTotalIibb();
+            }
+        }else{
+            // subtotal +/- descuentoRecargo
+            $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
+            $total = $this->getSubTotal() + $descRec  ;
+        }
         return round($total,2) ;
     }
 

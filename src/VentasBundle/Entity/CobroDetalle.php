@@ -48,6 +48,11 @@ class CobroDetalle {
      * @ORM\JoinColumn(name="ventas_cobro_id", referencedColumnName="id")
      */
     protected $cobro;
+    /**
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\NotaDebCred", inversedBy="cobroDetalles")
+     * @ORM\JoinColumn(name="ventas_notadebcred_id", referencedColumnName="id")
+     */
+    protected $notaDebCred;
 
     /**
      * Get id
@@ -195,5 +200,28 @@ class CobroDetalle {
     public function getCobro()
     {
         return $this->cobro;
+    }
+
+    /**
+     * Set notaDebCred
+     *
+     * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
+     * @return CobroDetalle
+     */
+    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
+    {
+        $this->notaDebCred = $notaDebCred;
+
+        return $this;
+    }
+
+    /**
+     * Get notaDebCred
+     *
+     * @return \VentasBundle\Entity\NotaDebCred 
+     */
+    public function getNotaDebCred()
+    {
+        return $this->notaDebCred;
     }
 }

@@ -48,11 +48,12 @@
         </div>
         <div style="display:inline-block; width: 50%;">
             <div>
-            {{ form_label(form.facturas)  }}
-            {{ form_widget(form.facturas,
+            {{ form_label(form.comprobanteAsociado)  }}
+            {{ form_widget(form.comprobanteAsociado,
                 {'attr':
                     {'style':'width:90%',
-                     'url_autocomplete' : path('get_autocomplete_facturas')
+                     'url_autocomplete' : path('get_autocomplete_facturas'),
+                     'url_items_comprobante' : path('get_items_comprobante'),
                     }
                 })
             }}
@@ -78,10 +79,48 @@
         </div>
     </fieldset>
 
+
+    <fieldset class="detalle_pago" {% if entity.formaPago.tipoPago == 'CTACTE' %} style="display:none" {% endif %} >
+        <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
+            <h5>DETALLE DEL PAGO:</h5>
+            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
+                {% set prototype = form.cobroDetalles.vars.prototype %}
+                <tbody data-index="{{form.cobroDetalles | length }}"
+                    data-prototype="{% filter escape %}{% include 'VentasBundle:Cobro:prototype.html.twig' with {'item':prototype} %}{% endfilter %}"
+                >
+                {% for det in form.cobroDetalles %}
+                    <tr>
+                        <td></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
+                <thead>
+                    <tr>
+                        <th style="text-align:right">
+                            IMPORTE: &nbsp;
+                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                            <span class="pago" style="font-size:16px" >0</span>.-
+                        </th>
+                        <th width="150px" class="red">
+                            VUELTO: &nbsp;
+                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                            <span class="vuelto" style="font-size:16px"></span>
+                        </th>
+                        <th width="30px" style="text-align:center;"><a href="javascript:void(0)" id="linkAddPago" tabindex="0" title="Agregar"><span class="add-item-button">+</span></th>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
+    </fieldset>
+
+
     <fieldset>
         <br clear="all" />
         <div class="actionbutton">
-            <button class="guardar tabbable" type="submit">GUARDAR</button>
+            <button class="guardar" id="guardar" type="button">Guardar</span></button>
             <a class="cancelar tabbable" type="button" href="{{ path('ventas_notadebcred')}}">Cancelar</a>
         </div>
     </fieldset>
@@ -92,26 +131,60 @@
   {{ form_end(form) }}
 </div>
 </div>
+<div id="dialog-tipo" title="Elegir Pago" style="display:none">
+<form>
+    <button type="button" class="stdbtn btn_black" data-tipo="EFECTIVO">EFECTIVO</button>
+    <button type="button" class="stdbtn btn_black" data-tipo="CHEQUE">CHEQUE</button>
+    <button type="button" class="stdbtn btn_black" data-tipo="TARJETA">TARJETA</button>
+</form>
+</div>
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript" src="{{ asset('assets/js/custom/ventas.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
         $('.datos-cliente').hide();
         $('.datos-cf').show();
         $('#ventasbundle_notadebcred_nombreCliente').attr('required',true);
-        $('#ventasbundle_notadebcred_nombreCliente').css('width', '95%')
+        $('#ventasbundle_notadebcred_nombreCliente').css('width', '95%');
+
+        $( "#dialog-tipo" ).dialog({
+            autoOpen: false,
+            height: 100,
+            width: 350,
+            modal: true
+        });
 
         // confirm on submit
-        $('#ventasbundle_notadebcred').on('submit', function(){
-            if( $('tbody tr.item').length > 0 ){
-                if (!confirm('Confirma la generación de la Nota Electrónica?')) {
+        $('#guardar').on('click', function(){
+            if( !$('#ventasbundle_notadebcred_comprobanteAsociado').val() ){
+                alert('Debe indicar un comprobante asociado.');
+                $('#ventasbundle_notadebcred_comprobanteAsociado').select2('open');
                 return false;
+            }
+            if( $('#tipoPago').val() != 'CTACTE' ){
+console.log($(':invalid') )
+                if(  $(':invalid').length>0 || vuelto<0 ){
+                    alert( 'Completar todos los datos para facturar!' );
+                    return false;
+                }
+            }
+            if( $('table.detalle tbody tr.item').length > 0 ){
+                if (!confirm('Confirma la generación de la Nota Electrónica?')) {
+                    return false;
                 }
             }else{  alert('Debe ingresar items a la Nota'); return false;}
+
+            $('#ventasbundle_notadebcred').submit();
+        })
+        $('#ventasbundle_notadebcred').on('submit', function(){
+
         })
     });
+
+
 });
 </script>{% endblock %}
