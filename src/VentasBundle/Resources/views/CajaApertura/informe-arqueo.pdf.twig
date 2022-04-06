@@ -1,0 +1,235 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="20px" margin-right="20px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="150px" width="100%" >
+                    <table font-size="10px" >
+                        <tr>
+                            <td border.type="none">
+                                <div width="100%">
+                                    <img ignore-error="true" src="{{logo}}" width="200px" />
+                                </div>
+                            </td>
+                            <td border.type="none" vertical-align="middle" text-align="right">
+                                PÁGINA <page-number />
+                            </td>
+                        </tr>
+                    </table>
+                    <table font-size="14px" >
+                        <tr>
+                            <td border.type="none" vertical-align="bottom" width="250px">
+                                Listado de Caja: {{ apertura.id }}
+                            </td>
+                            <td font-type="UniversElse" vertical-align="middle" text-align="center" width="90px" padding="10px">
+                                ARQUEO
+                            </td>
+                            <td border.type="none" vertical-align="bottom" text-align="right" padding-right="10px" width="240px">
+                                Fecha: {{ apertura.fechaApertura|date('d/m/Y H:i') }}
+                            </td>
+                            <td border.type="none" vertical-align="bottom" width="10px" text-align="center">
+                                <strong>|</strong>
+                            </td>
+                            <td border.type="none" vertical-align="bottom" text-align="left" padding-left="10px">
+                                {{ (apertura.fechaCierre) ? apertura.fechaCierre|date('d/m/Y H:i') : 'CAJA ABIERTA' }}
+                            </td>
+                        </tr>
+                    </table>
+                    <table font-size="14px" padding-bottom="15px">
+                        <tr>
+                            <td border.type="none" vertical-align="bottom" text-align="center" height="30px">
+                                Apertura: $ {{ apertura.montoApertura|number_format(3,'.',',') }}.-
+                            </td>
+                            <td border.type="none" vertical-align="bottom" text-align="center" height="30px">
+                                Cierre: {{ (apertura.fechaCierre) ? '$ ' ~ apertura.montoCierre|number_format(3,'.',',') : '-' }}.-
+                            </td>
+                        </tr>
+                    </table>
+                    <table font-size="8px">
+                        <tr margin-bottom="5px">
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm">
+                                Comprobante
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.2 cm">
+                                Fecha
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                                Cliente
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.6 cm">
+                                Mon
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.2 cm">
+                                Cotización
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                                EFECTIVO
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                                CHEQUE
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                                TARJETA
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                                CTA.CTE.
+                            </td>
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                                EGRESOS
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </header>
+        </placeholders>
+
+
+    <table font-size="8px">
+<!-- CREDITOS -->
+        {% set tot_efectivo, tot_cheque, tot_tarjeta, tot_ctacte, tot_egreso = 0,0,0,0,0 %}
+        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso = 0,0,0,0,0,0 %}
+        {% for mov in apertura.movimientos if mov.tipoComprobante in ['DEB','CRE'] %}
+            {% set cnt = cnt + 1 %}
+            {% if mov.tipoPago=='EFECTIVO' %}
+                {% set efectivo = efectivo + mov.importe %}
+            {% elseif mov.tipoPago=='CHEQUE' %}
+                {% set cheque = cheque + mov.importe %}
+            {% elseif mov.tipoPago=='TARJETA' %}
+                {% set tarjeta = tarjeta + mov.importe %}
+            {% elseif mov.tipoPago=='CTACTE' %}
+                {% set ctacte = ctacte + mov.importe %}
+            {% endif %}
+            {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
+        {% endfor %}
+        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'CRED.'} %}
+        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque)%}
+        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte)%}
+
+<!-- FACTURAS -->
+        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso = 0,0,0,0,0,0 %}
+        {% for mov in apertura.movimientos if mov.tipoComprobante == 'FAC' %}
+            {% set cnt = cnt + 1 %}
+            {% if mov.tipoPago=='EFECTIVO' %}
+                {% set efectivo = efectivo + mov.importe %}
+            {% elseif mov.tipoPago=='CHEQUE' %}
+                {% set cheque = cheque + mov.importe %}
+            {% elseif mov.tipoPago=='TARJETA' %}
+                {% set tarjeta = tarjeta + mov.importe %}
+            {% elseif mov.tipoPago=='CTACTE' %}
+                {% set ctacte = ctacte + mov.importe %}
+            {% endif %}
+            {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
+        {% endfor %}
+        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'FACTURAS'} %}
+        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque)%}
+        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte)%}
+
+<!-- TICKET -->
+        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso = 0,0,0,0,0,0 %}
+        {% for mov in apertura.movimientos if mov.tipoComprobante == 'TIC' %}
+            {% set cnt = cnt + 1 %}
+            {% if mov.tipoPago=='EFECTIVO' %}
+                {% set efectivo = efectivo + mov.importe %}
+            {% elseif mov.tipoPago=='CHEQUE' %}
+                {% set cheque = cheque + mov.importe %}
+            {% elseif mov.tipoPago=='TARJETA' %}
+                {% set tarjeta = tarjeta + mov.importe %}
+            {% elseif mov.tipoPago=='CTACTE' %}
+                {% set ctacte = ctacte + mov.importe %}
+            {% endif %}
+            {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
+        {% endfor %}
+        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'TICKET'} %}
+        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque)%}
+        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte)%}
+
+        <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
+
+        <tr font-style="italic" margin-top="3px" margin-bottom="10px" font-size="9px">
+            <td border.type="none" height="15px"  vertical-align="middle" colspan="5">Subtotal de Facturacion</td>
+            <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+                {{ tot_efectivo|number_format(3,'.',',') }}
+            </td>
+            <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+                {{ tot_cheque|number_format(3,'.',',') }}
+            </td>
+            <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+                {{ tot_tarjeta|number_format(3,'.',',') }}
+            </td>
+            <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+                {{ tot_ctacte|number_format(3,'.',',') }}
+            </td>
+            <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+                {{ 0|number_format(3,'.',',') }}
+            </td>
+        </tr>
+<!-- total de facturacion -->
+        <tr font-size="9px">
+            <td border.color="#999999" colspan="5" padding="10px"><b>TOTAL DE FACTURACION EN CAJA</b></td>
+            <td border.color="#999999" colspan="3" padding="10px" text-align="center">
+                {{ (tot_efectivo + tot_tarjeta + tot_cheque )|number_format(3,'.',',') }}
+            </td>
+            <td border.color="#999999" padding="10px" text-align="center"><b>CTA. CTE.</b></td>
+            <td border.color="#999999" padding="10px" text-align="center">
+                {{ tot_ctacte|number_format(3,'.',',') }}
+            </td>
+        </tr>
+        <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
+
+<!-- PAGOS A PROVEEDOR -->
+        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso = 0,0,0,0,0,0 %}
+        <!-- listar y sumariar pagos a proveedor -->
+        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'O. PAGO'} %}
+        {% set tot_efectivo,tot_cheque = (tot_efectivo - efectivo), (tot_cheque - cheque)%}
+        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta - tarjeta), (tot_ctacte - ctacte)%}
+        {% set tot_egreso = tot_egreso + egreso %}
+
+<!-- PAGOS RECIBIDOS -->
+        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso = 0,0,0,0,0,0 %}
+        <!-- listar y sumariar pagos a proveedor -->
+        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'RECIBO'} %}
+        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque - cheque)%}
+        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte - ctacte)%}
+
+<!-- ANULADOS -->
+
+<!-- TOTALES -->
+        <tr font-size="9px">
+            <td border.color="#999999" colspan="5" padding="10px"><b>TOTALES DE LA CAJA</b></td>
+            <td border.color="#999999" padding="10px" text-align="right" padding-right="5px">
+                {{ tot_efectivo|number_format(3,'.',',') }}
+            </td>
+            <td border.color="#999999" colspan="2" padding="10px" text-align="center"><b>TOTAL CTA. CTE.</b></td>
+            <td border.color="#999999" padding="10px" text-align="right" padding-right="5px">
+                {{ tot_ctacte|number_format(3,'.',',') }}
+            </td>
+            <td border.color="#999999" padding="10px" text-align="right" padding-right="5px">
+                {{ tot_egreso|number_format(3,'.',',') }}
+            </td>
+        </tr>
+        <tr>
+            <td colspan="5" text-align="right" border.type="none" height="20px" vertical-align="middle" padding-right="5px"> Cambio del día </td>
+            <td text-align="right" border.type="none" height="20px" vertical-align="middle" padding-right="5px"> {{ 0|number_format(3,'.',',') }} </td>
+        </tr>
+
+        <tr font-size="9px">
+            <td border.color="#555555" height="20px" colspan="5" padding="10px" vertical-align="middle"><b>TOTAL CAJA CONTADO</b></td>
+            <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
+                <!-- total efectivo - cambio del dia -->
+                {{ (tot_efectivo)|number_format(3,'.',',') }}
+            </td>
+            <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
+                {{ tot_cheque|number_format(3,'.',',') }}
+            </td>
+            <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
+                {{ tot_tarjeta|number_format(3,'.',',') }}
+            </td>
+            <td colspan="2" height="20px" border.color="#555555" padding="10px" text-align="center" vertical-align="middle">
+                <b>{{ (tot_efectivo + tot_cheque + tot_tarjeta)|number_format(3,'.',',') }}</b>
+            </td>
+        </tr>
+
+    </table>
+
+
+    </dynamic-page>
+</pdf>

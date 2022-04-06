@@ -118,8 +118,8 @@ class NotaDebCredController extends Controller {
         // debito + (aumenta la deuda con el proveedor)
         $em = $this->getDoctrine()->getManager();
         // Verificar si la caja está abierta CAJA=1
-        $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
-        if( !$caja->getAbierta()){
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
+        if( !$apertura ){
             $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
             return $this->redirect( $request->headers->get('referer') );
         }
@@ -216,6 +216,7 @@ class NotaDebCredController extends Controller {
                     if( $entity->getFormaPago()->getTipoPago() == 'CTACTE' ){
                     // insertar un detalle para ctacte
                         $detalle = new CobroDetalle();
+                        $detalle->setCajaApertura($apertura);
                         $detalle->setTipoPago('CTACTE');
                         $detalle->setMoneda($entity->getMoneda());
                         $detalle->setImporte($impTotal);
@@ -224,6 +225,7 @@ class NotaDebCredController extends Controller {
                     }
                 }else{
                     foreach( $entity->getCobroDetalles() as $detalle ){
+                        $detalle->setCajaApertura($apertura);
                         if(!$detalle->getMoneda()){
                             $detalle->setMoneda($entity->getMoneda());
                         }

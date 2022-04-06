@@ -41,8 +41,8 @@ class VentaType extends AbstractType {
             ))
             ->add('cotizacion','hidden')
             ->add('concepto','textarea',
-                    array('label'=>'Concepto Adicional:',
-                          'attr'=>array('rows'=>'1','cols'=>'1', 'required'=>false, 'class'=>'mediuminput')))
+                    array('label'=>'Concepto Adicional:','required'=>false, 
+                          'attr'=>array('rows'=>'1','cols'=>'1', 'class'=>'mediuminput')))
             ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
             ->add('detalles', 'collection', array(
                 'type' => new VentaDetalleType($type,$data),

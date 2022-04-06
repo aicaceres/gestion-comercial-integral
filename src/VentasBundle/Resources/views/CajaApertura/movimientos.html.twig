@@ -1,0 +1,58 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Caja </h1>
+<span class="pagedesc">Listado de Movimientos de Cajas</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="movimientos">
+        <thead>
+            <tr>
+                <th class="nosort">documento</th>
+                <th class="nosort">fecha</th>
+                <th class="nosort">cliente</th>
+                <th class="nosort">moneda</th>
+                <th class="nosort">cotizacion</th>
+                <th class="nosort">EFECTIVO</th>
+                <th class="nosort">CHEQUES</th>
+                <th class="nosort">TARJETAS</th>
+                <th class="nosort">CTA CTE</th>
+                <th class="nosort">Egresos</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mov in movimientos if mov.tipoComprobante in ['DEB','CRE'] %}
+                {% include "VentasBundle:CajaApertura:seccion.html.twig" %}
+            {% endfor %}
+            {% for mov in movimientos if mov.tipoComprobante == 'FAC' %}
+                {% include "VentasBundle:CajaApertura:seccion.html.twig" %}
+            {% endfor %}
+            {% for mov in movimientos if mov.tipoComprobante == 'TIC' %}
+                {% include "VentasBundle:CajaApertura:seccion.html.twig" %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div id="contentwrapper" class="contentwrapper">
+
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="tarjetas">
+        <tbody>
+            {% for mov in movimientos if mov.tipoPago=='TARJETA' %}
+                <tr>
+                    <td>{{ mov.comprobanteTxt }}</td>
+                    <td>{{ mov.datosTarjeta.tarjeta }}</td>
+                    <td>{{ mov.datosTarjeta.numero }}</td>
+                    <td class="alignright">
+                            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

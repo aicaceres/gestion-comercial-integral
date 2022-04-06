@@ -127,12 +127,12 @@ class CobroController extends Controller
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
         $em = $this->getDoctrine()->getManager();
         // Verificar si la caja está abierta CAJA=1
-        $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
-        if( !$caja->getAbierta()){
+        //$caja = $em->getRepository('ConfigBundle:Caja')->find(1);
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
+        if( !$apertura ){
             $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
             return $this->redirect( $request->headers->get('referer') );
         }
-
         $entity = new Cobro();
         $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
@@ -226,11 +226,13 @@ class CobroController extends Controller
                         $detalle->setTipoPago('CTACTE');
                         $detalle->setMoneda($entity->getMoneda());
                         $detalle->setImporte($impTotal);
+                        $detalle->setCajaApertura($apertura);
                         $entity->addDetalle($detalle);
                         $efectivo = false;
                     }
                 }else{
                     foreach( $entity->getDetalles() as $detalle ){
+                        $detalle->setCajaApertura($apertura);
                         if(!$detalle->getMoneda()){
                             $detalle->setMoneda($entity->getMoneda());
                         }

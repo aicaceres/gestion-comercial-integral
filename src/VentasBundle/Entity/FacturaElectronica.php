@@ -105,11 +105,16 @@ class FacturaElectronica
     public function getLetra() {
         return substr($this->getTipoComprobante()->getValor(),4,1);
     }
+    public function getTipo(){
+        return substr($this->getTipoComprobante()->getValor(),0,3);
+    }
     public function getTituloPdf() {
         $tipo = substr($this->getTipoComprobante()->getValor(),0,3);
         switch ($tipo) {
             case 'FAC':
                 return 'FACTURA';
+            case 'TIC':
+                return 'TICKET';
             case 'DEB':
                 return 'NOTA DE DEBITO';
             case 'CRE':

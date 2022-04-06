@@ -203,4 +203,48 @@ class CajaAperturaController extends Controller
         return $form;
     }
 
+    /**
+     * @Route("/{id}/xarqueoCajaApertura", name="xventas_apertura_arqueo")
+     * @Method("GET")
+     * @Template("VentasBundle:CajaApertura:movimientos.html.twig")
+     */
+    public function xarqueoCajaAperturaAction($id){
+        $session = $this->get('session');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_cierre');
+        $em = $this->getDoctrine()->getManager();
+        $movimientos = $em->getRepository('VentasBundle:CobroDetalle')->findBy(array('cajaApertura'=>$id));
+
+
+        return $this->render('VentasBundle:CajaApertura:movimientos.html.twig', array(
+                'movimientos' => $movimientos
+        ));
+    }
+
+    /**
+     * @Route("/{id}/arqueoCajaApertura.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="ventas_apertura_arqueo")
+     * @Method("GET")
+     */
+    public function arqueoCajaAperturaAction($id) {
+        $session = $this->get('session');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_cierre');
+        $em = $this->getDoctrine()->getManager();
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($id);
+
+        $logo = __DIR__.'/../../../web/assets/images/logo_comprobante_bn.png';
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
+                array('apertura' => $apertura, 'logo' => $logo), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=arqueo_' . $apertura->getId() . '.pdf'));
+    }
+
+
 }

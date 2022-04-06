@@ -106,7 +106,7 @@ jQuery(function ($) {
         // confirm on submit
         $('#ventasbundle_venta').on('submit', function(){
             if( !validlogin ){
-                alert('No posee login válido para realizar ventas!');
+                jAlert('No posee login válido para realizar ventas!', 'Atención');
                 window.location.href = "{{ path('ventas_venta')}}";
                 return false;
             }
@@ -115,10 +115,12 @@ jQuery(function ($) {
             txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
             if( $('tbody tr.item').length > 0 ){
                 if (!confirm(txt)) {
-                return false;
+                    return false;
                 }
-            }else{  alert('Debe ingresar items a la venta'); return false;}
-
+            }else{
+                jAlert('Debe ingresar items a la venta', 'Atención');
+                return false;
+            }
         })
     });
 

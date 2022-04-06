@@ -55,6 +55,56 @@ class CobroDetalle {
     protected $notaDebCred;
 
     /**
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\CajaApertura", inversedBy="movimientos")
+     * @ORM\JoinColumn(name="ventas_caja_apertura_id", referencedColumnName="id")
+     */
+    protected $cajaApertura;
+
+    public function getTipoComprobante(){
+        if( $this->getCobro() ){
+            // buscar factura
+            $tipo = $this->getCobro()->getFacturaElectronica()->getTipo();
+        }
+        if( $this->getNotaDebCred()){
+            // buscar nota
+            $tipo = $this->getNotaDebCred()->getNotaElectronica()->getTipo();
+        }
+        return $tipo;
+    }
+
+    public function getComprobanteTxt(){
+        if( $this->getCobro() ){
+            // buscar factura
+            $comprobante = $this->getCobro()->getFacturaElectronica()->getComprobanteTxt();
+        }
+        if( $this->getNotaDebCred()){
+            // buscar nota
+            $comprobante = $this->getNotaDebCred()->getNotaElectronica()->getComprobanteTxt();
+        }
+        return $comprobante;
+    }
+    public function getFecha(){
+        if( $this->getCobro() ){
+            $fecha = $this->getCobro()->getFechaCobro();
+        }
+        if( $this->getNotaDebCred()){
+            // buscar nota
+            $fecha = $this->getNotaDebCred()->getFecha();
+        }
+        return $fecha;
+    }
+    public function getCliente(){
+        if( $this->getCobro() ){
+            $cliente = $this->getCobro()->getCliente()->getNombre();
+        }
+        if( $this->getNotaDebCred()){
+            // buscar nota
+            $cliente = $this->getNotaDebCred()->getCliente()->getNombre();
+        }
+        return $cliente;
+    }
+
+    /**
      * Get id
      *
      * @return integer
@@ -218,10 +268,33 @@ class CobroDetalle {
     /**
      * Get notaDebCred
      *
-     * @return \VentasBundle\Entity\NotaDebCred 
+     * @return \VentasBundle\Entity\NotaDebCred
      */
     public function getNotaDebCred()
     {
         return $this->notaDebCred;
+    }
+
+    /**
+     * Set cajaApertura
+     *
+     * @param \VentasBundle\Entity\CajaApertura $cajaApertura
+     * @return CobroDetalle
+     */
+    public function setCajaApertura(\VentasBundle\Entity\CajaApertura $cajaApertura = null)
+    {
+        $this->cajaApertura = $cajaApertura;
+
+        return $this;
+    }
+
+    /**
+     * Get cajaApertura
+     *
+     * @return \VentasBundle\Entity\CajaApertura
+     */
+    public function getCajaApertura()
+    {
+        return $this->cajaApertura;
     }
 }

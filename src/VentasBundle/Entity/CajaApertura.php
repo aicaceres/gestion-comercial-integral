@@ -51,6 +51,11 @@ class CajaApertura
     protected $montoCierre;
 
     /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="cajaApertura")
+     */
+    protected $movimientos;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -63,7 +68,7 @@ class CajaApertura
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -101,7 +106,7 @@ class CajaApertura
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -124,7 +129,7 @@ class CajaApertura
     /**
      * Get fechaApertura
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaApertura()
     {
@@ -147,7 +152,7 @@ class CajaApertura
     /**
      * Get montoApertura
      *
-     * @return string 
+     * @return string
      */
     public function getMontoApertura()
     {
@@ -170,7 +175,7 @@ class CajaApertura
     /**
      * Get fechaCierre
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaCierre()
     {
@@ -193,7 +198,7 @@ class CajaApertura
     /**
      * Get montoCierre
      *
-     * @return string 
+     * @return string
      */
     public function getMontoCierre()
     {
@@ -216,7 +221,7 @@ class CajaApertura
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -239,7 +244,7 @@ class CajaApertura
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -262,7 +267,7 @@ class CajaApertura
     /**
      * Get caja
      *
-     * @return \ConfigBundle\Entity\Caja 
+     * @return \ConfigBundle\Entity\Caja
      */
     public function getCaja()
     {
@@ -285,7 +290,7 @@ class CajaApertura
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -308,10 +313,50 @@ class CajaApertura
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {
         return $this->updatedBy;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->movimientos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add movimientos
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $movimientos
+     * @return CajaApertura
+     */
+    public function addMovimiento(\VentasBundle\Entity\CobroDetalle $movimientos)
+    {
+        $this->movimientos[] = $movimientos;
+
+        return $this;
+    }
+
+    /**
+     * Remove movimientos
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $movimientos
+     */
+    public function removeMovimiento(\VentasBundle\Entity\CobroDetalle $movimientos)
+    {
+        $this->movimientos->removeElement($movimientos);
+    }
+
+    /**
+     * Get movimientos
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getMovimientos()
+    {
+        return $this->movimientos;
     }
 }

@@ -1,0 +1,40 @@
+<tr>
+    <td border.type="none" height="15px" vertical-align="middle" width="2.5 cm" padding-left="3px">
+        {{ mov.comprobanteTxt }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="center" width="1.2 cm">
+        {{ mov.fecha|date('d/m/Y') }}
+    </td>
+    <td border.type="none" vertical-align="middle" padding-left="3px">
+        {{ mov.cliente }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="center" width="0.6 cm">
+        {{ mov.moneda.simbolo }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="1.2 cm">
+        {{ mov.moneda.cotizacion|number_format(3,'.',',') }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
+        {% if mov.tipoPago=='EFECTIVO' %}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+        {% else %} 0.00 {% endif %}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
+        {% if mov.tipoPago=='CHEQUE' %}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+        {% else %} 0.00 {% endif %}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
+        {% if mov.tipoPago=='TARJETA' %}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+        {% else %} 0.00 {% endif %}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
+        {% if mov.tipoPago=='CTACTE' %}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+        {% else %} 0.00 {% endif %}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
+        0.00
+    </td>
+</tr>

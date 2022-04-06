@@ -69,7 +69,12 @@
                         <td>{{ apertura.montoApertura|number_format(2,'.',',') }}</td>
                         <td>{{ apertura.createdBy.username|upper }}</td>
                         <td style="background:#868686;padding:1px;"></td>
-                        <td>{% if apertura.fechaCierre %}{{apertura.fechaCierre|date('d-m-Y H:i')}}{% endif %}</td>
+                        <td>{% if apertura.fechaCierre %}
+                                    {{apertura.fechaCierre|date('d-m-Y H:i')}}
+                            {% elseif app.user.isAdmin(app.session.get('unidneg_id')) %}
+                                <a target="_blank" title="Movimientos" href="{{ path('ventas_apertura_arqueo',{'id':apertura.id}) }}" class="arqueo-caja anchorbutton"> Movimientos </a>
+                            {% endif %}
+                        </td>
                         <td>{% if apertura.fechaCierre  %}{{apertura.montoCierre|number_format(2,'.',',')}}{% endif %}</td>
                         <td>{% if apertura.fechaCierre %}{{ apertura.updatedBy.username }}{% endif %}</td>
                         <td class="{% if apertura.diferencia<0 %} rojo {% endif %}" >{% if apertura.fechaCierre %}{{apertura.diferencia|number_format(2,'.',',')}}{% endif %}</td>

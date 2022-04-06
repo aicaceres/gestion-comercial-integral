@@ -1,0 +1,19 @@
+<tr margin-top="3px" margin-bottom="10px" font-style="italic" font-size="9px">
+    <td border.type="none" vertical-align="middle" colspan="2">Subtotal {{tipo}} ({{ cnt }})</td>
+    <td colspan="3" border.style="dotted" border.type="bottom"></td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+        {{ efectivo|number_format(3,'.',',') }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+        {{ cheque|number_format(3,'.',',') }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+        {{ tarjeta|number_format(3,'.',',') }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+        {{ ctacte|number_format(3,'.',',') }}
+    </td>
+    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
+        {{ egreso|number_format(3,'.',',') }}
+    </td>
+</tr>

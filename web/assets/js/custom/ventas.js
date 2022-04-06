@@ -106,7 +106,9 @@ jQuery(function ($) {
                     descuentoRecargo = $('#porcentajeRecargo').val();
                     //$('.descuentoRecargo').text( descuentoRecargo.toFixed(2) )
                     $('[id*="_descuentoRecargo"]').val(descuentoRecargo);
-                    detallePago();
+                    if (esNotaDebCred) {
+                        detallePago();
+                    }
                     actualizaTotales();
                 }
             });
@@ -219,7 +221,6 @@ jQuery(function ($) {
         });
 
         actualizaTotales();
-
         if (esNotaDebCred) {
             $('#ventasbundle_notadebcred_comprobanteAsociado').on('change', function () {
                 cargarItems( $(this) );
