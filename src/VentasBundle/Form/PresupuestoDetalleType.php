@@ -48,9 +48,7 @@ class PresupuestoDetalleType extends AbstractType {
         }else{
             $builder->add('producto', 'entity', array(
                     'required' => true,
-                    'placeholder' => 'Seleccionar Producto...',
                     'class' => 'AppBundle:Producto',
-                    'attr' => array('class' => 'chzn-select', 'label' => 'Producto:'),
                     'query_builder' => function(ProductoRepository $em) {
                         return $em->getProductosFacturables();
                     }));

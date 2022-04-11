@@ -36,7 +36,7 @@ jQuery(function ($) {
             cache: true
             },
             minimumInputLength: 3,
-        }).on('change', function() {
+        }).on('change', function () {
             id = $(this).val();
             urlDatosCliente = $(this).attr('url_datos');
             $.getJSON( urlDatosCliente , {'id': id}).done(function(data){
@@ -63,9 +63,11 @@ jQuery(function ($) {
                         $('.datos-cliente').html(data.partial);
                         $('[id*="_transporte"]').val(data.transporte);
                     }
-                    $('[id*="_precioLista"]').val(data.listaprecio);
-                    $('[id*="_formaPago"]').val(data.formapago);
-                    $('[id*="_formaPago"]').change();
+                    if (!'{{entity.id}}') {
+                        $('[id*="_precioLista"]').val(data.listaprecio);
+                        $('[id*="_formaPago"]').val(data.formapago);
+                        $('[id*="_formaPago"]').change();
+                    }
                      // mostrar iva e iibb si corresponde
                     //if( !esPresupuesto){
                         if (data.categoriaIva == 'M' || data.categoriaIva == 'I') {
@@ -195,30 +197,43 @@ jQuery(function ($) {
                         id: obj.val(),
                         listaprecio: $('[id*="_precioLista"]').val(),
                         deposito: $('[id*="_deposito"]').val(),
-                    };
-                    urlDatosProducto = obj.attr('url_datos');
-                    $.getJSON( urlDatosProducto , data).done(function(data){
+                };
+                urlDatosProducto = obj.attr('url_datos');
+                $.ajax({
+                    dataType: "json",
+                    url: urlDatosProducto,
+                    async: false,
+                    data: data,
+                    success: function(data){
                         // actualizar datos
                         objprecio = obj.parent().siblings('.precTd');
-                        objprecio.find('[id*="_precio"]').val( data.precio );
+                        objprecio.find('[id*="_precio"]').val(data.precio);
                         objprecio.find('[id*="_alicuota"]').val(data.alicuota);
                         textoComodin = obj.siblings('[id*="_textoComodin"]')
                         if (esPresupuesto && data.comodin) {
-                            textoComodin.attr('required', true);
+                            textoComodin.attr('required',true);
                             textoComodin.show();
-                            textoComodin.focus();
+                            //textoComodin.focus();
                         } else {
-                            textoComodin.attr('required', false);
+                            textoComodin.attr('required',false);
                             textoComodin.hide();
                             objcant = obj.parent().siblings('.cantTd');
-                            objcant.find('[id*="_cantidad"]').focus();
+                            //objcant.find('[id*="_cantidad"]').focus();
                         }
                         obj.siblings('.bajominimo').toggle( data.bajominimo )
                         actualizaTotales();
-                    });
-                });
+                    }
+                })
+            }).trigger('change');
 
         });
+
+        lista = $('.form-horizontal').find('[id*="_precioLista"]');
+        lista.on('change', function (e) {
+            $collectionHolder.find('tr.item').each(function (i) {
+                $(this).find('[name*="[producto]"]').change()
+            })
+        })
 
         actualizaTotales();
         if (esNotaDebCred) {

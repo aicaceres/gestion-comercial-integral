@@ -97,7 +97,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/custom/ventas.js') }}"></script>
 <script type="text/javascript">
 let checklogin = "{{ app.session.get('checkrequired') }}";
-console.log(checklogin)
+console.log(checklogin);
 if( checklogin == '1' ){
     checkLoginVentas("{{ path('ventas_login')}}" ,"{{ path('ventas_venta')}}" );
 }
@@ -106,12 +106,12 @@ jQuery(function ($) {
 
         // confirm on submit
         $('#ventasbundle_venta').on('submit', function(){
-            if( !validlogin ){
+            /*if( !validlogin ){
                 jAlert('No posee login válido para realizar ventas!', 'Atención', function(){
                     window.location.href = "{{ path('ventas_venta')}}";
                 });
                 return false;
-            }
+            }*/
             // controlar que haya items cargados
             let txt = 'VENTA:   #'+$('#ventasbundle_venta_nroOperacion').val();
             txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';

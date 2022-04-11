@@ -215,14 +215,24 @@ class PresupuestoController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra Presupuesto.');
         }
-
-        $editForm = $this->createEditForm($entity,'new');
+        $editForm = $this->createEditForm($entity,'create');
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
             $em->flush();
             $this->addFlash('success', 'Los datos fueron modificados con éxito!');
             return $this->redirect($this->generateUrl('ventas_presupuesto'));
         }
+$errors = array();
+
+        if ($editForm->count() > 0) {
+            foreach ($editForm->all() as $child) {
+                if (!$child->isValid()) {
+echo $child->getName(); echo '<br>';
+                    $errors[$child->getName()] = (String) $editForm[$child->getName()]->getErrors();
+                }
+            }
+        }
+var_dump($errors);die;
         return $this->render('VentasBundle:Presupuesto:new.html.twig', array(
                     'entity' => $entity,
                     'form' => $editForm->createView(),

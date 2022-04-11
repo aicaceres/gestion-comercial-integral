@@ -162,7 +162,7 @@ class Producto
     private $updatedBy;
 
     public function __toString() {
-        return $this->codigo.' - '.$this->nombre;
+        return $this->nombre . ' | '. $this->codigo;
     }
     public function getCodigoNombreBarcode() {
         return $this->codigo.' - '.$this->nombre.' - '.$this->codigoBarra;
@@ -1093,7 +1093,7 @@ class Producto
     /**
      * Get presupuestos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getPresupuestos()
     {

@@ -69,7 +69,8 @@ class PresupuestoType extends AbstractType {
      */
     public function configureOptions(OptionsResolver $resolver) {
         $resolver->setDefaults(array(
-            'data_class' => 'VentasBundle\Entity\Presupuesto'
+            'data_class' => 'VentasBundle\Entity\Presupuesto',
+            'cascade_validation' => true,
         ));
     }
 

@@ -280,6 +280,14 @@ class VentaController extends Controller
     }
 
     /**
+     * @Route("/checkrequired", name="ventas_checkrequired")
+     * @Method("GET")
+     */
+    public function checkRequiredAction() {
+        return new Response( $this->get('session')->get('checkrequired') );
+    }
+
+    /**
     * @Route("checkLogin", name="ventas_login_check")
      */
     public function checkLoginAction(Request $request){
@@ -302,7 +310,7 @@ class VentaController extends Controller
                     $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
                     // RECARGAR LA PÁGINA PARA CAMBIAR USUARIO
                     $reload = true;
-                    // No requiere login al recargar
+                    // No requiere login
                     $this->get('session')->set('checkrequired','0');
                 }
                 $result = array( 'msg' => 'OK', 'url' => $this->generateUrl('ventas_venta_new'), 'reload' => $reload);

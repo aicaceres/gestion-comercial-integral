@@ -54,7 +54,7 @@
             </div>
             <div style="display:inline-block; width: 30%;">
                 {{ form_label(form.deposito)}}
-                {{ form_widget(form.deposito,{'attr':{'style':'width:80%','tabindex':-1}}) }}
+                {{ form_widget(form.deposito,{'attr':{'style':'width:80%'}}) }}
             </div>
             <div style="display:inline-block; width: 20%;">
                 {{ form_label(form.descuentaStock, null, {'label_attr': {'style': 'width:35%'}})}}
@@ -100,8 +100,8 @@
 
 jQuery(function ($) {
     $(window).on('load', function () {
-        $('.datos-cliente').hide();
-        $('.datos-cf').show();
+       // $('.datos-cliente').hide();
+       // $('.datos-cf').show();
         //$('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
 
         // confirm on submit

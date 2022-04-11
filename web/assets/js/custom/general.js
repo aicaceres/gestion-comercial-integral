@@ -26,8 +26,8 @@ jQuery(function($){
     $('.select2').select2({ width:'style' });
 });
 
-// variable global para definir si es valido el login en venta
-let validlogin = false;
+
+let validlogin=false;
 // lanza popup para login de ventas
 function checkLoginVentas(url_login,referer) {
     jQuery('#popup').html('');
