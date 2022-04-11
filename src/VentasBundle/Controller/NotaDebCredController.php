@@ -211,7 +211,7 @@ class NotaDebCredController extends Controller {
 
                 }
                 // completar datos de detalles
-                $efectivo = true;
+                $saldo = 0;
                 if( count($entity->getCobroDetalles()) == 0 ){
                     if( $entity->getFormaPago()->getTipoPago() == 'CTACTE' ){
                     // insertar un detalle para ctacte
@@ -221,7 +221,7 @@ class NotaDebCredController extends Controller {
                         $detalle->setMoneda($entity->getMoneda());
                         $detalle->setImporte($impTotal);
                         $entity->addCobroDetalle($detalle);
-                        $efectivo = false;
+                        $saldo = round($impTotal,2);
                     }
                 }else{
                     foreach( $entity->getCobroDetalles() as $detalle ){
@@ -235,9 +235,6 @@ class NotaDebCredController extends Controller {
                         }
                         if( $tipoPago != 'TARJETA' ){
                             $detalle->setDatosTarjeta(null);
-                        }
-                        if( $tipoPago != 'EFECTIVO' ){
-                            $efectivo = false;
                         }
                     }
                 }
@@ -269,22 +266,23 @@ class NotaDebCredController extends Controller {
                 if( empty($tributos) ){
                     unset( $data['Tributos'] );
                 }
-
+                // create voucher
                 $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
-
+                // seteo ultimos valores
+                $tipo = $notaElectronica->getTipoComprobante();
                 $entity->setIva($impIVA);
                 $entity->setPercIibb($impTrib);
                 $entity->setTotal($impTotal);
-                $entity->setSaldo($impTotal);
+                //$entity->setSaldo(  ($tipo->getClase() =='CRE') ? 0 : $saldo);
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
                 $entity->setUnidadNegocio($unidneg);
                 // signo
-                $signo = ( substr($entity->getNotaElectronica()->getTipoComprobante()->getValor(),0,3) == 'DEB'  ) ? '+' : '-';
-                $entity->setSigno($signo);
+                $entity->setSigno( $tipo->getSigno() );
                 // Guardar datos en factura electronica
                 $notaElectronica->setNotaDebCred($entity);
                 $notaElectronica->setPuntoVenta($ptovta);
                 $notaElectronica->setTotal(round($impTotal,2));
+                $notaElectronica->setSaldo( ($tipo->getClase() =='CRE') ? 0 : $saldo);
                 $notaElectronica->setCae($wsResult['CAE']);
                 $notaElectronica->setCaeVto($wsResult['CAEFchVto']);
                 $notaElectronica->setNroComprobante($wsResult['voucher_number']);

@@ -2,7 +2,7 @@
 {% block pageheader %}
 <div class="pageheader notab">
     <h1 class="pagetitle">Administración de Clientes</h1>
-<span class="pagedesc">Listado de Clientes del sistema</span> 
+<span class="pagedesc">Listado de Clientes del sistema</span>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -10,30 +10,34 @@
 
 <div id="contentwrapper" class="contentwrapper">
     <form id="printform" name="printform" target="_blank" action="{{ path("export_ventas_cliente") }}" method="post" style="height:40px; ">
-        <input type="hidden" id="searchterm" name="searchterm"/>        
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Clientes con Saldo Deudor: </strong></label>
+            <input type="checkbox" name="deudor" id="deudor" />
+
+        <input type="hidden" id="searchterm" name="searchterm"/>
         <button class="stdbtn floatright" type="submit" >Exportar</button>
-    </form> 
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="clientes_table">       
+    </form>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="clientes_table">
         <thead>
             <tr>
                 <th>Nombre y Apellido</th>
                 <th>CUIT</th>
                 <th>Dirección</th>
                 <th>Localidad</th>
-                <th class="nosort">Teléfono</th>                
-                <th class="nosort">Saldo</th>                
+                <th class="nosort">Teléfono</th>
+                <th class="nosort">Saldo</th>
                 <th style="width:5%;" class="nosort">Activo</th>
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_new') %}
                     <a class="editar create" href="{{ path('ventas_cliente_new') }}" style="text-align:center">Agregar Cliente</a>
-                    {% else %} &nbsp; {% endif %} 
+                    {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
         </thead>
         <tbody>
-           
+
         </tbody>
-    </table> 
+    </table>
 </div>
 
 {% endblock %}
@@ -43,22 +47,24 @@
 jQuery(document).ready(function($){
 
         var oTable = $('#clientes_table').dataTable({
-                "columnDefs": [        
+                "columnDefs": [
                     // These are the column name variables that will be sent to the server
                     { "name": "nombre", "targets": 0 },
-                    { "name": "cuit",  "targets": 1 },                    
-                    { "name": "direccion",  "targets": 2 },                    
-                    { "name": "localidad",  "targets": 3 },                    
-                    { "name": "telefono",  "targets": 4 },                    
-                    { "name": "saldo",  "targets": 5 },                    
-                    { "name": "activo",  "targets": 6 },  
-                    { "name": "actions",  "targets": 7 },                  
-                    { "targets"  : 'nosort', "orderable": false }        
+                    { "name": "cuit",  "targets": 1 },
+                    { "name": "direccion",  "targets": 2 },
+                    { "name": "localidad",  "targets": 3 },
+                    { "name": "telefono",  "targets": 4 },
+                    { "name": "saldo",  "targets": 5 },
+                    { "name": "activo",  "targets": 6 },
+                    { "name": "actions",  "targets": 7 },
+                    { "targets"  : 'nosort', "orderable": false }
                 ],
-                "rowCallback": function (row, data) {                             
-                    // registrar seleccion           
+                "rowCallback": function (row, data) {
+                    // registrar seleccion
                     $(row).find('td:nth-child(6n)').addClass('alignright');
-                   // $(row).find('td:nth-child(6n)').addClass('aligncenter');                   
+                    saldo = parseFloat( $(row).find('td:nth-child(6n)').html() );
+                    $(row).find('td:nth-child(6n)').html( saldo.toFixed(3) );
+                    $(row).find('td:nth-child(7n)').addClass('aligncenter');
                  },
                 // Server-side parameters
                 "processing": true,
@@ -67,11 +73,14 @@ jQuery(document).ready(function($){
                 "ajax": {
                     "url": "{{ path('cliente_index_datatables') }}",
                     "type": "POST",
+                    "data" : function (d) {
+                            d.deudor = $('#deudor').is(':checked');
+                        },
                 },
                 // Classic DataTables parameters
                 "bPaginate" : true,
-                "bInfo" : true, 
-                "bSearchable": true,        
+                "bInfo" : true,
+                "bSearchable": true,
                 "bLengthChange": true,
                 "pageLength":10,
                 "order": [[0, 'asc']],
@@ -91,12 +100,15 @@ jQuery(document).ready(function($){
                     "sInfoFiltered": "(filtrado de _MAX_ registros)",
                     "sSearch": "Buscar:"
                 }
-            }); 
-    
-   
+            });
+
+        $('#deudor').on('change', function(){
+            oTable.api().ajax.reload();
+        })
+
    $('#printform').on('submit',function(){
-        $('#searchterm').val( $('#clientes_table_filter input').val() );        
+        $('#searchterm').val( $('#clientes_table_filter input').val() );
     });
 });
-</script>     
+</script>
 {% endblock %}

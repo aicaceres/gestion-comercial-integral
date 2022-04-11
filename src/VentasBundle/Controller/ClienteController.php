@@ -296,20 +296,8 @@ class ClienteController extends Controller {
                 }
                 elseif ($var['tipo'] == 3) {
                     $pago = $em->getRepository('VentasBundle:PagoCliente')->find($var['id']);
-                    $var['comprobante'] = 'REC ' . $pago->getNroComprobante();
-                    $text = '';
-                    $conceptos = json_decode($pago->getConcepto());
-                    foreach ($conceptos as $item) {
-                        $doc = explode('-', $item->clave);
-                        if ($doc[0] == 'FAC') {
-                            $comprob = $em->getRepository('VentasBundle:Factura')->find($doc[1]);
-                        }
-                        else {
-                            $comprob = $em->getRepository('VentasBundle:NotaDebCred')->find($doc[1]);
-                        }
-                        $text = $text . ' [ ' . $doc[0] . ' ' . $comprob->getNroComprobante() . ' $' . $item->monto . '] ';
-                    }
-                    $var['concepto'] = 'Pago: ' . UtilsController::myTruncate($text, 30);
+                    $var['comprobante'] = 'REC ' . $pago->getComprobanteNro();
+                    $var['concepto'] = 'RECIBO ( ' . UtilsController::myTruncate( $pago->getComprobantesTxt(), 30) . ' )';
                     $var['importe'] = $pago->getTotal();
                 }
             }
@@ -371,13 +359,13 @@ class ClienteController extends Controller {
     /**
      * @Route("/selectFacturasCliente", name="select_facturas_cliente")
      * @Method("GET")
-     */
+
     public function facturasAction(Request $request) {
         $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $facturas = $em->getRepository('VentasBundle:Factura')->findByClienteId($id);
         return new JsonResponse($facturas);
-    }
+    }*/
 
     /**
      * @Route("/updateCuit", name="update_cuit_cliente")
@@ -436,29 +424,10 @@ class ClienteController extends Controller {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
         $entities = $em->getRepository('VentasBundle:Cliente')->findPagosByCriteria($cliId, $desde, $hasta);
-        /*if ($clientes) {
-            foreach ($entities as $pago) {
-                /* $text = '';
-                  $conceptos = json_decode($pago->getConcepto());
-                  foreach ($conceptos as $item) {
-                  $factura = $em->getRepository('ComprasBundle:Factura')->find($item->id);
-                  $text = $text.' [FAC '.$factura->getTipoFactura().$factura->getNroFactura().' $'.$item->monto.'] ';
-                  } */
-               /* $texto = UtilsController::textoListaFacturasAction($pago->getConcepto(), $em);
-                $pago->setConceptoTxt(UtilsController::myTruncate($texto, 30));
-                $pago->setConcepto($texto);
-                $detalle = UtilsController::myTruncate($pago->getDetalle(), 30);
-                $pago->setDetalle($detalle);
-            }
-        }
-        else {
-            $cliente = NULL;
-            $entities = NULL;
-        }*/
 
         return $this->render('VentasBundle:Cliente:pago_index.html.twig', array(
-                    'entities' => $entities, 'cliId' => $cliId, 'cliente'=>$cliente,
-                    'desde' => $desde, 'hasta' => $hasta
+            'entities' => $entities, 'cliId' => $cliId, 'cliente'=>$cliente,
+            'desde' => $desde, 'hasta' => $hasta
         ));
     }
 
@@ -468,14 +437,23 @@ class ClienteController extends Controller {
      * @Template("VentasBundle:Cliente:pago_edit.html.twig")
      */
     public function pagosNewAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente_pagos');
+        $session = $this->get('session');
+        $unidneg_id = $session->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
         $entity = new PagoCliente();
         $em = $this->getDoctrine()->getManager();
+
         $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('id'));
-        $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
-        $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
-        $entity->setPagoNro(sprintf("%06d", $equipo->getNroPagoVenta() + 1));
         $entity->setCliente($cliente);
+
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+        if($param){
+            // ultimo nro de operacion de cobro
+            $entity->setPagoNro( $param->getUltimoNroPagoCliente() + 1 );
+        }
+        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneBy(array('byDefault'=>1));
+        $entity->setMoneda( $moneda );
+        $entity->setFecha( new \DateTime() );
         $form = $this->pagosCreateCreateForm($entity);
         return $this->render('VentasBundle:Cliente:pago_edit.html.twig', array(
                     'entity' => $entity,
@@ -509,7 +487,8 @@ class ClienteController extends Controller {
         $fdesde = $request->get('fdesde');
         $fhasta = $request->get('fhasta');
         $cliente = $em->getRepository('VentasBundle:Cliente')->find($clienteId);
-        $textoFiltro = array($cliente ? $cliente->getNombre() : 'Todos', $fdesde ? $fdesde : '', $fhasta ? $fhasta : '');
+
+        $textoFiltro = array($cliente ? $cliente->getNombre() : '', $fdesde ? $fdesde : '', $fhasta ? $fhasta : '');
 
         //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
         //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
@@ -522,9 +501,9 @@ class ClienteController extends Controller {
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
-        $hoy = new \DateTime();
+        $txt = $cliente ? $cliente->getNombre() : '';
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition' => 'filename=listado_pagos_cliente_' . $cliente->getNombre() . '.pdf'));
+            'Content-Disposition' => 'filename=listado_pagos_cliente_' . $txt . '.pdf'));
     }
 
     /**
@@ -533,89 +512,100 @@ class ClienteController extends Controller {
      * @Template("VentasBundle:Cliente:pago_edit.html.twig")
      */
     public function pagosCreateAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente_pagos');
+        $session = $this->get('session');
+        $unidneg_id = $session->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
         $entity = new PagoCliente();
         $form = $this->pagosCreateCreateForm($entity);
         $form->handleRequest($request);
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
-            $arrayConceptos = explode(',', $request->get('txtconcepto'));
-            $facturasImpagas = $em->getRepository('VentasBundle:Cliente')->getFacturasImpagas($entity->getCliente()->getId());
-            $arrayFacturas = array();
-            foreach ($facturasImpagas as $fact) {
-                array_push($arrayFacturas, $fact['tipo'] . '-' . $fact['id']);
-            }
-            $conceptos = array_unique(array_merge($arrayConceptos, $arrayFacturas));
-            $total = $entity->getTotal();
-            $txtConcepto = array();
             try {
-                // Proceso de facturas - Ajustar los saldos
-                if ($conceptos[0]) {
-                    foreach ($conceptos as $item) {
-                        $doc = explode('-', $item);
-                        if ($doc[0] == 'FAC') {
-                            $comprob = $em->getRepository('VentasBundle:Factura')->find($doc[1]);
-                        }
-                        else {
-                            $comprob = $em->getRepository('VentasBundle:NotaDebCred')->find($doc[1]);
-                        }
+                // checkear apertura de caja
+                $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
+                if( !$apertura ){
+                    $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+                    return $this->redirect( $request->headers->get('referer') );
+                }
 
-                        if ($comprob && $total > 0) {
-                            $comptxt = array('clave' => $item, 'monto' => $comprob->getSaldo());
-                            if ($total >= $comprob->getSaldo()) {
-                                //alcanza para cubrir el saldo
-                                $total -= $comprob->getSaldo();
-                                $comprob->setSaldo(0);
-                                $comprob->setEstado('PAGADO');
-                            }
-                            else {
-                                //no alcanza, impacta el total
-                                $comprob->setSaldo($comprob->getSaldo() - $total);
-                                $total = 0;
-                                $comprob->setEstado('PAGO PARCIAL');
-                            }
-                            array_push($txtConcepto, $comptxt);
-                            $em->persist($comprob);
+                $totalPago = 0;
+                // limpiar cheque y tarjeta si no corresponde
+                foreach( $entity->getCobroDetalles() as $detalle ){
+                    $detalle->setCajaApertura($apertura);
+                    if(!$detalle->getMoneda()){
+                        $detalle->setMoneda($entity->getMoneda());
+                    }
+                    $tipoPago = $detalle->getTipoPago();
+                    if( $tipoPago != 'CHEQUE' ){
+                        $detalle->setChequeRecibido(null);
+                    }
+                    if( $tipoPago != 'TARJETA' ){
+                        $detalle->setDatosTarjeta(null);
+                    }
+                    // sumar importes para calcular nc
+                    $totalPago += $detalle->getImporte();
+                }
+                $comprobantes = $entity->getComprobantes();
+                $montoNotaCredito = 0;
+                if( $entity->getGeneraNotaCredito() ){
+                    // marcar como cancelados los comprobantes
+                    foreach($comprobantes as $comp){
+                        $comp->setSaldo( 0 );
+                        // asociar los comprobantes a la nc - generar array para ws
+                    }
+                    $montoNotaCredito = round( ( $entity->getTotal() - $totalPago ) ,2);
+                    // generar nota de credito - comprobante fiscal
+
+
+
+
+
+
+
+
+
+
+
+
+
+                }else{
+                    // cancelar saldos de los comprobantes
+                    $total = ( $totalPago > $entity->getTotal() ) ? $entity->getTotal() : $totalPago;
+                    $entity->setTotal( $total );
+                    foreach($comprobantes as $comprob){
+                        if ($total >= $comprob->getSaldo()) {
+                            //alcanza para cubrir el saldo
+                            $total -= $comprob->getSaldo();
+                            $comprob->setSaldo(0);
+                        }else {
+                            //no alcanza, impacta el total
+                            $comprob->setSaldo( $comprob->getSaldo() - $total);
+                            $total = 0;
                         }
                     }
                 }
-                $entity->setConcepto(json_encode($txtConcepto));
 
-                $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
-                $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
-                $entity->setPagoNro(sprintf("%06d", $equipo->getNroPagoVenta() + 1));
-                /* Guardar ultimo nro */
-                $equipo->setNroPagoVenta($equipo->getNroPagoVenta() + 1);
-
-                // cheques
-                foreach ($entity->getChequesRecibidos() as $cheque) {
-                    if (is_null($cheque->getId())) {
-                        $cheque->setTipo('T');
-                        $cheque->setUsado(false);
-                        $cheque->setTomado(new \DateTime);
-                        $cheque->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
-                        $cheque->setChequeNro(sprintf("%06d", $equipo->getNroInternoCheque() + 1));
-                        $equipo->setNroInternoCheque($equipo->getNroInternoCheque() + 1);
-                    }
-                    else {
-                        $obj = $em->getRepository('ConfigBundle:Cheque')->find($cheque->getId());
-                        $obj->setUsado(false);
-                        $entity->removeChequesRecibido($cheque);
-                        $entity->addChequesRecibido($obj);
-                    }
+                // set nro de pago
+                $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+                if($param){
+                    // ultimo nro de operacion de cobro
+                    $entity->setPagoNro( $param->getUltimoNroPagoCliente() + 1 );
+                    $param->setUltimoNroPagoCliente( $entity->getPagoNro() );
+                    $em->persist($param);
                 }
                 $em->persist($entity);
-                $em->persist($equipo);
                 $em->flush();
                 $em->getConnection()->commit();
+                $this->addFlash('success', 'Pago Registrado');
 
-                return $this->redirectToRoute('ventas_cliente_pagos');
+                return $this->redirectToRoute('ventas_cliente_pagos', array('cliId'=>$entity->getCliente()->getId()));
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());
                 $em->getConnection()->rollback();
             }
+
         }
 
         return $this->render('VentasBundle:Cliente:pago_edit.html.twig', array(
@@ -637,8 +627,6 @@ class ClienteController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el pago.');
         }
-        $texto = UtilsController::textoListaFacturasAction($entity->getConcepto(), $em);
-        $entity->setConceptoTxt($texto);
         return $this->render('VentasBundle:Cliente:pago_show.html.twig', array(
                     'entity' => $entity));
     }
@@ -647,9 +635,9 @@ class ClienteController extends Controller {
      * @Route("/pagos/deleteAjax/{id}", name="ventas_cliente_pagos_delete_ajax")
      * @Method("POST")
      */
-    public function pagosDeleteAjaxAction() {
+    public function pagosDeleteAjaxAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente_pagos');
-        $id = $this->getRequest()->get('id');
+        $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('VentasBundle:PagoCliente')->find($id);
         try {
@@ -689,6 +677,18 @@ class ClienteController extends Controller {
             $msg = $ex->getTraceAsString();
         }
         return new Response(json_encode($msg));
+    }
+
+    /**
+     * @Route("/getSaldoComprobante", name="get_saldo_comprobante")
+     * @Method("GET")
+     */
+    public function getSaldoComprobanteAction(Request $request) {
+        // facturas y notas de débito
+        $ids = $request->get('ids');
+        $em = $this->getDoctrine()->getManager();
+        $saldo = $em->getRepository('VentasBundle:FacturaElectronica')->findSaldoComprobantes($ids);
+        return new Response(  round($saldo,2) );
     }
 
     /**
@@ -920,6 +920,7 @@ class ClienteController extends Controller {
             $search = $request->get('search');
             $orders = $request->get('order');
             $columns = $request->get('columns');
+            $deudor = json_decode( $request->get('deudor') );
         }
         else // If the request is not a POST one, die hard
             die;
@@ -937,7 +938,7 @@ class ClienteController extends Controller {
         $otherConditions = "array or whatever is needed";
 
         // Get results from the Repository
-        $results = $this->repository->getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions = null);
+        $results = $this->repository->getIndexDTData($start, $length, $orders, $search, $columns, $deudor, $otherConditions = null);
 
         // Returned objects are of type Town
         $objects = $results["results"];
@@ -964,7 +965,6 @@ class ClienteController extends Controller {
             $j = 0;
             $nbColumn = count($columns);
             foreach ($columns as $key => $column) {
-                // In all cases where something does not exist or went wrong, return -
                 $responseTemp = '';
                 switch ($column['name']) {
                     case 'nombre': {
@@ -993,7 +993,7 @@ class ClienteController extends Controller {
                             break;
                         }
                     case 'saldo': {
-                            $saldo = $cliente->getSaldo();
+                            $saldo = round($cliente->getSaldo(),3) ;
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $saldo));
                             break;
                         }
@@ -1045,10 +1045,12 @@ class ClienteController extends Controller {
     public function exportClientesAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
         $search =  $request->get('searchterm');
-        $items = $em->getRepository('VentasBundle:Cliente')->getClientesForExportXls($search);
+        $deudor =  $request->get('deudor');
+
+        $items = $em->getRepository('VentasBundle:Cliente')->getClientesForExportXls($search,$deudor);
 
         $partial = $this->renderView('VentasBundle:Cliente:export-xls.html.twig',
-                array('items' => $items, 'search' => $search));
+                array('items' => $items, 'search' => $search, 'deudor'=>$deudor));
         $hoy = new \DateTime();
         $fileName = 'Clientes_' . $hoy->format('dmY_Hi');
         $response = new Response();

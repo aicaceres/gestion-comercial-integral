@@ -49,7 +49,7 @@ class ClienteRepository extends EntityRepository {
                 ->setParameter('agr', $cli);
 
         $pagos = $this->_em->createQueryBuilder('f')
-                ->select('g.id,3 tipo,g.fecha, 0 comprobante ,g.created fechaemi, 0 concepto, 0 importe')
+                ->select('g.id,3 tipo,g.fecha, 0 comprobante ,g.created fechaemi, 0 concepto, g.total importe')
                 ->from('VentasBundle\Entity\PagoCliente', 'g')
                 ->innerJoin('g.cliente', 'p')
                 ->where('p.id=:agr')
@@ -142,15 +142,17 @@ class ClienteRepository extends EntityRepository {
     public function getFacturasImpagas($id) {
         $cli = $this->find($id);
         $facturas = $this->_em->createQueryBuilder('f')
-                ->select("f.id, 'FAC' tipo, f.fechaFactura fecha, f.total, f.saldo, f.nroFactura nroComprobante")
-                ->from('VentasBundle\Entity\Factura', 'f')
-                ->innerJoin('f.cliente', 'p')
-                ->where('f.saldo>0')
+                ->select("f.id, 'FAC' tipo, c.fechaCobro fecha, f.total, f.saldo, 0 nroComprobante")
+                ->from('VentasBundle\Entity\FacturaElectronica', 'f')
+                ->innerJoin('f.cobro', 'c')
+                ->innerJoin('c.cliente', 'p')
+                ->innerJoin('c.formaPago', 'fp')
+                ->where('fp.cuentaCorriente=1')
                 ->andWhere('p.id=:agr')
                 ->setParameter('agr', $cli)
-                ->orderBy('f.fechaFactura');
+                ->orderBy('fecha');
         $notacred = $this->_em->createQueryBuilder('c')
-                ->select("c.id,'DEB' tipo,c.fecha, c.total, c.saldo, c.nroNotaDebCred nroComprobante")
+                ->select("c.id,'DEB' tipo,c.fecha, c.total, c.saldo, 0 nroComprobante")
                 ->from('VentasBundle\Entity\NotaDebCred', 'c')
                 ->innerJoin('c.cliente', 'p')
                 ->where('p.id=:agr')
@@ -300,7 +302,7 @@ class ClienteRepository extends EntityRepository {
 
 
 /**
-* para administracion de productos
+* para administracion de clientes
  */
     public function indexCount($provId = null) {
         $query = $this->_em->createQueryBuilder();
@@ -309,14 +311,15 @@ class ClienteRepository extends EntityRepository {
         return $query->getQuery()->getSingleScalarResult();
     }
 
-    public function getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions) {
+    public function getIndexDTData($start, $length, $orders, $search, $columns, $deudor, $otherConditions) {
+        $em = $this->_em;
         // Create Main Query
-        $query = $this->_em->createQueryBuilder();
+        $query = $em->createQueryBuilder();
         $query->select("c")
                 ->from('VentasBundle\Entity\Cliente', 'c');
 
         // Create Count Query
-        $countQuery = $this->_em->createQueryBuilder();
+        $countQuery = $em->createQueryBuilder();
         $countQuery->select("count(c.id)")
                 ->from('VentasBundle\Entity\Cliente', 'c');
 
@@ -324,6 +327,22 @@ class ClienteRepository extends EntityRepository {
         $query->innerJoin('c.localidad', 'l');
 
         $countQuery->innerJoin('c.localidad', 'l');
+
+        if($deudor){
+            $query->leftJoin('c.cobros','co')
+                  ->leftJoin('co.facturaElectronica','f')
+                  ->leftJoin('c.notasDebCredVenta','nc')
+                  ->leftJoin('nc.notaElectronica','ne')
+                  ->andWhere('f.saldo>0')
+                  ->orWhere('ne.saldo>0');
+
+            $countQuery->leftJoin('c.cobros','co')
+                  ->leftJoin('co.facturaElectronica','f')
+                  ->leftJoin('c.notasDebCredVenta','nc')
+                  ->leftJoin('nc.notaElectronica','ne')
+                  ->andWhere('f.saldo>0')
+                  ->orWhere('ne.saldo>0');
+        }
 
         // Other conditions than the ones sent by the Ajax call ?
 /*        if ($otherConditions === null) {
@@ -398,7 +417,7 @@ class ClienteRepository extends EntityRepository {
         );
     }
 
-    public function getClientesForExportXls($search=null){
+    public function getClientesForExportXls($search=null, $deudor=null){
         $query = $this->_em->createQueryBuilder();
         $query->select("c")
                 ->from('VentasBundle\Entity\Cliente', 'c')
@@ -410,6 +429,15 @@ class ClienteRepository extends EntityRepository {
                     ' OR c.direccion LIKE \'%' . $searchItem . '%\'  OR  c.telefono LIKE \'%' . $searchItem . '%\' '. ' OR l.name LIKE \'%' . $searchItem . '%\'' ;
             $query->andWhere($searchQuery);
         }
+        if($deudor){
+            $query->leftJoin('c.cobros','co')
+                  ->leftJoin('co.facturaElectronica','f')
+                  ->leftJoin('c.notasDebCredVenta','nc')
+                  ->leftJoin('nc.notaElectronica','ne')
+                  ->andWhere('f.saldo>0')
+                  ->orWhere('ne.saldo>0');
+        }
+
         return $query->getQuery()->getResult();
     }
 

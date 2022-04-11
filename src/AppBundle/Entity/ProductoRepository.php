@@ -348,7 +348,7 @@ class ProductoRepository extends EntityRepository {
     // para autocompletar
     public function filterByTerm($key) {
         $query = $this->_em->createQueryBuilder();
-            $query->select("p.id,p.nombre text")
+            $query->select("p.id, concat(p.nombre,'  |  ',p.codigo) text")
                     ->from('AppBundle:Producto', 'p')
                     ->where('p.nombre LIKE :key')
                     ->orWhere('p.codigo LIKE :key')

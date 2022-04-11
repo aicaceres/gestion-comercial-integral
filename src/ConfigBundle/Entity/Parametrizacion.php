@@ -44,6 +44,11 @@ class Parametrizacion {
      * @ORM\Column(name="ultimo_nro_presupuesto", type="integer")
      */
     protected $ultimoNroPresupuesto = 0;
+    /**
+     * @var integer $ultimoNroPagoCliente
+     * @ORM\Column(name="ultimo_nro_pago_cliente", type="integer")
+     */
+    protected $ultimoNroPagoCliente = 0;
 
     /**
      * @var integer $validezPresupuesto
@@ -257,7 +262,7 @@ class Parametrizacion {
     /**
      * Get puntoVentaFactura
      *
-     * @return string 
+     * @return string
      */
     public function getPuntoVentaFactura()
     {
@@ -280,10 +285,33 @@ class Parametrizacion {
     /**
      * Get puntoVentaTicket
      *
-     * @return string 
+     * @return string
      */
     public function getPuntoVentaTicket()
     {
         return $this->puntoVentaTicket;
+    }
+
+    /**
+     * Set ultimoNroPagoCliente
+     *
+     * @param integer $ultimoNroPagoCliente
+     * @return Parametrizacion
+     */
+    public function setUltimoNroPagoCliente($ultimoNroPagoCliente)
+    {
+        $this->ultimoNroPagoCliente = $ultimoNroPagoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get ultimoNroPagoCliente
+     *
+     * @return integer 
+     */
+    public function getUltimoNroPagoCliente()
+    {
+        return $this->ultimoNroPagoCliente;
     }
 }

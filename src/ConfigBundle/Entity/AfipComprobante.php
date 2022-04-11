@@ -46,6 +46,15 @@ class AfipComprobante {
         return $this->codigo . ' - ' . $this->nombre;
     }
 
+    public function getSigno(){
+        $tipo = substr($this->getValor(),0,3);
+        return ( ($tipo=='DEB') ? '+' : '-'  );
+    }
+    public function getClase(){
+        $clase = substr($this->getValor(),0,3);
+        return $clase;
+    }
+
     /**
      * Get id
      *

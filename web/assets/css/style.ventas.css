@@ -124,7 +124,7 @@
     border-collapse: collapse;
 }
 .tabla-pagos tr{
-    background-color: lightblue !important;
+    background-color: antiquewhite !important;
     border-bottom: 6px solid white;
 }
 #dialog-tipo form{

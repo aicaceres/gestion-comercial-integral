@@ -144,11 +144,10 @@ class Cliente
     */
     protected $localidadTrabajo;
 
-
      /**
-     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\Factura", mappedBy="cliente")
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\Cobro", mappedBy="cliente")
      */
-    protected $facturasVenta;
+    protected $cobros;
     /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PagoCliente", mappedBy="cliente")
      */
@@ -195,7 +194,6 @@ class Cliente
      */
     public function __construct()
     {
-        $this->facturasVenta = new \Doctrine\Common\Collections\ArrayCollection();
         $this->activo = true;
         $this->consumidorFinal = false;
         $this->saldoInicial = 0;
@@ -210,33 +208,18 @@ class Cliente
     }
 
     public function getSaldo(){
-        $facturas = $this->facturasVenta;
-        $pagos = $this->pagos;
-        $notasDebito = $this->notasDebCredVenta;
-        $saldo = $this->saldoInicial;
-        foreach ($facturas as $fact) {
-            if( !in_array($fact->getEstado(),['ANULADO']) )
-                $saldo += $fact->getTotal();
+        $saldo = 0;
+        foreach( $this->getCobros() as $cobro){
+            $saldo += $cobro->getFacturaElectronica()->getSaldo();
         }
-        foreach ($notasDebito as $deb) {
-            if($deb->getSigno()=='+' )
-                $saldo += $deb->getTotal();
-            else
-                $saldo -= $deb->getTotal();
-
-        }
-        foreach ($pagos as $pag) {
-            $saldo -= $pag->getTotal();
+        foreach( $this->getNotasDebCredVenta() as $cobro){
+            $saldo += $cobro->getNotaElectronica()->getSaldo();
         }
         return $saldo;
     }
 
     public function getFechaUltimaCompra(){
-        $facturas = $this->facturasVenta;
         $fecha=null;
-        foreach ($facturas as $fact) {
-            $fecha = $fact->getFechaFactura()->format('Y-m-d');
-        }
         return $fecha;
     }
 
@@ -849,39 +832,6 @@ class Cliente
     }
 
     /**
-     * Add facturasVenta
-     *
-     * @param \VentasBundle\Entity\Factura $facturasVenta
-     * @return Cliente
-     */
-    public function addFacturasVentum(\VentasBundle\Entity\Factura $facturasVenta)
-    {
-        $this->facturasVenta[] = $facturasVenta;
-
-        return $this;
-    }
-
-    /**
-     * Remove facturasVenta
-     *
-     * @param \VentasBundle\Entity\Factura $facturasVenta
-     */
-    public function removeFacturasVentum(\VentasBundle\Entity\Factura $facturasVenta)
-    {
-        $this->facturasVenta->removeElement($facturasVenta);
-    }
-
-    /**
-     * Get facturasVenta
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getFacturasVenta()
-    {
-        return $this->facturasVenta;
-    }
-
-    /**
      * Add pagos
      *
      * @param \VentasBundle\Entity\PagoCliente $pagos
@@ -991,5 +941,38 @@ class Cliente
     public function getUpdatedBy()
     {
         return $this->updatedBy;
+    }
+
+    /**
+     * Add cobros
+     *
+     * @param \VentasBundle\Entity\Cobro $cobros
+     * @return Cliente
+     */
+    public function addCobro(\VentasBundle\Entity\Cobro $cobros)
+    {
+        $this->cobros[] = $cobros;
+
+        return $this;
+    }
+
+    /**
+     * Remove cobros
+     *
+     * @param \VentasBundle\Entity\Cobro $cobros
+     */
+    public function removeCobro(\VentasBundle\Entity\Cobro $cobros)
+    {
+        $this->cobros->removeElement($cobros);
+    }
+
+    /**
+     * Get cobros
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCobros()
+    {
+        return $this->cobros;
     }
 }

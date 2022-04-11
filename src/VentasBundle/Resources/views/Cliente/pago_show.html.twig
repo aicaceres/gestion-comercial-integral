@@ -1,88 +1,175 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ asset('assets/css/style.ventas.css') }}" type="text/css" media="all" />
+{% endblock %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Pago del Cliente - {{entity.cliente.nombre}}</h1>
+    <h1 class="pagetitle">Cliente: {{entity.cliente.nombre}}</h1>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >Pago Nº {{entity.nroPago}}</h1>
-<div class="divEdicion">    
-    <form action="#" method="post" class="stdform">
+<h1 id="popup_title" >Pago Nº {{entity.comprobanteNro}}
+    <span class="floatright fechahora"> {{entity.fecha|date('d/m/Y')}}
+             &nbsp;| &nbsp; {{app.user.username}} </span>
+</h1>
+<div class="divForm divEdicion">
+    <form class="form-horizontal" id="ventasbundle_pagocliente">
+        <fieldset class="fields">
+            <div class="selectorCliente">
+                <label>DATOS DEL CLIENTE: </label>
+                <select style="width:80%" disabled="disabled" ><option>{{ entity.cliente.nombre }}</option></select>
+            </div>
+            <div class="datos-moneda">
+                <label>MONEDA:
+                  {% if entity.moneda.cotizacion != 1 %}
+                    <small><label> TIPO DE CAMBIO:</label> {{ entity.moneda.cotizacion }}</small>
+                  {% endif %}
+                </label>
+                <select class="select2" style="width:80%" disabled="disabled">
+                    <option>{{ entity.moneda.nombre}}</option>
+                </select>
+            </div>
+            <div style="display: inline-block; width: 20%">
+                <label>FECHA DE PAGO:</label>
+                <input type="text" disabled="disabled" class="datepicker hasDatepicker" value="{{entity.fecha|date('d/m/Y')}}">
+            </div>
+        </fieldset>
         <fieldset >
-            <div class="two_fields">
-                <div><label for="nroFactura">Nº Pago:</label>
-                    <input type="text" value="{{entity.nroPago}}" disabled="disabled" class="width100">
-                </div>
-                <div><label for="nroComprobante">Comprobante</label>
-                    <input type="text" value="{{entity.nroComprobante}}" disabled="disabled" class="width100">
-                </div>
-            </div> 
-            <p><div><label for="cliente">Cliente:</label>
-                    <input type="text" value="{{entity.cliente}}" disabled="disabled" class="smallinput">
-                </div>
-            </p>
-            <p><div><label for="fecha">Fecha Pago:</label>
-                    <input type="text" value="{{entity.fecha|date('d/m/Y')}}" disabled="disabled" class="width100">
-                </div>
-            </p>
-            <p>
-            <div><label for="concepto">Facturas:</label>
-                <textarea class="mediuminput" disabled="disabled">{{entity.conceptoTxt}}</textarea>   
-                
-                </div>
-            </p>
-            <p><div><label for="detalle">Detalle:</label>
-                <textarea class="mediuminput" disabled="disabled">{{entity.detalle}}</textarea>
-                </div>
-            </p>
-            <div class="locate">
-                <div><label for="importe">Importe</label><input type="text" class="width50" value="{{entity.importe}}"></div>
-                <div><label for="importe">Depósito:</label><input type="text" class="width50" value="{{entity.deposito}}"></div>
-                <div><label for="importe">Cheques:</label>
-                    <input type="text" value="{{entity.getTotalCheques}}" disabled="disabled" id="totCheques" class="width50">
-                </div>
-                <div><label for="importe">TOTAL:</label>
-                    <input type="text" value="{{entity.getTotal}}" disabled="disabled" id="total" class="width100">
-                </div>
-            </div>    
-            <br clear="all" /> 
-            <div style="margin-bottom: 20px;">
-                 <h4 style="margin-bottom: 5px;">Cheques </h4>
-                    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" >
-                        <thead>
+            <div class="datos-cliente">
+                {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+            </div>
+
+        </fieldset>
+
+        <fieldset class="fields">
+            <div style="display: inline-block; width: 55%">
+                <label >COMPROBANTES PENDIENTES:</label>
+                <select class="select2" style="width:90%">
+                    <option> {{ entity.comprobantesTxt }} </option>
+                </select>
+            </div>
+            <div style="display: inline-block; width: 15%">
+                <label>TOTAL:</label>
+                <strong> {{ entity.moneda.simbolo }} </strong>
+                <input class="number width100" disabled="disabled" value="{{ entity.total|number_format(2,'.',',') }}">
+            </div>
+            <div style="display: inline-block; width: 20%;">
+                <label>Generar NC:</label>
+                <input type="checkbox" {% if entity.generaNotaCredito %} checked="checked" {% endif %} >
+                <span class="nota-credito" style="padding: 5px; display: none;">
+                    <strong> {{ entity.moneda.simbolo }} </strong>
+                    <span>0.00</span>
+                </span>
+            </div>
+        </fieldset>
+        <fieldset class="fields">
+            <div>
+                <label>OBSERVACIONES:</label>
+                <textarea rows="1" style="height:20px">{{ entity.observaciones|raw }}</textarea>
+            </div>
+        </fieldset>
+
+        <fieldset class="detalle_pago">
+            <div style="display:inline-block; width:85%; margin:0 0 10px 5%;" >
+                <h5>DETALLE DEL PAGO:</h5>
+                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
+                    <tbody>
+                    {% set importe = 0 %}
+                    {% for det in entity.cobroDetalles %}
+                        {% set importe = importe + det.importe %}
+                        {% if det.tipoPago == 'EFECTIVO' %}
+                            <tr class="item">
+                                <td class="monedaTd" style="text-align:right;">
+                                    <label>EFECTIVO: </label>
+                                </td>
+                                <td class="importeTd alignright" width="160px">
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if det.tipoPago == 'CHEQUE' %}
+                            <tr class="item">
+                                <td class="chequeTd" style="font-size:11px">
+                                    <div style="margin:5px 0">
+                                        <label>CHEQUE N°</label>
+                                        <span>{{ det.chequeRecibido.nroCheque }}</span>
+                                        <label>Fecha:</label>
+                                        <span>{{ det.chequeRecibido.fecha|date('d-m-Y') }}</span>
+                                        <label>Dador:</label>
+                                        <span>{{ det.chequeRecibido.dador }}</span>
+                                        <label>Banco:</label>
+                                        <span>{{ det.chequeRecibido.banco }}</span>
+                                        <label>Sucursal:</label>
+                                        <span>{{ det.chequeRecibido.sucursal }}</span>
+                                    </div>
+                                </td>
+                                <td class="importeTd alignright" width="160px">
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% if det.tipoPago == 'TARJETA' %}
                             <tr>
-                                <th style="width:12%;" class="head0">Nº Interno</th>
-                                <th style="width:12%;" class="head0">Nº Cheque</th>
-                                <th class="head0" style="width:12%;">Fecha</th>
-                                <th class="head0">Titular</th>
-                                <th class="head0">Dador</th>
-                                <th class="head0">Banco</th>
-                                <th class="head0">Sucursal</th>
-                                <th class="head0" style="width:10%;">Importe</th>
+                                <td class="tarjetaTd" style="font-size:11px">
+                                    <div style="margin:5px 0">
+                                        <label>TARJETA:</label>
+                                        <span>{{ det.datosTarjeta.tarjeta }}</span>
+                                        <label>Número: </label>
+                                        <span>{{ det.datosTarjeta.numero }}</span>
+                                        <label>Cupón: </label>
+                                        <span>{{ det.datosTarjeta.cupon }}</span>
+                                        <label>Cuotas: </label>
+                                        <span>{{ det.datosTarjeta.cuota }}</span>
+                                        <label>Código Autorización: </label>
+                                        <span>{{ det.datosTarjeta.codigoAutorizacion }}</span>
+                                    </div>
+                                    {% if det.datosTarjeta.firmante %}
+                                    <div style="margin:5px 0">
+                                        <label>Firmante: </label>
+                                        <span>{{ det.datosTarjeta.firmante }}</span>
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td class="importeTd alignright" width="160px">
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody >
-                        {% for cheque in entity.chequesRecibidos %}
-                            <tr class="item" {% if cheque.devuelto %}style="text-decoration:line-through; " {% endif %}>
-                                <td>{{cheque.nroInterno}}</td>
-                                <td>{{cheque.nroCheque}}</td>
-                                <td>{{cheque.fecha|date('d/m/Y')}}</td>
-                                <td>{{cheque.titularCheque}}</td>
-                                <td>{{cheque.dador}}</td>
-                                <td>{{cheque.banco}}</td>
-                                <td>{{cheque.sucursal}}</td>
-                                <td class="importeTd">{{cheque.valor}}</td>                            
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>                
-            </div>                     
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="text-align:right">
+                                IMPORTE: &nbsp;
+                                <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                                <span class="pago" style="font-size:16px" >{{importe|number_format(3,'.',',')}}</span>.-
+                            </th>
+                            <th width="150px" class="vueltoTh">
+                                CAMBIO: &nbsp;
+                                <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                                <span class="vuelto" style="font-size:16px"> {{ 0|number_format(2,'.',',')}}  </span>
+                            </th>
+                        </tr>
+                    </thead>
+                </table>
+
+            </div>
+        </fieldset>
+
+
+
+
+
+        <fieldset>
+
             <div class="actionbutton">
                 <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
             </div>
         </fieldset>
     </form>
-</div>    
+</div>
 </div>
 {% endblock %}

@@ -17,7 +17,7 @@
     }
 </style>
 <div>
-    <div class="pageheader notab">   
+    <div class="pageheader notab">
         <h1 class="pagetitle caja aligncenter hidden">
             {{entity.caja.nombre}}
         </h1>
@@ -27,19 +27,19 @@
         </h1>
     </div>
 
-    {{ form_start(form, {'attr': {'class': 'stdform','id':'ventasbundle_cierre'}}) }}     
-    
-    <fieldset id="fieldmonto">                                        
-        {{ form_row(form.montoCierre, { 'attr': {'class' : 'mininput'} })}}                            
-    </fieldset> 
+    {{ form_start(form, {'attr': {'class': 'stdform','id':'ventasbundle_cierre'}}) }}
+
+    <fieldset id="fieldmonto">
+        {{ form_row(form.montoCierre, { 'attr': {'class' : 'width100 number'} })}}
+    </fieldset>
     <input type="hidden" name="id" value="{{ entity.id }}"/>
-    <p class="actionBar aligncenter">
-        <button class="guardar" type="submit" >Registrar Cierre de Caja</button>
+    <p class="actionBar aligncenter hidden">
+        <button class="js-registrar-cierre" type="button" >Registrar Cierre de Caja</button>
     </p>
-    
+
     <div name="rest" class="hiddenformrest"> {{ form_rest(form) }} </div>
     {{ form_end(form) }}
 
-</div> 
-    
+</div>
+
 {% endblock %}

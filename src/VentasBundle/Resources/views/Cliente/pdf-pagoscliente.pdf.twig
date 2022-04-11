@@ -9,11 +9,11 @@
                                 <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
                             </td>
                         </tr>
-                    </table>                                        
-                    <div border.color="#F5C98F" height="2px" ></div>   
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
                     <div height="5px"></div>
-                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
-                </div>                      
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
             </header>
             <footer>
                 <div height="30px" width="100%" text-align="right">
@@ -21,7 +21,8 @@
                 </div>
             </footer>
         </placeholders>
-        <h2 text-align="center"> Pagos del Cliente {{ filtro[0] }}</h2>
+        <h2 text-align="center"> Pagos de Clientes</h2>
+        {% if filtro[0] %} <h2 text-align="center"> {{ filtro[0] }} </h2>{% endif %}
         {% if filtro[1] or filtro[2] %}
         <h4><strong>Período:</strong> {{ filtro[1] }} al {{ filtro[2] }} </h4>
         {% endif %}
@@ -29,37 +30,52 @@
             <h4> Término de Búsqueda: "{{search}}" </h4>
             <div height="10px"></div>
         {%endif%}
-        <table font-size="9px">
+
+        <table font-size="9px" padding-top="5px">
             <tr>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1 cm"><strong>#</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Fecha</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>N° Comprobante</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Concepto</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Detalle</strong></td>                          
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Importe</strong></td>                
-            </tr>            
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>#</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.8 cm"><strong>Fecha</strong></td>
+                {% if not filtro[0] %}
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" ><strong>Cliente</strong></td>
+                {% endif %}
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>N° Comprobante</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Comprobantes Imputados</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>NC</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Importe</strong></td>
+            </tr>
             {% if items|length>0   %}
                 {% for item in items %}
                     <tr>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{loop.index}}</td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[0]}}</td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[1]}}</td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[2]}}</td>
-                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[3]}}</td>
-                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[4]}}</td>
-                    </tr>                
-                {% endfor %}  
-            {% else %}  
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[ 0 ]}}</td>
+                        {% if not filtro[0] %}
+                            <td height="20px" vertical-align="middle" padding-left="5px">{{ item[1] }}</td>
+                        {% endif %}
+                        <td height="20px" vertical-align="middle" padding-left="5px">
+                            {% if filtro[0] %} {{ item[1] }} {% else %} {{ item[2] }} {% endif %}
+                        </td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">
+                            {% if filtro[0] %} {{ item[2] }} {% else %} {{ item[3] }} {% endif %}
+                        </td>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">
+                            {% if filtro[0] %} {{ item[3] }} {% else %} {{ item[4] }} {% endif %}
+                        </td>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">
+                            {% if filtro[0] %} {{ item[4] }} {% else %} {{ item[5] }} {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %}
                 <tr>
                     <td colspan="6" height="30px" vertical-align="middle" padding-left="10px">
                         <strong>No hay pagos coincidentes con el criterio de búsqueda</strong></td>
                 </tr>
-            {% endif %}              
+            {% endif %}
 
             <tr>
-                <td colspan="6" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
+                <td colspan="{{ filtro[0] ? 6 : 7 }}" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px">
                     <strong>Cantidad de Pagos : {{items|length}}</strong></td>
             </tr>
-        </table>         
+        </table>
     </dynamic-page>
 </pdf>

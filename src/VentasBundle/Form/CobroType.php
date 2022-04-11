@@ -34,7 +34,7 @@ class CobroType extends AbstractType {
                 ->add('venta', 'entity', array('class' => 'VentasBundle:Venta'))
                 //->add('facturaElectronica', new FacturaElectronicaType())
                 ->add('detalles', 'collection', array(
-                    'type' => new CobroDetalleType($type),
+                    'type' => new CobroDetalleType(),
                     'by_reference' => false,
                     'allow_delete' => true,
                     'allow_add' => true,

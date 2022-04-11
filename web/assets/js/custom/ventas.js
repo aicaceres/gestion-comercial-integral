@@ -49,7 +49,7 @@ jQuery(function ($) {
                         if( data.esConsumidorFinal ){
                             $('.datos-cliente').hide();
                             $('.datos-cf').show();
-                            $('[id*="_nombreCliente"]').attr('required',true);
+                            //$('[id*="_nombreCliente"]').attr('required',true);
                             $('[id*="_nombreCliente"]').focus();
                         }else{
                             $('.datos-cf').hide();
@@ -92,11 +92,11 @@ jQuery(function ($) {
                     }
                 }
             });
-        });
+        }).trigger('change');
 
         // al modificar forma de pago actualizar datos del partial
         $('[id*="_formaPago"]').on('change', function () {
-            $('.datos-formapago').html('');
+            //$('.datos-formapago').html('');
             id = $(this).val();
             url_datos = $(this).attr('url_datos');
             $.get(url_datos, { 'id': id }).done(function (data) {
@@ -189,7 +189,7 @@ jQuery(function ($) {
                     cache: true
                     },
                     minimumInputLength: 3
-                }).on('change', function() {
+            }).on('change', function () {
                     obj = $(this);
                     var data = {
                         id: obj.val(),
@@ -492,25 +492,31 @@ function openModalProducto(obj){
                 deposito: $('[id*="_deposito"]').val(),
             };
             urlDatosProducto = obj.attr('url_datos');
-            $.getJSON( urlDatosProducto , data).done(function(data){
-                // actualizar datos
-                objprecio = obj.parent().siblings('.precTd');
-                objprecio.find('[id*="_precio"]').val( data.precio );
-                objprecio.find('[id*="_alicuota"]').val(data.alicuota);
-                textoComodin = obj.siblings('[id*="_textoComodin"]')
-                if (esPresupuesto && data.comodin) {
-                    textoComodin.attr('required',true);
-                    textoComodin.show();
-                    textoComodin.focus();
-                } else {
-                    textoComodin.attr('required',false);
-                    textoComodin.hide();
-                    objcant = obj.parent().siblings('.cantTd');
-                    objcant.find('[id*="_cantidad"]').focus();
+            $.ajax({
+                dataType: "json",
+                url: urlDatosProducto,
+                async: false,
+                data: data,
+                success: function(data){
+                    // actualizar datos
+                    objprecio = obj.parent().siblings('.precTd');
+                    objprecio.find('[id*="_precio"]').val(data.precio);
+                    objprecio.find('[id*="_alicuota"]').val(data.alicuota);
+                    textoComodin = obj.siblings('[id*="_textoComodin"]')
+                    if (esPresupuesto && data.comodin) {
+                        textoComodin.attr('required',true);
+                        textoComodin.show();
+                        textoComodin.focus();
+                    } else {
+                        textoComodin.attr('required',false);
+                        textoComodin.hide();
+                        objcant = obj.parent().siblings('.cantTd');
+                        objcant.find('[id*="_cantidad"]').focus();
+                    }
+                    obj.siblings('.bajominimo').toggle( data.bajominimo )
+                    actualizaTotales();
                 }
-                obj.siblings('.bajominimo').toggle( data.bajominimo )
-                actualizaTotales();
-            });
+            })
         });
         productolast.select2('focus');
     }

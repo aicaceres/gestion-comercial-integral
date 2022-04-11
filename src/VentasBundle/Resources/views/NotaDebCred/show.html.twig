@@ -152,8 +152,8 @@
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
                                 <span class="pago" style="font-size:16px" >{{importe|number_format(3,'.',',')}}</span>.-
                             </th>
-                            <th width="150px" class="red">
-                                VUELTO: &nbsp;
+                            <th width="150px" class="vueltoTh">
+                                CAMBIO: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
                                 <span class="vuelto" style="font-size:16px"> {{ (importe-entity.montoTotal)|number_format(2,'.',',')}}  </span>
                             </th>

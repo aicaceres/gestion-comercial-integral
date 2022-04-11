@@ -17,67 +17,68 @@ class PagoCliente
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
-    
+
     /**
      * @var datetime $fecha
      * @ORM\Column(name="fecha", type="datetime")
      */
-    private $fecha;    
+    private $fecha;
     /**
      * @var integer $prefijoNro
      * @ORM\Column(name="prefijo_nro", type="string", length=3)
      */
-    protected $prefijoNro;
+    protected $prefijoNro = '011';
     /**
      * @var integer $pagoNro
      * @ORM\Column(name="pago_nro", type="string", length=6)
      */
-    protected $pagoNro;    
-    
+    protected $pagoNro;
     /**
-     * @var integer $nroComprobante
-     * @ORM\Column(name="nro_comprobante", type="string", length=15, nullable=true)
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
+     * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
      */
-    protected $nroComprobante;
+    protected $moneda;
     /**
-     * @var string $concepto
-     * @ORM\Column(name="concepto", type="text", nullable=false)
-     */    
-    protected $concepto;    
+     * @var string $cotizacion
+     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     */
+    protected $cotizacion = 0;
     /**
-     * @var string $detalle
-     * @ORM\Column(name="detalle", type="text", nullable=true)
-     */    
-    protected $detalle;
-    
-     /**
-     * @var integer $importe
-     * @ORM\Column(name="importe", type="decimal", scale=3 )
+     * @var integer $total
+     * @ORM\Column(name="total", type="decimal", scale=2 )
      */
-    protected $importe;
-    
-     /**
-     * @var integer $deposito
-     * @ORM\Column(name="deposito", type="decimal", scale=3 )
+    protected $total=0;
+
+    /**
+     * @ORM\Column(name="genera_nota_credito", type="boolean",nullable=true)
      */
-    protected $deposito;
-    
+    protected $generaNotaCredito = false;
+
      /**
-     * @var integer $retencion
-     * @ORM\Column(name="retencion", type="decimal", scale=3 )
+     * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\FacturaElectronica", inversedBy="pagos")
+     * @ORM\JoinTable(name="comprobantes_x_pagocliente",
+     *      joinColumns={@ORM\JoinColumn(name="ventas_factura_electronica_id", referencedColumnName="id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="ventas_pago_cliente_id", referencedColumnName="id")}
+     * )
      */
-    protected $retencion;
-    
+    private $comprobantes;
+
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="pagoCliente",cascade={"persist", "remove"})
+     */
+    protected $cobroDetalles;
+
+    /**
+     * @var string $observaciones
+     * @ORM\Column(name="observaciones", type="text", nullable=true)
+     */
+    protected $observaciones;
+
      /**
      *@ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="pagos")
-     *@ORM\JoinColumn(name="cliente_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      */
     protected $cliente;
-    
-     /**
-     * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\Cheque", mappedBy="pagoCliente", cascade={"persist"})
-     */    
-    private $chequesRecibidos;    
 
     /**
      * @var datetime $created
@@ -85,7 +86,7 @@ class PagoCliente
      * @ORM\Column(type="datetime")
      */
     private $created;
-   
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -93,32 +94,36 @@ class PagoCliente
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
-    
-    private $conceptoTxt;    
-    public function getConceptoTxt(){
-        return $this->conceptoTxt;
-    }
-    public function setConceptoTxt($txt)
-    {
-        $this->conceptoTxt = $txt;    
-        return $this;
-    }    
-    
-    
+
     /**
      * Constructor
      */
     public function __construct()
     {
-        $this->chequesRecibidos = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->retencion = 0;
+        $this->comprobantes = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
-    
+
+    public function __toString(){
+         return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
+    }
+
+    public function getComprobanteNro(){
+        return $this->__toString();
+    }
+
+    public function getComprobantesTxt(){
+        $txt = '';
+        foreach ($this->getComprobantes() as $comp) {
+            $aux = ($txt) ? ' | ' : '';
+            $txt = $txt . $aux . $comp->getComprobanteTxt();
+        }
+        return $txt;
+    }
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -134,14 +139,14 @@ class PagoCliente
     public function setFecha($fecha)
     {
         $this->fecha = $fecha;
-    
+
         return $this;
     }
 
     /**
      * Get fecha
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFecha()
     {
@@ -157,14 +162,14 @@ class PagoCliente
     public function setPrefijoNro($prefijoNro)
     {
         $this->prefijoNro = $prefijoNro;
-    
+
         return $this;
     }
 
     /**
      * Get prefijoNro
      *
-     * @return string 
+     * @return string
      */
     public function getPrefijoNro()
     {
@@ -180,118 +185,64 @@ class PagoCliente
     public function setPagoNro($pagoNro)
     {
         $this->pagoNro = $pagoNro;
-    
+
         return $this;
     }
 
     /**
      * Get pagoNro
      *
-     * @return string 
+     * @return string
      */
     public function getPagoNro()
     {
         return $this->pagoNro;
     }
+
     /**
-     * Get nroPago
-     * @return string 
-     */
-    public function getNroPago()
-    {
-        return $this->prefijoNro.'-'.$this->pagoNro;
-    }  
-    
-    /**
-     * Set nroComprobante
+     * Set total
      *
-     * @param string $nroComprobante
+     * @param string $total
      * @return PagoCliente
      */
-    public function setNroComprobante($nroComprobante)
+    public function setTotal($total)
     {
-        $this->nroComprobante = $nroComprobante;
-    
+        $this->total = $total;
+
         return $this;
     }
 
     /**
-     * Get nroComprobante
+     * Get total
      *
-     * @return string 
+     * @return string
      */
-    public function getNroComprobante()
+    public function getTotal()
     {
-        return $this->nroComprobante;
+        return $this->total;
     }
 
     /**
-     * Set concepto
+     * Set observaciones
      *
-     * @param string $concepto
+     * @param string $observaciones
      * @return PagoCliente
      */
-    public function setConcepto($concepto)
+    public function setObservaciones($observaciones)
     {
-        $this->concepto = $concepto;
-    
+        $this->observaciones = $observaciones;
+
         return $this;
     }
 
     /**
-     * Get concepto
+     * Get observaciones
      *
-     * @return string 
+     * @return string
      */
-    public function getConcepto()
+    public function getObservaciones()
     {
-        return $this->concepto;
-    }
-
-    /**
-     * Set detalle
-     *
-     * @param string $detalle
-     * @return PagoCliente
-     */
-    public function setDetalle($detalle)
-    {
-        $this->detalle = $detalle;
-    
-        return $this;
-    }
-
-    /**
-     * Get detalle
-     *
-     * @return string 
-     */
-    public function getDetalle()
-    {
-        return $this->detalle;
-    }
-
-    /**
-     * Set importe
-     *
-     * @param string $importe
-     * @return PagoCliente
-     */
-    public function setImporte($importe)
-    {
-        $this->importe = $importe;
-    
-        return $this;
-    }
-
-    /**
-     * Get importe
-     *
-     * @return string 
-     */
-    public function getImporte()
-    {
-        return $this->importe;
+        return $this->observaciones;
     }
 
     /**
@@ -303,18 +254,85 @@ class PagoCliente
     public function setCreated($created)
     {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
         return $this->created;
+    }
+
+    /**
+     * Add comprobantes
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $comprobantes
+     * @return PagoCliente
+     */
+    public function addComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes)
+    {
+        $this->comprobantes[] = $comprobantes;
+
+        return $this;
+    }
+
+    /**
+     * Remove comprobantes
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $comprobantes
+     */
+    public function removeComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes)
+    {
+        $this->comprobantes->removeElement($comprobantes);
+    }
+
+    /**
+     * Get comprobantes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getComprobantes()
+    {
+        return $this->comprobantes;
+    }
+
+    /**
+     * Add cobroDetalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
+     * @return PagoCliente
+     */
+    public function addCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
+    {
+        $cobroDetalles->setPagoCliente($this);
+        $this->cobroDetalles[] = $cobroDetalles;
+
+        return $this;
+    }
+
+    /**
+     * Remove cobroDetalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
+     */
+    public function removeCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
+    {
+        $this->cobroDetalles->removeElement($cobroDetalles);
+    }
+
+    /**
+     * Get cobroDetalles
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCobroDetalles()
+    {
+        return $this->cobroDetalles;
     }
 
     /**
@@ -326,51 +344,18 @@ class PagoCliente
     public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
     {
         $this->cliente = $cliente;
-    
+
         return $this;
     }
 
     /**
      * Get cliente
      *
-     * @return \VentasBundle\Entity\Cliente 
+     * @return \VentasBundle\Entity\Cliente
      */
     public function getCliente()
     {
         return $this->cliente;
-    }
-
-    /**
-     * Add chequesRecibidos
-     *
-     * @param \ConfigBundle\Entity\Cheque $chequesRecibidos
-     * @return PagoCliente
-     */
-    public function addChequesRecibido(\ConfigBundle\Entity\Cheque $chequesRecibidos)
-    {
-        $chequesRecibidos->setPagoCliente($this);
-        $this->chequesRecibidos[] = $chequesRecibidos;
-        return $this;
-    }
-
-    /**
-     * Remove chequesRecibidos
-     *
-     * @param \ConfigBundle\Entity\Cheque $chequesRecibidos
-     */
-    public function removeChequesRecibido(\ConfigBundle\Entity\Cheque $chequesRecibidos)
-    {
-        $this->chequesRecibidos->removeElement($chequesRecibidos);
-    }
-
-    /**
-     * Get chequesRecibidos
-     *
-     * @return \Doctrine\Common\Collections\Collection 
-     */
-    public function getChequesRecibidos()
-    {
-        return $this->chequesRecibidos;
     }
 
     /**
@@ -382,75 +367,87 @@ class PagoCliente
     public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
     {
         $this->createdBy = $createdBy;
-    
+
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
         return $this->createdBy;
     }
-    
-    public function getTotalCheques(){
-        $total = 0;
-        foreach ($this->chequesRecibidos as $item) {
-           // if(!$item->getDevuelto())
-                $total = $total + $item->getValor();
-        }
-        return $total;
-    }
-    public function getTotal(){
-        return $this->getTotalCheques() + $this->deposito + $this->retencion + $this->importe;
-    }    
 
     /**
-     * Set deposito
+     * Set generaNotaCredito
      *
-     * @param string $deposito
+     * @param boolean $generaNotaCredito
      * @return PagoCliente
      */
-    public function setDeposito($deposito)
+    public function setGeneraNotaCredito($generaNotaCredito)
     {
-        $this->deposito = $deposito;
-    
+        $this->generaNotaCredito = $generaNotaCredito;
+
         return $this;
     }
 
     /**
-     * Get deposito
+     * Get generaNotaCredito
      *
-     * @return string 
+     * @return boolean
      */
-    public function getDeposito()
+    public function getGeneraNotaCredito()
     {
-        return $this->deposito;
+        return $this->generaNotaCredito;
     }
 
     /**
-     * Set retencion
+     * Set moneda
      *
-     * @param string $retencion
+     * @param \ConfigBundle\Entity\Moneda $moneda
      * @return PagoCliente
      */
-    public function setRetencion($retencion)
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
     {
-        $this->retencion = $retencion;
-    
+        $this->moneda = $moneda;
+
         return $this;
     }
 
     /**
-     * Get retencion
+     * Get moneda
      *
-     * @return string 
+     * @return \ConfigBundle\Entity\Moneda
      */
-    public function getRetencion()
+    public function getMoneda()
     {
-        return $this->retencion;
+        return $this->moneda;
     }
+
+    /**
+     * Set cotizacion
+     *
+     * @param string $cotizacion
+     * @return PagoCliente
+     */
+    public function setCotizacion($cotizacion)
+    {
+        $this->cotizacion = $cotizacion;
+
+        return $this;
+    }
+
+    /**
+     * Get cotizacion
+     *
+     * @return string
+     */
+    public function getCotizacion()
+    {
+        return $this->cotizacion;
+    }
+
 }

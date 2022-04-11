@@ -93,7 +93,7 @@ class Venta {
     protected $deposito;
 
     /**
-     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\VentaDetalle", mappedBy="venta",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\VentaDetalle", mappedBy="venta",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $detalles;
 
@@ -152,19 +152,19 @@ class Venta {
         if( $categIva == 'I' || $categIva == 'M'){
             // suma de descuentos x item
             foreach ($this->detalles as $item) {
-                $total = $total + $item->getDtoRecItem();
+                $total = $total + $item->getTotalDtoRecItem();
             }
             $total = $total / $this->getCotizacion();
         }else{
             // descuento sobre el subtotal
             $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
         }
-        return round( ($total ) ,3);
+        return round( ($total) ,3);
     }
     public function getTotalIva(){
         $total = 0;
         foreach ($this->detalles as $item) {
-            $total = $total + $item->getIvaItem();
+            $total = $total + $item->getTotalIvaItem();
         }
         return round( ($total / $this->getCotizacion()) ,3);
     }
@@ -185,7 +185,7 @@ class Venta {
             $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
             $total = $this->getSubTotal() + $descRec  ;
         }
-        return round($total,2) ;
+        return round($total,3) ;
     }
 
     /**
@@ -648,7 +648,7 @@ class Venta {
     /**
      * Get concepto
      *
-     * @return string 
+     * @return string
      */
     public function getConcepto()
     {

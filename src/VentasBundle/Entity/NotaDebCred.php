@@ -137,7 +137,7 @@ class NotaDebCred {
     protected $unidadNegocio;
 
     /**
-     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\NotaDebCredDetalle", mappedBy="notaDebCred",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\NotaDebCredDetalle", mappedBy="notaDebCred",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $detalles;
 
@@ -221,7 +221,7 @@ class NotaDebCred {
         if( $categIva == 'I' || $categIva == 'M'){
             // suma de descuentos x item
             foreach ($this->detalles as $item) {
-                $total = $total + $item->getDtoRecItem();
+                $total = $total + $item->getTotalDtoRecItem();
             }
             $total = $total / $this->getCotizacion();
         }else{
@@ -233,7 +233,7 @@ class NotaDebCred {
     public function getTotalIva(){
         $total = 0;
         foreach ($this->detalles as $item) {
-            $total = $total + $item->getIvaItem();
+            $total = $total + $item->getTotalIvaItem();
         }
         return round( ($total / $this->getCotizacion()) ,3);
     }

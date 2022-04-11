@@ -51,6 +51,12 @@ class CajaApertura
     protected $montoCierre;
 
     /**
+     * @var integer $cambios
+     * @ORM\Column(name="cambios", type="decimal", scale=2, nullable=true )
+     */
+    protected $cambios;
+
+    /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="cajaApertura")
      */
     protected $movimientos;
@@ -353,10 +359,33 @@ class CajaApertura
     /**
      * Get movimientos
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getMovimientos()
     {
         return $this->movimientos;
+    }
+
+    /**
+     * Set cambios
+     *
+     * @param string $cambios
+     * @return CajaApertura
+     */
+    public function setCambios($cambios)
+    {
+        $this->cambios = $cambios;
+
+        return $this;
+    }
+
+    /**
+     * Get cambios
+     *
+     * @return string 
+     */
+    public function getCambios()
+    {
+        return $this->cambios;
     }
 }

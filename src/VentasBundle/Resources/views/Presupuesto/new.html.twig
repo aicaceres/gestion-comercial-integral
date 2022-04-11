@@ -57,7 +57,8 @@
                 {{ form_widget(form.deposito,{'attr':{'style':'width:80%','tabindex':-1}}) }}
             </div>
             <div style="display:inline-block; width: 20%;">
-                {{ form_row(form.descuentaStock)}}
+                {{ form_label(form.descuentaStock, null, {'label_attr': {'style': 'width:35%'}})}}
+                {{ form_widget(form.descuentaStock)}}
             </div>
         </fieldset>
 
@@ -76,6 +77,8 @@
         <fieldset>
             <br clear="all" />
             <div class="actionbutton">
+                {% if entity.id %}
+                <a type="button" class="floatleft delete_button" href="{{ path('ventas_presupuesto_anular', { 'id': entity.id })}}">ANULAR</a> {% endif %}
                 <button class="guardar tabbable" type="submit" >Guardar</button>
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
@@ -99,7 +102,7 @@ jQuery(function ($) {
     $(window).on('load', function () {
         $('.datos-cliente').hide();
         $('.datos-cf').show();
-        $('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
+        //$('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
 
         // confirm on submit
         $('.guardar').on('click', function(){

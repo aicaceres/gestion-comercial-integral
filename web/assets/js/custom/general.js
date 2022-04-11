@@ -23,9 +23,7 @@ jQuery(function($){
     };
     $.datepicker.setDefaults($.datepicker.regional['es']);
 
-
-
-
+    $('.select2').select2({ width:'style' });
 });
 
 // variable global para definir si es valido el login en venta
@@ -141,7 +139,7 @@ function aperturaCajaVentas(url, cobro=false, caja=1 ) {
 function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
     let horaRefresh = null;
     data = { 'id': caja };
-    jQuery('#popup').html('');
+    jQuery('#popup').html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;">Cargando...</div>');
     jQuery('#popup')
         .load(url, data, function () {
             // refresca la hora en un campo fecha-hora
@@ -155,23 +153,55 @@ function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
             })
             // foco en monto
             jQuery('#ventasbundle_cierre_montoCierre').focus();
-            //reload = true;
+            jQuery('.js-registrar-cierre').on('click', function (e) {
+                if (jQuery('#ventasbundle_cierre_montoCierre').val()) {
+
+
+
+                    reload = true
+                } else {
+                    jAlert('Debe indicar la cantidad de dinero en caja.', 'Atención');
+                    return false;
+                }
+            })
         })
     .dialog({
         modal: true, autoOpen: false, title: "CIERRE DE CAJA", width: '450px',
+        buttons: [{text: "Registrar el Cierre de Caja", class: 'closePopup additem',
+            click: function () {
+                if (!jQuery('#ventasbundle_cierre_montoCierre').val()) {
+                    jAlert('Debe indicar la cantidad de dinero en caja.', 'Atención',
+                        function () {
+                            jQuery('#ventasbundle_cierre_montoCierre').focus();
+                        });
+                    return false;
+                }
+                url_cierre = jQuery('#ventasbundle_cierre').attr('action');
+                data = jQuery('#ventasbundle_cierre').serialize();
+                jQuery.post(url_cierre, data)
+                    .done(function (data) {
+                        if (data == 'ERROR') {
+                            jAlert('No se ha podido registrar el cierre. Intente nuevamente.');
+                        } else {
+                            window.open(data);
+                            window.location.reload();
+                        }
+                    }).fail(function () {
+                        alert("No se ha podido registrar el cierre. Intente nuevamente.");
+                    });
+                jQuery( this ).dialog( "close" )
+            }}],
         close: function (event, ui) {
             event.preventDefault();
             clearInterval(horaRefresh);
-            if( reload )
-                window.location.href = referer;
         }
     });
     jQuery('#popup').dialog('open');
 }
 
-function checknumero(obj){
+function checknumero(obj, dec=3){
     num = obj.val().replace(',','.');
-    num = ( isNaN(num) || num==='' )  ? 0 : parseFloat(num).toFixed(3);
+    num = ( isNaN(num) || num==='' )  ? 0 : parseFloat(num).toFixed(dec);
     obj.val( num );
     return num*1;
 }
@@ -181,6 +211,13 @@ jQuery(document).ready(function ($) {
     jQuery('#tabs').tabs();
 
     jQuery('.select2').select2();
+
+    $('.vuelto').on('DOMSubtreeModified', function () {
+        th = $(this).parent();
+        val = parseFloat($(this).html());
+        th.toggleClass('red', val<0 );
+        th.toggleClass('green', val>0 );
+    })
 
 // select clientes para index
     let selectClienteIndex = jQuery('#selectClienteIndex');

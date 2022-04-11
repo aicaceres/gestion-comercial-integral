@@ -53,6 +53,11 @@ class FacturaElectronica
      * @ORM\Column(name="total", type="decimal", scale=2 )
      */
     protected $total;
+    /**
+     * @var integer $saldo
+     * @ORM\Column(name="saldo", type="decimal", scale=2 )
+     */
+    protected $saldo;
 
     /**
     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Cobro", inversedBy="facturaElectronica")
@@ -60,6 +65,11 @@ class FacturaElectronica
     * Registro del cobro por el cual se genero el voucher
     */
     protected $cobro;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\PagoCliente", mappedBy="comprobantes")
+     */
+    protected $pagos;
 
     /**
     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred", inversedBy="notaElectronica")
@@ -79,6 +89,10 @@ class FacturaElectronica
         return $this;
     }
 
+    public function __toString(){
+        return $this->getComprobanteTxt();
+    }
+
     public function getNroComprobanteTxt(){
         return str_pad($this->getPuntoVenta(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getNroComprobante(), 8, "0", STR_PAD_LEFT);
     }
@@ -96,6 +110,17 @@ class FacturaElectronica
         }
         return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt().
         ' | '. $fecha . ' | '. $simbolo . $this->getTotal();
+    }
+    public function getComprobanteCtaCtePendienteTxt(){
+        if( $this->getCobro() ){
+            $fecha = $this->getCobro()->getFechaCobro()->format('d/m/Y');
+            $simbolo = $this->getCobro()->getMoneda()->getSimbolo();
+        }else{
+            $fecha = $this->getNotaDebCred()->getFecha()->format('d/m/Y');
+            $simbolo = $this->getNotaDebCred()->getMoneda()->getSimbolo();
+        }
+        return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt().
+        ' | '. $fecha . ' | '. $simbolo . $this->getSaldo();
     }
 
     public function getCodigoComprobante(){
@@ -315,5 +340,68 @@ class FacturaElectronica
     public function getTotal()
     {
         return $this->total;
+    }
+
+    /**
+     * Set saldo
+     *
+     * @param string $saldo
+     * @return FacturaElectronica
+     */
+    public function setSaldo($saldo)
+    {
+        $this->saldo = $saldo;
+
+        return $this;
+    }
+
+    /**
+     * Get saldo
+     *
+     * @return string
+     */
+    public function getSaldo()
+    {
+        return $this->saldo;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->pagos = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add pagos
+     *
+     * @param \VentasBundle\Entity\PagoCliente $pagos
+     * @return FacturaElectronica
+     */
+    public function addPago(\VentasBundle\Entity\PagoCliente $pagos)
+    {
+        $this->pagos[] = $pagos;
+
+        return $this;
+    }
+
+    /**
+     * Remove pagos
+     *
+     * @param \VentasBundle\Entity\PagoCliente $pagos
+     */
+    public function removePago(\VentasBundle\Entity\PagoCliente $pagos)
+    {
+        $this->pagos->removeElement($pagos);
+    }
+
+    /**
+     * Get pagos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPagos()
+    {
+        return $this->pagos;
     }
 }

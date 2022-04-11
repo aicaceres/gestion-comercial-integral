@@ -32,7 +32,7 @@ class PresupuestoType extends AbstractType {
                     'choice_label' => 'nombre'
                 ))
                 ->add('descuentaStock',null,array('label' => 'DESCONTAR:','required'=>false))
-                ->add('nombreCliente')
+                ->add('nombreCliente',null,array('required'=>false))
                 ->add('validez',null,array('label' => 'VALIDEZ [días]:','required'=>false))
                 ->add('detalles', 'collection', array(
                     'type' => new PresupuestoDetalleType($type,$data->getId()),

@@ -92,7 +92,7 @@ class Presupuesto {
     protected $unidadNegocio;
 
     /**
-     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PresupuestoDetalle", mappedBy="presupuesto",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PresupuestoDetalle", mappedBy="presupuesto",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $detalles;
 
@@ -183,7 +183,7 @@ class Presupuesto {
         if( $categIva == 'I' || $categIva == 'M'){
             // suma de descuentos x item
             foreach ($this->detalles as $item) {
-                $total = $total + $item->getDtoRecItem();
+                $total = $total + $item->getTotalDtoRecItem();
             }
         }else{
             // descuento sobre el subtotal
@@ -194,7 +194,7 @@ class Presupuesto {
     public function getTotalIva(){
         $total = 0;
         foreach ($this->detalles as $item) {
-            $total = $total + $item->getIvaItem();
+            $total = $total + $item->getTotalIvaItem();
         }
         return round( ($total) ,3);
     }

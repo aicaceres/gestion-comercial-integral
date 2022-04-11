@@ -43,7 +43,7 @@ class NotaDebCredType extends AbstractType {
                         'class' => 'row item'
                 )))
                 ->add('cobroDetalles', 'collection', array(
-                    'type' => new CobroDetalleType($type),
+                    'type' => new CobroDetalleType(),
                     'by_reference' => false,
                     'allow_delete' => true,
                     'allow_add' => true,

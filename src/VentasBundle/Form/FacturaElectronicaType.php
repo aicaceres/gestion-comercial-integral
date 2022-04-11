@@ -23,7 +23,7 @@ class FacturaElectronicaType extends AbstractType {
                                 ->andWhere('c.valor like :param1')
                                 ->orWhere('c.valor like :param2')
                                 ->setParameter('param1', '%FAC%')
-                                ->setParameter('param2', '%TIQUE%');
+                                ->setParameter('param2', '%TIC%');
                     }
                 ))
                 ->add('puntoVenta')

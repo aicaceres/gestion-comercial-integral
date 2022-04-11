@@ -218,6 +218,7 @@ class CobroController extends Controller
                 }
 
                 // completar datos de detalles
+                $saldo = 0;
                 $efectivo = true;
                 if( count($entity->getDetalles()) == 0 ){
                     if( $entity->getFormaPago()->getTipoPago() == 'CTACTE' ){
@@ -228,6 +229,7 @@ class CobroController extends Controller
                         $detalle->setImporte($impTotal);
                         $detalle->setCajaApertura($apertura);
                         $entity->addDetalle($detalle);
+                        $saldo = round($impTotal,2);
                         $efectivo = false;
                     }
                 }else{
@@ -257,7 +259,7 @@ class CobroController extends Controller
                 }
                 if( $efectivo && $catIva =='C' && $entity->getMoneda()->getCodigoAfip()=='PES' ){
                     $ptovta =$this->getParameter('ptovta_ws_ticket');
-                    //$tipoComprobante = 'TIQUE';
+                    $tipoComprobante = 'TICK-B';
                 }
 
                 $tipoFactura = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($tipoComprobante);
@@ -266,7 +268,7 @@ class CobroController extends Controller
                 $entity->setFacturaElectronica($facturaElectronica);
 
                 // emitir comprobante electronico si no es tique
-                if( $tipoComprobante != 'TIQUE' ){
+                if( $tipoComprobante != 'TICK-B' ){
                     /**  INICIO EMISION FACTURA WEBSERVICE */
                     $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
 
@@ -307,7 +309,7 @@ class CobroController extends Controller
                     $facturaElectronica->setCae('CAE');
                     $facturaElectronica->setCaeVto('2022-01-01');
                     $facturaElectronica->setNroComprobante('voucher_number');
-                    $comprobante = 'TICKET ';
+                    $comprobante = 'TICK-B ';
                 }
                 //$entity->setIva($impIVA);
                 //$entity->setPercIibb($impTrib);
@@ -319,6 +321,7 @@ class CobroController extends Controller
                 // Guardar datos en factura electronica
                 $facturaElectronica->setCobro($entity);
                 $facturaElectronica->setTotal($impTotal);
+                $facturaElectronica->setSaldo( round($saldo,2) );
                 $em->persist($facturaElectronica);
 
                 // set numeracion
@@ -337,7 +340,7 @@ class CobroController extends Controller
                 $em->getConnection()->commit();
 
                 $this->addFlash('success', 'Emitido el comprobante '. $comprobante );
-                if( $tipoComprobante == 'TIQUE' ){
+                if( $tipoComprobante == 'TICK-B' ){
                     // EMITIDO TICKET NO FACTURA
                     return $this->redirect($this->generateUrl('ventas_cobro'));
                 }

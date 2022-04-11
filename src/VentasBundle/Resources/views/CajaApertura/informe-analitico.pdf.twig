@@ -1,0 +1,104 @@
+<!-- Analitico -->
+    <dynamic-page page-size="A4" margin-left="20px" margin-right="20px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="90px" width="100%" >
+                    <table font-size="10px" >
+                        <tr>
+                            <td border.type="none">
+                                <div width="100%">
+                                    <img ignore-error="true" src="{{logo}}" width="180px" />
+                                </div>
+                            </td>
+                            <td border.type="none" vertical-align="middle" text-align="center" font-size="15px">
+                                Analítico de Caja N°: {{ apertura.id }}
+                            </td>
+                            <td border.type="none" vertical-align="middle" text-align="right">
+                                PÁGINA <page-number />
+                            </td>
+                        </tr>
+                    </table>
+                    <table font-size="14px" >
+                        <tr>
+                            <td border.type="none" vertical-align="bottom" text-align="right" padding-right="10px" width="370px">
+                                Inicio: {{ apertura.fechaApertura|date('d/m/Y H:i') }}
+                            </td>
+                            <td border.type="none" vertical-align="bottom" width="10px" text-align="center" >
+                                <strong>|</strong>
+                            </td>
+                            <td border.type="none" vertical-align="bottom" text-align="left" padding-left="10px">
+                                Cierre: {{ (apertura.fechaCierre) ? apertura.fechaCierre|date('d/m/Y H:i') : 'CAJA ABIERTA' }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </header>
+        </placeholders>
+
+<!-- EFECTIVO -->
+        <table width="80%" margin-left="20%">
+            <tr font-size="9px">
+                <td border.color="#999999" padding="10px"><b>TOTAL EFECTIVO</b></td>
+                <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ tot_efectivo|number_format(3,'.',',') }} </b>
+                </td>
+            </tr>
+        </table>
+
+<!-- TARJETA -->
+        <table padding-top="20px" width="80%" margin-left="20%">
+            <tr font-size="9px">
+                <td border.type="none" padding="8px" width="100px">Moneda: PESOS</td>
+                <td border.type="none" padding="8px" text-align="center">
+                    TARJETAS CRÉDITOS
+                </td>
+            </tr>
+        </table>
+        <table width="80%" margin-left="20%" margin-top="5px">
+            {% for mov in apertura.movimientos %}
+            {% if mov.tipoPago == 'TARJETA' %}
+                <tr font-size="8px">
+                    <td border.type="none" height="15px" vertical-align="middle" width="3.5 cm" padding-left="3px">
+                        {{ mov.comprobanteTxt }}
+                    </td>
+                    <td border.type="none" vertical-align="middle" width="3 cm">
+                        {{ mov.datosTarjeta.tarjeta.nombre }}
+                    </td>
+                    <td border.type="none" vertical-align="middle">
+                        {{ mov.datosTarjeta.numero ?? '0000 0000 0000 0000' }}
+                    </td>
+                    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,'.',',') }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+
+            {% endif %}
+            {% endfor %}
+            <tr font-size="9px" margin-top="10px">
+                <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL TARJETAS CRÉDITOS</b></td>
+                <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ tot_tarjeta|number_format(3,'.',',') }} </b>
+                </td>
+            </tr>
+            <tr font-size="8px" margin-top="10px">
+                <td border.type="none" padding-right="5px" text-align="right" colspan="3">Cambio del día</td>
+                <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ tot_vuelto|number_format(3,'.',',') }} </b>
+                </td>
+            </tr>
+            <tr font-size="10px" margin-top="10px" font-type="DejaVuSansMono">
+                <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL CAJA ANALÍTICA</b></td>
+                <td border.color="#999999" vertical-align="middle" text-align="right"  width="3 cm">
+                   <b> {{ (tot_efectivo - tot_vuelto + tot_tarjeta)|number_format(3,'.',',') }} </b>
+                </td>
+            </tr>
+        </table>
+
+    </dynamic-page>

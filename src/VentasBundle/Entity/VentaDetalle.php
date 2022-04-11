@@ -87,9 +87,18 @@ class VentaDetalle {
         $porcDtoRec = $this->getVenta()->getDescuentoRecargo();
         return ($this->getPrecio() * ($porcDtoRec / 100) ) ;
     }
+    // total del descuento
+    public function getTotalDtoRecItem(){
+        $porcDtoRec = $this->getVenta()->getDescuentoRecargo();
+        return ($this->getPrecio() * ($porcDtoRec / 100) ) * $this->getCantidad() ;
+    }
     // monto del iva del item para sumariar total si categoriaIva I o M
     public function getIvaItem(){
-        return ($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100);
+        return (($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100)) ;
+    }
+    // total del iva x item
+    public function getTotalIvaItem(){
+        return (($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100)) * $this->getCantidad() ;
     }
     // total del item
     public function getTotalItem(){

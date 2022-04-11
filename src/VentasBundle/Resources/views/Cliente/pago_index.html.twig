@@ -33,9 +33,12 @@
         <thead>
             <tr>
                 <th>Fecha</th>
+                {% if not cliId %}
+                <th>Cliente</th>
+                {% endif %}
                 <th class="nosort">Nº Comprobante</th>
-                <th class="nosort">Concepto</th>
-                <th class="nosort">Detalle</th>
+                <th class="nosort">Comprobantes Imputados</th>
+                <th class="nosort">NC</th>
                 <th class="nosort">Importe</th>
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente_pagos') and cliId %}
@@ -48,9 +51,12 @@
         {% for entity in entities %}
             <tr>
                 <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
-                <td>{{ entity.nroComprobante }}</td>
-                <td title="{{entity.concepto}}"><span class="hidden">{{entity.concepto}}</span>{{ entity.conceptoTxt }}</td>
-                <td>{{entity.detalle}}</td>
+                {% if not cliId %}
+                <td>{{ entity.cliente.nombre }}</td>
+                {% endif %}
+                <td>{{ entity.comprobanteNro }}</td>
+                <td>{{ entity.comprobantesTxt }}</td>
+                <td></td>
                 <td style="text-align: right">{{ entity.getTotal|number_format(2,'.',',') }}</td>
                 <td class="buttons">
                    <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
@@ -70,11 +76,11 @@ jQuery(document).ready(function($) {
         var keycode = (e.keyCode ? e.keyCode : e.which);
         if(keycode == '13'){ e.preventDefault(); }
     });
-    
+
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     var oTable = $('#dyntable2').dataTable();
     $('#printform').on('submit',function(){
-        $('#clienteid').val($('#selectCliente').val());
+        $('#clienteid').val($('#selectClienteIndex').val());
         $('#fdesde').val($('#desde').val());
         $('#fhasta').val($('#hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
@@ -93,7 +99,7 @@ jQuery(document).ready(function($) {
                 var conc = value[2].substr(a+22,b-22);
                 value[2]=conc;
             }
-            value.splice(5);
+            value.splice(6);
             datos[index] = value;
         });
         $('#datalist').val(JSON.stringify(datos));

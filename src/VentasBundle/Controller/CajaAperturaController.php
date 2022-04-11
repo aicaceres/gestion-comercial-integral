@@ -179,14 +179,19 @@ class CajaAperturaController extends Controller
                 $em->flush();
                 $em->getConnection()->commit();
                 $session->set('caja_abierta', false);
+                // url arqueo
+                $url_arqueo = $this->generateUrl('ventas_apertura_arqueo', array( 'id' => $entity->getId()) );
+                return new Response( $url_arqueo );
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());
                 $em->getConnection()->rollback();
+                return new Response( 'ERROR' );
             }
 
         }
-        return $this->redirect($this->generateUrl('ventas_apertura', array( 'cajaId' => $entity->getCaja()->getId()) ));
+$this->addFlash('error', 'invalid');
+        return new Response( 'ERROR' );
     }
 
 

@@ -44,7 +44,7 @@ class Cobro {
     protected $unidadNegocio;
 
     /**
-     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente")
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="cobros")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      */
     protected $cliente;
@@ -89,7 +89,7 @@ class Cobro {
     protected $cotizacion = 0;
 
     /**
-     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="cobro",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="cobro",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $detalles;
 
@@ -616,7 +616,7 @@ class Cobro {
     /**
      * Get tipoDocumentoCliente
      *
-     * @return \ConfigBundle\Entity\Parametro 
+     * @return \ConfigBundle\Entity\Parametro
      */
     public function getTipoDocumentoCliente()
     {
