@@ -120,7 +120,7 @@ function aperturaCajaVentas(url, cobro=false, caja=1 ) {
                 jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
             }, 1000);
             // foco en monto
-            jQuery('#ventasbundle_apertura_montoApertura').focus();
+            //jQuery('#ventasbundle_apertura_montoApertura').focus();
             jQuery('#ir_a_cobro').val(cobro);
         })
     .dialog({
@@ -139,7 +139,7 @@ function aperturaCajaVentas(url, cobro=false, caja=1 ) {
 function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
     let horaRefresh = null;
     data = { 'id': caja };
-    jQuery('#popup').html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;">Cargando...</div>');
+    jQuery('#popup').html('');
     jQuery('#popup')
         .load(url, data, function () {
             // refresca la hora en un campo fecha-hora
@@ -153,29 +153,18 @@ function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
             })
             // foco en monto
             jQuery('#ventasbundle_cierre_montoCierre').focus();
-            jQuery('.js-registrar-cierre').on('click', function (e) {
-                if (jQuery('#ventasbundle_cierre_montoCierre').val()) {
-
-
-
-                    reload = true
-                } else {
-                    jAlert('Debe indicar la cantidad de dinero en caja.', 'Atención');
-                    return false;
-                }
-            })
         })
     .dialog({
         modal: true, autoOpen: false, title: "CIERRE DE CAJA", width: '450px',
         buttons: [{text: "Registrar el Cierre de Caja", class: 'closePopup additem',
             click: function () {
-                if (!jQuery('#ventasbundle_cierre_montoCierre').val()) {
+                /*if (!jQuery('#ventasbundle_cierre_montoCierre').val()) {
                     jAlert('Debe indicar la cantidad de dinero en caja.', 'Atención',
                         function () {
                             jQuery('#ventasbundle_cierre_montoCierre').focus();
                         });
                     return false;
-                }
+                }*/
                 url_cierre = jQuery('#ventasbundle_cierre').attr('action');
                 data = jQuery('#ventasbundle_cierre').serialize();
                 jQuery.post(url_cierre, data)
@@ -183,7 +172,9 @@ function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
                         if (data == 'ERROR') {
                             jAlert('No se ha podido registrar el cierre. Intente nuevamente.');
                         } else {
-                            window.open(data);
+                            if (data) {
+                                window.open(data);
+                            }
                             window.location.reload();
                         }
                     }).fail(function () {

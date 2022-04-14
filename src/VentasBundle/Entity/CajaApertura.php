@@ -36,7 +36,7 @@ class CajaApertura
      * @var integer $montoApertura
      * @ORM\Column(name="monto_apertura", type="decimal", scale=2 )
      */
-    protected $montoApertura;
+    protected $montoApertura=0;
 
     /**
      * @var date $fechaCierre
@@ -48,7 +48,7 @@ class CajaApertura
      * @var integer $montoCierre
      * @ORM\Column(name="monto_cierre", type="decimal", scale=2, nullable=true )
      */
-    protected $montoCierre;
+    protected $montoCierre=0;
 
     /**
      * @var integer $cambios
@@ -382,7 +382,7 @@ class CajaApertura
     /**
      * Get cambios
      *
-     * @return string 
+     * @return string
      */
     public function getCambios()
     {

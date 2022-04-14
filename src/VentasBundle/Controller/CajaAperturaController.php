@@ -181,6 +181,10 @@ class CajaAperturaController extends Controller
                 $session->set('caja_abierta', false);
                 // url arqueo
                 $url_arqueo = $this->generateUrl('ventas_apertura_arqueo', array( 'id' => $entity->getId()) );
+                if( COUNT($entity->getMovimientos()) == 0 ){
+                    $this->addFlash('warning', 'No se registraron movimientos!');
+                    $url_arqueo = null;
+                }
                 return new Response( $url_arqueo );
             }
             catch (\Exception $ex) {

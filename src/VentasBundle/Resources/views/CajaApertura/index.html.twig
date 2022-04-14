@@ -50,14 +50,14 @@
             <tr>
                 <th class="nosort">#</th>
                 <th class="nosort">Apertura</th>
-                <th class="nosort">Monto</th>
+                <th class="nosort hidden">Monto</th>
                 <th class="nosort">Usuario</th>
                 <th class="nosort" style="background:#868686;padding:1px;"></th>
                 <th class="nosort">Cierre</th>
                 <th class="nosort">Monto</th>
                 <th class="nosort">Usuario</th>
                 <th class="hidden nosort">DIFERENCIA</th>
-                <th class="nosort" style="width:5%"></th>
+                <th class="nosort" style="width:10%"></th>
             </tr>
         </thead>
         <tbody>
@@ -66,7 +66,7 @@
                     <tr>
                         <td>{{ apertura.id }}</td>
                         <td>{{ apertura.fechaApertura|date('d-m-Y H:i') }}</td>
-                        <td>{{ apertura.montoApertura|number_format(2,'.',',') }}</td>
+                        <td class="hidden">{{ apertura.montoApertura|number_format(2,'.',',') }}</td>
                         <td>{{ apertura.createdBy.username|upper }}</td>
                         <td style="background:#868686;padding:1px;"></td>
                         <td>{% if apertura.fechaCierre %}
@@ -79,7 +79,11 @@
                         <td>{% if apertura.fechaCierre %}{{ apertura.updatedBy.username }}{% endif %}</td>
                         <td class="hidden {% if apertura.diferencia<0 %} rojo {% endif %}" >{% if apertura.fechaCierre %}{{apertura.diferencia|number_format(2,'.',',')}}{% endif %}</td>
                         <td>{% if apertura.fechaCierre %}
-                            <a target="_blank" href="{{ path('ventas_apertura_arqueo',{'id':apertura.id}) }}" title="Ver informe de Cierre" class="btn btnaction btn_folder"> <i class="icon-file"></i></a>
+                                {% if  apertura.movimientos|length == 0  %}
+                                   <span style="font-size:8px"> SIN MOVIMIENTOS </span>
+                                {% else %}
+                                    <a target="_blank" href="{{ path('ventas_apertura_arqueo',{'id':apertura.id}) }}" title="Ver informe de Cierre" class="btn btnaction btn_folder"> <i class="icon-file"></i></a>
+                                {% endif %}
                             {% endif %}
                         </td>
                     </tr>

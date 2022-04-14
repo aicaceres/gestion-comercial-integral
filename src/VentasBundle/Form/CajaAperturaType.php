@@ -12,9 +12,9 @@ class CajaAperturaType extends AbstractType {
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
-    
+
         $builder->add('caja')
-                ->add('montoApertura',null,array('label' => 'Monto Inicial:', 'required' => true));
+                ->add('montoApertura','hidden',array('label' => 'Monto Inicial:', 'required' => false));
 
     }
 

@@ -17,7 +17,7 @@
     }
 </style>
 <div>
-    <div class="pageheader notab">   
+    <div class="pageheader notab">
         <h1 class="pagetitle caja aligncenter hidden">
             {{entity.caja.nombre}}
         </h1>
@@ -27,20 +27,20 @@
         </h1>
     </div>
 
-    {{ form_start(form, {'attr': {'class': 'stdform','id':'ventasbundle_apertura'}}) }}     
-    
-    <fieldset id="fieldmonto">                                        
-        {{ form_row(form.montoApertura, { 'attr': {'class' : 'mininput'} })}}      
-         <input type="hidden" value="" name="ir-a-cobro" id="ir_a_cobro" />             
-    </fieldset> 
+    {{ form_start(form, {'attr': {'class': 'stdform','id':'ventasbundle_apertura'}}) }}
+
+    <fieldset id="fieldmonto">
+        {{ form_row(form.montoApertura, { 'attr': {'class' : 'mininput hidden'} })}}
+         <input type="hidden" value="" name="ir-a-cobro" id="ir_a_cobro" />
+    </fieldset>
 
     <p class="actionBar aligncenter">
         <button class="guardar" type="submit" >Registrar Apertura</button>
     </p>
-    
+
     <div name="rest" class="hiddenformrest"> {{ form_rest(form) }} </div>
     {{ form_end(form) }}
 
-</div> 
-    
+</div>
+
 {% endblock %}

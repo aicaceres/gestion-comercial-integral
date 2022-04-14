@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\Cliente;
 use VentasBundle\Form\ClienteType;
+use VentasBundle\Entity\NotaDebCred;
+use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Entity\PagoCliente;
 use VentasBundle\Form\PagoClienteType;
 
@@ -557,16 +559,73 @@ class ClienteController extends Controller {
                     $montoNotaCredito = round( ( $entity->getTotal() - $totalPago ) ,2);
                     // generar nota de credito - comprobante fiscal
 
+                    $notacredito = new NotaDebCred();
+                    $notacredito->setFecha( new \DateTime() );
+                    $notacredito->setCliente( $entity->getCliente() );
+                    $notacredito->setMoneda( $entity->getMoneda());
+                    $notacredito->setCotizacion( $entity->getCotizacion() );
+                    $notaElectronica = new FacturaElectronica();
+                    $notaElectronica->setPuntoVenta( $this->getParameter('ptovta_ws_factura') );
+                    $notacredito->setNotaElectronica($notaElectronica);
 
+                    // preparar datos para NC
+                    $docTipo = 99 ;
+                    $docNro = 0;
+                    if( $entity->getCliente()->getCuit() ){
+                        $docTipo = 80 ;
+                        $docNro = trim($entity->getCliente()->getCuit());
+                    }
+                    $cbtesAsoc = array();
+                    if( $entity->getComprobantes() ){
+                        foreach( $entity->getComprobantes() as $comp ){
+                            $cbtesAsoc[] = array( 'Tipo' => $comp->getCodigoComprobante(),
+                                                'PtoVta' => $comp->getPuntoVenta(),
+                                                'Nro' => $comp->getNroComprobante() );
+                        }
+                    }
 
+                    $catIva = ( $entity->getCliente()->getCategoriaIva() ) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
+                    $iva = $tributos = array();
+                    /*if( $entity->getDetalles() ){
+                        $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
+                        foreach( $entity->getDetalles() as $item ){
+                            $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array   ('valor'=>$item->getProducto()->getIva()));
+                            $codigo = intval($alicuota->getCodigo());
+                            $dtoRec = $item->getPrecio() * ($entity->getDescuentoRecargo()/100);
+                            $baseImp = $item->getPrecio() + $dtoRec;
+                            $importe = $baseImp * ( $alicuota->getValor() / 100 );
+                            $key = array_search($codigo, array_column($iva, 'Id'));
+                            if( $key === false){
+                                $iva[] = array( 'Id' => $codigo,
+                                                'BaseImp' => round($baseImp, 2) ,
+                                                'Importe' => round($importe,2) );
+                            }else{
+                                $iva[$key] = array( 'Id' => $codigo,
+                                                'BaseImp' => round( $iva[$key]['BaseImp'] + $baseImp ,2) ,
+                                                'Importe' => round( $iva[$key]['Importe'] + $importe ,2) );
+                            }
+                            // TOTALES
+                            $impDtoRec += $dtoRec;
+                            $impNeto += $baseImp;
+                            $impIVA += $importe;
+                            $impTotal += ($baseImp + $importe );
+                            //$item->setDescuento($dtoRec);
+                        }
+                        // TRIBUTOS
+                        $impTrib = 0;
+                        if( $catIva == 'I' ){
+                            $neto = round($impNeto,2);
+                            $iibb = round( ($neto * 0.035) ,2);
+                            $impTrib = $iibb;
+                            $tributos = array(
+                                'Id' => 7,
+                                'BaseImp' => $neto,
+                                'Alic' => 3.5,
+                                'Importe' => $iibb );
+                        }
+                        $impTotal += $impTrib;
 
-
-
-
-
-
-
-
+                    }*/
 
 
                 }else{
