@@ -1,5 +1,5 @@
 <pdf>
-    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px" >
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="20px" margin-top="20px" >
         <placeholders>
             <header>
                 <div height="60px" width="100%" >
@@ -9,11 +9,11 @@
                                 <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
                             </td>
                         </tr>
-                    </table>                                        
-                    <div border.color="#F5C98F" height="2px" ></div>   
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
                     <div height="5px"></div>
-                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
-                </div>                      
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
             </header>
             <footer>
                 <div height="30px" width="100%" text-align="right">
@@ -21,53 +21,52 @@
                 </div>
             </footer>
         </placeholders>
-        <h2 text-align="center"> Cuenta Corriente</h2>                   
+        <h2 text-align="center"> Cuenta Corriente</h2>
         <h4><strong>Cliente:</strong> {{ filtro[0] }}  </h4>
         {% if filtro[1] or filtro[2] %}
         <h4><strong>Período:</strong> {{ filtro[1] }} al {{ filtro[2] }} </h4>
         {% endif %}
         <div height="10px"></div>
 
-        <table font-size="9px">
+        <table font-size="9px" >
             <tr>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1 cm"></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm" ><strong>Fecha</strong></td>              
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"  width="2.5 cm"><strong>N° Comprobante</strong></td>                
-  
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Concepto</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Debe</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Haber</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Saldo</strong></td>                
-            </tr>            
-            {% if items|length>0   %}              
+                <td border.color="#888888" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.8 cm"></td>
+                <td border.color="#888888" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.8 cm" ><strong>Fecha</strong></td>
+                <td border.color="#888888" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Concepto</strong></td>
+                <td border.color="#888888" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>N° Comprobante</strong></td>
+                <td border.color="#888888" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Debe</strong></td>
+                <td border.color="#888888" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Haber</strong></td>
+                <td border.color="#888888" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Saldo</strong></td>
+            </tr>
+            {% if items|length>0   %}
                 {% set saldo,debe,haber=0,0,0 %}
                 {% for item in items %}
-                      
+
                     <tr>
-                        <td height="20px" vertical-align="middle" padding-left="10px">
-                          {% if item[0]=='-'%}  
-                               <img ignore-error="true" src="{{menos}}" width="10px" height="14px" margin-bottom="10px"/> 
-                          {% endif %}    
-                          {% if item[0]=='+'%}  
-                               <img ignore-error="true" src="{{mas}}" width="10px" height="14px" margin-bottom="10px"/> 
-                          {% endif %}    
+                        <td height="15px" vertical-align="middle" padding-left="10px" border.color="#888888">
+                          {% if item[0]=='-'%}
+                               <img ignore-error="true" src="{{menos}}" width="10px" height="10px" margin-bottom="5px"/>
+                          {% endif %}
+                          {% if item[0]=='+'%}
+                               <img ignore-error="true" src="{{mas}}" width="10px" height="10px" margin-bottom="5px"/>
+                          {% endif %}
                         </td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[1]}}</td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[2]}}</td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[3]}}</td>
-                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[4]}}</td>
-                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[5]}}</td>
-                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[6]}}</td>
-                    </tr>    
+                        <td height="15px" vertical-align="middle" text-align="center" border.color="#888888">{{item[1]}}</td>
+                        <td height="15px" vertical-align="middle" padding-left="5px" border.color="#888888">{{item[2]}}</td>
+                        <td height="15px" vertical-align="middle" padding-left="5px" border.color="#888888">{{item[3]}}</td>
+                        <td height="15px" vertical-align="middle" text-align="right" padding-right="10px" border.color="#888888">{{item[4]}}</td>
+                        <td height="15px" vertical-align="middle" text-align="right" padding-right="10px" border.color="#888888">{{item[5]}}</td>
+                        <td height="15px" vertical-align="middle" text-align="right" padding-right="10px" border.color="#888888">{{item[6]}}</td>
+                    </tr>
                     {% set debe = debe + (item[4]|replace({',': ''})) %}
                     {% set haber = haber + (item[5]|replace({',': ''})) %}
-                {% endfor %}  
-            {% else %}  
+                {% endfor %}
+            {% else %}
                 <tr>
                     <td colspan="7" height="30px" vertical-align="middle" padding-left="10px">
                         <strong>No hay datos para la cuenta corriente.</strong></td>
                 </tr>
-            {% endif %}              
+            {% endif %}
 
             <tr>
                 <td colspan="5" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
@@ -77,6 +76,6 @@
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
                     <strong>{{ (debe-haber) |number_format(2,'.',',')}}</strong></td>
             </tr>
-        </table>         
+        </table>
     </dynamic-page>
 </pdf>

@@ -115,7 +115,7 @@ jQuery(document).ready(function($) {
         "bInfo" : false
         });
     $('#printform').on('submit',function(){
-        $('#clienteid').val($('#selectClienteCtacte').val());
+        $('#clienteid').val($('#selectClienteIndex').val());
         $('#fdesde').val($('#desde').val());
         $('#fhasta').val($('#hasta').val());
         //$('#searchterm').val( $('#dyntable2_filter input').val() );
@@ -127,10 +127,10 @@ jQuery(document).ready(function($) {
                 if( value[0].indexOf('in.png')>-1 )  value[0]='+';
             }
             // nro comp
-            var i = value[2].indexOf('\n');
+            var i = value[3].indexOf('\n');
             if(i > -1){
-                var nro = value[2].substr(0,i);
-                value[2]=nro;
+                var nro = value[3].substr(0,i);
+                value[3]=nro;
             }
             datos[index] = value;
         });

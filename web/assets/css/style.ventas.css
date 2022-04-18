@@ -31,8 +31,8 @@
     .divnotif{
         padding: 0 10px;
     }
-    /* block-cliente */
-    .selectorCliente{
+    /* block-cliente, block-proveedor */
+    .selectorCliente, .selectorProveedor{
         display:inline-block;
         width: 50%;
     }

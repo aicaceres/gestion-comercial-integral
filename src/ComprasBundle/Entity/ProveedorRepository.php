@@ -267,4 +267,14 @@ class ProveedorRepository extends EntityRepository {
         return $facturas->getQuery()->getResult();
     }
 
+    public function filterByTerm($key) {
+        $query = $this->_em->createQueryBuilder();
+            $query->select("c.id,c.nombre text")
+                    ->from('ComprasBundle:Proveedor', 'c')
+                    ->where('c.nombre LIKE :key')
+                    ->orderBy('c.nombre')
+                    ->setParameter('key', '%' . $key . '%')
+                    ->setMaxResults(5);
+        return $query->getQuery()->getArrayResult();
+    }
 }

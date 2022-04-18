@@ -114,8 +114,8 @@ class NotaDebCredController extends Controller {
      */
     public function createAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_notadebcred');
-        // credito - (descuenta de la deuda con proveedor)
-        // debito + (aumenta la deuda con el proveedor)
+        // credito - (descuenta la deuda del cliente)
+        // debito + (aumenta la deuda del cliente)
         $em = $this->getDoctrine()->getManager();
         // Verificar si la caja está abierta CAJA=1
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
@@ -149,7 +149,7 @@ class NotaDebCredController extends Controller {
                         )
                     )*/
                     $factura = $entity->getComprobanteAsociado();
-                    $cbtesAsoc[] = array( 'Tipo' => $factura->getCodigoComprobante(),
+                    $cbtesAsoc[] = array( 'Tipo' =>                             $factura->getCodigoComprobante(),
                                         'PtoVta' => $factura->getPuntoVenta(),
                                         'Nro' => $factura->getNroComprobante() );
                 }
@@ -162,9 +162,9 @@ class NotaDebCredController extends Controller {
                     foreach( $entity->getDetalles() as $item ){
                         $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array   ('valor'=>$item->getProducto()->getIva()));
                         $codigo = intval($alicuota->getCodigo());
-                        $dtoRec = $item->getPrecio() * ($entity->getDescuentoRecargo()/100);
-                        $baseImp = $item->getPrecio() + $dtoRec;
-                        $importe = $baseImp * ( $alicuota->getValor() / 100 );
+                        $dtoRec = $item->getTotalDtoRecItem();
+                        $baseImp = $item->getTotalItem() + $dtoRec;
+                        $importe = $item->getTotalIvaItem();
                         $key = array_search($codigo, array_column($iva, 'Id'));
                         // IVA
                         /*  array(
@@ -273,7 +273,6 @@ class NotaDebCredController extends Controller {
                 $entity->setIva($impIVA);
                 $entity->setPercIibb($impTrib);
                 $entity->setTotal($impTotal);
-                //$entity->setSaldo(  ($tipo->getClase() =='CRE') ? 0 : $saldo);
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
                 $entity->setUnidadNegocio($unidneg);
                 // signo
@@ -291,7 +290,7 @@ class NotaDebCredController extends Controller {
                 $em->persist($entity);
                 $em->flush();
 
-                if( $entity->getSigno() == '-' && $entity->getDetalles()){
+                if( $tipo->getClase() =='CRE' && $entity->getDetalles()){
                         // Reponer de stock si es credito
                     $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
                     foreach ($entity->getDetalles() as $detalle){

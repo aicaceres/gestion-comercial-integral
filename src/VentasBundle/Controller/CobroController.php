@@ -168,9 +168,9 @@ class CobroController extends Controller
                     foreach( $entity->getVenta()->getDetalles() as $item ){
                         $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array   ('valor'=>$item->getProducto()->getIva()));
                         $codigo = intval($alicuota->getCodigo());
-                        $dtoRec = $item->getPrecio() * ($entity->getVenta()->getDescuentoRecargo()/100);
-                        $baseImp = $item->getPrecio() + $dtoRec;
-                        $importe = $baseImp * ( $alicuota->getValor() / 100 );
+                        $dtoRec = $item->getTotalDtoRecItem();
+                        $baseImp = $item->getTotalItem() + $dtoRec;
+                        $importe = $item->getTotalIvaItem();
                         $key = array_search($codigo, array_column($iva, 'Id'));
                         // IVA
                         /*  array(

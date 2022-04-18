@@ -82,68 +82,39 @@
             </header>
         </placeholders>
 
+    {% set tot_efectivo, tot_cheque, tot_tarjeta, tot_ctacte, tot_egreso,tot_vuelto = 0,0,0,0,0,0 %}
+    {% set tiposFacturacion = [ {'tag': 'CRE', 'title': 'CRÉDITOS'},
+                                {'tag': 'DEB', 'title': 'DÉBITOS'},
+                                {'tag': 'FAC', 'title': 'FACTURAS'},
+                                {'tag': 'TIC', 'title': 'TICKETS'}] %}
 
     <table font-size="8px">
-<!-- CREDITOS -->
-        {% set tot_efectivo, tot_cheque, tot_tarjeta, tot_ctacte, tot_egreso,tot_vuelto = 0,0,0,0,0,0 %}
-        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
-        {% for mov in apertura.movimientos if mov.tipoComprobante in ['DEB','CRE'] %}
-            {% set cnt,vuelto = (cnt + 1), (vuelto + mov.vuelto) %}
-            {% if mov.tipoPago=='EFECTIVO' %}
-                {% set efectivo = efectivo + mov.importe %}
-            {% elseif mov.tipoPago=='CHEQUE' %}
-                {% set cheque = cheque + mov.importe %}
-            {% elseif mov.tipoPago=='TARJETA' %}
-                {% set tarjeta = tarjeta + mov.importe %}
-            {% elseif mov.tipoPago=='CTACTE' %}
-                {% set ctacte = ctacte + mov.importe %}
-            {% endif %}
-            {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
-        {% endfor %}
-        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'CRED.'} %}
-        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
-        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
-        {% set tot_vuelto = tot_vuelto + vuelto %}
 
-<!-- FACTURAS -->
-        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
-        {% for mov in apertura.movimientos if mov.tipoComprobante == 'FAC' %}
-             {% set cnt,vuelto = (cnt + 1), (vuelto + mov.vuelto) %}
-            {% if mov.tipoPago=='EFECTIVO' %}
-                {% set efectivo = efectivo + mov.importe %}
-            {% elseif mov.tipoPago=='CHEQUE' %}
-                {% set cheque = cheque + mov.importe %}
-            {% elseif mov.tipoPago=='TARJETA' %}
-                {% set tarjeta = tarjeta + mov.importe %}
-            {% elseif mov.tipoPago=='CTACTE' %}
-                {% set ctacte = ctacte + mov.importe %}
-            {% endif %}
-            {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
-        {% endfor %}
-        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'FACTURAS'} %}
-        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque)%}
-        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte)%}
-        {% set tot_vuelto = tot_vuelto + vuelto %}
+        {% for tipoComp in tiposFacturacion %}
 
-<!-- TICKET -->
-        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
-        {% for mov in apertura.movimientos if mov.tipoComprobante == 'TIC' %}
-             {% set cnt,vuelto = (cnt + 1), (vuelto + mov.vuelto) %}
-            {% if mov.tipoPago=='EFECTIVO' %}
-                {% set efectivo = efectivo + mov.importe %}
-            {% elseif mov.tipoPago=='CHEQUE' %}
-                {% set cheque = cheque + mov.importe %}
-            {% elseif mov.tipoPago=='TARJETA' %}
-                {% set tarjeta = tarjeta + mov.importe %}
-            {% elseif mov.tipoPago=='CTACTE' %}
-                {% set ctacte = ctacte + mov.importe %}
-            {% endif %}
-            {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
+            {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
+
+            {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] %}
+                {% set cnt, vuelto, importe = (cnt + 1), (vuelto + (mov.vuelto*mov.signoCaja)), (mov.importe * mov.signoCaja)  %}
+                {% if mov.tipoPago=='EFECTIVO' %}
+                    {% set efectivo = efectivo + importe %}
+                {% elseif mov.tipoPago=='CHEQUE' %}
+                    {% set cheque = cheque + importe %}
+                {% elseif mov.tipoPago=='TARJETA' %}
+                    {% set tarjeta = tarjeta + importe %}
+                {% elseif mov.tipoPago=='CTACTE' %}
+                    {% set ctacte = ctacte + importe %}
+                {% endif %}
+                {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
+            {% endfor %}
+
+            {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
+            {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
+            {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
+            {% set tot_vuelto = tot_vuelto + vuelto %}
+
         {% endfor %}
-        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'TICKET'} %}
-        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque)%}
-        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte)%}
-        {% set tot_vuelto = tot_vuelto + vuelto %}
+
 
         <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
 
@@ -178,36 +149,33 @@
         </tr>
         <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
 
-<!-- PAGOS A PROVEEDOR -->
-        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
-        <!-- listar y sumariar pagos a proveedor -->
-        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'O. PAGO'} %}
-        {% set tot_efectivo,tot_cheque = (tot_efectivo - efectivo), (tot_cheque - cheque)%}
-        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta - tarjeta), (tot_ctacte - ctacte)%}
-        {% set tot_egreso = tot_egreso + egreso %}
+    {% set tiposPagos = [ {'tag': 'PAG', 'title': 'O. PAGO'},
+                          {'tag': 'REC', 'title': 'RECIBOS'}] %}
 
-<!-- PAGOS RECIBIDOS -->
+    {% for tipoComp in tiposPagos %}
+
         {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
-        {% for mov in apertura.movimientos if mov.tipoComprobante == 'REC' %}
-             {% set cnt,vuelto = (cnt + 1), (vuelto + mov.vuelto) %}
+
+        {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] %}
+            {% set cnt, vuelto, importe = (cnt + 1), (vuelto + (mov.vuelto*mov.signoCaja)), (mov.importe * mov.signoCaja) %}
             {% if mov.tipoPago=='EFECTIVO' %}
-                {% set efectivo = efectivo + mov.importe %}
+                {% set efectivo = efectivo + importe %}
             {% elseif mov.tipoPago=='CHEQUE' %}
-                {% set cheque = cheque + mov.importe %}
+                {% set cheque = cheque + importe %}
             {% elseif mov.tipoPago=='TARJETA' %}
-                {% set tarjeta = tarjeta + mov.importe %}
+                {% set tarjeta = tarjeta + importe %}
             {% elseif mov.tipoPago=='CTACTE' %}
-                {% set ctacte = ctacte + mov.importe %}
+                {% set ctacte = ctacte + importe %}
             {% endif %}
             {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
         {% endfor %}
-        <!-- listar y sumariar pagos a proveedor -->
-        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':'RECIBO'} %}
-        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque - cheque)%}
-        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte - ctacte)%}
+
+        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
+        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
+        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
         {% set tot_vuelto = tot_vuelto + vuelto %}
 
-<!-- ANULADOS -->
+    {% endfor %}
 
 <!-- TOTALES -->
         <tr font-size="9px">

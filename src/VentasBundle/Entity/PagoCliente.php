@@ -54,6 +54,13 @@ class PagoCliente
      */
     protected $generaNotaCredito = false;
 
+    /**
+    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred")
+    * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
+    * Registro de la nota de credito generada por pago adelantado
+    */
+    protected $notaDebCred;
+
      /**
      * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\FacturaElectronica", inversedBy="pagos")
      * @ORM\JoinTable(name="comprobantes_x_pagocliente",
@@ -120,6 +127,35 @@ class PagoCliente
         }
         return $txt;
     }
+
+    public function getMontoNc(){
+        $totpagos = 0;
+        foreach ($this->getCobroDetalles() as $det) {
+            $totpagos +=  $det->getImporte() ;
+        }
+        return $this->getTotal() - $totpagos;
+    }
+
+    public function getTextoPagosParaRecibo(){
+        $txt = '';
+        foreach( $this->cobroDetalles as $det){
+            $aux = ($txt) ? ' - ' : '';
+            $monto = $det->getMoneda()->getSimbolo() . ' ' .  $det->getImporte();
+            switch ($det->getTipoPago()){
+                case 'EFECTIVO':
+                    $txt = $txt . $aux . 'EFECTIVO: '. $monto;
+                    break;
+                case 'CHEQUE':
+                    $txt = $txt . $aux . 'CHEQUE: '. $monto;
+                    break;
+                case 'TARJETA':
+                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() .': ' . $monto;
+                    break;
+            }
+        }
+        return $txt;
+    }
+
     /**
      * Get id
      *
@@ -450,4 +486,27 @@ class PagoCliente
         return $this->cotizacion;
     }
 
+
+    /**
+     * Set notaDebCred
+     *
+     * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
+     * @return PagoCliente
+     */
+    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
+    {
+        $this->notaDebCred = $notaDebCred;
+
+        return $this;
+    }
+
+    /**
+     * Get notaDebCred
+     *
+     * @return \VentasBundle\Entity\NotaDebCred
+     */
+    public function getNotaDebCred()
+    {
+        return $this->notaDebCred;
+    }
 }

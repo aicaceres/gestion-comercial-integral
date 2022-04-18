@@ -91,7 +91,7 @@ class Proveedor {
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\RubroCompras")
      * @ORM\JoinColumn(name="rubro_compras_id", referencedColumnName="id")
      * */
-    protected $rubroCompras;    
+    protected $rubroCompras;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Escalas")
@@ -109,12 +109,12 @@ class Proveedor {
      * @var date $vencCertNoRetenerRentas
      * @ORM\Column(name="venc_cert_no_retener_rentas", type="date", nullable=true)
      */
-    private $vencCertNoRetenerRentas ;      
+    private $vencCertNoRetenerRentas ;
     /**
      * @var date $vencCertExcepcionGanancias
      * @ORM\Column(name="venc_cert_excepcion_ganancias", type="date", nullable=true)
      */
-    private $vencCertExcepcionGanancias ;      
+    private $vencCertExcepcionGanancias ;
 
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
@@ -172,6 +172,10 @@ class Proveedor {
      */
     private $createdBy;
     private $saldoxFechas;
+
+    public function getDomicilioCompleto(){
+        return $this->direccion.', '.$this->getLocalidad().', '.$this->getLocalidad()->getProvincia();
+    }
 
     public function getSaldoxFechas() {
         return $this->saldoxFechas;
@@ -728,7 +732,7 @@ class Proveedor {
     /**
      * Get representanteLocal
      *
-     * @return string 
+     * @return string
      */
     public function getRepresentanteLocal()
     {
@@ -751,7 +755,7 @@ class Proveedor {
     /**
      * Get representanteSede
      *
-     * @return string 
+     * @return string
      */
     public function getRepresentanteSede()
     {
@@ -774,7 +778,7 @@ class Proveedor {
     /**
      * Get vencCertNoRetenerRentas
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getVencCertNoRetenerRentas()
     {
@@ -797,7 +801,7 @@ class Proveedor {
     /**
      * Get vencCertExcepcionGanancias
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getVencCertExcepcionGanancias()
     {
@@ -820,7 +824,7 @@ class Proveedor {
     /**
      * Get rubroCompras
      *
-     * @return \ConfigBundle\Entity\RubroCompras 
+     * @return \ConfigBundle\Entity\RubroCompras
      */
     public function getRubroCompras()
     {
@@ -843,7 +847,7 @@ class Proveedor {
     /**
      * Get categoriaRentas
      *
-     * @return \ConfigBundle\Entity\Escalas 
+     * @return \ConfigBundle\Entity\Escalas
      */
     public function getCategoriaRentas()
     {
@@ -866,7 +870,7 @@ class Proveedor {
     /**
      * Get actividadComercial
      *
-     * @return \ConfigBundle\Entity\ActividadComercial 
+     * @return \ConfigBundle\Entity\ActividadComercial
      */
     public function getActividadComercial()
     {

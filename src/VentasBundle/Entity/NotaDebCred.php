@@ -48,7 +48,7 @@ class NotaDebCred {
      * @var integer $descuentoRecargo
      * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
      */
-    protected $descuentoRecargo;
+    protected $descuentoRecargo=0;
 
     /**
      * @var integer $iva
@@ -60,7 +60,7 @@ class NotaDebCred {
      * @var integer $percIibb
      * @ORM\Column(name="perc_iibb", type="decimal", scale=2,nullable=true )
      */
-    protected $percIibb;
+    protected $percIibb=0;
 
     /**
      * @var integer $total
@@ -72,7 +72,7 @@ class NotaDebCred {
      * @var integer $saldo
      * @ORM\Column(name="saldo", type="decimal", scale=3,nullable=true )
      */
-    protected $saldo;
+    protected $saldo=0;
 
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")

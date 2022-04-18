@@ -45,7 +45,7 @@
         <tr class="item" divdata="item_{{loop.index-1}}">
             <td class="ordTd">{{loop.index}}</td>
             <td class="prodTd" style="text-align:left">
-                {{ item.producto.nombre }}
+                {{ item.nombreProducto }}
             </td>
             <td class="cantTd"> {{ item.cantidad }}  {{item.producto.unidadmedida.nombre}}   </td>
             <td data-valor="{{item.precio}}" class="precTd alignright valor"> {{ item.precioUnitarioItem|number_format(3,'.',',') }} </td>

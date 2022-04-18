@@ -1,0 +1,14 @@
+<div class="selectorProveedor">
+    {{ form_label(form.proveedor) }}
+
+    {{ form_widget(form.proveedor,
+        {'attr':
+            {'style':'width:90%',
+             'url_autocomplete' : path('get_autocomplete_proveedores'),
+             'url_datos' : path('get_datos_proveedor'),
+            }
+        })
+    }}
+
+    <input type="hidden" value="{% if entity.proveedor.categoriaIva %}{{entity.proveedor.categoriaIva.nombre}}{% endif %}" id="categoriaIva"/>
+</div>

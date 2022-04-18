@@ -136,6 +136,10 @@ jQuery(function ($) {
             width: 350,
             modal: true
         });
+// si la pantalla es chica expandir
+        if ( $('#contentwrapper').width() < 1000) {
+            $('.togglemenu').click();
+        }
 // refresca la hora en un campo fecha-hora
         horaRefresh = setInterval(function () {
             $('.js-hora').html( new Date().toLocaleString().slice(9) );
@@ -193,24 +197,42 @@ jQuery(function ($) {
 
         $('#guardar').on('click', function(){
             if( !$('#ventasbundle_pagocliente_comprobantes').val() ){
-                jAlert('Debe indicar los comprobantes a abonar!', 'Atención');
+                jAlert('Debe indicar los comprobantes a abonar!');
                 $('#ventasbundle_pagocliente_comprobantes').select2('focus');
                 return false;
             }
             pago = parseFloat($('.pago').html()) ;
             if( $(':invalid').length>0 || pago<=0 ){
-                jAlert( 'Completar todos los datos para registrar el pago!', 'Atención' );
+                jAlert( 'Completar todos los datos para registrar el pago!');
                 return false;
             }
 
             txt = 'CONFIRMA LA REGISTRACIÓN DEL PAGO?';
             if( vuelto < 0 ){
-                txt = txt + '\n\n' + 'El monto del pago se imputará a las facturas indicadas hasta cubrir el mismo.';
+                txt = txt + '\n\n' + 'El pago se imputará a las facturas indicadas hasta cubrir el monto del mismo.';
             }
             if( !confirm(txt)){
                 return false;
             }
-            $('#ventasbundle_pagocliente').submit();
+            data = $('#ventasbundle_pagocliente').serialize();
+            $.ajax({
+                type: "POST",
+                url: '{{ path("ventas_cliente_pagos_create") }}',
+                data: data,
+                dataType: 'json',
+                success: function(res){
+                    if (res.msg=='OK') {
+                        window.open(res.urlprint);
+                        window.location.href = res.urlback;
+                    }else{
+                        jAlert(res.msg);
+                    }
+                },
+                error: function(error){
+                    jAlert("No se pudo generar el pago!");
+                }
+            });
+
         });
 
     });

@@ -17,12 +17,12 @@ class PagoProveedor
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
-    
+
     /**
      * @var datetime $fecha
      * @ORM\Column(name="fecha", type="datetime")
      */
-    private $fecha;    
+    private $fecha;
     /**
      * @var integer $prefijoNro
      * @ORM\Column(name="prefijo_nro", type="string", length=3)
@@ -32,8 +32,8 @@ class PagoProveedor
      * @var integer $pagoNro
      * @ORM\Column(name="pago_nro", type="string", length=6)
      */
-    protected $pagoNro;    
-    
+    protected $pagoNro;
+
     /**
      * @var integer $nroComprobante
      * @ORM\Column(name="nro_comprobante", type="string", length=20, nullable=true)
@@ -42,12 +42,12 @@ class PagoProveedor
     /**
      * @var string $concepto
      * @ORM\Column(name="concepto", type="text", nullable=false)
-     */    
-    protected $concepto;    
+     */
+    protected $concepto;
     /**
      * @var string $detalle
      * @ORM\Column(name="detalle", type="text", nullable=true)
-     */    
+     */
     protected $detalle;
 
      /**
@@ -61,17 +61,17 @@ class PagoProveedor
      * @ORM\Column(name="deposito", type="decimal", scale=3 )
      */
     protected $deposito;
-    
+
     /**
      *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pagos")
-     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
      */
     protected $proveedor;
-    
+
      /**
      * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\Cheque", mappedBy="pagoProveedor",cascade={"persist"})
-     */    
-    private $chequesPagados;     
+     */
+    private $chequesPagados;
 
     /**
      * @var datetime $created
@@ -79,7 +79,7 @@ class PagoProveedor
      * @ORM\Column(type="datetime")
      */
     private $created;
-   
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -87,7 +87,7 @@ class PagoProveedor
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-    
+
     private $conceptoTxt;
 
     /**
@@ -97,22 +97,30 @@ class PagoProveedor
     {
         $this->chequesPagados = new \Doctrine\Common\Collections\ArrayCollection();
         $this->deposito = 0;
-        $this->fecha = new \DateTime();  
+        $this->fecha = new \DateTime();
     }
-    
+
+    public function __toString(){
+         return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
+    }
+
+    public function getComprobanteNro(){
+        return $this->__toString();
+    }
+
     public function getConceptoTxt(){
         return $this->conceptoTxt;
     }
     public function setConceptoTxt($txt)
     {
-        $this->conceptoTxt = $txt;    
+        $this->conceptoTxt = $txt;
         return $this;
     }
-    
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -128,14 +136,14 @@ class PagoProveedor
     public function setFecha($fecha)
     {
         $this->fecha = $fecha;
-    
+
         return $this;
     }
 
     /**
      * Get fecha
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFecha()
     {
@@ -151,14 +159,14 @@ class PagoProveedor
     public function setPrefijoNro($prefijoNro)
     {
         $this->prefijoNro = $prefijoNro;
-    
+
         return $this;
     }
 
     /**
      * Get prefijoNro
      *
-     * @return string 
+     * @return string
      */
     public function getPrefijoNro()
     {
@@ -174,14 +182,14 @@ class PagoProveedor
     public function setPagoNro($pagoNro)
     {
         $this->pagoNro = $pagoNro;
-    
+
         return $this;
     }
 
     /**
      * Get pagoNro
      *
-     * @return string 
+     * @return string
      */
     public function getPagoNro()
     {
@@ -190,7 +198,7 @@ class PagoProveedor
 
     /**
      * Get nroPago
-     * @return string 
+     * @return string
      */
     public function getNroPago()
     {
@@ -205,14 +213,14 @@ class PagoProveedor
     public function setNroComprobante($nroComprobante)
     {
         $this->nroComprobante = $nroComprobante;
-    
+
         return $this;
     }
 
     /**
      * Get nroComprobante
      *
-     * @return string 
+     * @return string
      */
     public function getNroComprobante()
     {
@@ -228,14 +236,14 @@ class PagoProveedor
     public function setConcepto($concepto)
     {
         $this->concepto = $concepto;
-    
+
         return $this;
     }
 
     /**
      * Get concepto
      *
-     * @return string 
+     * @return string
      */
     public function getConcepto()
     {
@@ -251,14 +259,14 @@ class PagoProveedor
     public function setDetalle($detalle)
     {
         $this->detalle = $detalle;
-    
+
         return $this;
     }
 
     /**
      * Get detalle
      *
-     * @return string 
+     * @return string
      */
     public function getDetalle()
     {
@@ -274,14 +282,14 @@ class PagoProveedor
     public function setImporte($importe)
     {
         $this->importe = $importe;
-    
+
         return $this;
     }
 
     /**
      * Get importe
      *
-     * @return string 
+     * @return string
      */
     public function getImporte()
     {
@@ -297,14 +305,14 @@ class PagoProveedor
     public function setCreated($created)
     {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -320,14 +328,14 @@ class PagoProveedor
     public function setProveedor(\ComprasBundle\Entity\Proveedor $proveedor = null)
     {
         $this->proveedor = $proveedor;
-    
+
         return $this;
     }
 
     /**
      * Get proveedor
      *
-     * @return \ComprasBundle\Entity\Proveedor 
+     * @return \ComprasBundle\Entity\Proveedor
      */
     public function getProveedor()
     {
@@ -360,7 +368,7 @@ class PagoProveedor
     /**
      * Get chequesPagados
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getChequesPagados()
     {
@@ -376,20 +384,20 @@ class PagoProveedor
     public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
     {
         $this->createdBy = $createdBy;
-    
+
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
         return $this->createdBy;
     }
-    
+
     public function getTotalCheques(){
         $cant = 0;
         foreach ($this->chequesPagados as $cheque) {
@@ -400,7 +408,7 @@ class PagoProveedor
     }
     public function getTotal(){
         return $this->getTotalCheques() + $this->deposito + $this->importe;
-    }    
+    }
 
     /**
      * Set deposito
@@ -411,14 +419,14 @@ class PagoProveedor
     public function setDeposito($deposito)
     {
         $this->deposito = $deposito;
-    
+
         return $this;
     }
 
     /**
      * Get deposito
      *
-     * @return string 
+     * @return string
      */
     public function getDeposito()
     {

@@ -7,7 +7,7 @@
 {% block contentwrapper %}
 {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-<div>        
+<div>
     <form id="printform" name="printform" target="_blank"  action="{{ path("print_proveedor_pagos") }}" method="post">
         <input type="hidden" id="proveedorid" name="proveedorid"/>
         <input type="hidden" id="fdesde" name="fdesde"/>
@@ -15,28 +15,22 @@
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
         <button class="stdbtn floatright" type="submit" >Imprimir</button>
-    </form>    
+    </form>
     <form id="searchform" action="{{ path('compras_proveedor_pagos') }}" method="get">
-        <div style="display: inline-block; margin-bottom: 10px;">
-            &nbsp;&nbsp;&nbsp;
-            <label><strong>Proveedor:</strong></label>
-            <select class="select2" id="selectProveedor" name="provId">
-            {% for prov in proveedores if prov.activo %}
-                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
-            {% endfor %}
-            </select>  
-        </div>    
-        <div style="display: inline-block; margin-right: 30px;">     
+
+        {% include "ComprasBundle:Proveedor:_partial-select2-proveedor.html.twig" with { 'allowclear':true }  %}
+
+        <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Fecha Pago: </strong></label>
-            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
-            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
-        </div>        
+        </div>
     </form>
-</div><!-- button -->     
+</div><!-- button -->
 
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">        
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
                 <th>Fecha</th>
@@ -45,9 +39,9 @@
                 <th class="nosort">Detalle</th>
                 <th class="nosort">Importe</th>
                 <th class="nosort actionbutton addbutton">
-                   {% if app.user.access(app.session.get('unidneg_id'),'compras_proveedor_pagos') %}
+                   {% if app.user.access(app.session.get('unidneg_id'),'compras_proveedor_pagos') and provId %}
                     <a class="editar create" href="{{ path('compras_proveedor_pagos_new', { 'id': provId }) }}">Nuevo Pago</a>
-                    {% else %} &nbsp; {% endif %} 
+                    {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
         </thead>
@@ -67,9 +61,9 @@
             </tr>
            {% endfor %}
         </tbody>
-    </table>     
-</div>               
-        
+    </table>
+</div>
+
  {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
@@ -79,9 +73,9 @@ jQuery(document).ready(function($) {
         var keycode = (e.keyCode ? e.keyCode : e.which);
         if(keycode == '13'){ e.preventDefault(); }
     });
-    $('#selectProveedor').change(function(){ 
+    $('#selectProveedor').change(function(){
         $('#searchform').submit();
-    }); 
+    });
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     var oTable = $('#dyntable2').dataTable();
     $('#printform').on('submit',function(){
@@ -90,13 +84,13 @@ jQuery(document).ready(function($) {
         $('#fhasta').val($('#hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
         var datos = [];
-        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) { 
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             //fecha
             var i = value[0].indexOf('</span>');
             if( i >-1 ){
                 var fecha = value[0].substr(i+7);
                 value[0]=fecha;
-            }         
+            }
             //concepto
             var a = value[2].indexOf('<span class="hidden">');
             var b = value[2].indexOf('</span>');
@@ -106,9 +100,9 @@ jQuery(document).ready(function($) {
             }
             value.splice(5);
             datos[index] = value;
-        }); 
+        });
         $('#datalist').val(JSON.stringify(datos));
-    });    
-});    
-</script>    
+    });
+});
+</script>
 {% endblock %}

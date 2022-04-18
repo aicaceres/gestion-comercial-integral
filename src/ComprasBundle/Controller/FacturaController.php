@@ -15,7 +15,7 @@ use ComprasBundle\Form\FacturaType;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
 use ComprasBundle\Entity\PagoProveedor;
-
+use VentasBundle\Entity\CobroDetalle;
 /**
  * @Route("/factura")
  */
@@ -148,7 +148,10 @@ class FacturaController extends Controller {
 
                 // REGISTRAR EL PAGO DE CONTADO
                 if (isset($data['pagadoContado'])) {
-                    $this->registrarPagoContado($em, $entity);
+                    $res = $this->registrarPagoContado($em, $entity);
+                    if(!$res){
+                        throw $this->createNotFoundException('No se pudo registrar el pago.');
+                    }
                     $entity->setSaldo(0);
                     $entity->setEstado('PAGADO');
                     $em->persist($entity);
@@ -343,7 +346,10 @@ class FacturaController extends Controller {
             // $entity->setTotal( $entity->getMontoTotal() );
             // REGISTRAR EL PAGO DE CONTADO
             if (isset($data['pagadoContado'])) {
-                $this->registrarPagoContado($em, $entity);
+                $res = $this->registrarPagoContado($em, $entity);
+                    if(!$res){
+                        throw $this->createNotFoundException('No se pudo registrar el pago.');
+                    }
                 $entity->setSaldo(0);
                 $entity->setEstado('PAGADO');
             }
@@ -640,24 +646,43 @@ class FacturaController extends Controller {
     }
 
     private function registrarPagoContado($em, $factura) {
-        $pago = new PagoProveedor();
-        $pago->setFecha(new \DateTime());
-        $pago->setProveedor($factura->getProveedor());
-        $pago->setImporte($factura->getTotal());
-        $pago->setNroComprobante($factura->getNuevoNroComprobante());
-        $concepto = array();
-        array_push($concepto, array('clave' => 'FAC-' . $factura->getId(), 'monto' => $factura->getTotal()));
-        $pago->setConcepto(json_encode($concepto));
-        $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
-        $pago->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
-        $pago->setPagoNro(sprintf("%06d", $equipo->getNroPagoCompra() + 1));
-        /* Guardar ultimo nro */
-        $equipo->setNroPagoCompra($equipo->getNroPagoCompra() + 1);
-        $em->persist($equipo);
+        try {
+            $pago = new PagoProveedor();
+            $pago->setFecha(new \DateTime());
+            $pago->setProveedor($factura->getProveedor());
+            $pago->setImporte($factura->getTotal());
+            $pago->setNroComprobante($factura->getNuevoNroComprobante());
+            $concepto = array();
+            array_push($concepto, array('clave' => 'FAC-' . $factura->getId(), 'monto' => $factura->getTotal()));
+            $pago->setConcepto(json_encode($concepto));
+            $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
+            $pago->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
+            $pago->setPagoNro(sprintf("%06d", $equipo->getNroPagoCompra() + 1));
+            /* Guardar ultimo nro */
+            $equipo->setNroPagoCompra($equipo->getNroPagoCompra() + 1);
+            $em->persist($equipo);
+            $em->persist($pago);
+            // cobroDetalle
+            $cobro = new CobroDetalle();
+            $cobro->setTipoPago('EFECTIVO');
+            $cobro->setImporte( $pago->getImporte() );
+            $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByCodigoAfip('PES');
+            $cobro->setMoneda($moneda);
+            $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
+            if( !$apertura ){
+                $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para registrar pagos');
+                return false;
+            }
+            $cobro->setCajaApertura($apertura);
+            $cobro->setPagoProveedor( $pago );
+            $em->persist($cobro);
+            $em->flush();
+            return true;
+        }
+        catch (\Exception $ex) {
+            return $ex;
+        }
 
-        $em->persist($pago);
-
-        return $em->flush();
     }
 
 }

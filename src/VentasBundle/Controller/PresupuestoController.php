@@ -97,7 +97,7 @@ class PresupuestoController extends Controller {
     /**
      * @Route("/", name="ventas_presupuesto_create")
      * @Method("POST")
-     * @Template("VentasBundle:Presupuesto:edit.html.twig")
+     * @Template("VentasBundle:Presupuesto:new.html.twig")
      */
     public function createAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
@@ -162,7 +162,7 @@ class PresupuestoController extends Controller {
                 $em->getConnection()->rollback();
             }
         }
-        return $this->render('VentasBundle:Presupuesto:edit.html.twig', array(
+        return $this->render('VentasBundle:Presupuesto:new.html.twig', array(
                     'entity' => $entity,
                     'form' => $form->createView(),
         ));
@@ -222,17 +222,15 @@ class PresupuestoController extends Controller {
             $this->addFlash('success', 'Los datos fueron modificados con éxito!');
             return $this->redirect($this->generateUrl('ventas_presupuesto'));
         }
-$errors = array();
-
+        $errors = array();
         if ($editForm->count() > 0) {
             foreach ($editForm->all() as $child) {
                 if (!$child->isValid()) {
-echo $child->getName(); echo '<br>';
                     $errors[$child->getName()] = (String) $editForm[$child->getName()]->getErrors();
                 }
             }
         }
-var_dump($errors);die;
+
         return $this->render('VentasBundle:Presupuesto:new.html.twig', array(
                     'entity' => $entity,
                     'form' => $editForm->createView(),

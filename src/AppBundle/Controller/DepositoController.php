@@ -26,13 +26,13 @@ class DepositoController extends Controller
     public function indexAction()
     {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_deposito');
-        $em = $this->getDoctrine()->getManager();      
+        $em = $this->getDoctrine()->getManager();
         $entities = $em->getRepository('AppBundle:Deposito')->findByUnidadNegocio( $this->get('session')->get('unidneg_id') );
         return $this->render('AppBundle:Deposito:index.html.twig', array(
             'entities' => $entities,
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_deposito_create")
      * @Method("POST")
@@ -49,13 +49,17 @@ class DepositoController extends Controller
             $em = $this->getDoctrine()->getManager();
             $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
             $entity->setUnidadNegocio($unidneg);
-            
+
             if($entity->getPordefecto()){
                 // dejar solo este por defecto.
-               $em->getRepository('AppBundle:Deposito')->setPorDefectoFalse($unidneg->getId()); 
+               $em->getRepository('AppBundle:Deposito')->setPorDefectoFalse($unidneg->getId());
                $entity->setPordefecto(1);
             }
-            
+            if( !$entity->getLocalidad() ){
+                $localidad = $em->getRepository('ConfigBundle:Localidad')->findOneByByDefault(1);
+                $entity->setLocalidad($localidad);
+            }
+
             $em->persist($entity);
             $em->flush();
 
@@ -80,7 +84,7 @@ class DepositoController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/new", name="sistema_deposito_new")
      * @Method("GET")
@@ -100,7 +104,7 @@ class DepositoController extends Controller
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_deposito_edit")
      * @Method("GET")
@@ -137,7 +141,7 @@ class DepositoController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_deposito_update")
      * @Method("PUT")
@@ -159,10 +163,10 @@ class DepositoController extends Controller
         if ($editForm->isValid()) {
              if($entity->getPordefecto()){
                 // dejar solo este por defecto.
-               $em->getRepository('AppBundle:Deposito')->setPorDefectoFalse($unidneg); 
+               $em->getRepository('AppBundle:Deposito')->setPorDefectoFalse($unidneg);
                $entity->setPordefecto(1);
             }
-            
+
             $em->flush();
 
             return $this->redirect($this->generateUrl('sistema_deposito'));
@@ -173,13 +177,13 @@ class DepositoController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_deposito_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
+    {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_deposito_delete');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('AppBundle:Deposito')->find($id);
@@ -190,32 +194,32 @@ class DepositoController extends Controller
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }
         return new Response(json_encode($msg));
     }
-    
+
     /**
      * @Route("/selectDepositos", name="select_depositos")
      * @Method("POST")
-     */        
+     */
     public function depositosAction(Request $request)
     {
         $unidneg_id = $request->request->get('unidneg_id');
         $em = $this->getDoctrine()->getManager();
-        $depositos = $em->getRepository('AppBundle:Pedido')->findByUnidadNegocioId($unidneg_id);         
+        $depositos = $em->getRepository('AppBundle:Pedido')->findByUnidadNegocioId($unidneg_id);
         return new JsonResponse($depositos);
-    }        
-    
+    }
+
     /**
      * @Route("/autocompleteDepositos", name="autocomplete_depositos")
      * @Method("GET")
-     */        
+     */
     public function autocompleteDepositosAction(Request $request)
     {
         $unidneg_id = $request->get('unidneg_id');
         $em = $this->getDoctrine()->getManager();
-        $depositos = $em->getRepository('AppBundle:Deposito')->findByUnidadNegocio($unidneg_id);   
+        $depositos = $em->getRepository('AppBundle:Deposito')->findByUnidadNegocio($unidneg_id);
         $array = array();
         foreach ($depositos as $dep) {
             $array[] = ['id'=>$dep->getId(), 'text'=>$dep->getNombre()];
         }
         return new Response(json_encode($array));
-    }        
+    }
 }

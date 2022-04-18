@@ -29,11 +29,12 @@
         {{ form_label(cheque.fecha) }}
         {{ form_widget(cheque.fecha, { 'attr': {'class' : 'datepicker'} }) }}
         {{ form_label(cheque.dador) }}
-        {{ form_widget(cheque.dador, { 'attr': {'class':'smallinput'} }) }}
+        {{ form_widget(cheque.dador, { 'attr': {'style':'width:30%'} }) }}
         </div>
         <div style="margin:5px 0">
         {{ form_label(cheque.banco) }}
-        {{ form_widget(cheque.banco, { 'attr': {'class' : 'mininput selectBanco',
+        {{ form_widget(cheque.banco, { 'attr': {'class' : 'selectBanco',
+                'style': 'width:30%',
                     'data-url': path("sistema_banco_add") } }) }}
         {{ form_label(cheque.sucursal) }}
         {{ form_widget(cheque.sucursal, { 'attr': {'class':'smallinput'} }) }}

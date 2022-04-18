@@ -496,13 +496,14 @@ class ProveedorController extends Controller {
     public function pagosIndexAction(Request $request) {
         $unidneg = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg, 'compras_proveedor_pagos');
+
         $provId = $request->get('provId');
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
         $em = $this->getDoctrine()->getManager();
-        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
-        if (!$provId) {
-            $provId = $proveedores[0]->getId();
+        $proveedor = null;
+        if($provId){
+            $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($provId);
         }
         $entities = $em->getRepository('ComprasBundle:PagoProveedor')->findPagosByCriteria($provId, $desde, $hasta);
         foreach ($entities as $pago) {
@@ -519,11 +520,8 @@ class ProveedorController extends Controller {
             $pago->setDetalle($detalle);
         }
         return $this->render('ComprasBundle:Proveedor:pago_index.html.twig', array(
-                    'entities' => $entities,
-                    'proveedores' => $proveedores,
-                    'provId' => $provId,
-                    'desde' => $desde,
-                    'hasta' => $hasta
+            'entities' => $entities, 'provId' => $provId, 'proveedor'=>$proveedor,
+            'desde' => $desde, 'hasta' => $hasta
         ));
     }
 
@@ -938,6 +936,39 @@ class ProveedorController extends Controller {
         return $this->render('ComprasBundle:Proveedor:control.html.twig', array(
                     'resultado' => $resultado, 'provId' => $id, 'proveedores' => $proveedores
         ));
+    }
+
+    /**
+     * @Route("/getAutocompleteProveedores", name="get_autocomplete_proveedores")
+     * @Method("POST")
+     */
+    public function getAutocompleteProveedoresAction( Request $request) {
+        $term = $request->get('searchTerm');
+        $em = $this->getDoctrine()->getManager();
+        $results = $em->getRepository('ComprasBundle:Proveedor')->filterByTerm($term);
+        return new JsonResponse($results);
+    }
+
+    /**
+     * @Route("/getDatosProveedor", name="get_datos_proveedor")
+     * @Method("GET")
+     */
+    public function getDatosProveedorAction(Request $request) {
+        $id = $request->get('id');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('ComprasBundle:Proveedor')->find($id);
+        $partial = $this->renderView(
+            'ComprasBundle:Proveedor:_partial-datos-proveedor.html.twig',
+            array('item' => $entity)
+        );
+        $cuit = $entity->getCuit();
+        $valido = UtilsController::validarCuit($cuit);
+        $data = array(
+            'partial' => $partial,
+            'categoriaIva' => ($entity->getCategoriaIva() ) ?  $entity->getCategoriaIva()->getNombre() : null,
+            'cuitValido' => $valido
+        );
+        return new Response( json_encode($data));
     }
 
 }

@@ -11,11 +11,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\Cliente;
 use VentasBundle\Form\ClienteType;
-use VentasBundle\Entity\NotaDebCred;
-use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Entity\PagoCliente;
 use VentasBundle\Form\PagoClienteType;
-
+use VentasBundle\Entity\NotaDebCred;
+use VentasBundle\Entity\NotaDebCredDetalle;
+use VentasBundle\Entity\FacturaElectronica;
+use VentasBundle\Entity\CobroDetalle;
+use VentasBundle\Afip\src\Afip;
+use Endroid\QrCode\QrCode;
 /**
  * @Route("/cliente")
  */
@@ -340,7 +343,8 @@ class ClienteController extends Controller {
         $fdesde = $request->get('fdesde');
         $fhasta = $request->get('fhasta');
         $cliente = $em->getRepository('VentasBundle:Cliente')->find($clienteId);
-        $textoFiltro = array($cliente ? $cliente->getNombre() : 'Todos', $fdesde ? $fdesde : '', $fhasta ? $fhasta : '');
+        $txtcliente =$cliente ? $cliente->getNombre() : 'Todos';
+        $textoFiltro = array( $txtcliente , $fdesde ? $fdesde : '', $fhasta ? $fhasta : '');
 
         //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
         //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
@@ -355,7 +359,7 @@ class ClienteController extends Controller {
         $content = $facade->render($xml);
 
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition' => 'filename=ctacte_' . $cliente->getNombre() . '.pdf'));
+            'Content-Disposition' => 'filename=ctacte_' . $txtcliente . '.pdf'));
     }
 
     /**
@@ -509,21 +513,21 @@ class ClienteController extends Controller {
     }
 
     /**
-     * @Route("/pagos", name="ventas_cliente_pagos_create")
+     * @Route("/pagosCreate", name="ventas_cliente_pagos_create")
      * @Method("POST")
-     * @Template("VentasBundle:Cliente:pago_edit.html.twig")
      */
     public function pagosCreateAction(Request $request) {
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
+        $msg = 'OK';
         $entity = new PagoCliente();
         $form = $this->pagosCreateCreateForm($entity);
         $form->handleRequest($request);
         if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->getConnection()->beginTransaction();
             try {
+                $em = $this->getDoctrine()->getManager();
+                $em->getConnection()->beginTransaction();
                 // checkear apertura de caja
                 $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
                 if( !$apertura ){
@@ -564,10 +568,17 @@ class ClienteController extends Controller {
                     $notacredito->setCliente( $entity->getCliente() );
                     $notacredito->setMoneda( $entity->getMoneda());
                     $notacredito->setCotizacion( $entity->getCotizacion() );
+                    $notacredito->setSigno('-');
+                    $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
+                    $notacredito->setUnidadNegocio($unidneg);
+                    $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find(21);
+                    $notacredito->setFormaPago($formaPago);
                     $notaElectronica = new FacturaElectronica();
                     $notaElectronica->setPuntoVenta( $this->getParameter('ptovta_ws_factura') );
-                    $notacredito->setNotaElectronica($notaElectronica);
-
+                    $catIva = ( $entity->getCliente()->getCategoriaIva() ) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
+                    $letra = ( $catIva =='I' || $catIva == 'M' ) ? 'A' : 'B';
+                    $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->getIdByTipo('CRE-'.$letra);
+                    $notaElectronica->setTipoComprobante($tipoComp);
                     // preparar datos para NC
                     $docTipo = 99 ;
                     $docNro = 0;
@@ -584,50 +595,88 @@ class ClienteController extends Controller {
                         }
                     }
 
-                    $catIva = ( $entity->getCliente()->getCategoriaIva() ) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
+
                     $iva = $tributos = array();
-                    /*if( $entity->getDetalles() ){
-                        $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
-                        foreach( $entity->getDetalles() as $item ){
-                            $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array   ('valor'=>$item->getProducto()->getIva()));
-                            $codigo = intval($alicuota->getCodigo());
-                            $dtoRec = $item->getPrecio() * ($entity->getDescuentoRecargo()/100);
-                            $baseImp = $item->getPrecio() + $dtoRec;
-                            $importe = $baseImp * ( $alicuota->getValor() / 100 );
-                            $key = array_search($codigo, array_column($iva, 'Id'));
-                            if( $key === false){
-                                $iva[] = array( 'Id' => $codigo,
-                                                'BaseImp' => round($baseImp, 2) ,
-                                                'Importe' => round($importe,2) );
-                            }else{
-                                $iva[$key] = array( 'Id' => $codigo,
-                                                'BaseImp' => round( $iva[$key]['BaseImp'] + $baseImp ,2) ,
-                                                'Importe' => round( $iva[$key]['Importe'] + $importe ,2) );
-                            }
-                            // TOTALES
-                            $impDtoRec += $dtoRec;
-                            $impNeto += $baseImp;
-                            $impIVA += $importe;
-                            $impTotal += ($baseImp + $importe );
-                            //$item->setDescuento($dtoRec);
-                        }
-                        // TRIBUTOS
-                        $impTrib = 0;
-                        if( $catIva == 'I' ){
-                            $neto = round($impNeto,2);
-                            $iibb = round( ($neto * 0.035) ,2);
-                            $impTrib = $iibb;
-                            $tributos = array(
-                                'Id' => 7,
-                                'BaseImp' => $neto,
-                                'Alic' => 3.5,
-                                'Importe' => $iibb );
-                        }
-                        $impTotal += $impTrib;
+                    // armar item
+                    // calculos
+                    $grav = ( $catIva == 'I' ) ? 1.245 : 1.21;
+                    $impNeto = $montoNotaCredito / $grav;
+                    $detalle = new NotaDebCredDetalle();
+                    $detalle->setCantidad(1);
+                    $producto = $em->getRepository('AppBundle:Producto')->findOneBy(array('comodin'=>1));
+                    $detalle->setProducto($producto);
+                    $detalle->setTextoProducto('Descuento por pago anticipado');
+                    $detalle->setPrecio($impNeto);
+                    $detalle->setAlicuota('21.00');
+                    $notacredito->addDetalle($detalle);
+                    $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array('valor'=>'21.00'));
+                    $codigo = intval($alicuota->getCodigo());
 
-                    }*/
-
-
+                    $impIVA = $impNeto * ( 0.21 );
+                    $iva[] = array( 'Id' => $codigo,
+                                    'BaseImp' => round($impNeto, 2),
+                                    'Importe' => round($impIVA,2) );
+                    // TOTAL
+                    $impTotal = ($impNeto + $impIVA );
+                    $impTrib = 0;
+                    if( $catIva == 'I' ){
+                        $neto = round($impNeto,2);
+                        $iibb = round( ($neto * 0.035) ,2);
+                        $impTrib = $iibb;
+                        $tributos = array(
+                            'Id' => 7,
+                            'BaseImp' => $neto,
+                            'Alic' => 3.5,
+                            'Importe' => $iibb );
+                    }
+                    $impTotal += $impTrib;
+                    // realizar nota electronica
+                    $afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
+                    $data = array(
+                        'CantReg' 	=> 1,  // Cantidad de comprobantes a registrar
+                        'PtoVta' 	=> $notaElectronica->getPuntoVenta(),  // Punto de venta
+                        'CbteTipo' 	=> $notaElectronica->getCodigoComprobante(),  // Tipo de comprobante (ver tipos disponibles)
+                        'Concepto' 	=> 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
+                        'DocTipo' 	=> $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+                        'DocNro' 	=> $docNro,  // Número de documento del comprador (0 consumidor final)
+                        'CbteFch' 	=> intval( $notacredito->getFecha()->format('Ymd') ), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
+                        'ImpTotal' 	=> round($impTotal,2) , // Importe total del comprobante
+                        'ImpTotConc' 	=> 0,   // Importe neto no gravado
+                        'ImpNeto' 	=> round($impNeto,2) , // Importe neto gravado
+                        'ImpOpEx' 	=> 0,   // Importe exento de IVA
+                        'ImpIVA' 	=> round($impIVA,2),  //Importe total de IVA
+                        'ImpTrib' 	=> round($impTrib,2),   //Importe total de tributos
+                        'MonId' 	=> $notacredito->getMoneda()->getCodigoAfip(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
+                        'MonCotiz' 	=> $notacredito->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
+                        'Tributos' => $tributos,
+                        'CbtesAsoc' 	=> $cbtesAsoc,
+                        'Iva' 			=> $iva,
+                    );
+                    // si no hay tributos
+                    if( empty($tributos) ){
+                        unset( $data['Tributos'] );
+                    }
+                    // create voucher
+                    $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
+                    $notacredito->setIva($impIVA);
+                    $notacredito->setPercIibb($impTrib);
+                    $notacredito->setTotal($impTotal);
+                    $notaElectronica->setTotal($impTotal);
+                    $notaElectronica->setSaldo(0);
+                    $notaElectronica->setCae($wsResult['CAE']);
+                    $notaElectronica->setCaeVto($wsResult['CAEFchVto']);
+                    $notaElectronica->setNroComprobante($wsResult['voucher_number']);
+                    $notaElectronica->setNotaDebCred($notacredito);
+                    // generar detalle para caja
+                    $cobroDetalle = new CobroDetalle();
+                    $cobroDetalle->setCajaApertura($apertura);
+                    $cobroDetalle->setTipoPago('CTACTE');
+                    $cobroDetalle->setMoneda($notacredito->getMoneda());
+                    $cobroDetalle->setImporte($impTotal);
+                    $notacredito->addCobroDetalle($cobroDetalle);
+                    $em->persist($notaElectronica);
+                    $em->persist($notacredito);
+                    $entity->setNotaDebCred($notacredito);
                 }else{
                     // cancelar saldos de los comprobantes
                     $total = ( $totalPago > $entity->getTotal() ) ? $entity->getTotal() : $totalPago;
@@ -655,22 +704,98 @@ class ClienteController extends Controller {
                 }
                 $em->persist($entity);
                 $em->flush();
+                $res = array( 'msg' => 'OK',
+                              'urlback' =>  $this->generateUrl('ventas_cliente_pagos', ['cliId'=>$entity->getCliente()->getId()]),
+                              'urlprint' => $this->generateUrl('print_comprobante_pago_ventas', array('id' => $entity->getId() ))
+                            );
                 $em->getConnection()->commit();
-                $this->addFlash('success', 'Pago Registrado');
 
-                return $this->redirectToRoute('ventas_cliente_pagos', array('cliId'=>$entity->getCliente()->getId()));
+                return new JsonResponse($res) ;
             }
             catch (\Exception $ex) {
-                $this->addFlash('error', $ex->getMessage());
+                $msg = $ex->getMessage();
                 $em->getConnection()->rollback();
+                return new JsonResponse( array( 'msg' => $msg ) );
             }
 
         }
+        $errors = array();
+        if ($form->count() > 0) {
+            foreach ($form->all() as $child) {
+                if (!$child->isValid()) {
+                    $errors[$child->getName()] = (String) $form[$child->getName()]->getErrors();
+                }
+            }
+        }
+        return new JsonResponse( array( 'msg' => $errors ) );
+    }
 
-        return $this->render('VentasBundle:Cliente:pago_edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
-        ));
+    /**
+     * IMPRESION DE comprobante
+     */
+
+    /**
+     * @Route("/{id}/printComprobantePagoVentas.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="print_comprobante_pago_ventas")
+     * @Method("GET")
+     */
+    public function printComprobantePagoVentasAction($id){
+        $em = $this->getDoctrine()->getManager();
+        $pago = $em->getRepository('VentasBundle:PagoCliente')->find($id);
+        $nota = $pago->getNotaDebCred();
+        $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
+
+        $logo = __DIR__.'/../../../web/assets/images/logo_comprobante.png';
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+
+        if($nota){
+            $qr = __DIR__.'/../../../web/assets/imagesafip/qr.png';
+            $logoafip = __DIR__.'/../../../web/assets/imagesafip/logoafip.png';
+            $url =$this->getParameter('url_qr_afip');
+            $cuit =$this->getParameter('cuit_afip');
+            $ptovta =$this->getParameter('ptovta_ws_factura');
+
+            $data = array(
+                    "ver" => 1,
+                    "fecha" => $nota->getFecha()->format('Y-m-d'),
+                    "cuit" => $cuit,
+                    "ptoVta" => $ptovta,
+                    "tipoCmp" => $nota->getNotaElectronica()->getCodigoComprobante(),
+                    "nroCmp" => $nota->getNotaElectronica()->getNroComprobante(),
+                    "importe" => round($nota->getMontoTotal(),2) ,
+                    "moneda" => $nota->getMoneda()->getCodigoAfip(),
+                    "ctz" => $nota->getCotizacion(),
+                    "tipoDocRec" => 0,
+                    "nroDocRec" => 0,
+                    "tipoCodAut" => "E",
+                    "codAut" => $nota->getNotaElectronica()->getCae() );
+            $base64 = base64_encode( json_encode($data) );
+
+            $qrCode = new QrCode();
+            $qrCode
+                ->setText($url.$base64)
+                ->setSize(120)
+                ->setPadding(5)
+                ->setErrorCorrection('low')
+                ->setImageType(QrCode::IMAGE_TYPE_PNG)
+            ;
+            $qrCode->render($qr);
+            $array = array( 'pago'=> $pago, 'nota' => $nota,
+                             'empresa'=>$empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip'=> $logoafip );
+
+
+        }else{
+            $array = array( 'pago'=> $pago, 'nota' => $nota, 'empresa'=>$empresa, 'logo' => $logo );
+
+        }
+        $this->render('VentasBundle:Cliente:comprobante-pago.pdf.twig', $array, $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition'=>'filename=RECX-'.$pago->getComprobanteNro().'.pdf'));
     }
 
     /**

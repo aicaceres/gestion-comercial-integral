@@ -15,23 +15,24 @@ class PagoProveedorType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
+$data = $options['data'];
+        $prov = $data->getProveedor();
         $builder
             ->add('fecha','date',array('widget' => 'single_text', 'label'=>'Fecha Pago:',
                 'format' => 'dd-MM-yyyy', 'required' => true))
             ->add('nroComprobante',null,array('label'=>'Comprobante:', 'required' => false))
-            ->add('concepto',null,array('label'=>'Facturas:', 'required' => false))
-            ->add('detalle',null,array('required'=>false))
-            ->add('importe',null,array('label'=>'Efectivo:'))
-            ->add('deposito',null,array('label'=>'Depósito:'))
+            ->add('concepto',null,array('label'=>'COMPROBANTES PENDIENTES:', 'required' => false))
+
+            ->add('importe')
+
             ->add('proveedor','entity',array('label'=>'Proveedor:',
                 'class' => 'ComprasBundle:Proveedor', 'required' =>true,
-                'attr'  => array('class' => 'smallinput'),
-                'query_builder'=> function(EntityRepository $repository){
-                    return $qb = $repository->createQueryBuilder('p')
-                            ->where('p.activo=1')
-                            ->orderBy('p.nombre');
-                    }
-                ))    
+                'attr'  => array('class' => 'smallinput'),'label' => 'DATOS DEL PROVEEDOR: ',
+                        'query_builder' => function (EntityRepository $repository) use ($prov) {
+                            return $qb = $repository->createQueryBuilder('p')
+                                ->where("p.id=" . $prov->getId());
+                           }
+                        ))
             ->add('chequesPagados', 'collection', array(
                 'type'           => new ChequeType(),
                 'by_reference'   => false,
@@ -40,10 +41,10 @@ class PagoProveedorType extends AbstractType
                 'prototype_name' => 'items',
                 'attr'           => array(
                     'class' => 'row item'
-                )))                
+                )))
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */

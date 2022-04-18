@@ -57,10 +57,13 @@
             <div style="display: inline-block; width: 20%;">
                 <label>Generar NC:</label>
                 <input type="checkbox" {% if entity.generaNotaCredito %} checked="checked" {% endif %} >
-                <span class="nota-credito" style="padding: 5px; display: none;">
+                {% if entity.generaNotaCredito %}
+                <span class="nota-credito" style="padding: 5px;">
                     <strong> {{ entity.moneda.simbolo }} </strong>
-                    <span>0.00</span>
+                    <span>{{ entity.montoNc|number_format(2,'.',',') }}</span>
                 </span>
+               
+                {% endif %}
             </div>
         </fieldset>
         <fieldset class="fields">

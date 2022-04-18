@@ -113,7 +113,7 @@ class NotaDebCredDetalle {
     /** FIN VALORES ITEM */
 
     public function getNombreProducto(){
-        return $this->getProducto()->getNombre();
+        return ( $this->getProducto()->getComodin() ) ? $this->getTextoProducto() : $this->getProducto()->getNombre();
     }
 
 

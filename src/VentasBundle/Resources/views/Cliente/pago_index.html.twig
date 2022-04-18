@@ -56,11 +56,12 @@
                 {% endif %}
                 <td>{{ entity.comprobanteNro }}</td>
                 <td>{{ entity.comprobantesTxt }}</td>
-                <td></td>
+                <td>{% if entity.generaNotaCredito %} {{ entity.notaDebCred.notaElectronica.comprobanteTxt }} | {{entity.notaDebCred.moneda.simbolo}} {{entity.notaDebCred.notaElectronica.total|number_format(2,'.',',')}} {% endif %}</td>
                 <td style="text-align: right">{{ entity.getTotal|number_format(2,'.',',') }}</td>
                 <td class="buttons">
                    <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
-                   <a href url="{{ path('ventas_cliente_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a>
+                    <a href="#" url="{{ path('print_comprobante_pago_ventas', { 'id': entity.id })}}" class="editar btn btnaction btn_print"  title="Imprimir Comprobante"></a>
+                   <a href url="{{ path('ventas_cliente_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" style="display: none" title="Eliminar"></a>
                 </td>
             </tr>
            {% endfor %}

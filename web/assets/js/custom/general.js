@@ -235,6 +235,31 @@ jQuery(document).ready(function ($) {
     }).on('change', function(){
         jQuery('#searchform').submit();
     });
+    // select clientes para index
+    let selectProveedorIndex = jQuery('#selectProveedorIndex');
+    let url_selectProveedorIndex = selectProveedorIndex.attr('url');
+    selectProveedorIndex.select2({
+        ajax: {
+        url: url_selectProveedorIndex,
+        type: "post",
+        dataType: 'json',
+        delay: 250,
+        data: function (params) {
+            return {
+            searchTerm: params.term // search term
+            };
+        },
+        processResults: function (response) {
+            return {
+                results: response
+            };
+        },
+        cache: true
+        },
+        minimumInputLength: 3
+    }).on('change', function(){
+        jQuery('#searchform').submit();
+    });
 // limpia select2
     jQuery('#select2clear').on('click', function (e) {
         objselect = jQuery(this).siblings('select');

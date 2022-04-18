@@ -16,22 +16,22 @@
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
         {% if mov.tipoPago=='EFECTIVO' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+            {{ (mov.importe*mov.moneda.cotizacion*mov.signoCaja)|number_format(3,'.',',') }}
         {% else %} 0.000 {% endif %}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
         {% if mov.tipoPago=='CHEQUE' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+            {{ (mov.importe*mov.moneda.cotizacion*mov.signoCaja)|number_format(3,'.',',') }}
         {% else %} 0.000 {% endif %}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
         {% if mov.tipoPago=='TARJETA' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+            {{ (mov.importe*mov.moneda.cotizacion*mov.signoCaja)|number_format(3,'.',',') }}
         {% else %} 0.000 {% endif %}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
         {% if mov.tipoPago=='CTACTE' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+            {{ (mov.importe*mov.moneda.cotizacion*mov.signoCaja)|number_format(3,'.',',') }}
         {% else %} 0.000 {% endif %}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">

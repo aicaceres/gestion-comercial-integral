@@ -58,7 +58,11 @@ class CobroDetalle {
      * @ORM\JoinColumn(name="ventas_pago_cliente_id", referencedColumnName="id")
      */
     protected $pagoCliente;
-
+    /**
+     * @ORM\ManyToOne(targetEntity="ComprasBundle\Entity\PagoProveedor", inversedBy="cobroDetalles")
+     * @ORM\JoinColumn(name="compras_pago_proveedor_id", referencedColumnName="id")
+     */
+    protected $pagoProveedor;
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\CajaApertura", inversedBy="movimientos")
      * @ORM\JoinColumn(name="ventas_caja_apertura_id", referencedColumnName="id")
@@ -78,6 +82,10 @@ class CobroDetalle {
             // buscar nota
             $total = $this->getPagoCliente()->getTotal();
         }
+        if( $this->getPagoProveedor()){
+            // buscar nota
+            $total = $this->getPagoProveedor()->getImporte();
+        }
 
         $tipos = array('EFECTIVO','CHEQUE');
         $calcular = in_array( $this->getTipoPago(), $tipos );
@@ -95,8 +103,12 @@ class CobroDetalle {
             $tipo = $this->getNotaDebCred()->getNotaElectronica()->getTipo();
         }
         if( $this->getPagoCliente()){
-            // buscar pago
+            // recibo
             $tipo = 'REC';
+        }
+        if( $this->getPagoProveedor()){
+            // opag
+            $tipo = 'PAG';
         }
         return $tipo;
     }
@@ -114,6 +126,10 @@ class CobroDetalle {
             // buscar nota
             $comprobante = 'REC-X ' . $this->getPagoCliente()->getComprobanteNro();
         }
+        if( $this->getPagoProveedor()){
+            // buscar nota
+            $comprobante = 'O.PAG ' . $this->getPagoProveedor()->getComprobanteNro();
+        }
         return $comprobante;
     }
     public function getFecha(){
@@ -128,21 +144,40 @@ class CobroDetalle {
             // buscar nota
             $fecha = $this->getpagoCliente()->getFecha();
         }
+        if( $this->getpagoProveedor()){
+            // buscar nota
+            $fecha = $this->getpagoProveedor()->getFecha();
+        }
         return $fecha;
     }
     public function getCliente(){
         if( $this->getCobro() ){
-            $cliente = $this->getCobro()->getCliente()->getNombre();
+            $obj = $this->getCobro();
         }
         if( $this->getNotaDebCred()){
             // buscar nota
-            $cliente = $this->getNotaDebCred()->getCliente()->getNombre();
+            $obj = $this->getNotaDebCred();
         }
-        if( $this->getpagoCliente()){
+        if( $this->getPagoCliente()){
             // buscar nota
-            $cliente = $this->getpagoCliente()->getCliente()->getNombre();
+            $obj = $this->getPagoCliente();
         }
-        return $cliente;
+        if( $this->getPagoProveedor()){
+            // buscar nota
+            return $this->getPagoProveedor()->getProveedor()->getNombre();
+        }
+        return $obj->getCliente()->getNombre();
+    }
+
+    public function getSignoCaja(){
+        $signo = 1;
+        if( $this->getNotaDebCred() ){
+            $signo = ( $this->getNotaDebCred()->getNotaElectronica()->getTipo() == 'CRE' ) ? -1 : 1;
+        }
+        if( $this->getPagoProveedor() ){
+            $signo = -1;
+        }
+        return $signo;
     }
 
     /**
@@ -360,5 +395,28 @@ class CobroDetalle {
     public function getPagoCliente()
     {
         return $this->pagoCliente;
+    }
+
+    /**
+     * Set pagoProveedor
+     *
+     * @param \ComprasBundle\Entity\PagoProveedor $pagoProveedor
+     * @return CobroDetalle
+     */
+    public function setPagoProveedor(\ComprasBundle\Entity\PagoProveedor $pagoProveedor = null)
+    {
+        $this->pagoProveedor = $pagoProveedor;
+
+        return $this;
+    }
+
+    /**
+     * Get pagoProveedor
+     *
+     * @return \ComprasBundle\Entity\PagoProveedor
+     */
+    public function getPagoProveedor()
+    {
+        return $this->pagoProveedor;
     }
 }
