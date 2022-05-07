@@ -34,6 +34,9 @@
         <thead>
             <tr>
                 <th>Fecha</th>
+                {% if not provId  %}
+                    <th class="nosort">Proveedor</th>
+                {% endif %}
                 <th class="nosort">Nº Comprobante</th>
                 <th class="nosort">Concepto</th>
                 <th class="nosort">Detalle</th>
@@ -49,14 +52,17 @@
         {% for entity in entities %}
             <tr>
                 <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
+                {% if not provId  %}
+                    <td>{{ entity.proveedor }}</th>
+                {% endif %}
                 <td>{{ entity.nroComprobante }}</td>
                 <td title="{{entity.concepto}}"><span class="hidden">{{entity.concepto}}</span>{{ entity.conceptoTxt }}</td>
                 <td>{{entity.detalle}}</td>
-                <td style="text-align: right">{{ entity.getTotal|number_format(3,'.',',') }}</td>
+                <td style="text-align: right">{{ entity.getImporte|number_format(3,'.',',') }}</td>
                 <td class="buttons">
                    <a href="{{ path('compras_proveedor_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
                    <a href url="{{ path('compras_proveedor_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a> &nbsp;
-                   <a href="javascript:void(0)" url="{{ path('compras_pago_print', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Pago"></a>
+                   <a href="javascript:void(0)" url="{{ path('print_comprobante_retencion_rentas', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Pago"></a>
                 </td>
             </tr>
            {% endfor %}

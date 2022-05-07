@@ -5,5 +5,6 @@
     },
     "[twig]": {
         "editor.defaultFormatter": "SimonSiefke.prettier-vscode"
-    }
+    },
+    "editor.fontSize": 12
 }

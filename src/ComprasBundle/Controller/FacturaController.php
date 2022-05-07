@@ -652,6 +652,8 @@ class FacturaController extends Controller {
             $pago->setProveedor($factura->getProveedor());
             $pago->setImporte($factura->getTotal());
             $pago->setNroComprobante($factura->getNuevoNroComprobante());
+            $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByCodigoAfip('PES');
+            $pago->setMoneda($moneda);
             $concepto = array();
             array_push($concepto, array('clave' => 'FAC-' . $factura->getId(), 'monto' => $factura->getTotal()));
             $pago->setConcepto(json_encode($concepto));
@@ -666,7 +668,6 @@ class FacturaController extends Controller {
             $cobro = new CobroDetalle();
             $cobro->setTipoPago('EFECTIVO');
             $cobro->setImporte( $pago->getImporte() );
-            $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByCodigoAfip('PES');
             $cobro->setMoneda($moneda);
             $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
             if( !$apertura ){

@@ -130,7 +130,7 @@ class Proveedor {
      * @var integer $saldoInicial
      * @ORM\Column(name="saldo_inicial", type="decimal", scale=3, nullable=true )
      */
-    protected $saldoInicial;
+    protected $saldoInicial = 0;
 
     /**
      * @ORM\OneToMany(targetEntity="AppBundle\Entity\Producto", mappedBy="proveedor")
@@ -156,6 +156,11 @@ class Proveedor {
      * @ORM\OneToMany(targetEntity="ComprasBundle\Entity\Pedido", mappedBy="proveedor")
      */
     protected $pedidos;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ComprasBundle\Entity\RetencionGanancia", mappedBy="proveedor")
+     */
+    protected $acumuladosGanancias;
 
     /**
      * @var datetime $created
@@ -875,5 +880,38 @@ class Proveedor {
     public function getActividadComercial()
     {
         return $this->actividadComercial;
+    }
+
+    /**
+     * Add acumuladosGanancias
+     *
+     * @param \ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias
+     * @return Proveedor
+     */
+    public function addAcumuladosGanancia(\ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias)
+    {
+        $acumuladosGanancias->setProveedor($this);
+        $this->acumuladosGanancias[] = $acumuladosGanancias;
+        return $this;
+    }
+
+    /**
+     * Remove acumuladosGanancias
+     *
+     * @param \ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias
+     */
+    public function removeAcumuladosGanancia(\ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias)
+    {
+        $this->acumuladosGanancias->removeElement($acumuladosGanancias);
+    }
+
+    /**
+     * Get acumuladosGanancias
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAcumuladosGanancias()
+    {
+        return $this->acumuladosGanancias;
     }
 }

@@ -33,7 +33,16 @@ class PagoProveedor
      * @ORM\Column(name="pago_nro", type="string", length=6)
      */
     protected $pagoNro;
-
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
+     * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     */
+    protected $moneda;
+    /**
+     * @var string $cotizacion
+     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     */
+    protected $cotizacion = 1;
     /**
      * @var integer $nroComprobante
      * @ORM\Column(name="nro_comprobante", type="string", length=20, nullable=true)
@@ -57,6 +66,27 @@ class PagoProveedor
     protected $importe;
 
      /**
+     * @var integer $baseImponibleRentas
+     * @ORM\Column(name="base_imponible_rentas", type="decimal", scale=2 )
+     */
+    protected $baseImponibleRentas;
+     /**
+     * @var integer $retencionRentas
+     * @ORM\Column(name="retencion_rentas", type="decimal", scale=2 )
+     */
+    protected $retencionRentas;
+     /**
+     * @var integer $adicionalRentas
+     * @ORM\Column(name="adicional_rentas", type="decimal", scale=2 )
+     */
+    protected $adicionalRentas;
+     /**
+     * @var integer $retencionGanancias
+     * @ORM\Column(name="retencion_ganancias", type="decimal", scale=2 )
+     */
+    protected $retencionGanancias;
+
+     /**
      * @var integer $deposito
      * @ORM\Column(name="deposito", type="decimal", scale=3 )
      */
@@ -68,10 +98,10 @@ class PagoProveedor
      */
     protected $proveedor;
 
-     /**
-     * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\Cheque", mappedBy="pagoProveedor",cascade={"persist"})
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="pagoProveedor",cascade={"persist", "remove"}, orphanRemoval=true)
      */
-    private $chequesPagados;
+    protected $cobroDetalles;
 
     /**
      * @var datetime $created
@@ -95,7 +125,7 @@ class PagoProveedor
      */
     public function __construct()
     {
-        $this->chequesPagados = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->deposito = 0;
         $this->fecha = new \DateTime();
     }
@@ -115,6 +145,18 @@ class PagoProveedor
     {
         $this->conceptoTxt = $txt;
         return $this;
+    }
+
+    public function getAlicuotaRentasTxt(){
+        $ret = $this->getRetencionRentas() .'%';
+        $alicuota = ( $this->getAdicionalRentas()>0 ) ?  $ret . ' + '. $this->getAdicionalRentas() . '%' : $ret;
+        return $alicuota;
+    }
+
+    public function getMontoRetencionRentas(){
+        $retencion = $this->getBaseImponibleRentas() * ( $this->getRetencionRentas() / 100 );
+        $adicional = $retencion * ( $this->getAdicionalRentas() / 100 );
+        return $retencion + $adicional;
     }
 
     /**
@@ -343,39 +385,6 @@ class PagoProveedor
     }
 
     /**
-     * Add chequesPagados
-     *
-     * @param \ConfigBundle\Entity\Cheque $chequesPagados
-     * @return PagoProveedor
-     */
-    public function addChequesPagado(\ConfigBundle\Entity\Cheque $chequesPagados)
-    {
-        $chequesPagados->setPagoProveedor($this);
-        $this->chequesPagados[] = $chequesPagados;
-        return $this;
-    }
-
-    /**
-     * Remove chequesPagados
-     *
-     * @param \ConfigBundle\Entity\Cheque $chequesPagados
-     */
-    public function removeChequesPagado(\ConfigBundle\Entity\Cheque $chequesPagados)
-    {
-        $this->chequesPagados->removeElement($chequesPagados);
-    }
-
-    /**
-     * Get chequesPagados
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getChequesPagados()
-    {
-        return $this->chequesPagados;
-    }
-
-    /**
      * Set createdBy
      *
      * @param \ConfigBundle\Entity\Usuario $createdBy
@@ -400,14 +409,19 @@ class PagoProveedor
 
     public function getTotalCheques(){
         $cant = 0;
-        foreach ($this->chequesPagados as $cheque) {
-            //if(!$cheque->getDevuelto())
-                $cant = $cant + $cheque->getValor();
+        foreach ($this->getCobroDetalles() as $cobro) {
+            if( $cobro->getChequeRecibido() ){
+                $cant = $cant + $cobro->getChequeRecibido()->getValor();
+            }
         }
         return $cant;
     }
     public function getTotal(){
-        return $this->getTotalCheques() + $this->deposito + $this->importe;
+        $cant = 0;
+        foreach ($this->getCobroDetalles() as $cobro) {
+            $cant = $cant + $cobro->getImporte();
+        }
+        return $cant;
     }
 
     /**
@@ -431,5 +445,177 @@ class PagoProveedor
     public function getDeposito()
     {
         return $this->deposito;
+    }
+
+    /**
+     * Add cobroDetalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
+     * @return PagoProveedor
+     */
+    public function addCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
+    {
+        $cobroDetalles->setPagoProveedor($this);
+        $this->cobroDetalles[] = $cobroDetalles;
+
+        return $this;
+    }
+
+    /**
+     * Remove cobroDetalles
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
+     */
+    public function removeCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
+    {
+        $this->cobroDetalles->removeElement($cobroDetalles);
+    }
+
+    /**
+     * Get cobroDetalles
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCobroDetalles()
+    {
+        return $this->cobroDetalles;
+    }
+
+    /**
+     * Set cotizacion
+     *
+     * @param string $cotizacion
+     * @return PagoProveedor
+     */
+    public function setCotizacion($cotizacion)
+    {
+        $this->cotizacion = $cotizacion;
+
+        return $this;
+    }
+
+    /**
+     * Get cotizacion
+     *
+     * @return string
+     */
+    public function getCotizacion()
+    {
+        return $this->cotizacion;
+    }
+
+    /**
+     * Set moneda
+     *
+     * @param \ConfigBundle\Entity\Moneda $moneda
+     * @return PagoProveedor
+     */
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
+    {
+        $this->moneda = $moneda;
+
+        return $this;
+    }
+
+    /**
+     * Get moneda
+     *
+     * @return \ConfigBundle\Entity\Moneda
+     */
+    public function getMoneda()
+    {
+        return $this->moneda;
+    }
+
+    /**
+     * Set retencionRentas
+     *
+     * @param string $retencionRentas
+     * @return PagoProveedor
+     */
+    public function setRetencionRentas($retencionRentas)
+    {
+        $this->retencionRentas = $retencionRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get retencionRentas
+     *
+     * @return string
+     */
+    public function getRetencionRentas()
+    {
+        return $this->retencionRentas;
+    }
+
+    /**
+     * Set adicionalRentas
+     *
+     * @param string $adicionalRentas
+     * @return PagoProveedor
+     */
+    public function setAdicionalRentas($adicionalRentas)
+    {
+        $this->adicionalRentas = $adicionalRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get adicionalRentas
+     *
+     * @return string
+     */
+    public function getAdicionalRentas()
+    {
+        return $this->adicionalRentas;
+    }
+
+    /**
+     * Set baseImponibleRentas
+     *
+     * @param string $baseImponibleRentas
+     * @return PagoProveedor
+     */
+    public function setBaseImponibleRentas($baseImponibleRentas)
+    {
+        $this->baseImponibleRentas = $baseImponibleRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get baseImponibleRentas
+     *
+     * @return string
+     */
+    public function getBaseImponibleRentas()
+    {
+        return $this->baseImponibleRentas;
+    }
+
+    /**
+     * Set retencionGanancias
+     *
+     * @param string $retencionGanancias
+     * @return PagoProveedor
+     */
+    public function setRetencionGanancias($retencionGanancias)
+    {
+        $this->retencionGanancias = $retencionGanancias;
+
+        return $this;
+    }
+
+    /**
+     * Get retencionGanancias
+     *
+     * @return string
+     */
+    public function getRetencionGanancias()
+    {
+        return $this->retencionGanancias;
     }
 }

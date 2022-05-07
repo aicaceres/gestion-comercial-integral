@@ -88,7 +88,7 @@ class ParametroRepository extends EntityRepository {
 
     /**
      * Escalas impositivas
-     */        
+     */
     public function getByTipoEscala($tipo='R'){
         $consulta = ($tipo=='O') ? "e.tipo='G' OR e.tipo='H'" : "e.tipo='".$tipo."'";
         $query = $this->_em->createQueryBuilder();
@@ -99,4 +99,5 @@ class ParametroRepository extends EntityRepository {
         $query->andWhere($consulta);
         return $query->getQuery()->getResult();
     }
+   
 }

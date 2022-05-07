@@ -1,0 +1,78 @@
+
+    <dynamic-page page-size="A4" margin-left="40px" margin-right="40px" margin-top="30px" >
+        <placeholders>
+            <header>
+                <div height="50px" width="100%" font-size="14px" >
+                    <div text-align="right" padding-bottom="20px" vertical-align="middle">Certificado N°: {{ pago.comprobanteNro }}</div>
+                    <div text-align="right" padding-bottom="20px" vertical-align="middle">Fecha: {{ pago.fecha|date('d/m/Y') }}</div>
+                </div>
+            </header>
+
+        </placeholders>
+
+        <table font-size="14px" >
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle" colspan="2">A - Datos del Agente de Retención: </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle" width="6 cm">Apellido y Nombre o Denominación </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ empresa.nombre|upper }} S.A.</td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">C.U.I.T. N° </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ empresa.cuit }} </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">Domicilio </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ empresa.direccion }} </td>
+            </tr>
+        </table>
+        <table font-size="14px" margin-top="10px">
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle" colspan="2">B - Datos del Sujeto Retenido: </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle" width="6 cm">Apellido y Nombre o Denominación </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ pago.proveedor.nombre|upper }} S.A.</td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">C.U.I.T. N° </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ pago.proveedor.cuit }} </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">Domicilio </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ pago.proveedor.domicilioCompleto }} </td>
+            </tr>
+        </table>
+        <table font-size="14px" margin-top="10px">
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle" colspan="2">C - Datos de la Retención Practicada: </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle" width="8.2 cm">Impuesto </td>
+                <td border.type="none" height="20px" vertical-align="middle">: Impuesto a las Ganancias</td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">Régimen </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ pago.proveedor.actividadComercial }} </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">Comprobante que origina la retención </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ pago.comprobanteNro }} </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">Monto del Comprobante que origina la Retención </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ pago.baseImponibleRentas|number_format(2,'.',',') }} </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="20px" vertical-align="middle">Monto de la Retención </td>
+                <td border.type="none" height="20px" vertical-align="middle">: {{ pago.retencionGanancias|number_format(2,'.',',') }} </td>
+            </tr>
+        </table>
+
+        <div font-size="14px" height="50px" margin-top="40px">Firma del Agente de Retención:</div>
+        <div font-size="14px" height="50px" >Aclaración:............................................................</div>
+        <div font-size="14px" height="50px" >Cargo:................................................................... </div>
+
+
+    </dynamic-page>

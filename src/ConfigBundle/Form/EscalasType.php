@@ -16,13 +16,13 @@ class EscalasType extends AbstractType
         $builder
             ->add('tipo','hidden')
             ->add('nombre',null,array('label' => 'Nombre:'))
-            ->add('retencion',null,array('label' => '% Retención:'))
-            ->add('adicional',null,array('label' => '% Adicional:'))                       
-            ->add('minimo',null,array('label' => 'Mínimo:'))            
-            ->add('codigo_atp',null,array('label' => 'Código ATP:'))            
+            ->add('retencion')
+            ->add('adicional')
+            ->add('minimo')
+            ->add('codigo_atp')
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */
@@ -31,7 +31,7 @@ class EscalasType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => 'ConfigBundle\Entity\Escalas'
         ));
-    }    
+    }
 
     /**
      * @return string

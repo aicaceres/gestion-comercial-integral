@@ -45,52 +45,74 @@
                 {{ form_label(form.concepto)  }}
                 <div id="facturas"></div>
             </div>
+            <div style="display: inline-block; width: 10%">
+                <label for="comprasbundle_pagoproveedor_retencionGanancias" class="required">DGI:</label>
+                <strong class="simbolo">$</strong>
+                {{ form_widget(form.retencionGanancias,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Ganancias'}}) }}
+            </div>
+            <div style="display: inline-block; width: 13%">
+                <label for="comprasbundle_pagoproveedor_retencionRentas" class="required">DGR
+                    <span id="retrentas"></span>:
+                </label>
+                <strong class="simbolo">$</strong>
+                {{ form_widget(form.montoRentas,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Rentas'}}) }}
+            </div>
+
+        </fieldset>
+        <fieldset class="fields" >
+            <div style="display: inline-block; width: 75%">
+                {{ form_label(form.detalle,'OBSERVACIONES:') }}
+                {{ form_widget(form.detalle,{'attr': {'style': 'height:20px'}}) }}
+            </div>
             <div style="display: inline-block; width: 15%">
                 {{ form_label(form.importe,'TOTAL:') }}
                 <strong class="simbolo">$</strong>
                 {{ form_widget(form.importe,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Sumatoria de saldos de facturas seleccionadas'}}) }}
             </div>
         </fieldset>
-        <fieldset >
 
-            <br clear="all" />
-            <a href="#" id="getCheques" class="btn btn_search radius50" style="float: right;margin-bottom: 4px;"><span>Buscar Cheques</span></a>
+        <fieldset class="detalle_pago" >
+            <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
+                <h5>DETALLE DEL PAGO:</h5>
+                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
+                    {% set prototype = form.cobroDetalles.vars.prototype %}
+                    <tbody data-index="{{form.cobroDetalles | length }}"
+                        data-prototype="{% filter escape %}{% include 'VentasBundle:Cobro:prototype.html.twig' with {'item':prototype,'entity':entity} %}{% endfilter %}"
+                    >
+                    {% for det in form.cobroDetalles %}
+                        <tr>
+                            <td></td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="text-align:right">
+                                IMPORTE: &nbsp;
+                                <span class="simbolo" style="font-size:16px">$ </span>
+                                <span class="pago" style="font-size:16px" >0</span>.-
+                            </th>
+                            <th width="150px" class="vueltoTh">
+                                CAMBIO: &nbsp;
+                                <span class="simbolo" style="font-size:16px">$ </span>
+                                <span class="vuelto" style="font-size:16px"></span>
+                            </th>
+                            <th width="30px" style="text-align:center;"><a href="javascript:void(0)" id="linkAddPago" tabindex="0" title="Agregar"><span class="add-item-button">+</span></th>
+                        </tr>
+                    </thead>
+                </table>
 
-            <div style="margin-bottom: 20px;">
-                 <h4>Cheques </h4>
-                    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" >
-                        <thead>
-                            <tr>
-                                <th style="width:12%;" class="head0">Nº Cheque</th>
-                                <th class="head0" style="width:12%;">Fecha</th>
-                                <th class="head0">Titular</th>
-                                <th class="head0">Dador</th>
-                                <th class="head0">Banco</th>
-                                <th class="head0">Sucursal</th>
-                                <th class="head0" style="width:10%;">Importe</th>
-                                <th class="head0" style="text-align:center;width: 5%;"><a href="#" id="linkAdd" title="Agregar Cheque"><img src="{{asset('assets/images/icons/add.png')}}" /></a></th>
-                            </tr>
-                        </thead>
-                        <tbody data-index="{{form.chequesPagados | length }}"
-                               data-prototype="{% filter escape %}{% include 'ComprasBundle:Proveedor:pago_prototype.html.twig' with {'item':form.chequesPagados.vars.prototype} %}{% endfilter %}" >
-                        {% for cheque in form.chequesPagados %}
-                            <tr class="item">
-                                <td>{{form_widget(cheque.id)}}{{ form_widget(cheque.nroCheque, { 'attr': {'maxlength' : '10'} }) }}</td>
-                                <td>{{ form_widget(cheque.fecha, { 'attr': {'class' : 'datepicker'} }) }}</td>
-                                <td>{{ form_widget(cheque.titularCheque) }}</td>
-                                <td>{{ form_widget(cheque.dador) }}</td>
-                                <td>{{ form_widget(cheque.banco) }}</td>
-                                <td>{{ form_widget(cheque.sucursal) }}</td>
-                                <td class="importeTd">{{ form_widget(cheque.valor, { 'attr': {'class' : 'alignright'} }) }}</td>
-                                <td class="delTd" ></td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
             </div>
+        </fieldset>
+
+        <fieldset >
+            <br clear="all" />
+
             <input type="hidden" id="txtconcepto" name="txtconcepto"/>
             <div class="actionbutton">
-                <button class="guardar" type="submit" >Guardar</button>
+                 <button class="guardar" id="guardar" type="button">Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('compras_proveedor_pagos')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -98,11 +120,25 @@
     {{ form_end(form) }}
 </div>
 </div>
+<div id="dialog-tipo" title="Elegir Pago" style="display:none">
+<form>
+    <button type="button" class="stdbtn btn_black" data-tipo="EFECTIVO">EFECTIVO</button>
+    <button type="button" class="stdbtn btn_black" data-tipo="CHEQUE">CHEQUE</button>
+    <button type="button" class="stdbtn btn_black" data-tipo="TARJETA">TARJETA</button>
+</form>
+</div>
 {% endblock %}
 {% block extra_javascripts %}
 <script type="text/javascript">
-var $collectionHolder;
-jQuery(document).ready(function($) {
+jQuery(function ($) {
+    $(window).on('load', function () {
+        $( "#dialog-tipo" ).dialog({
+            autoOpen: false,
+            height: 100,
+            width: 350,
+            modal: true
+        });
+
     $('#comprasbundle_pagoproveedor_proveedor').attr('readonly', true);
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 // si la pantalla es chica expandir
@@ -121,128 +157,277 @@ jQuery(document).ready(function($) {
             async: true,
             data: 'prov='+ $(this).val() ,
             success: function(data) {
-                $('#facturas').html(data);
+                $('#facturas').html(data.partial);
+                $('#comprasbundle_pagoproveedor_retencionRentas').val(data.retrentas);
+                $('#comprasbundle_pagoproveedor_adicionalRentas').val(data.adicrentas);
+                $('#comprasbundle_pagoproveedor_baseImponibleRentas').val(data.baseImponible);
+                $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.retganancias.toFixed(3));
+                adicrentas = ( data.adicrentas>0 ) ? data.adicrentas + '%' : '';
+                retrentas = ( data.retrentas>0 ) ? data.retrentas + '% + ' + adicrentas : '';
+                $('#retrentas').html( retrentas )
                 $('#selectComprobantes').select2();
-                $('#selectComprobantes').change(function(event, data) {
-                    var total = 0;
+                $('#selectComprobantes').on('change',function(event, data) {
+                    var total = totalRentas = 0;
                     $(this).find(":selected").each(function(){
-                        var saldo = parseFloat( $(this).data('saldo') );
-                        total = total + saldo;
+                        var rentasitem = parseFloat( $(this).data('rentas') );
+                        var totitem = parseFloat( $(this).data('total') );
+                        total = total + totitem;
+                        totalRentas = totalRentas + rentasitem;
                     });
+                    total = total + );
+                    $('#comprasbundle_pagoproveedor_montoRentas').val( totalRentas.toFixed(3));
                     $('#comprasbundle_pagoproveedor_importe').val( total.toFixed(3));
+                    actualizarPagos();
                  });
-            }, error: function() {
+                $('#selectComprobantes').select2('focus');
+            },
+            error: function() {
                 alert('No se puede realizar la operación en este momento');
             }
        });
-    });
-    $('#comprasbundle_pagoproveedor_proveedor').change();
+    }).trigger('change');
 
-   $('[name*="importe"],[name*="deposito"]').on('change', function() {
-        actualizarTotal();
+    $(document).on('click','.js_get_cheques', function() {
+        cargarCheques( $(this).closest('.chequeTd') );
     });
-   $('#getCheques').on('click', function() {  cargarCheques();  });
-    $('.guardar').click(function() {
-        if (!confirm('Confirma la registración?')) { return false;  }
+
+
+    $('#guardar').on('click', function(){
         $('#txtconcepto').val($("[name='concepto']").val());
-    });
-    // Cheques
-    $collectionHolder = $('table.stdtable tbody');
-    $collectionHolder.find('.delTd').each(function() {
-        addItemFormDeleteLink($(this));
-    });
-    $('#linkAdd').on('click', function(e) {
-        e.preventDefault();
-        $('.togglemenu').click();
-        addNewItem();
-    });
-});
-function addNewItem( cheque ) {
-    var prototype = $collectionHolder.data('prototype');
-    var index = $collectionHolder.data('index');
-    var newForm = prototype.replace(/items/g, index);
-    $collectionHolder.data('index', index + 1);
-    $collectionHolder.append(newForm);
-    addItemFormDeleteLink($collectionHolder.find('.delTd').last());
-    lastTd = $collectionHolder.find('tr').last();
-    lastTd.find('.importeTd input').val(0);
-    lastTd.find('td input').first().focus();
-    if(cheque){
-        lastTd.find('[name*="id"]').val(cheque.id);
-        lastTd.find('[name*="nroCheque"]').val(cheque.nroCheque);
-        lastTd.find('[name*="fecha"]').val(cheque.fecha);
-        lastTd.find('[name*="titular"]').val(cheque.titular);
-        lastTd.find('[name*="titular"]').trigger("liszt:updated");
-        lastTd.find('[name*="dador"]').val(cheque.dador);
-        lastTd.find('[name*="banco"]').val(cheque.banco);
-        lastTd.find('[name*="sucursal"]').val(cheque.sucursal);
-        lastTd.find('[name*="valor"]').val(cheque.valor);
-        lastTd.find('input').attr('readonly','readonly');
-        lastTd.find('select option:not(:selected)').each(function(){
-            jQuery(this).attr('disabled', 'disabled');
+
+
+        if( !$('#txtconcepto').val() ){
+            jAlert('Debe indicar los comprobantes a abonar!');
+            $('#selectComprobantes').select2('focus');
+            return false;
+        }
+        pago = parseFloat($('.pago').html()) ;
+        if( $(':invalid').length>0 || pago<=0 ){
+            jAlert( 'Completar todos los datos para registrar el pago!');
+            return false;
+        }else{
+            if( pago < $('#comprasbundle_pagoproveedor_importe').val() ){
+                jAlert( 'Debe ingresar valores suficientes para cancelar el Total!');
+                return false;
+            }
+        }
+
+        if( !confirm('CONFIRMA LA REGISTRACIÓN DEL PAGO?')){
+            return false;
+        }
+        // enviar guardado
+
+        data = $('#comprasbundle_pagoproveedor').serialize();
+        $.ajax({
+            type: "POST",
+            url: '{{ path("compras_proveedor_pagos_create") }}',
+            data: data,
+            dataType: 'json',
+            success: function(res){
+                if (res.msg=='OK') {
+                    if( res.urlretrentas ){
+                        window.open(res.urlretrentas);
+                    }
+                    window.location.href = res.urlback;
+                }else{
+                    jAlert(res.msg);
+                }
+            },
+            error: function(error){
+                jAlert("No se pudo generar el pago!");
+            }
         });
-        actualizarTotal();
-    }else{
-        jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
-        jQuery('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
-        jQuery('[name*="valor"]').on('change',function() {
-            cheque = parseFloat( jQuery(this).val() );
-            if( isNaN(cheque) ){ jQuery(this).val(0); }
-            actualizarTotal();
+
+    });
+
+
+
+
+
+
+        $pagosHolder = $('table.tabla-pagos tbody');
+        $pagosHolder.find('.delTd').each(function() {
+            addPagoDeleteLink($(this));
+        });
+        $pagosHolder.find('.ordTd').each(function(i) {
+            $(this).html(i + 1);
+        });
+        $('#linkAddPago').on('click', function(e) {
+            e.preventDefault();
+            $( "#dialog-tipo" ).dialog('open');
+            $('#dialog-tipo button').first().focus();
+        });
+
+        $('#dialog-tipo button').on('click', function(){
+            tipo = $(this).data('tipo');
+            $( "#dialog-tipo" ).dialog('close');
+            addNewPago(tipo);
+        })
+
+    //calcularTotal();
+    actualizarPagos();
+    addNewPago('EFECTIVO');
+
+
+});
+function cargarCheques(objTd){
+    var rutaChequesCartera="{{ path('compras_proveedor_pagos_getcheques')}}";
+    var getDatosCheque="{{ path('compras_proveedor_pagos_getdatoscheque')}}";
+
+    $('#popup').html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
+               .load( rutaChequesCartera)
+               .dialog({
+                    modal: true, autoOpen: true, title: 'Cheques en Cartera', width: '70%', minHeight: 400,
+                    buttons: [{text: "Agregar", class: 'closePopup',
+                            click: function() {
+                                cheques = $(this).find('input[type="checkbox"]:checked');
+                                addNewTr = false;
+                                cheques.each(function(i) {
+                                    $.get(getDatosCheque,{id: $(this).attr('id') },
+                                        function(data){
+                                            if(addNewTr){
+                                                addNewPago('CHEQUE')
+                                                lastTr = $pagosHolder.find('tr').last();
+                                                chequeTd = lastTr.find('.chequeTd');
+                                            }else{
+                                                chequeTd = objTd
+                                                addNewTr = true;
+                                            }
+
+                                            chequeTd.find('[id*="_chequeRecibido_id"]').val(data.id)
+                                            chequeTd.find('[id*="_chequeRecibido_nroCheque"]').val(data.nroCheque)
+                                            chequeTd.find('[id*="_chequeRecibido_fecha"]').val(data.fecha)
+                                            chequeTd.find('[id*="_chequeRecibido_dador"]').val(data.dador)
+                                            chequeTd.find('[id*="_chequeRecibido_banco"]').val(data.banco).trigger('change')
+                                            chequeTd.find('[id*="_chequeRecibido_sucursal"]').val(data.sucursal)
+                                            chequeTd.find('[id*="_chequeRecibido_valor"]').val(data.valor)
+                                            chequeTd.parent().find('[id*="_importe"]').val(data.valor)
+                                            actualizarPagos();
+                                    }, "JSON");
+                                });
+
+                                $(this).dialog("close");
+                            }}],
+                });
+}
+
+    function addNewPago( tipo){
+        const prototype = $pagosHolder.data('prototype');
+        const index = $pagosHolder.data('index');
+        const newForm = prototype.replace(/items/g, index);
+
+        $pagosHolder.append(newForm);
+        $pagosHolder.data('index', index + 1);
+        lastTr = $pagosHolder.find('tr').last();
+        addPagoDeleteLink(lastTr.find('.delTd'));
+        lastTr.find('[id*="_tipoPago"]').val(tipo);
+        importe = lastTr.find('[id*="_importe"]');
+        importe.val(0)
+        importe.on('focus',function(e) {
+            $(this).select();
+        })
+        importe.on('change', function() {
+            if( $(this).siblings('[id*="_tipoPago"]').val() == 'CHEQUE' ){
+                // cargar valor al cheque
+                chequeTd = $(this).parent().parent().find('td.chequeTd');
+                chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
+            }
+            actualizarPagos();
+        });
+
+        if(tipo != 'TARJETA'){
+            lastTr.find('.tarjetaTd').remove();
+        }else{
+            // tarjeta
+            lastTr.find('[id*="_datosTarjeta_tarjeta"]').attr('required', true);
+            lastTr.find('[id*="_datosTarjeta_numero"]').inputmask(
+                {"mask": "9999 9999 9999 9999",
+                    onincomplete: function() {
+                        if( $(this).val() ){
+                            $(this).addClass('error');
+                        }else{
+                            $(this).removeClass('error');
+                        }
+                    },
+                    oncomplete: function() {
+                        $(this).removeClass('error');
+                    }
+                }
+                );
+            lastTr.find('[id*="_datosTarjeta_cuota"]').val(1);
+            // chequetd required false
+            lastTr.find('.chequeTd :required').each(function() {
+                $(this).attr('required',false) ;
+            })
+            lastTr.find('[id*="_datosTarjeta_tarjeta"]').focus();
+        }
+        if( tipo != 'CHEQUE'){
+            lastTr.find('.chequeTd').remove();
+        }else{
+            lastTr.find('[id*="_chequeRecibido_fecha"]').datepicker({dateFormat: 'dd-mm-yy'});
+            // agregar boton para buscar cheques
+            lastNro = lastTr.find('[id*="_chequeRecibido_nroCheque"]')
+            btnSearch = $('<a href="javascript:void(0)" class="js_get_cheques btn btnaction btn_search" title="Buscar cheques en cartera"></a>')
+            btnSearch.insertAfter(lastNro)
+            // tarjetaTd required false
+            lastTr.find('.tarjetaTd :required').each(function() {
+                $(this).attr('required',false) ;
+            })
+            selectBanco = lastTr.find('.selectBanco');
+            selectBanco.select2({
+                tags: true,
+                createTag: function (params) {
+                    var term = $.trim(params.term).toUpperCase();
+                    if (term === '') {
+                        return null;
+                    }
+                    return {
+                        id: term,
+                        text: term,
+                        newTag: true // add additional parameters
+                    }
+                }
+            });
+            lastTr.find('[id*="_chequeRecibido_nroCheque"]').focus();
+        }
+        if( tipo != 'EFECTIVO'){
+            lastTr.find('.monedaTd').hide();
+        }else{
+            lastTr.find('.tarjetaTd :required, .chequeTd :required').each(function() {
+                $(this).attr('required',false) ;
+            })
+            importe.focus();
+        }
+    }
+
+    function addPagoDeleteLink($itemFormTd) {
+        var $removeFormA = $('<a href="#" class="delItem" title="Quitar"><span class="del-item-button">-</span></a>');
+        $itemFormTd.append($removeFormA);
+        $removeFormA.on('click', function(e) {
+            if ( confirm('Desea eliminar este item?')) {
+                e.preventDefault();
+                $itemFormTd.parent().remove();
+                actualizarPagos();
+            }
+        });
+        $removeFormA.on('blur', function(e) {
+            $('#linkAddPago').focus();
         });
     }
 
-}
-function addItemFormDeleteLink($itemFormTd) {
-    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
-    $itemFormTd.append($removeFormA);
-    $removeFormA.on('click', function(e) {
-        var res = true;
-        if ($itemFormTd.parent().find(".cantTd input").val() > 0)
-            res = confirm('Desea eliminar este item?');
-        if (res) {
-            e.preventDefault();
-            $itemFormTd.parent().remove();
-            actualizarTotal();
-        }
-    });
-}
-function actualizarTotal(){
-    efectivo = parseFloat( jQuery('[name*="importe"]').val() );
-    if( isNaN(efectivo) ){ jQuery('[name*="importe"]').val(0); efectivo=0; }
-    deposito = parseFloat( jQuery('[name*="deposito"]').val() );
-    if( isNaN(deposito) ){ jQuery('[name*="deposito"]').val(0); deposito=0; }
-    valor=0;
-    jQuery('[name*="valor"]').each(function(){
-        valor +=  parseFloat( jQuery(this).val() );
-    });
-    jQuery('#totCheques').val(valor);
-    jQuery('#total').val(valor + efectivo + deposito );
-    jQuery('[name*="importe"]').val( efectivo );
-    jQuery('[name*="deposito"]').val( deposito );
-}
-function cargarCheques(){
-    var $rutaChequesCartera="{{ path('compras_proveedor_pagos_getcheques')}}";
-    var $getDatosCheque="{{ path('compras_proveedor_pagos_getdatoscheque')}}";
-  //  console.log($getDatosCheque);
-    jQuery('#popup').dialog({
-        modal: true, autoOpen: false, title: 'Cheques en Cartera', width: '70%', minHeight: 400,
-        buttons: [{text: "Agregar", class: 'closePopup',
-                click: function() {
-                    jQuery(this).find('input[type="checkbox"]:checked').each(function() {
-                        jQuery.get($getDatosCheque,{id: jQuery(this).attr('id') },
-                            function(data){
-                                addNewItem(data);
-                        }, "json");
-                    });
-                    jQuery(this).dialog("close");
-                }}],
-    });
-    jQuery.get($rutaChequesCartera , function( data ) {
-        jQuery('#popup').html(data);
-        jQuery('#popup').dialog('open');
-    });
-}
+    function actualizarPagos() {
+        total = checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
+        pagos = 0;
+        items = $(".tabla-pagos tbody tr.item");
+        items.each(function(){
+            importe = checknumero( $(this).find('[id*="_importe"]'),2 );
+            pagos += importe
+        });
 
+        $('.pago').html( pagos.toFixed(2) );
+        vuelto = pagos - total;
+        $('.vuelto').html(vuelto.toFixed(2))
+    }
+});
 </script>
 {% endblock %}

@@ -545,6 +545,8 @@ class ClienteController extends Controller {
                     $tipoPago = $detalle->getTipoPago();
                     if( $tipoPago != 'CHEQUE' ){
                         $detalle->setChequeRecibido(null);
+                    }else{
+                        $detalle->getChequeRecibido()->setTomado(new \DateTime);
                     }
                     if( $tipoPago != 'TARJETA' ){
                         $detalle->setDatosTarjeta(null);

@@ -16,6 +16,9 @@
     a.btn_search{
         margin:0;
     }
+    a.js_get_cheques{
+        margin-left: 4px;
+    }
     /* botones de items */
     .divForm span.add-item-button, .divForm span.del-item-button{
         font-size: 20px;

@@ -10,10 +10,12 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 use ConfigBundle\Controller\UtilsController;
+use ConfigBundle\Entity\Num2Str;
 use ComprasBundle\Entity\Proveedor;
 use ComprasBundle\Form\ProveedorType;
 use ComprasBundle\Entity\PagoProveedor;
 use ComprasBundle\Form\PagoProveedorType;
+use ComprasBundle\Entity\RetencionGanancia;
 
 /**
  * @Route("/proveedor")
@@ -539,6 +541,9 @@ class ProveedorController extends Controller {
         $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
         $entity->setPagoNro(sprintf("%06d", $equipo->getNroPagoCompra() + 1));
         $entity->setProveedor($proveedor);
+        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByCodigoAfip('PES');
+        $entity->setMoneda($moneda);
+
         $form = $this->pagosCreateCreateForm($entity);
         return $this->render('ComprasBundle:Proveedor:pago_edit.html.twig', array(
                     'entity' => $entity,
@@ -562,26 +567,71 @@ class ProveedorController extends Controller {
     /**
      * @Route("/pagos", name="compras_proveedor_pagos_create")
      * @Method("POST")
-     * @Template("ComprasBundle:Proveedor:pago_edit.html.twig")
      */
     public function pagosCreateAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_proveedor_pagos');
+        $session = $this->get('session');
+        $unidneg_id = $session->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'compras_proveedor_pagos');
+        $msg = 'OK';
         $entity = new PagoProveedor();
         $form = $this->pagosCreateCreateForm($entity);
         $form->handleRequest($request);
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
-            $arrayConceptos = explode(',', $request->get('txtconcepto'));
+            $conceptos = explode(',', $request->get('txtconcepto'));
+            $baseImponibleGanancias = $request->get('baseImponibleGanancias');
+            /*$arrayConceptos = explode(',', $request->get('txtconcepto'));
             $facturasImpagas = $em->getRepository('ComprasBundle:Proveedor')->getFacturasImpagas($entity->getProveedor()->getId());
             $arrayFacturas = array();
             foreach ($facturasImpagas as $fact) {
                 array_push($arrayFacturas, $fact['tipo'] . '-' . $fact['id']);
             }
-            $conceptos = array_unique(array_merge($arrayConceptos, $arrayFacturas));
+            $conceptos = array_unique(array_merge($arrayConceptos, $arrayFacturas));*/
             $total = round($entity->getTotal(), 3);
             $txtConcepto = array();
             try {
+                $em = $this->getDoctrine()->getManager();
+                $em->getConnection()->beginTransaction();
+                // checkear apertura de caja
+                $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
+                if( !$apertura ){
+                    $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+                    return $this->redirect( $request->headers->get('referer') );
+                }
+
+                $totalPago = 0;
+                // limpiar cheque y tarjeta si no corresponde
+                foreach( $entity->getCobroDetalles() as $detalle ){
+                    if( $detalle->getImporte()==0 ){
+                        $entity->removeCobroDetalle($detalle);
+                        continue;
+                    }
+                    $detalle->setCajaApertura($apertura);
+                    if(!$detalle->getMoneda()){
+                        $detalle->setMoneda($entity->getMoneda());
+                    }
+                    $tipoPago = $detalle->getTipoPago();
+                    if( $tipoPago != 'CHEQUE' ){
+                        $detalle->setChequeRecibido(null);
+                    }else{
+                        $cheque = $detalle->getChequeRecibido();
+                        if ($cheque->getId()) {
+                            $obj = $em->getRepository('ConfigBundle:Cheque')->find($cheque->getId());
+                            $detalle->setChequeRecibido($obj);
+                            $detalle->getChequeRecibido()->setUsado(true);
+                        }else{
+                            $cheque->setTomado(new \DateTime);
+                            $cheque->setUsado(true);
+                        }
+                    }
+                    if( $tipoPago != 'TARJETA' ){
+                        $detalle->setDatosTarjeta(null);
+                    }
+                    // sumar importes para calcular nc
+                    $totalPago += $detalle->getImporte();
+                }
+
                 // Proceso de facturas - Ajustar los saldos
                 foreach ($conceptos as $item) {
                     $doc = explode('-', $item);
@@ -620,39 +670,54 @@ class ProveedorController extends Controller {
                 /* Guardar ultimo nro */
                 $equipo->setNroPagoCompra($equipo->getNroPagoCompra() + 1);
 
-                // cheques
-                foreach ($entity->getChequesPagados() as $cheque) {
-                    if (is_null($cheque->getId())) {
-                        $cheque->setTipo('T');
-                        $cheque->setUsado(true);
-                        $cheque->setTomado(new \DateTime);
-                        $cheque->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
-                        $cheque->setChequeNro(sprintf("%06d", $equipo->getNroInternoCheque() + 1));
-                        $equipo->setNroInternoCheque($equipo->getNroInternoCheque() + 1);
+                // si hay retencion ganancias guardar el acumulado
+                if( $entity->getRetencionGanancias()==0 ){
+                    // buscar periodo
+                    $hoy = new \DateTime();
+                    $retencionGanancia = $em->getRepository('ComprasBundle:RetencionGanancia')->findOneBy(
+                            array('proveedor'=>$entity->getProveedor()->getId(), 'periodo' => $hoy->format('Ym') )
+                    );
+                    if( !$retencionGanancia ){
+                        $retencionGanancia = new RetencionGanancia();
+                        $retencionGanancia->setPeriodo( $hoy->format('Ym'));
+                        $retencionGanancia->setProveedor($entity->getProveedor());
                     }
-                    else {
-                        $obj = $em->getRepository('ConfigBundle:Cheque')->find($cheque->getId());
-                        $obj->setUsado(true);
-                        $entity->removeChequesPagado($cheque);
-                        $entity->addChequesPagado($obj);
-                    }
+                    $retencionGanancia->setAcumuladoTotal( $retencionGanancia->getAcumuladoTotal() + $baseImponibleGanancias );
+                    $retencionGanancia->setAcumuladoRetencion( $retencionGanancia->getAcumuladoRetencion() + $entity->getRetencionGanancias());
+                    $em->persist($retencionGanancia);
                 }
+
                 $em->persist($entity);
                 $em->persist($equipo);
                 $em->flush();
                 $em->getConnection()->commit();
 
-                return $this->redirectToRoute('compras_proveedor_pagos');
+                $urlretrentas = $entity->getRetencionRentas()>0 ? $this->generateUrl('print_comprobante_retencion_rentas', array('id' => $entity->getId() )) : '';
+
+                $res = array( 'msg' => 'OK',
+                              'urlback' =>  $this->generateUrl('compras_proveedor_pagos', ['provId'=>$entity->getProveedor()->getId()]),
+                              'urlretrentas' => $urlretrentas
+                            );
+                $em->getConnection()->commit();
+
+                return new JsonResponse($res) ;
             }
             catch (\Exception $ex) {
+                $msg = $ex->getMessage();
                 $em->getConnection()->rollback();
+                return new JsonResponse( array( 'msg' => $msg ) );
             }
         }
 
-        return $this->render('ComprasBundle:Proveedor:pago_edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
-        ));
+        $errors = array();
+        if ($form->count() > 0) {
+            foreach ($form->all() as $child) {
+                if (!$child->isValid()) {
+                    $errors[$child->getName()] = (String) $form[$child->getName()]->getErrors();
+                }
+            }
+        }
+        return new JsonResponse( array( 'msg' => $errors ) );
     }
 
     /**
@@ -673,6 +738,38 @@ class ProveedorController extends Controller {
         return $this->render('ComprasBundle:Proveedor:pago_show.html.twig', array(
                     'entity' => $entity));
     }
+
+    /**
+     * IMPRESION DE comprobante
+     */
+
+    /**
+     * @Route("/{id}/printComprobanteRetencionRentas.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="print_comprobante_retencion_rentas")
+     * @Method("GET")
+     */
+    public function printComprobanteRetencionRentasAction($id){
+        $em = $this->getDoctrine()->getManager();
+        $pago = $em->getRepository('ComprasBundle:PagoProveedor')->find($id);
+        $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+
+        $num2str = new Num2Str();
+        $letras = $num2str->ValorEnLetras($pago->getMontoRetencionRentas());
+        $array = array( 'pago'=> $pago, 'letras' => $letras, 'empresa'=>$empresa );
+
+        $this->render('ComprasBundle:Proveedor:comprobante-retencion.pdf.twig', $array, $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        $hoy = new \DateTime();
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition'=>'filename='.$hoy->format('YmdHi').'.pdf'));
+    }
+
 
     /**
      * @Route("/{id}/imprimir.{_format}",
@@ -702,9 +799,8 @@ class ProveedorController extends Controller {
      * @Route("/pagos/deleteAjax/{id}", name="compras_proveedor_pagos_delete_ajax")
      * @Method("POST")
      */
-    public function pagosDeleteAjaxAction() {
+    public function pagosDeleteAjaxAction($id) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_proveedor_pagos');
-        $id = $this->getRequest()->get('id');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ComprasBundle:PagoProveedor')->find($id);
         try {
@@ -727,13 +823,25 @@ class ProveedorController extends Controller {
                     $comprob->setEstado('PAGO PARCIAL');
                 $em->persist($comprob);
             }
+            // descontar acumulado de rentencion ganancias si corresponde
+            if( $entity->getRetencionGanancias()>0){
+                $retencionGanancia = $em->getRepository('ComprasBundle:RetencionGanancia')->findOneBy(
+                            array('proveedor'=>$entity->getProveedor()->getId(), 'periodo' => $entity->getFecha()->format('Ym') )
+                    );
+                if($retencionGanancia){
+                    $retencionGanancia->setAcumuladoTotal( $retencionGanancia->getAcumuladoTotal() - $entity->getBaseImponibleRentas() );
+                    $retencionGanancia->setAcumuladoRetencion( $retencionGanancia->getAcumuladoRetencion() - $entity->getRetencionGanancias() );
+                    $em->persist($retencionGanancia);
+                }
+            }
 
-            // liberar cheques
-            foreach ($entity->getChequesPagados() as $item) {
-                $cheque = $em->getRepository('ConfigBundle:Cheque')->find($item->getId());
-                $cheque->setUsado(false);
-                $cheque->setPagoProveedor(NULL);
-                $em->persist($cheque);
+            // liberar cheques y eliminar cobrodetalle
+            foreach ($entity->getCobroDetalles() as $item) {
+                if( $item->getChequeRecibido() ){
+                    $cheque = $em->getRepository('ConfigBundle:Cheque')->find($item->getChequeRecibido()->getId());
+                    $cheque->setUsado(false);
+                    $em->persist($cheque);
+                }
             }
             $em->remove($entity);
             $em->flush();
@@ -757,14 +865,79 @@ class ProveedorController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $facturas = $em->getRepository('ComprasBundle:Proveedor')->getFacturasImpagas($id);
         $datos = array();
+        ///  obtener porcentaje de retencion de rentas si corresponde
+        $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($id);
+        $hoy = new \DateTime();
+        $retrentas = $adicrentas = 0;
+        // get periodo de excepción de rentas y ganancias
+        $fechaNoRetenerRentas = $proveedor->getVencCertNoRetenerRentas() ? $proveedor->getVencCertNoRetenerRentas()->format('Y-m-d') : null;
+        $fechaExcepcionGanancias = $proveedor->getVencCertExcepcionGanancias() ? $proveedor->getVencCertExcepcionGanancias()->format('Y-m-d') : null;
+        if( $proveedor->getCategoriaRentas() && ( $fechaNoRetenerRentas < $hoy->format('Y-m-d') ||  is_null($fechaNoRetenerRentas) ) ){
+            $retrentas = $proveedor->getCategoriaRentas()->getRetencion();
+            $adicrentas = $proveedor->getCategoriaRentas()->getAdicional() ;
+        }
+        // para calculo de retencion ganancias
+        $porcGanancias = $exento = 0;
+        $retencionGanancia = $em->getRepository('ComprasBundle:RetencionGanancia')->findOneBy(
+                                        array('proveedor'=>$proveedor->getId(), 'periodo'=> $hoy->format('Ym') ));
+        $acumuladoTotalGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoTotal() : 0;
+        $acumuladoRetencionGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoRetencion() : 0;
+        if( $proveedor->getCategoriaIva() && ($fechaExcepcionGanancias < $hoy->format('Y-m-d') ||  is_null($fechaExcepcionGanancias) )  ){
+            $catIva = $proveedor->getCategoriaIva()->getNombre();
+            $exento = floatval($proveedor->getActividadComercial()->getExento()) ;
+            if( $catIva == 'N' ){
+                $porcGanancias = $proveedor->getActividadComercial()->getNoInscripto();
+                $exento = 0;
+            }elseif( $catIva == 'I' ){
+                $porcGanancias = $proveedor->getActividadComercial()->getInscripto();
+            }
+        }
+
+        $baseImponible = 0;
         foreach ($facturas as $value) {
-            $text = '[ ' . $value['tipo'] . ' ' . $value['nroComprobante'] . ' | ' . $value['fecha']->format('d-m-Y') . ' | $' . $value['saldo'] . ' ]';
-            array_push($datos, array('clave' => $value['tipo'] . '-' . $value['id'], 'text' => $text, 'saldo' => $value['saldo']));
+            $montoRetRentas = 0;
+            $neto = $value['total'] - $value['iva'];
+            $baseImponible += $neto;
+            // calcular retencion rentas
+            if( $retrentas>0 ){
+                if( $neto >= floatval( $proveedor->getCategoriaRentas()->getMinimo())  ){
+                    $retencion = $neto * ( $retrentas / 100 );
+                    $adicional = $retencion * ( $adicrentas / 100 );
+                    $montoRetRentas = $retencion + $adicional;
+                    //$baseImponibleRentas += $neto;
+                }
+            }
+            $total = $value['total'] - $montoRetRentas;
+            $text = '[ ' . $value['tipo'] .'-'. $value['letra']. ' ' . $value['nroComprobante'] . ' | ' . $value['fecha']->format('d-m-Y') . ' | $' . $value['total'] . ' ]';
+            array_push($datos,
+                array('clave' => $value['tipo'] . '-' . $value['id'], 'text' => $text,
+                    'montoRetRentas'=>$montoRetRentas, 'total' => $total));
+        }
+        $montoRetGanancias = 0;
+        if( ($baseImponible + $acumuladoTotalGanancia) > $exento ){
+            $hasta = $baseImponible + $acumuladoTotalGanancia - $exento;
+
+            $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaByHasta( $proveedor->getActividadComercial()->getCodigo(), $hasta );
+            if($escala){
+                $montoRetGanancias = ( $baseImponible - $escala->getDesde() ) * ( $escala->getPorcExcedente()/100) + $escala->getFijo() - $acumuladoRetencionGanancia;
+            }else{
+                $montoRetGanancias = ($baseImponible * ($porcGanancias / 100)) - $acumuladoRetencionGanancia;
+            }
+
+            $minimo = $proveedor->getActividadComercial()->getMinimo();
+            if( $acumuladoRetencionGanancia < $minimo){
+                if( $montoRetGanancias < $minimo){
+                    $montoRetGanancias = 0;
+                }
+            }
+
         }
 
         $partial = $this->renderView('ComprasBundle:Proveedor:factura-proveedor-row.html.twig',
-                array('datos' => $datos));
-        return new Response($partial);
+                array('datos' => $datos ));
+        return new JsonResponse( array( 'partial' => $partial, 'baseImponible' => $baseImponible,
+            'retganancias' => $montoRetGanancias,
+            'retrentas' => $retrentas, 'adicrentas' => $adicrentas ) );
     }
 
     /**
@@ -791,7 +964,7 @@ class ProveedorController extends Controller {
         $banco = ($cheque->getBanco()) ? $cheque->getBanco()->getId() : NULL;
         $array = array('id' => $cheque->getId(), 'nroCheque' => $cheque->getNroCheque(), 'nroInterno' => $cheque->getNroInterno(),
             'fecha' => $cheque->getFecha()->format('d-m-Y'), 'titular' => $titular,
-            'dador' => $cheque->getDador(), 'banco' => $banco, 'tomado' => $cheque->getTomado()->format('d-m-Y'),
+            'dador' => $cheque->getDador(), 'banco' => $banco, 'tomado' =>  $cheque->getTomado() ? $cheque->getTomado()->format('d-m-Y') : null,
             'sucursal' => $cheque->getSucursal(), 'valor' => $cheque->getValor());
         return new Response(json_encode($array));
     }

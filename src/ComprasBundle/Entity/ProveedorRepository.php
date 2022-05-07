@@ -123,7 +123,7 @@ class ProveedorRepository extends EntityRepository {
     public function getFacturasImpagas($id) {
         $prov = $this->find($id);
         $facturas = $this->_em->createQueryBuilder('f')
-                ->select("f.id, 'FAC' tipo, f.fechaFactura fecha, f.total, f.saldo, f.nroComprobante ")
+                ->select("f.id, 'FAC' tipo,f.tipoFactura letra, f.fechaFactura fecha, f.total, f.iva, f.saldo, f.nroComprobante ")
                 ->from('ComprasBundle\Entity\Factura', 'f')
                 ->innerJoin('f.proveedor', 'p')
                 ->where('f.saldo>0')
@@ -132,7 +132,7 @@ class ProveedorRepository extends EntityRepository {
                 ->setParameter('agr', $prov)
                 ->orderBy('f.fechaFactura');
         $notacred = $this->_em->createQueryBuilder('c')
-                ->select("c.id,'DEB' tipo,c.fecha, c.total, c.saldo, c.nroComprobante")
+                ->select("c.id,'DEB' tipo,c.tipoNota letra, c.fecha, c.total, c.iva, c.saldo, c.nroComprobante")
                 ->from('ComprasBundle\Entity\NotaDebCred', 'c')
                 ->innerJoin('c.proveedor', 'p')
                 ->where('p.id=:agr')

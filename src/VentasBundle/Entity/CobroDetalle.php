@@ -34,7 +34,7 @@ class CobroDetalle {
     protected $moneda;
 
      /**
-     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\CobroDetalleTarjeta", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\CobroDetalleTarjeta", cascade={"persist","remove"}, orphanRemoval=true)
      */
     private $datosTarjeta;
 

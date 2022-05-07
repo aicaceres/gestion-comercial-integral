@@ -79,7 +79,7 @@
                 {% endif %}
                 <td class="buttons">
                      <a href="{{ path('ventas_cobro_show',{ 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Cobro"></a>
-                    {% if entity.facturaElectronica.tipoComprobante.valor != 'TIQUE' %}
+                    {% if entity.facturaElectronica.tipoComprobante.valor not in ['TICK-B','TIQUE'] %}
                     <a href="#" url="{{ path('ventas_cobro_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
                     {% endif %}
                 </td>

@@ -1,6 +1,8 @@
 <select name="concepto" id="selectComprobantes" style="width:90%" class="select2 valores" multiple="multiple">
     <option value=""></option>
     {% for dato in datos %}
-    <option value="{{dato.clave}}" data-saldo="{{dato.saldo}}">{{dato.text}}</option>
+    <option value="{{dato.clave}}" data-total="{{dato.total}}" data-rentas="{{dato.montoRetRentas}}">
+        {{dato.text}}
+    </option>
     {% endfor %}
 </select>

@@ -42,7 +42,7 @@ class PagoCliente
      * @var string $cotizacion
      * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
      */
-    protected $cotizacion = 0;
+    protected $cotizacion = 1;
     /**
      * @var integer $total
      * @ORM\Column(name="total", type="decimal", scale=2 )

@@ -13,9 +13,11 @@
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
  {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
-        <fieldset >        
+        <fieldset >
             <div class="two_fields">
+            {% set label = ['% Retención:','% Adicional:','Mínimo:','Código ATP:'] %}
             {% if entity.tipo == 'G' or entity.tipo == 'H' %}
+                {% set label = ['Desde:','Hasta:','Fijo:','% Excedente:'] %}
                 <div>
                     <label>Tipo:</label>
                     <select name="tipo" id="tipo">
@@ -23,36 +25,36 @@
                         <option value="H" {% if entity.tipo == 'H' %} selected="selected" {% endif %}>HONORARIOS</option>
                     </select>
                 </div>
-            {% endif %}            
+            {% endif %}
             {{ form_row(form.nombre, { 'attr': {'class' : 'mediuminput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
-            </div> 
+            </div>
             <div class="two_fields">
-            {{ form_row(form.retencion, { 'attr': {'class' : 'mininput'} }) }} 
-            {{ form_row(form.adicional, { 'attr': {'class' : 'mininput'} }) }}
-            </div> 
+            {{ form_row(form.retencion, { 'attr': {'class' : 'mininput'}, 'label':label[0] }) }}
+            {{ form_row(form.adicional, { 'attr': {'class' : 'mininput'}, 'label':label[1] }) }}
+            </div>
             <div class="two_fields">
-            {{ form_row(form.minimo, { 'attr': {'class' : 'mininput'} }) }} 
-            {{ form_row(form.codigo_atp, { 'attr': {'class' : 'mininput'} }) }}
-            </div> 
+            {{ form_row(form.minimo, { 'attr': {'class' : 'mininput'}, 'label':label[2] }) }}
+            {{ form_row(form.codigo_atp, { 'attr': {'class' : 'mininput'}, 'label':label[3] }) }}
+            </div>
 
-            <br clear="all" /> 
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
-                <a class="cancelar" type="button" href="{{ path('sistema_escalas')}}">Cancelar</a>
+                <a class="cancelar" type="button" href="{{ path('sistema_escalas')}}?tipoId={{entity.tipo}}">Cancelar</a>
             </div>
         </fieldset>
 {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
-        $(document).on('change','#tipo',function(){ 
+        $(document).on('change','#tipo',function(){
             let tipo =  $(this).val();
             $('#configbundle_escalas_tipo').val(tipo);
-            if( tipo == 'G'){ 
+            if( tipo == 'G'){
                 $('#configbundle_escalas_nombre').val('HONORARIOS DIRECTORES Y ADMINI');
             }else{
                 $('#configbundle_escalas_nombre').val('HONORARIOS PROFESIONALES');
@@ -61,5 +63,5 @@ jQuery(function ($) {
         });
     });
 });
-</script>   
+</script>
 {% endblock %}

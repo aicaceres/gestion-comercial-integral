@@ -24,42 +24,58 @@ class Escalas {
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
-     */    
+     */
     protected $nombre;
     /**
      * @var string $tipo
      * @ORM\Column(name="tipo", type="string", nullable=false)
      */
-    protected $tipo;  
+    protected $tipo;
     /**
      * @var string $retencion
      * @ORM\Column(name="retencion", type="decimal", scale=2, nullable=true)
      */
-    protected $retencion = 0;      
+    protected $retencion = 0;
     /**
      * @var string $adicional
      * @ORM\Column(name="adicional", type="decimal", scale=2, nullable=true)
      */
-    protected $adicional = 0;      
+    protected $adicional = 0;
     /**
      * @var string $minimo
      * @ORM\Column(name="minimo", type="decimal", scale=2, nullable=true)
      */
-    protected $minimo = 0;      
+    protected $minimo = 0;
     /**
      * @var string $codigoAtp
      * @ORM\Column(name="codigo_atp", type="integer", nullable=true)
      */
-    protected $codigoAtp = 0;            
+    protected $codigoAtp = 0;
 
     public function __toString() {
         return $this->nombre;
-    }    
- 
+    }
+    // escala G o H
+    public function getDesde(){
+        return $this->retencion;
+    }
+    // escala G o H
+    public function getHasta(){
+        return $this->adicional;
+    }
+    // escala G o H
+    public function getFijo(){
+        return $this->minimo;
+    }
+    // escala G o H
+    public function getPorcExcedente(){
+        return $this->codigoAtp;
+    }
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -82,7 +98,7 @@ class Escalas {
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -105,7 +121,7 @@ class Escalas {
     /**
      * Get tipo
      *
-     * @return string 
+     * @return string
      */
     public function getTipo()
     {
@@ -128,7 +144,7 @@ class Escalas {
     /**
      * Get retencion
      *
-     * @return string 
+     * @return string
      */
     public function getRetencion()
     {
@@ -151,7 +167,7 @@ class Escalas {
     /**
      * Get adicional
      *
-     * @return string 
+     * @return string
      */
     public function getAdicional()
     {
@@ -174,7 +190,7 @@ class Escalas {
     /**
      * Get minimo
      *
-     * @return string 
+     * @return string
      */
     public function getMinimo()
     {
@@ -197,7 +213,7 @@ class Escalas {
     /**
      * Get codigoAtp
      *
-     * @return integer 
+     * @return integer
      */
     public function getCodigoAtp()
     {

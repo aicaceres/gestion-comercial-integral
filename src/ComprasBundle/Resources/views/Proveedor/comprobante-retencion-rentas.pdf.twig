@@ -1,0 +1,71 @@
+
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="30px" >
+        <placeholders>
+            <header>
+                <div height="50px" width="100%" >
+                    <div text-align="center" padding-bottom="20px" vertical-align="middle">IMPUESTOS SOBRE LOS INGRESOS BRUTOS - PROVINCIA DEL CHACO</div>
+                    <div border.color="#888888" height="1px" ></div>
+                </div>
+            </header>
+
+        </placeholders>
+
+        <table font-size="14px" >
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle">Agente de Retención :  {{ empresa.nombre|upper}} S.A. </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle">Número Inscripción :  {{ empresa.iibb }} </td>
+                <td border.type="none" height="30px" vertical-align="middle">CUIT : {{ empresa.cuit }}  </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle" colspan="2">Domicilio Fiscal : {{ empresa.direccion}} </td>
+            </tr>
+        </table>
+
+        <div border.color="#888888" height="1px" margin-top="20px" margin-bottom="20px"></div>
+
+        <table font-size="14px" >
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle" colspan="2">Sujeto Pasivo de Retención :  {{ pago.proveedor.nombre|upper}} S.A. </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle">Número Inscripción :  {{ pago.proveedor.iibb }} </td>
+                <td border.type="none" height="30px" vertical-align="middle">CUIT : {{ pago.proveedor.cuit }}  </td>
+            </tr>
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle" colspan="2">Domicilio : {{ pago.proveedor.domicilioCompleto}} </td>
+            </tr>
+        </table>
+
+        <div border.color="#888888" height="1px" margin-top="20px" margin-bottom="20px"></div>
+
+        <table font-size="14px" margin-left="30px" width="90%">
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle">Fecha de Pago : {{ pago.fecha|date('d/m/Y') }}</td>
+                <td border.type="none" height="30px" vertical-align="middle">Número de Retención : {{ pago.comprobanteNro }}</td>
+            </tr>
+            <tr>
+                <td border.type="none" height="30px" vertical-align="middle" text-align="left" colspan="2">Liquidación de la retención que se practica: </td>
+            </tr>
+        </table>
+        <table font-size="14px" margin-left="20px" width="90%" margin-top="10px">
+            <tr>
+                <td border.color="#888888" height="35px" vertical-align="middle" text-align="center">Monto Sujeto a Retención</td>
+                <td border.color="#888888" height="35px" vertical-align="middle" text-align="center">Alícuota</td>
+                <td border.color="#888888" height="35px" vertical-align="middle" text-align="center">Importe Retenido</td>
+            </tr>
+            <tr>
+                <td border.color="#888888" height="30px" vertical-align="middle" text-align="right" padding-right="20px">{{ pago.baseImponibleRentas|number_format(2,'.',',') }}</td>
+                <td border.color="#888888" height="30px" vertical-align="middle" text-align="center">{{ pago.alicuotaRentasTxt }}</td>
+                <td border.color="#888888" height="30px" vertical-align="middle" text-align="right" padding-right="20px">{{ pago.montoRetencionRentas|number_format(2,'.',',') }}</td>
+            </tr>
+            <tr>
+                <td border.type="none" height="35px" vertical-align="middle">En letras</td>
+            </tr>
+            <tr>
+                <td border.type="none" height="15px" vertical-align="middle" colspan="3"> {{pago.moneda}} {{letras}}.----------</td>
+            </tr>
+        </table>
+
+    </dynamic-page>

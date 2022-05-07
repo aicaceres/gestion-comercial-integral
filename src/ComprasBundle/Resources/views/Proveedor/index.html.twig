@@ -67,7 +67,7 @@
                 <td>{{ entity.cuit }}</td>
                 <td>{{ entity.direccion }}</td>
                 <td>{{ entity.localidad }}</td>
-                <td>{{ entity.telefono }}</td>
+                <td>{{ entity.telefono }} | {{  entity.categoriaRentas ? entity.categoriaRentas.retencion : 'xxx' }}</td>
                 <td class="alignright" >{{ entity.getSaldoxFechas|number_format(3,'.',',') }}</td>
                 <td><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /></td>
                 <td>

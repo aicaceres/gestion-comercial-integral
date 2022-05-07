@@ -13,6 +13,7 @@ class ChequeType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('id','hidden')
             ->add('valor','hidden')
             ->add('nroCheque',null,array('label' => 'Nº Cheque:','required'=>true))
             ->add('dador','text',array('label' => 'Dador:','required'=>true))

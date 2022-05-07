@@ -12,11 +12,11 @@ use ConfigBundle\Controller\UtilsController;
 use ComprasBundle\Entity\PagoProveedor;
 use ComprasBundle\Form\PagoProveedorType;
 
-class PagoProveedorController extends Controller {
+class XPagoProveedorController extends Controller {
 
-    public function indexAction() {
+    public function indexAction(Request $request) {
 
-        $id = $this->getRequest()->get('proveedorId');
+        $id = $request->get('proveedorId');
         $em = $this->getDoctrine()->getManager();
         $proveedores = $em->getRepository('AdminBundle:Proveedor')->findAll();
         if ($id)
@@ -53,6 +53,8 @@ class PagoProveedorController extends Controller {
         $entity->setPagoNro(sprintf("%06d", $equipo->getNroPagoCompra() + 1));
         $entity->setProveedor($proveedor);
         $entity->setFecha(new \DateTime);
+        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByCodigoAfip('PES');
+        $entity->setMoneda($moneda);
         $form = $this->createCreateForm($entity);
         return $this->render('ComprasBundle:PagoProveedor:edit.html.twig', array(
                     'entity' => $entity,

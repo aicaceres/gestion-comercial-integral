@@ -123,7 +123,7 @@ class Cheque {
     private $createdBy;
 
      /**
-     *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\PagoProveedor", inversedBy="chequesPagados")
+     *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\PagoProveedor")
      *@ORM\JoinColumn(name="compras_pago_proveedor_id", referencedColumnName="id")
      */
     private $pagoProveedor;
