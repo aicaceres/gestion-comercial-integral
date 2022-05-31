@@ -35,6 +35,12 @@ class Provincia {
     protected $byDefault = false;
 
     /**
+     * @var string $codSicore
+     * @ORM\Column(name="cod_sicore", type="string", length=2, nullable=true)
+     */
+    protected $codSicore;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Pais", inversedBy="provincias")
      * @ORM\JoinColumn(name="pais_id", referencedColumnName="id")
      */
@@ -179,4 +185,27 @@ class Provincia {
         return $this->byDefault;
     }
 
+
+    /**
+     * Set codSicore
+     *
+     * @param string $codSicore
+     * @return Provincia
+     */
+    public function setCodSicore($codSicore)
+    {
+        $this->codSicore = $codSicore;
+
+        return $this;
+    }
+
+    /**
+     * Get codSicore
+     *
+     * @return string 
+     */
+    public function getCodSicore()
+    {
+        return $this->codSicore;
+    }
 }

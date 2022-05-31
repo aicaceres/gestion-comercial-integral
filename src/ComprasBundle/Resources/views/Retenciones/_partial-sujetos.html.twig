@@ -1,0 +1,50 @@
+<div style="overflow-x: scroll">
+    <style>
+        table.sujetos tbody, table.sujetos thead,table.sujetos tfoot{
+            display: block;
+        }
+        table.sujetos tbody {
+            overflow-y: scroll;
+            height: 240px;
+        }
+        table.sujetos thead tr th {
+            font-weight: normal;
+            background-color: gainsboro;
+            color: #666;
+            border-right: 1px solid #eee;
+            padding: 0px 10px;
+        }
+    </style>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable datosafip sujetos" id="afip-sujetos">
+        <thead>
+            <tr style="background-color: gainsboro">
+                <th><span style="width:173px;display: block;">Numero de documento del retenido</span></th>
+                <th><span style="width:150px;display: block;">Razón social</span></th>
+                <th><span style="width:150px;display: block;">Domicilio fiscal</span></th>
+                <th><span style="width:150px;display: block;">Localidad</span></th>
+                <th><span style="width:45px;display: block;">Provincia</span></th>
+                <th><span style="width:70px;display: block;">Codigo postal</span></th>
+                <th><span style="width:155px;display: block;">Tipo de documento del retenido</span></th>
+            </tr>
+            </thead>
+        <tbody>
+            {% for item in resultado.sujetos %}
+                <tr>
+                    <td><span style="width:173px;display: block; ">{{ item.nrodoc }}</span></td>
+                    <td><span style="width:150px;display: block;">{{ item.razonsocial }}</span></td>
+                    <td><span style="width:150px;display: block;">{{ item.domicilio }}</span></td>
+                    <td><span style="width:150px;display: block;">{{ item.localidad }} </span></td>
+                    <td><span style="width:45px;display: block;">{{ item.provincia }} </span></td>
+                    <td><span style="width:70px;display: block;">{{ item.cp }} </span></td>
+                    <td><span style="width:155px;display: block;">{{ item.tipodoc }} </span></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+<div>
+    <h5 style="text-align:center; margin:10px;"> {{ resultado.sujetos|length }} sujetos en SU{{periodo|replace({'-':''})}}.txt
+        <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('retencion_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=SUJ" > <span>Descargar</span> </a></h5>
+</div>

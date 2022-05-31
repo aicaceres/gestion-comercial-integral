@@ -24,48 +24,64 @@ class ActividadComercial {
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false, unique=true)
-     */    
+     */
     protected $nombre;
     /**
      * @var string $codigo
      * @ORM\Column(name="codigo", type="string", nullable=false, unique=true)
-     */    
+     */
     protected $codigo;
     /**
      * @var string $exento
      * @ORM\Column(name="exento", type="decimal", scale=2,nullable=true)
      */
-    protected $exento = 0;  
+    protected $exento = 0;
     /**
      * @var string $inscripto
      * @ORM\Column(name="inscripto", type="decimal", scale=2, nullable=true)
      */
-    protected $inscripto = 0;      
+    protected $inscripto = 0;
     /**
      * @var string $noInscripto
      * @ORM\Column(name="no_inscripto", type="decimal", scale=2, nullable=true)
      */
-    protected $noInscripto = 0;         
+    protected $noInscripto = 0;
     /**
      * @var string $minimo
      * @ORM\Column(name="minimo", type="decimal", scale=2, nullable=true)
      */
-    protected $minimo = 0;         
-    
+    protected $minimo = 0;
+
     /**
      * @ORM\Column(name="by_default", type="boolean", nullable=true)
      */
-    protected $byDefault = false;    
+    protected $byDefault = false;
+
+    /**
+     * @var string $codigoImpuesto
+     * @ORM\Column(name="codigo_impuesto", type="string", nullable=true)
+     */
+    protected $codigoImpuesto;
+    /**
+     * @var string $codigoRegimen
+     * @ORM\Column(name="codigo_regimen", type="string", nullable=true)
+     */
+    protected $codigoRegimen;
+    /**
+     * @var string $codigoRG
+     * @ORM\Column(name="codigo_rg", type="string", nullable=true)
+     */
+    protected $codigoRG;
 
     public function __toString() {
         return $this->nombre;
-    }    
- 
+    }
+
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -88,7 +104,7 @@ class ActividadComercial {
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -111,7 +127,7 @@ class ActividadComercial {
     /**
      * Get exento
      *
-     * @return string 
+     * @return string
      */
     public function getExento()
     {
@@ -134,7 +150,7 @@ class ActividadComercial {
     /**
      * Get inscripto
      *
-     * @return string 
+     * @return string
      */
     public function getInscripto()
     {
@@ -157,7 +173,7 @@ class ActividadComercial {
     /**
      * Get noInscripto
      *
-     * @return string 
+     * @return string
      */
     public function getNoInscripto()
     {
@@ -180,7 +196,7 @@ class ActividadComercial {
     /**
      * Get minimo
      *
-     * @return string 
+     * @return string
      */
     public function getMinimo()
     {
@@ -203,7 +219,7 @@ class ActividadComercial {
     /**
      * Get byDefault
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getByDefault()
     {
@@ -226,10 +242,80 @@ class ActividadComercial {
     /**
      * Get codigo
      *
-     * @return string 
+     * @return string
      */
     public function getCodigo()
     {
         return $this->codigo;
     }
+
+    /**
+     * Set codigoImpuesto
+     *
+     * @param string $codigoImpuesto
+     * @return ActividadComercial
+     */
+    public function setCodigoImpuesto($codigoImpuesto)
+    {
+        $this->codigoImpuesto = $codigoImpuesto;
+
+        return $this;
+    }
+
+    /**
+     * Get codigoImpuesto
+     *
+     * @return string
+     */
+    public function getCodigoImpuesto()
+    {
+        return $this->codigoImpuesto;
+    }
+
+    /**
+     * Set codigoRegimen
+     *
+     * @param string $codigoRegimen
+     * @return ActividadComercial
+     */
+    public function setCodigoRegimen($codigoRegimen)
+    {
+        $this->codigoRegimen = $codigoRegimen;
+
+        return $this;
+    }
+
+    /**
+     * Get codigoRegimen
+     *
+     * @return string
+     */
+    public function getCodigoRegimen()
+    {
+        return $this->codigoRegimen;
+    }
+
+    /**
+     * Set codigoRG
+     *
+     * @param string $codigoRG
+     * @return ActividadComercial
+     */
+    public function setCodigoRG($codigoRG)
+    {
+        $this->codigoRG = $codigoRG;
+
+        return $this;
+    }
+
+    /**
+     * Get codigoRG
+     *
+     * @return string
+     */
+    public function getCodigoRG()
+    {
+        return $this->codigoRG;
+    }
+
 }

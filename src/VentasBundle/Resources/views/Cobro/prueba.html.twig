@@ -1,0 +1,343 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Ejemplos de impresión en javascript hacia impresora fiscal</title>
+        <script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
+        <script language="JavaScript">
+            function setModeloPuerto(){
+                modelo = document.getElementById("selectModelo").value;
+                puerto = document.getElementById("inputPuerto").value;
+                vel = document.getElementById("selectVel").value;
+            }
+
+            function imprimir(){
+                var driver = new Driver();
+                driver.host = "localhost" //Cambiar por el ip de la maquina de la fiscal si es remota
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+
+                try {
+                    driver.iniciarTrabajo();
+                    driver.cancelarComprobante();
+                    driver.datosCliente("Abel Miranda Cordovi %", tdCUIT, "20939802593", riResponsableInscripto, "Haefreingue 1686");
+               //   Si es nota de credito enviar la factura de referencia
+               //   driver.documentoDeReferencia2g(tcFactura_A, "0001-00000023")
+                    driver.abrirComprobante(tcFactura_A);
+                    driver.imprimirTextoFiscal("Texto fiscal");
+                    driver.imprimirItem2g("Item 1", 1, 0.1, 21, 0, Gravado, tiFijo, 1, "7790001001054", "", Unidad);
+                    driver.imprimirDescuentoGeneral("Descuento general", 0.01);
+                    driver.imprimirPago2g("Efectivo", 100, "", Efectivo, 1, "", "");
+                    driver.cerrarComprobante();
+                    driver.finalizarTrabajo();
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function facturaAAjusteTotal(){
+                var driver = new Driver();
+                driver.host = "localhost" //Cambiar por el ip de la maquina de la fiscal si es remota
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+
+                try {
+
+                    totalSegunSistema = 100;
+
+                    driver.iniciarTrabajo();
+                    driver.cancelarComprobante();
+                    driver.datosCliente("Abel Miranda Cordovi %", tdCUIT, "20939802593", riResponsableInscripto, "Haefreingue 1686");
+                    driver.documentoDeReferencia2g(tcRemito, "0001-00000001");
+                    driver.abrirComprobante(tcFactura_A);
+                    // Precio final = 100
+                    // Precio sin iva = 100 / 1.21 = 82.64
+                    // Total segun fiscal = 99.99
+                    // Debemos posteriormente leer ese total y ajustar por percepcion
+                    driver.imprimirItem2g("Item 1", 1, 82.64, 21, 0, Gravado, tiFijo, 1, "7790001001054", "", Unidad);
+                    driver.finalizarTrabajo();
+
+
+                    driver.iniciarTrabajo();
+                    driver.setearTipoComprobante(tcFactura_A);
+                    driver.subtotal();
+                    driver.finalizarTrabajo();
+
+                    driver.iniciarTrabajo();
+                    driver.setearTipoComprobante(tcFactura_A);
+                    if (driver.response.montoVentas != totalSegunSistema) {
+                        driver.ImprimirOtrosTributos(99, "Ajuste por redondeo", 0, totalSegunSistema - driver.response.montoVentas, 0);
+                    }
+                    driver.imprimirPago2g("Efectivo", 100, "", Efectivo, 1, "", "");
+                    driver.cerrarComprobante();
+                    driver.finalizarTrabajo();
+
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function facturaBAjusteTotal(){
+                var driver = new Driver();
+                driver.host = "localhost" //Cambiar por el ip de la maquina de la fiscal si es remota
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+
+                try {
+
+                    totalSegunSistema = 100;
+
+                    driver.iniciarTrabajo();
+                    driver.cancelarComprobante();
+                    driver.datosCliente("Abel Miranda Cordovi %", tdCUIT, "20939802593", riMonotributo, "Haefreingue 1686");
+                    driver.documentoDeReferencia2g(tcRemito, "0001-00000001");
+                    driver.abrirComprobante(tcFactura_B);
+                    // Precio final = 100
+                    // Precio sin iva = 100 / 1.21 = 82.64
+                    // Total segun fiscal = 99.99
+                    // Debemos posteriormente leer ese total y ajustar por percepcion
+                    driver.imprimirItem2g("Item 1", 1, 99.99, 21, 0, Gravado, tiFijo, 1, "7790001001054", "", Unidad);
+                    driver.finalizarTrabajo();
+
+
+                    driver.iniciarTrabajo();
+                    driver.setearTipoComprobante(tcFactura_B);
+                    driver.subtotal();
+                    driver.finalizarTrabajo();
+
+                    driver.iniciarTrabajo();
+                    driver.setearTipoComprobante(tcFactura_B);
+                    if (driver.response.montoVentas != totalSegunSistema) {
+                        driver.imprimirDescuentoGeneral("Ajuste por redondeo", driver.response.montoVentas - totalSegunSistema);
+                    }
+                    driver.imprimirPago2g("Efectivo", 1, "", Efectivo, 1, "", "");
+                    driver.cerrarComprobante();
+                    driver.finalizarTrabajo();
+
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function ticketNoFiscal(){
+                var driver = new Driver();
+                driver.host = "localhost" //Cambiar por el ip de la maquina de la fiscal si es remota
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+
+                try {
+                    driver.iniciarTrabajo();
+                    driver.cancelarComprobante();
+                    driver.abrirComprobante(tcNo_Fiscal);
+                    driver.imprimirTextoNoFiscal("Texto 1 no fiscal");
+                    driver.imprimirTextoNoFiscal("Texto 2 no fiscal");
+                    driver.imprimirTextoNoFiscal("Texto 3 no fiscal");
+                    driver.imprimirTextoNoFiscal("Texto 4 no fiscal");
+                    driver.cerrarComprobante();
+                    driver.finalizarTrabajo();
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function cierreX(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+
+                try {
+                    driver.iniciarTrabajo();
+                    driver.cierreX();
+                    driver.finalizarTrabajo();
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function cierreZ(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.cierreZ();
+                    driver.finalizarTrabajo();
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function cancelarComprobante(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = 9600;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.cancelarComprobante();
+                    driver.finalizarTrabajo();
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function reporteZFechas(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.reporteZFechas("011216", "031216", false);
+                    driver.finalizarTrabajo();
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function reporteZNumeros(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.reporteZNumeros(1, 10, false);
+                    driver.finalizarTrabajo();
+                    alert("Operación realizada con éxito!")
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function obtenerFechaHora(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.obtenerFechaHora();
+                    driver.finalizarTrabajo()
+                    alert(driver.response.fechaHora);
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function obtenerDatosDeInicializacion(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.obtenerDatosDeInicializacion();
+                    driver.finalizarTrabajo();
+                    serie.value = driver.response.nroSerie;
+                    alert("El número de serie de la impresora es: " + driver.response.nroSerie);
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function ultimoNumeroComprobante(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = 9600;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.ultimoComprobante(tcFactura_B);
+                    driver.finalizarTrabajo();
+                    alert(driver.response.ultimoNumero);
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+            function reporteElectronico(){
+                var driver = new Driver();
+                driver.modelo = modelo;
+                driver.puerto = puerto;
+                driver.baudios = vel;
+                try {
+                    driver.iniciarTrabajo();
+                    driver.obtenerPrimerBloqueReporteElectronico("1", "9", "c:\\datos\\reporte.zip", trNroCierre);
+                    driver.finalizarTrabajo();
+                    alert("Reporte generado con éxito");
+                } catch (e){
+                    alert(e);
+                }
+            }
+
+        </script>
+    </head>
+
+
+<body><h3>Ejemplos de impresión en javascript hacia impresora fiscal</h3>
+    <p>Se requiere tener instalado <a href="https://www.bitingenieria.com.ar/jdf_setup.exe">Javascript Driver Fiscal</a></p>
+    <p>El driver para descargar es una demo. La misma inserta la leyenda "(demo)" en cada item impreso.</p>
+    <p><select id="selectModelo" onchange="setModeloPuerto()">
+        <option value="0" selected="">Hasar715</option>
+        <option value="2">Hasar715v2</option>
+        <option value="3">Hasar615</option>
+        <option value="4">Hasar320</option>
+        <option value="5">HasarPR4</option>
+        <option value="6">HasarPR5F</option>
+        <option value="7">Hasar950</option>
+        <option value="8">Hasar951</option>
+        <option value="9">Hasar441</option>
+        <option value="10">Hasar321</option>
+        <option value="11">Hasar322</option>
+        <option value="12">Hasar322v2</option>
+        <option value="13">Hasar330</option>
+        <option value="14">Hasar1120</option>
+        <option value="15">HasarPL8F</option>
+        <option value="16">HasarPL8Fv2</option>
+        <option value="17">HasarPL23</option>
+        <option value="18">EpsonTM300AF</option>
+        <option value="19">EpsonTMU220AF</option>
+        <option value="20">EpsonTM2000</option>
+        <option value="21">EpsonTM2000AFPlus</option>
+        <option value="22">EpsonLX300</option>
+        <option value="23">HasarPT1000F</option>
+        <option value="24">EpsonTMT900FA</option>
+        <option value="25">EpsonTMU220AFII</option>
+    </select></p>
+    <p><select id="selectVel" onchange="setModeloPuerto()">
+        <option value="9600" selected="">9600</option>
+        <option value="115200">115200</option>
+    </select></p>
+    <p>Puerto: <input id="inputPuerto" value="2" onchange="setModeloPuerto()"></p>
+    <p><button onclick="imprimir()">Imprimir ticket-factura</button></p>
+    <p><button onclick="cierreX()">Cierre X</button></p>
+    <p><button onclick="cierreZ()">Cierre Z</button></p>
+    <p><button onclick="cancelarComprobante()">Cancelar Comprobante</button></p>
+    <p><button onclick="reporteZFechas()">Reporte Z por fechas</button></p>
+    <p><button onclick="reporteZNumeros()">Reporte Z por numeros</button></p>
+    <p><button onclick="obtenerFechaHora()">Obtener Fecha-Hora</button></p>
+    <p><button onclick="ultimoNumeroComprobante()">Obtener Ultimo Nro de Comprobante</button></p>
+    <p><button onclick="obtenerDatosDeInicializacion()">Obtener Datos de Inicializacion</button><input type="text" id="serie"></p>
+    <p><button onclick="ticketNoFiscal()">Ticket no fiscal</button></p>
+    <p><button onclick="facturaAAjusteTotal()">Ejemplo de factura A con ajuste de total</button></p>
+    <p><button onclick="facturaBAjusteTotal()">Ejemplo de factura B con ajuste de total</button></p>
+    <p><button onclick="reporteElectronico()">ReporteElectronico</button></p>
+    <script language="JavaScript">
+        setModeloPuerto();
+    </script>
+</body>
+</html>

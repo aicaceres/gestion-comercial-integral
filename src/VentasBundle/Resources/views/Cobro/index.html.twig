@@ -28,6 +28,7 @@
             <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
         </div>
+<a href="{{ path('prueba_tickeadora') }}" class="btn_print" title="Probar">probar</a>
 {% if app.session.get('caja_abierta') %}
     {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
         {% set urlxCobrar = path('ventas_por_cobrar') %}

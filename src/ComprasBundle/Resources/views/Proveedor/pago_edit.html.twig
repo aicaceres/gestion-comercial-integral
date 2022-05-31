@@ -129,6 +129,7 @@
 </div>
 {% endblock %}
 {% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
@@ -174,7 +175,6 @@ jQuery(function ($) {
                         total = total + totitem;
                         totalRentas = totalRentas + rentasitem;
                     });
-                    total = total + );
                     $('#comprasbundle_pagoproveedor_montoRentas').val( totalRentas.toFixed(3));
                     $('#comprasbundle_pagoproveedor_importe').val( total.toFixed(3));
                     actualizarPagos();
@@ -194,7 +194,6 @@ jQuery(function ($) {
 
     $('#guardar').on('click', function(){
         $('#txtconcepto').val($("[name='concepto']").val());
-
 
         if( !$('#txtconcepto').val() ){
             jAlert('Debe indicar los comprobantes a abonar!');
@@ -239,11 +238,6 @@ jQuery(function ($) {
         });
 
     });
-
-
-
-
-
 
         $pagosHolder = $('table.tabla-pagos tbody');
         $pagosHolder.find('.delTd').each(function() {

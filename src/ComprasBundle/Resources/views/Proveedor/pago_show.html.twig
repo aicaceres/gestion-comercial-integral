@@ -46,13 +46,13 @@
             </div>
             {% if entity.retencionGanancias > 0 %}
             <div style="display: inline-block; width: 10%">
-                <strong> {{ entity.moneda.simbolo }} </strong>
+                <strong>DGI: {{ entity.moneda.simbolo }} </strong>
                 <input class="number mediuminput" disabled="disabled" value="{{ entity.retencionGanancias|number_format(2,'.',',') }}">
             </div>
             {% endif %}
             {% if entity.montoRetencionRentas > 0 %}
             <div style="display: inline-block; width: 13%">
-                <label>Retención {{entity.alicuotaRentasTxt}}:</label>
+                <label>DGR {{entity.alicuotaRentasTxt}}:</label>
                 <strong> {{ entity.moneda.simbolo }} </strong>
                 <input class="number mediuminput" disabled="disabled" value="{{ entity.montoRetencionRentas|number_format(2,'.',',') }}">
             </div>

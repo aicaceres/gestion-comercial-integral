@@ -211,6 +211,7 @@ class UtilsController extends Controller {
         return $date;
     }
 
+
     public static function longDateSpanish($fecha, $dayname = FALSE) {
         $date = strtotime($fecha->format('Y-m-d'));
         $dia = date("l", $date);

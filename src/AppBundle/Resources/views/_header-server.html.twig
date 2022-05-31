@@ -1,6 +1,6 @@
 <div class="header">
     <ul class="headermenu">
-        <li id="homepage" ><a href="{{ path('homepage') }}"><span class="icon icon-flatscreen"></span>Tablero</a></li>
+        <li id="homepage" ><a href="{{ path('homepage') }}"><span class="icon icon-flatscreen"></span>Inicio</a></li>
         {% if app.user.access(app.session.get('unidneg_id'),'stock') %}
         <li id="stock"><a href="{{ path('stock') }}"><span class="icon icon-product"></span>Stock</a></li>
         {% endif %}
@@ -44,4 +44,4 @@
     {% include "AppBundle:Menus:menu-compra.html.twig" %}
 {% else %}
     {% include "AppBundle:Menus:menu-default.html.twig" %}
-{% endif %} 
+{% endif %}

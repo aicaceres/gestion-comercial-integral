@@ -277,4 +277,35 @@ class ProveedorRepository extends EntityRepository {
                     ->setMaxResults(5);
         return $query->getQuery()->getArrayResult();
     }
+
+    /**
+     * Encontrar los pagos con retencion de rentas dentro del periodo indicado
+     */
+    public function findRetencionesRentas($desde,$hasta){
+        $query = $this->_em->createQueryBuilder();
+            $query->select("p")
+                    ->from('ComprasBundle:PagoProveedor', 'p')
+                    ->where('p.baseImponibleRentas > 0')
+                    ->andWhere(" p.fecha >= '" . $desde . "'")
+                    ->andWhere(" p.fecha <= '" . $hasta . "'")
+                    ->orderBy('p.fecha');
+
+        return $query->getQuery()->getResult();
+
+    }
+    /**
+     * Encontrar los pagos con retencion de ganancias dentro del periodo indicado
+     */
+    public function findRetencionesGanancias($desde,$hasta){
+        $query = $this->_em->createQueryBuilder();
+            $query->select("p")
+                    ->from('ComprasBundle:PagoProveedor', 'p')
+                    ->where('p.retencionGanancias > 0')
+                    ->andWhere(" p.fecha >= '" . $desde . "'")
+                    ->andWhere(" p.fecha <= '" . $hasta . "'")
+                    ->orderBy('p.fecha');
+
+        return $query->getQuery()->getResult();
+
+    }
 }

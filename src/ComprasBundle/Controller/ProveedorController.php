@@ -882,7 +882,7 @@ class ProveedorController extends Controller {
                                         array('proveedor'=>$proveedor->getId(), 'periodo'=> $hoy->format('Ym') ));
         $acumuladoTotalGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoTotal() : 0;
         $acumuladoRetencionGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoRetencion() : 0;
-        if( $proveedor->getCategoriaIva() && ($fechaExcepcionGanancias < $hoy->format('Y-m-d') ||  is_null($fechaExcepcionGanancias) )  ){
+        if( $proveedor->getActividadComercial() && $proveedor->getCategoriaIva() && ($fechaExcepcionGanancias < $hoy->format('Y-m-d') ||  is_null($fechaExcepcionGanancias) )  ){
             $catIva = $proveedor->getCategoriaIva()->getNombre();
             $exento = floatval($proveedor->getActividadComercial()->getExento()) ;
             if( $catIva == 'N' ){
@@ -914,7 +914,7 @@ class ProveedorController extends Controller {
                     'montoRetRentas'=>$montoRetRentas, 'total' => $total));
         }
         $montoRetGanancias = 0;
-        if( ($baseImponible + $acumuladoTotalGanancia) > $exento ){
+        if( $proveedor->getActividadComercial() && ($baseImponible + $acumuladoTotalGanancia) > $exento ){
             $hasta = $baseImponible + $acumuladoTotalGanancia - $exento;
 
             $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaByHasta( $proveedor->getActividadComercial()->getCodigo(), $hasta );

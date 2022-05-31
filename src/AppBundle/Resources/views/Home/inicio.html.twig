@@ -8,12 +8,20 @@
 {% block contentwrapper %}
 {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-    <div class="two_third dashboard_left">              
-        <ul class="shortcuts">         
-            
+    <div class="two_third dashboard_left">
+        <ul class="shortcuts">
+
 
         </ul>
         <br clear="all" />
     </div><!--two_third dashboard_left -->
 </div>
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.togglemenu').click();
+});
+</script>
 {% endblock %}

@@ -28,6 +28,16 @@ class CobroController extends Controller
 {
 
     /**
+     * @Route("/prueba", name="prueba_tickeadora")
+     * @Method("GET")
+     * @Template()
+     */
+    public function pruebaAction(Request $request){
+        return $this->render('VentasBundle:Cobro:prueba.html.twig');
+    }
+
+
+    /**
      * @Route("/", name="ventas_cobro")
      * @Method("GET")
      * @Template()

@@ -1,0 +1,136 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<style>
+    .ui-datepicker{
+        width: 160px;
+    }
+    .ui-datepicker-calendar {
+     display: none;
+    }
+    .inputerror{
+        background-color: mistyrose !important;
+        font-weight: bold;
+    }
+</style>
+<div class="pageheader notab">
+    <h1 class="pagetitle">Retenciones de {{tipo}}</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+
+    <div class="" style="margin-bottom: 15px;">
+        <form action="{{ path }}" method="GET">
+            <div style="display: inline-block; margin-right: 30px;">
+                <label><strong>Período:</strong></label>
+                <input name="periodo" required="required" class="datepicker" tabindex="2" type="text" value="{{periodo}}">
+            </div>
+            <button type="submit" >Buscar</button>
+        </form>
+    </div>
+
+
+<div style="overflow-x: scroll">
+    <style>
+        table.rentas tbody, table.rentas thead,table.rentas tfoot{
+            display: block;
+        }
+        table.rentas tbody {
+            overflow-y: scroll;
+            height: 240px;
+        }
+        table.rentas thead tr th {
+            font-weight: normal;
+            background-color: gainsboro;
+            color: #666;
+            border-right: 1px solid #eee;
+            padding: 0px 10px;
+        }
+    </style>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable datosrentas rentas" id="rentas">
+        <thead>
+            <tr style="background-color: gainsboro">
+                <th><span style="width:147px;display: block;">N° CUIT Agente de Retención</span></th>
+                <th><span style="width:125px;display: block;">N° sucursal de Retención</span></th>
+                <th><span style="width:135px;display: block;">N° Comprobante Retención</span></th>
+                <th><span style="width:113px;display: block;">N° CUIT Contribuyente</span></th>
+                <th><span style="width:215px;display: block;">Razón Social Contribuyente</span></th>
+                <th><span style="width:360px;display: block;">Domicilio Contribuyente</span></th>
+                <th><span style="width:100px;display: block;">Fecha de Retención</span></th>
+                <th><span style="width:133px;display: block;">Monto Total de la retención</span></th>
+                <th><span style="width:83px;display: block;">Código concepto</span></th>
+                <th><span style="width:83px;display: block;">Monto Imponible</span></th>
+                <th><span style="width:84px;display: block;">Alícuota aplicada</span></th>
+
+            </tr>
+            </thead>
+        <tbody>
+            {% for item in resultado %}
+                <tr>
+                    <td><span style="width:147px;display: block; ">{{ item.cuitempresa }}</span></td>
+                    <td><span style="width:125px;display: block;"> {{ item.sucursal }} </span></td>
+                    <td><span style="width:135px;display: block;">{{ item.nrocomp }}</span></td>
+                    <td><span style="width:113px;display: block;">{{ item.cuit }} </span></td>
+                    <td><span style="width:215px;display: block;">{{ item.razonsocial }} </span></td>
+                    <td><span style="width:360px;display: block;">{{ item.domicilio }} </span></td>
+                    <td><span style="width:100px;display: block;">{{ item.fecha }} </span></td>
+                    <td><span style="width:133px;display: block;">{{ item.montoret }} </span></td>
+                    <td><span style="width:83px;display: block;"> {{ item.codconcepto }} </span></td>
+                    <td><span style="width:83px;display: block;">{{ item.imponible }} </span></td>
+                    <td><span style="width:84px;display: block;">{{ item.alicuota }} </span></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+</div>
+<div>
+    <h5 style="text-align:center; margin:10px;"> {{ resultado|length }} retenciones en {{ "now"|date('YmdHi') }}.txt
+        <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('retencion_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}" > <span>Descargar</span> </a></h5>
+</div>
+
+</div>
+
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({
+        dateFormat: "mm-yy",
+        changeMonth: true,
+        changeYear: true,
+        showButtonPanel: true,
+        closeText: "Seleccionar",
+        onClose: function(dateText, inst) {
+            if($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1) {
+                $(this).datepicker(
+                    'setDate',
+                    new Date(
+                        $("#ui-datepicker-div .ui-datepicker-year :selected").val(),
+                        $("#ui-datepicker-div .ui-datepicker-month :selected").val(),
+                        1
+                    )
+                ).trigger('change');
+                $('.date-picker').focusout();
+            }
+            $("#ui-datepicker-div").removeClass("month_year_datepicker");
+        },
+        beforeShow : function(input, inst) {
+            if((datestr = $(this).val()).length > 0) {
+                year = datestr.substring(datestr.length-4, datestr.length);
+                month = datestr.substring(0, 2);
+                $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
+                $(this).datepicker('setDate', new Date(year, month-1, 1));
+                $("#ui-datepicker-div").addClass("month_year_datepicker");
+            }
+        }
+    });
+    $('.togglemenu').click();
+
+});
+
+</script>
+{% endblock %}
