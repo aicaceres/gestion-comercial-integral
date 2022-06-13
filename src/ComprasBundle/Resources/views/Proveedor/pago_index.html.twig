@@ -62,7 +62,7 @@
                 <td class="buttons">
                    <a href="{{ path('compras_proveedor_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
                    <a href url="{{ path('compras_proveedor_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a> &nbsp;
-                   <a href="javascript:void(0)" url="{{ path('print_comprobante_retencion_rentas', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Pago"></a>
+                   <a href="javascript:void(0)" url="{{ path('print_comprobante_pago', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Pago"></a>
                 </td>
             </tr>
            {% endfor %}

@@ -73,7 +73,28 @@ class FacturaRepository extends EntityRepository {
     }
 
     public function findComprobantesByPeriodoUnidadNegocio($desde, $hasta, $unidneg) {
-        $facturas = $this->_em->createQueryBuilder('f')
+        $cobros = $this->_em->createQueryBuilder('c')
+                ->select('t.valor tipocomp,c.id,c.fechaCobro fecha ')
+                ->from('VentasBundle\Entity\Cobro', 'c')
+                ->innerJoin('c.facturaElectronica','f')
+                ->innerJoin('f.tipoComprobante','t')
+                ->innerJoin('c.unidadNegocio','u')
+                ->where('u.id=' . $unidneg)
+                ->andWhere("c.estado!='ANULADO'")
+                ->andWhere("c.fechaCobro>='" . $desde . " 00:00'")
+                ->andWhere("c.fechaCobro<='" . $hasta . " 23:59'");
+        $notas = $this->_em->createQueryBuilder('n')
+                ->select('t.valor tipocomp,n.id,n.fecha ')
+                ->from('VentasBundle\Entity\NotaDebCred', 'n')
+                ->innerJoin('n.notaElectronica','f')
+                ->innerJoin('f.tipoComprobante','t')
+                ->innerJoin('n.unidadNegocio','u')
+                ->where('u.id=' . $unidneg)
+                ->andWhere("n.estado!='ANULADO'")
+                ->andWhere("n.fecha>='" . $desde . " 00:00'")
+                ->andWhere("n.fecha<='" . $hasta . " 23:59'");
+
+        /*$facturas = $this->_em->createQueryBuilder('f')
                 ->select(" 'FAC-' tipocomp, f.id, f.fechaFactura fecha, f.tipoFactura tipo  ")
                 ->from("VentasBundle\Entity\Factura", 'f')
                 ->innerJoin('f.unidadNegocio', 'u')
@@ -88,9 +109,9 @@ class FacturaRepository extends EntityRepository {
                 ->where("n.estado!='ANULADO'")
                 ->andWhere('u.id=' . $unidneg)
                 ->andWhere("n.fecha>='" . $desde . " 00:00'")
-                ->andWhere("n.fecha<='" . $hasta . " 23:59'");
+                ->andWhere("n.fecha<='" . $hasta . " 23:59'");*/
 
-        $datos = array_merge($facturas->getQuery()->getArrayResult(), $notacred->getQuery()->getArrayResult());
+        $datos = array_merge($cobros->getQuery()->getArrayResult(), $notas->getQuery()->getArrayResult());
         $ord = usort($datos, function($a1, $a2) {
             $value1 = strtotime($a1['fecha']->format('Y-m-d'));
             $value2 = strtotime($a2['fecha']->format('Y-m-d'));
@@ -99,15 +120,18 @@ class FacturaRepository extends EntityRepository {
         return $datos;
     }
 
-    public function getCantidadAlicuotas($id) {
+    public function getCantidadAlicuotas($tipo,$id) {
         $query = $this->_em->createQueryBuilder();
-        $query->select('distinct a.id')
-                ->from('VentasBundle\Entity\FacturaDetalle', 'd')
-                ->innerJoin('d.afipAlicuota', 'a')
-                ->innerJoin('d.factura', 'f')
-                ->where('f.id=:arg')
+        $repo = ($tipo=='FAC') ? 'VentasBundle:VentaDetalle' : 'VentasBundle:NotaDebCredDetalle';
+        $cab = ($tipo=='FAC') ? 'd.venta' : 'd.notaDebCred';
+        $query->select('distinct d.alicuota')
+                ->from($repo, 'd')
+                ->innerJoin($cab, 'c')
+                ->where('c.id=:arg')
                 ->setParameter('arg', $id);
-        return $query->getQuery()->getResult();
+        return $query->getQuery()->getArrayResult();
+
+
     }
 
 }

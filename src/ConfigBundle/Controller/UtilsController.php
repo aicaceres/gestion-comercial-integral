@@ -133,19 +133,17 @@ class UtilsController extends Controller {
                 $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
                 $tipo = ' [DEB ';
             }
-            //$factura = $em->getRepository('ComprasBundle:Factura')->find($item->id);
             $text = $text . $tipo . $comprob->getNroComprobante() . ' $' . $item->monto . '] ';
         }
         return $text;
     }
 
-    // Lista de facturas en texto para impresion del pago
-    public static function textoListaFacturasPrintAction($concepto, $em) {
+    // Lista de facturas para impresion del pago
+    public static function arrayListaFacturasPrintAction($concepto, $em) {
         $lista = json_decode($concepto);
         $comprobantes = array();
 
         foreach ($lista as $item) {
-            $text = '';
             $doc = explode('-', $item->clave);
             if ($doc[0] == 'FAC') {
                 $comprob = $em->getRepository('ComprasBundle:Factura')->find($doc[1]);
@@ -156,8 +154,8 @@ class UtilsController extends Controller {
                 $tipo = ' DEB N°';
             }
             //$factura = $em->getRepository('ComprasBundle:Factura')->find($item->id);
-            $text = $tipo . $comprob->getNroComprobante() . ' $' . $item->monto . ' ';
-            $comprobantes[] = $text;
+            //$text = $tipo . $comprob->getNroComprobante() . ' $' . $item->monto . ' ';
+            $comprobantes[] = array( 'concepto' => $tipo . $comprob->getNroComprobante(), 'monto' =>  $item->monto );
         }
         return $comprobantes;
     }

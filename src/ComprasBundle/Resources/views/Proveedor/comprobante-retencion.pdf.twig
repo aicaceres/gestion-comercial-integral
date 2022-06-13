@@ -1,8 +1,0 @@
-<pdf>
-    {% if pago.montoRetencionRentas > 0 %}
-        {% include "ComprasBundle:Proveedor:comprobante-retencion-rentas.pdf.twig" %}
-    {% endif %}
-    {% if pago.retencionGanancias > 0 %}
-        {% include "ComprasBundle:Proveedor:comprobante-retencion-ganancias.pdf.twig" %}
-    {% endif %}
-</pdf>

@@ -46,18 +46,15 @@
                 <div id="facturas"></div>
             </div>
             <div style="display: inline-block; width: 10%">
-                <label for="comprasbundle_pagoproveedor_retencionGanancias" class="required">DGI:</label>
+                <label for="comprasbundle_pagoproveedor_retencionGanancias" class="required">DGI: <span id="lblGanancia"></label>
                 <strong class="simbolo">$</strong>
                 {{ form_widget(form.retencionGanancias,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Ganancias'}}) }}
             </div>
             <div style="display: inline-block; width: 13%">
-                <label for="comprasbundle_pagoproveedor_retencionRentas" class="required">DGR
-                    <span id="retrentas"></span>:
-                </label>
+                <label for="comprasbundle_pagoproveedor_retencionRentas" class="required">DGR: [ {{ lblRentas }} ] </label>
                 <strong class="simbolo">$</strong>
                 {{ form_widget(form.montoRentas,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Rentas'}}) }}
             </div>
-
         </fieldset>
         <fieldset class="fields" >
             <div style="display: inline-block; width: 75%">
@@ -153,32 +150,18 @@ jQuery(function ($) {
 
 
     $('#comprasbundle_pagoproveedor_proveedor').on('change',function(){
+        let provId = $(this).val();
         $.ajax({
             url: "{{ path("compras_proveedor_pagos_getfacturas") }}",
-            async: true,
-            data: 'prov='+ $(this).val() ,
+            //async: true,
+            data: 'prov='+ provId ,
             success: function(data) {
-                $('#facturas').html(data.partial);
-                $('#comprasbundle_pagoproveedor_retencionRentas').val(data.retrentas);
-                $('#comprasbundle_pagoproveedor_adicionalRentas').val(data.adicrentas);
-                $('#comprasbundle_pagoproveedor_baseImponibleRentas').val(data.baseImponible);
-                $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.retganancias.toFixed(3));
-                adicrentas = ( data.adicrentas>0 ) ? data.adicrentas + '%' : '';
-                retrentas = ( data.retrentas>0 ) ? data.retrentas + '% + ' + adicrentas : '';
-                $('#retrentas').html( retrentas )
+                $('#facturas').html(data);
                 $('#selectComprobantes').select2();
-                $('#selectComprobantes').on('change',function(event, data) {
-                    var total = totalRentas = 0;
-                    $(this).find(":selected").each(function(){
-                        var rentasitem = parseFloat( $(this).data('rentas') );
-                        var totitem = parseFloat( $(this).data('total') );
-                        total = total + totitem;
-                        totalRentas = totalRentas + rentasitem;
-                    });
-                    $('#comprasbundle_pagoproveedor_montoRentas').val( totalRentas.toFixed(3));
-                    $('#comprasbundle_pagoproveedor_importe').val( total.toFixed(3));
-                    actualizarPagos();
-                 });
+                $('#selectComprobantes').on('change', function(){
+                    let selected = $(this).val();
+                    changeComprobantes( provId, selected )
+                });
                 $('#selectComprobantes').select2('focus');
             },
             error: function() {
@@ -408,6 +391,28 @@ function cargarCheques(objTd){
             $('#linkAddPago').focus();
         });
     }
+
+    function changeComprobantes(provId,selected){
+        data = { 'provId':provId, 'selected': selected };
+        $.ajax({
+            url: "{{ path("compras_proveedor_pagos_getMontoAPagar") }}",
+            data: data ,
+            success: function(data) {
+                $('#comprasbundle_pagoproveedor_baseImponibleRentas').val(data.baseImponible);
+                $('#comprasbundle_pagoproveedor_retencionRentas').val(data.rentas);
+                $('#comprasbundle_pagoproveedor_adicionalRentas').val(data.adicional);
+                $('#comprasbundle_pagoproveedor_montoRentas').val( (data.rentas + data.adicional).toFixed(3));
+                $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.ganancias.toFixed(3));
+                $('#comprasbundle_pagoproveedor_importe').val(data.total.toFixed(3));
+                $('#lblGanancia').html( (data.porcGanancia) ? '[ ' + data.porcGanancia.toFixed(2)  + '% ]' : '' );
+                actualizarPagos();
+            },
+            error: function() {
+                alert('No se puede realizar la operación en este momento');
+            }
+       });
+    }
+
 
     function actualizarPagos() {
         total = checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );

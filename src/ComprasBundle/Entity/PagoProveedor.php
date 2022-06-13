@@ -158,6 +158,29 @@ class PagoProveedor
         $adicional = $retencion * ( $this->getAdicionalRentas() / 100 );
         return $retencion + $adicional;
     }
+    public function getAlicuotaGananciasTxt(){
+        return (($this->getRetencionGanancias() / $this->getBaseImponibleRentas()) * 100) .'%';
+    }
+
+    public function getTextoPagosParaOrdenPago(){
+        $txt = '';
+        foreach( $this->cobroDetalles as $det){
+            $aux = ($txt) ? ' - ' : '';
+            $monto = $det->getMoneda()->getSimbolo() . ' ' .  $det->getImporte();
+            switch ($det->getTipoPago()){
+                case 'EFECTIVO':
+                    $txt = $txt . $aux . 'EFECTIVO: '. $monto;
+                    break;
+                case 'CHEQUE':
+                    $txt = $txt . $aux . 'CHEQUE: '. $monto;
+                    break;
+                case 'TARJETA':
+                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() .': ' . $monto;
+                    break;
+            }
+        }
+        return $txt;
+    }
 
     /**
      * Get id
