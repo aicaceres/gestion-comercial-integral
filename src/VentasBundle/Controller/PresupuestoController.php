@@ -302,9 +302,13 @@ class PresupuestoController extends Controller {
                     if ($stock) {
                         $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
                     }else{
-                        $em->getConnection()->rollback();
-                        $this->addFlash('error', 'No se ha podido anular el presupuesto');
-                        return $this->redirect($this->generateUrl('ventas_presupuesto_show', array('id' => $entity->getId())));
+                        $stock = new Stock();
+                        $stock->setProducto($detalle->getProducto());
+                        $stock->setDeposito($deposito);
+                        $stock->setCantidad($detalle->getCantidad());
+                        //$em->getConnection()->rollback();
+                        //$this->addFlash('error', 'No se ha podido anular el presupuesto');
+                        //return $this->redirect($this->generateUrl('ventas_presupuesto_show', array('id' => $entity->getId())));
                     }
                     $em->persist($stock);
 

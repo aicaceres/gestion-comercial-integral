@@ -46,12 +46,12 @@
                 <div id="facturas"></div>
             </div>
             <div style="display: inline-block; width: 10%">
-                <label for="comprasbundle_pagoproveedor_retencionGanancias" class="required">DGI: <span id="lblGanancia"></label>
+                <label for="comprasbundle_pagoproveedor_montoGanancias" class="required">DGI: <span id="lblGanancia"></label>
                 <strong class="simbolo">$</strong>
-                {{ form_widget(form.retencionGanancias,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Ganancias'}}) }}
+                {{ form_widget(form.montoGanancias,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Ganancias'}}) }}
             </div>
             <div style="display: inline-block; width: 13%">
-                <label for="comprasbundle_pagoproveedor_retencionRentas" class="required">DGR: [ {{ lblRentas }} ] </label>
+                <label for="comprasbundle_pagoproveedor_retencionRentas" class="required">DGR: [ <span id="lblrentas">{{ lblRentas }}</span> ] </label>
                 <strong class="simbolo">$</strong>
                 {{ form_widget(form.montoRentas,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Rentas'}}) }}
             </div>
@@ -69,7 +69,7 @@
         </fieldset>
 
         <fieldset class="detalle_pago" >
-            <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
+            <div style="display:inline-block; width:95%; margin:10px 0;" >
                 <h5>DETALLE DEL PAGO:</h5>
                 <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
                     {% set prototype = form.cobroDetalles.vars.prototype %}
@@ -399,12 +399,16 @@ function cargarCheques(objTd){
             data: data ,
             success: function(data) {
                 $('#comprasbundle_pagoproveedor_baseImponibleRentas').val(data.baseImponible);
-                $('#comprasbundle_pagoproveedor_retencionRentas').val(data.rentas);
-                $('#comprasbundle_pagoproveedor_adicionalRentas').val(data.adicional);
+                $('#comprasbundle_pagoproveedor_retencionRentas').val(data.porcRentas);
+                $('#comprasbundle_pagoproveedor_adicionalRentas').val(data.porcAdicional);
+                // actualizar label con porcentajes dgr
+                $('#lblrentas').html( data.lblrentas );
+
                 $('#comprasbundle_pagoproveedor_montoRentas').val( (data.rentas + data.adicional).toFixed(3));
-                $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.ganancias.toFixed(3));
+                $('#comprasbundle_pagoproveedor_montoGanancias').val(data.ganancias.toFixed(3));
+                $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.porcGanancia.toFixed(3));
                 $('#comprasbundle_pagoproveedor_importe').val(data.total.toFixed(3));
-                $('#lblGanancia').html( (data.porcGanancia) ? '[ ' + data.porcGanancia.toFixed(2)  + '% ]' : '' );
+                $('#lblGanancia').html( '[ ' + data.porcGanancia.toFixed(2)  + '% ]' );
                 actualizarPagos();
             },
             error: function() {

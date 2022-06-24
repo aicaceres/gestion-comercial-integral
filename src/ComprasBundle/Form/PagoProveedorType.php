@@ -32,7 +32,8 @@ class PagoProveedorType extends AbstractType
             ->add('baseImponibleRentas','hidden')
             ->add('retencionRentas','hidden')
             ->add('adicionalRentas','hidden')
-            ->add('retencionGanancias',null,array('required' =>false))
+            ->add('retencionGanancias','hidden')
+            ->add('montoGanancias',null,array('mapped'=>false))
             ->add('cotizacion','hidden')
             ->add('cobroDetalles', 'collection', array(
                     'type' => new CobroDetalleType(),

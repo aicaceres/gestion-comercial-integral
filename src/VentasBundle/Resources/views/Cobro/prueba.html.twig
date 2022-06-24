@@ -261,7 +261,7 @@
                 driver.baudios = 9600;
                 try {
                     driver.iniciarTrabajo();
-                    driver.ultimoComprobante(tcFactura_B);
+                    driver.ultimoComprobante(tcFactura_A);
                     driver.finalizarTrabajo();
                     alert(driver.response.ultimoNumero);
                 } catch (e){

@@ -179,7 +179,13 @@
 <fieldset style="padding:10px 0;margin:10px 0 10px 0; width: 100%; background-color:khaki; text-align:center;">
 
         <div style="display:inline-block; width: 40%;">
-            <label>{{ entity.facturaElectronica.comprobanteTxt }} | Cae: {{ entity.facturaElectronica.cae }} | VtoCae: {{ entity.facturaElectronica.caeVto|date('d-m-Y') }} </label>
+            <label>{{ entity.facturaElectronica.comprobanteTxt }}
+                    {% if entity.facturaElectronica.tipoComprobante.valor == 'TICK-B' %}
+                        | Emisión: {{ entity.facturaElectronica.caeVto ?? entity.facturaElectronica.caeVto|date('d-m-Y') }}
+                    {% else %}
+                        | Cae: {{ entity.facturaElectronica.cae }} | VtoCae: {{ entity.facturaElectronica.caeVto ?? entity.facturaElectronica.caeVto|date('d-m-Y') }}
+                    {% endif %}
+            </label>
         </div>
 
     </fieldset>

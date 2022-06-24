@@ -10,7 +10,7 @@
             Desc./Rec. [<span class="descuentoRecargo">
             {{ venta.descuentoRecargo }}
             </span>%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
-            <span id="importeRecargo">{{ venta.totalDescuentoRecargo|number_format(3,'.',',') }}</span>.-
+            <span id="importeRecargo" data-tkimporte="{{venta.totalDescuentoRecargo}}">{{ venta.totalDescuentoRecargo|number_format(3,'.',',') }}</span>.-
         </th>
         <th id="ivaTd" style=" {% if not showiva %} display:none; {% endif %} width:16%">
         IVA: <span class="simbolo">{{simbolo}}</span>&nbsp;
@@ -44,11 +44,11 @@
     {% for item in venta.detalles %}
         <tr class="item" divdata="item_{{loop.index-1}}">
             <td class="ordTd">{{loop.index}}</td>
-            <td class="prodTd" style="text-align:left">
+            <td class="prodTd" data-tkcodigo="{{item.producto.codigo}}" style="text-align:left">
                 {{ item.nombreProducto }}
             </td>
-            <td class="cantTd"> {{ item.cantidad }}  {{item.producto.unidadmedida.nombre}}   </td>
-            <td data-valor="{{item.precio}}" class="precTd alignright valor"> {{ item.precioUnitarioItem|number_format(3,'.',',') }} </td>
+            <td class="cantTd" data-tkcantidad="{{ item.cantidad }}"> {{ item.cantidad }}  {{item.producto.unidadmedida.nombre}}   </td>
+            <td data-valor="{{item.precio}}" data-tkprecio="{{item.precioUnitarioItem}}" data-tkalicuota="{{item.alicuota}}" class="precTd alignright valor"> {{ item.precioUnitarioItem|number_format(3,'.',',') }} </td>
             <td data-valor="{{item.totalItem}}" class="itmSubtotalTd alignright valor">{{ item.totalItem|number_format(3,'.',',') }}
             </td>
         </tr>

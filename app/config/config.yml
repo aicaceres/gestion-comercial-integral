@@ -34,7 +34,11 @@ framework:
 twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
-    
+    globals:
+      ptovta_ifu_ticket: '%ptovta_ifu_ticket%'
+      modelo_tickeadora: '%modelo_tickeadora%'
+      puerto_tickeadora: '%puerto_tickeadora%'
+      baudios_tickeadora: '%baudios_tickeadora%'
 
 # Assetic Configuration
 assetic:
@@ -81,7 +85,7 @@ doctrine:
             softdeleteable:
               class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
               enabled: false
-              
+
 # Swiftmailer Configuration
 swiftmailer:
     transport: '%mailer_transport%'

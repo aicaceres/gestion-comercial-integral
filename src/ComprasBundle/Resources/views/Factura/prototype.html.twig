@@ -7,14 +7,14 @@
     </td>
     <td class="bulto">{{ form_widget(item.bulto) }} </td>
     <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }} </td>
-    <td class="precTd  alignright">        
+    <td class="precTd  alignright">
         <span tabIndex="-1">{{ form_widget(item.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
     </td>
     <td class="totalTd alignright"></td>
     <td class="delTd" style="text-align:center;"></td>
 </tr>
-<tr class="ccTr" style="display:none; background-color:gainsboro;">         
-      <td colspan="9">                     
+<tr class="ccTr" style="display:none; background-color:gainsboro;">
+      <td colspan="9">
           <div class="widgetbox" style="width:50%;margin:0 auto;">
             <div class="widgetcontent">
                 {{ form_errors(item.centroCostoDetalle) }}
@@ -24,22 +24,22 @@
                             <th>Centro de Costo</th>
                             <th style="width:30%">Monto</th>
                             <th style="width:5%">
-                                <a href="javascript:void(0)" class="addCC" title="Agregar otro centro de costo" tabIndex="-1"><img src="{{asset('assets/images/icons/add.png')}}" /></a>                                                        
+                                <a href="javascript:void(0)" class="addCC" title="Agregar otro centro de costo" tabIndex="-1"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
                             </th>
                         </tr>
                     </thead>
-                    <tbody class="holder"  data-index="{{item.centroCostoDetalle | length }}" 
+                    <tbody class="holder"  data-index="{{item.centroCostoDetalle | length }}"
                         data-prototype="{% filter escape %}{% include 'ComprasBundle:Factura:cc-prototype.html.twig' with {'cc':item.centroCostoDetalle.vars.prototype} %}{% endfilter %}">
-                        {% for cc in item.centroCostoDetalle %}                             
+                        {% for cc in item.centroCostoDetalle %}
                             <tr class="ccitem" style="height:30px;background-color: white" divdata="item_{{loop.index-1}}">
                                 <td class="unegTd">{{ form_widget(cc.centroCosto) }}</td>
-                                <td class="costoTd">{{ form_widget(cc.costo, { 'attr': {'class' : 'ccerror mediuminput' } }) }}</td>                            
-                                <td class="lnkTd"><a href="javascript:void(0)" class="delCC" title="Eliminar este elemento" tabIndex="-1"><img style="width:14px" src="{{asset('assets/images/icons/trash.png')}}" /></a></td>                                                                                                 
+                                <td class="costoTd">{{ form_widget(cc.costo, { 'attr': {'class' : 'ccerror mediuminput' } }) }}</td>
+                                <td class="lnkTd"><a href="javascript:void(0)" class="delCC" title="Eliminar este elemento" tabIndex="-1"><img style="width:14px" src="{{asset('assets/images/icons/trash.png')}}" /></a></td>
                             </tr>
-                        {% endfor %}           
+                        {% endfor %}
                     </tbody>
                 </table>
             </div><!--widgetcontent-->
         </div>
-      </td>          
+      </td>
 </tr>

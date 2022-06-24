@@ -245,11 +245,19 @@ class NotaDebCred {
     }
 
     // control provisorio si se puede eliminar
-    // si es credito y no modificó el stock
+    // si es credito y no modificó el stock o alguna de sus facturas asociadas ya tiene pagos
     // si es debito y estado es PENDIENTE
     public function eliminable() {
-        if ($this->getSigno() == '-' && !$this->getModificaStock()) {
-            return TRUE;
+        if ($this->getSigno() == '-') {
+            // si modifo stock no es eliminable
+            if( $this->getModificaStock() ) return FALSE;
+            // verificar facturas con pagos
+            foreach( $this->getFacturas() as $fact){
+                if( $fact->getEstado() == 'PAGADO' || $fact->getEstado() == 'PAGO PARCIAL' ){
+                    return false;
+                }
+            }
+            return true;
         }
         if ($this->getSigno() == '+' && $this->getEstado() == 'PENDIENTE') {
             return TRUE;

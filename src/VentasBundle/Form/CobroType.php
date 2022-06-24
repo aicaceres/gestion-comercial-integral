@@ -42,6 +42,8 @@ class CobroType extends AbstractType {
                     'attr' => array(
                         'class' => 'row item'
                 )))
+                    // para ticket
+                ->add('nroTicket','hidden',array('mapped'=>false))
         ;
         if ($type == 'new') {
             // en render de nueva venta solo traer cliente por defecto

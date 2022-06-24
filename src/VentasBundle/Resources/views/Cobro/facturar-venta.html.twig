@@ -109,7 +109,7 @@
             <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar disabled" disabled="disabled" id="guardar" type="button">Guardar y <span>Facturar</span></button>
-                <a class="cancelar" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
+                <a class="cancelar" onclick="return confirm('Confirma cancelar el cobro?')" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
             </div>
         </fieldset>
 
@@ -130,6 +130,7 @@
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
     let datosCompletos = false;
@@ -346,10 +347,114 @@ jQuery(function ($) {
                 return false;
             }
         }
+
        if( !confirm('Comfirma la registración del pago y la emisión de la factura?')){
             return false;
         }
-        $('#ventasbundle_cobro').submit();
+
+        if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' && '{{ entity.formaPago.contado }}' ){
+            modelo = '{{modelo_tickeadora}}'
+            puerto = '{{puerto_tickeadora}}'
+            baudios = '{{baudios_tickeadora}}'
+
+            // verificar si falta configuracion
+            if( !modelo || !puerto || !baudios ){
+                alert( ' No se pueden emitir tickets en este momento. Faltan configuraciones de la impresora!');
+                return false;
+            }
+
+            // si es por tickeadora lanzar emision de ticket
+            var driver = new Driver();
+            driver.host = "localhost" //Cambiar por el ip de la maquina de la fiscal si es remota
+            driver.modelo = modelo;
+            driver.puerto = puerto;
+            driver.baudios = baudios;
+            try {
+                    driver.iniciarTrabajo();
+                    driver.cancelarComprobante();
+                    // DATOS CLIENTE
+                    if( $('#ventasbundle_cobro_nroDocumentoCliente').val() ){
+                        tipoDoc = $('#ventasbundle_cobro_tipoDocumentoCliente option:selected').html();
+                        if( tipoDoc != 'DNI' ){
+                            alert('Los tipos de documento válidos para ticket es DNI');
+                            return false;
+                        }
+
+                        driver.datosCliente(
+                            $('#ventasbundle_cobro_nombreCliente').val() ? $('#ventasbundle_cobro_nombreCliente').val() : 'CONSUMIDOR FINAL',
+                            tdDNI,
+                            $('#ventasbundle_cobro_nroDocumentoCliente').val() ,
+                            riConsumidorFinal,
+                            " ");
+                    }
+               //   Si es nota de credito enviar la factura de referencia
+               //   driver.documentoDeReferencia2g(tcFactura_A, "0001-00000023")
+                    driver.abrirComprobante(tcFactura_B);
+                    //driver.imprimirTextoFiscal("Texto fiscal");
+
+                    // DETALLE
+                    $('.detalle-venta tbody tr').each(function(){
+                        descripcion = $(this).find('td.prodTd').html().trim();
+                        codigo = $(this).find('td.prodTd').data('tkcodigo');
+                        cantidad = $(this).find('td.cantTd').data('tkcantidad');
+                        precio = $(this).find('td.precTd').data('tkprecio');
+                        alicuota = $(this).find('td.precTd').data('tkalicuota');
+// descripcion, cantidad, precio, iva, impuestosInternos,g2CondicionIVA, g2TipoImpuestoInterno, g2UnidadReferencia, g2CodigoProducto, g2CodigoInterno, g2UnidadMedida
+                        driver.imprimirItem2g(
+                            descripcion,
+                            cantidad,
+                            precio,
+                            alicuota,
+                            0,
+                            Gravado,
+                            tiFijo,
+                            1,
+                            codigo,
+                            "",
+                            Unidad);
+                    });
+                    // DESC/REC
+                    montoDescuentoGeneral = parseFloat( $('#importeRecargo').data('tkimporte') ) * -1;
+                    descDescuentoGeneral = $('.descuentoRecargo').html().trim() + ' %';
+                    driver.imprimirDescuentoGeneral(descDescuentoGeneral, montoDescuentoGeneral);
+                    // PAGOS - recorrer tabla-pagos
+                    $('.tabla-pagos tbody tr').each(function(){
+                        tipoPago = $(this).find('[id*="_tipoPago"]').val();
+                        monto = parseFloat( $(this).find('[id*="_importe"]').val() );
+                        cuotas = 0;
+                        adicional = '';
+                        switch(tipoPago) {
+                            case 'EFECTIVO':
+                                formaPago = Efectivo;
+                                break;
+                            case 'CHEQUE':
+                                formaPago = Cheque;
+                                break;
+                            case 'TARJETA':
+                                formaPago = TarjetaDeCredito;
+                                cuotas =  $(this).find('[id*="_datosTarjeta_cuota"]').val();
+                                adicional = $(this).find('[id*="_datosTarjeta_tarjeta"] option:selected').html();
+                                break;
+                            }
+//descripcion, monto, g2DescripcionAdicional, g2CodigoFormaPago, g2Cuotas,g2Cupones, g2Referencia
+                        driver.imprimirPago2g(tipoPago, monto, adicional, formaPago, cuotas, "", "");
+                    });
+                    driver.cerrarComprobante();
+                    driver.finalizarTrabajo();
+
+                    //  nro comprobante emitido
+                    driver.iniciarTrabajo();
+                    driver.ultimoComprobante(tcFactura_B);
+                    driver.finalizarTrabajo();
+                    $('#ventasbundle_cobro_nroTicket').val(driver.response.ultimoNumero);
+
+                    //registración
+                    $('#ventasbundle_cobro').submit();
+                } catch (e){
+                    alert(e);
+                }
+        }
+
     })
 });
 

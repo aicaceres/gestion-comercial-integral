@@ -14,7 +14,6 @@ use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\Cobro;
 use VentasBundle\Form\CobroType;
 use VentasBundle\Entity\CobroDetalle;
-use VentasBundle\Entity\CobroDetalleTarjeta;
 use VentasBundle\Entity\FacturaElectronica;
 
 use VentasBundle\Afip\src\Afip;
@@ -132,6 +131,8 @@ class CobroController extends Controller
      * @Template("VentasBundle:Cobro:new.html.twig")
      */
     public function createAction(Request $request) {
+        $datos = $request->get('ventasbundle_cobro');
+        $nroTicketB = $datos['nroTicket'];
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
@@ -158,6 +159,8 @@ class CobroController extends Controller
             $em->getConnection()->beginTransaction();
             try {
                 $facturaElectronica = new FacturaElectronica();
+// REVISAR COMO MODIFICAR PARA OPTIMIZAR CUANDO SE IMPRIMIÓ TICKET.
+
 
                 // armar datos para webservice
                 $docTipo = 99 ;
@@ -268,7 +271,7 @@ class CobroController extends Controller
                     $tipoComprobante = 'FAC-A';
                 }
                 if( $efectivo && $catIva =='C' && $entity->getMoneda()->getCodigoAfip()=='PES' ){
-                    $ptovta =$this->getParameter('ptovta_ws_ticket');
+                    $ptovta =$this->getParameter('ptovta_ifu_ticket');
                     $tipoComprobante = 'TICK-B';
                 }
 
@@ -314,11 +317,10 @@ class CobroController extends Controller
                     $comprobante = $entity->getFacturaElectronica()->getComprobanteTxt();
                 }else{
                     /** EMISIÓN A TIQUEADORA */
-                    //$afip = new Afip(array('CUIT'=> $this->getParameter('cuit_afip')));
-
-                    $facturaElectronica->setCae('CAE');
-                    $facturaElectronica->setCaeVto('2022-01-01');
-                    $facturaElectronica->setNroComprobante('voucher_number');
+                    $hoy = new \DateTime();
+                    $facturaElectronica->setCae('');
+                    $facturaElectronica->setCaeVto($hoy->format('Y-m-d'));
+                    $facturaElectronica->setNroComprobante($nroTicketB);
                     $comprobante = 'TICK-B ';
                 }
                 //$entity->setIva($impIVA);

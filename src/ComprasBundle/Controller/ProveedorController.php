@@ -839,7 +839,7 @@ class ProveedorController extends Controller {
                     );
                 if($retencionGanancia){
                     $retencionGanancia->setAcumuladoTotal( $retencionGanancia->getAcumuladoTotal() - $entity->getBaseImponibleRentas() );
-                    $retencionGanancia->setAcumuladoRetencion( $retencionGanancia->getAcumuladoRetencion() - $entity->getRetencionGanancias() );
+                    $retencionGanancia->setAcumuladoRetencion( $retencionGanancia->getAcumuladoRetencion() - $entity->getMontoGanancias() );
                     $em->persist($retencionGanancia);
                 }
             }
@@ -890,7 +890,10 @@ class ProveedorController extends Controller {
         $datos = array(
             'baseImponible'=> 0,
             'rentas'=> 0,
+            'porcRentas'=> 0,
             'adicional'=> 0,
+            'porcAdicional'=> 0,
+            'lblrentas' => '',
             'porcGanancia'=> 0,
             'ganancias'=> 0,
             'total'=> 0);
@@ -909,6 +912,8 @@ class ProveedorController extends Controller {
                 $datos['baseImponible'] += $neto;
                 $datos['total'] += $obj->getTotal();
                 // calcular retencion rentas
+                $datos['porcRentas'] = $porcRentas['porcRetRentas'];
+                $datos['porcAdicional'] = $porcRentas['porcAdicRentas'];
                 $retrentas = $porcRentas['porcRetRentas'];
                 $adicrentas = $porcRentas['porcAdicRentas'];
                 if( $retrentas>0 ){
@@ -916,7 +921,12 @@ class ProveedorController extends Controller {
                         $datos['rentas'] = $neto * ( $retrentas / 100 );
                         $datos['adicional'] = $datos['rentas'] * ( $adicrentas / 100 );
                         $montoRetRentas = $datos['rentas'] + $datos['adicional'];
+                    }else{
+                        // setear en cero porque no se aplica retención por ser menor al mínimo
+                        $montoRetRentas = $datos['porcRentas'] = $datos['porcAdicional'] = 0;
                     }
+                    $aux = ($datos['porcAdicional']>0) ? ' + '.$datos['porcAdicional'].'%' : '';
+                    $datos['lblrentas'] = $datos['porcRentas'].'%'. $aux;
                 }
             }
             // calcular retencion Ganancias
@@ -956,8 +966,8 @@ class ProveedorController extends Controller {
 
             }
             // total a pagar menos las retenciones
+            $datos['porcGanancia'] = ($datos['ganancias'] == 0) ? 0 : $datos['porcGanancia'] ;
             $datos['total'] = $datos['total'] - $montoRetRentas - $datos['ganancias'];
-            // $porcGanancias = $this->getPorcentajeGanancias($id, $monto, $em );
         }
         return new JsonResponse( $datos );
     }

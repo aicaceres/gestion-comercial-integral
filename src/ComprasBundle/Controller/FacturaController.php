@@ -439,6 +439,8 @@ class FacturaController extends Controller {
                 $item->setCantidadxBulto($detalle->getCantidadxBulto());
                 $item->setProducto($detalle->getProducto());
                 $item->setPrecio($detalle->getPrecio());
+                $iva = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByValor($detalle->getProducto()->getIva());
+                $item->setAfipAlicuota($iva);
                 $factura->addDetalle($item);
             }
         }

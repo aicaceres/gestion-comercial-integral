@@ -159,7 +159,10 @@ class PagoProveedor
         return $retencion + $adicional;
     }
     public function getAlicuotaGananciasTxt(){
-        return (($this->getRetencionGanancias() / $this->getBaseImponibleRentas()) * 100) .'%';
+        return $this->getRetencionGanancias() .'%';
+    }
+    public function getMontoGanancias(){
+        return $this->getBaseImponibleRentas() * ( $this->getRetencionGanancias() / 100 );
     }
 
     public function getTextoPagosParaOrdenPago(){

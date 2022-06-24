@@ -87,7 +87,7 @@
                             <td class="ordTd" data-id="{{ det.vars.data.id }}"></td>
                             <td class="prodTd" data-iva="{{det.vars.data.producto.iva}}">{{ form_widget(det.producto) }}</td>
                             <td class="ivaTd">{{ form_widget(det.afipAlicuota) }}</td>
-                            <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
+                            <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'10','style':'text-align:right;'} }) }}
                               <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
                             </td>
                             <td class="bulto">{{ form_widget(det.bulto) }}</td>
@@ -534,8 +534,8 @@ function changeProducto(producto){
                    }
                    trIndex.find('.bulto input').prop('checked', data.bulto);
                    jQuery.uniform.update();
-                   trIndex.find('.cantTd input').focus();
                    actualizaTotales();
+                   trIndex.find('.cantTd input').select();
                }
            });
     }

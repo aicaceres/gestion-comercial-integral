@@ -46,8 +46,9 @@
             </div>
             {% if entity.retencionGanancias > 0 %}
             <div style="display: inline-block; width: 10%">
-                <strong>DGI: {{ entity.moneda.simbolo }} </strong>
-                <input class="number mediuminput" disabled="disabled" value="{{ entity.retencionGanancias|number_format(2,'.',',') }}">
+                <label>DGI: {{ entity.alicuotaGananciasTxt }}</label>
+                <strong> {{ entity.moneda.simbolo }} </strong>
+                <input class="number mediuminput" disabled="disabled" value="{{ entity.montoGanancias|number_format(2,'.',',') }}">
             </div>
             {% endif %}
             {% if entity.montoRetencionRentas > 0 %}
