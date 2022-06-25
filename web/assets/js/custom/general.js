@@ -27,7 +27,7 @@ jQuery(function($){
 });
 
 
-let validlogin=false;
+var validlogin=false;
 // lanza popup para login de ventas
 function checkLoginVentas(url_login,referer) {
     jQuery('#popup').html('');

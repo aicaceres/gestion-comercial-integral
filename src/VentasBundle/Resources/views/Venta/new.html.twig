@@ -97,13 +97,12 @@
 <script type="text/javascript" src="{{ asset('assets/js/custom/ventas.js') }}"></script>
 <script type="text/javascript">
 let checklogin = "{{ app.session.get('checkrequired') }}";
-console.log(checklogin);
+let idVenta = '{{ entity.id }}';
 if( checklogin == '1' ){
     checkLoginVentas("{{ path('ventas_login')}}" ,"{{ path('ventas_venta')}}" );
 }
 jQuery(function ($) {
     $(window).on('load', function () {
-
         // confirm on submit
         $('#ventasbundle_venta').on('submit', function(){
             /*if( !validlogin ){
@@ -114,7 +113,11 @@ jQuery(function ($) {
             }*/
             // controlar que haya items cargados
             let txt = 'VENTA:   #'+$('#ventasbundle_venta_nroOperacion').val();
-            txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
+            if(idVenta){
+                txt = txt + '\n\n' + 'CONFIRMA MODIFICAR LA VENTA?' + '\n' +'Se realizará el ajuste de los productos en el stock!';
+            }else{
+                txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
+            }
             if( $('tbody tr.item').length > 0 ){
                 if (!confirm(txt)) {
                     return false;

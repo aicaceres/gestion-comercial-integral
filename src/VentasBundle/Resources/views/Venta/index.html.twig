@@ -66,7 +66,7 @@
                 <td>{{entity.createdBy.username|upper }}</td>
                 {% endif %}
                 <td class="buttons">
-                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') and false %}
+                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') and entity.estado=='PENDIENTE' %}
                     <a href="{{ path('ventas_venta_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar"></a>
                     {% endif %}
                      <a href="{{ path('ventas_venta_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Venta"></a>

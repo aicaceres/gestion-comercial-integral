@@ -146,8 +146,9 @@ class VentaController extends Controller
                 $em->flush();
 
                 // Descuento de stock
-                $deposito = $entity->getDeposito();
-                foreach ($entity->getDetalles() as $detalle){
+                $this->registrarMovimientoStock($entity->getId(), $entity->getDeposito(), $entity->getDetalles(), '-', $em);
+
+                /*foreach ($entity->getDetalles() as $detalle){
                     $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
                     if ($stock) {
                         $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
@@ -171,7 +172,7 @@ class VentaController extends Controller
                     $em->persist($movim);
                     $em->flush();
 
-                }
+                }*/
 
                 $em->getConnection()->commit();
                 //$this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
@@ -238,8 +239,8 @@ class VentaController extends Controller
      */
     private function createEditForm(Venta $entity, $type) {
         $form = $this->createForm(new VentaType(), $entity, array(
-            'action' => $this->generateUrl('ventas_venta_create'),
-            'method' => 'POST',
+            'action' => $this->generateUrl('ventas_venta_update', array('id' => $entity->getId())),
+            'method' => 'PUT',
             'attr' => array('type'=>$type) ,
         ));
         return $form;
@@ -257,18 +258,90 @@ class VentaController extends Controller
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra la Venta.');
         }
+        $depositoAnterior = $entity->getDeposito();
+        $detalleAnterior = clone($entity->getDetalles()) ;
 
-        $editForm = $this->createEditForm($entity,'update');
+        $editForm = $this->createEditForm($entity,'create');
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
-            $em->flush();
-            $this->addFlash('success', 'Los datos fueron modificados con éxito!');
-            return $this->redirect($this->generateUrl('ventas_venta'));
+            $em->getConnection()->beginTransaction();
+            try {
+                // realizar los ajustes en el stock - deshacer el movimiento y rehacer
+                $depositoNuevo = $entity->getDeposito();
+                $detalleNuevo = $entity->getDetalles();
+                $difDetalle =  strcmp( $this->getDetalleJson($detalleAnterior) , $this->getDetalleJson($detalleNuevo));
+                if($difDetalle || ($depositoAnterior->getId()!=$depositoNuevo->getId()) ){
+                    // reingresar anteriores articulos al stock
+                    $res = $this->registrarMovimientoStock($entity->getId(), $depositoAnterior, $detalleAnterior, '+', $em);
+                    if($res){
+                        // descontar los nuevos
+                        $res = $this->registrarMovimientoStock($entity->getId(), $depositoNuevo, $detalleNuevo, '-', $em);
+                    }
+                    if(!$res){
+                        throw $this->createNotFoundException('No se realizó el ajuste en el stock.');
+                    }
+                }
+                $em->flush();
+                $em->getConnection()->commit();
+                $this->addFlash('success', 'Los datos fueron modificados con éxito!');
+                return $this->redirect($this->generateUrl('ventas_venta'));
+
+            }
+                catch (\Exception $ex) {
+                    $this->addFlash('error', $ex->getMessage());
+                    $em->getConnection()->rollback();
+            }
+
         }
         return $this->render('VentasBundle:Venta:new.html.twig', array(
                     'entity' => $entity,
                     'form' => $editForm->createView(),
         ));
+    }
+
+    private function getDetalleJson($detalle){
+        // devuelve el string del detalle para comparacion
+        $array = [];
+        foreach ($detalle as $item){
+            $array[] = array( 'prod' => $item->getProducto()->getId(), 'cant' => round($item->getCantidad(),2)  );
+        }
+        return json_encode($array);
+    }
+
+    // registrar ingresos y egresos de stock
+    private function registrarMovimientoStock($ventaId, $deposito, $detalles, $signo, $em){
+        $hoy = new \DateTime();
+        try{
+            foreach ($detalles as $detalle){
+                    $cantidad = ($signo=='-') ? $detalle->getCantidad() *-1 : $detalle->getCantidad();
+                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                    if ($stock) {
+                        $stock->setCantidad($stock->getCantidad() + $cantidad);
+                    }else {
+                        $stock = new Stock();
+                        $stock->setProducto($detalle->getProducto());
+                        $stock->setDeposito($deposito);
+                        $stock->setCantidad( 0 + $cantidad);
+                    }
+                    $em->persist($stock);
+
+    // Cargar movimiento
+                    $movim = new StockMovimiento();
+                    $movim->setFecha($hoy);
+                    $movim->setTipo('ventas_venta');
+                    $movim->setSigno($signo);
+                    $movim->setMovimiento($ventaId);
+                    $movim->setProducto($detalle->getProducto());
+                    $movim->setCantidad($detalle->getCantidad());
+                    $movim->setDeposito($deposito);
+                    $em->persist($movim);
+                    $em->flush();
+
+                }
+        }catch (\Exception $ex) {
+            return $ex->getMessage();
+        }
+        return true;
     }
 
 
