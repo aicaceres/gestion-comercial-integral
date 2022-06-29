@@ -2194,7 +2194,7 @@ a.desactivado{ cursor: not-allowed !important ; opacity: 0.5;}
 	margin-top: 10px; text-align: right; padding: 7px 20px; -moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; border: 0;
 	border: 1px solid #E50000; cursor: pointer; font-weight: bold; color: #fff; display:inline-block;
 }
-.actionbutton a.editar:hover,.actionbutton button.guardar:hover{ background: #485B79; border: 1px solid #3f526f;; }
+.actionbutton a.editar:hover,.actionbutton button.guardar:hover{ background: blue; border: 1px solid #3f526f;; }
 .actionbutton a.cancelar { background: #eee; color: #666; border: 1px solid #ddd; }
 .actionbutton a.cancelar:hover { background: #ddd; border: 1px solid #ccc; }
 /*.actionbutton .loading { margin: 0 10px; font-style: italic; color: #999; font-size: 11px; display: none; }

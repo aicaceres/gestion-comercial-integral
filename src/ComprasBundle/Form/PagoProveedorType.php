@@ -29,11 +29,12 @@ class PagoProveedorType extends AbstractType
                     'required' => true, 'label' => 'MONEDA: '
                 ))
             ->add('montoRentas',null,array('mapped'=>false))
+            ->add('montoGanancias',null,array('mapped'=>false))
+
             ->add('baseImponibleRentas','hidden')
             ->add('retencionRentas','hidden')
             ->add('adicionalRentas','hidden')
             ->add('retencionGanancias','hidden')
-            ->add('montoGanancias',null,array('mapped'=>false))
             ->add('cotizacion','hidden')
             ->add('cobroDetalles', 'collection', array(
                     'type' => new CobroDetalleType(),

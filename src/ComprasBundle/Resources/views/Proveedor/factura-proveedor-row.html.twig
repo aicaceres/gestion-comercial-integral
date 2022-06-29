@@ -2,7 +2,7 @@
     <option value=""></option>
     {% for dato in facturas %}
     <option value="{{dato.tipo}}-{{dato.id}}">
-        [ {{ dato.tipo ~ '-' ~ dato.letra ~ ' ' ~ dato.nroComprobante ~ ' | ' ~ dato.fecha|date('d-m-Y') ~ ' | $' ~ dato.total  }}  ]
+        [ {{ dato.tipo ~ '-' ~ dato.letra ~ ' ' ~ dato.nroComprobante ~ ' | ' ~ dato.fecha|date('d-m-Y') ~ ' | $' ~ dato.saldo  }} ]
     </option>
     {% endfor %}
 </select>

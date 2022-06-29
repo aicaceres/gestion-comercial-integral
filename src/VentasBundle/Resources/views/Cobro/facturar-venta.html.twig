@@ -108,7 +108,7 @@
         <fieldset>
             <br clear="all" />
             <div class="actionbutton">
-                <button class="guardar disabled" disabled="disabled" id="guardar" type="button">Guardar y <span>Facturar</span></button>
+                <button class="guardar disabled" disabled="disabled" id="guardar" type="button">Guardar y <span>Facturar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }}></button>
                 <a class="cancelar" onclick="return confirm('Confirma cancelar el cobro?')" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -353,6 +353,7 @@ jQuery(function ($) {
         }
 
         if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' && '{{ entity.formaPago.contado }}' ){
+            $('.loader_facturar').removeClass('hidden');
             modelo = '{{modelo_tickeadora}}'
             puerto = '{{puerto_tickeadora}}'
             baudios = '{{baudios_tickeadora}}'
@@ -453,6 +454,7 @@ jQuery(function ($) {
                 } catch (e){
                     alert(e);
                 }
+            $('.loader_facturar').addClass('hidden');
         }
 
     })

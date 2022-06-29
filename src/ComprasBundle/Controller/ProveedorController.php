@@ -510,12 +510,6 @@ class ProveedorController extends Controller {
         }
         $entities = $em->getRepository('ComprasBundle:PagoProveedor')->findPagosByCriteria($provId, $desde, $hasta);
         foreach ($entities as $pago) {
-            /* $text = '';
-              $conceptos = json_decode($pago->getConcepto());
-              foreach ($conceptos as $item) {
-              $factura = $em->getRepository('ComprasBundle:Factura')->find($item->id);
-              $text = $text.' [FAC '.$factura->getTipoFactura().$factura->getNroFactura().' $'.$item->monto.'] ';
-              } */
             $texto = UtilsController::textoListaFacturasAction($pago->getConcepto(), $em);
             $pago->setConceptoTxt(UtilsController::myTruncate($texto, 30));
             $pago->setConcepto($texto);
@@ -578,6 +572,7 @@ class ProveedorController extends Controller {
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'compras_proveedor_pagos');
         $msg = 'OK';
+        $formData = $request->get('comprasbundle_pagoproveedor');
         $entity = new PagoProveedor();
         $form = $this->pagosCreateCreateForm($entity);
         $form->handleRequest($request);
@@ -585,7 +580,7 @@ class ProveedorController extends Controller {
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
             $conceptos = explode(',', $request->get('txtconcepto'));
-            $baseImponibleGanancias = $request->get('baseImponibleGanancias');
+            //$baseImponibleGanancias = $request->get('baseImponibleGanancias');
             /*$arrayConceptos = explode(',', $request->get('txtconcepto'));
             $facturasImpagas = $em->getRepository('ComprasBundle:Proveedor')->getFacturasImpagas($entity->getProveedor()->getId());
             $arrayFacturas = array();
@@ -593,7 +588,7 @@ class ProveedorController extends Controller {
                 array_push($arrayFacturas, $fact['tipo'] . '-' . $fact['id']);
             }
             $conceptos = array_unique(array_merge($arrayConceptos, $arrayFacturas));*/
-            $total = round($entity->getTotal(), 3);
+
             $txtConcepto = array();
             try {
                 $em = $this->getDoctrine()->getManager();
@@ -636,7 +631,8 @@ class ProveedorController extends Controller {
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
                 }
-
+                //$totalPago = $totalPago + $formData['montoRentas'] + $formData['montoGanancias'];
+                $total = round($formData['importe'] + $formData['montoRentas'] + $formData['montoGanancias'], 3);
                 // Proceso de facturas - Ajustar los saldos
                 foreach ($conceptos as $item) {
                     $doc = explode('-', $item);
@@ -647,6 +643,7 @@ class ProveedorController extends Controller {
                         $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
                     }
                     $saldoComprob = round($comprob->getSaldo(), 3);
+                    // cancelar el comprobante
                     if ($comprob && $total > 0) {
                         if ($total >= $saldoComprob) {
                             //alcanza para cubrir el saldo
@@ -674,7 +671,7 @@ class ProveedorController extends Controller {
                 $entity->setPagoNro(sprintf("%06d", $equipo->getNroPagoCompra() + 1));
                 /* Guardar ultimo nro */
                 $equipo->setNroPagoCompra($equipo->getNroPagoCompra() + 1);
-
+                $baseImponibleGanancias = $formData['baseImponibleRentas'];
                 // si hay retencion ganancias guardar el acumulado
                 if( $entity->getRetencionGanancias()==0 ){
                     // buscar periodo
@@ -700,8 +697,8 @@ class ProveedorController extends Controller {
                 $urlretrentas = $entity->getRetencionRentas()>0 ? $this->generateUrl('print_comprobante_pago', array('id' => $entity->getId() )) : '';
 
                 $res = array( 'msg' => 'OK',
-                              'urlback' =>  $this->generateUrl('compras_proveedor_pagos', ['provId'=>$entity->getProveedor()->getId()]),
-                              'urlretrentas' => $urlretrentas
+                                'urlback' =>  $this->generateUrl('compras_proveedor_pagos', ['provId'=>$entity->getProveedor()->getId()]),
+                                'urlretrentas' => $urlretrentas
                             );
                 $em->getConnection()->commit();
 
@@ -897,8 +894,11 @@ class ProveedorController extends Controller {
             'porcGanancia'=> 0,
             'ganancias'=> 0,
             'total'=> 0);
+        $datos['porcRentas'] = $porcRentas['porcRetRentas'];
+        $datos['porcAdicional'] = $porcRentas['porcAdicRentas'];
         $selected = $request->get('selected');
         if( is_array($selected) ){
+            $montoRetRentas = 0;
             foreach ($selected as $sel){
                 $comp = explode("-", $sel);
                 if( $comp[0] == 'FAC' ){
@@ -907,28 +907,35 @@ class ProveedorController extends Controller {
                     $obj = $em->getRepository('ComprasBundle:NotaDebCred')->find($comp[1]);
                 }
                 $proveedor = $obj->getProveedor();
-                $montoRetRentas = 0;
-                $neto = $obj->getTotal() - $obj->getIva();
-                $datos['baseImponible'] += $neto;
-                $datos['total'] += $obj->getTotal();
+
+                //$neto = $obj->getTotal() - $obj->getIva();
+                $neto = $obj->getSaldoImponible();
+                $datos['total'] += $obj->getSaldo();
                 // calcular retencion rentas
-                $datos['porcRentas'] = $porcRentas['porcRetRentas'];
-                $datos['porcAdicional'] = $porcRentas['porcAdicRentas'];
                 $retrentas = $porcRentas['porcRetRentas'];
                 $adicrentas = $porcRentas['porcAdicRentas'];
                 if( $retrentas>0 ){
                     if( $neto >= floatval( $proveedor->getCategoriaRentas()->getMinimo())  ){
-                        $datos['rentas'] = $neto * ( $retrentas / 100 );
-                        $datos['adicional'] = $datos['rentas'] * ( $adicrentas / 100 );
-                        $montoRetRentas = $datos['rentas'] + $datos['adicional'];
+                        $datos['baseImponible'] += $neto;
+                        $rentas = $neto * ( $retrentas / 100 );
+                        $adicional = $rentas * ( $adicrentas / 100 );
+                        $monto = $rentas + $adicional;
                     }else{
                         // setear en cero porque no se aplica retención por ser menor al mínimo
-                        $montoRetRentas = $datos['porcRentas'] = $datos['porcAdicional'] = 0;
+                        $monto = $rentas = $adicional = 0;
                     }
-                    $aux = ($datos['porcAdicional']>0) ? ' + '.$datos['porcAdicional'].'%' : '';
-                    $datos['lblrentas'] = $datos['porcRentas'].'%'. $aux;
                 }
+                $datos['rentas'] += $rentas;
+                $datos['adicional'] += $adicional;
+                $montoRetRentas += $monto;
             }
+            // si montoRetRentas es 0 limpiar los porcentajes.
+            if( $montoRetRentas == 0 ){
+                $datos['porcRentas'] = $datos['porcAdicional'] = 0;
+            }
+            $aux = ($datos['porcAdicional']>0) ? ' + '.$datos['porcAdicional'].'%' : '';
+            $datos['lblrentas'] = $datos['porcRentas'].'%'. $aux;
+
             // calcular retencion Ganancias
             $hoy = new \DateTime();
             $fechaExcepcionGanancias = $proveedor->getVencCertExcepcionGanancias() ? $proveedor->getVencCertExcepcionGanancias()->format('Y-m-d') : null;

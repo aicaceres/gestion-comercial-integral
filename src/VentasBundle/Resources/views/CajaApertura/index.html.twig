@@ -11,7 +11,7 @@
 <div id="contentwrapper" class="contentwrapper">
 {# fomulario para filtros #}
     <form id="searchform" action="{{ path('ventas_apertura') }}" method="get" style="margin-bottom:10px">
-        <div style="display: none; margin-bottom: 10px;">
+        <div style="display:none; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Caja:</strong></label>
             <select class="uniformselect" id="selectCaja" name="cajaId">
@@ -26,6 +26,16 @@
             <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
             <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+        </div>
+<!-- Botones para cierres X y Z -->
+        <div style="display: inline-block;float:right;" >
+            <label><strong>TICKEADORA FISCAL:</strong></label>
+            <button type="button" class="stdbtn btn_yellow" onclick="cierreX()" style="padding:7px 20px">
+                Cierre X <img class="loader_cierrex hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
+            </button>
+            <button type="button" class="stdbtn btn_red" onclick="cierreZ()" style="padding:7px 20px">
+                Cierre Z <img class="loader_cierrez hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
+            </button>
         </div>
     </form>
 
@@ -80,7 +90,7 @@
                         <td class="hidden {% if apertura.diferencia<0 %} rojo {% endif %}" >{% if apertura.fechaCierre %}{{apertura.diferencia|number_format(2,'.',',')}}{% endif %}</td>
                         <td>{% if apertura.fechaCierre %}
                                 {% if  apertura.movimientos|length == 0  %}
-                                   <span style="font-size:8px"> SIN MOVIMIENTOS </span>
+                                    <span style="font-size:8px"> SIN MOVIMIENTOS </span>
                                 {% else %}
                                     <a target="_blank" href="{{ path('ventas_apertura_arqueo',{'id':apertura.id}) }}" title="Ver informe de Cierre" class="btn btnaction btn_folder"> <i class="icon-file"></i></a>
                                 {% endif %}
@@ -96,7 +106,11 @@
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
 <script type="text/javascript">
+var modelo = '{{modelo_tickeadora}}'
+var puerto = '{{puerto_tickeadora}}'
+var baudios = '{{baudios_tickeadora}}'
 jQuery(document).ready(function($){
     $('#selectCaja').change(function(){
         $('#searchform').submit();
@@ -114,5 +128,40 @@ jQuery(document).ready(function($){
         cierreCajaVentas(url)
     });
 });
+// cierres de tickeadora fiscal
+function cierreX(){
+   jQuery('.loader_cierrex').removeClass('hidden');
+    var driver = new Driver();
+    driver.modelo = modelo;
+    driver.puerto = puerto;
+    driver.baudios = baudios;
+
+    try {
+        driver.iniciarTrabajo();
+        driver.cierreX();
+        driver.finalizarTrabajo();
+        alert("Operación realizada con éxito!")
+    } catch (e){
+        alert(e);
+    }
+    jQuery('.loader_cierrex').addClass('hidden');
+}
+
+function cierreZ(){
+    jQuery('.loader_cierrez').removeClass('hidden');
+    var driver = new Driver();
+    driver.modelo = modelo;
+    driver.puerto = puerto;
+    driver.baudios = baudios;
+    try {
+        driver.iniciarTrabajo();
+        driver.cierreZ();
+        driver.finalizarTrabajo();
+        alert("Operación realizada con éxito!")
+    } catch (e){
+        alert(e);
+    }
+    jQuery('.loader_cierrez').addClass('hidden');
+}
 </script>
 {% endblock %}

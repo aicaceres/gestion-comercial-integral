@@ -68,7 +68,7 @@
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="3px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="3px">
                                 <span> {{pago.moneda.simbolo}}
-                                {{(pago.baseImponibleRentas)|number_format(2,'.',',')}}
+                                {{(pago.importe + pago.montoRetencionRentas + pago.montoGanancias)|number_format(2,'.',',')}}
                                 </span>
                             </td>
                         </tr>

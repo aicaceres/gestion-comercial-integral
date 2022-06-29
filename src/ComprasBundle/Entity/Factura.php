@@ -231,6 +231,14 @@ class Factura {
                 $this->getImpuestoInterno() + $this->getTmc();
     }
 
+    // calcula saldo imponible
+    public function getSaldoImponible(){
+        $imp = $this->getTotal() - $this->getIva();
+        $porc = ($imp * 100) / $this->getTotal();
+        $saldoImponible = ($this->getSaldo() * $porc) / 100;
+        return $saldoImponible;
+    }
+
     /**
      * Constructor
      */
