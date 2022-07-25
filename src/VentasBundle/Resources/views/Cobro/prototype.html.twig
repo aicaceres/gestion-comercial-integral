@@ -6,7 +6,7 @@
         {% set tarjeta = item.datosTarjeta %}
         <div style="margin:5px 0">
         {{ form_label(tarjeta.tarjeta,'TARJETA:') }}
-        {{ form_widget(tarjeta.tarjeta, { 'attr': {'class':'mininput'} }) }}
+        {{ form_widget(tarjeta.tarjeta, { 'attr': {'class':'mininput select2'} }) }}
         {{ form_label(tarjeta.numero, 'Número: ') }}
         {{ form_widget(tarjeta.numero, { 'attr': {'class':'mininput creditcard'} }) }}
         {{ form_label(tarjeta.cupon, 'Cupón: ') }}

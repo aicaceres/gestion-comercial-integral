@@ -197,6 +197,18 @@ class ProveedorRepository extends EntityRepository {
         return $query->getQuery()->getArrayResult();
     }
 
+    public function getNotasByFactura($provId, $factura) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('n')
+                ->from('ComprasBundle\Entity\NotaDebCred', 'n')
+                ->innerJoin('n.proveedor', 'pr')
+                ->innerJoin('n.facturas','f')
+                ->where('pr.id=' . $provId)
+                ->andWhere('f.id=' . $factura);
+
+        return $query->getQuery()->getArrayResult();
+    }
+
     public function getFacturasCompraxFecha($id, $desde, $hasta, $rubro) {
         $facturas = $this->_em->createQueryBuilder();
         $facturas->select("sum(f.total) total")

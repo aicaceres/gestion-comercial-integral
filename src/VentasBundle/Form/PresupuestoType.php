@@ -35,7 +35,7 @@ class PresupuestoType extends AbstractType {
                 ->add('nombreCliente',null,array('required'=>false))
                 ->add('validez',null,array('label' => 'VALIDEZ [días]:','required'=>false))
                 ->add('detalles', 'collection', array(
-                    'type' => new PresupuestoDetalleType($type,$data->getId()),
+                    'type' => new PresupuestoDetalleType($type,$data),
                     'by_reference' => false,
                     'allow_delete' => true,
                     'allow_add' => true,

@@ -104,6 +104,11 @@ class VentaDetalle {
     public function getTotalItem(){
         return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
     }
+
+    public function getBaseImponibleItem(){
+        $precio = ($this->getPrecio() / $this->getVenta()->getCotizacion()) * $this->getCantidad();
+        return round( $precio, 3);
+    }
     /** FIN VALORES ITEM */
 
     public function getNombreProducto(){

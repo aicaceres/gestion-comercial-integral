@@ -31,17 +31,22 @@ class VentaDetalleType extends AbstractType {
         ;
 
         if($this->type=='new'){
-            $vta = ($this->data->getId() ) ? $this->data->getId() : '0';
+            $prodsId = [];
+            if( count($this->data->getDetalles() ) >0 ){
+                //precargar productos item
+                foreach($this->data->getDetalles() as $d){
+                    $prodsId[] = $d->getProducto()->getId();
+                }
+            }
 
             $builder->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
                     'class' => 'AppBundle:Producto',
-                    'query_builder' => function(EntityRepository $repository)use($vta){
+                    'query_builder' => function(EntityRepository $repository)use($prodsId){
                         $qb = $repository->createQueryBuilder('p')
-                                ->innerJoin('p.ventas','d')
-                                ->innerJoin('d.venta','v')
-                                ->where("v.id=".$vta);
+                                        ->where(' p.id IN (:productos)')
+                                        ->setParameter('productos', $prodsId, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                         return $qb;
                     }
             ));

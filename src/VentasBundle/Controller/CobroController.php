@@ -4,6 +4,7 @@ namespace VentasBundle\Controller;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -161,7 +162,6 @@ class CobroController extends Controller
                 $facturaElectronica = new FacturaElectronica();
 // REVISAR COMO MODIFICAR PARA OPTIMIZAR CUANDO SE IMPRIMIÓ TICKET.
 
-
                 // armar datos para webservice
                 $docTipo = 99 ;
                 $docNro = 0;
@@ -182,7 +182,7 @@ class CobroController extends Controller
                         $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array   ('valor'=>$item->getProducto()->getIva()));
                         $codigo = intval($alicuota->getCodigo());
                         $dtoRec = $item->getTotalDtoRecItem();
-                        $baseImp = $item->getTotalItem() + $dtoRec;
+                        $baseImp = $item->getBaseImponibleItem() + $dtoRec;
                         $importe = $item->getTotalIvaItem();
                         $key = array_search($codigo, array_column($iva, 'Id'));
                         // IVA
@@ -308,7 +308,6 @@ class CobroController extends Controller
                     if( empty($tributos) ){
                         unset( $data['Tributos'] );
                     }
-
                     $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
                     $facturaElectronica->setCae($wsResult['CAE']);
                     $facturaElectronica->setCaeVto($wsResult['CAEFchVto']);
@@ -478,8 +477,15 @@ class CobroController extends Controller
         $xml = $response->getContent();
         $content = $facade->render($xml);
         $hoy = new \DateTime();
+        $filename = $cobro->getFacturaElectronica()->getComprobanteTxt().'.pdf';
+        if( $this->getParameter('billing_folder') ){
+            $file = $this->getParameter('billing_folder').$filename;
+            if( !file_exists($file) ){
+                file_put_contents( $file, $content, FILE_APPEND);
+            }
+        }
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition'=>'filename='.$cobro->getFacturaElectronica()->getComprobanteTxt().'.pdf'));
+            'Content-Disposition'=>'filename='.$filename));
     }
 
     /**

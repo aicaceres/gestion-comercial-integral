@@ -455,7 +455,12 @@ jQuery(function ($) {
                     alert(e);
                 }
             $('.loader_facturar').addClass('hidden');
+        }else{
+
+            $('#ventasbundle_cobro').submit();
         }
+
+
 
     })
 });
@@ -473,10 +478,6 @@ function detallePago(){
         setBotonGuardar(true);
         return true;
     }else{
-        //if( categoriaIva == 'C' && tipoPago == 'EFECTIVO'){
-            // se emite ticket
-            //$('#guardar').find('span').html('TICKET');
-        //}
         setBotonGuardar(false);
         addNewItem(tipoPago);
     }
@@ -493,24 +494,28 @@ function addNewItem( tipo){
     addItemFormDeleteLink(lastTr.find('.delTd'));
     lastTr.find('[id*="_tipoPago"]').val(tipo);
     importe = lastTr.find('[id*="_importe"]');
-    importe.val(0)
-    importe.on('focus',function(e) {
-        $(this).select();
-    })
-    importe.on('change', function() {
-        if( $(this).siblings('[id*="_tipoPago"]').val() == 'CHEQUE' ){
-            // cargar valor al cheque
-            chequeTd = $(this).parent().parent().find('td.chequeTd');
-            chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
-        }
-        actualizarSuma();
-    });
+    // si es el primero cargar el valor total, sino el saldo faltante
+    const imp = $('.vuelto').html() ? $('.vuelto').html() : $('#importeTotal').data('total')
+    importe.val( Math.abs(parseFloat(imp)) )
+    importe
+        .on('focus',function(e) {
+            $(this).select();
+            })
+        .on('change', function() {
+            if( $(this).siblings('[id*="_tipoPago"]').val() == 'CHEQUE' ){
+                // cargar valor al cheque
+                chequeTd = $(this).parent().parent().find('td.chequeTd');
+                chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
+            }
+            actualizarSuma();
+        });
 
     if(tipo != 'TARJETA'){
        lastTr.find('.tarjetaTd').remove();
     }else{
         // tarjeta
         lastTr.find('[id*="_datosTarjeta_tarjeta"]').attr('required', true);
+        lastTr.find('[id*="_datosTarjeta_tarjeta"]').select2();
         lastTr.find('[id*="_datosTarjeta_numero"]').inputmask(
             {"mask": "9999 9999 9999 9999",
                 onincomplete: function() {
@@ -540,6 +545,7 @@ function addNewItem( tipo){
         lastTr.find('.tarjetaTd :required').each(function() {
             $(this).attr('required',false) ;
         })
+        lastTr.find( '[id*="_valor"]' ).val( importe.val());
         selectBanco = lastTr.find('.selectBanco');
         selectBanco.select2({
             tags: true,
@@ -565,6 +571,7 @@ function addNewItem( tipo){
         })
         importe.focus();
     }
+    actualizarSuma();
 }
 
 function addItemFormDeleteLink($itemFormTd) {
@@ -587,7 +594,7 @@ function actualizarSuma(){
     pagos = 0;
     items = $(".tabla-pagos tbody tr.item");
     items.each(function(){
-        importe = checknumero( $(this).find('[id*="_importe"]') );
+        importe = checknumero( $(this).find('[id*="_importe"]'),2 );
         pagos += importe
     });
     $('.pago').html(pagos.toFixed(2));

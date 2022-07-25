@@ -394,7 +394,7 @@ class ProveedorController extends Controller {
                     $text = $text . ' [ ' . $doc[0] . ' ' . $comprob->getNroComprobante() . ' $' . $item->monto . '] ';
                 }
                 $var['concepto'] = 'Pago: ' . UtilsController::myTruncate($text, 30);
-                $var['importe'] = $pago->getTotal();
+                $var['importe'] = $pago->getImporte();
             }
         }
         $ord = usort($ctacte, function($a1, $a2) {
@@ -631,8 +631,41 @@ class ProveedorController extends Controller {
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
                 }
-                //$totalPago = $totalPago + $formData['montoRentas'] + $formData['montoGanancias'];
+                $resto = round($totalPago + $formData['montoRentas'] + $formData['montoGanancias'], 3);
+                $entity->setSaldo( $formData['importe'] - $totalPago );
+                $entity->setImporte( $resto );
+                // recorrer comprobantes, imputar el pago y marcar como retencionesAplicadas
+                foreach ($conceptos as $item) {
+                    $doc = explode('-', $item);
+                    if ($doc[0] == 'FAC') {
+                        $comprob = $em->getRepository('ComprasBundle:Factura')->find($doc[1]);
+                    }
+                    else {
+                        $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
+                    }
+                    $montocomp = $saldoComprob = round($comprob->getSaldo(), 3);
+                    if ($resto >= $saldoComprob) {
+                        //alcanza para cubrir el saldo
+                        $resto = round(($resto - $saldoComprob), 3);
+                        $comprob->setSaldo(0);
+                        $comprob->setEstado('PAGADO');
+                    }
+                    else {
+                        //no alcanza, impacta el total
+                        $montocomp = $resto;
+                        $comprob->setSaldo(round(($saldoComprob - $resto), 3));
+                        $resto = 0;
+                        $comprob->setEstado('PAGO PARCIAL');
+                    }
+                    $comprob->setRetencionesAplicadas(1);
+                    $comptxt = array('clave' => $item, 'monto' => $montocomp);
+                    array_push($txtConcepto, $comptxt);
+                    $em->persist($comprob);
+                }
+
+/*
                 $total = round($formData['importe'] + $formData['montoRentas'] + $formData['montoGanancias'], 3);
+
                 // Proceso de facturas - Ajustar los saldos
                 foreach ($conceptos as $item) {
                     $doc = explode('-', $item);
@@ -663,7 +696,7 @@ class ProveedorController extends Controller {
                         array_push($txtConcepto, $comptxt);
                         $em->persist($comprob);
                     }
-                }
+                }*/
 
                 $entity->setConcepto(json_encode($txtConcepto));
                 $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
@@ -827,6 +860,11 @@ class ProveedorController extends Controller {
                     $comprob->setEstado('PENDIENTE');
                 else
                     $comprob->setEstado('PAGO PARCIAL');
+                if( $entity->getBaseImponibleRentas()>0 ){
+                    // desmarcar retenciones aplicadas unicamente si se aplicaron en este pago
+                    $comprob->setRetencionesAplicadas(0);
+                }
+
                 $em->persist($comprob);
             }
             // descontar acumulado de rentencion ganancias si corresponde
@@ -906,11 +944,13 @@ class ProveedorController extends Controller {
                 }else{
                     $obj = $em->getRepository('ComprasBundle:NotaDebCred')->find($comp[1]);
                 }
+                $datos['total'] += $obj->getSaldo();
                 $proveedor = $obj->getProveedor();
 
-                //$neto = $obj->getTotal() - $obj->getIva();
+                // si ya se imputaron las retenciones saltar comprobante para calculo
+                if( $obj->getRetencionesAplicadas() ) continue;
+
                 $neto = $obj->getSaldoImponible();
-                $datos['total'] += $obj->getSaldo();
                 // calcular retencion rentas
                 $retrentas = $porcRentas['porcRetRentas'];
                 $adicrentas = $porcRentas['porcAdicRentas'];

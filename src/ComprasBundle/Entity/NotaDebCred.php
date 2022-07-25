@@ -134,6 +134,10 @@ class NotaDebCred {
      * @ORM\Column(name="modifica_stock", type="boolean",nullable=true)
      */
     protected $modificaStock = false;
+    /**
+     * @ORM\Column(name="retenciones_aplicadas", type="boolean",nullable=true)
+     */
+    protected $retencionesAplicadas = false;
 
     /**
      * @var integer $saldo
@@ -231,10 +235,14 @@ class NotaDebCred {
     }
     // calcula saldo imponible
     public function getSaldoImponible(){
-        $imp = $this->getTotal() - $this->getIva();
-        $porc = ($imp * 100) / $this->getTotal();
-        $saldoImponible = ($this->getSaldo() * $porc) / 100;
-        return $saldoImponible;
+        if( !$this->retencionesAplicadas ){
+            $imp = $this->getTotal() - $this->getIva();
+            $porc = ($imp * 100) / $this->getTotal();
+            $saldoImponible = ($this->getSaldo() * $porc) / 100;
+            return $saldoImponible;
+        }else{
+            return $this->getSaldo();
+        }
     }
     /**
      * Constructor
@@ -962,4 +970,27 @@ class NotaDebCred {
         }
     }
 
+
+    /**
+     * Set retencionesAplicadas
+     *
+     * @param boolean $retencionesAplicadas
+     * @return NotaDebCred
+     */
+    public function setRetencionesAplicadas($retencionesAplicadas)
+    {
+        $this->retencionesAplicadas = $retencionesAplicadas;
+
+        return $this;
+    }
+
+    /**
+     * Get retencionesAplicadas
+     *
+     * @return boolean
+     */
+    public function getRetencionesAplicadas()
+    {
+        return $this->retencionesAplicadas;
+    }
 }

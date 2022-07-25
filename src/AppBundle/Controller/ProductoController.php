@@ -1062,8 +1062,22 @@ class ProductoController extends Controller {
      */
     public function getAutocompleteProductosAction( Request $request) {
         $term = $request->get('searchTerm');
+        $lista = $request->get('lista');
+        $categoriaIva = $request->get('cativa');
         $em = $this->getDoctrine()->getManager();
         $results = $em->getRepository('AppBundle:Producto')->filterByTerm($term);
+        foreach($results as &$res){
+            $producto = $em->getRepository('AppBundle:Producto')->find($res['id']);
+            $precio = $producto->getPrecioByLista($lista);
+            if( in_array($categoriaIva, ['I','M'] ) ){
+                $total =  number_format($precio ,3);
+            }else{
+                $iva = $producto->getIva();
+                $montoIva = round( ($precio * ( $iva/100 )) ,3);
+                $total = number_format( ($precio + $montoIva) ,3);
+            }
+            $res['text'] = $res['text'] . ' | $'. $total;
+        }
         return new JsonResponse($results);
     }
     /**

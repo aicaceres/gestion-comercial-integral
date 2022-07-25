@@ -1,5 +1,15 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
+<style>
+.divEdicion select:focus, .divEdicion input:focus, .divEdicion button:focus, .divEdicion a:focus, .divEdicion .select2-container *:focus{
+        color:blue ;
+        font-weight:bold ;
+        background-color: gainsboro;
+    }
+.focus{
+    font-weight:bold ;
+}
+</style>
 <div class="pageheader notab">
     <h1 class="pagetitle">Facturas de Compras</h1>
 </div><!--pageheader-->
@@ -9,12 +19,12 @@
 <h1 id="popup_title" >{{ (entity.id) ? 'Editar Factura ' : 'Alta de Nueva Factura' }}</h1>
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
-   {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+{{ form_start(form, {'attr': {'class': 'stdform','id':'comprasbundle_factura'}}) }}
         <fieldset >
             <div class="formrows">
             <div class="two_fields">
                 {{ form_row(form.afipComprobante) }}
-                {{ form_row(form.fechaFactura, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+                {{ form_row(form.fechaFactura, { 'attr': {'class' : 'datepicker'} }) }}
             </div>
             <div class="two_fields nrofactura">
                 {{ form_row(form.afipPuntoVenta, { 'attr': {'class' : 'width50', 'maxlength':'5', 'title':'Punto de venta'} }) }}
@@ -53,7 +63,7 @@
             <div class="two_fields" style='margin-top: 10px;'>
                 <div>
                     <label style="width:180px">Centro de Costo por defecto:</label>
-                    <select id="centrocosto-default" class="chzn-select">
+                    <select id="centrocosto-default" class="select2">
                         <option value=''>Seleccionar</option>
                         {% for centro in centros  %}
                         <option value="{{ centro.id }}" >{{ centro.nombre|upper }}</option>
@@ -174,8 +184,8 @@
             </div>
             <br clear="all" />
             <div class="actionbutton">
-                <button class="guardar" type="submit" >Guardar</button>
-                <a class="cancelar" type="button" href="{{ path('compras_factura')}}">Cancelar</a>
+                <button class="guardar" type="button" >Guardar</button>
+                <a class="cancelar" id="cancelar" type="button" href="{{ path('compras_factura')}}">Cancelar</a>
             </div>
         </fieldset>
         <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
@@ -191,8 +201,27 @@ jQuery(document).ready(function($) {
 
     $(document).on('keypress',function(e){
         var keycode = (e.keyCode ? e.keyCode : e.which);
-        if(keycode == '13'){ e.preventDefault(); }
+        if (keycode == 43) {
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+        if(keycode == '13'){
+            e.preventDefault();
+            if( $('#linkAdd:focus').length > 0){
+                $('#linkAdd').click();
+            }
+            if( $('.linkDel:focus').length > 0 ){
+                $('.linkDel:focus').click();
+            }
+            if( $('.guardar:focus').length > 0 ){
+                $('.guardar').click();
+            }
+            if( $('.cancelar:focus').length > 0 ){
+                document.getElementById('cancelar').click();
+            }
+        }
     });
+
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
     $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
@@ -202,6 +231,7 @@ jQuery(document).ready(function($) {
             actualizaTotales();
             //$('#comprasbundle_factura_tipoFactura').change();
         });
+        $('#comprasbundle_factura_fechaFactura').focus();
     });
     $('#comprasbundle_factura_proveedor').change(function(){
         $('#nrocuit').text('');
@@ -247,12 +277,6 @@ jQuery(document).ready(function($) {
         actualizaTotales();
     })
 
-   $().keypress(function(e) {
-        if (e.which == 43) {
-            e.preventDefault();
-            $('#linkAdd').click();
-        }
-    });
 
     $('.guardar').click(function() {
         if( $(document).find('.ccred').length >0 ){
@@ -267,7 +291,28 @@ jQuery(document).ready(function($) {
             if (!confirm('Confirma la registración?')) {
                return false;
             }
-        }else{  alert('Debe ingresar items a la factura'); return false;}
+        }else{
+            alert('Debe ingresar items a la factura');
+            return false;
+        }
+
+        data = $('#comprasbundle_factura').serialize();
+        $.ajax({
+            type: "POST",
+            url: '{{ path("compras_factura_create") }}',
+            data: data,
+            dataType: 'json',
+            success: function(res){
+                if (res.msg=='OK') {
+                    if( res.urlcomppago ){
+                        window.open(res.urlcomppago);
+                    }
+                    window.location.href = res.urlback;
+                }else{
+                    jAlert(res.msg);
+                }
+            }
+        });
 
     });
    /* $('[name*="proveedor"]').change(function(){
@@ -349,6 +394,15 @@ jQuery(document).ready(function($) {
         }
     });
 
+    // focus input radio y check
+$('input[type=radio]').on('focus',function(){
+    $(this).parent().addClass('focus')
+}).on('blur',function(){
+    $(this).parent().removeClass('focus')
+})
+
+    $("#comprasbundle_factura_afipComprobante").select2('focus');
+
 });
  // funciones personalizas para el formulario
  function addNewItem() {
@@ -418,7 +472,7 @@ function delCC(item){
         item.closest('.ccitem').remove();
         // si aun quedan items controlar
         if( holder.find('tr').length > 0 ){
-             checkCosto(holder);
+            checkCosto(holder);
         }else{
             holder.closest('.ccTr').prev().find('.delTd H5').removeClass('ccred');
             holder.closest('.ccTr').prev().find('.linkcc').addClass('empty');
@@ -470,7 +524,7 @@ function checkCosto(holder){
     }
 }
 function addItemFormDeleteLink($itemFormTd) {
-    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" class="linkDel"><span class="minus"></span></a>');
     $itemFormTd.append($removeFormA);
     $removeFormA.on('click', function(e) {
         var res = true;
@@ -498,15 +552,15 @@ function addItemFormCentroCostoLink($itemFormTd) {
         var costo = $itemFormTd.parent().find(".precTd input").val();
         if( prod && cant>0 && costo>0){
            // si no está visible mostrar, sino ocultar
-           if( ccTr.is(":visible") ){
-               ccTr.hide();
-           }else{
-               ccTr.show();
-               var hold = ccTr.find('.holder');
-               if( hold.find('tr').length == 0 ){
-                    addNewCC(hold);
-                }
-           }
+            if( ccTr.is(":visible") ){
+                ccTr.hide();
+            }else{
+                ccTr.show();
+                var hold = ccTr.find('.holder');
+                if( hold.find('tr').length == 0 ){
+                        addNewCC(hold);
+                    }
+            }
 
         }else{
             alert('Debe completar los datos para cargar el centro de costos');
@@ -516,28 +570,28 @@ function addItemFormCentroCostoLink($itemFormTd) {
 function changeProducto(producto){
     if(producto.val()){
         jQuery.ajax({
-               url: "{{ path("get_data_producto") }}",
-               //async:false,
-               dataType:"json",
-               data: 'prod='+ producto.val(),
-               success: function(data) {
-                   trIndex = producto.parent().parent();
-                   trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);
-                   trIndex.find('.cantTd input').val(1);
-                   trIndex.find('span.unidmed').html(data.unidmed);
-                   if(data.bulto){
-                       trIndex.find('span.unidmed').hide();
-                       trIndex.find('.cantxBulto input').val(data.cantxBulto);
-                   }else{
-                       trIndex.find('span.unidmed').show();
-                       trIndex.find('.cantxBulto input').val('');
-                   }
-                   trIndex.find('.bulto input').prop('checked', data.bulto);
-                   jQuery.uniform.update();
-                   actualizaTotales();
-                   trIndex.find('.cantTd input').select();
-               }
-           });
+                url: "{{ path("get_data_producto") }}",
+                //async:false,
+                dataType:"json",
+                data: 'prod='+ producto.val(),
+                success: function(data) {
+                    trIndex = producto.parent().parent();
+                    trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);
+                    trIndex.find('.cantTd input').val(1);
+                    trIndex.find('span.unidmed').html(data.unidmed);
+                    if(data.bulto){
+                        trIndex.find('span.unidmed').hide();
+                        trIndex.find('.cantxBulto input').val(data.cantxBulto);
+                    }else{
+                        trIndex.find('span.unidmed').show();
+                        trIndex.find('.cantxBulto input').val('');
+                    }
+                    trIndex.find('.bulto input').prop('checked', data.bulto);
+                    jQuery.uniform.update();
+                    actualizaTotales();
+                    trIndex.find('.cantTd input').select();
+                }
+            });
     }
 }
 function changeBulto(item){

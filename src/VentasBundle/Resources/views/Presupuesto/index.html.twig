@@ -59,7 +59,7 @@
                         {% if not entity.descuentaStock %}
                             <a href="{{ path('ventas_presupuesto_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar"></a>
                         {% endif %}
-
+                        <a href="{{ path('ventas_venta_presupuesto', { 'id': entity.id }) }}" class="editar btn btnaction btn_book" title="Generar Venta"></a>
                     {% endif %}
                 </td>
             </tr>

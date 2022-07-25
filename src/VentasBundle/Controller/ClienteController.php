@@ -796,8 +796,17 @@ class ClienteController extends Controller {
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
+
+        $filename = 'RECX-'. $pago->getComprobanteNro().'.pdf';
+        if( $this->getParameter('billing_folder') && $nota ){
+            $file = $this->getParameter('billing_folder').$filename;
+            if( !file_exists($file) ){
+                file_put_contents( $file, $content, FILE_APPEND);
+            }
+        }
+
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition'=>'filename=RECX-'.$pago->getComprobanteNro().'.pdf'));
+            'Content-Disposition'=>'filename='.$filename));
     }
 
     /**

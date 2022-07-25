@@ -18,7 +18,7 @@
                 <div><label for="nroPedido">Fecha Factura:</label>
                     <input type="text" value="{{entity.fechaFactura|date('d/m/Y')}}" disabled="disabled" class="width100">
                 </div>
-            </div> 
+            </div>
             <div class="two_fields">
                 <div><label for="nroPedido">Proveedor:</label>
                     <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="smallinput">
@@ -26,18 +26,18 @@
                 <div>
                     <label for="estado" >Estado:</label>
                     <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
-                </div> 
+                </div>
                 <div style="display:none"><label for="nroFactura">Nº Comprobante:</label>
                     <input type="text" value="{{entity.nroComprobante}}" disabled="disabled" class="width100">
                 </div>
-            </div> 
+            </div>
             <div>
                 <label for="estado" >Descripción:</label>
                 <input type="text" value="{{entity.descripcion}}" disabled="disabled" class="smallinput">
-                
+
                 <strong style="padding-left:10px" > Saldo: {{ entity.saldo|number_format(3,'.',',') }} </strong>
-              
-            </div>         
+
+            </div>
             <div style="padding-top: 20px; margin-left: 50px; width: 80%;" >
                 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
@@ -47,7 +47,7 @@
                             <th style="width:10%;">Alícuota</th>
                             <th style="width:15%;">Cantidad</th>
                             <th style="width:10%;">Precio Unit.</th>
-                            <th colspan='2' style="width:10%;">SubTotal</th>                                        
+                            <th colspan='2' style="width:10%;">SubTotal</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -58,7 +58,7 @@
                             <td class="alignright">{{det.afipAlicuota}}</td>
                             <td class="alignright">{{det.cantidadTxt}}</td>
                             <td class="alignright">{{det.precio|number_format(3,'.',',')}}</td>
-                            <td class="alignright">{{ det.subTotal|number_format(3,'.',',') }}</td>  
+                            <td class="alignright">{{ det.subTotal|number_format(3,'.',',') }}</td>
                             <td><a href="javascript:void(0)" class="linkcc {% if det.centroCostoDetalle|length==0  %}empty{% endif %}" title="Centro Costo" style='float:right'><h5 style="display:inline;">CC</h5></a></td>
                         </tr>
                         {% if det.centroCostoDetalle|length>0  %}
@@ -68,71 +68,71 @@
                                     <thead>
                                         <tr>
                                             <th>Centro de Costo</th>
-                                            <th style="width:30%">Monto</th>                                        
+                                            <th style="width:30%">Monto</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for cc in det.centroCostoDetalle %}                             
+                                        {% for cc in det.centroCostoDetalle %}
                                             <tr class="ccitem" style="height:30px;background-color: white" divdata="item_{{loop.index-1}}">
                                                 <td> {{ cc.centroCosto }} </td>
                                                 <td> {{ cc.costo }} </td>
                                             </tr>
-                                        {% endfor %}           
+                                        {% endfor %}
                                     </tbody>
-                                </table>                                                                
-                            </td>                                                                                                               
+                                </table>
+                            </td>
                         </tr>
-                        {% endif %} 
-                        
-                    {% endfor %}           
-                    </tbody>                    
+                        {% endif %}
+
+                    {% endfor %}
+                    </tbody>
                     <tfoot>
                         <tr>
                             <th class="head1" colspan="5" style="text-align:right"></th>
                             <th colspan='2' class="head1" style="text-align:right;padding-right: 10px;">{{entity.subTotal|number_format(3,'.',',')}}</th>
                         </tr>
                     </tfoot>
-                </table> 
-                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">   
+                </table>
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
                         <tr>
-                            <th>Subtotal Neto </th>                                                       
-                            <th>Imp. Interno </th>                                                       
-                            <th>IVA </th>                                                       
-                            <th>Percep. IVA </th>                                                       
-                            <th>Percep. DGR </th>                                                       
-                            <th>Percep. Muni </th>                                                       
-                            <th>Total Bonif. </th>                                                       
-                            <th>No Grav.</th> 
-                            <th>TOTAL</th> 
+                            <th>Subtotal Neto </th>
+                            <th>Imp. Interno </th>
+                            <th>IVA </th>
+                            <th>Percep. IVA </th>
+                            <th>Percep. DGR </th>
+                            <th>Percep. Muni </th>
+                            <th>Total Bonif. </th>
+                            <th>No Grav.</th>
+                            <th>TOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{ entity.subtotalNeto|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.impuestoInterno|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.iva|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.percepcionIva|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.percepcionDgr|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.percepcionMunicipal|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.totalBonificado|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.tmc|number_format(3,'.',',') }}</td>   
-                            <td class="red">{{ entity.total|number_format(3,'.',',') }}</td>   
-                        </tr> 
+                            <td>{{ entity.subtotalNeto|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.impuestoInterno|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.iva|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.percepcionIva|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.percepcionDgr|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.percepcionMunicipal|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.totalBonificado|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.tmc|number_format(3,'.',',') }}</td>
+                            <td class="red">{{ entity.total|number_format(3,'.',',') }}</td>
+                        </tr>
                     </tbody>
-                </table>                             
-            </div>                           
-            <br clear="all" /> 
+                </table>
+            </div>
+            <br clear="all" />
             {% if pagos|length > 0 %}
             <div style="padding-bottom: 20px; margin: 0 auto; width: 60%;">
                  <h4 style="margin-bottom: 5px;">Pagos y Notas de Crédito </h4>
                     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" >
                         <thead>
                             <tr>
-                                <th>Tipo</th>
                                 <th>Fecha</th>
-                                <th>Nº Comprobante</th>                                
-                                <th class="head0">Monto</th>                                
+                                <th>Tipo</th>
+                                <th>Nº Comprobante</th>
+                                <th class="head0">Monto</th>
                             </tr>
                         </thead>
                         <tbody >
@@ -140,8 +140,8 @@
                         {% for pago in pagos %}
                             {% set total = total + pago.monto %}
                             <tr>
-                                <td>{{ pago.tipo }}</td>
                                 <td>{{pago.fecha|date('d/m/Y')}}</td>
+                                <td>{{ pago.tipo }}</td>
                                 <td>{{pago.comprobante}}
                                     {% if(pago.tipo=='PAGO') %}
                                 <a target='_blank' href="{{path('compras_proveedor_pagos_show', { 'id': pago.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
@@ -149,7 +149,7 @@
                                 <a target='_blank' href="{{path('compras_notadebcred_show', { 'id': pago.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                                 {% endif %}
                                 </td>
-                                <td>{{pago.monto|number_format(3,'.',',')}} </td>                                                                                       
+                                <td>{{pago.monto|number_format(3,'.',',')}} </td>
                             </tr>
                         {% endfor %}
                         </tbody>
@@ -159,20 +159,20 @@
                                 <th> {{ total|number_format(3,'.',',') }} {% if (entity.total-total)>0 %} <span style="color:red;float:right"> [{{ (entity.total-total)|number_format(3,'.',',') }} ] </span> {% endif %}</th>
                             </tr>
                         </tfoot>
-                    </table>                
-            </div> 
+                    </table>
+            </div>
            {% endif %}
             <div class="actionbutton">
                 <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
             </div>
         </fieldset>
     </form>
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
-<script type="text/javascript">    
-    jQuery(document).ready(function($) { 
+<script type="text/javascript">
+    jQuery(document).ready(function($) {
         $('.linkcc').on('click',function(){
             var div = $(this).closest('tr').next('.ccdiv')
             if( div.is(':visible') ){
@@ -181,7 +181,7 @@
                 div.show();
             }
         });
-        
+
     });
-</script>    
-{% endblock %}    
+</script>
+{% endblock %}

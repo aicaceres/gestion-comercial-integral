@@ -68,7 +68,7 @@
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="3px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="3px">
                                 <span> {{pago.moneda.simbolo}}
-                                {{(pago.importe + pago.montoRetencionRentas + pago.montoGanancias)|number_format(2,'.',',')}}
+                                {{(pago.importe )|number_format(2,'.',',')}}
                                 </span>
                             </td>
                         </tr>
@@ -93,7 +93,7 @@
                         <tr>
                             <td border.type="none"></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" margin-top="8px" font-size="18px"><strong>Total:</strong></td>
-                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ pago.importe|number_format(2,'.',',') }} </strong>
+                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ (pago.importe - pago.montoRetencionRentas - pago.montoGanancias )|number_format(2,'.',',') }} </strong>
                             </td>
                         </tr>
                     </table>

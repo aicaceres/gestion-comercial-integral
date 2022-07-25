@@ -92,7 +92,7 @@
                                 <span class="pago" style="font-size:16px" >0</span>.-
                             </th>
                             <th width="150px" class="vueltoTh">
-                                CAMBIO: &nbsp;
+                                SALDO: &nbsp;
                                 <span class="simbolo" style="font-size:16px">$ </span>
                                 <span class="vuelto" style="font-size:16px"></span>
                             </th>
@@ -185,14 +185,17 @@ jQuery(function ($) {
         }
         pago = parseFloat($('.pago').html()) ;
         if( $(':invalid').length>0 || pago<=0 ){
-            jAlert( 'Completar todos los datos para registrar el pago!');
+            jAlert( 'Completar todos los datos para registrar el pago! Debe ingresar algún monto para el pago.');
             return false;
-        }else{
-            if( pago < $('#comprasbundle_pagoproveedor_importe').val() ){
-                jAlert( 'Debe ingresar valores suficientes para cancelar el Total!');
+        }
+        /*else{
+            // controlar que el pago cubra los impuestos
+            impuestos = parseFloat($('#comprasbundle_pagoproveedor_montoGanancias').val())  + parseFloat($('#comprasbundle_pagoproveedor_montoRentas').val());
+            if( pago < impuestos ){
+                jAlert( `El monto mínimo del pago debe ser $ ${impuestos} ` );
                 return false;
             }
-        }
+        }*/
 
         if( !confirm('CONFIRMA LA REGISTRACIÓN DEL PAGO?')){
             return false;

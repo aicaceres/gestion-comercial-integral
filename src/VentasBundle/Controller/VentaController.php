@@ -15,6 +15,7 @@ use ConfigBundle\Controller\UtilsController;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
 use VentasBundle\Entity\Venta;
+use VentasBundle\Entity\VentaDetalle;
 use VentasBundle\Form\VentaType;
 
 /**
@@ -211,7 +212,75 @@ class VentaController extends Controller
         ));
         return $form;
     }
+    /**
+     * @Route("/{id}/repeat", name="ventas_venta_repeat")
+     * @Method("GET")
+     * @Template()
+     */
+    public function repeatVentaAction($id)
+    {
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta_new');
+        $em = $this->getDoctrine()->getManager();
+        $venta = $em->getRepository('VentasBundle:Venta')->find($id);
+        if (!$venta) {
+            throw $this->createNotFoundException('No se encuentra la Venta.');
+        }
+        $entity = clone $venta;
+        $entity->setFechaVenta( new \DateTime() );
+        $entity->setCotizacion( $entity->getMoneda()->getCotizacion() );
+        $form = $this->createCreateForm($entity,'new');
+        return $this->render('VentasBundle:Venta:new.html.twig', array(
+            'entity' => $entity,
+            'form' => $form->createView(),
+        ));
+    }
+    /**
+     * @Route("/fromPresupuesto/{id}", name="ventas_venta_presupuesto")
+     * @Method("GET")
+     * @Template()
+     */
+    public function fromPresupuestoAction($id)
+    {
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta_new');
+        $em = $this->getDoctrine()->getManager();
+        $presupuesto = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        if (!$presupuesto) {
+            throw $this->createNotFoundException('No se encuentra la Venta.');
+        }
+        $entity = new Venta();
+        $entity->setFechaVenta( new \DateTime() );
+        // setear datos del presupuesto
+        $entity->setCliente( $presupuesto->getCliente() );
+        $entity->setDeposito($presupuesto->getDeposito());
+        $entity->setPrecioLista( $presupuesto->getPrecioLista() );
+        $entity->setFormaPago( $presupuesto->getFormaPago() );
+        $entity->setDescuentoRecargo( $presupuesto->getDescuentoRecargo() );
+        $entity->setTransporte( $entity->getCliente()->getTransporte() );
 
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+        if($param){
+            // ultimo nro de operacion de venta
+            $entity->setNroOperacion( $param->getUltimoNroOperacionVenta() + 1 );
+        }
+        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
+        $entity->setMoneda( $moneda );
+        $entity->setCotizacion( $moneda->getCotizacion() );
+        // cargar detalle
+        foreach($presupuesto->getDetalles() as $det){
+            $new = new VentaDetalle();
+            $new->setProducto($det->getProducto());
+            $new->setCantidad($det->getCantidad());
+            $entity->addDetalle($new);
+        }
+
+        $form = $this->createCreateForm($entity,'new');
+        return $this->render('VentasBundle:Venta:new.html.twig', array(
+            'entity' => $entity,
+            'form' => $form->createView(),
+        ));
+    }
     /**
      * @Route("/{id}/edit", name="ventas_venta_edit")
      * @Method("GET")

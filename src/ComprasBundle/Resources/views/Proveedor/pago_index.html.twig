@@ -55,7 +55,7 @@
                 {% if not provId  %}
                     <td>{{ entity.proveedor }}</th>
                 {% endif %}
-                <td>{{ entity.nroComprobante }}</td>
+                <td>{{ entity.comprobanteNro }}</td>
                 <td title="{{entity.concepto}}"><span class="hidden">{{entity.concepto}}</span>{{ entity.conceptoTxt }}</td>
                 <td>{{entity.detalle}}</td>
                 <td style="text-align: right">{{ entity.getImporte|number_format(3,'.',',') }}</td>

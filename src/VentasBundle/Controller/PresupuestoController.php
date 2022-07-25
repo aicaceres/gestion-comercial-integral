@@ -168,7 +168,6 @@ class PresupuestoController extends Controller {
         ));
     }
 
-
     /**
      * @Route("/{id}/edit", name="ventas_presupuesto_edit")
      * @Method("GET")

@@ -10,11 +10,11 @@ use Doctrine\ORM\EntityRepository;
 class PresupuestoDetalleType extends AbstractType {
 
     private $type;
-    private $id;
-    public function __construct($type,$id)
+    private $data;
+    public function __construct($type,$data)
     {
         $this->type= $type;
-        $this->id= $id;
+        $this->data= $data;
     }
 
     /**
@@ -30,17 +30,22 @@ class PresupuestoDetalleType extends AbstractType {
                 ->add('alicuota', 'hidden')
         ;
         if($this->type=='new'){
-            $pres = ($this->id ) ? $this->id : '0';
+            $prodsId = [];
+            if( count($this->data->getDetalles() ) >0 ){
+                //precargar productos item
+                foreach($this->data->getDetalles() as $d){
+                    $prodsId[] = $d->getProducto()->getId();
+                }
+            }
 
             $builder->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
                     'class' => 'AppBundle:Producto',
-                    'query_builder' => function(EntityRepository $repository)use($pres){
+                    'query_builder' => function(EntityRepository $repository)use($prodsId){
                         $qb = $repository->createQueryBuilder('p')
-                                ->innerJoin('p.presupuestos','d')
-                                ->innerJoin('d.presupuesto','v')
-                                ->where("v.id=".$pres);
+                                ->where(' p.id IN (:productos)')
+                                        ->setParameter('productos', $prodsId, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
                         return $qb;
                     }
             ));

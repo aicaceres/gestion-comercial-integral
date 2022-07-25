@@ -32,7 +32,7 @@ class NotaDebCredType extends AbstractType {
                 ))
                 ->add('concepto','text',array('label' => 'Concepto Adicional:','required' => false))
                 ->add('cotizacion','hidden')
-                ->add('descuentoRecargo','hidden')
+                ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
                 ->add('detalles', 'collection', array(
                     'type' => new NotaDebCredDetalleType($type),
                     'by_reference' => false,

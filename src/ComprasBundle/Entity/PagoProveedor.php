@@ -87,10 +87,12 @@ class PagoProveedor
     protected $retencionGanancias;
 
      /**
-     * @var integer $deposito
-     * @ORM\Column(name="deposito", type="decimal", scale=3 )
+     ** Diferencia entre el pago total y los importes abonados.
+     ** Refleja los saldos pendientes de las facturas imputadas
+     * @var integer $saldo
+     * @ORM\Column(name="saldo", type="decimal", scale=3 )
      */
-    protected $deposito;
+    protected $saldo;
 
     /**
      *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pagos")
@@ -126,7 +128,7 @@ class PagoProveedor
     public function __construct()
     {
         $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->deposito = 0;
+        $this->saldo = 0;
         $this->fecha = new \DateTime();
     }
 
@@ -451,26 +453,26 @@ class PagoProveedor
     }
 
     /**
-     * Set deposito
+     * Set saldo
      *
-     * @param string $deposito
+     * @param string $saldo
      * @return PagoProveedor
      */
-    public function setDeposito($deposito)
+    public function setSaldo($saldo)
     {
-        $this->deposito = $deposito;
+        $this->saldo = $saldo;
 
         return $this;
     }
 
     /**
-     * Get deposito
+     * Get saldo
      *
      * @return string
      */
-    public function getDeposito()
+    public function getSaldo()
     {
-        return $this->deposito;
+        return $this->saldo;
     }
 
     /**

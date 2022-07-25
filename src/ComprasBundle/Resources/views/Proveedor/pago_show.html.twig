@@ -39,7 +39,7 @@
 
         <fieldset class="fields">
             <div style="display: inline-block; width: 65%">
-                <label >COMPROBANTES CANCELADOS:</label>
+                <label >COMPROBANTES IMPUTADOS:</label>
                 <select style="width:90%" disabled="disabled" >
                     <option> {{ entity.conceptoTxt }} </option>
                 </select>
@@ -68,7 +68,7 @@
             <div style="display: inline-block; width: 15%">
                 <label>TOTAL:</label>
                 <strong> {{ entity.moneda.simbolo }} </strong>
-                <input class="number mediuminput" disabled="disabled" value="{{ entity.importe|number_format(2,'.',',') }}">
+                <input class="number mediuminput" disabled="disabled" value="{{ ( entity.total + entity.saldo )|number_format(2,'.',',') }}">
             </div>
         </fieldset>
 
@@ -150,9 +150,9 @@
                                 <span class="pago" style="font-size:16px" >{{importe|number_format(3,'.',',')}}</span>.-
                             </th>
                             <th width="150px" class="vueltoTh">
-                                CAMBIO: &nbsp;
+                                SALDO: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="vuelto" style="font-size:16px"> {{ (entity.importe - importe)|number_format(2,'.',',')}}  </span>
+                                <span class="vuelto" style="font-size:16px"> {{ (entity.saldo)|number_format(2,'.',',')}}  </span>
                             </th>
                         </tr>
                     </thead>

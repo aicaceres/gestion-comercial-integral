@@ -20,6 +20,7 @@ class CobroDetalleTarjeta {
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Tarjeta")
      * @ORM\JoinColumn(name="tarjeta_id", referencedColumnName="id")
+     * @ORM\OrderBy({"nombre" = "ASC"})
      */
     protected $tarjeta;
     /**

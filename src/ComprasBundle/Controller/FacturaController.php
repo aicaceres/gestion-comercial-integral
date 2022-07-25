@@ -3,6 +3,7 @@
 namespace ComprasBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -81,16 +82,16 @@ class FacturaController extends Controller {
     /**
      * @Route("/", name="compras_factura_create")
      * @Method("POST")
-     * @Template("ComprasBundle:Factura:edit.html.twig")
      */
     public function createAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_factura_new');
         $entity = new Factura();
         $data = $request->get('comprasbundle_factura');
+
         $em = $this->getDoctrine()->getManager();
         $centros = $em->getRepository('ConfigBundle:CentroCosto')->findByActivo(true);
         $form = $this->createCreateForm($entity);
-
+        $urlcomppago = '';
         $form->handleRequest($request);
 
         if ($form->isValid()) {
@@ -149,28 +150,46 @@ class FacturaController extends Controller {
                 // REGISTRAR EL PAGO DE CONTADO
                 if (isset($data['pagadoContado'])) {
                     $res = $this->registrarPagoContado($em, $entity);
-                    if(!$res){
+                    if(!is_numeric($res)){
                         throw $this->createNotFoundException('No se pudo registrar el pago.');
                     }
                     $entity->setSaldo(0);
                     $entity->setEstado('PAGADO');
+                    $entity->setRetencionesAplicadas(1);
                     $em->persist($entity);
                     $em->flush();
-                }
 
+                    $urlcomppago= $this->generateUrl('print_comprobante_pago', array('id' => $res ));
+                }
+                $res = array( 'msg' => 'OK',
+                                'urlback' =>  $this->generateUrl('compras_factura'),
+                                'urlcomppago' => $urlcomppago
+                            );
                 $em->getConnection()->commit();
-                return $this->redirect($this->generateUrl('compras_factura'));
+                //return $this->redirect($this->generateUrl('compras_factura'));
+                return new JsonResponse($res) ;
             }
             catch (\Exception $ex) {
-                $this->addFlash('error', $ex->getMessage());
+                $msg = $ex->getMessage();
                 $em->getConnection()->rollback();
+                return new JsonResponse( array( 'msg' => $msg ) );
             }
         }
-        return $this->render('ComprasBundle:Factura:edit.html.twig', array(
+        $errors = array();
+        if ($form->count() > 0) {
+            foreach ($form->all() as $child) {
+                if (!$child->isValid()) {
+                    $errors[$child->getName()] = (String) $form[$child->getName()]->getErrors();
+                }
+            }
+        }
+
+        return new JsonResponse( array( 'msg' => $errors,'nn'=>'s' ) );
+        /*return $this->render('ComprasBundle:Factura:edit.html.twig', array(
                     'entity' => $entity,
                     'centros' => $centros,
                     'form' => $form->createView(),
-        ));
+        ));*/
     }
 
     public function actualizarCostoyStock($em, $factura, $actstock, $actcostos) {
@@ -231,8 +250,9 @@ class FacturaController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Factura entity.');
         }
+        $proveedor = $entity->getProveedor()->getId();
         $arrayPagos = array();
-        $pagos = $em->getRepository('ComprasBundle:PagoProveedor')->getPagosByFactura($entity->getProveedor()->getId(), $id);
+        $pagos = $em->getRepository('ComprasBundle:PagoProveedor')->getPagosByFactura($proveedor, $id);
         foreach ($pagos as $pago) {
             $concepto = json_decode($pago['concepto']);
             foreach ($concepto as $item) {
@@ -241,25 +261,23 @@ class FacturaController extends Controller {
                         'id' => $pago['id'],
                         'tipo' => 'PAGO',
                         'fecha' => $pago['fecha'],
-                        'comprobante' => $pago['nroComprobante'],
+                        'comprobante' =>str_pad($pago['prefijoNro'], 4, "0", STR_PAD_LEFT) . '-' .  str_pad($pago['pagoNro'], 8, "0", STR_PAD_LEFT) ,
                         'monto' => $item->monto
                     ));
                 }
             }
         }
-        $proveedor = $entity->getProveedor();
-        foreach ($proveedor->getNotasDebCred() as $nota) {
-            foreach ($nota->getFacturas() as $nf) {
-                if ($nf->getId() == $entity->getId()) {
-                    array_push($arrayPagos, array(
-                        'id' => $nota->getId(),
-                        'tipo' => 'NC',
-                        'fecha' => $nota->getFecha(),
-                        'comprobante' => $nota->getNroNotaDebCred(),
-                        'monto' => $nota->getTotal()
-                    ));
-                }
-            }
+        $notas = $em->getRepository('ComprasBundle:PagoProveedor')->getNotasByFactura($proveedor, $id);
+        foreach ($notas as $nota) {
+
+            array_push($arrayPagos, array(
+                    'id' => $nota['id'],
+                    'tipo' => 'NC',
+                    'fecha' => $nota['fecha'],
+                    'comprobante' => $nota['tipoNota'].' '. $nota['nroComprobante'],
+                    'monto' => $nota['total']
+                ));
+
         }
 
         return $this->render('ComprasBundle:Factura:show.html.twig', array(
@@ -650,8 +668,10 @@ class FacturaController extends Controller {
     private function registrarPagoContado($em, $factura) {
         try {
             $pago = new PagoProveedor();
-            $pago->setFecha(new \DateTime());
-            $pago->setProveedor($factura->getProveedor());
+            $hoy = new \DateTime();
+            $pago->setFecha($hoy);
+            $proveedor = $factura->getProveedor();
+            $pago->setProveedor($proveedor);
             $pago->setImporte($factura->getTotal());
             $pago->setNroComprobante($factura->getNuevoNroComprobante());
             $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByCodigoAfip('PES');
@@ -665,6 +685,79 @@ class FacturaController extends Controller {
             /* Guardar ultimo nro */
             $equipo->setNroPagoCompra($equipo->getNroPagoCompra() + 1);
             $em->persist($equipo);
+            // calculo de impuestos
+            // PORCENTAJE RENTAS
+            $montoRetRentas = $retrentas = $adicrentas = $ganancias = 0;
+            // get periodo de excepción de rentas
+            $fechaNoRetenerRentas = $proveedor->getVencCertNoRetenerRentas() ? $proveedor->getVencCertNoRetenerRentas()->format('Y-m-d') : null;
+            if( $proveedor->getCategoriaRentas() && ( $fechaNoRetenerRentas < $hoy->format('Y-m-d') ||  is_null($fechaNoRetenerRentas) ) ){
+                $retrentas = $proveedor->getCategoriaRentas()->getRetencion();
+                $adicrentas = $proveedor->getCategoriaRentas()->getAdicional() ;
+            }
+            // TOTAL A PAGAR RENTAS
+            $baseImponible = 0;
+            $total = $factura->getTotal();
+            $neto = $factura->getTotal() - $factura->getIva();
+            if( $retrentas>0 ){
+                if( $neto >= floatval( $proveedor->getCategoriaRentas()->getMinimo())  ){
+                    $baseImponible = $neto;
+                    $rentas = $neto * ( $retrentas / 100 );
+                    $adicional = $rentas * ( $adicrentas / 100 );
+                    $montoRetRentas = $rentas + $adicional;
+                }else{
+                    // setear en cero porque no se aplica retención por ser menor al mínimo
+                    $montoRetRentas = $rentas = $adicional = 0;
+                }
+            }
+            if($montoRetRentas==0){
+                $retrentas = $adicrentas = 0;
+            }
+            // TOTAL A PAGAR GANANCIAS
+            $fechaExcepcionGanancias = $proveedor->getVencCertExcepcionGanancias() ? $proveedor->getVencCertExcepcionGanancias()->format('Y-m-d') : null;
+            $exento = 0;
+            $retencionGanancia = $em->getRepository('ComprasBundle:RetencionGanancia')->findOneBy(
+                                            array('proveedor'=>$proveedor->getId(), 'periodo'=> $hoy->format('Ym') ));
+            $acumuladoTotalGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoTotal() : 0;
+            $acumuladoRetencionGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoRetencion() : 0;
+
+            if( $proveedor->getActividadComercial() && $proveedor->getCategoriaIva() && ($fechaExcepcionGanancias < $hoy->format('Y-m-d') ||  is_null($fechaExcepcionGanancias) )  ){
+                $catIva = $proveedor->getCategoriaIva()->getNombre();
+                $exento = floatval($proveedor->getActividadComercial()->getExento()) ;
+                if( $catIva == 'N' ){
+                    $porcGanancia = floatval($proveedor->getActividadComercial()->getNoInscripto());
+                    $exento = 0;
+                }elseif( $catIva == 'I' ){
+                    $porcGanancia = floatval($proveedor->getActividadComercial()->getInscripto());
+                }
+            }
+            if( $proveedor->getActividadComercial() && ($baseImponible + $acumuladoTotalGanancia) > $exento ){
+                $hasta = $baseImponible + $acumuladoTotalGanancia - $exento;
+
+                $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaByHasta( $proveedor->getActividadComercial()->getCodigo(), $hasta );
+                if($escala){
+                    $ganancias = ( $baseImponible - $escala->getDesde() ) * ( $escala->getPorcExcedente()/100) + $escala->getFijo() - $acumuladoRetencionGanancia;
+                }else{
+                    $ganancias = ($baseImponible * ($porcGanancia / 100)) - $acumuladoRetencionGanancia;
+                }
+
+                $minimo = $proveedor->getActividadComercial()->getMinimo();
+                if( $acumuladoRetencionGanancia < $minimo){
+                    if( $ganancias < $minimo){
+                        $ganancias = 0;
+                    }
+                }
+
+            }
+            // total a pagar menos las retenciones
+            $porcGanancia = ($ganancias == 0) ? 0 : $porcGanancia ;
+            //$total = $total - $montoRetRentas - $ganancias;
+
+            $pago->setBaseImponibleRentas($baseImponible);
+            $pago->setRetencionGanancias($ganancias);
+            $pago->setRetencionRentas( $retrentas);
+            $pago->setAdicionalRentas($adicrentas);
+            $pago->setImporte($total);
+            $pago->setSaldo(0);
             $em->persist($pago);
             // cobroDetalle
             $cobro = new CobroDetalle();
@@ -680,10 +773,10 @@ class FacturaController extends Controller {
             $cobro->setPagoProveedor( $pago );
             $em->persist($cobro);
             $em->flush();
-            return true;
+            return $pago->getId();
         }
         catch (\Exception $ex) {
-            return $ex;
+            return $ex->getMessage();
         }
 
     }

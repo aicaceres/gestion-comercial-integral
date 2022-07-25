@@ -494,13 +494,20 @@ class NotaDebCredController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:NotaDebCred:comprobante.pdf.twig',
-                      array( 'nota' => $nota, 'empresa'=>$empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip'=> $logoafip ), $response);
+                    array( 'nota' => $nota, 'empresa'=>$empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip'=> $logoafip ), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
         $hoy = new \DateTime();
+        $filename = $nota->getNotaElectronica()->getComprobanteTxt().'.pdf';
+        if( $this->getParameter('billing_folder') ){
+            $file = $this->getParameter('billing_folder').$filename;
+            if( !file_exists($file) ){
+                file_put_contents( $file, $content, FILE_APPEND);
+            }
+        }
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition'=>'filename='.$nota->getNotaElectronica()->getComprobanteTxt().'.pdf'));
+            'Content-Disposition'=>'filename='.$filename));
     }
 
 

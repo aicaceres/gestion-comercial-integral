@@ -1,5 +1,12 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
+<style>
+.divEdicion select:focus, .divEdicion input:focus, .divEdicion button:focus, .divEdicion a:focus, .divEdicion .select2-container *:focus{
+        color:blue ;
+        font-weight:bold ;
+        background-color: gainsboro;
+    }
+</style>
 <div class="pageheader notab">
     <h1 class="pagetitle">Notas de Débito y Crédito</h1>
 </div><!--pageheader-->
@@ -14,7 +21,7 @@
             <div class="formrows">
                 <div class="two_fields">
                     {{ form_row(form.afipComprobante) }}
-                    {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
+                    {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
                 </div>
                 <div class="two_fields nrofactura">
                     {{ form_row(form.afipPuntoVenta, { 'attr': {'class' : 'width50', 'maxlength':'5', 'title':'Punto de venta'} }) }}
@@ -22,7 +29,7 @@
                 </div>
 
                 <div class="two_fields">
-                {{ form_row(form.proveedor, { 'attr': {'tabindex':'0'} }) }}
+                {{ form_row(form.proveedor, { 'attr': {'class':'select2'} }) }}
                     <div style="font-weight:bold; vertical-align: middle">
                         <span style="padding-right:10px">CUIT:</span><span id="nrocuit"> {% if form.vars.data.proveedor %} {{ form.vars.data.proveedor.cuit }} {% endif %}<span>
                      </div>
@@ -116,7 +123,7 @@
             <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
-                <a class="cancelar" type="button" href="{{ path('compras_notadebcred')}}">Cancelar</a>
+                <a class="cancelar" id="cancelar" type="button" href="{{ path('compras_notadebcred')}}">Cancelar</a>
             </div>
         </fieldset>
         <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
@@ -152,8 +159,27 @@ jQuery(document).ready(function($) {
 
     $(document).on('keypress',function(e){
         var keycode = (e.keyCode ? e.keyCode : e.which);
-        if(keycode == '13'){ e.preventDefault(); }
+        if (keycode == 43) {
+            e.preventDefault();
+            $('#linkAdd').click();
+        }
+        if(keycode == '13'){
+            e.preventDefault();
+            if( $('#linkAdd:focus').length > 0){
+                $('#linkAdd').click();
+            }
+            if( $('.linkDel:focus').length > 0 ){
+                $('.linkDel:focus').click();
+            }
+            if( $('.guardar:focus').length > 0 ){
+                $('.guardar').click();
+            }
+            if( $('.cancelar:focus').length > 0 ){
+                document.getElementById('cancelar').click();
+            }
+        }
     });
+
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
     $collectionHolder = $('table.factura tbody');
@@ -184,12 +210,8 @@ jQuery(document).ready(function($) {
             jQuery(this).val(0);
         totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 );
     });
-   $(document).keypress(function(e) {
-        if (e.which == 43) {
-            e.preventDefault();
-            $('#linkAdd').click();
-        }
-    });
+
+
    /* $('#comprasbundle_notadebcred_tipoNota').on('change',function(){
         actualizaTotales();
     });*/
@@ -264,6 +286,7 @@ jQuery(document).ready(function($) {
 
     actualizaTotales();
 
+    $("#comprasbundle_notadebcred_afipComprobante").select2('focus');
 });
  // funciones personalizas para el formulario
  function addNewItem() {
@@ -286,7 +309,7 @@ jQuery(document).ready(function($) {
         if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  totales(); });
 }
 function addItemFormDeleteLink($itemFormTd) {
-    var $removeFormA = jQuery('<a href="#" title="Quitar" tabIndex="-1"><span class="minus"></span></a>');
+    var $removeFormA = jQuery('<a href="javascript:void(0)" title="Quitar" class="linkDel"><span class="minus"></span></a>');
     $itemFormTd.append($removeFormA);
     $removeFormA.on('click', function(e) {
         var res = true;

@@ -15,6 +15,12 @@ jQuery(function ($) {
 
         $(document).on('keydown', (e) => { detectarControles(e); })
 
+        $('.cancelar').on('click', function () {
+            if (!confirm('Desea cancelar esta operación?')) {
+                return false;
+            }
+        })
+
         cliente = $('.form-horizontal').find('[id*="_cliente"]');
         url_cliente_autocomplete = cliente.attr('url_autocomplete')
         cliente.select2({
@@ -92,6 +98,7 @@ jQuery(function ($) {
                             }
                         });
                     }
+                    actualizaTotales();
                 }
             });
         }).trigger('change');
@@ -136,7 +143,7 @@ jQuery(function ($) {
 
         // al modificar el descuento o recargo si posee permiso
         $('[id*="_descuentoRecargo"]').on('change', function () {
-               actualizaTotales();
+                actualizaTotales();
         });
 
         // al presionar ctrl+enter abrir popup
@@ -147,6 +154,7 @@ jQuery(function ($) {
                 openModal($(this))
             }
         });
+
         // en buscar abrir popup correspondiente
         $(document).on('click','.btn_search',function(e) {
             obj = $(this).parent().find('select');
@@ -488,7 +496,9 @@ function openModalProducto(obj){
             delay: 250,
             data: function (params) {
                 return {
-                searchTerm: params.term // search term
+                searchTerm: params.term, // search term
+                lista: $('[id*="_precioLista"]').val(),
+                cativa: $('#categoriaIva').val()
                 };
             },
             processResults: function (response) {
@@ -499,7 +509,7 @@ function openModalProducto(obj){
             cache: true
             },
             minimumInputLength: 3
-        }).on('change', function() {
+    }).on('change', function () {
             obj = $(this);
             var data = {
                 id: obj.val(),
@@ -639,6 +649,14 @@ function openModalProducto(obj){
             e.preventDefault();
             $('#linkAdd').click();
         }
+
+        if (e.keyCode == 13) {
+            if ($(e.target).is('input[type="text"]')
+                || $(e.target).is('input[type="checkbox"]')) {
+                e.preventDefault();
+            }
+
+        }
     }
 
     // FUNCIONES NOTAS DEBCRED
@@ -738,6 +756,7 @@ function openModalProducto(obj){
         }else{
             // tarjeta
             lastTr.find('[id*="_datosTarjeta_tarjeta"]').attr('required', true);
+            lastTr.find('[id*="_datosTarjeta_tarjeta"]').select2();
             lastTr.find('[id*="_datosTarjeta_numero"]').inputmask(
                 {"mask": "9999 9999 9999 9999",
                     onincomplete: function() {
