@@ -146,35 +146,10 @@ class VentaController extends Controller
                 $em->persist($param);
                 $em->flush();
 
-                // Descuento de stock
-                $this->registrarMovimientoStock($entity->getId(), $entity->getDeposito(), $entity->getDetalles(), '-', $em);
-
-                /*foreach ($entity->getDetalles() as $detalle){
-                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
-                    if ($stock) {
-                        $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
-                    }else {
-                        $stock = new Stock();
-                        $stock->setProducto($detalle->getProducto());
-                        $stock->setDeposito($deposito);
-                        $stock->setCantidad( 0 - $detalle->getCantidad());
-                    }
-                    $em->persist($stock);
-
-    // Cargar movimiento
-                    $movim = new StockMovimiento();
-                    $movim->setFecha($entity->getFechaVenta());
-                    $movim->setTipo('ventas_venta');
-                    $movim->setSigno('-');
-                    $movim->setMovimiento($entity->getId());
-                    $movim->setProducto($detalle->getProducto());
-                    $movim->setCantidad($detalle->getCantidad());
-                    $movim->setDeposito($deposito);
-                    $em->persist($movim);
-                    $em->flush();
-
-                }*/
-
+                if( $entity->getDescuentaStock() ){
+                    // Descuento de stock
+                    $this->registrarMovimientoStock($entity->getId(), $entity->getDeposito(), $entity->getDetalles(), '-', $em);
+                }
                 $em->getConnection()->commit();
                 //$this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
                 // requiere login al volver a ingresar a venta
@@ -229,6 +204,7 @@ class VentaController extends Controller
         $entity = clone $venta;
         $entity->setFechaVenta( new \DateTime() );
         $entity->setCotizacion( $entity->getMoneda()->getCotizacion() );
+        $entity->setDescuentaStock(true);
         $form = $this->createCreateForm($entity,'new');
         return $this->render('VentasBundle:Venta:new.html.twig', array(
             'entity' => $entity,
@@ -267,6 +243,7 @@ class VentaController extends Controller
         $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
         $entity->setMoneda( $moneda );
         $entity->setCotizacion( $moneda->getCotizacion() );
+        $entity->setDescuentaStock( !$presupuesto->getDescuentaStock() );
         // cargar detalle
         foreach($presupuesto->getDetalles() as $det){
             $new = new VentaDetalle();
@@ -335,19 +312,21 @@ class VentaController extends Controller
         if ($editForm->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
-                // realizar los ajustes en el stock - deshacer el movimiento y rehacer
-                $depositoNuevo = $entity->getDeposito();
-                $detalleNuevo = $entity->getDetalles();
-                $difDetalle =  strcmp( $this->getDetalleJson($detalleAnterior) , $this->getDetalleJson($detalleNuevo));
-                if($difDetalle || ($depositoAnterior->getId()!=$depositoNuevo->getId()) ){
-                    // reingresar anteriores articulos al stock
-                    $res = $this->registrarMovimientoStock($entity->getId(), $depositoAnterior, $detalleAnterior, '+', $em);
-                    if($res){
-                        // descontar los nuevos
-                        $res = $this->registrarMovimientoStock($entity->getId(), $depositoNuevo, $detalleNuevo, '-', $em);
-                    }
-                    if(!$res){
-                        throw $this->createNotFoundException('No se realizó el ajuste en el stock.');
+                if( $entity->getDescuentaStock() ){
+                    // realizar los ajustes en el stock - deshacer el movimiento y rehacer
+                    $depositoNuevo = $entity->getDeposito();
+                    $detalleNuevo = $entity->getDetalles();
+                    $difDetalle =  strcmp( $this->getDetalleJson($detalleAnterior) , $this->getDetalleJson($detalleNuevo));
+                    if($difDetalle || ($depositoAnterior->getId()!=$depositoNuevo->getId()) ){
+                        // reingresar anteriores articulos al stock
+                        $res = $this->registrarMovimientoStock($entity->getId(), $depositoAnterior, $detalleAnterior, '+', $em);
+                        if($res){
+                            // descontar los nuevos
+                            $res = $this->registrarMovimientoStock($entity->getId(), $depositoNuevo, $detalleNuevo, '-', $em);
+                        }
+                        if(!$res){
+                            throw $this->createNotFoundException('No se realizó el ajuste en el stock.');
+                        }
                     }
                 }
                 $em->flush();

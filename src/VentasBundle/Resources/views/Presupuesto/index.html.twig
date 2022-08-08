@@ -1,7 +1,7 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Presupuestos</h1>
+    <h1 class="pagetitle">Presupuestos / Remitos</h1>
     <span class="pagedesc">Relación con Clientes</span>
 </div><!--pageheader-->
 {% endblock %}
@@ -33,7 +33,7 @@
                 <th>Usuario</th>
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_presupuesto_new') %}
-                    <a class="editar create" href="{{ path('ventas_presupuesto_new') }}">Nuevo Presupuesto</a>
+                    <a class="editar create" href="{{ path('ventas_presupuesto_new') }}">Nuevo Presupuesto / Remito</a>
                     {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
@@ -41,7 +41,7 @@
         <tbody>
            {% for entity in entities %}
             <tr>
-                <td class="alignright">{{entity.nroPresupuesto}}</td>
+                <td class="alignright">{% if entity.tipo=='R' %}<small style="float:left; font-size:8px;">REMITO</small>  {% endif %} {{entity.nroPresupuesto}}</td>
                 <td><span class="hidden">{{ entity.fechaPresupuesto|date('Ymd') }}</span>{{ entity.fechaPresupuesto|date('d-m-Y') }}</td>
                 <td>{% if entity.nombreCliente %} {{ entity.nombreCliente }} {% else %}  {{ entity.cliente }} {% endif %}</td>
                 <td class="alignright">{{ entity.montoTotal|number_format(3,'.',',') }}</td>
@@ -51,15 +51,15 @@
                         <strong style="height:26px;display:block;"> ANULADO: {{ entity.updated|date('d-m-Y H:i:s') }} | {{ entity.updatedBy.username }} </strong>
                     {% else %}
 
-                        <a href="{{ path('ventas_presupuesto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Presupuesto"></a>
+                        <a href="{{ path('ventas_presupuesto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a>
                         {% if app.user.access(app.session.get('unidneg_id'),'ventas_presupuesto_print') %}
-                        <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" presid="{{entity.id}}"  title="Imprimir Presupuesto"></a>
+                        <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" presid="{{entity.id}}"  title="Imprimir"></a>
                         {% endif %}
 
                         {% if not entity.descuentaStock %}
                             <a href="{{ path('ventas_presupuesto_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar"></a>
                         {% endif %}
-                        <a href="{{ path('ventas_venta_presupuesto', { 'id': entity.id }) }}" class="editar btn btnaction btn_book" title="Generar Venta"></a>
+                        <a href="{{ path('ventas_venta_presupuesto', { 'id': entity.id }) }}" class="editar btn btnaction btn_book" title="Generar Nueva Venta"></a>
                     {% endif %}
                 </td>
             </tr>

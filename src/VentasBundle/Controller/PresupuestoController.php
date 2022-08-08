@@ -103,6 +103,7 @@ class PresupuestoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $unidneg_id = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
+
         $entity = new Presupuesto();
         $form = $this->createCreateForm($entity,'create');
         $form->handleRequest($request);
@@ -271,7 +272,7 @@ class PresupuestoController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:Presupuesto:presupuesto.pdf.twig',
-                      array( 'presupuesto' => $presupuesto, 'empresa'=>$empresa, 'logo' => $logo ), $response);
+                array( 'presupuesto' => $presupuesto, 'empresa'=>$empresa, 'logo' => $logo ), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

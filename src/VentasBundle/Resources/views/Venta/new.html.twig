@@ -59,8 +59,16 @@
 
         </fieldset>
         <fieldset class="fields" style="padding-top:10px">
+            <div style="display:inline-block; width: 70%;">
                 {{ form_label(form.concepto) }}
                 {{ form_widget(form.concepto) }}
+            </div>
+            {% if app.user.isAdmin(app.session.get('unidneg_id')) %}
+                <div style="display:inline-block; width: 20%;">
+                    {{ form_label(form.descuentaStock, null, {'label_attr': {'style': 'width:50%'}})}}
+                    {{ form_widget(form.descuentaStock)}}
+                </div>
+            {% endif %}
         </fieldset>
 
         <fieldset>
@@ -105,19 +113,18 @@ jQuery(function ($) {
     $(window).on('load', function () {
         // confirm on submit
         $('#ventasbundle_venta').on('submit', function(){
-            /*if( !validlogin ){
-                jAlert('No posee login válido para realizar ventas!', 'Atención', function(){
-                    window.location.href = "{{ path('ventas_venta')}}";
-                });
-                return false;
-            }*/
-            // controlar que haya items cargados
             let txt = 'VENTA:   #'+$('#ventasbundle_venta_nroOperacion').val();
             if(idVenta){
-                txt = txt + '\n\n' + 'CONFIRMA MODIFICAR LA VENTA?' + '\n' +'Se realizará el ajuste de los productos en el stock!';
+                txt = txt + '\n' + 'Confirma modificar la venta?';
+                txtadic = '\n\n' +'NO SE REALIZARÁ EL AJUSTE DEL STOCK!!!';
             }else{
-                txt = txt + '\n\n' + 'CONFIRMA REGISTRAR LA VENTA?' + '\n' +'Se realizará el descuento de los productos en el stock!';
+                txt = txt + '\n' + 'Confirma registrar la venta?';
+                txtadic = '\n\n' +'NO SE REALIZARÁ EL DESCUENTO EN EL STOCK!!!';
             }
+            if ( !$('#ventasbundle_venta_descuentaStock').attr('checked')){
+                txt += txtadic;
+            }
+            // controlar que haya items cargados
             if( $('tbody tr.item').length > 0 ){
                 if (!confirm(txt)) {
                     return false;

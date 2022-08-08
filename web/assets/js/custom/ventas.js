@@ -21,6 +21,7 @@ jQuery(function ($) {
             }
         })
 
+
         cliente = $('.form-horizontal').find('[id*="_cliente"]');
         url_cliente_autocomplete = cliente.attr('url_autocomplete')
         cliente.select2({
@@ -140,6 +141,13 @@ jQuery(function ($) {
             });
         });
         $('[id*="_moneda"]').change();
+
+        $('[id*="_descuentoRecargo"]').on('change', function () {
+            if ($(this).val() > 0) {
+                alert('No se pueden realizar recargos!!');
+                $(this).val(0);
+            }
+        });
 
         // al modificar el descuento o recargo si posee permiso
         $('[id*="_descuentoRecargo"]').on('change', function () {
@@ -288,6 +296,7 @@ jQuery(function ($) {
             })
             .dialog({
                 modal: true, autoOpen: true, title: title, width: '40%', minHeight: 400,
+                position: { my: "top", at: "top", of: ".bodywrapper" },
                 close: function() {
                     // volver focus al control
                     $(obj).focus();
@@ -445,7 +454,7 @@ function openModalProducto(obj){
                 "bInfo" : true,
                 "bSearchable": true,
                 "bLengthChange": true,
-                "pageLength":10,
+                "pageLength":25,
                 "order": [[0, 'asc']],
                 "sPaginationType": "full_numbers",
                 "oLanguage": {

@@ -100,7 +100,7 @@ class FormaPago {
     }
 
     public function __toString() {
-        return $this->nombre;
+        return  $this->id.' - ' . $this->nombre;
     }
 
     public function getTextSelect(){

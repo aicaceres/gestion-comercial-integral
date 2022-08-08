@@ -26,7 +26,7 @@
         font-weight: bold;
     }
     /* Estilo para focus */
-    .divForm select:focus, .divForm input:focus, .divForm button:focus, .divForm a:focus, .divForm .select2-container *:focus{
+    .divForm select:focus, .divForm input:focus, .divForm button:focus, .divForm a:focus, .divForm .select2-container *:focus, #popup_prompt{
         color:blue ;
         font-weight:bold ;
         background-color: gainsboro;

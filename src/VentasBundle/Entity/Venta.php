@@ -36,7 +36,10 @@ class Venta {
      * @ORM\Column(name="estado", type="string")
      */
     protected $estado = 'PENDIENTE';
-
+    /**
+     * @ORM\Column(name="descuenta_stock", type="boolean",nullable=true)
+     */
+    protected $descuentaStock = true;
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
@@ -653,5 +656,28 @@ class Venta {
     public function getConcepto()
     {
         return $this->concepto;
+    }
+
+    /**
+     * Set descuentaStock
+     *
+     * @param boolean $descuentaStock
+     * @return Venta
+     */
+    public function setDescuentaStock($descuentaStock)
+    {
+        $this->descuentaStock = $descuentaStock;
+
+        return $this;
+    }
+
+    /**
+     * Get descuentaStock
+     *
+     * @return boolean 
+     */
+    public function getDescuentaStock()
+    {
+        return $this->descuentaStock;
     }
 }

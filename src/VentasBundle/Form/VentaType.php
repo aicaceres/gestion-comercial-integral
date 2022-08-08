@@ -39,10 +39,11 @@ class VentaType extends AbstractType {
                 'class' => 'ConfigBundle:Moneda',
                 'required' => true, 'label' => 'MONEDA: '
             ))
+            ->add('descuentaStock',null,array('label' => 'DESCONTAR STOCK:','required'=>false))
             ->add('cotizacion','hidden')
             ->add('concepto','textarea',
-                    array('label'=>'Concepto Adicional:','required'=>false, 
-                          'attr'=>array('rows'=>'1','cols'=>'1', 'class'=>'mediuminput')))
+                    array('label'=>'Concepto Adicional:','required'=>false,
+                          'attr'=>array('rows'=>'1','cols'=>'1', 'class'=>'largeinput')))
             ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
             ->add('detalles', 'collection', array(
                 'type' => new VentaDetalleType($type,$data),

@@ -20,10 +20,10 @@ class CobroDetalleTarjetaType extends AbstractType {
                     'required' => false
                 ))
                 ->add('cupon')
-                ->add('cuota')
+                ->add('cuota',null, array('required' => true) )
                 ->add('numero')
                 ->add('firmante')
-                ->add('codigoAutorizacion',null,array('required' => true))
+                ->add('codigoAutorizacion',null,array('required' => false))
                 //->add('presentarAlFacturar','choice', array('required' => false, 'expanded' => false,
                 //   'choices' => array(1 => 'Si', 0 => 'No') ))
         ;

@@ -2,7 +2,7 @@ jQuery(document).ready(function($) {
     $('.saveFactura').on('click', function() {
         if ($('tbody tr').length > 0) {
             var url = $('form').attr('action');
-            jFactura('Cantidad de copias?&nbsp;&nbsp;', $('#cantCopias').val(), 'Impresion de Facturas', function(r) {
+            jPresupuesto('Seleccione tipo de impresión:', 'P', 'Impresion de Presupuestos', function(r) {
                 if (r) {
                     $('#cantCopias').val(r);
                     $.ajax({

@@ -77,7 +77,10 @@ class Presupuesto {
      * @ORM\Column(name="descuenta_stock", type="boolean",nullable=true)
      */
     protected $descuentaStock = false;
-
+    /**
+     * @ORM\Column(name="tipo", type="string")
+     */
+    protected $tipo = 'P';
     /**
      * @var integer $validez
      * validez en dias
@@ -631,5 +634,28 @@ class Presupuesto {
     public function getValidez()
     {
         return $this->validez;
+    }
+
+    /**
+     * Set tipo
+     *
+     * @param string $tipo
+     * @return Presupuesto
+     */
+    public function setTipo($tipo)
+    {
+        $this->tipo = $tipo;
+
+        return $this;
+    }
+
+    /**
+     * Get tipo
+     *
+     * @return string 
+     */
+    public function getTipo()
+    {
+        return $this->tipo;
     }
 }

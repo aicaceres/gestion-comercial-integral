@@ -8,6 +8,7 @@
 <div class="pageheader notab">
     <h1 class="pagetitle">PRESUPUESTO:
         <span style="margin-left:10px" class="nroOperacion">#{{entity.nroPresupuesto}}</span>
+{% if entity.tipo=='R' %}&nbsp;&nbsp; -- REMITO -- {% endif %}
         <span class="floatright fechahora">
             {{entity.fechaPresupuesto|date('d/m/Y')}}
             <span class="js-hora"> {{entity.fechaPresupuesto|date('H:i:s')}}</span> &nbsp; | &nbsp; {{app.user.username}}
@@ -56,10 +57,12 @@
                 {{ form_label(form.deposito)}}
                 {{ form_widget(form.deposito,{'attr':{'style':'width:80%'}}) }}
             </div>
+            {% if app.user.isAdmin(app.session.get('unidneg_id')) %}
             <div style="display:inline-block; width: 20%;">
                 {{ form_label(form.descuentaStock, null, {'label_attr': {'style': 'width:35%'}})}}
                 {{ form_widget(form.descuentaStock)}}
             </div>
+            {% endif %}
         </fieldset>
 
         <fieldset>
@@ -79,7 +82,7 @@
             <div class="actionbutton">
                 {% if entity.id %}
                 <a type="button" class="floatleft delete_button" href="{{ path('ventas_presupuesto_anular', { 'id': entity.id })}}">ANULAR</a> {% endif %}
-                <button class="guardar tabbable" type="submit" >Guardar</button>
+                <button class="guardar tabbable" type="button" >Guardar</button>
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -107,26 +110,46 @@ jQuery(function ($) {
         // confirm on submit
         $('.guardar').on('click', function(){
             // controlar que haya items cargados
-            let txt = 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
-            txt = txt + '\n\n' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
+            let txt = '<span>';
+            txt += 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
+            txt += '\n' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
             if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") ){
-                txt = txt + '\n' +'Se realizará el descuento de los productos en el stock!';
+                txt += '\n' +'<b>Se realizará el descuento de los productos en el stock!</b>';
             }
+            txt += '</span>';
             // detectar inputs invalidos
             if( $(':invalid').length > 0 ){
                 $(':invalid').focus();
                 return false;
             }
             if( $('tbody tr.item').length > 0 ){
-                if (!confirm(txt)) {
-                return false;
-                }
-                $('#ventasbundle_presupuesto').submit();
+                txt = txt + '\n\n' +'Seleccionar Tipo:';
+                jPresupuesto(txt, 'P', 'Impresión de Presupuestos', function(r) {
+                    if (r) {
+                        if( r=='R' ){
+                            $('#ventasbundle_presupuesto_descuentaStock').attr("checked",true);
+                        }
+                        $('#ventasbundle_presupuesto_tipo').val(r);
+                        $('#ventasbundle_presupuesto').submit();
+                    }
+                });
+
             }else{
                 alert('Debe ingresar items al presupuesto');
                 return false;
             }
         });
+
+        $(document).on('change','#popup_prompt',function() {
+            let txt = '<span>';
+            txt += 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
+            txt += '<br>' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
+            if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") || $('#popup_prompt').val() ==='R' ){
+                txt += '<br>' +'<b>Se realizará el descuento de los productos en el stock!</b>';
+            }
+            txt += '</span>';
+            $('#popup_message span').html( txt );
+        })
 
     });
 

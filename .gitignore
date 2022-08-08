@@ -24,3 +24,5 @@
 /composer.json
 /composer.lock
 *.php~
+*.sql
+.htaccess

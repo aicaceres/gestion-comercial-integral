@@ -32,6 +32,7 @@ class PresupuestoType extends AbstractType {
                     'choice_label' => 'nombre'
                 ))
                 ->add('descuentaStock',null,array('label' => 'DESCONTAR:','required'=>false))
+                ->add('tipo','hidden')
                 ->add('nombreCliente',null,array('required'=>false))
                 ->add('validez',null,array('label' => 'VALIDEZ [días]:','required'=>false))
                 ->add('detalles', 'collection', array(

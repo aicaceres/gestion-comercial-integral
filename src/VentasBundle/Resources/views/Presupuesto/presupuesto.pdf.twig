@@ -15,7 +15,7 @@
                             </td>
                             <td border.type="none" text-align="center" vertical-align="middle">
                                 <div width="100%" font-size="16px" padding-bottom="10px">
-                                    <strong>PRESUPUESTO</strong>
+                                    <strong> {% if (presupuesto.tipo=='P') %} PRESUPUESTO {% else %} REMITO {% endif %}</strong>
                                 </div>
                                 <div font-size="11px" padding-bottom="5px">
                                     <strong>Número: {{presupuesto.nroPresupuestoTxt}} </strong>
@@ -130,18 +130,18 @@
                     {{item.nombreProducto}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{item.precioUnitarioItem|number_format(1,'.',',')}}
+                    {% if (presupuesto.tipo=='P') %}  {{item.precioUnitarioItem|number_format(1,'.',',')}} {% endif %}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{item.producto.iva|number_format(2,'.',',')}}
+                    {% if (presupuesto.tipo=='P') %} {{item.producto.iva|number_format(2,'.',',')}} {% endif %}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{item.totalItem|number_format(2,'.',',')}}
+                    {% if (presupuesto.tipo=='P') %}  {{item.totalItem|number_format(2,'.',',')}} {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </table>
-
+{% if (presupuesto.tipo=='P') %}
         <table font-size="9px" padding-top="100px">
             <tr margin-bottom="8px">
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
@@ -155,6 +155,6 @@
                 </td>
             </tr>
         </table>
-
+{% endif %}
     </dynamic-page>
 </pdf>
