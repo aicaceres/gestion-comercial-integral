@@ -599,7 +599,7 @@ function actualizarSuma(){
     });
     $('.pago').html(pagos.toFixed(2));
     vuelto = pagos.toFixed(2) - total.toFixed(2);
-    $('.vuelto').html(vuelto.toFixed(2))
+    $('.vuelto').html(vuelto.toFixed(2).replace('.',','))
     $('#linkAdd').toggle( (vuelto < 0) )
 
     // verificar datos faltantes

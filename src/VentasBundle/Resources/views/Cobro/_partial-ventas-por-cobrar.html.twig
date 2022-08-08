@@ -42,7 +42,7 @@
             </td>
             <td class="alignright">
                 <a href="{{ path('ventas_cobro_facturar', { 'id': entity.id }) }}" title="Cobrar esta venta">
-                <span style="float:left"> {{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(3,'.',',') }}
+                <span style="float:left"> {{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(3,',','.') }}
                 </a>
             </td>
             <td>{{entity.createdBy.nombre|upper }}</td>

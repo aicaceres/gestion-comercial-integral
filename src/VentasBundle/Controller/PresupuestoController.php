@@ -212,15 +212,57 @@ class PresupuestoController extends Controller {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_venta_new');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        $descuentaStock = $entity->getDescuentaStock();
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra Presupuesto.');
         }
         $editForm = $this->createEditForm($entity,'create');
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
-            $em->flush();
-            $this->addFlash('success', 'Los datos fueron modificados con éxito!');
-            return $this->redirect($this->generateUrl('ventas_presupuesto'));
+            $em->getConnection()->beginTransaction();
+            try{
+
+                $em->flush();
+
+                if( !$descuentaStock && $entity->getDescuentaStock() ){
+                    // Descuento de stock
+                    $deposito = $entity->getDeposito();
+                    foreach ($entity->getDetalles() as $detalle){
+                        $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                        if ($stock) {
+                            $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
+                        }else {
+                            $stock = new Stock();
+                            $stock->setProducto($detalle->getProducto());
+                            $stock->setDeposito($deposito);
+                            $stock->setCantidad( 0 - $detalle->getCantidad());
+                        }
+                        $em->persist($stock);
+        // Cargar movimiento
+                        $movim = new StockMovimiento();
+                        $movim->setFecha(new \DateTime());
+                        $movim->setTipo('ventas_presupuesto');
+                        $movim->setSigno('-');
+                        $movim->setMovimiento($entity->getId());
+                        $movim->setProducto($detalle->getProducto());
+                        $movim->setCantidad($detalle->getCantidad());
+                        $movim->setDeposito($deposito);
+                        $em->persist($movim);
+                        $em->flush();
+                    }
+
+                }
+
+
+                $em->getConnection()->commit();
+                $this->addFlash('success', 'Los datos fueron modificados con éxito!');
+                return $this->redirect($this->generateUrl('ventas_presupuesto'));
+            }
+            catch (\Exception $ex) {
+                $this->addFlash('error', $ex->getMessage());
+                $em->getConnection()->rollback();
+            }
+
         }
         $errors = array();
         if ($editForm->count() > 0) {

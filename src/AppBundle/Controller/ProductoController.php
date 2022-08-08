@@ -809,6 +809,7 @@ class ProductoController extends Controller {
             $deposito = $request->get('deposito');
             $cotizacion = $request->get('cotizacion');
             $categoriaIva = $request->get('categoriaIva');
+            $descuento = $request->get('descuento');
             $esPresupuesto = json_decode( $request->get('esPresupuesto') );
 
         }
@@ -869,6 +870,11 @@ class ProductoController extends Controller {
                         }else{
                             $precioConv = round( ( $precio * ( 1 + $alicuota/100) ) / $cotizacion ,3);
                         }
+                    }
+
+                    // si hay descuento aplicar al precio a mostrar
+                    if( $descuento <0 ){
+                        $precioConv = round($precioConv * ( 1 + $descuento/100),3);
                     }
 
                     $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv ));

@@ -4,7 +4,7 @@
     <tr class="resumen">
       <th style="width:18%">
         Subtotal: <span class="simbolo">{{simbolo}}</span>&nbsp;
-            <span id="importeSubtotal" >{{ (entity.subTotal)|number_format(3,'.',',')}}</span>.-
+            <span id="importeSubtotal" >{{ (entity.subTotal)|number_format(3,',','.')}}</span>.-
       </th>
       <th >
         Descuento/Recargo [
@@ -12,23 +12,23 @@
                 {% set disabledDescuentoRecargo = app.user.access(app.session.get('unidneg_id'),'ventas_venta_descuento') ? false : true %}
                 {{ form_widget(form.descuentoRecargo, {'attr': {'disabled': disabledDescuentoRecargo, 'class':'width50'} }) }}
             {% else %}
-                {{ entity.descuentoRecargo|number_format(2,'.',',') }}
+                {{ entity.descuentoRecargo|number_format(2,',','.') }}
             {% endif %}
         %]:
         <span class="simbolo">{{simbolo}}</span>&nbsp;
-        <span id="importeRecargo">{{ entity.totalDescuentoRecargo|number_format(3,'.',',') }}</span>.-
+        <span id="importeRecargo">{{ entity.totalDescuentoRecargo|number_format(3,',','.') }}</span>.-
       </th>
       <th id="ivaTd" style=" {% if not showiva %} display:none; {% endif %} width:16%">
         IVA: <span class="simbolo">{{simbolo}}</span>&nbsp;
-        <span id="importeIVA">{{ entity.totalIva|number_format(3,'.',',') }}</span>.-
+        <span id="importeIVA">{{ entity.totalIva|number_format(3,',','.') }}</span>.-
       </th>
       <th id="iibbTd" style="{% if not showiibb %} display:none; {% endif %}width:20%">
         Perc.IIBB [3.50%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
-        <span id="importeIIBB">{{ entity.totalIibb|number_format(3,'.',',') }}</span>.-
+        <span id="importeIIBB">{{ entity.totalIibb|number_format(3,',','.') }}</span>.-
       </th>
       <th style="width:18%" class="gralTotalTd red">
         TOTAL: <span class="simbolo">{{simbolo}}</span>&nbsp;<span id="importeTotal">
-          {{ entity.montoTotal|number_format(3,'.',',')}}
+          {{ entity.montoTotal|number_format(3,',','.')}}
         </span>.-
       </th>
     </tr>

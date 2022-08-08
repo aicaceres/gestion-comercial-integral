@@ -32,7 +32,7 @@
                 <th>Total</th>
                 <th>Usuario</th>
                 <th class="nosort actionbutton addbutton">
-                   {% if app.user.access(app.session.get('unidneg_id'),'ventas_presupuesto_new') %}
+                   {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') %}
                     <a class="editar create" href="{{ path('ventas_presupuesto_new') }}">Nuevo Presupuesto / Remito</a>
                     {% else %} &nbsp; {% endif %}
                 </th>

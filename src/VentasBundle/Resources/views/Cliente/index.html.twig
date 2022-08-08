@@ -63,7 +63,7 @@ jQuery(document).ready(function($){
                     // registrar seleccion
                     $(row).find('td:nth-child(6n)').addClass('alignright');
                     saldo = parseFloat( $(row).find('td:nth-child(6n)').html() );
-                    $(row).find('td:nth-child(6n)').html( saldo.toFixed(3) );
+                    $(row).find('td:nth-child(6n)').html( saldo.toFixed(3).replace('.',',') );
                     $(row).find('td:nth-child(7n)').addClass('aligncenter');
                  },
                 // Server-side parameters

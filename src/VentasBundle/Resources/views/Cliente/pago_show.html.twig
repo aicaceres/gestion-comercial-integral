@@ -52,7 +52,7 @@
             <div style="display: inline-block; width: 15%">
                 <label>TOTAL:</label>
                 <strong> {{ entity.moneda.simbolo }} </strong>
-                <input class="number width100" disabled="disabled" value="{{ entity.total|number_format(2,'.',',') }}">
+                <input class="number width100" disabled="disabled" value="{{ entity.total|number_format(2,',','.') }}">
             </div>
             <div style="display: inline-block; width: 20%;">
                 <label>Generar NC:</label>
@@ -60,9 +60,9 @@
                 {% if entity.generaNotaCredito %}
                 <span class="nota-credito" style="padding: 5px;">
                     <strong> {{ entity.moneda.simbolo }} </strong>
-                    <span>{{ entity.montoNc|number_format(2,'.',',') }}</span>
+                    <span>{{ entity.montoNc|number_format(2,',','.') }}</span>
                 </span>
-               
+
                 {% endif %}
             </div>
         </fieldset>
@@ -87,7 +87,7 @@
                                     <label>EFECTIVO: </label>
                                 </td>
                                 <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,',','.') }}</span>
                                 </td>
                             </tr>
                         {% endif %}
@@ -108,7 +108,7 @@
                                     </div>
                                 </td>
                                 <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,',','.') }}</span>
                                 </td>
                             </tr>
                         {% endif %}
@@ -135,7 +135,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,',','.') }}</span>
                                 </td>
                             </tr>
                         {% endif %}
@@ -148,12 +148,12 @@
                             <th style="text-align:right">
                                 IMPORTE: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="pago" style="font-size:16px" >{{importe|number_format(3,'.',',')}}</span>.-
+                                <span class="pago" style="font-size:16px" >{{importe|number_format(3,',','.')}}</span>.-
                             </th>
                             <th width="150px" class="vueltoTh">
                                 CAMBIO: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="vuelto" style="font-size:16px"> {{ 0|number_format(2,'.',',')}}  </span>
+                                <span class="vuelto" style="font-size:16px"> {{ 0|number_format(2,',','.')}}  </span>
                             </th>
                         </tr>
                     </thead>

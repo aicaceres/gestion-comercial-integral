@@ -295,7 +295,7 @@ jQuery(function ($) {
                 eval( fnc )
             })
             .dialog({
-                modal: true, autoOpen: true, title: title, width: '40%', minHeight: 400,
+                modal: true, autoOpen: true, title: title, width: '50%', minHeight: 400,
                 position: { my: "top", at: "top", of: ".bodywrapper" },
                 close: function() {
                     // volver focus al control
@@ -409,6 +409,7 @@ function openModalProducto(obj){
     const deposito = $('[id*="_deposito"]').val();
     const cotizacion = $('[id*="_cotizacion"]').val();
     const categoriaIva = $('#categoriaIva').val();
+    const descuento = $('[id*="_descuentoRecargo"]').val();
     const url_list = obj.attr('url_list');
 
     var oTable = $('#productos_table').dataTable({
@@ -445,7 +446,8 @@ function openModalProducto(obj){
                     "data" : { 'listaprecio' : listaprecio,
                                 'deposito' : deposito,
                                 'cotizacion': cotizacion,
-                                'categoriaIva' : categoriaIva,
+                                'categoriaIva': categoriaIva,
+                                'descuento': descuento,
                                 //'esPresupuesto' : esPresupuesto,
                             },
                 },
@@ -615,17 +617,17 @@ function openModalProducto(obj){
         totalIvaResumen = totalIVA/cotizacion;
         totalIibbResumen = totalIIBB/cotizacion;
         $('#subtotalTh').html( subTotalResumen.toFixed(3));
-        $('#importeSubtotal').html(subTotalResumen.toFixed(3));
+        $('#importeSubtotal').html(subTotalResumen.toFixed(3).replace('.',','));
 
         if( (categoriaIva != 'I' && categoriaIva != 'M') ){
             descrec = subTotalResumen * (porcentaje/100);
         }
         const totalgral = subTotalResumen + descrec + totalIvaResumen + totalIibbResumen;
-        $('#importeRecargo').text(descrec.toFixed(3));
-        $('#importeTotal').text(totalgral.toFixed(3));
+        $('#importeRecargo').text(descrec.toFixed(3).replace('.',','));
+        $('#importeTotal').text(totalgral.toFixed(3).replace('.',','));
         // iva e iibb
-        $('#importeIVA').text( totalIvaResumen.toFixed(3));
-        $('#importeIIBB').text( totalIibbResumen.toFixed(3));
+        $('#importeIVA').text( totalIvaResumen.toFixed(3).replace('.',','));
+        $('#importeIIBB').text( totalIibbResumen.toFixed(3).replace('.',','));
 
         $collectionHolder.find('.ordTd').each(function(index) {
             $(this).html(index+1);
@@ -685,7 +687,8 @@ function openModalProducto(obj){
         if (tipoPago == 'CTACTE') {
             vuelto = 0;
         } else {
-            total = parseFloat( $('#importeTotal').html() );
+            total = parseFloat($('#importeTotal').html());
+            console.log(total)
             pagos = 0;
             items = $(".tabla-pagos tbody tr.item");
             items.each(function(){
@@ -694,7 +697,7 @@ function openModalProducto(obj){
             });
             $('.pago').html(pagos.toFixed(2));
             vuelto = pagos.toFixed(2) - total.toFixed(2);
-            $('.vuelto').html(vuelto.toFixed(2))
+            $('.vuelto').html(vuelto.toFixed(2).replace('.',','))
             $('#linkAddPago').toggle( (vuelto < 0) )
         }
         // verificar datos faltantes
