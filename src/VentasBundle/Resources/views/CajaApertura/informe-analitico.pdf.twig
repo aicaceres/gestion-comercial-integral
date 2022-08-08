@@ -40,7 +40,7 @@
             <tr font-size="9px">
                 <td border.color="#999999" padding="10px"><b>TOTAL EFECTIVO</b></td>
                 <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                   <b> {{ tot_efectivo|number_format(3,'.',',') }} </b>
+                   <b> {{ tot_efectivo|number_format(3,',','.') }} </b>
                 </td>
             </tr>
         </table>
@@ -68,7 +68,7 @@
                         {{ mov.datosTarjeta.numero ?? '0000 0000 0000 0000' }}
                     </td>
                     <td border.type="none"  vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,'.',',') }}
+                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,',','.') }}
                     </td>
                 </tr>
             {% else %}
@@ -84,7 +84,7 @@
             <tr font-size="9px" margin-top="10px">
                 <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL TARJETAS CRÉDITOS</b></td>
                 <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                   <b> {{ tot_tarjeta|number_format(3,'.',',') }} </b>
+                   <b> {{ tot_tarjeta|number_format(3,',','.') }} </b>
                 </td>
             </tr>
         </table>
@@ -112,7 +112,7 @@
                         {{ mov.chequeRecibido.nroCheque }}
                     </td>
                     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,'.',',') }}
+                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,',','.') }}
                     </td>
                 </tr>
             {% else %}
@@ -128,7 +128,7 @@
             <tr font-size="9px" margin-top="10px">
                 <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL CHEQUES</b></td>
                 <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                   <b> {{ tot_cheque|number_format(3,'.',',') }} </b>
+                   <b> {{ tot_cheque|number_format(3,',','.') }} </b>
                 </td>
             </tr>
         </table>
@@ -138,13 +138,13 @@
             <tr font-size="8px" margin-top="10px">
                 <td border.type="none" padding-right="5px" text-align="right">Cambio del día</td>
                 <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                   <b> {{ tot_vuelto|number_format(3,'.',',') }} </b>
+                   <b> {{ tot_vuelto|number_format(3,',','.') }} </b>
                 </td>
             </tr>
             <tr font-size="10px" margin-top="10px" font-type="DejaVuSansMono">
                 <td border.color="#999999" padding="10px"><b>TOTAL CAJA ANALÍTICA</b></td>
                 <td border.color="#999999" vertical-align="middle" text-align="right"  width="3 cm">
-                   <b> {{ (tot_efectivo - tot_vuelto + tot_tarjeta + tot_cheque)|number_format(3,'.',',') }} </b>
+                   <b> {{ (tot_efectivo - tot_vuelto + tot_tarjeta + tot_cheque)|number_format(3,',','.') }} </b>
                 </td>
             </tr>
         </table>

@@ -56,7 +56,7 @@
                     <td class="alignright">{{entity.concepto}}</td>
                     <td class="alignright debe">{{entity.importe}}</td>
                     <td class="alignright haber"></td>
-                    <td class="alignright">{{saldo|number_format(2,'.',',')}}</td>
+                    <td class="alignright">{{saldo|number_format(2,',','.')}}</td>
                 </tr>
                 {%else%}
             <tr id="{{loop.index}}">
@@ -82,18 +82,18 @@
                     <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.id }) }}" style="float:right"><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                 {% endif %}
                 </td>
-                <td class="alignright debe">{% if entity.tipo in ['0','1','4'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
-                <td class="alignright haber">{% if entity.tipo in ['3','2'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
-                <td class="alignright">{{saldo|number_format(2,'.',',')}}</td>
+                <td class="alignright debe">{% if entity.tipo in ['0','1','4'] %}{{entity.importe|number_format(2,',','.')}}{% endif %}</td>
+                <td class="alignright haber">{% if entity.tipo in ['3','2'] %}{{entity.importe|number_format(2,',','.')}}{% endif %}</td>
+                <td class="alignright">{{saldo|number_format(2,',','.')}}</td>
             </tr>
             {%endif%}
            {% endfor %}
         </tbody>
         <tfoot>
             <th colspan="4"></th>
-            <th class="alignright" >{{debe|number_format(2,'.',',')}}</th>
-            <th class="alignright" >{{haber|number_format(2,'.',',')}}</th>
-            <th class="alignright saldo_ctacte" >{{saldo|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{debe|number_format(2,',','.')}}</th>
+            <th class="alignright" >{{haber|number_format(2,',','.')}}</th>
+            <th class="alignright saldo_ctacte" >{{saldo|number_format(2,',','.')}}</th>
         </tfoot>
     </table>
 </div>

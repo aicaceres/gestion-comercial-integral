@@ -76,7 +76,7 @@
                     <tr>
                         <td>{{ apertura.id }}</td>
                         <td>{{ apertura.fechaApertura|date('d-m-Y H:i') }}</td>
-                        <td class="hidden">{{ apertura.montoApertura|number_format(2,'.',',') }}</td>
+                        <td class="hidden">{{ apertura.montoApertura|number_format(2,',','.') }}</td>
                         <td>{{ apertura.createdBy.username|upper }}</td>
                         <td style="background:#868686;padding:1px;"></td>
                         <td>{% if apertura.fechaCierre %}
@@ -85,9 +85,9 @@
                                 <a target="_blank" title="Movimientos" href="{{ path('ventas_apertura_arqueo',{'id':apertura.id}) }}" class="hidden arqueo-caja anchorbutton"> Movimientos </a>
                             {% endif %}
                         </td>
-                        <td>{% if apertura.fechaCierre  %}{{apertura.montoCierre|number_format(2,'.',',')}}{% endif %}</td>
+                        <td>{% if apertura.fechaCierre  %}{{apertura.montoCierre|number_format(2,',','.')}}{% endif %}</td>
                         <td>{% if apertura.fechaCierre %}{{ apertura.updatedBy.username }}{% endif %}</td>
-                        <td class="hidden {% if apertura.diferencia<0 %} rojo {% endif %}" >{% if apertura.fechaCierre %}{{apertura.diferencia|number_format(2,'.',',')}}{% endif %}</td>
+                        <td class="hidden {% if apertura.diferencia<0 %} rojo {% endif %}" >{% if apertura.fechaCierre %}{{apertura.diferencia|number_format(2,',','.')}}{% endif %}</td>
                         <td>{% if apertura.fechaCierre %}
                                 {% if  apertura.movimientos|length == 0  %}
                                     <span style="font-size:8px"> SIN MOVIMIENTOS </span>

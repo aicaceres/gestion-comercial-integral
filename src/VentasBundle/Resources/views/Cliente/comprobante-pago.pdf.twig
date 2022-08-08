@@ -65,7 +65,7 @@
                                 <div>Op: {{app.user|upper}} - {{'now'|date('d-m-Y H:i')}} </div>
                             </td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" margin-top="8px" font-size="18px"><strong>Total:</strong></td>
-                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ totalpago|number_format(2,'.',',')}}</strong>
+                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ totalpago|number_format(2,',','.')}}</strong>
                             </td>
                         </tr>
                     </table>
@@ -118,7 +118,7 @@
                     Pago imputado a: {{pago.comprobantesTxt}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{totalpago|number_format(2,'.',',')}}
+                    {{totalpago|number_format(2,',','.')}}
                 </td>
             </tr>
             {% if pago.generaNotaCredito %}
@@ -130,7 +130,7 @@
                     Descuento por pago adelantado ( NC {{pago.notaDebCred.notaElectronica.comprobanteTxt}} )
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{pago.montoNc*-1|number_format(2,'.',',')}}
+                    {{pago.montoNc*-1|number_format(2,',','.')}}
                 </td>
             </tr>
             {% endif %}

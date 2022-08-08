@@ -48,7 +48,7 @@
                     <td>{{ mov.datosTarjeta.tarjeta }}</td>
                     <td>{{ mov.datosTarjeta.numero }}</td>
                     <td class="alignright">
-                            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,'.',',') }}
+                            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,',','.') }}
                     </td>
                 </tr>
             {% endfor %}

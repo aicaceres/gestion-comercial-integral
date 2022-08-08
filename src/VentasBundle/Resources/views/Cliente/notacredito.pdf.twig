@@ -69,16 +69,16 @@
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="3px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="3px">
                                 <span> {{nota.moneda.simbolo}}
-                                {{(nota.subTotal)|number_format(2,'.',',')}}
+                                {{(nota.subTotal)|number_format(2,',','.')}}
                                 </span>
                             </td>
                         </tr>
                         <tr>
                             <td border.type="none" font-size="8px">Op: {{app.user|upper}} - {{'now'|date('d-m-Y H:i')}} </td>
-                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{nota.descuentoRecargo}}%]: {{nota.moneda.simbolo}} {{nota.totalDescuentoRecargo|number_format(3,'.',',')}}</td>
+                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{nota.descuentoRecargo}}%]: {{nota.moneda.simbolo}} {{nota.totalDescuentoRecargo|number_format(3,',','.')}}</td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
-                                <span>{{nota.moneda.simbolo}} {{ (nota.subTotal + nota.totalDescuentoRecargo)|number_format(2,'.',',') }}</span>
+                                <span>{{nota.moneda.simbolo}} {{ (nota.subTotal + nota.totalDescuentoRecargo)|number_format(2,',','.') }}</span>
                             </td>
                         </tr>
                         {% if nota.notaElectronica.letra == 'A' %}
@@ -87,7 +87,7 @@
                             <td border.type="none"></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>IVA:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
-                                <span>{{nota.moneda.simbolo}} {{ nota.totalIva|number_format(2,'.',',')}}</span>
+                                <span>{{nota.moneda.simbolo}} {{ nota.totalIva|number_format(2,',','.')}}</span>
                             </td>
                         </tr>
                             {% if nota.cliente.categoriaIva == 'I' %}
@@ -96,7 +96,7 @@
                                 <td border.type="none"></td>
                                 <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Perc. IIBB 3.50%:</span></td>
                                 <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
-                                    <span>{{nota.moneda.simbolo}} {{ (nota.percIibb/nota.cotizacion)|number_format(2,'.',',')}}</span>
+                                    <span>{{nota.moneda.simbolo}} {{ (nota.percIibb/nota.cotizacion)|number_format(2,',','.')}}</span>
                                 </td>
                             </tr>
                             {% endif %}
@@ -108,7 +108,7 @@
                             <td border.color="#555555" height="30px" vertical-align="middle"  width="4 cm" text-align="center" font-size="9px">Dirección de Comercio Interior 0800-444-3346</td>
                             <td border.type="none"></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" margin-top="8px" font-size="18px"><strong>Total:</strong></td>
-                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ nota.montoTotal|number_format(2,'.',',')}}</strong>
+                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ nota.montoTotal|number_format(2,',','.')}}</strong>
                             </td>
                         </tr>
                     </table>
@@ -192,20 +192,20 @@
                     {{item.nombreProducto}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{item.precioUnitarioItem|number_format(3,'.',',')}}
+                    {{item.precioUnitarioItem|number_format(3,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{item.alicuota|number_format(2,'.',',')}}%
+                    {{item.alicuota|number_format(2,',','.')}}%
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{ item.totalItem|number_format(2,'.',',')}}
+                    {{ item.totalItem|number_format(2,',','.')}}
                 </td>
             </tr>
             {% endfor %}
             {% if nota.concepto %}
             <tr>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                     {{ 1|number_format(3,'.',',')}}
+                     {{ 1|number_format(3,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="center" padding-top="5px">
                     999999
@@ -214,13 +214,13 @@
                     {{nota.concepto|nl2br}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{0|number_format(3,'.',',')}}
+                    {{0|number_format(3,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{21|number_format(2,'.',',')}}%
+                    {{21|number_format(2,',','.')}}%
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{ 0|number_format(2,'.',',')}}
+                    {{ 0|number_format(2,',','.')}}
                 </td>
             </tr>
             {% endif %}

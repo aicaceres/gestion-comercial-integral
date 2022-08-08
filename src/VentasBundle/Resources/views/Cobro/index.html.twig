@@ -73,7 +73,7 @@
                 <td><span class="hidden">{{ entity.fechaCobro|date('YmdHi') }}</span>{{ entity.fechaCobro|date('d-m-Y H:i') }}</td>
                 <td>{{ entity.cliente }}</td>
                 <td>{{ entity.formaPago }}</td>
-                <td class="alignright"><span class="floatleft">{{entity.moneda.simbolo}}</span> {{ entity.venta.montoTotal|number_format(2,'.',',') }}</td>
+                <td class="alignright"><span class="floatleft">{{entity.moneda.simbolo}}</span> {{ entity.venta.montoTotal|number_format(2,',','.') }}</td>
                 <td class="estado">{{ entity.facturaElectronica.comprobanteTxt }}</td>
                 {% if not owns  %}
                 <td>{{entity.createdBy.nombre|upper }}</td>

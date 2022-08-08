@@ -8,6 +8,7 @@
 /web/assets/fancybox/*
 /web/assets/fonts/*
 /web/assets/images/*
+/web/assets/imagesafip/*
 /web/assets/js/plugins/*
 /web/assets/js/qz/*
 /app/bootstrap.php.cache

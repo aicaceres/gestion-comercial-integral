@@ -130,13 +130,13 @@
                     {{item.nombreProducto}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {% if (presupuesto.tipo=='P') %}  {{item.precioUnitarioItem|number_format(1,'.',',')}} {% endif %}
+                    {% if (presupuesto.tipo=='P') %}  {{item.precioUnitarioItem|number_format(1,',','.')}} {% endif %}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {% if (presupuesto.tipo=='P') %} {{item.producto.iva|number_format(2,'.',',')}} {% endif %}
+                    {% if (presupuesto.tipo=='P') %} {{item.producto.iva|number_format(2,',','.')}} {% endif %}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {% if (presupuesto.tipo=='P') %}  {{item.totalItem|number_format(2,'.',',')}} {% endif %}
+                    {% if (presupuesto.tipo=='P') %}  {{item.totalItem|number_format(2,',','.')}} {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -145,13 +145,13 @@
         <table font-size="9px" padding-top="100px">
             <tr margin-bottom="8px">
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    Subtotal: $ {{presupuesto.subTotal|number_format(3,'.',',')}}
+                    Subtotal: $ {{presupuesto.subTotal|number_format(3,',','.')}}
                 </td>
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    Descuento/Recargo [{{presupuesto.descuentoRecargo}}%]: $ {{presupuesto.totalDescuentoRecargo|number_format(3,'.',',')}}
+                    Descuento/Recargo [{{presupuesto.descuentoRecargo}}%]: $ {{presupuesto.totalDescuentoRecargo|number_format(3,',','.')}}
                 </td>
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    TOTAL: $ {{presupuesto.montoTotal|number_format(3,'.',',')}}
+                    TOTAL: $ {{presupuesto.montoTotal|number_format(3,',','.')}}
                 </td>
             </tr>
         </table>

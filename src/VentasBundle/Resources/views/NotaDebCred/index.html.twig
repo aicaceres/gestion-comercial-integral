@@ -21,7 +21,7 @@
         <input type="hidden" id="fhasta" name="fhasta"/>
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
-        <button class="stdbtn floatright" type="submit" >Imprimir</button>
+        <button class="stdbtn floatright hidden" type="submit" >Imprimir</button>
     </form>
     <form id="searchform" action="{{ path('ventas_notadebcred') }}" method="get">
 
@@ -74,7 +74,7 @@
                 <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
                 <td>{{ entity.clienteTxt }}</td>
                 <td>{{ entity.notaElectronica.cae }}</td>
-                <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(2,'.',',') }}</td>
+                <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(2,',','.') }}</td>
                 <td>{{ entity.createdBy.username }}</td>
                 <td class="buttons">
                     {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
