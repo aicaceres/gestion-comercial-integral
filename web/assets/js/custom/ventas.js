@@ -650,9 +650,9 @@ function openModalProducto(obj){
                 openModal($('[id*="_formapago"]'))
             }
             // ctrl + alt + G
-            if( e.keyCode == 71 ){
+            if (e.keyCode === 71) {
                 e.preventDefault();
-                $('.form-horizontal').submit();
+                $('.guardar').click();
             }
         }
         // tecla + agrega item
