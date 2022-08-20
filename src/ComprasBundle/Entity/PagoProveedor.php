@@ -69,22 +69,22 @@ class PagoProveedor
      * @var integer $baseImponibleRentas
      * @ORM\Column(name="base_imponible_rentas", type="decimal", scale=2 )
      */
-    protected $baseImponibleRentas;
+    protected $baseImponibleRentas = 0;
      /**
      * @var integer $retencionRentas
      * @ORM\Column(name="retencion_rentas", type="decimal", scale=2 )
      */
-    protected $retencionRentas;
+    protected $retencionRentas = 0;
      /**
      * @var integer $adicionalRentas
      * @ORM\Column(name="adicional_rentas", type="decimal", scale=2 )
      */
-    protected $adicionalRentas;
+    protected $adicionalRentas = 0;
      /**
      * @var integer $retencionGanancias
      * @ORM\Column(name="retencion_ganancias", type="decimal", scale=2 )
      */
-    protected $retencionGanancias;
+    protected $retencionGanancias = 0;
 
      /**
      ** Diferencia entre el pago total y los importes abonados.
@@ -92,7 +92,7 @@ class PagoProveedor
      * @var integer $saldo
      * @ORM\Column(name="saldo", type="decimal", scale=3 )
      */
-    protected $saldo;
+    protected $saldo = 0;
 
     /**
      *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pagos")
@@ -130,6 +130,7 @@ class PagoProveedor
         $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->saldo = 0;
         $this->fecha = new \DateTime();
+        $this->baseImponibleRentas = 0;
     }
 
     public function __toString(){

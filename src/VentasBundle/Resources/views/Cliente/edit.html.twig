@@ -48,10 +48,13 @@
                     {{ form_row(form.ultVerificacionCuit, { 'attr': {'class' : 'datepicker'  } }) }}
                 </div>
 
-                <p>{{ form_row(form.categoria_iva, { 'attr': {'class' : 'uniformselect'  } }) }}</p>
-                <div class="two_fields">                
-                {{ form_row(form.categoriaRentas, { 'attr': {'class' : 'smallinput'  } }) }}
+                <div class="two_fields">
+                {{ form_row(form.categoria_iva, { 'attr': {'class' : 'uniformselect'  } }) }}
                 {{ form_row(form.provinciaRentas, { 'attr': {'class' : 'smallinput'  } }) }}
+				</div>
+                <div class="two_fields">
+                {{ form_row(form.categoriaRentas, { 'attr': {'class' : 'smallinput'  } }) }}
+                {{ form_row(form.vencCertNoRetener, { 'attr': {'class' : 'datepicker'  } }) }}
 				</div>
 
 				<div class="two_fields">
@@ -90,11 +93,11 @@
 		{% block extra_javascripts %}
 			{% include "VentasBundle::block-locate-js.html.twig" %}
 <script type="text/javascript">
-	jQuery(document).ready(function($) {    	
+	jQuery(document).ready(function($) {
 	    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
         $('#ventasbundle_cliente_localidadTrabajo').select2({
             placeholder: "Buscar Localidad de trabajo...",
-            allowClear: true            
+            allowClear: true
         });
 	   // $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
 });

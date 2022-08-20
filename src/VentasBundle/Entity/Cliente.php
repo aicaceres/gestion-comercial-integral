@@ -77,7 +77,12 @@ class Cliente
      * @var date $ultVerificacionCuit
      * @ORM\Column(name="ult_verificacion_cuit", type="date", nullable=true)
      */
-    private $ultVerificacionCuit ;
+    private $ultVerificacionCuit;
+    /**
+     * @var date $vencCertNoRetener
+     * @ORM\Column(name="venc_cert_no_retener", type="date", nullable=true)
+     */
+    private $vencCertNoRetener;
     /**
      * @ORM\Column(name="consumidor_final", type="boolean",nullable=true)
      */
@@ -974,5 +979,28 @@ class Cliente
     public function getCobros()
     {
         return $this->cobros;
+    }
+
+    /**
+     * Set vencCertNoRetener
+     *
+     * @param \DateTime $vencCertNoRetener
+     * @return Cliente
+     */
+    public function setVencCertNoRetener($vencCertNoRetener)
+    {
+        $this->vencCertNoRetener = $vencCertNoRetener;
+
+        return $this;
+    }
+
+    /**
+     * Get vencCertNoRetener
+     *
+     * @return \DateTime 
+     */
+    public function getVencCertNoRetener()
+    {
+        return $this->vencCertNoRetener;
     }
 }

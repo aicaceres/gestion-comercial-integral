@@ -666,7 +666,6 @@ function openModalProducto(obj){
                 || $(e.target).is('input[type="checkbox"]')) {
                 e.preventDefault();
             }
-
         }
     }
 

@@ -41,6 +41,8 @@ class ClienteType extends AbstractType
                  ->add('limiteCredito',null,array('label' => 'Limite de Crédito:','required'=>false))
                  ->add('ultVerificacionCuit', 'date', array('widget' => 'single_text', 'label' => 'Ult. Verif. CUIT:',
                     'format' => 'dd-MM-yyyy', 'required' => false))
+                 ->add('vencCertNoRetener', 'date', array('widget' => 'single_text', 'label' => 'Venc. No Retener:',
+                    'format' => 'dd-MM-yyyy', 'required' => false))
                  ->add('activo',null,array('label' => 'Activo:','required'=>false))
 
                  ->add('precioLista','entity',array('label'=>'Lista:',

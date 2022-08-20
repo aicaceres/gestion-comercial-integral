@@ -952,6 +952,7 @@ class ProveedorController extends Controller {
 
                 $neto = $obj->getSaldoImponible();
                 // calcular retencion rentas
+                $monto = $rentas = $adicional = 0;
                 $retrentas = $porcRentas['porcRetRentas'];
                 $adicrentas = $porcRentas['porcAdicRentas'];
                 if( $retrentas>0 ){

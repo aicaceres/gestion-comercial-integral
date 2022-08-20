@@ -10,7 +10,7 @@
         Descuento/Recargo [
             {% if form is defined %}
                 {% set disabledDescuentoRecargo = app.user.access(app.session.get('unidneg_id'),'ventas_venta_descuento') ? false : true %}
-                {{ form_widget(form.descuentoRecargo, {'attr': {'disabled': disabledDescuentoRecargo, 'class':'width50'} }) }}
+                {{ form_widget(form.descuentoRecargo, {'attr': {'readonly': disabledDescuentoRecargo, 'class':'width50'} }) }}
             {% else %}
                 {{ entity.descuentoRecargo|number_format(2,',','.') }}
             {% endif %}
