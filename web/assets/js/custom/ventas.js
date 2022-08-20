@@ -226,7 +226,7 @@ jQuery(function ($) {
                         objprecio.find('[id*="_precio"]').val(data.precio);
                         objprecio.find('[id*="_alicuota"]').val(data.alicuota);
                         textoComodin = obj.siblings('[id*="_textoComodin"]')
-                        if (esPresupuesto && data.comodin) {
+                        if (data.comodin) {
                             textoComodin.attr('required',true);
                             textoComodin.show();
                             //textoComodin.focus();
@@ -539,7 +539,7 @@ function openModalProducto(obj){
                     objprecio.find('[id*="_precio"]').val(data.precio);
                     objprecio.find('[id*="_alicuota"]').val(data.alicuota);
                     textoComodin = obj.siblings('[id*="_textoComodin"]')
-                    if (esPresupuesto && data.comodin) {
+                    if (data.comodin) {
                         textoComodin.attr('required',true);
                         textoComodin.show();
                         textoComodin.focus();

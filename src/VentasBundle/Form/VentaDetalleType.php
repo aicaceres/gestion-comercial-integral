@@ -26,6 +26,7 @@ class VentaDetalleType extends AbstractType {
         $builder->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:'))
                 //->add('bulto', null, array('required' => false))
                 //->add('cantidadxBulto', null, array('required' => false))
+                ->add('textoComodin','text')
                 ->add('precio', 'hidden')
                 ->add('alicuota', 'hidden')
         ;
