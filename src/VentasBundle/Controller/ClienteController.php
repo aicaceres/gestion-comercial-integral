@@ -253,14 +253,25 @@ class ClienteController extends Controller {
         $formapago = ($entity->getFormaPago()) ? $entity->getFormaPago()->getId() : 1;
         $cuit = $entity->getCuit();
         $valido = UtilsController::validarCuit($cuit);
+        $categIva = ($entity->getCategoriaIva() ) ?  $entity->getCategoriaIva()->getNombre() : null;
+        // determinar si descuenta iibb
+        $showiibb = false;
+        $hoy = new \DateTime();
+        $vencNoRetencion = $entity->getVencCertNoRetener() ? $entity->getVencCertNoRetener()->format('Ymd') : null;
+        $categRentas = $entity->getCategoriaRentas() ? $entity->getCategoriaRentas()->getId() : null;
+        if( $categIva == 'I' && ($vencNoRetencion < $hoy->format('Ymd') ||  is_null($vencNoRetencion)  ) && $categRentas != 18){
+            $showiibb = true;
+        }
+
         $data = array(
             'partial' => $partial,
             'listaprecio' => $lista,
             'formapago' => $formapago,
             'transporte' => $transporte,
-            'categoriaIva' => ($entity->getCategoriaIva() ) ?  $entity->getCategoriaIva()->getNombre() : null,
+            'categoriaIva' => $categIva,
             'cuitValido' => $valido,
             'esConsumidorFinal' => $entity->getConsumidorFinal(),
+            'showiibb' => $showiibb
         );
         return new Response( json_encode($data));
     }

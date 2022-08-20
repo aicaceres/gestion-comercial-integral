@@ -79,7 +79,7 @@ jQuery(function ($) {
                     //if( !esPresupuesto){
                         if (data.categoriaIva == 'M' || data.categoriaIva == 'I') {
                             $('#ivaTd').show();
-                            if( data.categoriaIva == 'I'){
+                            if( data.showiibb ){
                                 $('#iibbTd').show();
                             }
                         }
