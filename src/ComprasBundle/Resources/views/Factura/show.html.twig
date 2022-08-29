@@ -11,11 +11,11 @@
     <form action="#" method="post" class="stdform">
         <fieldset >
             <div class="two_fields">
-                <div><label for="nroFactura">Nº Factura:</label>
-                    <input type="text" value="{{entity.tipoFactura}}" disabled="disabled" style="width:12px">
+                <div><label for="nroFactura">{{ entity.afipComprobante.nombre}}:</label>
+
                     <input type="text" value="{{entity.nuevoNroComprobante}}" disabled="disabled" class="smallinput">
                 </div>
-                <div><label for="nroPedido">Fecha Factura:</label>
+                <div><label for="nroPedido">Fecha:</label>
                     <input type="text" value="{{entity.fechaFactura|date('d/m/Y')}}" disabled="disabled" class="width100">
                 </div>
             </div>

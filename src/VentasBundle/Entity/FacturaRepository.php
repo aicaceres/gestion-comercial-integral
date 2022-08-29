@@ -74,7 +74,7 @@ class FacturaRepository extends EntityRepository {
 
     public function findComprobantesByPeriodoUnidadNegocio($desde, $hasta, $unidneg) {
         $cobros = $this->_em->createQueryBuilder('c')
-                ->select('t.valor tipocomp,c.id,c.fechaCobro fecha ')
+                ->select('t.valor tipocomp,c.id,c.fechaCobro fecha, f.id fe ')
                 ->from('VentasBundle\Entity\Cobro', 'c')
                 ->innerJoin('c.facturaElectronica','f')
                 ->innerJoin('f.tipoComprobante','t')
@@ -84,7 +84,7 @@ class FacturaRepository extends EntityRepository {
                 ->andWhere("c.fechaCobro>='" . $desde . " 00:00'")
                 ->andWhere("c.fechaCobro<='" . $hasta . " 23:59'");
         $notas = $this->_em->createQueryBuilder('n')
-                ->select('t.valor tipocomp,n.id,n.fecha ')
+                ->select('t.valor tipocomp,n.id,n.fecha, f.id fe ')
                 ->from('VentasBundle\Entity\NotaDebCred', 'n')
                 ->innerJoin('n.notaElectronica','f')
                 ->innerJoin('f.tipoComprobante','t')
@@ -93,23 +93,6 @@ class FacturaRepository extends EntityRepository {
                 ->andWhere("n.estado!='ANULADO'")
                 ->andWhere("n.fecha>='" . $desde . " 00:00'")
                 ->andWhere("n.fecha<='" . $hasta . " 23:59'");
-
-        /*$facturas = $this->_em->createQueryBuilder('f')
-                ->select(" 'FAC-' tipocomp, f.id, f.fechaFactura fecha, f.tipoFactura tipo  ")
-                ->from("VentasBundle\Entity\Factura", 'f')
-                ->innerJoin('f.unidadNegocio', 'u')
-                ->where("f.estado!='ANULADO'")
-                ->andWhere('u.id=' . $unidneg)
-                ->andWhere("f.fechaFactura>='" . $desde . " 00:00'")
-                ->andWhere("f.fechaFactura<='" . $hasta . " 23:59'");
-        $notacred = $this->_em->createQueryBuilder('c')
-                ->select(" CASE WHEN n.signo='+' THEN 'DEB-' ELSE 'CRE-' END tipocomp,n.id, n.fecha, n.tipoNota tipo")
-                ->from('VentasBundle\Entity\NotaDebCred', 'n')
-                ->innerJoin('n.unidadNegocio', 'u')
-                ->where("n.estado!='ANULADO'")
-                ->andWhere('u.id=' . $unidneg)
-                ->andWhere("n.fecha>='" . $desde . " 00:00'")
-                ->andWhere("n.fecha<='" . $hasta . " 23:59'");*/
 
         $datos = array_merge($cobros->getQuery()->getArrayResult(), $notas->getQuery()->getArrayResult());
         $ord = usort($datos, function($a1, $a2) {

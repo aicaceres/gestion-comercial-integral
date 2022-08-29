@@ -75,8 +75,8 @@ class FacturaType extends AbstractType {
                     'query_builder' => function(EntityRepository $repository) {
                         return $qb = $repository->createQueryBuilder('c')
                                 ->where('c.activo=1')
-                                ->andWhere('c.valor like :param')
-                                ->setParameter('param', '%FAC%');
+                                ->andWhere("c.valor like '%FAC%'")
+                                ->orWhere("c.valor like '%REC%'");
                     }
                 ))
                 ->add('afipPuntoVenta', null, array('label' => 'N° Comprobante', 'required' => true))

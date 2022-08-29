@@ -58,7 +58,7 @@
         <tbody>
            {% for entity in entities %}
             <tr {% if entity.estado=='CANCELADO' %} class="deleted" {%endif%}>
-                <td>{{entity.tipoFactura~' '~entity.nuevoNroComprobante}}</td>
+                <td>{{entity.afipComprobante.nombre~' '~entity.nuevoNroComprobante}}</td>
                 <td><span class="hidden">{{ entity.fechaFactura|date('Ymd') }}</span>{{ entity.fechaFactura|date('d-m-Y') }}</td>
                 <td>{{ entity.proveedor }}</td>
                 <td class="alignright">{{ entity.getTotal|number_format(3,'.',',') }}</td>

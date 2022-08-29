@@ -101,72 +101,86 @@ class ImpuestoController extends Controller {
         $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
         $unidneg = $this->get('session')->get('unidneg_id');
 
-        $facturas = $em->getRepository('VentasBundle:Factura')->findByUnidadNegocio($unidneg);
-        $notas = $em->getRepository('VentasBundle:NotaDebCred')->findByUnidadNegocio($unidneg);
-        if (in_array($unidneg, array(1, 2))) {
-            $aux = ($unidneg == 1) ? 2 : 1;
-            // 1-> Gastronomía - 2-> Lavandería
-            // buscar y agregar facturas y notas de la otra unidad de negocio que comparte libro de IVA
-            $facturas2 = $em->getRepository('VentasBundle:Factura')->findByUnidadNegocio($aux);
-            $notas2 = $em->getRepository('VentasBundle:NotaDebCred')->findByUnidadNegocio($aux);
-            $facturas = array_merge($facturas, $facturas2);
-            $notas = array_merge($notas, $notas2);
-        }
-
         $items = array();
-        foreach ($facturas as $fact) {
-            if ($fact->getFechaFactura()->format('Y-m-d') >= $desde && $fact->getFechaFactura()->format('Y-m-d') <= $hasta) {
-                $nro = explode('-', $fact->getNroFactura());
-                if ($fact->getTotalIva() == 0) {
-                    $neto = 0;
-                    $nograv = $fact->getSubTotal();
-                }
-                else {
-                    $neto = $fact->getSubTotal();
-                    $nograv = 0;
-                }
-                $item = array('fecha' => $fact->getFechaFactura(), 'tipoComprobante' => 'FC', 'tipo' => $fact->getTipoFactura(),
-                    'tipofact' => $nro[0], 'nrocomp' => (isset($nro[1])) ? $nro[1] : '0', 'cuit' => $fact->getCliente()->getCuit(),
-                    'razon' => $fact->getCliente()->getNombre(), 'iibb' => '',
-                    'impuestos' => '0', 'retIVA' => '0',
-                    'neto' => $neto, 'iva' => $fact->getTotalIva(), 'nograv' => $nograv, 'total' => $fact->getTotal());
-                array_push($items, $item);
-            }
-        }
-        foreach ($notas as $nota) {
-            if ($nota->getFecha()->format('Y-m-d') >= $desde && $nota->getFecha()->format('Y-m-d') <= $hasta) {
-                $nro = explode('-', $nota->getNroComprobante());
-                if ($nota->getSigno() == '-') {
-                    $i = -1;
-                    $tipo = 'NC';
-                }
-                else {
-                    $i = 1;
-                    $tipo = 'ND';
-                }
-                if ($nota->getTotalIva() == 0) {
-                    $neto = 0;
-                    $nograv = $nota->getSubTotal();
-                }
-                else {
-                    $neto = $nota->getSubTotal();
-                    $nograv = 0;
-                }
+        $datos = $em->getRepository('VentasBundle:FacturaElectronica')->findComprobantesByPeriodoUnidadNegocio($desde, $hasta, $unidneg);
 
-                $item = array('fecha' => $nota->getFecha(), 'tipoComprobante' => $tipo, 'tipo' => $nota->getTipoNota(),
-                    'tipofact' => $nro[0], 'nrocomp' => (isset($nro[1])) ? $nro[1] : '0', 'cuit' => $nota->getCliente()->getCuit(),
-                    'razon' => $nota->getCliente()->getNombre(), 'iibb' => '',
-                    'impuestos' => '0' * $i, 'retIVA' => '0' * $i,
-                    'neto' => $neto * $i, 'iva' => $nota->getTotalIva() * $i, 'nograv' => $nograv * $i, 'total' => $nota->getTotal() * $i);
-                array_push($items, $item);
+        foreach ($datos as $dato){
+            $fe = $em->getRepository('VentasBundle:FacturaElectronica')->find($dato['fe']);
+            $cliente = ($fe->getCobro()) ? $fe->getCobro()->getCliente() : $fe->getNotaDebCred()->getCliente();
+            $comp = ($fe->getCobro()) ? $fe->getCobro()->getVenta() : $fe->getNotaDebCred();
+
+            $neto = ($comp->getTotalIva()==0) ? 0 : $comp->getSubTotal();
+            $nograv = ($comp->getTotalIva()==0) ? $comp->getSubTotal() : 0;
+            $exento = 0;
+            if( $cliente->getCategoriaIva()->getNombre() === 'E'){
+                $exento = $nograv;
+                $nograv = 0;
             }
+            $impuestos = $comp->getTotalIibb();
+
+            $item = array( 'fecha' => $dato['fecha'], 'nrocomprobante' => $fe->getComprobanteTxt(),
+                'cuit' => $cliente->getCuit(), 'razon' => $cliente->getNombre(), 'iibb' =>$cliente->getNroInscripcion(),
+                'impuestos' => $impuestos, 'retIVA' => '0', 'neto' => $neto, 'exento' => $exento,
+                'iva' => $comp->getTotalIva() , 'nograv' => $nograv, 'total' => $comp->getMontoTotal() );
+
+
+            // $item = array('fecha' => $dato['fecha], 'tipoComprobante' => $dato['tipocomp], 'tipo' => $fact->getTipoFactura(),
+            //         'tipofact' => $nro[0], 'nrocomp' => (isset($nro[1])) ? $nro[1] : '0', 'cuit' => $fact->getCliente()->getCuit(),
+            //         'razon' => $fact->getCliente()->getNombre(), 'iibb' => '',
+            //         'impuestos' => '0', 'retIVA' => '0',
+            //         'neto' => $neto, 'iva' => $fact->getTotalIva(), 'nograv' => $nograv, 'total' => $fact->getTotal());
+            array_push($items, $item);
+
         }
 
-        $ord = usort($items, function($a1, $a2) {
-            $value1 = strtotime($a1['fecha']->format('Y-m-d'));
-            $value2 = strtotime($a2['fecha']->format('Y-m-d'));
-            return $value1 - $value2;
-        });
+
+        // foreach ($datos as $fact) {
+        //     if ($fact->getFechaFactura()->format('Y-m-d') >= $desde && $fact->getFechaFactura()->format('Y-m-d') <= $hasta) {
+        //         $nro = explode('-', $fact->getNroFactura());
+        //         if ($fact->getTotalIva() == 0) {
+        //             $neto = 0;
+        //             $nograv = $fact->getSubTotal();
+        //         }
+        //         else {
+        //             $neto = $fact->getSubTotal();
+        //             $nograv = 0;
+        //         }
+        //         $item = array('fecha' => $fact->getFechaFactura(), 'tipoComprobante' => 'FC', 'tipo' => $fact->getTipoFactura(),
+        //             'tipofact' => $nro[0], 'nrocomp' => (isset($nro[1])) ? $nro[1] : '0', 'cuit' => $fact->getCliente()->getCuit(),
+        //             'razon' => $fact->getCliente()->getNombre(), 'iibb' => '',
+        //             'impuestos' => '0', 'retIVA' => '0',
+        //             'neto' => $neto, 'iva' => $fact->getTotalIva(), 'nograv' => $nograv, 'total' => $fact->getTotal());
+        //         array_push($items, $item);
+        //     }
+        // }
+        // foreach ($notas as $nota) {
+        //     if ($nota->getFecha()->format('Y-m-d') >= $desde && $nota->getFecha()->format('Y-m-d') <= $hasta) {
+        //         $nro = explode('-', $nota->getNroComprobante());
+        //         if ($nota->getSigno() == '-') {
+        //             $i = -1;
+        //             $tipo = 'NC';
+        //         }
+        //         else {
+        //             $i = 1;
+        //             $tipo = 'ND';
+        //         }
+        //         if ($nota->getTotalIva() == 0) {
+        //             $neto = 0;
+        //             $nograv = $nota->getSubTotal();
+        //         }
+        //         else {
+        //             $neto = $nota->getSubTotal();
+        //             $nograv = 0;
+        //         }
+
+        //         $item = array('fecha' => $nota->getFecha(), 'tipoComprobante' => $tipo, 'tipo' => $nota->getTipoNota(),
+        //             'tipofact' => $nro[0], 'nrocomp' => (isset($nro[1])) ? $nro[1] : '0', 'cuit' => $nota->getCliente()->getCuit(),
+        //             'razon' => $nota->getCliente()->getNombre(), 'iibb' => '',
+        //             'impuestos' => '0' * $i, 'retIVA' => '0' * $i,
+        //             'neto' => $neto * $i, 'iva' => $nota->getTotalIva() * $i, 'nograv' => $nograv * $i, 'total' => $nota->getTotal() * $i);
+        //         array_push($items, $item);
+        //     }
+        // }
 
 
         return $this->render('AppBundle:Impuesto:libroiva.html.twig', array(

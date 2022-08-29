@@ -166,14 +166,21 @@ class Venta {
     }
     public function getTotalIva(){
         $total = 0;
-        foreach ($this->detalles as $item) {
-            $total = $total + $item->getTotalIvaItem();
+        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        if ($categIva == 'E'){
+            return 0;
+        }else{
+            foreach ($this->detalles as $item) {
+                $total = $total + $item->getTotalIvaItem();
+            }
+            return round( ($total / $this->getCotizacion()) ,3);
         }
-        return round( ($total / $this->getCotizacion()) ,3);
     }
     public function getTotalIibb(){
+        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        $categRentas = $this->getCliente()->getCategoriaRentas()->getId();
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * 0.035;
+        return ( $categIva == 'I' && $categRentas != 18 ) ? $monto * 0.035 : 0;
     }
     public function getMontoTotal(){
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
@@ -674,7 +681,7 @@ class Venta {
     /**
      * Get descuentaStock
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getDescuentaStock()
     {
