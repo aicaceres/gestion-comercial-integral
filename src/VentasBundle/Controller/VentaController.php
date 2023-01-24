@@ -205,6 +205,7 @@ class VentaController extends Controller
         $entity->setFechaVenta( new \DateTime() );
         $entity->setCotizacion( $entity->getMoneda()->getCotizacion() );
         $entity->setDescuentaStock(true);
+        $entity->setEstado('PENDIENTE');
         $form = $this->createCreateForm($entity,'new');
         return $this->render('VentasBundle:Venta:new.html.twig', array(
             'entity' => $entity,

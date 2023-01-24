@@ -495,7 +495,8 @@ function addNewItem( tipo){
     lastTr.find('[id*="_tipoPago"]').val(tipo);
     importe = lastTr.find('[id*="_importe"]');
     // si es el primero cargar el valor total, sino el saldo faltante
-    const imp = $('.vuelto').html() ? $('.vuelto').html() : $('#importeTotal').data('total')
+    const imp = $('.vuelto').html() ? $('.vuelto').html().replace(',','.') : $('#importeTotal').data('total')
+
     importe.val( Math.abs(parseFloat(imp)) )
     importe
         .on('focus',function(e) {
@@ -598,6 +599,7 @@ function actualizarSuma(){
         pagos += importe
     });
     $('.pago').html(pagos.toFixed(2));
+    $('#importeTotal').html(pagos.toFixed(2).replace('.',','));
     vuelto = pagos.toFixed(2) - total.toFixed(2);
     $('.vuelto').html(vuelto.toFixed(2).replace('.',','))
     $('#linkAdd').toggle( (vuelto < 0) )

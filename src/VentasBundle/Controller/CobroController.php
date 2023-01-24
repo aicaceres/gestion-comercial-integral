@@ -181,9 +181,9 @@ class CobroController extends Controller
                     foreach( $entity->getVenta()->getDetalles() as $item ){
                         $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy( array   ('valor'=>$item->getProducto()->getIva()));
                         $codigo = intval($alicuota->getCodigo());
-                        $dtoRec = $item->getTotalDtoRecItem();
+                        $dtoRec = $item->getTotalDtoRecItem() /  $entity->getVenta()->getCotizacion();
                         $baseImp = $item->getBaseImponibleItem() + $dtoRec;
-                        $importe = $item->getTotalIvaItem();
+                        $importe = $item->getTotalIvaItem() /  $entity->getVenta()->getCotizacion();
                         $key = array_search($codigo, array_column($iva, 'Id'));
                         // IVA
                         /*  array(
@@ -207,6 +207,7 @@ class CobroController extends Controller
                         $impTotal += ($baseImp + $importe );
                         //$item->setDescuento($dtoRec);
                     }
+
                     // TRIBUTOS
                     /*array(
                         'Id' 		=>  99, // Id del tipo de tributo (ver tipos disponibles)
