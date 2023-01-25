@@ -254,6 +254,7 @@ class VentaController extends Controller
             $new = new VentaDetalle();
             $new->setProducto($det->getProducto());
             $new->setCantidad($det->getCantidad());
+            $new->setTextoComodin($det->getTextoComodin());
             $entity->addDetalle($new);
         }
 
