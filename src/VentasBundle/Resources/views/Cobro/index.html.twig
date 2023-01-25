@@ -93,15 +93,11 @@
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
+var printpdf = '{{printpdf}}';
 jQuery(document).ready(function($){
     if ( $('#contentwrapper').width() < 1000) {
             $('.togglemenu').click();
         }
-    const printpdf = '{{printpdf}}';
-    if( printpdf ){
-        $('[facid="'+printpdf+'"]').click()
-    }
-
     $(document).on('keydown',function(e){ detectarControles(e); })
     $('#selectUser').change(function(){
         $('#searchform').submit();
@@ -110,14 +106,16 @@ jQuery(document).ready(function($){
 
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
-
+    if( printpdf ){
+        console.log( '[facid="'+printpdf+'"]')
+        $('[facid="'+printpdf+'"]').click()
+    }
     function detectarControles(e) {
     // ctrl + alt + C
-    if( e.ctrlKey && e.altKey && e.keyCode == 67 ){
+      if( e.ctrlKey && e.altKey && e.keyCode == 67 ){
         $('.facturarVentas').click();
+      }
     }
-
-}
 });
 </script>
 {% endblock %}
