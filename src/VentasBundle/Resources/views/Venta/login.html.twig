@@ -2,19 +2,19 @@
 <style type="text/css">
     #confirmar-logueo:focus { background-color: royalblue; }
     #password { width: 244px !important}
-</style>    
-    
+</style>
+
 <div class="loginbox">
     <div class="loginboxinner">
         <div class="notiflogin hidden">
             <div class="loginmsg"></div>
-        </div>        
+        </div>
         <form id="login" action="{{ path("ventas_login_check") }}" method="post">
-            <div class="username">
+            {# <div class="username">
                 <div class="usernameinner">
                     <input type="text" size="25" required="required" name="_username" id="username" value="{{ app.user.username }}" onfocus="this.select();" style="text-transform:uppercase;" />
-                </div>          
-            </div>
+                </div>
+            </div> #}
             <div class="password">
                 <div class="passwordinner">
                     <input type="password" required="required" name="_password" id="password" autocomplete="off" autofocus="autofocus" onfocus="this.select();"/>
@@ -22,8 +22,8 @@
             </div>
                 <input type="hidden" name="empresa" id="empresa" value="">
                 <input type="hidden" name="unidad" id="unidad" value="">
-                <input type="hidden" name="_target_path" value="/venta/newVenta" />          
-            <button type="submit" id="confirmar-logueo">Confirmar</button>                    
+                <input type="hidden" name="_target_path" value="/venta/newVenta" />
+            <button type="submit" id="confirmar-logueo">Confirmar</button>
         </form>
     </div><!--loginboxinner-->
 </div><!--loginbox-->

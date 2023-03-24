@@ -419,40 +419,51 @@ class VentaController extends Controller
     }
 
     /**
-    * @Route("checkLogin", name="ventas_login_check")
-     */
-    public function checkLoginAction(Request $request){
-        $username = strtoupper($request->get('username')) ;
-        $password = trim($request->get('password'))  ;
-        $em = $this->get('doctrine')->getEntityManager();
-        $reload = false;
-        $user = $em->getRepository('ConfigBundle:Usuario')->findOneBy(array("username"=>$username));
-        if ($user) {
-            // Get the encoder for the users password
-            $encoder = $this->get('security.encoder_factory')->getEncoder($user);
-            if ($encoder->isPasswordValid($user->getPassword(), $password, null)) {
-                // verificar si es el mismo usuario
-                if( $this->getUser()->getUsername() !== $username ){
-                    // loguear al nuevo usuario
-                    $token = new UsernamePasswordToken($user, null, 'secured_area', $user->getRoles());
-                    $this->get('security.context')->setToken($token);
-                    $this->get('session')->set('_security_secured_area', serialize($token));
-                    $event = new InteractiveLoginEvent($request, $token);
-                    $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
-                    // RECARGAR LA PÁGINA PARA CAMBIAR USUARIO
-                    $reload = true;
-                    // No requiere login
-                    $this->get('session')->set('checkrequired','0');
-                }
-                $result = array( 'msg' => 'OK', 'url' => $this->generateUrl('ventas_venta_new'), 'reload' => $reload);
-            }else{
-                $result = array( 'msg' => 'Ingrese una contraseña válida!', 'field'=>'password' );
-            }
-        }else{
-            $result = array( 'msg' => 'Ingrese un usuario válido!', 'field'=>'username' );
-        }
-        return new Response( json_encode($result));
+   * @Route("checkLogin", name="ventas_login_check")
+   */
+  public function checkLoginAction(Request $request)
+  {
+    //$username = strtoupper($request->get('username')) ;
+    $password = trim($request->get('password'));
+    $em = $this->get('doctrine')->getEntityManager();
+    $reload = false;
+
+    $user = $this->getUserByPassword($password);
+
+    if ($user) {
+      // verificar si es el mismo usuario
+      if ($this->getUser()->getUsername() !== $user->getUsername()) {
+        // loguear al nuevo usuario
+        $token = new UsernamePasswordToken($user, null, 'secured_area', $user->getRoles());
+        $this->get('security.context')->setToken($token);
+        $this->get('session')->set('_security_secured_area', serialize($token));
+        $event = new InteractiveLoginEvent($request, $token);
+        $this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+        // RECARGAR LA PÁGINA PARA CAMBIAR USUARIO
+        $reload = true;
+        // No requiere login
+        $this->get('session')->set('checkrequired', '0');
+      }
+      $result = array('msg' => 'OK', 'url' => $this->generateUrl('ventas_venta_new'), 'reload' => $reload);
+    } else {
+      $result = array('msg' => 'Ingrese una contraseña válida!', 'field' => 'password');
     }
+    return new Response(json_encode($result));
+  }
+
+  private function getUserByPassword($password)
+  {
+    $em = $this->get('doctrine')->getEntityManager();
+    $users = $em->getRepository('ConfigBundle:Usuario')->findByActivo(1);
+    foreach ($users as $user) {
+      // Get the encoder for the users password
+      $encoder = $this->get('security.encoder_factory')->getEncoder($user);
+      if ($encoder->isPasswordValid($user->getPassword(), $password, null)) {
+        return $user;
+      }
+    }
+    return null;
+  }
 
     /**
      * @Route("/anularVenta", name="ventas_venta_anular")
