@@ -58,7 +58,7 @@ function checkLoginVentas(url_login,referer) {
             })
         })
         .dialog({
-            modal: true, autoOpen: false, title: "INGRESO A VENTAS", width: '450px', minHeight: 280,
+            modal: true, autoOpen: false, title: "INGRESO A VENTAS", width: '450px', minHeight: 300,
             close: function (event, ui) {
                 event.preventDefault();
                 if (!validlogin) {

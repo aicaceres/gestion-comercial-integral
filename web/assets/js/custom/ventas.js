@@ -451,10 +451,10 @@ jQuery(function ($) {
 		var oTable = $("#productos_table").dataTable({
 			columnDefs: [
 				// These are the column name variables that will be sent to the server
-				{ name: "nombre", targets: 0 },
-				{ name: "codigo", targets: 1 },
-				{ name: "precio", targets: 2 },
-				{ name: "stock", targets: 3 },
+				{ name: "nombre", "orderData": 3, targets: 0 },
+				{ name: "codigo", "orderData": 3, targets: 1 },
+				{ name: "precio", "orderData": 3, targets: 2 },
+				{ name: "stock", "orderData": 3, targets: 3 },
 				{ targets: "nosort", orderable: false },
 			],
 			rowCallback: function (row, data) {
@@ -496,7 +496,6 @@ jQuery(function ($) {
 			bSearchable: true,
 			bLengthChange: true,
 			pageLength: 25,
-			order: [[0, "asc"]],
 			sPaginationType: "full_numbers",
 			oLanguage: {
 				oPaginate: {

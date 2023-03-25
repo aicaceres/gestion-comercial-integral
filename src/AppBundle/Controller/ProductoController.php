@@ -858,6 +858,8 @@ class ProductoController extends Controller {
                 // In all cases where something does not exist or went wrong, return -
                 $responseTemp = $precioTemp = "-";
                 $rowPrecio = $producto->getPrecios()[0];
+                $precio = $alicuota = 0;
+
                 if ($rowPrecio !== null) {
                     if( $esPresupuesto ){
                         $precio = $precioConv = $rowPrecio->getPrecio();
