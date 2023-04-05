@@ -1084,6 +1084,10 @@ class ProductoController extends Controller {
                 $montoIva = round( ($precio * ( $iva/100 )) ,3);
                 $total = number_format( ($precio + $montoIva) ,3);
             }
+            $contado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
+            if( $contado ){
+                $total = round($total * ( 1 + $contado->getPorcentajeRecargo()/100),3);
+            }
             $res['text'] = $res['text'] . ' | $'. $total;
         }
         return new JsonResponse($results);
