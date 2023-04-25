@@ -74,61 +74,6 @@ class ClienteRepository extends EntityRepository {
         $datos = array_merge($facturas->getQuery()->getArrayResult(), $pagos->getQuery()->getArrayResult());
         $datos = array_merge($datos, $notadeb->getQuery()->getArrayResult());
 
-        /* if($desde){
-          // calcular hasta fecha desde
-          $inicial = new \DateTime($desde);
-          // facturas
-          $facturas = $this->_em->createQueryBuilder('f')
-          ->select('SUM(f.total) importe')
-          ->from('VentasBundle\Entity\Factura', 'f')
-          ->innerJoin('f.cliente', 'p')
-          ->where('p.id=:agr')
-          ->andWhere(" f.fechaFactura <= '".UtilsController::toAnsiDate($desde)."'")
-          ->setParameter('agr', $cli);
-          //notas de Debito
-          $notadeb = $this->_em->createQueryBuilder('c')
-          ->select(' SUM(c.total) importe')
-          ->from('VentasBundle\Entity\NotaDebCred', 'c')
-          ->innerJoin('c.cliente', 'p')
-          ->where('p.id=:agr')
-          ->andWhere('c.estado=:agr2')
-          ->andWhere("c.signo= '+'")
-          ->andWhere(" c.fecha <= '". UtilsController::toAnsiDate($desde)."'")
-          ->setParameter('agr', $cli)
-          ->setParameter('agr2', 'ACREDITADO');
-          //notas de Credito
-          $notacred = $this->_em->createQueryBuilder('c')
-          ->select(' SUM(c.total) importe')
-          ->from('VentasBundle\Entity\NotaDebCred', 'c')
-          ->innerJoin('c.cliente', 'p')
-          ->where('p.id=:agr')
-          ->andWhere('c.estado=:agr2')
-          ->andWhere("c.signo= '-'")
-          ->andWhere(" c.fecha <= '". UtilsController::toAnsiDate($desde)."'")
-          ->setParameter('agr', $cli)
-          ->setParameter('agr2', 'ACREDITADO');
-          $pagos = $this->_em->createQueryBuilder('f')
-          ->select('g')
-          ->from('VentasBundle\Entity\PagoCliente', 'g')
-          ->innerJoin('g.cliente', 'p')
-          ->where('p.id=:agr')
-          ->andWhere(" g.fecha <= '". UtilsController::toAnsiDate($desde)."'")
-          ->setParameter('agr', $cli);
-          $totpagos=0;
-          if( $pagos ){
-          foreach($pagos as $pago){
-          $totpagos = $totpagos + $pago->getTotal();
-          }
-          }
-          $saldoInicial = $cli->getSaldoInicial() + $facturas->getQuery()->getSingleScalarResult()
-          + $notadeb->getQuery()->getSingleScalarResult() - $notacred->getQuery()->getSingleScalarResult() - $totpagos ;
-          }else{
-          // tomar valor del proveedor unicamente
-          $saldoInicial = $cli->getSaldoInicial();
-          $inicial = new \DateTime('2000-01-01');
-          }
-         */
-
         if (!$desde) {
             $saldoInicial = $cli->getSaldoInicial();
             $inicial = new \DateTime('2000-01-01');

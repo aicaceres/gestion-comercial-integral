@@ -214,12 +214,20 @@ class Cliente
 
     public function getSaldo(){
         $saldo = 0;
+
         foreach( $this->getCobros() as $cobro){
             $saldo += $cobro->getFacturaElectronica()->getSaldo();
         }
-        foreach( $this->getNotasDebCredVenta() as $cobro){
-            $saldo += $cobro->getNotaElectronica()->getSaldo();
+
+        foreach( $this->getNotasDebCredVenta() as $debcred){
+            $tipo = explode('-', $debcred->getNotaElectronica()->getTipoComprobante()->getValor()) ;
+            if($tipo[0]==='CRE' && $debcred->getFormaPago()->getCuentaCorriente()){
+              $saldo -= $debcred->getNotaElectronica()->getTotal();
+            }else{
+              $saldo += $debcred->getNotaElectronica()->getSaldo();
+            }
         }
+
         return $saldo;
     }
 
@@ -997,7 +1005,7 @@ class Cliente
     /**
      * Get vencCertNoRetener
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getVencCertNoRetener()
     {

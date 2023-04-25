@@ -119,10 +119,13 @@ jQuery(function ($) {
             }
             txt += '</span>';
             // detectar inputs invalidos
+
             if( $(':invalid').length > 0 ){
+                alert('Debe completar todos los datos requeridos!');
                 $(':invalid').focus();
                 return false;
             }
+
             if( $('tbody tr.item').length > 0 ){
                 txt = txt + '\n\n' +'Seleccionar Tipo:';
                 jPresupuesto(txt, 'P', 'Impresión de Presupuestos', function(r) {
