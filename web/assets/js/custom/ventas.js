@@ -625,7 +625,8 @@ jQuery(function ($) {
 
 	function actualizaTotales() {
 		let iva = (iibb = descrec = 0)
-		let subTotal = (totalIVA = totalIIBB = 0)
+    let subTotal = (totalIVA = totalIIBB = 0)
+    let subtotalTh = 0
 		const cotizacion = parseFloat($('[id*="_cotizacion"]').val())
 		const categoriaIva = $("#categoriaIva").val()
 		const porcentaje = checknumero($('[id*="_descuentoRecargo"]'))
@@ -653,8 +654,12 @@ jQuery(function ($) {
 			//}
 			// calcular la cotización si es distinta a 1
 			precUnit = precio / cotizacion
-			precTot = (precio * cant) / cotizacion
-			item.find(".precTd span").html(precUnit.toFixed(3))
+      // calcular precio con descuento para la vista
+      precUnit = precUnit * (1 + (porcentaje / 100));
+      precTot = precUnit * cant
+      // subtotal para vista
+      subtotalTh += precTot
+      item.find(".precTd span").html(precUnit.toFixed(3))
 			item.find(".itmSubtotalTd").text(precTot.toFixed(3))
 			// totalizar
 			subTotal += precio * cant
@@ -664,7 +669,7 @@ jQuery(function ($) {
 		subTotalResumen = subTotal / cotizacion
 		totalIvaResumen = totalIVA / cotizacion
 		totalIibbResumen = totalIIBB / cotizacion
-		$("#subtotalTh").html(subTotalResumen.toFixed(3))
+		$("#subtotalTh").html(subtotalTh.toFixed(3))
 		$("#importeSubtotal").html(subTotalResumen.toFixed(3).replace(".", ","))
 
 		if (categoriaIva != "I" && categoriaIva != "M") {
