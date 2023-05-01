@@ -206,6 +206,11 @@ class VentaController extends Controller
         $entity->setCotizacion( $entity->getMoneda()->getCotizacion() );
         $entity->setDescuentaStock(true);
         $entity->setEstado('PENDIENTE');
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+        if($param){
+            // ultimo nro de operacion de venta
+            $entity->setNroOperacion( $param->getUltimoNroOperacionVenta() + 1 );
+        }
         // actualizar los precios
         foreach($entity->getDetalles() as $det){
           $det->setPrecio( $det->getProducto()->getPrecioByLista($entity->getPrecioLista()->getId())  );

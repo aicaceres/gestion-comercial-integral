@@ -50,16 +50,22 @@
                     {% if entity.estado == 'ANULADO' %}
                         <strong style="height:26px;display:block;"> ANULADO: {{ entity.updated|date('d-m-Y H:i:s') }} | {{ entity.updatedBy.username }} </strong>
                     {% else %}
-
+                        {# SHOW #}
                         <a href="{{ path('ventas_presupuesto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a>
                         {% if app.user.access(app.session.get('unidneg_id'),'ventas_presupuesto_print') %}
-                        <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" presid="{{entity.id}}"  title="Imprimir"></a>
+                        {# PRINT #}
+                          <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" presid="{{entity.id}}"  title="Imprimir"></a>
                         {% endif %}
 
-                        {% if not entity.descuentaStock %}
-                            <a href="{{ path('ventas_presupuesto_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar"></a>
+                        {% if not entity.descuentaStock and entity.estado != 'IMPRESO' %}
+                        {# EDIT #}
+                          <a href="{{ path('ventas_presupuesto_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar"></a>
                         {% endif %}
-                        <a href="{{ path('ventas_venta_presupuesto', { 'id': entity.id }) }}" class="editar btn btnaction btn_book" title="Generar Nueva Venta"></a>
+                        {# REPEAT #}
+                        <a href="{{ path('ventas_presupuesto_repeat', { 'id': entity.id }) }}" class="editar btn btnaction btn_refresh" title="Generar Nuevo"></a>
+                        {# VENTA #}
+                        <a href="{{ path('ventas_venta_presupuesto', { 'id': entity.id }) }}" class="editar btn btnaction btn_book" title="Generar Venta"></a>
+
                     {% endif %}
                 </td>
             </tr>

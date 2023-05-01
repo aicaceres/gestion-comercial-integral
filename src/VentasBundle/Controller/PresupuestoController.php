@@ -122,6 +122,13 @@ class PresupuestoController extends Controller {
                     $param->setUltimoNroPresupuesto( $entity->getNroPresupuesto() );
                     $em->persist($param);
                 }
+                // verificar que no haya items sin producto.
+                foreach ($entity->getDetalles() as $detalle){
+                  if( $detalle->getProducto() == null ){
+                    $entity->removeDetalle($detalle);
+                  }
+                }
+
                 $em->persist($entity);
                 $em->flush();
                 if( $entity->getDescuentaStock() ){
@@ -180,6 +187,10 @@ class PresupuestoController extends Controller {
         $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el Presupuesto.');
+        }
+        if ($entity->getEstado() == 'IMPRESO') {
+            $this->addFlash('error', 'El presupuesto ya no puede ser editado una vez impreso.');
+            return $this->redirectToRoute('ventas_presupuesto');
         }
         $editForm = $this->createEditForm($entity,'new');
 
@@ -319,6 +330,11 @@ class PresupuestoController extends Controller {
         $xml = $response->getContent();
         $content = $facade->render($xml);
         $hoy = new \DateTime();
+
+        $presupuesto->setEstado('IMPRESO');
+        $em->persist($presupuesto);
+        $em->flush();
+
         return new Response($content, 200, array('content-type' => 'application/pdf',
             'Content-Disposition'=>'filename=presupuesto_'.$presupuesto->getNroPresupuesto().'_'.$hoy->format('dmY_Hi').'.pdf'));
     }
@@ -379,5 +395,39 @@ class PresupuestoController extends Controller {
         return $this->redirect($this->generateUrl('ventas_presupuesto'));
     }
 
+
+    /**
+     * @Route("/{id}/repeat", name="ventas_presupuesto_repeat")
+     * @Method("GET")
+     * @Template()
+     */
+    public function repeatAction($id)
+    {
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta_new');
+        $em = $this->getDoctrine()->getManager();
+        $presupuesto = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        if (!$presupuesto) {
+            throw $this->createNotFoundException('No se encuentra el presupuesto.');
+        }
+
+        $entity = clone $presupuesto;
+        $entity->setFechaPresupuesto( new \DateTime() );
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+        if($param){
+            // cargar datos parametrizados por defecto
+            $entity->setNroPresupuesto( $param->getUltimoNroPresupuesto() + 1 );
+        }
+        $entity->setEstado('EMITIDO');
+        // actualizar los precios
+        foreach($entity->getDetalles() as $det){
+          $det->setPrecio( $det->getProducto()->getPrecioByLista($entity->getPrecioLista()->getId())  );
+        }
+        $form = $this->createCreateForm($entity,'new');
+        return $this->render('VentasBundle:Presupuesto:new.html.twig', array(
+            'entity' => $entity,
+            'form' => $form->createView(),
+        ));
+    }
 
 }

@@ -454,6 +454,8 @@ class PedidoController extends Controller {
                         $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
                         $clone->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
                         $clone->setPedidoNro(sprintf("%08d", $equipo->getNroPedidoCompra() + 1));
+                        /* Guardar ultimo nro */
+                        $equipo->setNroPedidoCompra($equipo->getNroPedidoCompra() + 1);
                         $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
                         $clone->setUnidadNegocio($unidneg);
                     }
@@ -502,6 +504,7 @@ class PedidoController extends Controller {
                     $pedido->setEstado('RECIBIDO');
                     if ($nuevo) {
                         $em->persist($clone);
+                        $em->persist($equipo);
                         $em->flush();
                     }
                 }
@@ -596,7 +599,7 @@ class PedidoController extends Controller {
                 $msg = 'OK';
             }
             catch (\Exception $ex) {
-                $msg = UtilsController::errorMessage($ex->getErrorCode());
+                $msg = $ex->getMessage();
             }
         }
         $partial = $this->renderView('ComprasBundle:Pedido:partial-items.html.twig',
@@ -623,7 +626,7 @@ class PedidoController extends Controller {
             $msg = 'OK';
         }
         catch (\Exception $ex) {
-            $msg = UtilsController::errorMessage($ex->getErrorCode());
+            $msg = $ex->getMessage();
         }
         return new Response($msg);
     }
@@ -779,7 +782,7 @@ class PedidoController extends Controller {
             $msg = 'OK';
         }
         catch (\Exception $ex) {
-            $msg = UtilsController::errorMessage($ex->getErrorCode());
+            $msg = $ex->getMessage();
         }
         return new Response($msg);
     }

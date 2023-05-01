@@ -66,7 +66,8 @@ class CajaAperturaController extends Controller
         $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $caja = $em->getRepository('ConfigBundle:Caja')->find($id);
-        if($caja->getAbierta()){
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($caja->getId());
+        if($caja->getAbierta() || $apertura ){
             $this->addFlash('error', 'Esta caja ya se encuentra abierta.<br> Debe realizar el cierre primero!');
             $partial = $this->renderView('AppBundle::notificacion.html.twig');
             return new Response($partial);
@@ -93,11 +94,19 @@ class CajaAperturaController extends Controller
         $form = $this->createAperturaForm($entity);
         $form->handleRequest($request);
         $em = $this->getDoctrine()->getManager();
+        $caja = $entity->getCaja();
         // definir ruta
-        $ruta = $this->redirect($this->generateUrl('ventas_apertura', array( 'cajaId' => $entity->getCaja()->getId()) ));
+        $ruta = $this->redirect($this->generateUrl('ventas_apertura', array( 'cajaId' => $caja->getId()) ));
         if ($form->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
+                // verificar que no exista caja abierta
+                $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($caja->getId());
+                if($apertura){
+                    $this->addFlash('error', 'Esta caja ya se encuentra abierta!');
+                    return $ruta;
+                }
+
                 $entity->getCaja()->setAbierta(true);
                 $entity->setFechaApertura( new \DateTime() );
                 $em->persist($entity);
@@ -139,9 +148,9 @@ class CajaAperturaController extends Controller
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_cierre');
 
-        $caja = $request->get('id');
+        $cajaId = $request->get('id');
         $em = $this->getDoctrine()->getManager();
-        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($caja);
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($cajaId);
         if(!$apertura){
             $this->addFlash('error', 'No se encuentra una apertura de caja para realizar el cierre.');
             $partial = $this->renderView('AppBundle::notificacion.html.twig');
@@ -194,10 +203,9 @@ class CajaAperturaController extends Controller
             }
 
         }
-$this->addFlash('error', 'invalid');
+        $this->addFlash('error', 'invalid');
         return new Response( 'ERROR' );
     }
-
 
     /**
      * Creates a form to create a Venta entity.
@@ -210,23 +218,6 @@ $this->addFlash('error', 'invalid');
             'method' => 'POST'
         ));
         return $form;
-    }
-
-    /**
-     * @Route("/{id}/xarqueoCajaApertura", name="xventas_apertura_arqueo")
-     * @Method("GET")
-     * @Template("VentasBundle:CajaApertura:movimientos.html.twig")
-     */
-    public function xarqueoCajaAperturaAction($id){
-        $session = $this->get('session');
-        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_cierre');
-        $em = $this->getDoctrine()->getManager();
-        $movimientos = $em->getRepository('VentasBundle:CobroDetalle')->findBy(array('cajaApertura'=>$id));
-
-
-        return $this->render('VentasBundle:CajaApertura:movimientos.html.twig', array(
-                'movimientos' => $movimientos
-        ));
     }
 
     /**
@@ -254,6 +245,5 @@ $this->addFlash('error', 'invalid');
         return new Response($content, 200, array('content-type' => 'application/pdf',
             'Content-Disposition' => 'filename=arqueo_' . $apertura->getId() . '.pdf'));
     }
-
 
 }

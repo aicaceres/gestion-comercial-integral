@@ -135,6 +135,10 @@ class Venta {
      */
     private $updatedBy;
 
+   public function __clone() {
+        $this->id = null;
+    }
+
     public function __toString(){
         return strval($this->getNroOperacion());
     }

@@ -122,6 +122,11 @@ class Pedido
         $this->fechaPedido = new \DateTime();
         $this->estado = 'NUEVO';
     }
+
+    public function __clone() {
+        $this->id = null;
+    }
+
     /**
      * Get id
      *

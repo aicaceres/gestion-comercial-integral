@@ -32,7 +32,7 @@ class Presupuesto {
     private $fechaPresupuesto;
 
     /**
-     * Estados: EMITIDO - ANULADO
+     * Estados: EMITIDO - IMPRESO - ANULADO
      */
     /**
      * @var string $estado
@@ -135,6 +135,10 @@ class Presupuesto {
     public function __construct()
     {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    public function __clone() {
+        $this->id = null;
     }
 
     public function getNroPresupuestoTxt(){
@@ -652,7 +656,7 @@ class Presupuesto {
     /**
      * Get tipo
      *
-     * @return string 
+     * @return string
      */
     public function getTipo()
     {

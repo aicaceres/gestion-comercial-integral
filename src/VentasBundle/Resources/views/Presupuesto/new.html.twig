@@ -81,7 +81,8 @@
             <br clear="all" />
             <div class="actionbutton">
                 {% if entity.id %}
-                <a type="button" class="floatleft delete_button" href="{{ path('ventas_presupuesto_anular', { 'id': entity.id })}}">ANULAR</a> {% endif %}
+                <a type="button" class="floatleft delete_button" href="{{ path('ventas_presupuesto_anular', { 'id': entity.id })}}">ANULAR</a>
+                {% endif %}
                 <button class="guardar tabbable" type="button" >Guardar</button>
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
@@ -109,7 +110,7 @@ jQuery(function ($) {
         //$('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
 
         // confirm on submit
-        $('.guardar').on('click', function(){
+         $('.guardar').on('click', function(){
             // controlar que haya items cargados
             let txt = '<span>';
             txt += 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
@@ -127,7 +128,8 @@ jQuery(function ($) {
             }
 
             if( $('tbody tr.item').length > 0 ){
-                txt = txt + '\n\n' +'Seleccionar Tipo:';
+                // funcionalidad de remito anulada por pedido de aides
+                {# txt = txt + '\n\n' +'Seleccionar Tipo:';
                 jPresupuesto(txt, 'P', 'Impresión de Presupuestos', function(r) {
                     if (r) {
                         if( r=='R' ){
@@ -136,8 +138,9 @@ jQuery(function ($) {
                         $('#ventasbundle_presupuesto_tipo').val(r);
                         $('#ventasbundle_presupuesto').submit();
                     }
-                });
+                }); #}
 
+                $('#ventasbundle_presupuesto').submit();
             }else{
                 alert('Debe ingresar items al presupuesto');
                 return false;
