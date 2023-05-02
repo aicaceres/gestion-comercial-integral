@@ -179,6 +179,7 @@ class CajaAperturaController extends Controller
         $form = $this->createCierreForm($entity);
         $form->handleRequest($request);
         $em = $this->getDoctrine()->getManager();
+        $logger = $this->get('logger');
         if ($form->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
@@ -194,17 +195,16 @@ class CajaAperturaController extends Controller
                     $this->addFlash('warning', 'No se registraron movimientos!');
                     $url_arqueo = null;
                 }
-                return new Response( $url_arqueo );
+                $logger->info($url_arqueo);
+                return new Response( json_encode(['message'=>'URL', 'url'=> $url_arqueo]) );
             }
             catch (\Exception $ex) {
-                $this->addFlash('error', $ex->getMessage());
                 $em->getConnection()->rollback();
-                return new Response( 'ERROR' );
+                return new Response( json_encode(['message'=>'ERROR', 'error'=> $ex->getMessage()]) );
             }
 
         }
-        $this->addFlash('error', 'invalid');
-        return new Response( 'ERROR' );
+        return new Response( json_encode(['message'=>'ERROR', 'error'=> 'invalid form!' ]) );
     }
 
     /**

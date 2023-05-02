@@ -137,48 +137,43 @@ function aperturaCajaVentas(url, cobro=false, caja=1 ) {
 // lanza popup para cierre de caja
 // CAJA=1
 function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
-    let horaRefresh = null;
+  let horaRefresh = null;
     data = { 'id': caja };
     jQuery('#popup').html('');
     jQuery('#popup')
         .load(url, data, function () {
-            // refresca la hora en un campo fecha-hora
-            horaRefresh = setInterval(function () {
-                jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
-            }, 1000);
             // confirm para el cierre
             jQuery('#ventasbundle_cierre').on('submit', function () {
                 if (!confirm('CONFIRMA EL CIERRE DE CAJA!\n\n Este movimiento no puede ser modificado!'))
                     return false;
             })
+            jQuery('.closePopup').removeClass('hidden')
+            // refresca la hora en un campo fecha-hora
+            horaRefresh = setInterval(function () {
+                jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
+            }, 1000);
             // foco en monto
-            jQuery('#ventasbundle_cierre_montoCierre').focus();
+            //jQuery('#ventasbundle_cierre_montoCierre').focus();
         })
     .dialog({
         modal: true, autoOpen: false, title: "CIERRE DE CAJA", width: '450px',
-        buttons: [{text: "Registrar el Cierre de Caja", class: 'closePopup additem',
+        buttons: [{text: "Registrar el Cierre de Caja", class: 'closePopup additem hidden',
             click: function () {
-                /*if (!jQuery('#ventasbundle_cierre_montoCierre').val()) {
-                    jAlert('Debe indicar la cantidad de dinero en caja.', 'Atención',
-                        function () {
-                            jQuery('#ventasbundle_cierre_montoCierre').focus();
-                        });
-                    return false;
-                }*/
                 url_cierre = jQuery('#ventasbundle_cierre').attr('action');
-                data = jQuery('#ventasbundle_cierre').serialize();
-                jQuery.post(url_cierre, data)
-                    .done(function (data) {
-                        if (data == 'ERROR') {
-                            jAlert('No se ha podido registrar el cierre. Intente nuevamente.');
+                formdata = jQuery('#ventasbundle_cierre').serialize();
+                jQuery.post(url_cierre, formdata)
+                  .done(function (data) {
+                        if (data.message == 'ERROR') {
+                          jAlert('No se ha podido registrar el cierre. Intente nuevamente. ');
+                          alert(data.error)
                         } else {
-                            if (data) {
-                                window.open(data);
+                            if (data.message == 'URL') {
+                                window.open(data.url);
                             }
                             window.location.reload();
                         }
                     }).fail(function () {
-                        alert("No se ha podido registrar el cierre. Intente nuevamente.");
+                        alert("No se ha podido registrar el cierre. Intente nuevamente. fail ");
                     });
                 jQuery( this ).dialog( "close" )
             }}],

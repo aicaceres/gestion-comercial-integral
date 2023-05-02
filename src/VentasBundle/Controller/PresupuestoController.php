@@ -163,7 +163,8 @@ class PresupuestoController extends Controller {
                 }
 
                 $em->getConnection()->commit();
-                return $this->redirect($this->generateUrl('ventas_presupuesto', array('printpdf' => $entity->getId())));
+                // return $this->redirect($this->generateUrl('ventas_presupuesto', array('printpdf' => $entity->getId())));
+                return $this->redirect($this->generateUrl('ventas_presupuesto'));
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());

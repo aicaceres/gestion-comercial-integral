@@ -352,7 +352,8 @@ jQuery(function ($) {
             return false;
         }
 
-        if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' && '{{ entity.formaPago.contado }}' ){
+        //if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' && '{{ entity.formaPago.contado }}' ){
+        if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' ){
             $('.loader_facturar').removeClass('hidden');
             modelo = '{{modelo_tickeadora}}'
             puerto = '{{puerto_tickeadora}}'

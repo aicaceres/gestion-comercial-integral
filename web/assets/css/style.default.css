@@ -2315,6 +2315,9 @@ button.addrubro {
     margin-bottom: 10px;
     padding: 7px 20px;
 }
+.closePopup.hidden{
+  display:none;
+}
 .ui-widget-overlay {
     position: absolute;
     top: 0;

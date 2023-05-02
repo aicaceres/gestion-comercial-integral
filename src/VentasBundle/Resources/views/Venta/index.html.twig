@@ -63,7 +63,7 @@
                 <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span> {{ entity.montoTotal|number_format(3,',','.') }}</td>
                 <td class="estado">{{ entity.estado }}</td>
                 {% if not owns  %}
-                <td>{{entity.createdBy.username|upper }}</td>
+                <td>{{entity.updatedBy.username|upper }}</td>
                 {% endif %}
                 <td class="buttons">
                     <a href="{{ path('ventas_venta_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Venta"></a>

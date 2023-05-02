@@ -1,4 +1,5 @@
 jQuery(function ($) {
+  var last_formapago
 	const esPresupuesto = $(location).attr("pathname").includes("presupuesto")
 	const esNotaDebCred = $(location).attr("pathname").includes("notadebcred")
   $(window).on("load", function () {
@@ -54,6 +55,7 @@ jQuery(function ($) {
 					// actualizar partial datos
 					if (data) {
 						$("#categoriaIva").val(data.categoriaIva)
+						$("#esConsumidorFinal").val(data.esConsumidorFinal)
 						// ocultar iva e iibb en resumen
 						$("#ivaTd, #iibbTd").hide()
 						if ($(".datos-cf").length > 0) {
@@ -115,24 +117,32 @@ jQuery(function ($) {
 			.trigger("change")
 
 		// al modificar forma de pago actualizar datos del partial
-		$('[id*="_formaPago"]').on("change", function () {
-			//$('.datos-formapago').html('');
-			id = $(this).val()
-			url_datos = $(this).attr("url_datos")
-			$.get(url_datos, { id: id }).done(function (data) {
-				// actualizar datos
-				if (data) {
-					$(".datos-formapago").html(data)
-					descuentoRecargo = $("#porcentajeRecargo").val()
-					//$('.descuentoRecargo').text( descuentoRecargo.toFixed(2) )
-					$('[id*="_descuentoRecargo"]').val(descuentoRecargo)
-					if (esNotaDebCred) {
-						detallePago()
-					}
-					actualizaTotales()
-				}
-			})
-		})
+
+    $('[id*="_formaPago"]').on("focus",function(){
+      last_formapago = $(this).val();
+      }).on("change", function (e) {
+        e.preventDefault()
+        id = $(this).val()
+        url_datos = $(this).attr("url_datos")
+        $.get(url_datos, { id: id }).done(function (data) {
+          // actualizar datos
+          if (data) {
+            $(".datos-formapago").html(data)
+            let esCtaCte = $("#esCtaCte").val()
+            let esConsumidorFinal = $("#esConsumidorFinal").val() == 'true'
+            if (checkConsumidorFinal(esCtaCte,esConsumidorFinal)) {
+              descuentoRecargo = $("#porcentajeRecargo").val()
+              //$('.descuentoRecargo').text( descuentoRecargo.toFixed(2) )
+              $('[id*="_descuentoRecargo"]').val(descuentoRecargo)
+              if (esNotaDebCred) {
+                detallePago()
+              }
+              actualizaTotales()
+            }
+          }
+        })
+      })
+
 
 		$('[id*="_moneda"]').on("change", function () {
 			label = $(this).prev("label")
@@ -308,6 +318,15 @@ jQuery(function ($) {
 		cliente.select2("focus")
 	})
 	// funciones
+  function checkConsumidorFinal(cc, cf) {
+    if (cc && cf) {
+      $('[id*="_formaPago"]').val(last_formapago)
+      $('[id*="_formaPago"]').change()
+      alert('Consumidor final no puede seleccionar formas de pago en cuenta corriente!!')
+      return false
+    }
+    return true
+  }
 
 	function openModal(obj) {
 		const url = obj.attr("url")
