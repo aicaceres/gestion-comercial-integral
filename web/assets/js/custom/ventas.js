@@ -1,7 +1,7 @@
 jQuery(function ($) {
   var last_formapago
 	const esPresupuesto = $(location).attr("pathname").includes("presupuesto")
-	const esNotaDebCred = $(location).attr("pathname").includes("notadebcred")
+  const esNotaDebCred = $(location).attr("pathname").includes("notadebcred")
   $(window).on("load", function () {
     var onLoad = true
 		// si la pantalla es chica expandir
@@ -84,8 +84,8 @@ jQuery(function ($) {
               onLoad = false
             }else{
 							$('[id*="_precioLista"]').val(data.listaprecio)
-							$('[id*="_formaPago"]').val(data.formapago)
-							$('[id*="_formaPago"]').change()
+              $('[id*="_formaPago"]').val(data.formapago)
+							$('[id*="_formaPago"]').blur()
 						}
 						// mostrar iva e iibb si corresponde
 						//if( !esPresupuesto){
@@ -120,7 +120,7 @@ jQuery(function ($) {
 
     $('[id*="_formaPago"]').on("focus",function(){
       last_formapago = $(this).val();
-      }).on("change", function (e) {
+    }).on("blur", function (e) {
         e.preventDefault()
         id = $(this).val()
         url_datos = $(this).attr("url_datos")
@@ -216,7 +216,7 @@ jQuery(function ($) {
 				.attr("required", $(this).find(".prodTd input").is(":visible"))
 			productolast = $(this).find('[name*="[producto]"]')
 
-			url_producto_autocomplete = productolast.attr("url_autocomplete")
+      url_producto_autocomplete = productolast.attr("url_autocomplete")
 			productolast
 				.select2({
 					ajax: {
@@ -226,7 +226,9 @@ jQuery(function ($) {
 						delay: 250,
 						data: function (params) {
 							return {
-								searchTerm: params.term, // search term
+                searchTerm: params.term, // search term
+                lista: $('[id*="_precioLista"]').val(),
+                cativa: $("#categoriaIva").val(),
 							}
 						},
 						processResults: function (response) {
@@ -260,12 +262,12 @@ jQuery(function ($) {
 							if (data.comodin) {
 								textoComodin.attr("required", true)
 								textoComodin.show()
-								//textoComodin.focus();
+								textoComodin.focus()
 							} else {
 								textoComodin.attr("required", false)
 								textoComodin.hide()
 								objcant = obj.parent().siblings(".cantTd")
-								//objcant.find('[id*="_cantidad"]').focus();
+								objcant.find('[id*="_cantidad"]').focus()
 							}
 							obj.siblings(".bajominimo").toggle(data.bajominimo)
 							actualizaTotales()
@@ -286,8 +288,11 @@ jQuery(function ($) {
 		if (esNotaDebCred) {
 			$("#ventasbundle_notadebcred_comprobanteAsociado").on(
 				"change",
-				function () {
-					cargarItems($(this))
+        function () {
+          if (confirm("Desea cargar los items del comprobante asociado?")) {
+            cargarItems($(this))
+          }
+          filtrarTipoComprobante($(this))
 				}
 			)
 
@@ -323,6 +328,7 @@ jQuery(function ($) {
       $('[id*="_formaPago"]').val(last_formapago)
       $('[id*="_formaPago"]').change()
       alert('Consumidor final no puede seleccionar formas de pago en cuenta corriente!!')
+      $('[id*="_formaPago"]').focus()
       return false
     }
     return true
@@ -561,7 +567,7 @@ jQuery(function ($) {
 		})
 
 		productolast = $('[name*="[producto]"]').last()
-		url_producto_autocomplete = productolast.attr("url_autocomplete")
+    url_producto_autocomplete = productolast.attr("url_autocomplete")
 		productolast
 			.select2({
 				ajax: {
@@ -745,23 +751,40 @@ jQuery(function ($) {
 	}
 
 	// FUNCIONES NOTAS DEBCRED
-	function cargarItems(obj) {
-		$.getJSON(
-			obj.attr("url_items_comprobante"),
-			{ id: obj.val() },
-			function (data) {
-				if (confirm("Desea cargar los items del comprobante asociado?")) {
-					$.each(data, function (i, item) {
-						addNewItem()
-						$('[name*="[cantidad]"]').last().val(item.cant)
-						var newOption = new Option(item.text, item.id, true, true)
-						$('[name*="[producto]"]').last().append(newOption).trigger("change")
-					})
-					actualizaTotales()
-				}
-			}
-		)
+  function cargarItems(obj) {
+      $('.divcarga').removeClass('hidden')
+      $.getJSON(
+        obj.attr("url_items_comprobante"),
+        { id: obj.val() },
+        function (data) {
+            $.each(data, function (i, item) {
+              addNewItem()
+              $('[name*="[cantidad]"]').last().val(item.cant)
+              var newOption = new Option(item.text, item.id, true, true)
+              $('[name*="[producto]"]').last().append(newOption).trigger("change")
+              $('.divcarga').addClass('hidden')
+            })
+            actualizaTotales()
+        }
+        )
 	}
+  function filtrarTipoComprobante(obj) {
+    $.getJSON(
+        obj.attr("url_tipos_comprobante_valido"),
+        { id:  obj.val() },
+      function (data) {
+          objTiposComprobante = $('[id*="_notaElectronica_tipoComprobante"]')
+          objTiposComprobante.find('option').each(function (e) {
+            if ( !data.includes( parseInt($(this).val()) ) ) {
+              $(this).attr("disabled", "disabled")
+            }
+          });
+          objTiposComprobante.val(objTiposComprobante.find('option:not([disabled]):first').val())
+          objTiposComprobante.focus()
+        }
+        )
+  }
+
 
 	function actualizarSuma() {
 		if (tipoPago == "CTACTE") {

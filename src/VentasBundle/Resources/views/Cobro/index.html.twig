@@ -6,6 +6,9 @@
 {% endblock %}
 {% block contentwrapper %}
 {% include "AppBundle::notificacion.html.twig" %}
+
+{# <a href="{{ path('prueba_tickeadora') }}" target="_blank" class="btn_print" title="Probar">PRUEBA TICKEADORA</a> #}
+
 <div id="contentwrapper" class="contentwrapper">
 <div>
     <form id="searchform" action="{{ path('ventas_cobro') }}" method="get">
@@ -23,71 +26,30 @@
         {% endif %}
         <div style="display: inline-block; margin-right: 30px;">
             &nbsp;&nbsp;&nbsp;
-            <label><strong>Fecha Venta: </strong></label>
+            <label><strong>Rango de Fecha: </strong></label>
             <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
             <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
         </div>
-<a href="{{ path('prueba_tickeadora') }}" class="btn_print hidden" title="Probar">probar</a>
-{% if app.session.get('caja_abierta') %}
-    {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
-        {% set urlxCobrar = path('ventas_por_cobrar') %}
-            <a href="javascript:void(0)" onclick="partialVentasPorCobrar('{{ urlxCobrar }}')"  class="btn btn_blue btn_dollartag floatright facturarVentas" title="ctrl + alt + C">
-                <span style="font-size: 14px;">COBRAR VENTAS</span>
-            </a>
-    {% endif %}
-{% else %}
-    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
-            {% set urlApertura = path('ventas_apertura_new') %}
-            <a href="javascript:void(0)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')" class="btn btn_orange btn_lock floatright " title="Debe abrir la caja para realizar cobros">
-                <span style="font-size: 14px;">APERTURA DE CAJA</span>
-            </a>
-    {% else %}
-        <div class="external-event floatright" style="background-color:orangered" title="Debe abrir la caja para realizar cobros">CAJA CERRADA</div>
-    {% endif %}
-
-{% endif %}
-
     </form>
 
-</div><!-- button -->
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
-        <thead>
-            <tr>
-                <th># Op.</th>
-                <th>Fecha / Hora</th>
-                <th>Cliente</th>
-                <th>Forma de Pago</th>
-                <th>Total</th>
-                <th>Comprobante</th>
-                {% if not owns %}
-                <th>Usuario</th>
-                {% endif %}
-                <th class="nosort actionbutton addbutton">&nbsp;</th>
-            </tr>
-        </thead>
-        <tbody>
-           {% for entity in entities %}
-            <tr>
-                <td>{{entity.nroOperacion}}</td>
-                <td><span class="hidden">{{ entity.fechaCobro|date('YmdHi') }}</span>{{ entity.fechaCobro|date('d-m-Y H:i') }}</td>
-                <td>{{ entity.cliente }}</td>
-                <td>{{ entity.formaPago }}</td>
-                <td class="alignright"><span class="floatleft">{{entity.moneda.simbolo}}</span> {{ entity.venta.montoTotal|number_format(2,',','.') }}</td>
-                <td class="estado">{{ entity.facturaElectronica.comprobanteTxt }}</td>
-                {% if not owns  %}
-                <td>{{entity.createdBy.nombre|upper }}</td>
-                {% endif %}
-                <td class="buttons">
-                     <a href="{{ path('ventas_cobro_show',{ 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Cobro"></a>
-                    {% if entity.facturaElectronica.tipoComprobante.valor not in ['TICK-B','TIQUE'] %}
-                    <a href="#" url="{{ path('ventas_cobro_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
-                    {% endif %}
-                </td>
-            </tr>
-           {% endfor %}
-        </tbody>
-    </table>
+</div>
+
+<div>
+            <ul class="hornav">
+                <li class="current"><a href="#tab-porcobrar">Ventas por Cobrar</a></li>
+                <li><a href="#tab-cobrados">Cobros Realizados</a></li>
+            </ul>
+            <div id="nav-contentwrapper" class="contentwrapper">
+                 <div id="tab-porcobrar" class="subcontent">
+                     {% include 'VentasBundle:Cobro:_partial-tab-por-cobrar.html.twig' %}
+                  </div>
+                 <div id="tab-cobrados" class="subcontent" style="display: none;">
+                     {% include 'VentasBundle:Cobro:_partial-tab-cobrados.html.twig' %}
+                  </div>
+            </div>
+</div>
+
 </div>
  {% endblock %}
 {% block extra_javascripts %}
@@ -104,18 +66,61 @@ jQuery(document).ready(function($){
     });
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
-    var oTable = $('#dyntable2').dataTable();
+    var oTable = $('.table-cobrados').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
     if( printpdf ){
         console.log( '[facid="'+printpdf+'"]')
         $('[facid="'+printpdf+'"]').click()
     }
-    function detectarControles(e) {
+{# VENTAS POR COBRAR #}
+    $('#ventasxcobrar').dataTable({
+            "bSort": false,
+            "sPaginationType": "full_numbers",
+                "oLanguage": {
+                    "oPaginate": {
+                        "sFirst": "<<",
+                        "sNext": ">",
+                        "sLast": ">>",
+                        "sPrevious": "<"
+                    },
+            "sLengthMenu": "Mostrar _MENU_ registros ",
+            "sZeroRecords": "Sin datos",
+            "sInfo": " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+            "sInfoEmpty": "Sin coincidencias",
+            "sInfoFiltered": "(filtrado de _MAX_ registros)",
+            "sSearch": "Buscar:",
+            "sSelect": "%d seleccionados"
+        }
+    });
+    $('#ventasxcobrar_filter input').val('#');
+    $('#ventasxcobrar_filter input').focus();
+    /// hover de nro operacion resalta toda la fila
+    $(document).on('focus', '.operacion', function (e) {
+        jQuery('#ventasxcobrar tbody tr').removeClass('selectedline');
+        jQuery(this).parent().addClass('selectedline');
+    })
+
+    $(document).on('click','.view_detail' ,function(){
+      partialDetalleVenta($(this))
+    })
+
+    {# function detectarControles(e) {
     // ctrl + alt + C
       if( e.ctrlKey && e.altKey && e.keyCode == 67 ){
         $('.facturarVentas').click();
       }
-    }
+    } #}
 });
+
+function partialDetalleVenta(obj) {
+    jQuery('#popup')
+        .html('')
+        .load(obj.data('url'))
+        .dialog({
+            modal: true, autoOpen: false, title: "DETALLE DE VENTA", width: "70%",minHeight: 380,
+            close: function() { obj.focus() }
+        });
+        jQuery('#popup').dialog('open');
+}
 </script>
 {% endblock %}

@@ -18,11 +18,11 @@ class PresupuestoRepository extends EntityRepository {
                     ->andWhere('pr.id=' . $cliId);
         }
         if ($desde) {
-            $cadena = " p.fechaPresupuesto >= '" . UtilsController::toAnsiDate($desde) . "'";
+            $cadena = " p.fechaPresupuesto >= '" . UtilsController::toAnsiDate($desde) . " 00:00'";
             $query->andWhere($cadena);
         }
         if ($hasta) {
-            $cadena = " p.fechaPresupuesto <= '" . UtilsController::toAnsiDate($hasta) . "'";
+            $cadena = " p.fechaPresupuesto <= '" . UtilsController::toAnsiDate($hasta) . " 23:59'";
             $query->andWhere($cadena);
         }
         return $query->getQuery()->getResult();

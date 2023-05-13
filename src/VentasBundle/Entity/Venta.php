@@ -135,7 +135,7 @@ class Venta {
      */
     private $updatedBy;
 
-   public function __clone() {
+    public function __clone() {
         $this->id = null;
     }
 

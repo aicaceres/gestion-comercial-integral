@@ -317,6 +317,7 @@ class VentaController extends Controller
         }
         $depositoAnterior = $entity->getDeposito();
         $detalleAnterior = clone($entity->getDetalles()) ;
+        $detalleAnteriorJson = $this->getDetalleJson($detalleAnterior);
 
         $editForm = $this->createEditForm($entity,'create');
         $editForm->handleRequest($request);
@@ -327,8 +328,10 @@ class VentaController extends Controller
                     // realizar los ajustes en el stock - deshacer el movimiento y rehacer
                     $depositoNuevo = $entity->getDeposito();
                     $detalleNuevo = $entity->getDetalles();
-                    $difDetalle =  strcmp( $this->getDetalleJson($detalleAnterior) , $this->getDetalleJson($detalleNuevo));
+                    $difDetalle =  strcmp( $detalleAnteriorJson , $this->getDetalleJson($detalleNuevo));
+
                     if($difDetalle || ($depositoAnterior->getId()!=$depositoNuevo->getId()) ){
+
                         // reingresar anteriores articulos al stock
                         $res = $this->registrarMovimientoStock($entity->getId(), $depositoAnterior, $detalleAnterior, '+', $em);
                         if($res){

@@ -17,11 +17,11 @@
             {% if entity.id %}
                 <div>
                     <label for="configbundle_perfil_nombre" class="required">Nombre:</label>{{entity.nombre|upper}}
-                </div>                                    
-            {% else %}                
+                </div>
+            {% else %}
                 {{ form_label(form.nombre) }}
                 {{ form_widget(form.nombre, { 'attr': {'class' : 'mininput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
-                {{ form_errors(form.nombre) }}                
+                {{ form_errors(form.nombre) }}
             {% endif %}
             </p>
             <p>
@@ -34,7 +34,7 @@
             {{ form_widget(form.activo) }}
             {{ form_errors(form.activo) }}
              </p>
-                
+
              <ul class="hornav">
                 <li class="current"><a href="#modstock">Stock</a></li>
                 <li><a href="#modcompras">Compras</a></li>
@@ -43,66 +43,66 @@
             </ul>
 
              <div id="contentwrapper" class="contentwrapper">
-                 <div id="modstock" class="subcontent">                 
-                     {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'stock' } %}             
-                  </div>                 
-                 <div id="modcompras" class="subcontent" style="display: none;">                 
-                     {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'compras' } %}             
-                  </div>                 
-                 <div id="modventas" class="subcontent" style="display: none;">                 
-                     {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'ventas' } %}             
-                  </div>                 
-                 <div id="modsistema" class="subcontent" style="display: none;">                     
-                    {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'sistema' } %}                    
-                </div><!-- #activities -->     
+                 <div id="modstock" class="subcontent">
+                     {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'stock' } %}
+                  </div>
+                 <div id="modcompras" class="subcontent" style="display: none;">
+                     {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'compras' } %}
+                  </div>
+                 <div id="modventas" class="subcontent" style="display: none;">
+                     {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'ventas' } %}
+                  </div>
+                 <div id="modsistema" class="subcontent" style="display: none;">
+                    {% include 'ConfigBundle:Perfil:_partial-modulo.html.twig' with {'txtmod': 'sistema' } %}
+                </div><!-- #activities -->
              </div>
-                   
-            <br clear="all" /> 
+
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('sistema_seguridad_perfil')}}">Cancelar</a>
             </div>
         </fieldset>
 {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
-{% block extra_javascripts %} 
+{% block extra_javascripts %}
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     $slct = $('.select2').select2();
-    $slct.on("select2:select", function (e) { 
+    $slct.on("select2:select", function (e) {
          var modId = $(this).data('moduloid');
          if( e.params.data.id == modId){
              $('#chkmodulo'+modId).prop('checked',true);
-             $.uniform.update();    
-         }               
-    });  
-    $slct.on("select2:unselect", function (e) { 
+             $.uniform.update();
+         }
+    });
+    $slct.on("select2:unselect", function (e) {
          var modId = $(this).data('moduloid');
          if( e.params.data.id == modId){
             $('#chkmodulo'+modId).prop('checked',false);
-             $.uniform.update();       
+             $.uniform.update();
          }
-      });   
+      });
     $('.chkmodulo').on('change', function(event){
        var modId = $(this).data('moduloid');
        if( $(this).is(":checked") ){
-          $('#configbundle_perfil_permisos_'+modId).attr('disabled',false); 
+          $('#configbundle_perfil_permisos_'+modId).attr('disabled',false);
           $('#configbundle_perfil_permisos_'+modId).val(modId).trigger("change");
-          $('#configbundle_perfil_permisos_'+modId).select2("open"); 
+          $('#configbundle_perfil_permisos_'+modId).select2("open");
        }else{
           $('#configbundle_perfil_permisos_'+modId).val(null).trigger("change");
           $('#configbundle_perfil_permisos_'+modId).attr('disabled',true);
        }
-        
-      });  
-          
-      
+
+      });
+
+
 {% if entity.admin %}
-       $('#configbundle_perfil_activo').prop('checked',true); 
-       $('#configbundle_perfil_activo').attr('disabled',true);             
-    {% endif %}      
-});    
-</script>  
+       $('#configbundle_perfil_activo').prop('checked',true);
+       $('#configbundle_perfil_activo').attr('disabled',true);
+    {% endif %}
+});
+</script>
 {% endblock %}

@@ -140,7 +140,7 @@ class NotaDebCredController extends Controller {
                     $docTipo = $entity->getTipoDocumentoCliente()->getCodigo();
                     $docNro = $entity->getNroDocumentoCliente();
                 }
-                $cbtesAsoc = array();
+                $cbtesAsoc = $periodoAsoc = array();
                 if( $entity->getComprobanteAsociado() ){
                     /* array(
                         'Tipo' 		=> 6, // Tipo de comprobante (ver tipos disponibles)
@@ -152,6 +152,13 @@ class NotaDebCredController extends Controller {
                     $cbtesAsoc[] = array( 'Tipo' =>                             $factura->getCodigoComprobante(),
                                         'PtoVta' => $factura->getPuntoVenta(),
                                         'Nro' => $factura->getNroComprobante() );
+                }else{
+                  /* array(
+                        'FchDesde' => Ymd
+                        'FchHasta'  => Ymd
+                        )
+                  */
+                  $periodoAsoc = array( 'FchDesde' => intval( $entity->getFecha()->format('Ymd') ), 'FchHasta' => intval( $entity->getFecha()->format('Ymd') ));
                 }
 
                 $catIva = ( $entity->getCliente()->getCategoriaIva() ) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
@@ -260,12 +267,18 @@ class NotaDebCredController extends Controller {
                     'MonCotiz' 	=> $entity->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
                     'Tributos' => $tributos,
                     'CbtesAsoc' 	=> $cbtesAsoc,
+                    'PeriodoAsoc' => $periodoAsoc,
                     'Iva' 			=> $iva,
                 );
+                // si no hay combrobante asociado
+                if( empty($cbtesAsoc) ){
+                  unset( $data['CbtesAsoc'] );
+                }
                 // si no hay tributos
                 if( empty($tributos) ){
                     unset( $data['Tributos'] );
                 }
+
                 // create voucher
                 $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
                 // seteo ultimos valores

@@ -26,6 +26,8 @@ class ParametrizacionType extends AbstractType
                     'label_attr' => array('style'=>'width:200px')))
             ->add('ultimoNroPresupuesto',null,array('label' => 'Último N° de Presupuesto:',
                     'label_attr' => array('style'=>'width:200px')))
+            ->add('cantidadItemsParaFactura',null,array('label' => 'Cantidad de Items para Factura:',
+                    'label_attr' => array('style'=>'width:200px')))
             ->add('validezPresupuesto',null,array('label' => 'Validez del presupuesto en días:',
                     'label_attr' => array('style'=>'width:200px')))
         ;

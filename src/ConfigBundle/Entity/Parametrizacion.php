@@ -28,6 +28,12 @@ class Parametrizacion {
     protected $ventasDepositoBydefault;
 
     /**
+     * @var integer $cantidadItemsParaFactura
+     * @ORM\Column(name="cantidad_items_para_factura", type="integer")
+     */
+    protected $cantidadItemsParaFactura = 10;
+
+    /**
      * @var integer $ultimoNroOperacionVenta
      * @ORM\Column(name="ultimo_nro_operacion_venta", type="integer")
      */
@@ -129,6 +135,29 @@ class Parametrizacion {
     public function getVentasDepositoBydefault()
     {
         return $this->ventasDepositoBydefault;
+    }
+
+    /**
+     * Set cantidadItemsParaFactura
+     *
+     * @param integer $cantidadItemsParaFactura
+     * @return Parametrizacion
+     */
+    public function setCantidadItemsParaFactura($cantidadItemsParaFactura)
+    {
+        $this->cantidadItemsParaFactura = $cantidadItemsParaFactura;
+
+        return $this;
+    }
+
+    /**
+     * Get cantidadItemsParaFactura
+     *
+     * @return integer
+     */
+    public function getCantidadItemsParaFactura()
+    {
+        return $this->cantidadItemsParaFactura;
     }
 
     /**
@@ -308,7 +337,7 @@ class Parametrizacion {
     /**
      * Get ultimoNroPagoCliente
      *
-     * @return integer 
+     * @return integer
      */
     public function getUltimoNroPagoCliente()
     {

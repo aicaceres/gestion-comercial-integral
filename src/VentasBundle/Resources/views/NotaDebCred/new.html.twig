@@ -43,10 +43,7 @@
     </fieldset>
 
     <fieldset class="fields" >
-        <div style="display:inline-block; width: 25%;">
-            {{ form_row(form.notaElectronica.tipoComprobante) }}
-        </div>
-        <div style="display:inline-block; width: 50%;">
+        <div style="display:inline-block; width: 40%">
             <div>
             {{ form_label(form.comprobanteAsociado)  }}
             {{ form_widget(form.comprobanteAsociado,
@@ -54,25 +51,40 @@
                     {'style':'width:90%',
                      'url_autocomplete' : path('get_autocomplete_facturas'),
                      'url_items_comprobante' : path('get_items_comprobante'),
+                     'url_tipos_comprobante_valido' : path('get_tipos_comprobante_valido'),
                     }
                 })
             }}
             </div>
         </div>
-        <div style="display:inline-block; width:20%;">
-            {{ form_row(form.precioLista) }}
+        <div style="display:inline-block; width: 20%;">
+            {{ form_row(form.notaElectronica.tipoComprobante) }}
+        </div>
+        <div style="display:inline-block; width: 10%;">
+            {{ form_row(form.periodoAsocDesde, { 'attr': {'class' : 'datepicker'} }) }}
+        </div>
+        <div style="display:inline-block; width: 10%;">
+            {{ form_row(form.periodoAsocHasta, { 'attr': {'class' : 'datepicker'} }) }}
         </div>
     </fieldset>
     <fieldset class="fields" >
-        {{ form_row(form.concepto, { 'attr' : { 'class':'mediuminput' } }) }}
+        <div style="display:inline-block; width:20%;">
+            {{ form_row(form.precioLista) }}
+        </div>
+        <div style="display:inline-block; width:70%;">
+            {{ form_row(form.concepto) }}
+        </div>
     </fieldset>
+
 
     <fieldset>
         <div style="padding-top: 20px; margin:auto; width: 100%;">
+            <div style="text-align:center; color:orangered; font-size:12px;" class="divcarga hidden" >Cargando items de comprobante asociado...</div>
             {{ form_errors(form.detalles) }}
             {% include "VentasBundle:Partial:_partial-detalle.html.twig" %}
         </div>
     </fieldset>
+
     <fieldset>
         <div style="margin:auto; width: 100%;">
             {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': false, 'showiibb': false } %}
@@ -146,6 +158,18 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
+        $('.datepicker').datepicker({
+          dateFormat: 'dd-mm-yy',
+          onClose: function( selectedDate )
+            {
+              let desde = $('#ventasbundle_notadebcred_periodoAsocDesde').datepicker( "getDate" )
+              let hasta = $('#ventasbundle_notadebcred_periodoAsocHasta').datepicker( "getDate" )
+              if( desde && hasta && desde > hasta){
+                alert('Controlar el rango de fechas, la fecha desde debe ser menor a la fecha hasta!')
+                $('#ventasbundle_notadebcred_periodoAsocHasta').val('')
+              }
+            }
+        });
         $('.datos-cliente').hide();
         $('.datos-cf').show();
         $('#ventasbundle_notadebcred_nombreCliente').attr('required',true);
@@ -160,11 +184,15 @@ jQuery(function ($) {
 
         // confirm on submit
         $('#guardar').on('click', function(){
-            if( !$('#ventasbundle_notadebcred_comprobanteAsociado').val() ){
-                alert('Debe indicar un comprobante asociado.');
+
+            if( !$('#ventasbundle_notadebcred_comprobanteAsociado').val() &&
+                  (!$('#ventasbundle_notadebcred_periodoAsocDesde').val() || !$('#ventasbundle_notadebcred_periodoAsocHasta').val()))
+            {
+                alert('Debe indicar un comprobante asociado o un rango de período válido.');
                 $('#ventasbundle_notadebcred_comprobanteAsociado').select2('open');
                 return false;
             }
+
             if( $('#tipoPago').val() != 'CTACTE' ){
                 if(  $(':invalid').length>0 || vuelto<0 ){
                     alert( 'Completar todos los datos para facturar!' );

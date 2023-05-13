@@ -353,12 +353,16 @@ jQuery(function ($) {
         }
 
         //if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' && '{{ entity.formaPago.contado }}' ){
-        if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' ){
+        esCategoriaC = '{{ entity.cliente.categoriaIva }}' == 'C'
+        esMonedaPesos = '{{ entity.moneda }}'=='PESOS'
+        cantidadItemsTicket = $('.detalle-venta tbody tr').length <= '{{ cantidadItemsParaFactura }}'
+
+        if( esCategoriaC && esMonedaPesos && cantidadItemsTicket ){
+
             $('.loader_facturar').removeClass('hidden');
             modelo = '{{modelo_tickeadora}}'
             puerto = '{{puerto_tickeadora}}'
             baudios = '{{baudios_tickeadora}}'
-
             // verificar si falta configuracion
             if( !modelo || !puerto || !baudios ){
                 alert( ' No se pueden emitir tickets en este momento. Faltan configuraciones de la impresora!');
@@ -378,7 +382,7 @@ jQuery(function ($) {
                     if( $('#ventasbundle_cobro_nroDocumentoCliente').val() ){
                         tipoDoc = $('#ventasbundle_cobro_tipoDocumentoCliente option:selected').html();
                         if( tipoDoc != 'DNI' ){
-                            alert('Los tipos de documento válidos para ticket es DNI');
+                            alert('El tipo de documento válido para ticket es DNI');
                             return false;
                         }
 

@@ -30,10 +30,10 @@ class NotaDebCredDetalle {
     protected $producto;
 
     /**
-     * @var integer $textoProducto
-     * @ORM\Column(name="texto_producto", type="string",nullable=true)
+     * @var integer $textoComodin
+     * @ORM\Column(name="texto_comodin", type="string",nullable=true)
      */
-    protected $textoProducto;
+    protected $textoComodin;
 
     /**
      * @var integer $cantidad
@@ -113,7 +113,7 @@ class NotaDebCredDetalle {
     /** FIN VALORES ITEM */
 
     public function getNombreProducto(){
-        return ( $this->getProducto()->getComodin() ) ? $this->getTextoProducto() : $this->getProducto()->getNombre();
+        return ( $this->getProducto()->getComodin() ) ? $this->getTextoComodin() : $this->getProducto()->getNombre();
     }
 
 
@@ -177,26 +177,26 @@ class NotaDebCredDetalle {
     }
 
     /**
-     * Set textoProducto
+     * Set textoComodin
      *
-     * @param string $textoProducto
+     * @param string $textoComodin
      * @return NotaDebCredDetalle
      */
-    public function setTextoProducto($textoProducto)
+    public function setTextoComodin($textoComodin)
     {
-        $this->textoProducto = $textoProducto;
+        $this->textoComodin = $textoComodin;
 
         return $this;
     }
 
     /**
-     * Get textoProducto
+     * Get textoComodin
      *
      * @return string
      */
-    public function getTextoProducto()
+    public function getTextoComodin()
     {
-        return $this->textoProducto;
+        return $this->textoComodin;
     }
 
     /**

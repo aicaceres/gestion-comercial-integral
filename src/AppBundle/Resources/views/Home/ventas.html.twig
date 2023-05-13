@@ -26,8 +26,9 @@
 {% if app.session.get('caja_abierta') %}
 {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
         {% set urlxCobrar = path('ventas_por_cobrar') %}
+{# onclick="partialVentasPorCobrar('{{ urlxCobrar }}')" #}
             <li>
-                <a href="javascript:void(0)" accesskey="C" title="Cobrar Ventas (Shift+Alt+C)" onclick="partialVentasPorCobrar('{{ urlxCobrar }}')" class="pago"><span>Nuevo Cobro</span>
+                <a href="{{ path('ventas_cobro') }}" accesskey="C" title="Cobrar Ventas (Shift+Alt+C)"  class="pago"><span>Nuevo Cobro</span>
                 </a>
             </li>
     {% endif %}

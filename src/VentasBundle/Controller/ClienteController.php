@@ -618,7 +618,7 @@ class ClienteController extends Controller {
                     $detalle->setCantidad(1);
                     $producto = $em->getRepository('AppBundle:Producto')->findOneBy(array('comodin'=>1));
                     $detalle->setProducto($producto);
-                    $detalle->setTextoProducto('Descuento por pago anticipado');
+                    $detalle->setTextoComodin('Descuento por pago anticipado');
                     $detalle->setPrecio($impNeto);
                     $detalle->setAlicuota('21.00');
                     $notacredito->addDetalle($detalle);
@@ -975,8 +975,8 @@ class ClienteController extends Controller {
      */
     public function clienteListDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();
-        $this->repository = $this->entityManager->getRepository('VentasBundle:Cliente');
+        $em = $this->getDoctrine()->getManager();
+        $repo = $em->getRepository('VentasBundle:Cliente');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
             $draw = intval($request->get('draw'));
@@ -1002,12 +1002,12 @@ class ClienteController extends Controller {
         $otherConditions = "array or whatever is needed";
 
         // Get results from the Repository
-        $results = $this->repository->getListDTData($start, $length, $orders, $search, $columns, $otherConditions = null);
+        $results = $repo->getListDTData($start, $length, $orders, $search, $columns, $otherConditions = null);
 
         // Returned objects are of type Town
         $objects = $results["results"];
         // Get total number of objects
-        $total_objects_count = $this->repository->listcount();
+        $total_objects_count = $repo->listcount();
         // Get total number of results
         $selected_objects_count = count($objects);
         // Get total number of filtered data
@@ -1116,8 +1116,8 @@ class ClienteController extends Controller {
      */
     public function clienteIndexDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();
-        $this->repository = $this->entityManager->getRepository('VentasBundle:Cliente');
+        $em = $this->getDoctrine()->getManager();
+        $repo = $em->getRepository('VentasBundle:Cliente');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
             $draw = intval($request->get('draw'));
@@ -1144,12 +1144,12 @@ class ClienteController extends Controller {
         $otherConditions = "array or whatever is needed";
 
         // Get results from the Repository
-        $results = $this->repository->getIndexDTData($start, $length, $orders, $search, $columns, $deudor, $otherConditions = null);
+        $results = $repo->getIndexDTData($start, $length, $orders, $search, $columns, $deudor, $otherConditions = null);
 
         // Returned objects are of type Town
         $objects = $results["results"];
         // Get total number of objects
-        $total_objects_count = $this->repository->indexCount();
+        $total_objects_count = $repo->indexCount();
         // Get total number of results
         $selected_objects_count = count($objects);
         // Get total number of filtered data

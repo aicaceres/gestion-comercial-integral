@@ -131,6 +131,18 @@ class NotaDebCred {
     protected $comprobanteAsociado;
 
     /**
+     * @var datetime $periodoAsocDesde
+     * @ORM\Column(name="periodo_asoc_desde", type="datetime", nullable=true)
+     */
+    private $periodoAsocDesde;
+
+    /**
+     * @var datetime $periodoAsocHasta
+     * @ORM\Column(name="periodo_asoc_hasta", type="datetime", nullable=true)
+     */
+    private $periodoAsocHasta;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
@@ -890,5 +902,51 @@ class NotaDebCred {
     public function getTipoDocumentoCliente()
     {
         return $this->tipoDocumentoCliente;
+    }
+
+    /**
+     * Set periodoAsocDesde
+     *
+     * @param \DateTime $periodoAsocDesde
+     * @return NotaDebCred
+     */
+    public function setPeriodoAsocDesde($periodoAsocDesde)
+    {
+        $this->periodoAsocDesde = $periodoAsocDesde;
+
+        return $this;
+    }
+
+    /**
+     * Get periodoAsocDesde
+     *
+     * @return \DateTime 
+     */
+    public function getPeriodoAsocDesde()
+    {
+        return $this->periodoAsocDesde;
+    }
+
+    /**
+     * Set periodoAsocHasta
+     *
+     * @param \DateTime $periodoAsocHasta
+     * @return NotaDebCred
+     */
+    public function setPeriodoAsocHasta($periodoAsocHasta)
+    {
+        $this->periodoAsocHasta = $periodoAsocHasta;
+
+        return $this;
+    }
+
+    /**
+     * Get periodoAsocHasta
+     *
+     * @return \DateTime 
+     */
+    public function getPeriodoAsocHasta()
+    {
+        return $this->periodoAsocHasta;
     }
 }

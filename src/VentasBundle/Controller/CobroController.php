@@ -61,8 +61,12 @@ class CobroController extends Controller
     }
     $entities = $em->getRepository('VentasBundle:Cobro')->findByCriteria($unidneg, $desde, $hasta, $id);
     $users = $em->getRepository('VentasBundle:Cobro')->getUsers();
+
+    $ventas = $em->getRepository('VentasBundle:Venta')->findPorCobrarByCriteria($unidneg, $desde, $hasta, $id);
+
     return $this->render('VentasBundle:Cobro:index.html.twig', array(
       'entities' => $entities,
+      'ventas' => $ventas,
       'id' => $id,
       'owns' => $owns,
       'users' => $users,
@@ -89,13 +93,14 @@ class CobroController extends Controller
       $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
       return $this->redirect($request->headers->get('referer'));
     }
-
+    $cantidadItemsParaFactura = 0;
     $entity = new Cobro();
     $entity->setFechaCobro(new \DateTime());
     $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
     if ($param) {
       // ultimo nro de operacion de cobro
       $entity->setNroOperacion($param->getUltimoNroOperacionCobro() + 1);
+      $cantidadItemsParaFactura = $param->getCantidadItemsParaFactura();
     }
     $venta = $em->getRepository('VentasBundle:Venta')->find($id);
     if (!$venta) {
@@ -124,6 +129,7 @@ class CobroController extends Controller
     return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
       'entity' => $entity,
       'form' => $form->createView(),
+      'cantidadItemsParaFactura' => $cantidadItemsParaFactura,
     ));
   }
 
@@ -438,6 +444,19 @@ class CobroController extends Controller
   }
 
   /**
+   * @Route("/ventasViewDetail", name="ventas_view_detail")
+   */
+  public function ventasViewDetailAction(Request $request)
+  {
+    $em = $this->getDoctrine()->getManager();
+    $venta = $em->getRepository('VentasBundle:Venta')->find( $request->get('id'));
+
+    return $this->render('VentasBundle:Cobro:_partial-view-detalle.html.twig', array(
+      'venta' => $venta
+    ));
+  }
+
+  /**
    * @Route("/{id}/printCobroVentas.{_format}",
    * defaults = { "_format" = "pdf" },
    * name="ventas_cobro_print")
@@ -552,6 +571,26 @@ class CobroController extends Controller
     return new JsonResponse($items);
   }
 
+  /**
+   * @Route("/getTiposComprobantaValido", name="get_tipos_comprobante_valido")
+   * @Method("GET")
+   *
+   */
+  public function getTiposComprobantaValido(Request $request)
+  {
+    $id = $request->get('id');
+    $em = $this->getDoctrine()->getManager();
+    $comprobante = $em->getRepository('VentasBundle:FacturaElectronica')->find($id);
+    $items = array();
+    if ($comprobante) {
+      $valor = explode('-', $comprobante->getTipoComprobante()->getValor());
+      $tipos = $em->getRepository('ConfigBundle:AfipComprobante')->findByValor( array( 'CRE-'.$valor[1] , 'DEB-'.$valor[1] ) );
+      foreach ($tipos as $tipo) {
+        $items[] = $tipo->getId();
+      }
+    }
+    return new JsonResponse($items);
+  }
 
 
   /*

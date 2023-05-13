@@ -33,6 +33,12 @@ class NotaDebCredType extends AbstractType {
                 ->add('concepto','text',array('label' => 'Concepto Adicional:','required' => false))
                 ->add('cotizacion','hidden')
                 ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
+
+                ->add('periodoAsocDesde', 'date', array('widget' => 'single_text', 'label' => 'Período Desde:',
+                    'format' => 'dd-MM-yyyy', 'required' => false))
+                ->add('periodoAsocHasta', 'date', array('widget' => 'single_text', 'label' => 'Hasta:',
+                    'format' => 'dd-MM-yyyy', 'required' => false))
+
                 ->add('detalles', 'collection', array(
                     'type' => new NotaDebCredDetalleType($type),
                     'by_reference' => false,
