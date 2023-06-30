@@ -16,7 +16,8 @@ class ProveedorRepository extends EntityRepository {
                 ->from('ComprasBundle\Entity\Factura', 'f')
                 ->innerJoin('f.proveedor', 'p')
                 ->where('p.id=:agr')
-                ->andWhere("f.estado!='CANCELADO'")
+                // ->andWhere("f.estado!='CANCELADO'")
+                // ->andWhere("f.estado!='ANULADO'")
                 ->setParameter('agr', $prov);
 
         $notacred = $this->_em->createQueryBuilder('c')
@@ -24,9 +25,9 @@ class ProveedorRepository extends EntityRepository {
                 ->from('ComprasBundle\Entity\NotaDebCred', 'c')
                 ->innerJoin('c.proveedor', 'p')
                 ->where('p.id=:agr')
-                //->andWhere('c.estado=:agr2')
+                // ->andWhere("c.estado='ACREDITADO'")
+                // ->andWhere("c.signo='-'")
                 ->setParameter('agr', $prov);
-        //->setParameter('agr2', 'ACREDITADO')
 
         $pagos = $this->_em->createQueryBuilder('f')
                 ->select('g.id,3 tipo,g.fecha, 0 comprobante , 0 concepto, 0 importe')
@@ -215,8 +216,8 @@ class ProveedorRepository extends EntityRepository {
                 ->from('ComprasBundle\Entity\Factura', 'f')
                 ->innerJoin('f.proveedor', 'p')
                 ->where('p.id=:agr')
-                ->andWhere("f.estado!='CANCELADO'")
-                ->andWhere("f.estado!='ANULADO'")
+                // ->andWhere("f.estado!='CANCELADO'")
+                // ->andWhere("f.estado!='ANULADO'")
                 ->setParameter('agr', $id);
         if ($desde) {
             $cadena = " f.fechaFactura >= '" . UtilsController::toAnsiDate($desde) . "'";
@@ -240,7 +241,7 @@ class ProveedorRepository extends EntityRepository {
                 ->innerJoin('f.proveedor', 'p')
                 ->where('p.id=:agr')
                 ->andWhere('f.signo=' . "'" . $signo . "'")
-                //->andWhere("f.estado!='ACREDITADO'")
+                // ->andWhere("f.estado='ACREDITADO'")
                 ->setParameter('agr', $id);
         if ($desde) {
             $cadena = " f.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";

@@ -51,10 +51,10 @@ class ProveedorController extends Controller {
             // Notas crédito
             $notaCredito = $em->getRepository('ComprasBundle:Proveedor')->getNotasCompraxFecha($prov->getId(), $desde, $hasta, '-', $rubroId);
             $saldo = $saldo - $notaCredito;
-            // Pagos
+           // Pagos
             $pagos = $em->getRepository('ComprasBundle:Proveedor')->getPagosxFecha($prov->getId(), $desde, $hasta, $rubroId);
             foreach ($pagos as $pago) {
-                $saldo -= $pago->getTotal();
+                $saldo -= $pago->getImporte();
             }
 
             $prov->setSaldoxFechas($saldo);
