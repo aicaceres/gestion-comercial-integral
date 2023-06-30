@@ -1,10 +1,10 @@
 {
     "editor.defaultFormatter": "Sophisticode.php-formatter",
     "[php]": {
-        "editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+        "editor.defaultFormatter": "junstyle.php-cs-fixer"
     },
     "[twig]": {
-        "editor.defaultFormatter": "SimonSiefke.prettier-vscode"
+        "editor.defaultFormatter": "junstyle.twig-language"
     },
-    "editor.fontSize": 12
+    "editor.fontSize": 11
 }

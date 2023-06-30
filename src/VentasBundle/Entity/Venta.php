@@ -4,13 +4,13 @@ namespace VentasBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
-
 /**
  * VentasBundle\Entity\Venta
  * @ORM\Table(name="ventas_venta")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\VentaRepository")
  */
 class Venta {
+
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -51,6 +51,11 @@ class Venta {
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      */
     protected $cliente;
+   /**
+     * @var string $nombreCliente
+     * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     */
+    protected $nombreCliente;
      /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
@@ -180,11 +185,11 @@ class Venta {
             return round( ($total / $this->getCotizacion()) ,3);
         }
     }
-    public function getTotalIibb(){
+    public function getTotalIibb($iibbPercent=3.5){
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
         $categRentas = $this->getCliente()->getCategoriaRentas()->getId();
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return ( $categIva == 'I' && $categRentas != 18 ) ? $monto * 0.035 : 0;
+        return ( $categIva == 'I' && $categRentas != 18 ) ? $monto * $iibbPercent/100  : 0;
     }
     public function getMontoTotal(){
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
@@ -284,6 +289,29 @@ class Venta {
     public function getCliente()
     {
         return $this->cliente;
+    }
+
+    /**
+     * Set nombreCliente
+     *
+     * @param string $nombreCliente
+     * @return Cliente
+     */
+    public function setNombreCliente($nombreCliente)
+    {
+        $this->nombreCliente = $nombreCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get nombreCliente
+     *
+     * @return string
+     */
+    public function getNombreCliente()
+    {
+        return $this->nombreCliente;
     }
 
     /**

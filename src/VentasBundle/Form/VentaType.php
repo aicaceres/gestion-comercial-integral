@@ -17,10 +17,12 @@ class VentaType extends AbstractType {
         $type = $options['attr']['type'];
         $data = $options['data'];
         $builder
-            ->add('nroOperacion', 'hidden')
-            ->add('estado', 'hidden')
-            ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
-                 'required' => true, 'label' => 'FORMA DE PAGO: '))
+          //   ->add('nombreCliente',null,array('required'=>false,
+          // 'attr'=> array('placeholder'=>'Nombre y Apellido')))
+            ->add('moneda', 'entity', array(
+                'class' => 'ConfigBundle:Moneda',
+                'required' => true, 'label' => 'MONEDA: '
+            ))
             ->add('precioLista', 'entity', array(
                 'class' => 'AppBundle:PrecioLista',
                 'required' => true, 'label' => 'LISTA DE PRECIOS: ',
@@ -35,15 +37,18 @@ class VentaType extends AbstractType {
                 'class' => 'ConfigBundle:Transporte',
                 'required' => false, 'label' => 'TRANSPORTE: '
             ))
-            ->add('moneda', 'entity', array(
-                'class' => 'ConfigBundle:Moneda',
-                'required' => true, 'label' => 'MONEDA: '
-            ))
             ->add('descuentaStock',null,array('label' => 'DESCONTAR STOCK:','required'=>false))
-            ->add('cotizacion','hidden')
             ->add('concepto','textarea',
                     array('label'=>'Concepto Adicional:','required'=>false,
                           'attr'=>array('rows'=>'1','cols'=>'1', 'class'=>'largeinput')))
+
+
+            // ->add('nroOperacion', 'hidden')
+            // ->add('estado', 'hidden')
+            // ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
+            //      'required' => true, 'label' => 'FORMA DE PAGO: '))
+            // ->add('cotizacion','hidden')
+
             ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
             ->add('detalles', 'collection', array(
                 'type' => new VentaDetalleType($type,$data),
@@ -55,25 +60,25 @@ class VentaType extends AbstractType {
                     'class' => 'row item',
                 )
             ));
-        if ($type == 'new') {
-            // en render de nueva venta solo traer cliente por defecto
-            $data = $options['data'];
-            $cliente = $data->getCliente()->getId();
-            $builder->add('cliente', 'entity', array(
-                'required' => true, 'attr' => array('class' => 'tabbable'),
-                'class' => 'VentasBundle:Cliente', 'label' => 'CLIENTE: ',
-                'query_builder' => function (EntityRepository $repository) use ($cliente) {
-                    return $qb = $repository->createQueryBuilder('c')
-                        ->where("c.id=" . $cliente);
-                }
-            ));
-        } else if ($type == 'create') {
-            // al crear traer objeto completo para match del cliente si fue modificado
-            $builder->add('cliente', 'entity', array(
-                'class' => 'VentasBundle:Cliente',
-                'required' => true
-            ));
-        }
+        // if ($type == 'new') {
+        //     // en render de nueva venta solo traer cliente por defecto
+        //     $data = $options['data'];
+        //     $cliente = $data->getCliente()->getId();
+        //     $builder->add('cliente', 'entity', array(
+        //         'required' => true, 'attr' => array('class' => 'tabbable'),
+        //         'class' => 'VentasBundle:Cliente', 'label' => 'CLIENTE: ',
+        //         'query_builder' => function (EntityRepository $repository) use ($cliente) {
+        //             return $qb = $repository->createQueryBuilder('c')
+        //                 ->where("c.id=" . $cliente);
+        //         }
+        //     ));
+        // } else if ($type == 'create') {
+        //     // al crear traer objeto completo para match del cliente si fue modificado
+        //     $builder->add('cliente', 'entity', array(
+        //         'class' => 'VentasBundle:Cliente',
+        //         'required' => true
+        //     ));
+        // }
     }
 
     /**

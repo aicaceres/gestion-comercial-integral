@@ -5,6 +5,36 @@
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
+<style>
+.tag-descuento{
+  display: inline-block;
+  border: 1px solid grey;
+  padding: 4px 10px;
+  position: relative;
+  border-radius: 10%;
+  margin-right: 10px;
+}
+.close-icon {
+  position: absolute;
+  top: -10px;
+  right: -4px;
+  cursor: pointer;
+  font-weight: bold;
+  color: red;
+  font-size: 18px;
+}
+.flexbox-descuentos{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content: center;
+}
+.stdtable tfoot th{
+  padding: 2px 10px !important;
+}
+</style>
+
+
 <div id="contentwrapper" class="contentwrapper">
 <h1 id="popup_title" >{{ (entity.id) ? 'Editar Pedido ' : 'Alta de Nuevo Pedido' }}</h1>
 {% include "AppBundle::notificacion.html.twig" %}
@@ -60,42 +90,75 @@
                 {{ form_row(form.fechaEntrega, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
             </div>
             <div class="two_fields">
-                <div style="float:right;padding-bottom:10px">
-                {{ form_row(form.cerrado,{'label': 'Enviado al Proveedor','label_attr':{'style':'width:130px'},'attr': {'title':'Marcar cuando se envía el pedido al Proveedor. Hasta que no se marque se podrán agregar o modificar items del pedido.'} }) }}
+                <div style="text-align:center">
+                  <button class="stdbtn" type="button" onclick="cargarBajominimo()" >Cargar productos debajo del mínimo</button>
+                </div>
+                <div>
+                {{ form_label(form.cerrado, 'Enviado al Proveedor', {'label_attr': {'style':'width:115px'}}) }}
+                {{ form_widget(form.cerrado,{'attr': {'title':'Marcar cuando se envía el pedido al Proveedor. Hasta que no se marque se podrán agregar o modificar items del pedido.'} }) }}
                 </div>
             </div>
 
         {% endif %}
 
             <div style="padding-top: 20px;" id="divItems">
-                <table style="width:80%;margin: 0 auto;" cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
                         <tr>
                             <th style="width:5%;">Nº</th>
                             <th>Producto</th>
-                            <th style="width:15%;">Stock</th>
-                            <th style="width:15%;">Cantidad</th>
+                            <th style="width:10%;">Stock</th>
+                            <th style="width:12%;">Cantidad</th>
                             <th style="width:10%;">TOTAL</th>
-                            <th style="width:3%;" colspan="2"></th>
-                        </tr>
-                    </thead>
-                     <tbody>
-                         {% for item in entity.detalles %}
-                       {% include "ComprasBundle:Pedido:partial-items.html.twig" %}
-                       {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="5"></th>
-                            <th colspan="2" style="text-align:center;">
+                            <th style="width:10%;">Precio Unit.</th>
+                            <th style="width:10%;">Monto TOTAL</th>
+                            <th style="width:3%;text-align:center;" colspan="2">
                                 {% if entity.estado == 'NUEVO' %}
                                 <a href="javascript:void(0)" id="linkAdd" data-url="{{path('compras_render_item_pedido')}}" title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
                                 {% endif %}
                             </th>
                         </tr>
+                    </thead>
+                     <tbody>
+
+                       {% for item in entity.detalles %}
+                        {% include "ComprasBundle:Pedido:partial-items.html.twig" with {'idx':loop.index} %}
+                       {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="6"> <span style="float:right;"> Subtotal: $</span> </th>
+                            <th class="subtotal alignright" >{{entity.costoTotal|number_format(3,'.','')}}</th>
+                        </tr>
+<tr>
+  <th colspan="5" rowspan="3">
+{{ form_widget(form.descuentos) }}
+    <div class="flexbox-descuentos">
+      <div>
+        <a class="btn btn_dollartag" href="javascript:void(0)" title="Agregar Descuento" onclick="agregarDescuentos()"> <span>Descuentos: </span> </a>
+      </div>
+      <div id="descuentos" style="padding:10px"> </div>
+
+    </div>
+  </th>
+  <th><span style="float:right;"> Descuento: $</span> </th>
+  <th class="alignright">{{ form_widget(form.montoDescuento, { 'attr': {'class' : 'input-hidden' } }) }}</th>
+
+</tr>
+<tr>
+  <th><span style="float:right;"> I.V.A.: $</span></th>
+  <th class="alignright">{{ form_widget(form.montoIva, { 'attr': {'class' : 'input-hidden' } }) }}</th>
+
+</tr>
+<tr>
+  <th><span style="float:right;"> TOTAL: $</span></th>
+  <th class="total alignright" style="font-size:12px;">{{entity.montoTotal|number_format(3,'.','')}}</th>
+
+</tr>
                     </tfoot>
                 </table>
             </div>
+
             <br clear="all" />
             <div class="actionbutton">
                  {% if entity.id and entity.estado in ['NUEVO','PENDIENTE'] %}
@@ -130,17 +193,24 @@ jQuery(document).ready(function($) {
             $('.additem').click();
         }
     });
-    $('.item').find('.ordTd').each(function(index) {
-                  $(this).html(index+1);
-                });
+    renderDescuentos()
     $('.guardar').click(function() {
         if( !$('#comprasbundle_pedido_proveedor').val() ){
             alert('Debe seleccionar un Proveedor');
             return false;
         };
         if( $('#comprasbundle_pedido_cerrado').is(':checked')){
-            if( $('tbody tr.item').length > 0 ){
-                if (!confirm('Confirma el envío del pedido al proveedor?')) {
+            let items = $('tbody tr.item')
+            let msg = 'Confirma el envío del pedido al proveedor?'
+            if( items.length > 0 ){
+                items.each(function(){
+                  let cantidad = parseFloat( $(this).find('.cantTd').text() )
+                  if(cantidad === 0) {
+                    msg = 'Hay productos en el pedido con cantidad cero!! \n\n'+msg
+                    return false
+                  }
+                })
+                if (!confirm(msg)) {
                     return false;
                 }
             }else{
@@ -172,10 +242,7 @@ jQuery(document).ready(function($) {
             if(data==='OK'){
                 // eliminar de la tabla
                 tr.remove();
-                //reordenar nros
-                $('.stdtable').find('.ordTd').each(function(index) {
-                  jQuery(this).html(index+1);
-                });
+                actualizarTotales();
             }else{
                 alert( 'error '+data.msg );
             }
@@ -235,9 +302,8 @@ jQuery(document).ready(function($) {
                                         ord+'</td><td>'+ data.prod +'</td><td class="stockTd alignright">'+data.stock+'</td><td class="alignright">'+data.cant+'</td>'+
                                         '<td class="alignright">'+data.total+'</td><td><a class="delTd" href="javascript:void(0)" title="Quitar" data-id="'+data.id+'" tabIndex="-1"><span class="minus"></span></a></td> </tr>');
 */
-                                    $('.item').find('.ordTd').each(function(index) {
-                                      $(this).html(index+1);
-                                    });
+
+                                    actualizarTotales();
                                 } else {
                                     alert('error ' + data.msg);
                                 }
@@ -290,6 +356,7 @@ jQuery(document).ready(function($) {
                              if(data.msg==='OK'){
                                  // reemplazar en la tabla
                                  tr.replaceWith(data.tr);
+                                  actualizarTotales();
                             } else {
                                 alert('error ' + data.msg);
                             }
@@ -327,6 +394,7 @@ function changeProducto(producto) {
             data: 'prod=' + producto.val() + '&dep=' + jQuery('#comprasbundle_pedido_deposito').val(),
             success: function (data) {
                 form.find('#comprasbundle_pedidodetalle_cantidad').val(1);
+                form.find('#comprasbundle_pedidodetalle_precio').val(data.costo);
                 form.find('.unidmed').text(data.unidmed);
                 if (data.bulto) {
                     form.find('#unidmed_bulto').show();
@@ -368,4 +436,95 @@ function changeBulto(item) {
         }
     }
 
+function cargarBajominimo(){
+  if(confirm('Desea realizar la carga de los productos con stock por debajo del mínimo?')){
+    let prov = jQuery('#comprasbundle_pedido_proveedor').val()
+    let dep = jQuery('#comprasbundle_pedido_deposito').val()
+    let url = "{{ path('cargar_productos_bajominimo') }}?id="+{{entity.id}}+"&proveedor="+prov+"&deposito="+dep
+    location.href = url
+  }
+}
+
+function actualizarTotales(){
+  let items = jQuery('tbody tr.item');
+  let subtotal = 0;
+  // calcular subtotal
+  items.each(function(i){
+    item = jQuery(this);
+    item.find('.ordTd').html(i+1);
+    subtotal = subtotal + parseFloat( item.find('.montototalTd').text() );
+  })
+  jQuery('.subtotal').html( subtotal.toFixed(3) );
+  calcularTotales()
+}
+
+function calcularTotales(){
+  let descuentos = descuentosToArray()
+  let subtotal = parseFloat( jQuery('.subtotal').html() )
+  // DEFINIR COMO APLICAR LOS DESCUENTOS
+  let monto = 0
+  descuentos.forEach(function(desc){
+    calc = subtotal * ( parseFloat(desc) /100 )
+    subtotal = subtotal - calc
+    monto = monto + calc
+  })
+  jQuery('#comprasbundle_pedido_montoDescuento').val( monto.toFixed(3) )
+  let iva = subtotal * (10.5/100)
+  let total = subtotal + iva
+  jQuery('#comprasbundle_pedido_montoIva').val( iva.toFixed(3) );
+  jQuery('.total').html( total.toFixed(3) );
+}
+
+function agregarDescuentos(){
+  let values = descuentosToArray()
+  let idx = values.length ? values.length : 0
+  if(idx < 5){
+    // pedir nuevo descuento
+    jPrompt('Ingresar el porcentaje', null, 'Descuentos', function(r) {
+      let value = parseFloat(r)
+      if(value){
+        if( !isNaN( value ) && value > 0 && value <= 100){
+          //agregarlo
+          values[idx] = value
+          jQuery('#comprasbundle_pedido_descuentos').val( values  )
+
+          renderDescuentos()
+          calcularTotales()
+        }else{
+          alert('El porcentaje ingresado no es válido!')
+        }
+      }
+		});
+  } else {
+    alert('Se alcanzó el máximo de 5 descuentos!')
+  }
+}
+
+function renderDescuentos(){
+  let values = descuentosToArray()
+  // armar tags
+  let  divDescuentos = jQuery('<div></div>')
+  values.forEach( (v,i) =>  {
+    let span = jQuery('<div class="tag-descuento" data-value="'+v+'" >' +v+ '% <span class="close-icon" onclick="removeDescuento()">&times;</span></div>')
+    divDescuentos.append(span)
+  })
+  jQuery('#descuentos').html(divDescuentos)
+
+}
+
+function removeDescuento(){
+  let values = []
+  let el = jQuery(event.target).parent()
+  el.remove()
+  jQuery('#descuentos .tag-descuento').each(function(e,i){
+    values.push( parseFloat( jQuery(this).data('value') ) );
+  })
+  jQuery('#comprasbundle_pedido_descuentos').val(values)
+  calcularTotales()
+}
+
+function descuentosToArray(){
+  let descuentos = jQuery('#comprasbundle_pedido_descuentos')
+  return descuentos.val().split(',').filter(Boolean)
+}
 </script>{% endblock %}

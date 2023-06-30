@@ -116,7 +116,7 @@ class ImpuestoController extends Controller {
                 $exento = $nograv;
                 $nograv = 0;
             }
-            $impuestos = $comp->getTotalIibb();
+            $impuestos = $comp->getTotalIibb($this->getParameter('iibb_percent'));
 
             $item = array( 'fecha' => $dato['fecha'], 'nrocomprobante' => $fe->getComprobanteTxt(),
                 'cuit' => $cliente->getCuit(), 'razon' => $cliente->getNombre(), 'iibb' =>$cliente->getNroInscripcion(),

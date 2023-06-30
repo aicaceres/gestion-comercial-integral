@@ -9,13 +9,13 @@
     {% include "AppBundle::notificacion.html.twig" %}
 
 <div id="contentwrapper" class="contentwrapper">
-<div>  
+<div>
     <form id="printform" name="printform" target="_blank"  action="{{ path("export_productos") }}" method="post">
         <input type="hidden" id="proveedorid" name="proveedorid"/>
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
         <button class="stdbtn print floatright" type="submit" >Exportar</button>
-    </form>    
+    </form>
     <form id="searchform" action="{{ path('stock_producto') }}" method="get">
         <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
@@ -27,12 +27,12 @@
             {% for prov in proveedores %}
                 <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
             {% endfor %}
-            </select>  
-        </div>        
+            </select>
+        </div>
     </form>
-</div><!-- button -->     
-    
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="productos_table">        
+</div><!-- button -->
+
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="productos_table">
         <thead>
             <tr>
                 <th>Código</th>
@@ -44,14 +44,14 @@
                 <th class="nosort actionbutton addbutton ">
                    {% if app.user.access(app.session.get('unidneg_id'),'stock_producto_new') %}
                     <a class="editar create" href="{{ path('stock_producto_new') }}">Agregar Producto</a>
-                    {% else %} &nbsp; {% endif %} 
+                    {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
         </thead>
         <tbody>
-           
+
         </tbody>
-    </table> 
+    </table>
 </div>
 
 {% endblock %}
@@ -60,27 +60,27 @@
  <script type="text/javascript">
 jQuery(document).ready(function($) {
     $('.togglemenu').click();
-    $(".chzn-select").chosen();
+    $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
     $(".chzn-select").change(function(){ $('#searchform').submit(); });
-     
+
     const proveedor = $('#selectProveedor').val();
 
     var oTable = $('#productos_table').dataTable({
-                "columnDefs": [        
+                "columnDefs": [
                     // These are the column name variables that will be sent to the server
                     { "name": "codigo", "targets": 0 },
-                    { "name": "producto",  "targets": 1 },                    
-                    { "name": "proveedor",  "targets": 2 },                    
-                    { "name": "rubro",  "targets": 3 },                    
-                    { "name": "costo",  "targets": 4 },                    
-                    { "name": "activo",  "targets": 5 },  
-                    { "name": "actions",  "targets": 6 },                  
-                    { "targets"  : 'nosort', "orderable": false }        
+                    { "name": "producto",  "targets": 1 },
+                    { "name": "proveedor",  "targets": 2 },
+                    { "name": "rubro",  "targets": 3 },
+                    { "name": "costo",  "targets": 4 },
+                    { "name": "activo",  "targets": 5 },
+                    { "name": "actions",  "targets": 6 },
+                    { "targets"  : 'nosort', "orderable": false }
                 ],
-                "rowCallback": function (row, data) {                             
-                    // registrar seleccion           
+                "rowCallback": function (row, data) {
+                    // registrar seleccion
                     $(row).find('td:nth-child(5n)').addClass('alignright');
-                    $(row).find('td:nth-child(6n)').addClass('aligncenter');                   
+                    $(row).find('td:nth-child(6n)').addClass('aligncenter');
                  },
                 // Server-side parameters
                 "processing": true,
@@ -93,8 +93,8 @@ jQuery(document).ready(function($) {
                 },
                 // Classic DataTables parameters
                 "bPaginate" : true,
-                "bInfo" : true, 
-                "bSearchable": true,        
+                "bInfo" : true,
+                "bSearchable": true,
                 "bLengthChange": true,
                 "pageLength":10,
                 "order": [[0, 'asc']],
@@ -114,40 +114,40 @@ jQuery(document).ready(function($) {
                     "sInfoFiltered": "(filtrado de _MAX_ registros)",
                     "sSearch": "Buscar:"
                 }
-            }); 
-    
+            });
+
     $('#printform').on('submit',function(){
         $('#proveedorid').val($('#selectProveedor').val());
         $('#searchterm').val( $('#productos_table_filter input').val() );
         /*var datos = [];
         oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             datos[index] = value;
-        }); 
+        });
         $('#datalist').val(JSON.stringify(datos));*/
     });
-    
-    //oTable.fnSort( [ [1,'desc'] ] );     
+
+    //oTable.fnSort( [ [1,'desc'] ] );
    /* $(".print").click(function() {
         var orden = oTable.fnSettings().aaSorting;
         var datos = [];
         oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             datos[index] = value;
-        }); 
-        var search = $('#dyntable2_filter input').val();  
+        });
+        var search = $('#dyntable2_filter input').val();
         $.ajax({
             type: 'POST',
             url: '{{ path("print_productos") }}',
             data: { orden: orden[0], search:search, datos:JSON.stringify(datos) ,provId: $('#selectProveedor').val() },
             success: function(data) {
 
-                
+
             //    window.open("data:application/octet-stream;charset=utf-16le;base64,"+encodeURIComponent(data));
               //  window.open("data:application/pdf," + encodeURIComponent(data));
                // window.open("data:application/pdf," + encodeURIComponent(data),'nombre.pdf');
             }
-        }); 
+        });
     });*/
-    
-});    
-</script>  
+
+});
+</script>
 {% endblock %}

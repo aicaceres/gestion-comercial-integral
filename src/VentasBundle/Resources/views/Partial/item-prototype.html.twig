@@ -1,26 +1,33 @@
 <tr class="item" divdata="item_items">
     <td class="ordTd"></td>
     <td class="prodTd">
-        {{ form_widget(item.producto,
-            {'attr':
-                {'style':'width:80%',
-                 'url':path('get_lista_productos'),
-                 'url_autocomplete' : path('get_autocomplete_productos'),
-                 'url_datos' : path('get_datos_venta_producto'),
-                 'url_list' : path('producto_list_datatables'),
-                 'fnc':'openModalProducto',
-                 'mtitle':'Seleccionar Producto'
-                }
-            })
-        }}
-        <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
+
+      <select class="widgetProducto" style="width:85%"
+              name="ventasbundle_producto[]"
+              data-urlselect = "{{ path('get_autocomplete_productos') }} "
+              data-urldatos = "{{ path('get_datos_venta_producto') }}"
+              data-urlpopup = "{{ path('get_lista_productos') }}"
+              data-urltable = "{{ path('producto_list_datatables') }}"
+      >
+        {% if item.vars.data %}
+          {% set inclIva = not (entity.cliente.categoriaIva == 'I' or entity.cliente.categoriaIva == 'M') %}
+          <option value="{{item.vars.data.producto.id}}" selected="selected">{{item.vars.data.producto}} | ${{ item.vars.data.producto.getPrecioContadoByLista( entity.precioLista.id, descuentoContado, inclIva )  }} </option>
+        {% endif %}
+      </select>
+
+        <a href="javascript:void(0)" class="btn btnaction btn_search" onclick="handleSearchProducto(this)"></a>
         <small class="bajominimo hidden">Bajo Mínimo</small>
         {% if item.textoComodin is defined %}
-            {{ form_widget(item.textoComodin, {'attr': {'class':'largeinput', 'style':'display:none'}}) }}
+            {% set comodin = item.vars.data ? item.vars.data.producto.comodin : false %}
+            {% set display = comodin ? '' : 'display:none' %}
+            {% set required = comodin ? true : false %}
+            {{ form_widget(item.textoComodin, {'attr': {'class':'largeinput', 'style':display, 'required' : required }}) }}
         {% endif %}
+
     </td>
     <td class="cantTd">
         {{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft','min':'0'} }) }}
+        {# <input name="ventasbundle_cantidad[]" class="number floatleft" min="0"/> #}
         <span class="unidmed floatleft" style="padding-left: 5px"></span>
     </td>
     <td class="precTd alignright">
@@ -28,5 +35,7 @@
         {{ form_widget(item.precio) }}  {{ form_widget(item.alicuota) }}
     </td>
     <td class="itmSubtotalTd alignright">0</td>
-    <td class="delTd" style="text-align:center;"></td>
+    <td class="delTd" style="text-align:center;">
+      <a href="javascript:void(0)" class="delItem" title="Quitar" onclick="handleItemDelete(this)" ><span class="del-item-button">-</span></a>
+    </td>
 </tr>

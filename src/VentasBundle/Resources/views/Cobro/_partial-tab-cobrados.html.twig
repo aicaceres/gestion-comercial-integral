@@ -21,15 +21,24 @@
             <td>{{ entity.cliente }}</td>
             <td>{{ entity.formaPago }}</td>
             <td class="alignright"><span class="floatleft">{{entity.moneda.simbolo}}</span> {{ entity.venta.montoTotal|number_format(2,',','.') }}</td>
-            <td class="estado">{{ entity.facturaElectronica.comprobanteTxt }}</td>
+            <td class="estado">
+              {% if entity.facturaElectronica %}
+                {{ entity.facturaElectronica.comprobanteTxt }}
+              {% else %}
+                <a href="{{ path('ventas_cobro_edit',{ 'id': entity.id }) }}" type="button" class="stdbtn btn_red " title="Facturar">Facturar</a>
+              {% endif %}
+            </td>
             {% if not owns  %}
             <td>{{entity.createdBy.nombre|upper }}</td>
             {% endif %}
             <td class="buttons">
                   <a href="{{ path('ventas_cobro_show',{ 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Cobro"></a>
-                {% if entity.facturaElectronica.tipoComprobante.valor not in ['TICK-B','TIQUE'] %}
-                <a href="#" url="{{ path('ventas_cobro_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
+                {% if entity.facturaElectronica %}
+                  {% if entity.facturaElectronica.tipoComprobante.valor not in ['TICK-B','TIQUE'] %}
+                  <a href="#" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'Cobro' })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
+                  {% endif %}
                 {% endif %}
+
             </td>
         </tr>
         {% endfor %}

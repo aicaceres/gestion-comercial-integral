@@ -14,19 +14,23 @@
             <div class="two_fields">
                 {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
                {{ form_row(form.deposito) }}
-            </div> 
+            </div>
            {{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}
 
             <div style="padding-top: 20px; " id="divItems">
                 <div style="margin-bottom: 10px;display:inline-block; width:60%;">
         {{ form_label(form.tipo) }}
         {{ form_widget(form.tipo, { 'attr': {'class' : 'radionumerac' } }) }}
-                </div> 
+                </div>
                 <div style="display:inline-block;">
         {{ form_label(form.registrarAjuste) }}
         {{ form_widget(form.registrarAjuste, { 'attr': {'title' : 'Hasta que no se marque no se registrarán los movimientos en el stock' } }) }}
-                </div> 
-                
+                </div>
+                <div style="display:inline-block; float:right">
+                  {{ form_label(form.csv) }}
+                  {{ form_widget(form.csv) }}
+                </div>
+
                 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction" id="detalles">
                     <thead>
                         <tr>
@@ -40,9 +44,9 @@
                     </thead>
                     <tbody>
                         {% for item in entity.detalles %}
-                            {% include "AppBundle:Stock:tr_item_ajuste.html.twig" %}                                
-                        {% endfor %}           
-                    </tbody> 
+                            {% include "AppBundle:Stock:tr_item_ajuste.html.twig" %}
+                        {% endfor %}
+                    </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="5"></th>
@@ -51,10 +55,10 @@
                             </th>
                         </tr>
                     </tfoot>
-                </table>    
+                </table>
 
-            </div>                
-            <br clear="all" /> 
+            </div>
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('stock_ajuste')}}">Cancelar</a>
@@ -62,13 +66,14 @@
         </fieldset>
         <div name="rest" style="display:none">{{ form_rest(form) }}</div>
 {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
 <script type="text/javascript">
 var $tipoajuste='+';
-jQuery(document).ready(function($) {    
+jQuery(document).ready(function($) {
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     var  depositos = "[{{ app.session.get('depositos')|join(', ') }}]";
     $('#appbundle_stockajuste_deposito option').each(function() {
@@ -80,14 +85,14 @@ jQuery(document).ready(function($) {
         $(this).html(index+1);
     });
      // Setear tipo de ajuste segun radio
-    $('input:radio').uniform(); 
+    $('input:radio').uniform();
     var tipo = $('#appbundle_stockajuste_tipo').on('change',function(){
         $tipoajuste = $(this).find(':checked').val();
     });
     tipo.change();
     // Previene submit al enter y evento en el +
     $(document).keypress(function(e) {
-        if (e.which == 43) { 
+        if (e.which == 43) {
             e.preventDefault();
             $('#linkAdd').click();
         }
@@ -95,6 +100,45 @@ jQuery(document).ready(function($) {
             $('.additem').click();
         }
     });
+
+// importar desde csv
+$('#appbundle_stockajuste_csv').on('change', function(){
+var file = $(this)[0].files[0];
+
+if( file.type != 'text/csv' ){
+  alert('El formato del archivo no es compatible para la carga de items.')
+  $(this).val(null)
+  return false
+}else{
+
+  if( confirm('Desea cargar los items al ajuste desde el archivo "'+ file.name +'" ?') ){
+
+     $('form.stdform').submit()
+
+      {# formData = new FormData();
+      formData.append( 'file', file )
+
+    $.ajax({
+        url: "{{path('process_csv_file')}}",
+        data: formData,
+        contentType: false,
+        processData: false,
+        type: 'POST',
+        success: function(data){
+            console.log(data);
+        }
+    }); #}
+
+  }else{
+    $(this).val(null)
+    return false
+  }
+
+}
+
+})
+
+
     // quitar items al detalle
     $(document).on('click','.delTd', function(e) {
         var res = true;
@@ -119,11 +163,11 @@ jQuery(document).ready(function($) {
            alert( "No se ha podido eliminar el item. Intente nuevamente." );
          });
         }
-    });    
+    });
 
- // AGREGAR NUEVO ITEM   
+ // AGREGAR NUEVO ITEM
     $('#linkAdd').on('click',function(){
-        var partialurl =  $(this).data('url');    
+        var partialurl =  $(this).data('url');
         $('#popup').dialog('open');
         $('#popup')
             .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
@@ -154,12 +198,12 @@ jQuery(document).ready(function($) {
                 form.find('.addloteAjuste').on('click',function(){
                     if( prod.val() ){
                         $(this).hide();
-                        $('#popuplote').show();                        
+                        $('#popuplote').show();
                         formLote.find('#producto').val( prod.val() );
                         formLote.find('#nroLote').focus();
                     }
                 });
-                
+
                 formLote.find('#fechaVencimiento').datepicker({dateFormat: 'dd-mm-yy'});
                 formLote.find('#cancelAddLote').on('click',function(){
                     $('#popuplote').hide();
@@ -167,33 +211,33 @@ jQuery(document).ready(function($) {
                     formLote.find('#fechaVencimiento').val('');
                     form.find('.addloteAjuste').show();
                 });
-                formLote.find('#okAddLote').on('click',function(){ 
+                formLote.find('#okAddLote').on('click',function(){
                     var nro = formLote.find('#nroLote').val();
                     var fecha = formLote.find('#fechaVencimiento').val();
                     if( nro=='' || fecha=='' ){
                         alert('Debe ingresar los datos requeridos.');
                         return false;
                     }
-                    var $addLoteProducto="{{ path('add_loteproducto')}}";
+                    var addLoteProducto="{{ path('add_loteproducto')}}";
                     // crear lote nuevo.
-                    var select = $('#appbundle_stockajustedetalle_lotes');                    
-                    jQuery.get($addLoteProducto, {prod_id: prod, nro:nro, vto:fecha  },
-                        function(datos){ 
+                    var select = jQuery('#appbundle_stockajustedetalle_lotes');
+                    jQuery.get(addLoteProducto, {prod_id: prod.val(), nro:nro, vto:fecha  },
+                        function(datos){
                             var newOption = new Option(datos.text, datos.id, true, true);
-                            select.append(newOption).trigger("liszt:updated");                            
+                            select.append(newOption).trigger("liszt:updated");
                         }, "json");
                     $('#popuplote').hide();
                     formLote.find('#nroLote').val('');
                     formLote.find('#fechaVencimiento').val('');
                     form.find('.addloteAjuste').show();
-                });                                
+                });
                 form.find('#appbundle_stockajustedetalle_producto_chzn').trigger('mousedown');
               })
             .dialog({
             modal: true, autoOpen: true, title: 'Agregar item al ajuste',width: '50%', minHeight: 200,
             buttons: [{text: "Agregar", class: 'closePopup additem',
-                    click: function() { 
-                        var form = $("[name='appbundle_stockajustedetalle']");  
+                    click: function() {
+                        var form = $("[name='appbundle_stockajustedetalle']");
                         if(!form.find("#appbundle_stockajustedetalle_producto").val()){
                             alert('Debe ingresar un producto!');
                             form.find('#appbundle_stockajustedetalle_producto_chzn').trigger('mousedown');
@@ -209,11 +253,11 @@ jQuery(document).ready(function($) {
                             form.find("#appbundle_stockajustedetalle_cantidadxBulto").focus();
                             return false;
                         }
-                        // guardar item en detalle 
+                        // guardar item en detalle
                          $.post( "{{path('stock_item_ajuste_create')}}" , form.serialize(),function(data){
                              if(data.msg==='OK'){
                                  // insertar en la tabla
-                                $('#detalles tbody').append(data.tr); 
+                                $('#detalles tbody').append(data.tr);
                                 //reordenar nros
                                 $('#detalles').find('.ordTd').each(function(index) {
                                   $(this).html(index+1);
@@ -228,12 +272,12 @@ jQuery(document).ready(function($) {
                             $(this).dialog("destroy");
                         }}]
             });
-        });    
- 
-// EDITAR ITEM    
+        });
+
+// EDITAR ITEM
     $(document).on('click','.editTd',function(){
-        var partialurl =  $(this).data('url'); 
-        var actionurl = $(this).data('actionurl'); 
+        var partialurl =  $(this).data('url');
+        var actionurl = $(this).data('actionurl');
         var tr = $(this).parent().parent();
         $('#popup').dialog('open');
         $('#popup')
@@ -242,9 +286,9 @@ jQuery(document).ready(function($) {
                 var form = $("[name='appbundle_stockajustedetalle']");
                 form.find('input:radio').uniform();
                 var prod = form.find("#appbundle_stockajustedetalle_producto");
-                prod.chosen({no_results_text: "Sin resultados", search_contains: true}); 
+                prod.chosen({no_results_text: "Sin resultados", search_contains: true});
                 prod.prop('disabled', true).trigger("liszt:updated");
-                
+
                 form.find("#appbundle_stockajustedetalle_bulto").uniform();
                 form.find("#appbundle_stockajustedetalle_bulto").change(function () {
                     changeBulto($(this));
@@ -253,12 +297,50 @@ jQuery(document).ready(function($) {
                 var lote_selector = form.find('#appbundle_stockajustedetalle_lotes');
                 lote_selector.chosen({no_results_text: "Sin resultados",placeholder_text_multiple:"Seleccionar..",search_contains: true});
                 form.find('#appbundle_stockajustedetalle_lotes_chzn,#appbundle_stockajustedetalle_producto_chzn').css('width','400px');
+
+var formLote = $("#formlote");
+                form.find('.addloteAjuste').on('click',function(){
+                    if( prod.val() ){
+                        $(this).hide();
+                        $('#popuplote').show();
+                        formLote.find('#producto').val( prod.val() );
+                        formLote.find('#nroLote').focus();
+                    }
+                });
+formLote.find('#fechaVencimiento').datepicker({dateFormat: 'dd-mm-yy'});
+                formLote.find('#cancelAddLote').on('click',function(){
+                    $('#popuplote').hide();
+                    formLote.find('#nroLote').val('');
+                    formLote.find('#fechaVencimiento').val('');
+                    form.find('.addloteAjuste').show();
+                });
+                formLote.find('#okAddLote').on('click',function(){
+                    var nro = formLote.find('#nroLote').val();
+                    var fecha = formLote.find('#fechaVencimiento').val();
+                    if( nro=='' || fecha=='' ){
+                        alert('Debe ingresar los datos requeridos.');
+                        return false;
+                    }
+                    var addLoteProducto="{{ path('add_loteproducto')}}";
+                    // crear lote nuevo.
+                    var select = jQuery('#appbundle_stockajustedetalle_lotes');
+                    jQuery.get(addLoteProducto, {prod_id: prod.val(), nro:nro, vto:fecha  },
+                        function(datos){
+                            var newOption = new Option(datos.text, datos.id, true, true);
+                            select.append(newOption).trigger("liszt:updated");
+                        }, "json");
+                    $('#popuplote').hide();
+                    formLote.find('#nroLote').val('');
+                    formLote.find('#fechaVencimiento').val('');
+                    form.find('.addloteAjuste').show();
+                });
+
               })
             .dialog({
             modal: true, autoOpen: true, title: 'Editar item del ajuste',width: '50%', minHeight: 200,
             buttons: [{text: "Modificar", class: 'closePopup additem',
-                    click: function() { 
-                        var form = $("[name='appbundle_stockajustedetalle']");  
+                    click: function() {
+                        var form = $("[name='appbundle_stockajustedetalle']");
                         if(!form.find("#appbundle_stockajustedetalle_cantidad").val()){
                             alert('Debe ingresar una cantidad!');
                             form.find("#appbundle_stockajustedetalle_cantidad").focus();
@@ -271,7 +353,7 @@ jQuery(document).ready(function($) {
                         }
                         // quitar disable antes de enviar
                         form.find("#appbundle_stockajustedetalle_producto").prop('disabled', false).trigger("liszt:updated");
-                        // guardar item en detalle 
+                        // guardar item en detalle
                          $.post( actionurl , form.serialize(),function(data){
                              if(data.msg==='OK'){
                                  // reemplazar en la tabla
@@ -290,17 +372,17 @@ jQuery(document).ready(function($) {
                             $(this).dialog("destroy");
                         }}]
             });
-        });   
+        });
 
-    
-    
-    
-        
 
-    $('.guardar').click(function() {        
+
+
+
+
+    $('.guardar').click(function() {
         if( !$('#appbundle_stockajuste_deposito').val() ){
             alert('Seleccionar un Depósito para continuar.');
-            return false;  
+            return false;
         };
         if( $('#appbundle_stockajuste_registrarAjuste').is(':checked')){
             if( $('tbody tr.item').length > 0 ){
@@ -316,9 +398,9 @@ jQuery(document).ready(function($) {
     $(".bulto input").each(function() {
         changeBulto( $(this) );
     });
-    
+
     $(".btnlote").click(function(){ lotes( $(this) );  });*/
-});    
+});
 function changeProducto(producto) {
     var form = jQuery("[name='appbundle_stockajustedetalle']");
     form.find('.loaders').show();
@@ -326,7 +408,7 @@ function changeProducto(producto) {
     form.find('#appbundle_stockajustedetalle_bulto').prop('checked', 0);
     jQuery.uniform.update();
     form.find('#appbundle_stockajustedetalle_cantidadxBulto').val('');
-    form.find(".unidmed").hide();        
+    form.find(".unidmed").hide();
     jQuery.ajax({
         url: "{{ path("get_data_producto") }}",
         //async:false,
@@ -349,14 +431,14 @@ function changeProducto(producto) {
             lote_selector.html('<option></option>');
             var lotes = data.lotes;
             if(lotes.length>0){
-                for (var i = 0, total = lotes.length; i < total; i++) {                        
+                for (var i = 0, total = lotes.length; i < total; i++) {
                  lote_selector.append('<option value="' + lotes[i].id + '">' + lotes[i].name + '</option>');
-                }                
+                }
            }
            lote_selector.trigger("liszt:updated");
            jQuery('#productoid').val(  producto.val() );
             form.find('.loaders').hide();
-            form.find('#appbundle_stockajustedetalle_cantidad').focus();                
+            form.find('#appbundle_stockajustedetalle_cantidad').focus();
         }
     });
 }
@@ -385,11 +467,11 @@ function changeProducto(producto){
                async:false,
                dataType:"json",
                data: 'prod='+ producto.val(),
-               success: function(data) { 
+               success: function(data) {
                    trIndex = producto.parent().parent();
                    //limpiar lotes
                    var lote_selector = trIndex.find('.lote [id$="_lotes"]');
-                   lote_selector.val("-1").trigger("change");  
+                   lote_selector.val("-1").trigger("change");
                    trIndex.find('.cantTd input').val(1);
                    trIndex.find('span.unidmed').html(data.unidmed);
                    if(data.bulto){
@@ -399,26 +481,26 @@ function changeProducto(producto){
                        trIndex.find('span.unidmed').show();
                        trIndex.find('.cantxBulto input').val('');
                    }
-                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   trIndex.find('.bulto input').prop('checked', data.bulto);
                    jQuery.uniform.update();
-                   trIndex.find('.cantTd input').focus();                       
+                   trIndex.find('.cantTd input').focus();
                }
            });
 }
 
-function lotes( item ){    
+function lotes( item ){
     var lote = item.next('.lote');
     if(item.parent().find('[name*="producto"]').val()){
-      // si es + agregar lote 
-      var signo = item.parent().next('.signoTd').find('[name*="signo"]').val();         
-      lote.toggle();  
+      // si es + agregar lote
+      var signo = item.parent().next('.signoTd').find('[name*="signo"]').val();
+      lote.toggle();
       if( !lote.is(":visible")){
           lote.find('[name*="lotes"]').val("-1").trigger("change");
           lote.find('[name*="lotes"]').attr('required',false);
       }else{
          if( signo=='+'){
               lote.find('.addlote').show();
-              lote.find('.addlote').click();               
+              lote.find('.addlote').click();
             }else{
                 lote.find('.addlote').hide();
             }
@@ -433,7 +515,7 @@ function addlote( item ){
     jQuery('#popuplote').dialog({
         modal: true, autoOpen: true, title: 'Carga de lote', minHeight: 180,
         buttons: [{text: "Agregar", class: 'closePopup',
-                click: function() { 
+                click: function() {
                     var prod = item.parent().parent().find('[name*="producto"]').val();
                     var nro = jQuery(this).find('#nroLote').val();
                     var fecha = jQuery(this).find('#fechaVencimiento').val();
@@ -445,9 +527,9 @@ function addlote( item ){
                     // crear lote nuevo.
                     var select = item.parent().find('[name*="lotes"]');
                     jQuery.get($addLoteProducto,{prod_id: prod, nro:nro, vto:fecha  },
-                        function(datos){ 
+                        function(datos){
                             var newOption = new Option(datos.text, datos.id, true, true);
-                            
+
                             // create the option and append to Select2
                           //  var option = new Option(datos.id, datos.text, false, false);
                             select.append(newOption).trigger('change');
@@ -459,11 +541,11 @@ function addlote( item ){
                                     data: datos
                                 }
                             });
-                            
+
                         }, "json");
-                    
+
                     //recargar select y seleccionar el valor
-                    jQuery(this).dialog("close"); 
+                    jQuery(this).dialog("close");
                 }}]
     });
 }

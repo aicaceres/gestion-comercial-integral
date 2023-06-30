@@ -12,7 +12,7 @@
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
     {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
-    <fieldset >     
+    <fieldset >
         <p>
             {{ form_label(form.codigo) }}
             {{ form_widget(form.codigo, { 'attr': {'class' : 'width100' } }) }}
@@ -21,42 +21,42 @@
         <p>
             {{ form_label(form.nombre) }}
             {{ form_widget(form.nombre, { 'attr': {'class' : 'smallinput'} }) }}
-            {{ form_errors(form.nombre) }}    
+            {{ form_errors(form.nombre) }}
         </p>
         <p>
             {{ form_label(form.descripcion) }}
             {{ form_widget(form.descripcion, { 'attr': {'class' : 'smallinput' } })  }}
-            {{ form_errors(form.descripcion) }}    
-        </p>   
+            {{ form_errors(form.descripcion) }}
+        </p>
         <p>
             {{ form_label(form.codigoBarra,'Código de Barra') }}
             {{ form_widget(form.codigoBarra, { 'attr': {'class' : 'mininput' } })  }}
             {{ form_errors(form.codigoBarra) }}
-        </p>                                               
+        </p>
         <p>
             {{ form_label(form.unidadMedida) }}
             {{ form_widget(form.unidadMedida)  }}
             {{ form_errors(form.unidadMedida) }}
-        </p>                                               
+        </p>
 
         <div class="locate">
             <div>
                 {{ form_label(form.stock_minimo) }}
                 {{ form_widget(form.stock_minimo, { 'attr': {'class' : 'width100' } })  }}
-                {{ form_errors(form.stock_minimo) }}    
-                <a href="javascript:void(0)" class="minimoPorDeposito" title="Mínimo por depósito">
+                {{ form_errors(form.stock_minimo) }}
+                <a href="javascript:void(0)" class="minimoPorDeposito" title="Mínimo por depósito" onclick=" jQuery('#stockMinimo').toggle() ">
                     <img src="{{ asset('assets/images/icons/glass.png') }}" style="vertical-align:middle"/>
                 </a>
             </div>
             <div>
-                {{ form_row(form.costo, { 'attr': {'class' : 'number' } })  }}                           
+                {{ form_row(form.costo, { 'attr': {'class' : 'number' } })  }}
             </div>
             <div>
                 {{ form_label(form.iva,'IVA') }}
                 {{ form_widget(form.iva, { 'attr': {'class' : 'number' } })  }}
-                {{ form_errors(form.iva) }}  %                            
+                {{ form_errors(form.iva) }}  %
             </div>
-        </div>                           
+        </div>
         <div class="widgetbox" id="stockMinimo" style="width: 50%;margin-left: 150px;background: beige;padding: 15px;display:none;">
             <div class="title" style="margin:0;"><h5>Stock mínimo por depósito <a href="#" id="addStockxDeposito" title="Agregar otro depósito">[ + ]</a></h5></div>
             <div class="widgetcontent">
@@ -66,15 +66,19 @@
                         <tr>
                             <th>Depósito</th>
                             <th style="width:30%">Stock Mínimo</th>
+                            <th style="width:5%"></th>
                         </tr>
                     </thead>
                     <tbody data-index="{{form.stock | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Producto:_stock_minimo_prototype.html.twig' with {'item':form.stock.vars.prototype} %}{% endfilter %}">
                         {% for st in form.stock %}
                             <tr class="item" style="height:30px" divdata="item_{{loop.index-1}}">
                                 <td class="depTd">{{ st.vars.data.deposito.nombre|upper }}<div style="display:none">{{ form_widget(st.deposito) }}<div></td>
-                                <td class="minTd">{{ form_widget(st.stockMinimo, { 'attr': {'class' : 'stkmin mediuminput' } }) }}</td>                            
+                                <td class="minTd">{{ form_widget(st.stockMinimo, { 'attr': {'onchange': 'checkStock(this)' } }) }}</td>
+                                <td class="delTd">
+                                  <a href="javascript:void(0)" title="Eliminar" class="btn btnaction btn_trash" onclick="delStockxDeposito(this)" ></a>
+                                </td>
                             </tr>
-                        {% endfor %}           
+                        {% endfor %}
                     </tbody>
                 </table>
 
@@ -82,28 +86,30 @@
         </div>
 
 
-        <p>{{ form_row(form.rubro) }}   </p>                                         
+        <p>{{ form_row(form.rubro) }}   </p>
         <p>
             {{ form_label(form.proveedor) }}
-            {{ form_widget(form.proveedor) }}  
-            {{ form_errors(form.proveedor) }}                      
-        </p>         
-        <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>    
+            {{ form_widget(form.proveedor) }}
+            {{ form_errors(form.proveedor) }}
+        </p>
+        <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>
         <div class="locate">
-            {{ form_row(form.bulto) }} 
-            {{ form_row(form.cantidadxBulto, { 'attr': {'class' : 'mininput' }, 'label_attr': {'style': 'width:105px !important;'} }) }} 
-            {{ form_row(form.activo) }}    
+            {{ form_row(form.bulto) }}
+            {{ form_row(form.cantidadxBulto, { 'attr': {'class' : 'mininput' }, 'label_attr': {'style': 'width:105px !important;'} }) }}
+            {{ form_row(form.activo) }}
         </div>
 
         <div class="two_fields">
-            {{ form_row(form.facturable) }}              
+            {{ form_row(form.facturable) }}
             <div class="aligncenter">
-                <button id="precios" class="guardar" type="button" >Precios</button> 
+                <button id="precios" class="guardar" type="button" onclick="jQuery('#divprecios').toggle()">Precios</button>
             </div>
-        </div>  
+        </div>
 
         <div class="widgetbox" id="divprecios" style="width:60%;margin-left: 150px;background: beige;padding: 15px;display:none;">
-            <div class="title" style="margin:0;"><h5>Precios de Venta <a href="#" id="addPrecioVenta" title="Agregar otro precio">[ + ]</a></h5></div>
+            <div class="title" style="margin:0;"><h5>Precios de Venta
+                <a href="javascript:void(0)" id="addPrecioVenta" onclick="addNewPrecio(this)" title="Agregar otro precio">[ + ]</a></h5>
+            </div>
             <div class="widgetcontent">
                 {{ form_errors(form.precios) }}
                 <table class="stdtable precioxlista" cellspacing="0" cellpadding="0" border="0" style="background:white;margin-top: 10px;">
@@ -111,15 +117,19 @@
                         <tr>
                             <th>Lista</th>
                             <th style="width:30%">Precio</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody data-index="{{form.precios | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Producto:_precios_prototype.html.twig' with {'item':form.precios.vars.prototype} %}{% endfilter %}">
                         {% for prc in form.precios %}
                             <tr class="item2" style="height:30px" divdata="item2_{{loop.index-1}}">
                                 <td class="listaTd">{{ prc.vars.data.precioLista|upper }}<div style="display:none">{{ form_widget(prc.precioLista) }}<div></td>
-                                <td class="precTd">{{ form_widget(prc.precio, { 'attr': {'class' : 'precval mediuminput' } }) }}</td>                            
+                                <td class="precTd">{{ form_widget(prc.precio, { 'attr': {'class' : 'precval mediuminput' } }) }}</td>
+                                <td class="delTd">
+                                  <a href="javascript:void(0)" title="Eliminar precio" class="btn btnaction btn_trash" onclick="delPrecioVenta(this)" ></a>
+                                </td>
                             </tr>
-                        {% endfor %}           
+                        {% endfor %}
                     </tbody>
                 </table>
 
@@ -127,33 +137,28 @@
         </div>
 
 
-        <br clear="all" /> 
+        <br clear="all" />
         <div class="actionbutton">
             <button class="guardar" type="submit" >Guardar</button>
             <a class="cancelar" type="button" href="{{ path('stock_producto')}}">Cancelar</a>
         </div>
     </fieldset>
     <div style="display:none">{{ form_end(form) }}</div>
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 <script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
 <script type="text/javascript">
+    var processing = false
     jQuery(document).ready(function($){
         $('[id*="deposito"]').attr('readonly','readonly');
-        $(":file").uniform(); 
+        $(":file").uniform();
         $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
-        $(".minimoPorDeposito").on('click',function(){
-            if($('#stockMinimo').is(':visible')){
-                $('#stockMinimo').hide();
-            }else{
-                $('#stockMinimo').show();
-            }            
-        });
-        $('.stkmin').on('change',function(){
+
+        {# $('.stkmin').on('change',function(){
             checkStock($(this));
-        });
+        }); #}
         // stock x deposito
         $holder = $('table.stockxDeposito tbody');
         $('#addStockxDeposito').on('click',function(e){
@@ -162,34 +167,16 @@
             e.stopPropagation();
         });
 
-        // Precios
-        $holder2 = $('table.precioxlista tbody');
-        $('#addPrecioVenta').on('click',function(e){
-           e.preventDefault();
-            addNewPrecio();
-            e.stopPropagation();
-        });
-        $('.precval').on('change',function(){
-            checkPrecio($(this));
-        });
-        $("#precios").on('click',function(){
-            if($('#divprecios').is(':visible')){
-                $('#divprecios').hide();
-            }else{
-                $('#divprecios').show();
-            }            
-        });
     });
+
 function addNewDeposito(){
     var prototype = $holder.data('prototype');
     var index = $holder.data('index');
     var newForm = prototype.replace(/items/g, index);
     $holder.append(newForm);
     $holder.data('index', index + 1);
-    $holder.find('.stkmin').last().on('change',function(){
-            checkStock(jQuery(this));
-        });
-    dep = $holder.find('.depTd select').last(); 
+
+    dep = $holder.find('.depTd select').last();
     dep.select2();
     // cargar depósitos..
     prod = '{{entity.id}}';
@@ -197,15 +184,17 @@ function addNewDeposito(){
         dep.html('');
         for (var i = 0, total = data.length; i < total; i++) {
             dep.append('<option value="' + data[i].id + '">' + data[i].nombre + '</option>');
-        }        
+        }
         dep.focus();
     }, "json");
-}    
+}
+
 function checkStock(item){
-    dep = item.parent().parent().find('select');
+    input = jQuery(item)
+    dep = input.parent().parent().find('select');
     if(dep.val()){
-        if( isNaN(item.val()) )
-            item.val(0);
+        if( isNaN(input.val()) )
+            input.val(0);
         var tot = 0;
         jQuery('.stkmin').each(function(){
             var stkmin = jQuery(this).val();
@@ -218,18 +207,27 @@ function checkStock(item){
         jQuery('#appbundle_producto_stock_minimo').val( 0 );
         dep.focus();
     }
-}    
+}
 /// PRECIOS
-function addNewPrecio(){
+function addNewPrecio(link){
+    if( processing ) return false
+    else processing = true
+
+    $holder2 = jQuery('table.precioxlista tbody');
+
     var prototype = $holder2.data('prototype');
+    // obtener listas ya cargadas para no repetir
+    listasExistentes = []
+    $holder2.find('.listaTd select').each( (i, item) => {
+      listasExistentes.push( parseInt( jQuery(item).val() ) )
+    })
+
     var index = $holder2.data('index');
     var newForm = prototype.replace(/items2/g, index);
     $holder2.append(newForm);
     $holder2.data('index', index + 1);
-    $holder2.find('.precval').last().on('change',function(){
-            checkPrecio(jQuery(this));
-        });
-    lista = $holder2.find('.listaTd select').last(); 
+
+    lista = $holder2.find('.listaTd select').last();
     lista.select2();
     // cargar listas..
     prod = '{{entity.id}}';
@@ -238,16 +236,42 @@ function addNewPrecio(){
         lista.html('');
         if( data.length>0 ){
             for (var i = 0, total = data.length; i < total; i++) {
+              if( !listasExistentes.includes(data[i].id) )
                 lista.append('<option value="' + data[i].id + '">' + data[i].nombre + '</option>');
-            }        
-            lista.focus();
-        }else{
-            alert('No hay lista de precio sin cargar!')
-            jQuery('.item2').last().remove();
+            }
+            lista.on('select2:selecting', function(e){
+              newVal = e.params.args.data.id
+
+              $holder2.find('.listaTd select').each( (i, item) => {
+                if( newVal == jQuery(item).val() ){
+                  alert('Esta lista ya está cargada')
+                  e.preventDefault()
+                  jQuery(this).select2('close')
+                  return false
+                }
+              })
+              jQuery(this).closest('tr').find('.precval').focus()
+            })
+            lista.closest('tr').find('.precval').focus()
         }
+        if(lista.find('option').length  == 0){
+          alert('No hay lista de precio sin cargar!')
+          lista.closest('tr').remove();
+        }
+        processing = false
     }, "json");
 }
-function checkPrecio(item){
+
+function delPrecioVenta(obj){
+  tr = jQuery(obj).closest("tr")
+  return confirm('Desea eliminar este precio?') ? tr.remove() : false
+}
+function delStockxDeposito(obj){
+  tr = jQuery(obj).closest("tr")
+  if( confirm('Desea eliminar este item?')  ){
+    tr.remove()
+    jQuery('.stkmin').change()
+  }else return false
 }
 </script>
 {% endblock %}

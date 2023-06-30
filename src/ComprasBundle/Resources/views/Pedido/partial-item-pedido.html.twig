@@ -17,12 +17,12 @@
     }
     .chzn-container-single.chzn-disabled .chzn-single div b{
         display:none;
-    }    
-</style>    
+    }
+</style>
 {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
 
-<fieldset style="margin-bottom:7px">  
-    {{ form_row(form.producto) }} 
+<fieldset style="margin-bottom:7px">
+    {{ form_row(form.producto) }}
 </fieldset>
 <fieldset>
 <div>
@@ -31,11 +31,15 @@
    &nbsp;&nbsp; {{ form_widget(form.bulto, { 'attr': {'class' : 'bulto'} }) }}
    &nbsp;&nbsp;  {{ form_widget(form.cantidadxBulto) }}
    <span id="unidmed_bulto" class="unidmed" style="padding-left: 5px;display: inline-block;">{% if entity.id %}{{entity.producto.unidadMedida}}{% endif %}</span>
+    <div style="display: inline-block;">
+       {{ form_label(form.precio) }}
+      {{ form_widget(form.precio, { 'attr': {'class' : 'width50'} }) }}
+    </div>
 </div>
-<input id="pedidoid" value="" name="pedidoid" type="hidden"/>   
+<input id="pedidoid" value="" name="pedidoid" type="hidden"/>
 </fieldset>
 <span class="prodPedPendiente"></span>
  <div class="loaders">
     <img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" />
 </div>
- {{ form_end(form) }} 
+ {{ form_end(form) }}

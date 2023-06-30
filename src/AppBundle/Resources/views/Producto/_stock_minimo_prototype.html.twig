@@ -1,4 +1,9 @@
 <tr class="item" divdata="item_items" style="height:30px">
     <td class="depTd">{{ form_widget(item.deposito) }}</td>
-    <td class="minTd">{{ form_widget(item.stockMinimo, { 'attr': {'class' : 'stkmin mediuminput' } }) }}</td>                            
+    <td class="minTd">{{ form_widget(item.stockMinimo, { 'attr': {'onchange': 'checkStock(this)' } }) }}</td>
+    <td class="delTd">
+        <a href="javascript:void(0)"
+          title="Eliminar" class="btn btnaction btn_trash"
+          onclick="delStockxDeposito(this)" ></a>
+    </td>
 </tr>

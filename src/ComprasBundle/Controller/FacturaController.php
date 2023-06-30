@@ -317,7 +317,7 @@ class FacturaController extends Controller {
                     'form' => $editForm->createView(),
                     'centros' => $centros
         ));
-    }
+    } 
 
     /**
      * Creates a form to edit a Factura entity.

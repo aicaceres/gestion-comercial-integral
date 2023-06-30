@@ -79,13 +79,14 @@ jQuery(document).ready(function($) {
         var keycode = (e.keyCode ? e.keyCode : e.which);
         if(keycode == '13'){ e.preventDefault(); }
     });
-    $('#selectProveedor').change(function(){
+    {# $('#selectProveedor').change(function(){
         $('#searchform').submit();
-    });
+    }); #}
+
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     var oTable = $('#dyntable2').dataTable();
     $('#printform').on('submit',function(){
-        $('#proveedorid').val($('#selectProveedor').val());
+        $('#proveedorid').val($('#selectProveedorIndex').val());
         $('#fdesde').val($('#desde').val());
         $('#fhasta').val($('#hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
@@ -97,16 +98,19 @@ jQuery(document).ready(function($) {
                 var fecha = value[0].substr(i+7);
                 value[0]=fecha;
             }
+            var idx = $('#proveedorid').val() ? 2 : 3
+
             //concepto
-            var a = value[2].indexOf('<span class="hidden">');
-            var b = value[2].indexOf('</span>');
+            var a = value[idx].indexOf('<span class="hidden">');
+            var b = value[idx].indexOf('</span>');
             if( a >-1 ){
-                var conc = value[2].substr(a+22,b-22);
-                value[2]=conc;
+                var conc = value[idx].substr(a+22,b-22);
+                value[idx]=conc;
             }
-            value.splice(5);
+            value.splice( idx + 3);
             datos[index] = value;
         });
+
         $('#datalist').val(JSON.stringify(datos));
     });
 });

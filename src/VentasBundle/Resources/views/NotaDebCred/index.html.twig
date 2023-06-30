@@ -79,7 +79,7 @@
                 <td class="buttons">
                     {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
                     <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Nota"></a>
-                    <a href="#" url="{{ path('print_notadebcred_ventas', { 'id': entity.id })}}" class="editar btn btnaction btn_print" notaid="{{entity.id}}" title="Imprimir Comprobante"></a>
+                    <a href="javascript:void(0)" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'NotaDebCred' })}}" class="editar btn btnaction btn_print" id="nota{{entity.id}}" title="Imprimir Comprobante"></a>
                     {% endif %}
                 </td>
             </tr>
@@ -117,7 +117,8 @@ jQuery(document).ready(function($){
     });
     const printpdf = '{{printpdf}}';
     if( printpdf ){
-        $('[notaid="'+printpdf+'"]').click()
+      $('#nota'+printpdf).click()
+      $('.btn_search').click()
     }
 });
 </script>

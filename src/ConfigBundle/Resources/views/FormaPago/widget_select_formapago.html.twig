@@ -1,0 +1,12 @@
+<div class="selectFormaPago">
+  <label> FORMA DE PAGO: </label>
+  <select id="widgetFormaPago" style="width:100%" name="select_formapago"
+          data-urlselect = "{{ path('get_formapago_autocomplete') }} "
+          data-urldatos = "{{ path('get_datos_formapago') }}"
+          data-consumidorfinal = "{{consumidorFinal}}"
+  >
+
+      <option value="{{formaPago.id}}" selected="selected">{{formaPago}}</option>
+
+  </select>
+</div>

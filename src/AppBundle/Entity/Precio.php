@@ -2,12 +2,19 @@
 namespace AppBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * AppBundle\Entity\Precio
  *
- * @ORM\Table(name="precio")
+ * @ORM\Table(name="precio",uniqueConstraints={@ORM\UniqueConstraint(name="prodxlista_idx", columns={"producto_id", "precio_lista_id"})})
  * @ORM\Entity(repositoryClass="AppBundle\Entity\PrecioListaRepository")
+ * @UniqueEntity(
+ *     fields={"producto", "precioLista"},
+ *     errorPath="producto",
+ *     message="Registro de precio duplicado."
+ * )
  */
 class Precio
 {

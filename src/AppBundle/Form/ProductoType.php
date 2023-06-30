@@ -35,8 +35,8 @@ class ProductoType extends AbstractType
                 'allow_add'      => true,
                 'prototype_name' => 'items',
                 'attr'           => array(
-                    'class' => 'row item'
-                )))    
+                    'class' => 'row item',
+                )))
             ->add('precios', 'collection', array(
                 'type'           => new PrecioProductoType(),
                 'by_reference'   => false,
@@ -45,7 +45,7 @@ class ProductoType extends AbstractType
                 'prototype_name' => 'items2',
                 'attr'           => array(
                     'class' => 'row item2'
-                )))    
+                )))
             ->add('proveedor','entity',array('label'=>'Proveedor:',
                 'class' => 'ComprasBundle:Proveedor', 'required' =>false,
                 'attr'  => array('class' => 'chzn-select'),
@@ -54,7 +54,7 @@ class ProductoType extends AbstractType
                             ->where('p.activo=1')
                             ->orderBy('p.nombre');
                     }
-                ))         
+                ))
             ;
 
          $builder->add('rubro','entity',array(
@@ -64,9 +64,9 @@ class ProductoType extends AbstractType
                     'attr' => array('class' => 'chzn-select'),
                     'required'      =>false,
                     'class' => 'ConfigBundle\\Entity\\Parametro',
-                    'query_builder' => function(ParametroRepository $em) 
+                    'query_builder' => function(ParametroRepository $em)
                     { return $em->getSubRubros();  },))  ;
-         
+
         $optionsUM = array(
             'class'         => 'ConfigBundle:Parametro',
             'placeholder'   => 'Seleccionar...',
@@ -78,7 +78,7 @@ class ProductoType extends AbstractType
                     ->where('p.activo=1 and p.agrupador = :val ')
                     ->setParameter('val', ParametroType::getTablaId($repository, 'unidad-medida'));
             });
-         $builder->add('unidadMedida', 'entity', $optionsUM);                    
+         $builder->add('unidadMedida', 'entity', $optionsUM);
     }
 
     /**

@@ -22,43 +22,31 @@
    {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_notadebcred'}}) }}
 
     <fieldset class="fields" >
-        {% include "VentasBundle:Partial:block-cliente.html.twig" %}
+        {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente} %}
 
-        {% include "VentasBundle:Partial:block-moneda.html.twig" %}
+        <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
 
-        {% include "VentasBundle:Partial:block-formapago.html.twig" %}
+            {% include "VentasBundle:Partial:block-select-moneda.html.twig" %}
+        </div>
+
+        {% include "ConfigBundle:FormaPago:widget_select_formapago.html.twig"
+              with {'formaPago':entity.formapago, 'consumidorFinal':entity.cliente.consumidorFinal } %}
 
     </fieldset>
     <fieldset>
 
-        <div class="datos-cliente" style="display:none" >
-            {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
-        </div>
+        {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente, 'detallado': entity} %}
 
-        {% include "VentasBundle:Partial:_partial-datos-cf.html.twig" %}
+        {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
 
-        <div class="datos-formapago">
-            {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
-        </div>
     </fieldset>
 
     <fieldset class="fields" >
         <div style="display:inline-block; width: 40%">
-            <div>
-            {{ form_label(form.comprobanteAsociado)  }}
-            {{ form_widget(form.comprobanteAsociado,
-                {'attr':
-                    {'style':'width:90%',
-                     'url_autocomplete' : path('get_autocomplete_facturas'),
-                     'url_items_comprobante' : path('get_items_comprobante'),
-                     'url_tipos_comprobante_valido' : path('get_tipos_comprobante_valido'),
-                    }
-                })
-            }}
-            </div>
+            {% include "VentasBundle:NotaDebCred:block-select-comprobanteasociado.html.twig" %}
         </div>
-        <div style="display:inline-block; width: 20%;">
-            {{ form_row(form.notaElectronica.tipoComprobante) }}
+        <div style="display:inline-block; width: 25%;">
+            {{ form_row(form.tipoComprobante) }}
         </div>
         <div style="display:inline-block; width: 10%;">
             {{ form_row(form.periodoAsocDesde, { 'attr': {'class' : 'datepicker'} }) }}
@@ -66,16 +54,18 @@
         <div style="display:inline-block; width: 10%;">
             {{ form_row(form.periodoAsocHasta, { 'attr': {'class' : 'datepicker'} }) }}
         </div>
+        <div style="display:inline-block; width: 5%;">
+            <button type="button" class="stdbtn btn_default" onclick="setPeriodoAsociado()">Hoy</button>
+        </div>
     </fieldset>
-    <fieldset class="fields" >
-        <div style="display:inline-block; width:20%;">
+    <fieldset class="fields" style="margin-top:10px">
+        <div style="display:inline-block; width:30%;">
             {{ form_row(form.precioLista) }}
         </div>
-        <div style="display:inline-block; width:70%;">
+        <div style="display:inline-block; width:65%;">
             {{ form_row(form.concepto) }}
         </div>
     </fieldset>
-
 
     <fieldset>
         <div style="padding-top: 20px; margin:auto; width: 100%;">
@@ -91,43 +81,7 @@
         </div>
     </fieldset>
 
-
-    <fieldset class="detalle_pago" {% if entity.formaPago.tipoPago == 'CTACTE' %} style="display:none" {% endif %} >
-        <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
-            <h5>DETALLE DEL PAGO:</h5>
-            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
-                {% set prototype = form.cobroDetalles.vars.prototype %}
-                <tbody data-index="{{form.cobroDetalles | length }}"
-                    data-prototype="{% filter escape %}{% include 'VentasBundle:Cobro:prototype.html.twig' with {'item':prototype} %}{% endfilter %}"
-                >
-                {% for det in form.cobroDetalles %}
-                    <tr>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
-                <thead>
-                    <tr>
-                        <th style="text-align:right">
-                            IMPORTE: &nbsp;
-                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                            <span class="pago" style="font-size:16px" >0</span>.-
-                        </th>
-                        <th width="150px" class="vueltoTh">
-                            CAMBIO: &nbsp;
-                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                            <span class="vuelto" style="font-size:16px"></span>
-                        </th>
-                        <th width="30px" style="text-align:center;"><a href="javascript:void(0)" id="linkAddPago" tabindex="0" title="Agregar"><span class="add-item-button">+</span></th>
-                    </tr>
-                </thead>
-            </table>
-
-        </div>
-    </fieldset>
-
+    {% include "VentasBundle:CobroVenta:_partial-detalle-pago.html.twig" with { 'cobroDetalles': form.cobroDetalles } %}
 
     <fieldset>
         <br clear="all" />
@@ -137,54 +91,77 @@
         </div>
     </fieldset>
 
-    {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" %}
+    {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" with {'shortcuts': ['cliente', 'formapago', '+pago', '+producto'] } %}
 
     <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
   {{ form_end(form) }}
 </div>
 </div>
-<div id="dialog-tipo" title="Elegir Pago" style="display:none">
-<form>
-    <button type="button" class="stdbtn btn_black" data-tipo="EFECTIVO">EFECTIVO</button>
-    <button type="button" class="stdbtn btn_black" data-tipo="CHEQUE">CHEQUE</button>
-    <button type="button" class="stdbtn btn_black" data-tipo="TARJETA">TARJETA</button>
-</form>
-</div>
+
+{% include "VentasBundle:CobroVenta:_partial-dialog-tipopago.html.twig" %}
+
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
-<script type="text/javascript" src="{{ asset('assets/js/custom/ventas.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetFormapago.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetCliente.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/notaDebCred.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/moduloVentas.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/detallePago.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
-        $('.datepicker').datepicker({
-          dateFormat: 'dd-mm-yy',
-          onClose: function( selectedDate )
-            {
-              let desde = $('#ventasbundle_notadebcred_periodoAsocDesde').datepicker( "getDate" )
-              let hasta = $('#ventasbundle_notadebcred_periodoAsocHasta').datepicker( "getDate" )
-              if( desde && hasta && desde > hasta){
-                alert('Controlar el rango de fechas, la fecha desde debe ser menor a la fecha hasta!')
-                $('#ventasbundle_notadebcred_periodoAsocHasta').val('')
-              }
-            }
-        });
-        $('.datos-cliente').hide();
-        $('.datos-cf').show();
-        $('#ventasbundle_notadebcred_nombreCliente').attr('required',true);
-        $('#ventasbundle_notadebcred_nombreCliente').css('width', '95%');
 
-        $( "#dialog-tipo" ).dialog({
-            autoOpen: false,
-            height: 100,
-            width: 350,
-            modal: true
-        });
+      // fecha desde y hasta
+      $('.datepicker').datepicker({
+        dateFormat: 'dd-mm-yy',
+        onClose: function( selectedDate )
+          {
+            let desde = $('#ventasbundle_notadebcred_periodoAsocDesde').datepicker( "getDate" )
+            let hasta = $('#ventasbundle_notadebcred_periodoAsocHasta').datepicker( "getDate" )
+            if( desde && hasta && desde > hasta){
+              alert('Controlar el rango de fechas, la fecha desde debe ser menor a la fecha hasta!')
+              $('#ventasbundle_notadebcred_periodoAsocHasta').val('')
+            }
+          }
+      });
+      $('#ventasbundle_notadebcred_tipoComprobante').width('90%')
+      // datos del cliente cuando es consumidor final
+      {% if entity.cliente.consumidorFinal %}
+
+        var nrodoc = $("#ventasbundle_nroDocumentoCliente")
+        $("#ventasbundle_tipoDocumentoCliente").select2({
+          ajax: {
+            url: $("#ventasbundle_tipoDocumentoCliente").attr("url_select"),
+            type: "post",
+            dataType: "json",
+            data: (params) => {
+              return {
+                searchTerm: params.term,
+                slug: "tipo-documento"
+              }
+            },
+            processResults: (response) => {
+              return { results : response }
+            },
+            cache: true
+          },
+          placeholder: "Seleccionar...",
+          allowClear: true,
+          width:'style',
+        }).on("select2:select", function(e){
+          nrodoc.attr("required", true )
+          nrodoc.focus()
+        }).on("select2:unselect", function(){
+          nrodoc.val("")
+          nrodoc.attr("required", false )
+        })
+
+      {% endif %}
 
         // confirm on submit
         $('#guardar').on('click', function(){
-
             if( !$('#ventasbundle_notadebcred_comprobanteAsociado').val() &&
                   (!$('#ventasbundle_notadebcred_periodoAsocDesde').val() || !$('#ventasbundle_notadebcred_periodoAsocHasta').val()))
             {
@@ -192,9 +169,10 @@ jQuery(function ($) {
                 $('#ventasbundle_notadebcred_comprobanteAsociado').select2('open');
                 return false;
             }
+            let vuelto = $(".vuelto").html() ? $(".vuelto").html().replace(",", ".") : 0
 
-            if( $('#tipoPago').val() != 'CTACTE' ){
-                if(  $(':invalid').length>0 || vuelto<0 ){
+            if( $('.datos-formapago').data('tipopago') != 'CTACTE' ){
+                if(  $(':invalid').length>0 || parseFloat(vuelto) <0 ){
                     alert( 'Completar todos los datos para facturar!' );
                     return false;
                 }
@@ -207,11 +185,14 @@ jQuery(function ($) {
 
             $('#ventasbundle_notadebcred').submit();
         })
-       /* $('#ventasbundle_notadebcred').on('submit', function(){
 
-        })*/
     });
-
-
 });
+
+function setPeriodoAsociado(){
+  let hoy = new Date().toJSON().slice(0,10).split('-').reverse().join('-')
+  jQuery('#ventasbundle_notadebcred_periodoAsocDesde').val( hoy )
+  jQuery('#ventasbundle_notadebcred_periodoAsocHasta').val( hoy )
+}
+
 </script>{% endblock %}

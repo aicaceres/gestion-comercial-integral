@@ -17,7 +17,7 @@
         <span id="importeIVA">{{ venta.totalIva|number_format(3,',','.') }}</span>.-
         </th>
         <th id="iibbTd" style="{% if not showiibb %} display:none; {% endif %}width:20%">
-            Perc.IIBB [3.50%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+            Perc.IIBB [{{iibb_percent|number_format(2,'.',',')}}%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
             <span id="importeIIBB">{{ venta.totalIibb|number_format(3,',','.') }}</span>.-
         </th>
         <th style="width:18%" class="gralTotalTd red">

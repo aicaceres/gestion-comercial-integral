@@ -26,25 +26,20 @@
 
         <fieldset class="fields" >
 
-            {% include "VentasBundle:Partial:block-cliente.html.twig" %}
-            <div class="datos-moneda">
-                <!-- mantiene el formato en pantalla -->
-                <input type="hidden" id="ventasbundle_presupuesto_cotizacion" value="1" />
-            </div>
-            {% include "VentasBundle:Partial:block-formapago.html.twig" %}
+            {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente} %}
+
+            <div class="datos-moneda" data-cotizacion="{{moneda.cotizacion}}" data-simbolo="{{moneda.simbolo}}">&nbsp;</div>
+
+            {% include "ConfigBundle:FormaPago:widget_select_formapago.html.twig"
+              with {'formaPago':entity.formapago, 'consumidorFinal':entity.cliente.consumidorFinal } %}
 
         </fieldset>
 
         <fieldset>
-            <div class="datos-cliente" style="display:none" >
-                {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
-            </div>
-            <div class="datos-cf">
-                {{ form_widget(form.nombreCliente)}}
-            </div>
-            <div class="datos-formapago">
-                {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
-            </div>
+            {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente, 'nombreCliente': entity.nombreCliente} %}
+
+            {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
+
         </fieldset>
 
         <fieldset class="fields">
@@ -83,7 +78,7 @@
                 {% if entity.id %}
                 <a type="button" class="floatleft delete_button" href="{{ path('ventas_presupuesto_anular', { 'id': entity.id })}}">ANULAR</a>
                 {% endif %}
-                <button class="guardar tabbable" type="button" >Guardar</button>
+                <button id="guardar" class="guardar tabbable" type="button" >Guardar</button>
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_presupuesto')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -93,34 +88,33 @@
 
     </div>
 
-    {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" %}
+    {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" with {'shortcuts': ['cliente', 'formapago', '+producto'] } %}
 
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
-<script type="text/javascript" src="{{ asset('assets/js/custom/ventas.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetFormapago.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetCliente.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/moduloVentas.js') }}"></script>
 <script type="text/javascript">
 
 jQuery(function ($) {
 
     $(window).on('load', function () {
-       // $('.datos-cliente').hide();
-       // $('.datos-cf').show();
-        //$('#ventasbundle_presupuesto_nombreCliente').attr('required', true);
 
         // confirm on submit
          $('.guardar').on('click', function(){
+
             // controlar que haya items cargados
             let txt = '<span>';
-            txt += 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
+            txt += 'PRESUPUESTO:   '+$('.nroOperacion').html();
             txt += '\n' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
             if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") ){
                 txt += '\n' +'<b>Se realizará el descuento de los productos en el stock!</b>';
             }
             txt += '</span>';
             // detectar inputs invalidos
-
             if( $(':invalid').length > 0 ){
                 alert('Debe completar todos los datos requeridos!');
                 $(':invalid').focus();

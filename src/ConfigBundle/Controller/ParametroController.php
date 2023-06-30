@@ -3,6 +3,7 @@
 namespace ConfigBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
@@ -51,7 +52,7 @@ class ParametroController extends Controller {
      */
     public function setParamAfipActivo(Request $request) {
         $id = $request->get('id');
-        $valor = $request->get('valor');
+        $campo = $request->get('campo');
         switch ($request->get('slug')) {
             case 'alicuota':
                 $entity = 'ConfigBundle:AfipAlicuota';
@@ -66,7 +67,12 @@ class ParametroController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $dato = $em->getRepository($entity)->find($id);
         try {
-            $dato->setActivo($valor);
+            if($campo === 'activo'){
+              $dato->setActivo( !$dato->getActivo() );
+            }
+            if($campo === 'visiblecompras'){
+              $dato->setVisibleCompras( !$dato->getVisibleCompras() );
+            }
             $em->persist($dato);
             $em->flush();
             $msg = 'OK';
@@ -85,7 +91,7 @@ class ParametroController extends Controller {
         $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $comp = $em->getRepository('ConfigBundle:AfipComprobante')->find($id);
-        $valor = split('-', $comp->getValor());
+        $valor = explode('-', $comp->getValor());
         $signo = ( $valor[0] == 'DEB' ) ? '+' : '-';
         return new Response(json_encode(array('letra' => $valor[1], 'signo' => $signo)));
     }
@@ -303,8 +309,8 @@ class ParametroController extends Controller {
         }
         $form->handleRequest($request);
 
+        $em = $this->getDoctrine()->getManager();
         if ($form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             if ($slug == 'localidad') {
                 try {
                     $em->persist($entity);
@@ -427,6 +433,20 @@ class ParametroController extends Controller {
                     'entity' => $entity,
                     'form' => $editForm->createView(),
         ));
+    }
+
+
+    /**
+     * @Route("/getParametroAutocomplete", name="get_parametro_autocomplete")
+     * @Method("POST")
+     */
+    public function getParametroAutocompleteAction( Request $request) {
+        $term = $request->get('searchTerm');
+        $slug = $request->get('slug');
+        $em = $this->getDoctrine()->getManager();
+        $agrupador = $em->getRepository('ConfigBundle:Parametro')->findOneByNombre($slug);
+        $results = $em->getRepository('ConfigBundle:Parametro')->filterByTerm($term, $agrupador->getId());
+        return new JsonResponse($results);
     }
 
 }

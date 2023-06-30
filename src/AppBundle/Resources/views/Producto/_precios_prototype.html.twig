@@ -1,4 +1,9 @@
 <tr class="item2" divdata="item2_items2" style="height:30px">
     <td class="listaTd">{{ form_widget(item.precioLista) }}</td>
-    <td class="precTd">{{ form_widget(item.precio, { 'attr': {'class' : 'precval mediuminput' } }) }}</td>                            
+    <td class="precTd">{{ form_widget(item.precio, { 'attr': {'class' : 'precval mediuminput' } }) }}</td>
+    <td class="delTd">
+        <a href="javascript:void(0)"
+          title="Eliminar precio" class="btn btnaction btn_trash"
+          onclick="delPrecioVenta(this)" ></a>
+    </td>
 </tr>

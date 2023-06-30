@@ -49,6 +49,12 @@ class FacturaElectronica
     protected $caeVto;
 
     /**
+     * @var datetime $fechaEmision
+     * @ORM\Column(name="fecha_emision", type="datetime", nullable=true)
+     */
+    protected $fechaEmision;
+
+    /**
      * @var integer $total
      * @ORM\Column(name="total", type="decimal", scale=2 )
      */
@@ -248,6 +254,29 @@ class FacturaElectronica
     public function getCaeVto()
     {
         return $this->caeVto;
+    }
+
+    /**
+     * Set fechaEmision
+     *
+     * @param \DateTime $fechaEmision
+     * @return NotaDebCred
+     */
+    public function setFechaEmision($fechaEmision)
+    {
+        $this->fechaEmision = $fechaEmision;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaEmision
+     *
+     * @return \DateTime
+     */
+    public function getFechaEmision()
+    {
+        return $this->fechaEmision;
     }
 
     /**

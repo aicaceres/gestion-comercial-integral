@@ -292,8 +292,6 @@ class ProveedorController extends Controller {
 
         return $response;
 
-
-
         //    $logo1 = __DIR__.'/../../../web/bundles/app/img/logobanner1.jpg';
         //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
 
@@ -336,8 +334,9 @@ class ProveedorController extends Controller {
         $xml = $response->getContent();
         $content = $facade->render($xml);
         $hoy = new \DateTime();
+        $fileTxt = ($proveedor) ? $proveedor->getNombre() : $hoy->format('YmdHi');
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition' => 'filename=listado_pagos_proveedor_' . $proveedor->getNombre() . '.pdf'));
+            'Content-Disposition' => 'filename=listado_pagos_proveedor_' . $fileTxt . '.pdf'));
     }
 
     /**
@@ -1249,11 +1248,12 @@ class ProveedorController extends Controller {
         foreach ($proveedor->getFacturasCompra() as $fact) {
             $monto = 0;
             $montonota = 0;
-            if ($fact->getEstado() == 'PAGADO') {
+            if ($fact->getEstado() == 'PAGADO' || $fact->getEstado() == 'PAGO PARCIAL') {
 
                 $pagos = $em->getRepository('ComprasBundle:PagoProveedor')->getPagosByFactura($id, $fact->getId());
                 foreach ($pagos as $pago) {
                     $concepto = json_decode($pago['concepto']);
+
                     foreach ($concepto as $item) {
                         if ($item->clave == 'FAC-' . $fact->getId()) {
                             $monto = $monto + $item->monto;
@@ -1277,7 +1277,6 @@ class ProveedorController extends Controller {
                     'pago' => $monto,
                     'nota' => $montonota
                 );
-
                 array_push($resultado, $res);
             }
         }

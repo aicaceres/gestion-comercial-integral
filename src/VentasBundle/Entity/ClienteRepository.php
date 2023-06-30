@@ -386,14 +386,16 @@ class ClienteRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
-    public function filterByTerm($key) {
+    public function filterByTerm($key,$limit) {
         $query = $this->_em->createQueryBuilder();
-            $query->select("c.id,c.nombre text")
+            $query->select("c.id,c.nombre text, c.cuit, c.dni")
                     ->from('VentasBundle:Cliente', 'c')
                     ->where('c.nombre LIKE :key')
+                    ->orWhere('c.dni LIKE :key')
+                    ->orWhere('c.cuit LIKE :key')
                     ->orderBy('c.nombre')
                     ->setParameter('key', '%' . $key . '%')
-                    ->setMaxResults(5);
+                    ->setMaxResults($limit ? $limit : 5);
         return $query->getQuery()->getArrayResult();
     }
 

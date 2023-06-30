@@ -88,7 +88,7 @@ class FormaPago {
     protected $copiasComprobante;
 
     public function getTipoPago(){
-        $tipo = 'X';
+        $tipo = 'EFECTIVO';
         if( $this->cuentaCorriente ){
             $tipo = 'CTACTE';
         }elseif( $this->tarjeta ){

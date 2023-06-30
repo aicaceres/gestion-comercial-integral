@@ -1,29 +1,33 @@
 jQuery(function ($) {
-  var last_formapago
+	var last_formapago
+	var tipoPago
 	const esPresupuesto = $(location).attr("pathname").includes("presupuesto")
-  const esNotaDebCred = $(location).attr("pathname").includes("notadebcred")
-  $(window).on("load", function () {
-    var onLoad = true
-		// si la pantalla es chica expandir
-		if ($("#contentwrapper").width() < 1000) {
-			$(".togglemenu").click()
-		}
-		// refresca la hora en un campo fecha-hora
-		horaRefresh = setInterval(function () {
-			$(".js-hora").html(new Date().toLocaleString().slice(9))
-		}, 1000)
+	const esNotaDebCred = $(location).attr("pathname").includes("notadebcred")
 
-		$(".select2").select2({ width: "style" })
+	$(window).on("load", function () {
+		var onLoad = true
 
-		$(document).on("keydown", (e) => {
-			detectarControles(e)
-		})
 
-		$(".cancelar").on("click", function () {
-			if (!confirm("Desea cancelar esta operación?")) {
-				return false
-			}
-		})
+		// change moneda
+		// $(".ventasbundle_moneda")
+		// 	.on("change", function () {
+		// 		let small = $(this).parent().find("small")
+		// 		let id = $(this).val()
+		// 		let url_datos = $(this).attr("url_datos")
+		// 		$.getJSON(url_datos, { id: id }).done(function (data) {
+		// 			// actualizar datos
+		// 			if (data) {
+		// 				$(".datos-moneda").data("cotizacion", data.cotizacion)
+		// 				$(".datos-moneda").data("simbolo", data.simbolo)
+		// 				let smallText =
+		// 					data.cotizacion > 1 ? "TIPO DE CAMBIO: " + data.cotizacion : ""
+		// 				small.html(smallText)
+		// 			}
+		// 		})
+		// 	})
+		// 	.change()
+
+		/**+++++++++++  */
 
 		cliente = $(".form-horizontal").find('[id*="_cliente"]')
 		url_cliente_autocomplete = cliente.attr("url_autocomplete")
@@ -48,9 +52,9 @@ jQuery(function ($) {
 				},
 				minimumInputLength: 3,
 			})
-      .on("change", function () {
+			.on("change", function () {
 				id = $(this).val()
-        urlDatosCliente = $(this).attr("url_datos")
+				urlDatosCliente = $(this).attr("url_datos")
 				$.getJSON(urlDatosCliente, { id: id }).done(function (data) {
 					// actualizar partial datos
 					if (data) {
@@ -79,12 +83,12 @@ jQuery(function ($) {
 							// ventas no tiene datos de cf
 							$(".datos-cliente").html(data.partial)
 							$('[id*="_transporte"]').val(data.transporte)
-            }
-            if (onLoad) {
-              onLoad = false
-            }else{
+						}
+						if (onLoad) {
+							onLoad = false
+						} else {
 							$('[id*="_precioLista"]').val(data.listaprecio)
-              $('[id*="_formaPago"]').val(data.formapago)
+							$('[id*="_formaPago"]').val(data.formapago)
 							$('[id*="_formaPago"]').blur()
 						}
 						// mostrar iva e iibb si corresponde
@@ -99,17 +103,17 @@ jQuery(function ($) {
 						color = data.cuitValido ? "#666666" : "orangered"
 						$(".cuitcliente").css("color", color)
 
-						if (esNotaDebCred) {
-							// recargar facturas segun cliente
-							objfact = $("#ventasbundle_notadebcred_comprobanteAsociado")
-							url_fact = objfact.attr("url_autocomplete")
-							$.getJSON(url_fact, { id: cliente.val() }).done(function (data) {
-								// actualizar datos
-								if (data) {
-									objfact.html("<option></option>").select2({ data: data })
-								}
-							})
-						}
+						// if (esNotaDebCred) {
+						// 	// recargar facturas segun cliente
+						// 	objfact = $("#ventasbundle_notadebcred_comprobanteAsociado")
+						// 	url_fact = objfact.attr("url_autocomplete")
+						// 	$.getJSON(url_fact, { id: cliente.val() }).done(function (data) {
+						// 		// actualizar datos
+						// 		if (data) {
+						// 			objfact.html("<option></option>").select2({ data: data })
+						// 		}
+						// 	})
+						// }
 						actualizaTotales()
 					}
 				})
@@ -117,81 +121,54 @@ jQuery(function ($) {
 			.trigger("change")
 
 		// al modificar forma de pago actualizar datos del partial
+		// $("#widgetFormaPago").on("change", function () {
+		// 	actualizaTotales()
+		// })
+		// $('[id*="_formaPago"]').on("focus",function(){
+		//   last_formapago = $(this).val();
+		// }).on("blur", function (e) {
+		//     e.preventDefault()
+		//     id = $(this).val()
+		//     url_datos = $(this).attr("url_datos")
+		//     $.get(url_datos, { id: id }).done(function (data) {
+		//       // actualizar datos
+		//       if (data) {
+		//         $(".datos-formapago").html(data)
+		//         let esCtaCte = $("#esCtaCte").val()
+		//         let esConsumidorFinal = $("#esConsumidorFinal").val() == 'true'
+		//         if (checkConsumidorFinal(esCtaCte,esConsumidorFinal)) {
+		//           descuentoRecargo = $("#porcentajeRecargo").val()
+		//           //$('.descuentoRecargo').text( descuentoRecargo.toFixed(2) )
+		//           $('[id*="_descuentoRecargo"]').val(descuentoRecargo)
+		//           if (esNotaDebCred) {
+		//             detallePago()
+		//           }
+		//           actualizaTotales()
+		//         }
+		//       }
+		//     })
+		//   })
 
-    $('[id*="_formaPago"]').on("focus",function(){
-      last_formapago = $(this).val();
-    }).on("blur", function (e) {
-        e.preventDefault()
-        id = $(this).val()
-        url_datos = $(this).attr("url_datos")
-        $.get(url_datos, { id: id }).done(function (data) {
-          // actualizar datos
-          if (data) {
-            $(".datos-formapago").html(data)
-            let esCtaCte = $("#esCtaCte").val()
-            let esConsumidorFinal = $("#esConsumidorFinal").val() == 'true'
-            if (checkConsumidorFinal(esCtaCte,esConsumidorFinal)) {
-              descuentoRecargo = $("#porcentajeRecargo").val()
-              //$('.descuentoRecargo').text( descuentoRecargo.toFixed(2) )
-              $('[id*="_descuentoRecargo"]').val(descuentoRecargo)
-              if (esNotaDebCred) {
-                detallePago()
-              }
-              actualizaTotales()
-            }
-          }
-        })
-      })
+		// $('[id*="_moneda"]').on("change", function () {
+		// 	label = $(this).prev("label")
+		// 	label.find("small").remove()
+		// 	id = $(this).val()
+		// 	url_datos = $(this).attr("url_datos")
+		// 	$.getJSON(url_datos, { id: id }).done(function (data) {
+		// 		// actualizar datos
+		// 		if (data) {
+		// 			span = $("<small></small>").html(data.partial)
+		// 			label.append(span)
+		// 			$(".simbolo").html(data.simbolo)
+		// 			$('[id*="_cotizacion"]').val(data.cotizacion)
+		// 			actualizaTotales()
+		// 		}
+		// 	})
+		// })
+		// $('[id*="_moneda"]').change()
 
 
-		$('[id*="_moneda"]').on("change", function () {
-			label = $(this).prev("label")
-			label.find("small").remove()
-			id = $(this).val()
-			url_datos = $(this).attr("url_datos")
-			$.getJSON(url_datos, { id: id }).done(function (data) {
-				// actualizar datos
-				if (data) {
-					span = $("<small></small>").html(data.partial)
-					label.append(span)
-					$(".simbolo").html(data.simbolo)
-					$('[id*="_cotizacion"]').val(data.cotizacion)
-					actualizaTotales()
-				}
-			})
-		})
-		$('[id*="_moneda"]').change()
 
-		$('[id*="_descuentoRecargo"]').on("change", function () {
-			if ($(this).val() > 0) {
-				alert("No se pueden realizar recargos!!")
-				$(this).val(0)
-			}
-		})
-
-		// al modificar el descuento o recargo si posee permiso
-		$('[id*="_descuentoRecargo"]').on("change", function () {
-			actualizaTotales()
-		})
-
-		// al presionar ctrl+enter abrir popup
-		$(document).on(
-			"click change keydown",
-			'[id*="_cliente"], [id*="_formaPago"],[name*="producto"]',
-			function (e) {
-				if (e.keyCode == 13 && e.ctrlKey) {
-					e.preventDefault()
-					openModal($(this))
-				}
-			}
-		)
-
-		// en buscar abrir popup correspondiente
-		$(document).on("click", ".btn_search", function (e) {
-			obj = $(this).parent().find("select")
-			e.preventDefault()
-			openModal(obj)
-		})
 
 		$("#linkAdd").on("click", function (e) {
 			e.preventDefault()
@@ -216,7 +193,7 @@ jQuery(function ($) {
 				.attr("required", $(this).find(".prodTd input").is(":visible"))
 			productolast = $(this).find('[name*="[producto]"]')
 
-      url_producto_autocomplete = productolast.attr("url_autocomplete")
+			url_producto_autocomplete = productolast.attr("url_autocomplete")
 			productolast
 				.select2({
 					ajax: {
@@ -226,9 +203,9 @@ jQuery(function ($) {
 						delay: 250,
 						data: function (params) {
 							return {
-                searchTerm: params.term, // search term
-                lista: $('[id*="_precioLista"]').val(),
-                cativa: $("#categoriaIva").val(),
+								searchTerm: params.term, // search term
+								lista: $('[id*="_precioLista"]').val(),
+								cativa: $("#categoriaIva").val(),
 							}
 						},
 						processResults: function (response) {
@@ -286,15 +263,15 @@ jQuery(function ($) {
 
 		actualizaTotales()
 		if (esNotaDebCred) {
-			$("#ventasbundle_notadebcred_comprobanteAsociado").on(
-				"change",
-        function () {
-          if (confirm("Desea cargar los items del comprobante asociado?")) {
-            cargarItems($(this))
-          }
-          filtrarTipoComprobante($(this))
-				}
-			)
+			// $("#ventasbundle_notadebcred_comprobanteAsociado").on(
+			// 	"change",
+			//   function () {
+			//     if (confirm("Desea cargar los items del comprobante asociado?")) {
+			//       cargarItems($(this))
+			//     }
+			//     filtrarTipoComprobante($(this))
+			// 	}
+			// )
 
 			$pagosHolder = $("table.tabla-pagos tbody")
 			$pagosHolder.find(".delTd").each(function () {
@@ -322,17 +299,9 @@ jQuery(function ($) {
 
 		cliente.select2("focus")
 	})
-	// funciones
-  function checkConsumidorFinal(cc, cf) {
-    if (cc && cf) {
-      $('[id*="_formaPago"]').val(last_formapago)
-      $('[id*="_formaPago"]').change()
-      alert('Consumidor final no puede seleccionar formas de pago en cuenta corriente!!')
-      $('[id*="_formaPago"]').focus()
-      return false
-    }
-    return true
-  }
+
+	// FUNCIONES
+
 
 	function openModal(obj) {
 		const url = obj.attr("url")
@@ -360,109 +329,109 @@ jQuery(function ($) {
 	}
 
 	// CLIENTES
-	function openModalCliente() {
-		url_list = cliente.attr("url_list")
-		var oTable = $("#clientes_table").dataTable({
-			columnDefs: [
-				// These are the column name variables that will be sent to the server
-				{ name: "nombre", targets: 0 },
-				{ name: "cuit", targets: 1 },
-				{ targets: "nosort", orderable: false },
-			],
-			rowCallback: function (row, data) {
-				// seleccionar on click
-				$(row)
-					.find("a")
-					.on("click", function () {
-						var data = {
-							id: $(this).data("id"),
-							text: $(this).text(),
-						}
-						var newOption = new Option(data.text, data.id, true, true)
-						cliente.append(newOption).trigger("change")
-						$("#popup").dialog("destroy")
-						cliente.select2("focus")
-					})
-			},
-			// Server-side parameters
-			processing: true,
-			serverSide: true,
-			// Ajax call
-			ajax: {
-				url: url_list,
-				type: "POST",
-			},
-			// Classic DataTables parameters
-			bPaginate: true,
-			bInfo: true,
-			bSearchable: true,
-			bLengthChange: true,
-			pageLength: 10,
-			order: [[0, "asc"]],
-			sPaginationType: "full_numbers",
-			oLanguage: {
-				oPaginate: {
-					sFirst: "<<",
-					sNext: ">",
-					sLast: ">>",
-					sPrevious: "<",
-				},
-				sProcessing: "Cargando...",
-				sLengthMenu: "Mostrar _MENU_ registros ",
-				sZeroRecords: "Sin datos",
-				sInfo: " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
-				sInfoEmpty: "Sin coincidencias",
-				sInfoFiltered: "(filtrado de _MAX_ registros)",
-				sSearch: "Buscar:",
-			},
-		})
-		// focus en buscar
-		$("#clientes_table_filter input").focus()
-	}
+	// function openModalCliente() {
+	// 	url_list = cliente.attr("url_list")
+	// 	var oTable = $("#clientes_table").dataTable({
+	// 		columnDefs: [
+	// 			// These are the column name variables that will be sent to the server
+	// 			{ name: "nombre", targets: 0 },
+	// 			{ name: "cuit", targets: 1 },
+	// 			{ targets: "nosort", orderable: false },
+	// 		],
+	// 		rowCallback: function (row, data) {
+	// 			// seleccionar on click
+	// 			$(row)
+	// 				.find("a")
+	// 				.on("click", function () {
+	// 					var data = {
+	// 						id: $(this).data("id"),
+	// 						text: $(this).text(),
+	// 					}
+	// 					var newOption = new Option(data.text, data.id, true, true)
+	// 					cliente.append(newOption).trigger("change")
+	// 					$("#popup").dialog("destroy")
+	// 					cliente.select2("focus")
+	// 				})
+	// 		},
+	// 		// Server-side parameters
+	// 		processing: true,
+	// 		serverSide: true,
+	// 		// Ajax call
+	// 		ajax: {
+	// 			url: url_list,
+	// 			type: "POST",
+	// 		},
+	// 		// Classic DataTables parameters
+	// 		bPaginate: true,
+	// 		bInfo: true,
+	// 		bSearchable: true,
+	// 		bLengthChange: true,
+	// 		pageLength: 10,
+	// 		order: [[0, "asc"]],
+	// 		sPaginationType: "full_numbers",
+	// 		oLanguage: {
+	// 			oPaginate: {
+	// 				sFirst: "<<",
+	// 				sNext: ">",
+	// 				sLast: ">>",
+	// 				sPrevious: "<",
+	// 			},
+	// 			sProcessing: "Cargando...",
+	// 			sLengthMenu: "Mostrar _MENU_ registros ",
+	// 			sZeroRecords: "Sin datos",
+	// 			sInfo: " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+	// 			sInfoEmpty: "Sin coincidencias",
+	// 			sInfoFiltered: "(filtrado de _MAX_ registros)",
+	// 			sSearch: "Buscar:",
+	// 		},
+	// 	})
+	// 	// focus en buscar
+	// 	$("#clientes_table_filter input").focus()
+	// }
 
-	// FORMAS DE PAGO
-	function openModalFormaPago() {
-		var fTable = $("#formapago_table").dataTable({
-			bAutoWidth: false,
-			bRetrieve: true,
-			columnDefs: [
-				{
-					targets: "nosort",
-					orderable: false,
-				},
-			],
-			rowCallback: function (row, data) {
-				// seleccionar on click
-				$(row)
-					.find("a")
-					.on("click", function () {
-						formaPago = $('[id*="_formaPago"]')
-						formaPago.val($(this).data("id"))
-						$("#popup").dialog("destroy")
-						formaPago.change()
-						formaPago.focus()
-					})
-			},
-			sPaginationType: "full_numbers",
-			oLanguage: {
-				oPaginate: {
-					sFirst: "<<",
-					sNext: ">",
-					sLast: ">>",
-					sPrevious: "<",
-				},
-				sLengthMenu: "Mostrar _MENU_ registros ",
-				sZeroRecords: "Sin datos",
-				sInfo: " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
-				sInfoEmpty: "Sin coincidencias",
-				sInfoFiltered: "(filtrado de _MAX_ registros)",
-				sSearch: "Buscar:",
-				sSelect: "%d seleccionados",
-			},
-		})
-		// focus en buscar
-		$("#formapago_table_filter input").focus()
-	}
+	// // FORMAS DE PAGO
+	// function openModalFormaPago() {
+	// 	var fTable = $("#formapago_table").dataTable({
+	// 		bAutoWidth: false,
+	// 		bRetrieve: true,
+	// 		columnDefs: [
+	// 			{
+	// 				targets: "nosort",
+	// 				orderable: false,
+	// 			},
+	// 		],
+	// 		rowCallback: function (row, data) {
+	// 			// seleccionar on click
+	// 			$(row)
+	// 				.find("a")
+	// 				.on("click", function () {
+	// 					formaPago = $('[id*="_formaPago"]')
+	// 					formaPago.val($(this).data("id"))
+	// 					$("#popup").dialog("destroy")
+	// 					formaPago.change()
+	// 					formaPago.focus()
+	// 				})
+	// 		},
+	// 		sPaginationType: "full_numbers",
+	// 		oLanguage: {
+	// 			oPaginate: {
+	// 				sFirst: "<<",
+	// 				sNext: ">",
+	// 				sLast: ">>",
+	// 				sPrevious: "<",
+	// 			},
+	// 			sLengthMenu: "Mostrar _MENU_ registros ",
+	// 			sZeroRecords: "Sin datos",
+	// 			sInfo: " _START_ / _END_  -  <strong>Total: _TOTAL_ </strong>",
+	// 			sInfoEmpty: "Sin coincidencias",
+	// 			sInfoFiltered: "(filtrado de _MAX_ registros)",
+	// 			sSearch: "Buscar:",
+	// 			sSelect: "%d seleccionados",
+	// 		},
+	// 	})
+	// 	// focus en buscar
+	// 	$("#formapago_table_filter input").focus()
+	// }
 
 	// PRODUCTOS
 	function openModalProducto(obj) {
@@ -476,10 +445,10 @@ jQuery(function ($) {
 		var oTable = $("#productos_table").dataTable({
 			columnDefs: [
 				// These are the column name variables that will be sent to the server
-				{ name: "nombre", "orderData": 3, targets: 0 },
-				{ name: "codigo", "orderData": 3, targets: 1 },
-				{ name: "precio", "orderData": 3, targets: 2 },
-				{ name: "stock", "orderData": 3, targets: 3 },
+				{ name: "nombre", orderData: 3, targets: 0 },
+				{ name: "codigo", orderData: 3, targets: 1 },
+				{ name: "precio", orderData: 3, targets: 2 },
+				{ name: "stock", orderData: 3, targets: 3 },
 				{ targets: "nosort", orderable: false },
 			],
 			rowCallback: function (row, data) {
@@ -546,6 +515,7 @@ jQuery(function ($) {
 
 	// funciones personalizas para el formulario
 	function addNewItem() {
+		console.log("aa")
 		var prototype = $collectionHolder.data("prototype")
 		var index = $collectionHolder.data("index")
 		var newForm = prototype.replace(/items/g, index)
@@ -567,7 +537,7 @@ jQuery(function ($) {
 		})
 
 		productolast = $('[name*="[producto]"]').last()
-    url_producto_autocomplete = productolast.attr("url_autocomplete")
+		url_producto_autocomplete = productolast.attr("url_autocomplete")
 		productolast
 			.select2({
 				ajax: {
@@ -610,13 +580,35 @@ jQuery(function ($) {
 						objprecio.find('[id*="_precio"]').val(data.precio)
 						objprecio.find('[id*="_alicuota"]').val(data.alicuota)
 						textoComodin = obj.siblings('[id*="_textoComodin"]')
+// implementacion por agregado de precio unitario editable en comodin
+						idInputPrecio = objprecio.find('[id*="_precio"]').attr("id")
+						inputPrecioUnitario = $(
+							`<input type="text" class="precioUnitarioComodin" data-precio="${idInputPrecio}" 						value="0" style="text-align:right" onchange="handleChangePrecio()"/>`
+						)
+
 						if (data.comodin) {
 							textoComodin.attr("required", true)
 							textoComodin.show()
 							textoComodin.focus()
+
+							if (esNotaDebCred) {
+								//objprecio.find("span").addClass('hidden')
+								objprecio.prepend(inputPrecioUnitario)
+								inputPrecioUnitario.on("change", function () {
+									precio = $(this).parent().find('[id*="_precio"]')
+									precio.val($(this).val())
+									actualizaTotales()
+								})
+							}
 						} else {
 							textoComodin.attr("required", false)
 							textoComodin.hide()
+
+							if (esNotaDebCred) {
+								objprecio.find($(".precioUnitarioComodin")).remove()
+								//objprecio.find("span").removeClass('hidden')
+							}
+
 							objcant = obj.parent().siblings(".cantTd")
 							objcant.find('[id*="_cantidad"]').focus()
 						}
@@ -650,8 +642,8 @@ jQuery(function ($) {
 
 	function actualizaTotales() {
 		let iva = (iibb = descrec = 0)
-    let subTotal = (totalIVA = totalIIBB = 0)
-    let subtotalTh = 0
+		let subTotal = (totalIVA = totalIIBB = 0)
+		let subtotalTh = 0
 		const cotizacion = parseFloat($('[id*="_cotizacion"]').val())
 		const categoriaIva = $("#categoriaIva").val()
 		const porcentaje = checknumero($('[id*="_descuentoRecargo"]'))
@@ -679,12 +671,12 @@ jQuery(function ($) {
 			//}
 			// calcular la cotización si es distinta a 1
 			precUnit = precio / cotizacion
-      // calcular precio con descuento para la vista
-      precUnit = precUnit * (1 + (porcentaje / 100));
-      precTot = precUnit * cant
-      // subtotal para vista
-      subtotalTh += precTot
-      item.find(".precTd span").html(precUnit.toFixed(3))
+			// calcular precio con descuento para la vista
+			precUnit = precUnit * (1 + porcentaje / 100)
+			precTot = precUnit * cant
+			// subtotal para vista
+			subtotalTh += precTot
+			item.find(".precTd span").html(precUnit.toFixed(3))
 			item.find(".itmSubtotalTd").text(precTot.toFixed(3))
 			// totalizar
 			subTotal += precio * cant
@@ -711,80 +703,10 @@ jQuery(function ($) {
 		$collectionHolder.find(".ordTd").each(function (index) {
 			$(this).html(index + 1)
 		})
-		if (esNotaDebCred) {
-			actualizarSuma()
-		}
+		// if (esNotaDebCred) {
+		// 	actualizarSuma()
+		// }
 	}
-
-	function detectarControles(e) {
-		if (e.ctrlKey && e.altKey) {
-			// ctrl + alt + C
-			if (e.keyCode == 67) {
-				e.preventDefault()
-				openModal($('[id*="_cliente"]'))
-			}
-			// ctrl + alt + J
-			if (e.keyCode == 70) {
-				e.preventDefault()
-				openModal($('[id*="_formapago"]'))
-			}
-			// ctrl + alt + G
-			if (e.keyCode === 71) {
-				e.preventDefault()
-				$(".guardar").click()
-			}
-		}
-		// tecla + agrega item
-		if (e.keyCode == 171) {
-			e.preventDefault()
-			$("#linkAdd").click()
-		}
-
-		if (e.keyCode == 13) {
-			if (
-				$(e.target).is('input[type="text"]') ||
-				$(e.target).is('input[type="checkbox"]')
-			) {
-				e.preventDefault()
-			}
-		}
-	}
-
-	// FUNCIONES NOTAS DEBCRED
-  function cargarItems(obj) {
-      $('.divcarga').removeClass('hidden')
-      $.getJSON(
-        obj.attr("url_items_comprobante"),
-        { id: obj.val() },
-        function (data) {
-            $.each(data, function (i, item) {
-              addNewItem()
-              $('[name*="[cantidad]"]').last().val(item.cant)
-              var newOption = new Option(item.text, item.id, true, true)
-              $('[name*="[producto]"]').last().append(newOption).trigger("change")
-              $('.divcarga').addClass('hidden')
-            })
-            actualizaTotales()
-        }
-        )
-	}
-  function filtrarTipoComprobante(obj) {
-    $.getJSON(
-        obj.attr("url_tipos_comprobante_valido"),
-        { id:  obj.val() },
-      function (data) {
-          objTiposComprobante = $('[id*="_notaElectronica_tipoComprobante"]')
-          objTiposComprobante.find('option').each(function (e) {
-            if ( !data.includes( parseInt($(this).val()) ) ) {
-              $(this).attr("disabled", "disabled")
-            }
-          });
-          objTiposComprobante.val(objTiposComprobante.find('option:not([disabled]):first').val())
-          objTiposComprobante.focus()
-        }
-        )
-  }
-
 
 	function actualizarSuma() {
 		if (tipoPago == "CTACTE") {
@@ -822,7 +744,7 @@ jQuery(function ($) {
 
 	function detallePago() {
 		$pagosHolder.html("")
-		const tipoPago = $("#tipoPago").val()
+		const tipoPago = $(".datos-formapago").data('tipopago')
 
 		//$('#guardar').find('span').html('FACTURA');
 		// si no es cta cte se habilita detalle de pago

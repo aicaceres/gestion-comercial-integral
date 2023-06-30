@@ -109,7 +109,8 @@
                         <a href="{{ path('compras_pedido_recepcion_new', { 'id': entity.id }) }}" class="editar btn btnaction btn_truck" title="Recepción de Mercaderías"></a>
                         {% endif %}
                     {% endif %}
-                    <a href="javascript:void(0)" url="{{ path('compras_pedido_print', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Pedido"></a>
+                    <a href="javascript:void(0)" url="{{ path('compras_pedido_print', { 'id': entity.id, 'valorizado': false }) }}" class="editar btn btnaction btn_print" title="Imprimir Pedido"></a>
+                    <a href="javascript:void(0)" url="{{ path('compras_pedido_print', { 'id': entity.id, 'valorizado': true }) }}" class="editar btn btnaction btn_print btn_black" title="Imprimir Pedido Valorizado"></a>
                 </td>
             </tr>
             {% endif %}

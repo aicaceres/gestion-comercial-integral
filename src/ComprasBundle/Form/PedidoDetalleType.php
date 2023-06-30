@@ -45,6 +45,7 @@ class PedidoDetalleType extends AbstractType {
                   )) */
                 ->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:'))
                 ->add('bulto', null, array('required' => false))
+                ->add('precio', null, array('required' => true, 'label' => 'Precio:'))
                 ->add('cantidadxBulto', null, array('required' => false))
                 ->add('cantidadStock', 'hidden', array('required' => false))
         ;

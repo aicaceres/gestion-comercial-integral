@@ -47,6 +47,16 @@
                 <div><label>Comprob. Asociado:</label>
                     <input type="text" value="{{entity.comprobanteAsociado.comprobanteTxt}}" disabled="disabled" class="mediuminput">
                 </div>
+             {% elseif entity.periodoAsocDesde and entity.periodoAsocHasta %}
+                <div class="two_fields">
+                <div><label>Período Asoc. Desde:</label>
+                    <input type="text" value="{{entity.periodoAsocDesde|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+
+                <div><label>Hasta:</label>
+                    <input type="text" value="{{entity.periodoAsocHasta|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div>
             {% endif %}
             </div>
             <div  class="two_fields">

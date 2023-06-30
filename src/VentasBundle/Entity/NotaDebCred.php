@@ -42,7 +42,13 @@ class NotaDebCred {
     /**
      * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="notaDebCred", cascade={"persist"})
      */
-    private $notaElectronica;
+    protected $notaElectronica;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipComprobante")
+     * @ORM\JoinColumn(name="afip_comprobante_id", referencedColumnName="id")
+     * */
+    protected $tipoComprobante;
 
     /**
      * @var integer $descuentoRecargo
@@ -249,9 +255,9 @@ class NotaDebCred {
         }
         return round( ($total / $this->getCotizacion()) ,3);
     }
-    public function getTotalIibb(){
+    public function getTotalIibb($iibbPercent=3.5){
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * 0.035;
+        return $monto * $iibbPercent/100 ;
     }
     public function getMontoTotal(){
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
@@ -560,6 +566,29 @@ class NotaDebCred {
     {
         return $this->notaElectronica;
     }
+
+    /**
+     * Set tipoComprobante
+     *
+     * @param \ConfigBundle\Entity\AfipComprobante $tipoComprobante
+     * @return NotaDebCred
+     */
+    public function setTipoComprobante(\ConfigBundle\Entity\AfipComprobante $tipoComprobante = null)
+    {
+        $this->tipoComprobante = $tipoComprobante;
+        return $this;
+    }
+
+    /**
+     * Get tipoComprobante
+     *
+     * @return \ConfigBundle\Entity\AfipComprobante
+     */
+    public function getTipoComprobante()
+    {
+        return $this->tipoComprobante;
+    }
+
 
     /**
      * Set formaPago
@@ -920,7 +949,7 @@ class NotaDebCred {
     /**
      * Get periodoAsocDesde
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getPeriodoAsocDesde()
     {
@@ -943,7 +972,7 @@ class NotaDebCred {
     /**
      * Get periodoAsocHasta
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getPeriodoAsocHasta()
     {

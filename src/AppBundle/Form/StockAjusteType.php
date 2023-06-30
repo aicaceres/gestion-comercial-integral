@@ -19,23 +19,24 @@ class StockAjusteType extends AbstractType
             'class'         => 'AppBundle:Deposito',
             'placeholder'   => 'Seleccione Depósito',
             'label'         => 'Depósito:',
-            'required'      => true,  
+            'required'      => true,
             'query_builder' => function (EntityRepository $repository) use ($unidadnegocio) {
                 $qb = $repository->createQueryBuilder('d')
                     ->innerJoin('d.unidadNegocio', 'u')
                     ->where('u.id = :unidadnegocio')
-                    ->orderBy('d.nombre')    
+                    ->orderBy('d.nombre')
                     ->setParameter('unidadnegocio', $unidadnegocio);
                 return $qb;
             }
         );
         $builder
             ->add('fecha','date',array('widget' => 'single_text', 'label'=>'Fecha Ajuste:',
-                'format' => 'dd-MM-yyyy', 'required' => true))   
-            ->add('deposito', 'entity', $formOptions) 
+                'format' => 'dd-MM-yyyy', 'required' => true))
+            ->add('deposito', 'entity', $formOptions)
+            ->add('csv', 'file', array('mapped'=>false, 'required' => false, 'label'=>'Importar Items') )
             /*->add('deposito','entity',array('label'=>'Depósito:',
                 'class' => 'AppBundle:Deposito', 'required' =>true))    */
-            ->add('observaciones',null,array('label' => 'Observaciones:','required' => false)) 
+            ->add('observaciones',null,array('label' => 'Observaciones:','required' => false))
             ->add('registrarAjuste','checkbox',array('label'=>'Registrar el ajuste ',
                 'label_attr' => array('class'=>'infoicon')
                 ,'mapped' => false,'required' => false))
@@ -52,7 +53,7 @@ class StockAjusteType extends AbstractType
                 )))*/
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */

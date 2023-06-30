@@ -1,0 +1,277 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ asset('assets/css/style.ventas.css') }}" type="text/css" media="all" />
+{% endblock %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">COBRO DE VENTAS:
+        <span style="margin-left:10px" class="nroOperacion">#{{entity.nroOperacion}}</span>
+        <span class="floatright fechahora">
+            {{entity.fechaCobro|date('d/m/Y')}}
+            <span class="js-hora"> {{entity.fechaCobro|date('H:i:s')}}</span> &nbsp; | &nbsp; {{app.user.username}}
+        </span>
+    </h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    <fieldset class="venta-fieldset">
+        <div>
+            <label>VENTA: </label>
+            <input type="text" disabled="disabled" class="width100" value="#{{entity.venta.nroOperacion}}"/>
+        </div>
+        <div>
+            <label>FECHA/HORA: </label>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.venta.fechaVenta|date('d-m-Y H:i')}}"/>
+        </div>
+        <div>
+            <label>VENDEDOR: </label>
+            <input type="text" disabled="disabled" class="width100" value="{{entity.venta.createdBy.username}}"/>
+        </div>
+        <div style="width:10%">
+            <button class="stdbtn btn_red"
+              onclick="jsAnularVenta(event)"
+              data-url= "{{ path('ventas_venta_anular', { 'id': entity.venta.id })}}"
+              data-redirect="{{ path('ventas_cobro')}}"
+              > Anular Venta </button>
+        </div>
+
+    </fieldset>
+
+<div id="contentwrapper" class="contentwrapper" style="padding-top:10px">
+{% include "AppBundle::notificacion.html.twig" %}
+    <div class="divForm">
+
+      {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_cobro'}}) }}
+
+      <fieldset class="fields">
+
+      <div class="selectorCliente" data-categiva="{{entity.cliente.categoriaIva}}">
+        <label> CLIENTE: </label>
+        <input value="{{entity.cliente.nombre}}" disabled style="width:90%"/>
+      </div>
+
+      <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
+        <label> MONEDA: </label>
+        <input value="{{entity.moneda}}" disabled style="width:80%"/>
+      </div>
+
+      {% include "ConfigBundle:FormaPago:widget_select_formapago.html.twig"
+        with {'formaPago':entity.formapago, 'consumidorFinal': entity.cliente.consumidorFinal } %}
+
+      </fieldset>
+      <fieldset>
+
+          {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente, 'detallado': entity } %}
+
+            {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
+
+      </fieldset>
+
+      <fieldset style=" text-align:center; margin-top:10px">
+            <div style="display:inline-block; width:85%;" >
+                {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
+                {% set showiva = (cativa != 'C') %}
+                {% set showiibb = (cativa == 'I') %}
+
+                {% include "VentasBundle:CobroVenta:_partial-detalle.html.twig" with {'venta':entity.venta,'showiva': showiva, 'showiibb': showiibb } %}
+            </div>
+        </fieldset>
+
+      {% include "VentasBundle:CobroVenta:_partial-detalle-pago.html.twig" with { 'cobroDetalles': form.detalles } %}
+
+      <fieldset>
+            <br clear="all" />
+            <div style="text-align: center;" id="divEmitirTicket">
+              <label> EMITIR TICKET</label>
+              <input type="checkbox" name="emitirTicket" id="emitirTicket"/>
+            </div>
+            <div class="actionbutton">
+                <button class="guardar" id="guardar" type="button" data-urlemitir="{{ path('ventas_factura_emitir') }}">
+                  <span>Guardar y Facturar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
+                </button>
+                <a class="cancelar" onclick="return confirm('Confirma cancelar el cobro?')" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
+            </div>
+        </fieldset>
+
+    <input type="hidden" name="ventasbundle_cobro_venta" value="{{entity.venta.id}}" />
+    <input type="hidden" id="ventasbundle_cobro_id" name="ventasbundle_cobro_id" value="{{entity.id}}"/>
+
+    <div name="rest" class="hiddenformrest"> {{ form_rest(form) }} </div>
+    {{ form_end(form) }}
+
+    </div>
+    {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" with {'shortcuts': ['formapago', 'detalle', '+pago']} %}
+</div>
+
+{% include "VentasBundle:CobroVenta:_partial-dialog-tipopago.html.twig" %}
+
+{% endblock %}
+
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/moduloVentas.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/detallePago.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetFormapago.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/imprimirTicket.js') }}"></script>
+<script type="text/javascript">
+jQuery(function ($) {
+
+    // datos del cliente cuando es consumidor final
+    {% if entity.cliente.consumidorFinal %}
+
+    var nrodoc = $("#ventasbundle_nroDocumentoCliente")
+    $("#ventasbundle_tipoDocumentoCliente").select2({
+      ajax: {
+        url: $("#ventasbundle_tipoDocumentoCliente").attr("url_select"),
+        type: "post",
+        dataType: "json",
+        data: (params) => {
+          return {
+            searchTerm: params.term,
+            slug: "tipo-documento"
+          }
+        },
+				processResults: (response) => {
+          return { results : response }
+        },
+				cache: true
+      },
+      placeholder: "Seleccionar...",
+      allowClear: true,
+      width:'style',
+    }).on("select2:select", function(e){
+      nrodoc.attr("required", true )
+      nrodoc.focus()
+    }).on("select2:unselect", function(){
+      nrodoc.val("")
+      nrodoc.attr("required", false )
+    })
+
+    {% endif %}
+
+    const porcentaje = $('.datos-formapago').data('porcentajerecargo')
+    $('span.descuentoRecargo').html(porcentaje.toFixed(2))
+
+    $('#widgetFormaPago').on('select2:select',function(){
+      actualizarImportes()
+    })
+
+    // check si corresponde ticket
+    checkEmitirTicket()
+
+    // guardar y facturar
+    $('#guardar').on('click',function(){
+
+      let vuelto = $(".vuelto").html() ? $(".vuelto").html().replace(",", ".") : 0
+
+      if( $('.datos-formapago').data('tipopago') != 'CTACTE' ){
+          if(  $(':invalid').length>0 || parseFloat(vuelto) <0 ){
+              alert( 'Completar todos los datos para facturar!' );
+              return false;
+          }
+      }
+
+      emitirTicket = $('#emitirTicket').is(':checked')
+      let txt = emitirTicket ? '\n\n Se emitirá un Ticket' : '\n\n Se enviarán los datos a la Afip para registrar la factura'
+      if( confirm('Comfirma la registración del pago y la emisión de la factura?'+txt)){
+        registrarCobro()
+      }else{
+        return false
+      }
+    })
+
+});
+
+function jsAnularVenta(e){
+  let url = e.currentTarget.dataset.url
+  let redirect = e.currentTarget.dataset.redirect
+  if( confirm('Confirma la anulación de esta venta? \nLos productos se reingresarán al stock!')){
+    jQuery.post( url )
+        .done(function(data){
+            // redireccionar a cobros
+            if(data=='OK'){
+                window.location.href = redirect;
+            }else{
+                alert('No se ha podido anular la venta!')
+            }
+        })
+        .fail(function(){
+            alert('No se ha podido anular la venta!')
+        });
+    }
+}
+
+function checkEmitirTicket(){
+  esCategoriaC = '{{ entity.cliente.categoriaIva }}' == 'C'
+  esMonedaPesos = '{{ entity.moneda }}'=='PESOS'
+  esTicketPorCantidadItems = jQuery('.detalle-venta tbody tr').length <= '{{ cantidadItemsParaFactura }}'
+  emitirTicket = esCategoriaC && esMonedaPesos && esTicketPorCantidadItems;
+  jQuery('#emitirTicket').prop('checked', emitirTicket)
+  jQuery.uniform.update();
+}
+
+function registrarCobro(){
+  let id = jQuery('#ventasbundle_cobro_id').val()
+  const formdata = jQuery("#ventasbundle_cobro").serialize()
+  const url = jQuery("#ventasbundle_cobro").attr("action")
+  setFacturando(true)
+  jQuery.post(url, formdata, function(data){
+
+    if(data.res  === 'OK'){
+      jQuery('#ventasbundle_cobro_id').val(data.id)
+      enviarEmision(data.id)
+    }else{
+      alert(data.msg)
+      setFacturando(false)
+    }
+  })
+}
+
+function enviarEmision(id){
+  jQuery('#emitirTicket').is(':checked') ?
+    imprimirTicket(id) :
+    emitirFactura(id)
+}
+
+function emitirFactura(cobroId){
+  jQuery('#guardar span').html('Emitiendo Factura...')
+  const url = jQuery('#guardar').data('urlemitir')
+  jQuery.post(url, {id:cobroId, entity: 'Cobro'}, function(data){
+    if(data.res === 'OK'){
+      jQuery("#divEmitirTicket").remove()
+      setFacturando(false)
+      window.open(data.urlprint)
+      location.href = jQuery('.cancelar').attr('href')
+    }else{
+      alert(data.msg)
+      setFacturando(false)
+    }
+  })
+}
+
+function imprimirTicket(cobroId){
+  jQuery('#guardar span').html('Emitiendo Ticket...')
+  alert('Emitiendo Ticket...');
+  setFacturando(false)
+}
+
+function setFacturando(on){
+  if(on){
+    jQuery('.cancelar').hide()
+    jQuery('#guardar').attr('disabled', true)
+    jQuery('.loader_facturar').removeClass('hidden')
+    jQuery('#guardar span').html('Guardando datos...')
+  }else{
+    setTimeout(function(){
+        jQuery('.loader_facturar').addClass('hidden');
+        jQuery('#guardar span').html('Guardar y Facturar')
+        jQuery('.cancelar').show();
+        jQuery('#guardar').removeAttr('disabled')
+      }, 1000);
+  }
+}
+
+</script>
+{% endblock %}

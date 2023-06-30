@@ -1,6 +1,53 @@
-<label> CUIT: </label><span class="cuitcliente"> {{item.cuit}} </span>
-<label> IVA: </label> {% if item.categoriaIva %} {{item.categoriaIva.descripcion|upper}} {% else %} No definido {% endif %}
-<label> RENTAS: </label> {% if item.categoriaRentas %} {{item.categoriaRentas.nombre|upper}}{% else %} No definido  {% endif %}
-{% if item.direccion is defined %}
-<label> DIRECCIÓN: </label> {{item.domicilioCompleto|upper}}
+
+<div class="datos-cliente datos-cf">
+
+{% if item.consumidorFinal %}
+
+  {% if detallado is defined %}
+
+    <div style="width: 50%; ">
+        <label>Nombre: </label>
+        <input type="text" name="ventasbundle_nombreCliente" id="ventasbundle_nombreCliente" value="{{detallado.nombreCliente}}"/>
+    </div>
+    <div style="width: 18%;">
+        <label>Tipo Documento: </label>
+        <select class="select2" id="ventasbundle_tipoDocumentoCliente"
+            name="ventasbundle_tipoDocumentoCliente" style="width:100%"
+            url_select = "{{ path('get_parametro_autocomplete') }}"
+        >
+          <option value="{{detallado.tipoDocumentoCliente}}" selected="selected">{{detallado.tipoDocumentoCliente}}</option>
+        </select>
+    </div>
+    <div style="width: 18%;">
+        <label>N° Documento: </label>
+        <input type="text" name="ventasbundle_nroDocumentoCliente" id="ventasbundle_nroDocumentoCliente" value="{{detallado.nroDocumentoCliente}}"/>
+    </div>
+
+  {% else %}
+
+    <div style="width: 80%; ">
+        <input type="text" name="ventasbundle_nombreCliente" id="ventasbundle_nombreCliente" placeholder="Nombre y Apellido" value="{{ nombreCliente is defined ? nombreCliente : '' }}"/>
+    </div>
+
+  {% endif %}
+
+{% else %}
+
+    <label> CUIT: </label>
+    <span class="cuitcliente {% if cuitvalido is defined %} {{ not cuitvalido ? 'cuitinvalido' : '' }} {% endif %}">
+      {{item.cuit}}
+    </span>
+
+    <label> IVA: </label>
+      {{ item.categoriaIva ? item.categoriaIva.descripcion|upper : "No definido" }}
+
+    <label> RENTAS: </label>
+    {{ item.categoriaRentas ? item.categoriaRentas.nombre|upper : "No definido" }}
+
+    {% if item.direccion is defined %}
+      <label> DIRECCIÓN: </label> {{item.domicilioCompleto|upper}}
+    {% endif %}
+
 {% endif %}
+
+</div>

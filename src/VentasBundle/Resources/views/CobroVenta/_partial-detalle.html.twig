@@ -1,0 +1,77 @@
+{% set simbolo = ( entity.moneda is defined ) ? entity.moneda.simbolo : '$' %}
+<table style="width:100%"  cellpadding="0" cellspacing="0" border="0" class="resumen-venta stdtable noaction">
+  <thead>
+    <tr class="resumen">
+        <th style="width:18%">
+            Subtotal: <span class="simbolo">{{simbolo}}</span>&nbsp;
+                <span id="importeSubtotal" >{{ (venta.subTotal)|number_format(3,',','.')}}</span>.-
+        </th>
+        <th>
+            Desc./Rec. [<span class="descuentoRecargo">
+            {{ venta.descuentoRecargo }}
+            </span>%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+            <span id="importeRecargo" data-tkimporte="{{venta.totalDescuentoRecargo}}">{{ venta.totalDescuentoRecargo|number_format(3,',','.') }}</span>.-
+        </th>
+        <th id="ivaTd" style=" {% if not showiva %} display:none; {% endif %} width:16%">
+        IVA: <span class="simbolo">{{simbolo}}</span>&nbsp;
+        <span id="importeIVA">{{ venta.totalIva|number_format(3,',','.') }}</span>.-
+        </th>
+        <th id="iibbTd" style="{% if not showiibb %} display:none; {% endif %}width:20%">
+            Perc.IIBB [{{iibb_percent|number_format(2,'.',',')}}%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+            <span id="importeIIBB">{{ venta.totalIibb|number_format(3,',','.') }}</span>.-
+        </th>
+        <th style="width:18%" class="gralTotalTd red">
+            A PAGAR: <span class="simbolo">{{simbolo}}</span>&nbsp;
+                <span id="importeTotal" data-total="{{ venta.montoTotal}}"> {{ venta.montoTotal|number_format(2,',','.')}} </span>.-
+        </th>
+
+      <th style="width:34px">
+        <a href="javascript:void(0)" title="Ver Detalle de Artículos" class="btn btnaction btn_list" onclick="jQuery('.detalle-venta').toggle()"></a>
+      </th>
+    </tr>
+  </thead>
+</table>
+<input type="hidden" id="ventasbundle_venta_descuentoRecargo" value="{{venta.descuentoRecargo}}" />
+<table style="width:100%;" cellspacing="0" border="0" class="detalle detalle-venta hidden stdtable noaction">
+    <thead>
+        <tr>
+            <th style="width:3%;">#</th>
+            <th>Producto</th>
+            <th style="width:10%;">Cant.</th>
+            <th style="width:15%;">Precio Unit.</th>
+            <th style="width:15%;">SubTotal</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in venta.detalles %}
+        <tr class="item" divdata="item_{{loop.index-1}}">
+            <td class="ordTd">{{loop.index}}</td>
+            <td class="prodTd" style="text-align:left">
+                {{ item.nombreProducto }}
+            </td>
+            <td class="cantTd" data-tkcantidad="{{ item.cantidad }}">
+              {{ item.cantidad }}  {{item.producto.unidadmedida.nombre}}
+              <input type="hidden" value="{{ item.cantidad }}"/>
+            </td>
+            <td data-valor="{{item.precio}}" data-tkprecio="{{item.precioUnitarioItem}}" data-tkalicuota="{{item.alicuota}}" class="precTd alignright valor">
+                {{ item.precioUnitarioItem|number_format(3,',','.') }}
+              <input type="hidden" id="ventasbundle_venta_detalles_{{loop.index-1}}_precio" value="{{ item.precio  }}"/>
+              <input type="hidden" id="ventasbundle_venta_detalles_{{loop.index-1}}_alicuota" value="{{ item.alicuota  }}"/>
+            </td>
+            <td data-valor="{{item.totalItem}}" class="itmSubtotalTd alignright valor">{{ item.totalItem|number_format(3,',','.') }}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th colspan="4" style="text-align:right">&nbsp; </th>
+            <th class="cktotal alignright" id="subtotalTh">
+                <span class="simbolo" style="float:left">{{simbolo}}</span>
+                <span data-valor="{{ venta.subTotal }} " class="valor">
+                    {{ venta.subTotal|number_format(3,',','.') }}
+                 </span>
+            </th>
+        </tr>
+    </tfoot>
+</table>

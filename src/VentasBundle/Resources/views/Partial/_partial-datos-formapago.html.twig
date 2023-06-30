@@ -1,12 +1,16 @@
-{% set lblPorcentajeRecargo =  (item.porcentajeRecargo > 0) ? 'RECARGO:' : 'DESCUENTO:' %}
-<label class="lblPorcentajeRecargo"> {{ lblPorcentajeRecargo }} </label>
-   {{ item.porcentajeRecargo|abs ~ ' %' }}
-{% if item.cuotas > 0 %}
-    <label> CUOTAS:</label>{{item.cuotas}}
-{% endif %}
-{% if item.plazo > 0 %}
-    <label> PLAZO:</label>{{item.plazo ~ ' ' ~ item.vencimiento|upper }}
-{% endif %}
-<input type="hidden" id="porcentajeRecargo" name="porcentaje" value="{{item.porcentajeRecargo}}" />
-<input type="hidden" id="tipoPago" value="{{item.tipoPago}}" />
-<input type="hidden" id="esCtaCte" value="{{item.cuentaCorriente}}" />
+
+<div class="datos-formapago"
+  data-porcentajeRecargo="{{item.porcentajeRecargo}}"
+  data-tipoPago="{{item.tipoPago}}"
+  data-ctacte ="{{item.cuentaCorriente}}"
+>
+  {% set lblPorcentajeRecargo =  (item.porcentajeRecargo > 0) ? 'RECARGO:' : 'DESCUENTO:' %}
+  <label class="lblPorcentajeRecargo"> {{ lblPorcentajeRecargo }} </label>
+    {{ item.porcentajeRecargo|abs ~ ' %' }}
+  {% if item.cuotas > 0 %}
+      <label> CUOTAS:</label>{{item.cuotas}}
+  {% endif %}
+  {% if item.plazo > 0 %}
+      <label> PLAZO:</label>{{item.plazo ~ ' ' ~ item.vencimiento|upper }}
+  {% endif %}
+</div>

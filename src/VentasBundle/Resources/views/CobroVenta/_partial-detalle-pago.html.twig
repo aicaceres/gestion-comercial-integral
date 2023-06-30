@@ -1,0 +1,37 @@
+
+<fieldset class="detalle_pago" {{ (entity.formaPago.tipoPago == 'CTACTE') ? 'style="display:none"' : '' }} >
+        <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
+            <h5>DETALLE DEL PAGO:</h5>
+            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
+                {% set prototype = cobroDetalles.vars.prototype %}
+                <tbody data-index="{{cobroDetalles | length }}"
+                    data-prototype="{% filter escape %}{% include 'VentasBundle:CobroVenta:prototype.html.twig' with {'item':prototype} %}{% endfilter %}"
+                >
+    {% for detpago in cobroDetalles %}
+
+        {% include 'VentasBundle:CobroVenta:prototype.html.twig' with {'item': detpago} %}
+
+    {% endfor %}
+
+                </tbody>
+            </table>
+            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
+                <thead>
+                    <tr>
+                        <th style="text-align:right">
+                            IMPORTE: &nbsp;
+                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                            <span class="pago" style="font-size:16px" >0</span>.-
+                        </th>
+                        <th width="150px" class="vueltoTh">
+                            CAMBIO: &nbsp;
+                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
+                            <span class="vuelto" style="font-size:16px"></span>
+                        </th>
+                        <th width="30px" style="text-align:center;"><a href="javascript:void(0)" id="linkAddPago" tabindex="0" title="Agregar" onclick="linkAddPago()"><span class="add-item-button">+</span></th>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
+    </fieldset>

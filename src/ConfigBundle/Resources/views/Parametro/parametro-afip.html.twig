@@ -15,45 +15,47 @@
                 <th style="width:10%">Código</th>
                 <th>Descripción</th>
                 <th style="width:10%" class="nosort">Activo</th>
+                {% if(slug|upper == 'COMPROBANTE') %}
+                  <th style="width:10%" class="nosort">Módulo de Compras</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
-           {% for entity in entities %}
+          {% for entity in entities %}
             <tr>
                 <td>{{ entity.codigo |upper}}</td>
-                <td>{{ entity.nombre |upper}}</td>                
-                <td><input class="activo" data-id="{{ entity.id }}" type="checkbox" {% if entity.activo %}checked="checked"{% endif %} /></td>                
+                <td>{{ entity.nombre |upper}}</td>
+                <td><input onclick="changeCheckValue()" data-campo="activo" data-id="{{ entity.id }}" type="checkbox" {% if entity.activo %} checked="checked" {% endif %} /></td>
+                {% if(entity.visibleCompras is defined) %}
+                  <td><input onclick="changeCheckValue()" data-campo="visiblecompras" data-id="{{ entity.id }}" type="checkbox" {% if entity.visibleCompras %}checked="checked"{% endif %} /></td>
+                {% endif %}
             </tr>
-           {% endfor %}
+          {% endfor %}
         </tbody>
-    </table> 
+    </table>
 </div>
 {% endblock %}
-    
+
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
-jQuery(document).ready(function($) { 
-    $(".activo").click(function(e) {         
-      var checkbox = $(this);
-      id = checkbox.data('id');
-      valor =  checkbox.is(":checked");
-     $.ajax({
-               url: "{{ path("set_paramafip_activo") }}",  
-               dataType:"json",
-               data: {id: id, valor: valor, slug: '{{slug}}' },
-               success: function(data) { 
-                   if(data==='OK'){
-                       console.log('ok');
-                   }else{
-                       alert(data);
-                       checkbox.prop('checked',!valor);
-                        $.uniform.update(checkbox);
-                   }
-               }
-           });
-   });            
-});
-</script>  
+
+function changeCheckValue()
+{
+  let data = event.target.dataset
+  jQuery.ajax({
+            url: "{{ path("set_paramafip_activo") }}",
+            dataType:"json",
+            data: {id: data.id, slug: '{{slug}}', campo: data.campo },
+            success: function(data) {
+                if(data!='OK'){
+                    alert(data);
+                    checkbox.prop('checked',!valor);
+                    $.uniform.update(checkbox);
+                }
+            }
+          });
+}
+</script>
 
 {% endblock %}

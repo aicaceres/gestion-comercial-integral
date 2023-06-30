@@ -10,7 +10,7 @@
         {% block stylesheets %}
             <link rel="stylesheet" href="{{ asset('assets/css/style.default.css') }}" type="text/css" media="all" />
             <link rel="stylesheet" href="{{ asset('assets/css/style.blueline.css') }}" type="text/css" media="all" />
-            <link href="{{ asset('assets/js/plugins/select2/select2.min.css') }}" rel="stylesheet" type="text/css">
+            <link href="{{ asset('assets/js/plugins/select2/select2.css') }}" rel="stylesheet" type="text/css">
             <link rel="stylesheet" href="{{ asset('assets/fancybox/jquery.fancybox.css?v=2.1.5') }}" type="text/css" media="screen" />
             {% block page_stylesheets %}{% endblock %}
 
@@ -34,6 +34,7 @@
 
     </head>
     <body>
+        <input type="hidden" id="iibbPercent" value="{{iibb_percent}}"/>
         <!--<span id="loading"></span>-->
         {% block body %}{% endblock %}
 

@@ -19,6 +19,9 @@ class PedidoType extends AbstractType
             ->add('fechaEntrega','date',array('widget' => 'single_text', 'label'=>'Entrega Estimada:',
                 'format' => 'dd-MM-yyyy', 'required' => false))
             ->add('estado','hidden')
+            ->add('descuentos', 'text', array('read_only' => true, 'attr'  => array('class' => 'hidden', 'autocomplete'=>'off')))
+            ->add('montoDescuento', null, array('read_only' => true, 'attr'  => array('autocomplete'=>'off')))
+            ->add('montoIva', null, array('read_only' => true, 'attr'  => array('autocomplete'=>'off')))
             ->add('proveedor','entity',array('label'=>'Proveedor:',
                 'class' => 'ComprasBundle:Proveedor', 'required' =>true,
                 'attr'  => array('class' => 'uniformselect'),

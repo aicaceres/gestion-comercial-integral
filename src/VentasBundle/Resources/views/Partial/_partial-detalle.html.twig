@@ -7,44 +7,16 @@
             <th style="width:10%;">Precio Unit.</th>
             <th style="width:10%;">SubTotal</th>
             <th style="width:3%;">
-                <a href="#" id="linkAdd" tabindex="0"  title="Agregar"><span class="add-item-button">+</span></a>
+                <a href="javascript:void(0)" id="linkAdd" tabindex="0"  title="Agregar" onclick="addNewItem()"><span class="add-item-button">+</span></a>
             </th>
         </tr>
     </thead>
     <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'VentasBundle:Partial:item-prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
     {% for det in form.detalles %}
-        <tr class="item" divdata="item_{{loop.index-1}}">
-            <td class="ordTd"></td>
-            <td class="prodTd">
-                {{ form_widget(det.producto,
-                    {'attr':
-                        {'style':'width:80%',
-                        'url':path('get_lista_productos'),
-                        'url_autocomplete' : path('get_autocomplete_productos'),
-                        'url_datos' : path('get_datos_venta_producto'),
-                        'url_list' : path('producto_list_datatables'),
-                        'fnc':'openModalProducto',
-                        'mtitle':'Seleccionar Producto'
-                        }
-                    })
-                }}
-                <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
-                {% if det.textoComodin is defined %}
-                    {% set display = det.vars.data.textoComodin ? ''  : 'display:none' %}
-                    {{ form_widget(det.textoComodin, {'attr': {'class':'largeinput', 'style': display }}) }}
-                {% endif %}
-            </td>
-            <td class="cantTd">
-                {{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'0'} }) }}
-                <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
-                            </td>
-            <td class="precTd alignright">
-                <span>0</span>
-                {{ form_widget(det.precio) }}  {{ form_widget(det.alicuota) }}
-            </td>
-            <td class="itmSubtotalTd alignright">0</td>
-            <td class="delTd" style="text-align:center;"></td>
-        </tr>
+
+        {% include 'VentasBundle:Partial:item-prototype.html.twig' with {'item': det} %}
+
+        
     {% endfor %}
     </tbody>
 

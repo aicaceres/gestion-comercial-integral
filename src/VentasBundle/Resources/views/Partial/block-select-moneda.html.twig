@@ -1,0 +1,17 @@
+<div class="selectorMoneda">
+    <label>MONEDA:
+      <small>
+        {% if entity.moneda.cotizacion > 1 %}
+          {{ 'TIPO DE CAMBIO: ' ~ entity.moneda.cotizacion }}
+        {% endif %}
+      </small>
+    </label>
+    {{ form_widget(form.moneda,
+        {'attr':
+            { 'style':'width:80%',
+              'class':'ventasbundle_moneda',
+              'url_datos': path('get_datos_moneda')
+            }
+        })
+    }}
+</div>

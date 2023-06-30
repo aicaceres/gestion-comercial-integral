@@ -31,7 +31,7 @@ class ProductoRepository extends EntityRepository {
 
     public function findBajoMinimo($id,$dep){
        $query = $this->_em->createQueryBuilder('p')
-                ->select(" p.codigo,p.nombre,u.nombre unidadMedida,pr.nombre proveedor, r.nombre rubro, CASE WHEN (s.stockMinimo is not null) THEN s.stockMinimo ELSE p.stockMinimo END stockMinimo, s.cantidad stockActual  ")
+                ->select(" p.codigo,p.nombre,u.nombre unidadMedida,pr.nombre proveedor, r.nombre rubro, CASE WHEN (s.stockMinimo is not null) THEN s.stockMinimo ELSE p.stockMinimo END stockMinimo, s.cantidad stockActual, p.costo  ")
                 ->from('AppBundle\Entity\Producto', 'p')
                 ->innerJoin('p.stock', 's')
                 ->innerJoin('s.deposito','d')
@@ -39,14 +39,8 @@ class ProductoRepository extends EntityRepository {
                 ->leftJoin('p.unidadMedida', 'u')
                 ->leftJoin('p.proveedor', 'pr')
                 ->where('d.id='.$dep)
+                ->andWhere('p.comodin=0')
                ->andWhere('CASE WHEN (s.stockMinimo is not null) THEN s.stockMinimo ELSE p.stockMinimo END >= s.cantidad');
-
-       /*$query = $this->_em->createQueryBuilder('s')
-                ->select('s')
-                ->from('AppBundle\Entity\Stock', 's')
-                ->leftJoin('s.producto', 'p')
-                ->innerJoin('s.deposito','d')
-                ->andWhere('d.id='.$dep);  */
         if($id){
             $query->innerJoin('p.proveedor', 'pv')
                     ->andWhere('pv.id='.$id  );
@@ -174,12 +168,6 @@ class ProductoRepository extends EntityRepository {
         $countQuery->leftJoin('e.precios', 'p')
                    ->leftJoin('p.precioLista','l')  ;
 
-        if ($listaprecio) {
-            $searchQuery = 'l.id=' . $listaprecio;
-            $query->andWhere($searchQuery);
-            $countQuery->andWhere($searchQuery);
-        }
-
         // Other conditions than the ones sent by the Ajax call ?
         if ($otherConditions === null)
         {
@@ -194,6 +182,13 @@ class ProductoRepository extends EntityRepository {
             $query->where($otherConditions);
             $countQuery->where($otherConditions);
         }
+
+        if ($listaprecio) {
+            $searchQuery = 'l.id=' . $listaprecio;
+            $query->andWhere($searchQuery);
+            $countQuery->andWhere($searchQuery);
+        }
+
 
         if( $search['value'] ){
             $searchItem = trim($search['value']);
@@ -233,7 +228,6 @@ class ProductoRepository extends EntityRepository {
                 }
             }
         }
-
         // Execute
         $results = $query->getQuery()->getResult();
         $countResult = $countQuery->getQuery()->getSingleScalarResult();
@@ -269,11 +263,11 @@ class ProductoRepository extends EntityRepository {
                 ->from('AppBundle\Entity\Producto', 'p');
 
         // Create inner joins
-        $query->innerJoin('p.proveedor', 'pr')
-              ->innerJoin('p.rubro', 'r');
+        $query->leftJoin('p.proveedor', 'pr')
+              ->leftJoin('p.rubro', 'r');
 
-        $countQuery->innerJoin('p.proveedor', 'pr')
-                   ->innerJoin('p.rubro', 'r') ;
+        $countQuery->leftJoin('p.proveedor', 'pr')
+                   ->leftJoin('p.rubro', 'r') ;
 
         // Other conditions than the ones sent by the Ajax call ?
 /*        if ($otherConditions === null) {

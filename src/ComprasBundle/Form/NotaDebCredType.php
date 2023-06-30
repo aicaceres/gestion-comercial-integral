@@ -79,10 +79,11 @@ class NotaDebCredType extends AbstractType {
                     'query_builder' => function(EntityRepository $repository) {
                         return $qb = $repository->createQueryBuilder('c')
                                 ->where('c.activo=1')
-                                ->andWhere('c.valor like :param1')
-                                ->setParameter('param1', '%DEB%')
-                                ->orWhere('c.valor like :param2')
-                                ->setParameter('param2', '%CRE%')
+                                ->andWhere('c.visibleCompras=1')
+                                // ->andWhere('c.valor like :param1')
+                                // ->setParameter('param1', '%DEB%')
+                                // ->orWhere('c.valor like :param2')
+                                // ->setParameter('param2', '%CRE%')
                                 ->orderBy('c.codigo');
                     }
                 ))

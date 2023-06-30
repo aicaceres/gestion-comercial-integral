@@ -1497,7 +1497,7 @@ a.btn_pdf { background-position: -190px -227px; }
 
 a.btn_marker { background-position: -10px -262px; }
 a.btn_sign { background-position: -47px -262px; }
-a.btn_note { background-position: -82px -262px; }
+a.btn_note2 { background-position: -82px -262px; }
 a.btn_cut { background-position: -119px -262px; }
 a.btn_pencil { background-position: -154px -262px; }
 a.btn_paint { background-position: -190px -262px; }
@@ -1546,8 +1546,8 @@ a.btn_table { background-position: -82px -480px; }
 	font-weight: bold; padding: 7px 10px; border: 1px solid #ccc; background: #eee url(../images/buttons.png) repeat-x top left; color: #333;
 	-moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; cursor: pointer; opacity: 0.8;
 }
-.stdbtn:hover { text-decoration: none; opacity: 1; }
-.stdbtn:focus { text-decoration: none; opacity: 1; }
+.stdbtn:hover { text-decoration: none; opacity: 1; color: white !important}
+.stdbtn:focus { text-decoration: none; opacity: 1; color: white !important}
 
 .btn_yellow { background-position: 0 -38px; border-color: #ebb205; color: #ae510d; }
 .btn_blue { background-position: 0 -76px; border-color: #0282ce; color: #fff; }
@@ -2078,6 +2078,27 @@ form select.width10 { min-width: 130px !important; }
 .sortlist > li div.details p:last-child { margin-bottom: 0; }
 
 /******PERSONALIZADOS ********/
+.input-hidden{
+  box-shadow: none !important;
+  border: none !important;
+  background-color: transparent !important;
+  font-weight: bold !important;
+  text-align: right !important;
+  padding: 0 !important;
+  color: #333 !important;
+  font-size: 11px;
+}
+.cuitinvalido{
+  color: orangered;
+}
+
+  /* Estilo para focus */
+  .divEdicion select:focus, .divEdicion input:focus, .divEdicion button:focus, .divEdicion a:focus, .divEdicion .select2-container *:focus, #popup_prompt, a:focus{
+      color:blue ;
+      font-weight:bold ;
+      background-color: gainsboro;
+  }
+
 #ventasxcobrar tbody tr td:focus,td.operacion a:focus,.paginate_button:focus,
 .selectedline td, td a:hover {
     color:red !important;
@@ -2234,6 +2255,7 @@ a.btnaction.btn_note { background-position:-50px -122px;}
 a.btnaction.btn_print,a.btnaction.btn_print2,a.btnaction.btn_printcomp { background-position:-193px -410px;}
 a.btnaction.btn_truck { background-position: -195px -481px; }
 a.btnaction.btn_folder { background-position: -158px -86px; }
+a.btnaction.btn_note2 { background-position: -86px -266px; }
 
 .divEdicion{ padding: 10px 15px 0; }
 .stdtable.noaction tbody tr.item td { padding: 0 10px;}

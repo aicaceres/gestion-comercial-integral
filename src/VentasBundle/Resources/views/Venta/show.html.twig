@@ -59,8 +59,15 @@
         </div>
     </fieldset>
     <fieldset>
-    <div class="datos-cliente" style="display:inline-block; width:100%; vertical-align: top;">
+    {% if entity.nombreCliente is null %}
+      <div class="datos-cliente" style="display:inline-block; width:100%; vertical-align: top;">
         {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+      </div>
+    {% else %}
+      <div class="datos-cf">
+          <input type="text" disabled="disabled" value="{{ entity.nombreCliente}}">
+      </div>
+      {% endif %}
     </fieldset>
     <fieldset>
             <div style="display:inline-block; width: 35%;">

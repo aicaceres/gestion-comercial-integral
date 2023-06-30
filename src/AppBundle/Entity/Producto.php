@@ -76,12 +76,12 @@ class Producto
     protected $proveedor;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Precio", mappedBy="producto",cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Precio", mappedBy="producto",cascade={"persist"}, orphanRemoval=true)
      */
     protected $precios;
 
     /**
-     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Stock", mappedBy="producto",cascade={"persist"})
+     * @ORM\OneToMany(targetEntity="AppBundle\Entity\Stock", mappedBy="producto",cascade={"persist"}, orphanRemoval=true)
      */
     protected $stock;
 
@@ -774,6 +774,12 @@ class Producto
             }
         }
         return $precio;
+    }
+    public function getPrecioContadoByLista($lista,$dtoContado,$iva)
+    {
+
+      $precio = $iva ? $this->getPrecioConIvaByLista($lista) : $this->getPrecioByLista($lista);
+      return round( $precio * ( 1 + floatval($dtoContado) /100 ),3);
     }
 
     /**

@@ -52,16 +52,16 @@
                             <td height="20px" vertical-align="middle" padding-left="5px">{{ item[1] }}</td>
                         {% endif %}
                         <td height="20px" vertical-align="middle" padding-left="5px">
-                            {% if filtro[0] %} {{ item[1] }} {% else %} {{ item[2] }} {% endif %}
+                            {{ filtro[0] ? item[1] : item[2] }}
                         </td>
                         <td height="20px" vertical-align="middle" padding-left="5px">
-                            {% if filtro[0] %} {{ item[2] }} {% else %} {{ item[3] }} {% endif %}
+                            {{ filtro[0] ? item[2] : item[3] }}
                         </td>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">
-                            {% if filtro[0] %} {{ item[3] }} {% else %} {{ item[4] }} {% endif %}
+                            {{ filtro[0] ? item[3] : item[4] }}
                         </td>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">
-                            {% if filtro[0] %} {{ item[4] }} {% else %} {{ item[5] }} {% endif %}
+                            {{ filtro[0] ? item[4] : item[5] }}
                         </td>
                     </tr>
                 {% endfor %}

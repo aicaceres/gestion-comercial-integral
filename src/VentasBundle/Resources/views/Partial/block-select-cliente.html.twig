@@ -1,0 +1,14 @@
+<div class="selectorCliente" data-categiva="{{cliente.categoriaIva}}">
+
+  <label> DATOS DEL CLIENTE: </label>
+  <select id="widgetCliente" style="width:90%"
+          name="ventasbundle_cliente"
+          data-urlselect = "{{ path('get_autocomplete_clientes') }} "
+          data-urldatos = "{{ path('get_datos_venta_cliente') }}"
+  >
+
+      <option value="{{cliente.id}}" selected="selected">{{cliente}}</option>
+
+  </select>
+
+</div>

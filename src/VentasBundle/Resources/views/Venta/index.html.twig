@@ -58,7 +58,7 @@
             <tr>
                 <td class="alignright">{{entity.nroOperacion}}</td>
                 <td><span class="hidden">{{ entity.fechaVenta|date('YmdHi') }}</span>{{ entity.fechaVenta|date('d-m-Y H:i') }}</td>
-                <td>{{ entity.cliente }}</td>
+                <td>{{ entity.cliente }}{{ entity.nombreCliente ? ('<br>' ~ entity.nombreCliente) |raw : '' }}</td>
                 <td>{{ entity.formaPago }}</td>
                 <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span> {{ entity.montoTotal|number_format(3,',','.') }}</td>
                 <td class="estado">{{ entity.estado }}</td>

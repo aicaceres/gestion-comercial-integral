@@ -1,0 +1,15 @@
+<div class="selectorComprobanteAsociado">
+
+  <label> Comprobante Asociado: </label>
+  <select id="ventasbundle_notadebcred_comprobanteAsociado" style="width:90%"
+          name="ventasbundle_notadebcred_comprobanteAsociado"
+          data-urlselect = "{{ path('get_autocomplete_facturas') }}"
+          data-urlitems = "{{ path('get_items_comprobante') }}"
+          data-urltiposvalidos = "{{  path('get_tipos_comprobante_valido') }}"
+  >
+
+      <option value="{{entity.comprobanteAsociado}}" selected="selected">{{entity.comprobanteAsociado}}</option>
+
+  </select>
+
+</div>

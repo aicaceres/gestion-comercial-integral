@@ -11,19 +11,27 @@
 
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos' : 'Alta de Nuevo Pago' }} &nbsp;&nbsp;#{{ '%04d'|format(entity.prefijoNro) ~ '-' ~ '%08d'|format(entity.pagoNro) }}
+<h1 id="popup_title" style="margin-bottom:10px">{{ (entity.id) ? 'Editar datos' : 'Alta de Nuevo Pago' }} &nbsp;&nbsp;#{{ '%04d'|format(entity.prefijoNro) ~ '-' ~ '%08d'|format(entity.pagoNro) }}
         <span class="floatright fechahora">
             {{entity.fecha|date('d/m/Y')}}
             <span class="js-hora"> {{entity.fecha|date('H:i:s')}}</span> &nbsp;| &nbsp; {{app.user.username}} </span>
 </h1>
 {% include "AppBundle::notificacion.html.twig" %}
-    <div class="divForm divEdicion">
+    <div class="divForm">
         {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_pagocliente'}}) }}
 
         <fieldset class="fields" >
-            {% include "VentasBundle:Partial:block-cliente.html.twig" %}
+            {# {% include "VentasBundle:Partial:block-cliente.html.twig" %} #}
+          <div class="selectorCliente">
+            <label> CLIENTE: </label>
+            <input value="{{entity.cliente.nombre}}" disabled style="width:90%"/>
+          </div>
 
-            {% include "VentasBundle:Partial:block-moneda.html.twig" %}
+            {# {% include "VentasBundle:Partial:block-moneda.html.twig" %} #}
+
+          <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
+              {% include "VentasBundle:Partial:block-select-moneda.html.twig" %}
+          </div>
 
             <div style="display: inline-block; width: 20%">
                 {{ form_label(form.fecha) }}
@@ -31,9 +39,7 @@
             </div>
         </fieldset>
         <fieldset >
-            <div class="datos-cliente" >
-                {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
-            </div>
+            {% include "VentasBundle:CobroVenta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
         </fieldset>
         <fieldset class="fields" >
             <div style="display: inline-block; width: 55%">
@@ -126,6 +132,7 @@
 </div>
 {% endblock %}
 {% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetCliente.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {

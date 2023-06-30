@@ -1,16 +1,28 @@
 <div class="notifmsg info png_bg" style="margin-top:50px; background-position:10px 7px !important">
-    <div style="padding: 5px 10px 5px 36px">
-        <small>
-        Ctrl+Enter = Abrir búsqueda <strong class="divnotif">|</strong>
-        Ctrl+Alt+C = Buscar Cliente <strong class="divnotif">|</strong>
-        Ctrl+Alt+F = Buscar Forma de Pago <strong class="divnotif">|</strong>
-        {% if 'cobro' in app.request.attributes.get('_route') %}
+  <div style="padding: 5px 10px 5px 36px">
+    <small>
+      {% if 'cliente' in shortcuts %}
+        Ctrl+Alt+C = Cliente <strong class="divnotif">|</strong>
+      {% endif %}
+
+      {% if 'formapago' in shortcuts %}
+        Ctrl+Alt+F = Forma de Pago <strong class="divnotif">|</strong>
+      {% endif %}
+
+      {% if 'detalle' in shortcuts %}
         Ctrl+Alt+D = Ver Detalle de Items <strong class="divnotif">|</strong>
-        + = Agregar pago
-        {% else %}
-        + = Agregar producto
-        {% endif %}
-        <strong class="divnotif">|</strong>
-        Ctrl+Alt+G = Guardar  </small>
-    </div>
+      {% endif %}
+
+      {% if '+pago' in shortcuts %}
+        Ctrl+Alt+P = Agregar pago <strong class="divnotif">|</strong>
+      {% endif %}
+
+      {% if '+producto' in shortcuts %}
+        + = Agregar producto <strong class="divnotif">|</strong>
+      {% endif %}
+
+      Ctrl+Alt+G = Guardar
+
+    </small>
+  </div>
 </div>

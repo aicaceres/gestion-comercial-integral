@@ -176,7 +176,7 @@ jQuery(function ($) {
             $(".detalle-venta").toggle();
         });
 
-        $(document).on('keydown', (e) => { detectarControles(e); })
+        $(document).on('keydown', (e) => {detectarControles(e); })
 
         $('#ventasbundle_cobro_nombreCliente,#ventasbundle_cobro_direccionCliente').css('width', '95%')
 
@@ -352,7 +352,6 @@ jQuery(function ($) {
             return false;
         }
 
-        //if( '{{ entity.cliente.categoriaIva }}' == 'C' && '{{ entity.moneda }}'=='PESOS' && '{{ entity.formaPago.contado }}' ){
         esCategoriaC = '{{ entity.cliente.categoriaIva }}' == 'C'
         esMonedaPesos = '{{ entity.moneda }}'=='PESOS'
         cantidadItemsTicket = $('.detalle-venta tbody tr').length <= '{{ cantidadItemsParaFactura }}'
@@ -464,9 +463,6 @@ jQuery(function ($) {
 
             $('#ventasbundle_cobro').submit();
         }
-
-
-
     })
 });
 
@@ -627,9 +623,9 @@ function setBotonGuardar(valid){
     }
 }
 
-function actualizaTotales(){
+{# function actualizaTotales(){
 
-}
+} #}
 
 function openModal(obj){
     const url = obj.attr('url');
@@ -776,7 +772,6 @@ function detectarControles(e) {
         if( $('#linkAdd').is(':visible') )
             $('#linkAdd').click();
     }
-
 }
 
 /*function actualizaTotales(){

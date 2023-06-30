@@ -16,6 +16,7 @@ use AppBundle\Entity\StockAjuste;
 use AppBundle\Entity\StockAjusteDetalle;
 use AppBundle\Form\StockAjusteDetalleType;
 use AppBundle\Form\StockAjusteType;
+use ComprasBundle\Entity\LoteProducto;
 
 /**
  * @Route("/stock")
@@ -132,6 +133,41 @@ class StockController extends Controller
         if ($editForm->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
+
+                $csv = $editForm['csv']->getData();
+                if($csv){
+                  // Open the file
+                  if (($handle = fopen($csv->getPathname(), "r")) !== false) {
+                      // Read and process the lines.
+                      while (($data = fgetcsv($handle,0,';')) !== false) {
+                        $detalle = new StockAjusteDetalle();
+                        $letra = strtoupper(trim($data[0]));
+                        if( in_array($letra , array('I','E')) ){
+                          $signo = $letra === 'I' ? '+' : '-';
+                        }else{
+                          throw new \Exception("Error Processing Request");
+                        }
+                        $detalle->setSigno($signo);
+                        $producto = $em->getRepository('AppBundle:Producto')->findOneByCodigo(trim($data[1]));
+                        $detalle->setProducto($producto);
+                        $detalle->setCantidad( floatval($data[2]) );
+                        $detalle->setMotivo( $data[3]);
+                        if( $data[4] ){
+                          $lote = $em->getRepository('ComprasBundle:LoteProducto')->findOneByNroLote($data[4]);
+                          if(!$lote && isset($data[5])){
+                            $vto = new \DateTime($data[5]);
+                            $lote = new LoteProducto();
+                            $lote->setNroLote($data[4]);
+                            $lote->setFechaVencimiento($vto);
+                            $lote->setProducto($producto);
+                          }
+                          $detalle->addLote($lote);
+                        }
+                        $entity->addDetalle($detalle);
+                      }
+                      fclose($handle);
+                  }
+                }
                 $em->persist($entity);
                 $em->flush();
                 if ($registrarAjuste) {
@@ -169,18 +205,26 @@ class StockController extends Controller
                         $movim->setCantidad($cantidad);
                         $movim->setDeposito($deposito);
                         $em->persist($movim);
+                        $em->flush();
                     }
                     $entity->setProcesado(1);
                     $em->flush();
                 }
 
                 $em->getConnection()->commit();
-                return $this->redirectToRoute('stock_ajuste');
+
+                // si se cargo desde un archivo volver a la edicion
+                if( !$csv ){
+                  return $this->redirectToRoute('stock_ajuste');
+                }
+
             } catch (\Exception $ex) {
-                $this->get('session')->getFlashBag()->add('error', $ex->getMessage());
+                $msg = $csv ? "No se han podido cargar los datos desde el archivo. Controle que el formato sea correcto." : $ex->getMessage();
+                $this->get('session')->getFlashBag()->add('error', $msg );
                 $em->getConnection()->rollback();
             }
         }
+
         return $this->render('AppBundle:Stock:ajusteEdit.html.twig', array(
             'entity'      => $entity,
             'form'   => $editForm->createView()
@@ -202,6 +246,19 @@ class StockController extends Controller
         $form->handleRequest($request);
 
         if ($form->isValid()) {
+
+$file = $form['csv']->getData();
+
+// Open the file
+        if (($handle = fopen($csv->getPathname(), "r")) !== false) {
+            // Read and process the lines.
+            while (($data = fgetcsv($handle)) !== false) {
+var_dump($data);
+            }
+            fclose($handle);
+            //$em->flush();
+        }
+die;
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
             try{

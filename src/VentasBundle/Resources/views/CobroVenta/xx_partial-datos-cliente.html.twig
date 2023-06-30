@@ -1,0 +1,23 @@
+<div class="datos-cliente datos-cf">
+{% if item.consumidorFinal %}
+
+    
+
+{% else %}
+
+    <label> CUIT: </label>
+    <span class="cuitcliente"> {{item.cuit}} </span>
+
+    <label> IVA: </label>
+      {{ item.categoriaIva ? item.categoriaIva.descripcion|upper : "No definido" }}
+
+    <label> RENTAS: </label>
+    {{ item.categoriaRentas ? item.categoriaRentas.nombre|upper : "No definido" }}
+
+    {% if item.direccion is defined %}
+      <label> DIRECCIÓN: </label> {{item.domicilioCompleto|upper}}
+    {% endif %}
+
+{% endif %}
+</div>
+

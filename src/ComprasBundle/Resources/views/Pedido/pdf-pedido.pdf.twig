@@ -9,11 +9,11 @@
                                 <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
                             </td>
                         </tr>
-                    </table>                                        
-                    <div border.color="#F5C98F" height="2px" ></div>   
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
                     <div height="5px"></div>
-                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
-                </div>                      
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
             </header>
             <footer>
                 <div height="30px" width="100%" text-align="right">
@@ -23,31 +23,31 @@
         </placeholders>
         {% set recibido=false %}
     {% if entity.estado in ['RECIBIDO','FACTURADO']  %}{% set recibido=true %}{% endif %}
-    <h2 text-align="center"> PEDIDO DE COMPRAS </h2>     
+    <h2 text-align="center"> PEDIDO DE COMPRAS </h2>
     <table font-size="9px">
         <tr>
             <td border.type="none" height="20px" vertical-align="middle"><strong>Fecha de Pedido:</strong> {{ entity.fechaPedido|date('d-m-Y') }}</td>
             <td border.type="none" height="20px" vertical-align="middle"><strong>Proveedor: </strong>{{entity.proveedor}}</td>
-        </tr> 
+        </tr>
         <tr>
             <td border.type="none" height="20px" vertical-align="middle"><strong>PEDIDO Nº</strong> {{entity.nroPedido}}</td>
             <td border.type="none" height="20px" vertical-align="middle"><strong>Depósito:</strong> {{entity.deposito}} </td>
-        </tr> 
+        </tr>
         <tr>
-            <td border.type="none" height="20px" vertical-align="middle"> <strong>Estado:</strong> {{entity.estado}} </td>       
+            <td border.type="none" height="20px" vertical-align="middle"> <strong>Estado:</strong> {{entity.estado}} </td>
             <td border.type="none" height="20px" vertical-align="middle">{% if recibido %} <strong>Recibido el:</strong> {{entity.fechaEntrega|date('d/m/Y')}} {% endif %}</td>
-        </tr> 
+        </tr>
         {% if recibido %}
         <tr>
-            <td border.type="none" height="20px" vertical-align="middle"> <strong>Calificación:</strong> {{entity.calificacionProveedor}} </td>       
+            <td border.type="none" height="20px" vertical-align="middle"> <strong>Calificación:</strong> {{entity.calificacionProveedor}} </td>
             <td border.type="none" height="20px" vertical-align="middle"> <strong>Observaciones:</strong> {{entity.obsRecepcion}} </td>
-        </tr> 
+        </tr>
         {% endif %}
     </table>
 
     <div height="20px"></div>
-    
-    <table font-size="9px">   
+
+    <table font-size="8px">
         <tr>
             <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="0.8 cm"><strong>#</strong></td>
             <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px"><strong>Producto</strong></td>
@@ -62,21 +62,21 @@
                 <td border.color="black" height="20px" vertical-align="middle" padding-left="10px">{{det.producto.codigoNombre}}
                     {% if(det.lotes|length >0) %}
                                 [ Lotes:
-                                {% for lote in det.lotes %}                            
+                                {% for lote in det.lotes %}
                                     {{lote.__toString()}}
                                     {% if not loop.last%} / {% endif%}
                                 {% endfor %}
                                 ]
-                            {% endif %}  
+                            {% endif %}
                 </td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if 'x' in det.cantidadTxt %} {{det.cantidadTxt}} {%endif%}</td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.cantidadTotal|number_format(3,'.',',')~' '~ det.producto.unidadMedida}}</td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if entity.estado=='RECIBIDO' and ('x' in det.entregadoItemTxt) and det.entregado>0%} {{det.entregadoItemTxt}}{%endif%}</td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if entity.estado=='RECIBIDO' %} {{ det.entregadoItemTotalTxt }}{%endif%}</td>
             </tr>
-            {% endfor %}   
+            {% endfor %}
         {% endif %}
-    </table>   
+    </table>
 
 </dynamic-page>
 </pdf>

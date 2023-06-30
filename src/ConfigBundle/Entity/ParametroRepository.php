@@ -99,5 +99,33 @@ class ParametroRepository extends EntityRepository {
         $query->andWhere($consulta);
         return $query->getQuery()->getResult();
     }
-   
+
+    public function filterFormaPagoByTerm($key, $cf) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("c")
+                ->from('ConfigBundle:FormaPago', 'c')
+                ->where('c.nombre LIKE :key')
+                ->setParameter('key', '%' . $key . '%')
+                ->orderBy('c.id');
+        if($cf){
+          // para consumidor final no puede ser tipo ctacte
+          $query->andWhere('c.cuentaCorriente = 0');
+        }
+        return $query->getQuery()->getArrayResult();
+    }
+
+    public function filterByTerm($key, $agrId) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("p.id,p.nombre text")
+                ->from('ConfigBundle:Parametro', 'p')
+                ->where('p.nombre LIKE :key')
+                ->andWhere('p.activo=1')
+                ->andWhere('p.agrupador = :agrId')
+                ->orderBy('p.id')
+                ->setParameter('key', '%' . $key . '%')
+                ->setParameter('agrId', $agrId ) ;
+
+        return $query->getQuery()->getArrayResult();
+    }
+
 }

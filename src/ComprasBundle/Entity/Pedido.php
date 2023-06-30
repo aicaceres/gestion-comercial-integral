@@ -44,8 +44,27 @@ class Pedido
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
+     * Estados: NUEVO - PENDIENTE - ENTREGADO - CANCELADO
      */
     protected $estado;
+
+    /**
+     * @var string $descuentos
+     * @ORM\Column(name="descuentos", type="string", nullable=true)
+     */
+    protected $descuentos;
+
+    /**
+     * @var integer $montoDescuento
+     * @ORM\Column(name="monto_descuento", type="decimal", precision=15, scale=3, nullable=true )
+     */
+    protected $montoDescuento;
+
+    /**
+     * @var integer $montoIva
+     * @ORM\Column(name="monto_iva", type="decimal", precision=15, scale=3, nullable=true )
+     */
+    protected $montoIva;
 
      /**
      *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pedidos")
@@ -110,9 +129,6 @@ class Pedido
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
     private $updatedBy;
-/**
- * Estados: NUEVO - PENDIENTE - ENTREGADO - CANCELADO
- */
     /**
      * Constructor
      */
@@ -121,6 +137,9 @@ class Pedido
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->fechaPedido = new \DateTime();
         $this->estado = 'NUEVO';
+        $this->descuentos = '';
+        $this->montoDescuento = 0;
+        $this->montoIva = 0;
     }
 
     public function __clone() {
@@ -259,6 +278,72 @@ class Pedido
     {
         return $this->estado;
     }
+
+    /**
+     * Set descuentos
+     *
+     * @param string $descuentos
+     * @return Pedido
+     */
+    public function setDescuentos($descuentos)
+    {
+        $this->descuentos = $descuentos;
+
+        return $this;
+    }
+
+    /**
+     * Get descuentos
+     *
+     * @return string
+     */
+    public function getDescuentos()
+    {
+        return $this->descuentos;
+    }
+
+    /**
+     * Set montoDescuento
+     *
+     * @param string $montoDescuento
+     * @return PedidoDetalle
+     */
+    public function setMontoDescuento($montoDescuento) {
+        $this->montoDescuento = $montoDescuento;
+
+        return $this;
+    }
+
+    /**
+     * Get montoDescuento
+     *
+     * @return string
+     */
+    public function getMontoDescuento() {
+        return $this->montoDescuento;
+    }
+
+    /**
+     * Set montoIva
+     *
+     * @param string $montoIva
+     * @return PedidoDetalle
+     */
+    public function setMontoIva($montoIva) {
+        $this->montoIva = $montoIva;
+
+        return $this;
+    }
+
+    /**
+     * Get montoIva
+     *
+     * @return string
+     */
+    public function getMontoIva() {
+        return $this->montoIva;
+    }
+
 
     /**
      * Set created
@@ -457,7 +542,20 @@ class Pedido
         return $tot;
     }
 
+    public function getDescuentosTxt(){
+      $descuentos = explode(',', $this->getDescuentos());
+      $txt = '';
+      if($descuentos){
+        foreach($descuentos as $desc){
+          $txt = ($txt ? $txt.' + ' : '') . $desc . '%';
+        }
+      }
+      return $txt === '%' ? '0.00%' : $txt;
+    }
 
+    public function getMontoTotal(){
+      return $this->getCostoTotal() - $this->getMontoDescuento() + $this->getMontoIva();
+    }
 
  /*   public function getPendientes(){
         $cant = 0;

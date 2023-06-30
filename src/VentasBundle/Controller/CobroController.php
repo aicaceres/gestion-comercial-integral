@@ -37,7 +37,6 @@ class CobroController extends Controller
     return $this->render('VentasBundle:Cobro:prueba.html.twig');
   }
 
-
   /**
    * @Route("/", name="ventas_cobro")
    * @Method("GET")
@@ -86,6 +85,72 @@ class CobroController extends Controller
     $session = $this->get('session');
     $unidneg_id = $session->get('unidneg_id');
     UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
+
+    $em = $this->getDoctrine()->getManager();
+
+    $referer = $request->headers->get('referer');
+    if( $this->checkCajaAbierta($em)){
+      return $this->redirect($referer);
+    }
+
+    $entity = new Cobro();
+
+    $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+    if ($param) {
+      // ultimo nro de operacion de cobro
+      $entity->setNroOperacion($param->getUltimoNroOperacionCobro() + 1);
+      $cantidadItemsParaFactura = $param->getCantidadItemsParaFactura();
+    }else{
+      $this->addFlash('error','No se ha podido acceder a la parametrización. Intente nuevamente o contacte a servicio técnico.');
+      return $this->redirect($referer);
+    }
+
+    $venta = $em->getRepository('VentasBundle:Venta')->find($id);
+    if (!$venta) {
+      $this->addFlash('error','No se encuentra este registro de venta.');
+      return $this->redirect($referer);
+    }
+
+    $entity->setVenta($venta);
+    $entity->setCliente($venta->getCliente());
+    $entity->setNombreCliente( $venta->getNombreCliente() );
+    $entity->setMoneda($venta->getMoneda());
+    $entity->setFormaPago($venta->getFormaPago());
+
+    $form = $this->createCreateForm($entity);
+    return $this->render('VentasBundle:CobroVenta:form-facturar-venta.html.twig', array(
+      'entity' => $entity,
+      'form' => $form->createView(),
+      'cantidadItemsParaFactura' => $cantidadItemsParaFactura,
+    ));
+
+  }
+
+  /**
+   * Creates a form to create a Venta entity.
+   * @param Cobro $entity The entity
+   * @return \Symfony\Component\Form\Form The form
+   */
+  private function createCreateForm(Cobro $entity)
+  {
+    $form = $this->createForm(new CobroType(), $entity, array(
+      'action' => $this->generateUrl('ventas_cobro_create'),
+      'method' => 'POST',
+    ));
+    return $form;
+  }
+
+/**+++++++++++++++++++++++++++++++++++++++++++++++++++++++++  */
+  /**
+   * @Route("/xfacturarVenta/{id}", name="xventas_cobro_facturar")
+   * @Method("GET")
+   * @Template()
+   */
+  public function xfacturarVentaAction(Request $request, $id)
+  {
+    $session = $this->get('session');
+    $unidneg_id = $session->get('unidneg_id');
+    UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
     $em = $this->getDoctrine()->getManager();
     // Verificar si la caja está abierta CAJA=1
     $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
@@ -108,6 +173,7 @@ class CobroController extends Controller
     }
     $entity->setVenta($venta);
     $entity->setCliente($venta->getCliente());
+    if( $venta->getNombreCliente() ) $entity->setNombreCliente($venta->getNombreCliente() );
     $entity->setMoneda($venta->getMoneda());
     $entity->setFormaPago($venta->getFormaPago());
     //$facturaElectronica = new FacturaElectronica();
@@ -125,7 +191,7 @@ class CobroController extends Controller
         $facturaElectronica->setTipoComprobante($tipoFactura);*/
     //$entity->setFacturaElectronica($facturaElectronica);
 
-    $form = $this->createCreateForm($entity, 'new');
+    $form = $this->createCreateForm($entity,'new');
     return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
       'entity' => $entity,
       'form' => $form->createView(),
@@ -142,7 +208,130 @@ class CobroController extends Controller
   public function createAction(Request $request)
   {
     $datos = $request->get('ventasbundle_cobro');
-    $nroTicketB = $datos['nroTicket'];
+    $ventaId = $request->get('ventasbundle_cobro_venta');
+    $cobroId = $request->get('ventasbundle_cobro_id');
+    $session = $this->get('session');
+    $unidneg_id = $session->get('unidneg_id');
+    UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
+    $em = $this->getDoctrine()->getManager();
+    $response = array('res' => 'OK' ,'msg' => '', 'id'=> null);
+
+    // Verificar si la caja está abierta CAJA=1
+    $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+    if (!$apertura) {
+      $response['res'] = 'ERROR';
+      $response['msg'] = 'La caja está cerrada. Debe realizar la apertura para iniciar cobros';
+      return new JsonResponse($response);
+    }
+
+    $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+
+    if($cobroId){
+      $entity = $em->getRepository('VentasBundle:Cobro')->find($cobroId);
+    }else{
+      $entity = new Cobro();
+      $entity->setFechaCobro(new \DateTime());
+    }
+
+    $form = $this->createCreateForm($entity);
+    $form->handleRequest($request);
+
+    if ($form->isValid()) {
+      $em->getConnection()->beginTransaction();
+      try {
+        $venta = $em->getRepository('VentasBundle:Venta')->find($ventaId);
+        $entity->setVenta($venta);
+        $cliente = $entity->getVenta()->getCliente();
+        $entity->setCliente($cliente);
+        $entity->setMoneda($entity->getVenta()->getMoneda());
+        $entity->setCotizacion($entity->getVenta()->getCotizacion());
+        $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
+        if( $entity->getVenta()->getFormaPago() !== $formapago ){
+          $venta->setFormaPago( $formapago );
+          $venta->setDescuentoRecargo( $formapago->getPorcentajeRecargo() );
+          $em->persist($venta);
+        }
+        $entity->setFormaPago($formapago);
+
+        if($cliente->getConsumidorFinal()){
+          $entity->setNombreCliente( $request->get('ventasbundle_nombreCliente') );
+          $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($request->get('ventasbundle_tipoDocumentoCliente'));
+          $entity->setTipoDocumentoCliente($tipoDoc);
+          $entity->setNroDocumentoCliente($request->get('ventasbundle_nroDocumentoCliente'));
+        }
+
+        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
+        $entity->setUnidadNegocio($unidneg);
+
+        if ($param && !$entity->getNroOperacion()) {
+          // cargar datos parametrizados por defecto
+          $entity->setNroOperacion($param->getUltimoNroOperacionCobro() + 1);
+          $param->setUltimoNroOperacionCobro($entity->getNroOperacion());
+          $em->persist($param);
+        }
+
+        // completar datos de detalles
+        // $saldo = 0;
+        $efectivo = true;
+        if (count($entity->getDetalles()) == 0) {
+          if ($formapago->getTipoPago() === 'CTACTE') {
+            // insertar un detalle para ctacte
+            $detalle = new CobroDetalle();
+            $detalle->setTipoPago('CTACTE');
+            $detalle->setMoneda($entity->getMoneda());
+            $detalle->setImporte($venta->getMontoTotal());
+            $detalle->setCajaApertura($apertura);
+            $entity->addDetalle($detalle);
+            // $saldo = round($impTotal, 2);
+            $efectivo = false;
+          }
+        } else {
+          foreach ($entity->getDetalles() as $detalle) {
+            $detalle->setCajaApertura($apertura);
+            if (!$detalle->getMoneda()) {
+              $detalle->setMoneda($entity->getMoneda());
+            }
+            $tipoPago = $detalle->getTipoPago();
+            if ($tipoPago !== 'CHEQUE') {
+              $detalle->setChequeRecibido(null);
+            }
+            if ($tipoPago !== 'TARJETA') {
+              $detalle->setDatosTarjeta(null);
+            }
+            if ($tipoPago !== 'EFECTIVO') {
+              $efectivo = false;
+            }
+          }
+        }
+
+        $entity->getVenta()->setEstado('FACTURADO');
+        $entity->setEstado('CREADO');
+        $em->persist($entity);
+         $em->flush();
+        $em->getConnection()->commit();
+
+        $response['res'] = 'OK';
+        $response['msg'] = 'El registro del cobro se han guardado correctamente!';
+        $response['id'] = $entity->getId();
+        return new JsonResponse($response);
+
+      } catch (\Exception $ex) {
+        $em->getConnection()->rollback();
+        $response['res'] = 'ERROR';
+        $response['msg'] = $ex->getMessage();
+        return new JsonResponse($response);
+      }
+
+    }
+
+
+die;
+
+
+///////
+
+    // $nroTicketB = $datos['nroTicket'];
+
     $session = $this->get('session');
     $unidneg_id = $session->get('unidneg_id');
     UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
@@ -154,13 +343,15 @@ class CobroController extends Controller
       $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
       return $this->redirect($request->headers->get('referer'));
     }
+    $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+
     $entity = new Cobro();
     $form = $this->createCreateForm($entity, 'create');
     $form->handleRequest($request);
 
     // SACAR SI DESPUES SE HABILITA MODIFICAR CLIENTE, FORMA DE PAGO Y MONEDA
     $entity->setCliente($entity->getVenta()->getCliente());
-    $entity->setFormaPago($entity->getVenta()->getFormaPago());
+    //$entity->setFormaPago($entity->getVenta()->getFormaPago());
     $entity->setMoneda($entity->getVenta()->getMoneda());
 
     ////////////////////////////////
@@ -234,12 +425,12 @@ class CobroController extends Controller
           $impTrib = 0;
           if ($catIva == 'I') {
             $neto = round($impNeto, 2);
-            $iibb = round(($neto * 0.035), 2);
+            $iibb = round(($neto * $this->getParameter('iibb_percent')/100 ), 2);
             $impTrib = $iibb;
             $tributos = array(
               'Id' => 7,
               'BaseImp' => $neto,
-              'Alic' => 3.5,
+              'Alic' => $this->getParameter('iibb_percent'),
               'Importe' => $iibb
             );
           }
@@ -286,7 +477,11 @@ class CobroController extends Controller
         if ($catIva == 'I' || $catIva == 'M') {
           $tipoComprobante = 'FAC-A';
         }
-        if ($efectivo && $catIva == 'C' && $entity->getMoneda()->getCodigoAfip() == 'PES') {
+        $esCategoriaC = $catIva == 'C';
+        $esMonedaPesos = $entity->getMoneda()->getCodigoAfip() == 'PES';
+        $cantidadItemsTicket =  count($entity->getVenta()->getDetalles()) <= $param->getCantidadItemsParaFactura() ;
+
+        if ( $esCategoriaC && $esMonedaPesos && $cantidadItemsTicket) {
           $ptovta = $this->getParameter('ptovta_ifu_ticket');
           $tipoComprobante = 'TICK-B';
         }
@@ -342,8 +537,8 @@ class CobroController extends Controller
         //$entity->setPercIibb($impTrib);
         //$entity->setTotal($impTotal);
         //$entity->setSaldo($impTotal);
-        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
-        $entity->setUnidadNegocio($unidneg);
+        // $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
+        // $entity->setUnidadNegocio($unidneg);
 
         // Guardar datos en factura electronica
         $facturaElectronica->setCobro($entity);
@@ -352,16 +547,15 @@ class CobroController extends Controller
         $em->persist($facturaElectronica);
 
         // set numeracion
-        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
-        if ($param) {
-          // cargar datos parametrizados por defecto
-          $entity->setNroOperacion($param->getUltimoNroOperacionCobro() + 1);
-          $param->setUltimoNroOperacionCobro($entity->getNroOperacion());
-          $em->persist($param);
-        }
+        // if ($param) {
+        //   // cargar datos parametrizados por defecto
+        //   $entity->setNroOperacion($param->getUltimoNroOperacionCobro() + 1);
+        //   $param->setUltimoNroOperacionCobro($entity->getNroOperacion());
+        //   $em->persist($param);
+        // }
 
-        $entity->getVenta()->setEstado('FACTURADO');
-        $entity->setEstado('FINALIZADO');
+        // $entity->getVenta()->setEstado('FACTURADO');
+        // $entity->setEstado('FINALIZADO');
         $em->persist($entity);
         $em->flush();
         $em->getConnection()->commit();
@@ -377,27 +571,54 @@ class CobroController extends Controller
         $em->getConnection()->rollback();
       }
     }
-    $this->addFlash('error', 'invalid');
+    //$this->addFlash('error', 'invalid');
     return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
       'entity' => $entity,
       'form' => $form->createView(),
+      'cantidadItemsParaFactura' => $param->getCantidadItemsParaFactura(),
     ));
   }
 
+
   /**
-   * Creates a form to create a Venta entity.
-   * @param Cobro $entity The entity
-   * @return \Symfony\Component\Form\Form The form
+   * @Route("/{id}/edit", name="ventas_cobro_edit")
+   * @Method("GET")
+   * @Template()
    */
-  private function createCreateForm(Cobro $entity, $type)
+  public function editAction($id)
+  {
+    $session = $this->get('session');
+    $unidneg_id = $session->get('unidneg_id');
+    UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
+
+    $em = $this->getDoctrine()->getManager();
+    $entity = $em->getRepository('VentasBundle:Cobro')->find($id);
+    if (!$entity) {
+      throw $this->createNotFoundException('No se encuentra el Cobro.');
+    }
+    $editForm = $this->createEditForm($entity);
+
+    $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+
+    return $this->render('VentasBundle:CobroVenta:form-facturar-venta.html.twig', array(
+      'entity' => $entity,
+      'form' => $editForm->createView(),
+      'cantidadItemsParaFactura' => $param->getCantidadItemsParaFactura(),
+    ));
+  }
+
+
+  private function createEditForm(Cobro $entity)
   {
     $form = $this->createForm(new CobroType(), $entity, array(
-      'action' => $this->generateUrl('ventas_cobro_create'),
+      'action' => $this->generateUrl('ventas_cobro_create', array('id' => $entity->getVenta()->getId())),
       'method' => 'POST',
-      'attr' => array('type' => $type),
+      'attr' => array('type' => ''),
     ));
     return $form;
   }
+
+
 
   /**
    * @Route("/{id}/showVenta", name="ventas_cobro_showventa")
@@ -459,7 +680,7 @@ class CobroController extends Controller
   /**
    * @Route("/{id}/printCobroVentas.{_format}",
    * defaults = { "_format" = "pdf" },
-   * name="ventas_cobro_print")
+   * name="xventas_cobro_print")
    * @Method("GET")
    */
   public function printCobroVentasAction(Request $request, $id)
@@ -564,7 +785,10 @@ class CobroController extends Controller
         $items[] = array(
           'id' => $row->getProducto()->getId(),
           'text' => $row->getProducto()->getNombre(),
-          'cant' => $row->getCantidad()
+          'cant' => $row->getCantidad(),
+          'comodin' => $row->getTextoComodin(),
+          'precio' => $row->getPrecio(),
+          'alicuota' => $row->getAlicuota()
         );
       }
     }
@@ -572,11 +796,11 @@ class CobroController extends Controller
   }
 
   /**
-   * @Route("/getTiposComprobantaValido", name="get_tipos_comprobante_valido")
+   * @Route("/getTiposComprobanteValido", name="get_tipos_comprobante_valido")
    * @Method("GET")
    *
    */
-  public function getTiposComprobantaValido(Request $request)
+  public function getTiposComprobanteValido(Request $request)
   {
     $id = $request->get('id');
     $em = $this->getDoctrine()->getManager();
@@ -590,6 +814,16 @@ class CobroController extends Controller
       }
     }
     return new JsonResponse($items);
+  }
+
+  private function checkCajaAbierta($em)
+  {
+    $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+    if (!$apertura) {
+      $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+      return true;
+    }
+    return false;
   }
 
 

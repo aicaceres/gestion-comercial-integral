@@ -42,6 +42,12 @@ class AfipComprobante {
      */
     protected $activo = true;
 
+    /**
+     * @var string $visibleCompras
+     * @ORM\Column(name="visible_compras", type="boolean", nullable=true)
+     */
+    protected $visibleCompras = false;
+
     public function __toString() {
         return $this->codigo . ' - ' . $this->nombre;
     }
@@ -106,6 +112,26 @@ class AfipComprobante {
         return $this->activo;
     }
 
+    /**
+     * Set visibleCompras
+     *
+     * @param boolean $visibleCompras
+     * @return AfipComprobante
+     */
+    public function setVisibleCompras($visibleCompras) {
+        $this->visibleCompras = $visibleCompras;
+
+        return $this;
+    }
+
+    /**
+     * Get visibleCompras
+     *
+     * @return boolean
+     */
+    public function getVisibleCompras() {
+        return $this->visibleCompras;
+    }
     /**
      * Set codigo
      *

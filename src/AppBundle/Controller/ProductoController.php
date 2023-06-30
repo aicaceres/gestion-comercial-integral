@@ -27,14 +27,8 @@ class ProductoController extends Controller {
         $provId = $request->get('provId');
         $em = $this->getDoctrine()->getManager();
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
-       /* if ($provId) {
-            $entities = $em->getRepository('AppBundle:Producto')->findByProveedor($provId);
-        }
-        else {
-            $entities = $em->getRepository('AppBundle:Producto')->findAll();
-        }*/
+
         return $this->render('AppBundle:Producto:index.html.twig', array(
-                   // 'entities' => $entities,
                     'proveedores' => $proveedores,
                     'provId' => $provId,
         ));
@@ -689,11 +683,11 @@ class ProductoController extends Controller {
         }else{
             $aux = $em->getRepository('AppBundle:PrecioLista')->findByActivo(1);
             $listas = array();
-            /*foreach($aux as $lista){
-
-            }*/
+            foreach($aux as $lista){
+              array_push( $listas, array('id'=> $lista->getId(), 'nombre' => $lista->getNombre() ) );
+            }
         }
-        return new Response(json_encode($listas));
+        return new JsonResponse($listas);
     }
 
 // STOCK DEL PRODUCTO EN UN DEPOSITO
@@ -794,8 +788,8 @@ class ProductoController extends Controller {
      */
     public function productoListDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();
-        $this->repository = $this->entityManager->getRepository('AppBundle:Producto');
+        $em = $this->getDoctrine()->getManager();
+        $repo = $em->getRepository('AppBundle:Producto');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
             $draw = intval($request->get('draw'));
@@ -829,12 +823,12 @@ class ProductoController extends Controller {
         $otherConditions = "array or whatever is needed";
 
         // Get results from the Repository
-        $results = $this->repository->getListDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $listaprecio);
+        $results = $repo->getListDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $listaprecio);
 
         // Returned objects are of type Town
         $objects = $results["results"];
         // Get total number of objects
-        $total_objects_count = $this->repository->listcount();
+        $total_objects_count = $repo->listcount();
         // Get total number of results
         $selected_objects_count = count($objects);
         // Get total number of filtered data
@@ -881,16 +875,16 @@ class ProductoController extends Controller {
 
                     $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv ));
                 }
+                $codigo =  htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getCodigo()));
                 switch ($column['name']) {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
-                            $responseTemp = "<a class='nombre-producto' data-id='".$producto->getId()."' data-precio='".$precio."' data-alicuota='".$alicuota."' href='javascript:void(0);'>".$name."</a>";
+                            $responseTemp = "<a class='nombre-producto' data-contado='".$precioTemp."' data-id='".$producto->getId()."' data-codigo='".$codigo."' href='javascript:void(0);'>".$name."</a>";
                             break;
                         }
                     case 'codigo': {
-                            $codigo = $producto->getCodigo();
-                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $codigo));
+                            $responseTemp = $codigo;
                             break;
                         }
                     case 'precio': {
@@ -931,8 +925,8 @@ class ProductoController extends Controller {
      */
     public function productoIndexDatatablesAction(Request $request) {
         // Set up required variables
-        $this->entityManager = $this->getDoctrine()->getManager();
-        $this->repository = $this->entityManager->getRepository('AppBundle:Producto');
+        $em = $this->getDoctrine()->getManager();
+        $repo = $em->getRepository('AppBundle:Producto');
         // Get the parameters from DataTable Ajax Call
         if ($request->getMethod() == 'POST') {
             $draw = intval($request->get('draw'));
@@ -962,12 +956,12 @@ class ProductoController extends Controller {
         $unidNeg = $this->get('session')->get('unidneg_id');
 
         // Get results from the Repository
-        $results = $this->repository->getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $provId);
+        $results = $repo->getIndexDTData($start, $length, $orders, $search, $columns, $otherConditions = null, $provId);
 
         // Returned objects are of type Town
         $objects = $results["results"];
         // Get total number of objects
-        $total_objects_count = $this->repository->indexCount();
+        $total_objects_count = $repo->indexCount();
         // Get total number of results
         $selected_objects_count = count($objects);
         // Get total number of filtered data
@@ -1007,6 +1001,8 @@ class ProductoController extends Controller {
                             // However it can happen if left or right joins are used
                             if ($prov !== null) {
                                 $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r"), ' ', $prov->getNombre()));
+                            }else{
+                              $responseTemp = "";
                             }
                             break;
                         }
@@ -1016,6 +1012,8 @@ class ProductoController extends Controller {
                             // However it can happen if left or right joins are used
                             if ($rubro !== null) {
                                 $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r"), ' ', $rubro->getNombre()));
+                            }else{
+                              $responseTemp = "";
                             }
                             break;
                         }
@@ -1028,7 +1026,7 @@ class ProductoController extends Controller {
                             $activo = ($producto->getActivo()) ? " checked='checked'" : "";
                             $title = ($producto->getActivo()) ? " title='Activo'" : " title='Inactivo'";
                             $responseTemp = "<input type='checkbox' disabled='disabled' ".$activo.$title. " />" ;
-                           break;
+                            break;
                     }
                     case 'actions': {
                             $user = $this->getUser();
@@ -1076,18 +1074,20 @@ class ProductoController extends Controller {
         $results = $em->getRepository('AppBundle:Producto')->filterByTerm($term);
         foreach($results as &$res){
             $producto = $em->getRepository('AppBundle:Producto')->find($res['id']);
-            $precio = $producto->getPrecioByLista($lista);
+            $precio = floatval( $producto->getPrecioByLista($lista) );
             if( in_array($categoriaIva, ['I','M'] ) ){
-                $total =  number_format($precio ,3);
+                $total = round( $precio, 3);
             }else{
                 $iva = $producto->getIva();
-                $montoIva = round( ($precio * ( $iva/100 )) ,3);
-                $total = number_format( ($precio + $montoIva) ,3);
+                $montoIva =  ($precio * ( $iva/100 )) ;
+                $total = round( ($precio + $montoIva) ,3) ;
             }
+
             $contado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
             if( $contado ){
-                $total = round($total * ( 1 + $contado->getPorcentajeRecargo()/100),3);
+                $total = round( $total * ( 1 + $contado->getPorcentajeRecargo()/100 ),3);
             }
+
             $res['text'] = $res['text'] . ' | $'. $total;
         }
         return new JsonResponse($results);

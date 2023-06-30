@@ -39,6 +39,7 @@ twig:
       modelo_tickeadora: '%modelo_tickeadora%'
       puerto_tickeadora: '%puerto_tickeadora%'
       baudios_tickeadora: '%baudios_tickeadora%'
+      iibb_percent: '%iibb_percent%'
 
 # Assetic Configuration
 assetic:

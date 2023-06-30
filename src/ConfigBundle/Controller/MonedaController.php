@@ -11,6 +11,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use ConfigBundle\Controller\UtilsController;
 use ConfigBundle\Entity\Moneda;
 use ConfigBundle\Form\MonedaType;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
  * @Route("/moneda")
@@ -179,11 +180,19 @@ class MonedaController extends Controller
         $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Moneda')->find($id);
+        $data = array('simbolo' => $entity->getSimbolo(), 'cotizacion' => $entity->getCotizacion());
+        return new JsonResponse( $data );
+
         $partial = $this->renderView(
             'VentasBundle:Partial:_partial-datos-moneda.html.twig',
             array('item' => $entity)
         );
         $datos = array('partial' => $partial, 'simbolo' => $entity->getSimbolo(), 'cotizacion' => $entity->getCotizacion());
         return new Response( json_encode($datos) );
+    }
+
+    public function getMonedaByDefault(){
+      $em = $this->getDoctrine()->getManager();
+      return $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
     }
 }

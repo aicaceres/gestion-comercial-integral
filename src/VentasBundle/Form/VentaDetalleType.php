@@ -23,42 +23,44 @@ class VentaDetalleType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
 
-        $builder->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:'))
+        $builder->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:',
+                    'attr' => array('onchange' => 'actualizarImportes()')
+                ))
                 //->add('bulto', null, array('required' => false))
                 //->add('cantidadxBulto', null, array('required' => false))
-                ->add('textoComodin','text')
+                ->add('textoComodin','text', array('required' => false))
                 ->add('precio', 'hidden')
                 ->add('alicuota', 'hidden')
         ;
 
-        if($this->type=='new'){
-            $prodsId = [];
-            if( count($this->data->getDetalles() ) >0 ){
-                //precargar productos item
-                foreach($this->data->getDetalles() as $d){
-                    $prodsId[] = $d->getProducto()->getId();
-                }
-            }
+        // if($this->type=='new'){
+        //     $prodsId = [];
+        //     if( count($this->data->getDetalles() ) >0 ){
+        //         //precargar productos item
+        //         foreach($this->data->getDetalles() as $d){
+        //             $prodsId[] = $d->getProducto()->getId();
+        //         }
+        //     }
 
-            $builder->add('producto', 'entity', array(
-                    'required' => true,
-                    'placeholder' => 'Seleccionar Producto...',
-                    'class' => 'AppBundle:Producto',
-                    'query_builder' => function(EntityRepository $repository)use($prodsId){
-                        $qb = $repository->createQueryBuilder('p')
-                                        ->where(' p.id IN (:productos)')
-                                        ->setParameter('productos', $prodsId, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
-                        return $qb;
-                    }
-            ));
-        }else{
-            $builder->add('producto', 'entity', array(
-                    'required' => true,
-                    'class' => 'AppBundle:Producto',
-                    'query_builder' => function(ProductoRepository $em) {
-                        return $em->getProductosFacturables();
-                    }));
-        }
+        //     $builder->add('producto', 'entity', array(
+        //             'required' => true,
+        //             'placeholder' => 'Seleccionar Producto...',
+        //             'class' => 'AppBundle:Producto',
+        //             'query_builder' => function(EntityRepository $repository)use($prodsId){
+        //                 $qb = $repository->createQueryBuilder('p')
+        //                                 ->where(' p.id IN (:productos)')
+        //                                 ->setParameter('productos', $prodsId, \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+        //                 return $qb;
+        //             }
+        //     ));
+        // }else{
+        //     $builder->add('producto', 'entity', array(
+        //             'required' => true,
+        //             'class' => 'AppBundle:Producto',
+        //             'query_builder' => function(ProductoRepository $em) {
+        //                 return $em->getProductosFacturables();
+        //             }));
+        // }
     }
 
     /**

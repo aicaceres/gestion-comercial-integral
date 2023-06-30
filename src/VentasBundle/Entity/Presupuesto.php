@@ -135,6 +135,7 @@ class Presupuesto {
     public function __construct()
     {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->validez = 1;
     }
 
     public function __clone() {
@@ -168,7 +169,7 @@ class Presupuesto {
     }
     public function getTotalIibb(){
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * 0.035;
+        return $monto * $this->getParameter('iibb_percent')/100 ;
     }
     public function getMontoTotal(){
         $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo()  ;
@@ -205,9 +206,9 @@ class Presupuesto {
         }
         return round( ($total) ,3);
     }
-    public function getTotalIibb(){
+    public function getTotalIibb($iibbPercent = 3.5){
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * 0.035;
+        return $monto * $iibbPercent/100 ;
     }
     public function getMontoTotal(){
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();

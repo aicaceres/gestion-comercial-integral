@@ -17,60 +17,60 @@ class StockAjusteDetalle
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
-    
+
     /**
      * @var string $signo
      * @ORM\Column(name="signo", type="string")
      */
     private $signo='+';
-    
+
      /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3)
      */
     protected $cantidad;
-    
+
    /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
      */
-    protected $bulto = false;   
-   
+    protected $bulto = false;
+
      /**
      * @var integer $cantidadxBulto
      * @ORM\Column(name="cantidad_x_bulto", type="integer", nullable=true )
      */
-    protected $cantidadxBulto;     
+    protected $cantidadxBulto;
 
      /**
      * @ORM\Column(name="motivo", type="text", nullable=true)
      */
-    protected $motivo; 
-    
+    protected $motivo;
+
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="stock")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
-    protected $producto; 
+    protected $producto;
 
      /**
      *@ORM\ManyToOne(targetEntity="AppBundle\Entity\StockAjuste", inversedBy="detalles")
-     *@ORM\JoinColumn(name="stock_ajuste_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="stock_ajuste_id", referencedColumnName="id")
      */
-    protected $stockAjuste;    
-    
+    protected $stockAjuste;
+
      /**
-     * @ORM\ManyToMany(targetEntity="ComprasBundle\Entity\LoteProducto", inversedBy="ajusteDetalles")
+     * @ORM\ManyToMany(targetEntity="ComprasBundle\Entity\LoteProducto", inversedBy="ajusteDetalles",cascade={"persist"})
      * @ORM\JoinTable(name="lotes_x_ajustedetalle",
      *      joinColumns={@ORM\JoinColumn(name="stock_ajuste_detalle_id", referencedColumnName="id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="compras_lote_producto_id", referencedColumnName="id")}
      * )
      */
     private $lotes;
-    
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -92,7 +92,7 @@ class StockAjusteDetalle
     /**
      * Get signo
      *
-     * @return string 
+     * @return string
      */
     public function getSigno()
     {
@@ -114,7 +114,7 @@ class StockAjusteDetalle
     /**
      * Get cantidad
      *
-     * @return integer 
+     * @return integer
      */
     public function getCantidad()
     {
@@ -136,7 +136,7 @@ class StockAjusteDetalle
     /**
      * Get motivo
      *
-     * @return string 
+     * @return string
      */
     public function getMotivo()
     {
@@ -158,7 +158,7 @@ class StockAjusteDetalle
     /**
      * Get producto
      *
-     * @return \AppBundle\Entity\Producto 
+     * @return \AppBundle\Entity\Producto
      */
     public function getProducto()
     {
@@ -174,14 +174,14 @@ class StockAjusteDetalle
     public function setStockAjuste(\AppBundle\Entity\StockAjuste $stockAjuste = null)
     {
         $this->stockAjuste = $stockAjuste;
-    
+
         return $this;
     }
 
     /**
      * Get stockAjuste
      *
-     * @return \AppBundle\Entity\StockAjuste 
+     * @return \AppBundle\Entity\StockAjuste
      */
     public function getStockAjuste()
     {
@@ -204,7 +204,7 @@ class StockAjusteDetalle
     /**
      * Get bulto
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getBulto()
     {
@@ -227,13 +227,13 @@ class StockAjusteDetalle
     /**
      * Get cantidadxBulto
      *
-     * @return integer 
+     * @return integer
      */
     public function getCantidadxBulto()
     {
         return $this->cantidadxBulto;
     }
-    
+
     public function getCantidadTxt()
     {
         if( $this->bulto ){
@@ -242,28 +242,28 @@ class StockAjusteDetalle
             $txt = $this->getCantidad().' '. $this->getProducto()->getUnidadMedida()->getNombre();
         }
         return $txt;
-    }    
+    }
     public function getCantidadTotal(){
         if( $this->bulto )  return $this->cantidad * $this->cantidadxBulto;
         else                return $this->cantidad;
     }
-    
+
     public function getLotesTxt(){
         $txt = '';
         foreach ($this->lotes as $value) {
-           $txt = $txt. '<br> '. $value->__toString(); 
+           $txt = $txt. '<br> '. $value->__toString();
         }
         return $txt;
     }
 public function getLotesItemTxt(){
         $txt = '';
         $div = '<br>';
-        foreach ($this->lotes as $value) {           
-           $txt = $txt. $div. $value->__toString(); 
+        foreach ($this->lotes as $value) {
+           $txt = $txt. $div. $value->__toString();
            $div = ' / ';
         }
         return $txt;
-    }        
+    }
     /**
      * Constructor
      */
@@ -297,7 +297,7 @@ public function getLotesItemTxt(){
     /**
      * Get lotes
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getLotes()
     {

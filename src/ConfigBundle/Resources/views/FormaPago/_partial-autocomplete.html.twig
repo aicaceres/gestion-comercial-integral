@@ -1,0 +1,12 @@
+{% set lblPorcentajeRecargo =  (item.porcentajeRecargo > 0) ? 'Rec:' : 'Desc:' %}
+<div style="line-height:16px;">
+  <span style="display:block; font-weight:bold">
+      {{item.id}} - {{ item.nombre }}
+  </span>
+  <small>
+    <span style="display:inline-block;width:25%" >{{ lblPorcentajeRecargo ~ ' ' ~ item.porcentajeRecargo|abs ~ ' %'  }}</span>
+    <span style="display:inline-block;width:25%"> Cuotas: {{item.cuotas}} </span>
+    <span style="display:inline-block"> Plazo: {{item.plazo ~ ' ' ~ item.vencimiento|upper }} </span>
+  </small>
+</div>
+<hr>

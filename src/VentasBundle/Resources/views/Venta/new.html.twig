@@ -25,21 +25,23 @@
 
         <fieldset class="fields" >
 
-            {% include "VentasBundle:Partial:block-cliente.html.twig" %}
+            {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente} %}
 
-            {% include "VentasBundle:Partial:block-moneda.html.twig" %}
+            <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
 
-            {% include "VentasBundle:Partial:block-formapago.html.twig" %}
+              {% include "VentasBundle:Partial:block-select-moneda.html.twig" %}
+            </div>
+
+            {% include "ConfigBundle:FormaPago:widget_select_formapago.html.twig"
+              with {'formaPago':entity.formapago, 'consumidorFinal':entity.cliente.consumidorFinal } %}
 
         </fieldset>
 
         <fieldset>
-            <div class="datos-cliente">
-                {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
-            </div>
-            <div class="datos-formapago">
-                {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
-            </div>
+            {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente , 'cuitvalido': cuitvalido, 'nombreCliente': entity.nombreCliente} %}
+
+            {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
+
         </fieldset>
 
         <fieldset class="fields">
@@ -86,7 +88,7 @@
         <fieldset>
             <br clear="all" />
             <div class="actionbutton">
-                <button class="guardar tabbable" type="submit" >Guardar</button>
+                <button id="guardar" class="guardar tabbable" type="submit" >Guardar</button>
                 <a class="cancelar tabbable" type="button" href="{{ path('ventas_venta')}}">Cancelar</a>
             </div>
         </fieldset>
@@ -96,13 +98,16 @@
 
     </div>
 
-    {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" %}
+
+    {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" with {'shortcuts': ['cliente', 'formapago', '+producto'] } %}
 
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
-<script type="text/javascript" src="{{ asset('assets/js/custom/ventas.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetFormapago.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/widgetCliente.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/moduloVentas.js') }}"></script>
 <script type="text/javascript">
 let checklogin = "{{ app.session.get('checkrequired') }}";
 let idVenta = '{{ entity.id }}';
@@ -111,29 +116,30 @@ if( checklogin == '1' ){
 }
 jQuery(function ($) {
     $(window).on('load', function () {
-        // confirm on submit
-        $('#ventasbundle_venta').on('submit', function(){
-            let txt = 'VENTA:   #'+$('#ventasbundle_venta_nroOperacion').val();
-            if(idVenta){
-                txt = txt + '\n' + 'Confirma modificar la venta?';
-                txtadic = '\n\n' +'NO SE REALIZARÁ EL AJUSTE DEL STOCK!!!';
-            }else{
-                txt = txt + '\n' + 'Confirma registrar la venta?';
-                txtadic = '\n\n' +'NO SE REALIZARÁ EL DESCUENTO EN EL STOCK!!!';
-            }
-            if ( !$('#ventasbundle_venta_descuentaStock').attr('checked')){
-                txt += txtadic;
-            }
-            // controlar que haya items cargados
-            if( $('tbody tr.item').length > 0 ){
-                if (!confirm(txt)) {
-                    return false;
-                }
-            }else{
-                jAlert('Debe ingresar items a la venta', 'Atención');
-                return false;
-            }
-        })
+
+      // confirm on submit
+      $('#ventasbundle_venta').on('submit', function(){
+          let txt = 'VENTA:   '+$('.nroOperacion').html();
+          if(idVenta){
+              txt = txt + '\n' + 'Confirma modificar la venta?';
+              txtadic = '\n\n' +'NO SE REALIZARÁ EL AJUSTE DEL STOCK!!!';
+          }else{
+              txt = txt + '\n' + 'Confirma registrar la venta?';
+              txtadic = '\n\n' +'NO SE REALIZARÁ EL DESCUENTO EN EL STOCK!!!';
+          }
+          if ( !$('#ventasbundle_venta_descuentaStock').attr('checked')){
+              txt += txtadic;
+          }
+          // controlar que haya items cargados
+          if( $('tbody tr.item').length > 0 ){
+              if (!confirm(txt)) {
+                  return false;
+              }
+          }else{
+              jAlert('Debe ingresar items a la venta', 'Atención');
+              return false;
+          }
+      })
     });
 
 });
