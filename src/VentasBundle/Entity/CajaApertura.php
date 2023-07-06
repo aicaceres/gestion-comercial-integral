@@ -93,7 +93,6 @@ class CajaApertura
 
     /**   Diferencia encontrada entre la apertura y cierre    */
     public function getDiferencia(){
-        return 0;
         return ($this->getMontoApertura() + $this->getTotalMovimientos()) - $this->getMontoCierre();
     }
 

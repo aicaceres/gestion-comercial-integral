@@ -150,20 +150,29 @@ class NotaDebCredController extends Controller
         $entity->setNombreCliente( $request->get('ventasbundle_nombreCliente') );
         $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
         $entity->setFormaPago($formapago);
-        $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($request->get('ventasbundle_tipoDocumentoCliente'));
-        $entity->setTipoDocumentoCliente($tipoDoc);
-        $entity->setNroDocumentoCliente($request->get('ventasbundle_nroDocumentoCliente'));
         $entity->setCotizacion($entity->getMoneda()->getCotizacion());
 
-        $docTipo = 99;
-        $docNro = 0;
-        if ($entity->getCliente()->getCuit()) {
-          $docTipo = 80;
-          $docNro = trim($entity->getCliente()->getCuit());
-        } elseif ($entity->getTipoDocumentoCliente()) {
-          $docTipo = $entity->getTipoDocumentoCliente()->getCodigo();
-          $docNro = $entity->getNroDocumentoCliente();
+        $tipoDocReq = $request->get('ventasbundle_tipoDocumentoCliente');
+        if( $tipoDocReq ){
+          $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($tipoDocReq);
+          $docNro = $request->get('ventasbundle_nroDocumentoCliente') ? $request->get('ventasbundle_nroDocumentoCliente') : 0;
+          $entity->setTipoDocumentoCliente($tipoDoc);
+          $entity->setNroDocumentoCliente($docNro);
+          $docTipo = $tipoDoc->getCodigo();
+        }else{
+          $docTipo = 99;
+          $docNro = 0;
+          if ($entity->getCliente()->getCuit()) {
+            $docTipo = 80;
+            $docNro = trim($entity->getCliente()->getCuit());
+          } elseif ($entity->getTipoDocumentoCliente()) {
+            $docTipo = $entity->getTipoDocumentoCliente()->getCodigo();
+            $docNro = $entity->getNroDocumentoCliente();
+          }
         }
+
+        $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
+        $entity->setComprobanteAsociado($compAsoc);
         $cbtesAsoc = $periodoAsoc = array();
         if ($entity->getComprobanteAsociado()) {
           /* array(
@@ -379,7 +388,22 @@ class NotaDebCredController extends Controller
 
         return $this->redirectToRoute('ventas_notadebcred', array('printpdf' => $entity->getId()));
       } catch (\Exception $ex) {
-        $this->addFlash('error', $ex->getMessage());
+
+        switch ($ex->getCode()) {
+          case 10015:
+            $msg = "Debe ingresar tipo y nro de documento del cliente.";
+            break;
+          case 10016:
+            $msg = "Se está intentando autorizar un comprobante con fecha anterior al último informado o hay inconvenientes con la conexión a internet";
+            break;
+          case 10013:
+            $msg = "Para comprobantes clase A y M el tipo de documento debe ser CUIT";
+            break;
+          default:
+            $msg = $ex->getMessage();
+            break;
+        }
+        $this->addFlash('error', $msg);
         $em->getConnection()->rollback();
       }
     }

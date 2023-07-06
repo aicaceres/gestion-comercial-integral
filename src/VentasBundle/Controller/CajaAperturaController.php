@@ -76,9 +76,10 @@ class CajaAperturaController extends Controller
         $entity->setCaja( $caja );
         $entity->setFechaApertura( new \DateTime() );
         $form = $this->createAperturaForm($entity);
+        $form->get('referer')->setData($request->headers->get('referer'));
         return $this->render('VentasBundle:CajaApertura:new.html.twig', array(
             'entity' => $entity,
-            'form' => $form->createView(),
+            'form' => $form->createView()
         ));
     }
 
@@ -100,6 +101,7 @@ class CajaAperturaController extends Controller
         if ($form->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
+                $referer = $request->get('ventasbundle_apertura')['referer'];
                 // verificar que no exista caja abierta
                 $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($caja->getId());
                 if($apertura){
@@ -113,9 +115,7 @@ class CajaAperturaController extends Controller
                 $em->flush();
                 $em->getConnection()->commit();
                 $session->set('caja_abierta', true);
-                if( $request->get('ir-a-cobro') ){
-                    $ruta = $this->redirect($this->generateUrl('ventas_cobro'));
-                }
+                $ruta = $this->redirect($referer);
             }
             catch (\Exception $ex) {
                 $this->addFlash('error', $ex->getMessage());
@@ -231,13 +231,14 @@ class CajaAperturaController extends Controller
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_cierre');
         $em = $this->getDoctrine()->getManager();
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($id);
+        $movimientos = $em->getRepository('VentasBundle:CajaApertura')->getMovimientosById($id);
 
         $logo = __DIR__.'/../../../web/assets/images/logo_comprobante_bn.png';
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
-                array('apertura' => $apertura, 'logo' => $logo), $response);
+                array('apertura' => $apertura, 'movimientos'=>$movimientos, 'logo' => $logo), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

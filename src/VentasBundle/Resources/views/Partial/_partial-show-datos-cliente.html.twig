@@ -1,0 +1,35 @@
+
+<div class="datos-cliente datos-cf">
+{% set cliente = entity.cliente %}
+
+{% if cliente.consumidorFinal %}
+
+        <label>Nombre: </label>
+        {{entity.nombreCliente}}
+
+        <label>Tipo Documento: </label>
+        {{entity.tipoDocumentoCliente}}
+
+        <label>N° Documento: </label>
+        {{entity.nroDocumentoCliente}}
+
+{% else %}
+
+    <label> CUIT: </label>
+    <span class="cuitcliente">
+      {{cliente.cuit}}
+    </span>
+
+    <label> IVA: </label>
+      {{ cliente.categoriaIva ? cliente.categoriaIva.descripcion|upper : "No definido" }}
+
+    <label> RENTAS: </label>
+    {{ cliente.categoriaRentas ? cliente.categoriaRentas.nombre|upper : "No definido" }}
+
+    {% if cliente.direccion is defined %}
+      <label> DIRECCIÓN: </label> {{cliente.domicilioCompleto|upper}}
+    {% endif %}
+
+{% endif %}
+
+</div>

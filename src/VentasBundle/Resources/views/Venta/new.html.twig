@@ -19,6 +19,11 @@
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
 {% include "AppBundle::notificacion.html.twig" %}
+
+    <div id="updating-data" class="warning hidden" style="text-align:center">
+        Actualizando datos del cliente... aguarde por favor
+    </div>
+
     <div class="divForm">
 
         {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_venta'}}) }}
@@ -140,6 +145,9 @@ jQuery(function ($) {
               return false;
           }
       })
+
+       $('#widgetCliente').select2('focus')
+
     });
 
 });

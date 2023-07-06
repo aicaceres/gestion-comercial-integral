@@ -14,11 +14,11 @@ class CobroRepository extends EntityRepository {
                 ->innerJoin('c.unidadNegocio', 'un')
                 ->where("un.id=" . $unidneg);
         if ($desde) {
-            $cadena = " c.fechaCobro >= '" . UtilsController::toAnsiDate($desde) . "'";
+            $cadena = " c.fechaCobro >= '" . UtilsController::toAnsiDate($desde) . " 00:00'";
             $query->andWhere($cadena);
         }
         if ($hasta) {
-            $cadena = " c.fechaCobro <= '" . UtilsController::toAnsiDate($hasta) . "'";
+            $cadena = " c.fechaCobro <= '" . UtilsController::toAnsiDate($hasta) . " 23:59'";
             $query->andWhere($cadena);
         }
         if($userId){

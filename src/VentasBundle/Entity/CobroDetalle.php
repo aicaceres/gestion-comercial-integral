@@ -38,8 +38,9 @@ class CobroDetalle {
      */
     private $datosTarjeta;
 
-     /**
-     * @ORM\OneToOne(targetEntity="ConfigBundle\Entity\Cheque", cascade={"persist"})
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Cheque", cascade={"persist"})
+     * @ORM\JoinColumn(name="cheque_recibido_id", referencedColumnName="id")
      */
     private $chequeRecibido;
 
@@ -69,10 +70,20 @@ class CobroDetalle {
      */
     protected $cajaApertura;
 
+    public function getEstado(){
+      return  $this->getCobro() ? $this->getCobro()->getEstado() : 'FINALIZADO';
+    }
+
     public function getVuelto(){
+        $incluir = true;
+        $total = 0;
         if( $this->getCobro() ){
             // buscar factura
-            $total = $this->getCobro()->getVenta()->getMontoTotal();
+            if($this->getCobro()->getFacturaElectronica()){
+              $total = $this->getCobro()->getVenta()->getMontoTotal();
+            }else{
+              $incluir = false;
+            }
         }
         if( $this->getNotaDebCred()){
             // buscar nota
@@ -90,13 +101,13 @@ class CobroDetalle {
         $tipos = array('EFECTIVO','CHEQUE');
         $calcular = in_array( $this->getTipoPago(), $tipos );
 
-        return  $calcular ? ($this->getImporte() -  $total) : 0 ;
+        return  $calcular && $incluir ? ($this->getImporte() -  $total) : 0 ;
     }
 
     public function getTipoComprobante(){
         if( $this->getCobro() ){
             // buscar factura
-            $tipo = $this->getCobro()->getFacturaElectronica()->getTipo();
+            $tipo = $this->getCobro()->getFacturaElectronica() ? $this->getCobro()->getFacturaElectronica()->getTipo() : '';
         }
         if( $this->getNotaDebCred()){
             // buscar nota

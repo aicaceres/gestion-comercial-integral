@@ -18,6 +18,9 @@
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
 {% include "AppBundle::notificacion.html.twig" %}
+    <div id="updating-data" class="warning hidden" style="text-align:center">
+        Actualizando datos del cliente... aguarde por favor
+    </div>
 <div class="divForm">
    {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_notadebcred'}}) }}
 
@@ -69,7 +72,7 @@
 
     <fieldset>
         <div style="padding-top: 20px; margin:auto; width: 100%;">
-            <div style="text-align:center; color:orangered; font-size:12px;" class="divcarga hidden" >Cargando items de comprobante asociado...</div>
+            <div style="text-align:center; color:orangered; font-size:12px;" class="divcarga hidden" >Cargando items de comprobante asociado... Aguarde por favor</div>
             {{ form_errors(form.detalles) }}
             {% include "VentasBundle:Partial:_partial-detalle.html.twig" %}
         </div>
@@ -185,7 +188,6 @@ jQuery(function ($) {
 
             $('#ventasbundle_notadebcred').submit();
         })
-
     });
 });
 

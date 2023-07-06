@@ -37,12 +37,14 @@ jQuery(document).ready(function ($) {
 		})
 		.on("select2:selecting", function (e) {
 			let divDatos = $(".datos-cliente")
-			if (divDatos.length) {
+      if (divDatos.length) {
+        jQuery("#updating-data").removeClass("hidden")
 				id = e.params.args.data.id
         url_datos = selectCliente.data("urldatos")
         // ocultar iva e iibb en resumen
-				$("#ivaTd, #iibbTd").hide()
-				$.get(url_datos, { id: id }).done(function (data) {
+        $("#ivaTd, #iibbTd").hide()
+
+				const getDataCliente = $.get(url_datos, { id: id }).done(function (data) {
           if (data) {
             divDatos.replaceWith(data.partial)
             $(".selectorCliente").data("categiva", data.categoriaIva)
@@ -74,9 +76,13 @@ jQuery(document).ready(function ($) {
 						}
             // cuit
             color = data.cuitValido ? "#666666" : "orangered"
-						$(".cuitcliente").css("color", color)
+            $(".cuitcliente").css("color", color)
+            setTimeout(function () {
+              jQuery("#updating-data").addClass("hidden")
+              selectCliente.select2('focus')
+            }, 2000)
 					}
-				}, "json")
+        }, "json")
 			}
 		})
 

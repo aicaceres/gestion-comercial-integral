@@ -60,9 +60,41 @@ jQuery(document).ready(function ($) {
 			selectComprobante.data("urlitems"),
 			{ id },
       function (data) {
+        const itemsCount = data.length - 1;
+        
         $.each(data, function (i, item) {
-          // console.log(item)
-					addNewItem()
+          addNewItem()
+          const newOption = new Option(item.text, item.id, true, true)
+          // producto
+          let prod = jQuery(".widgetProducto").last()
+          prod.append(newOption).trigger("select2:selecting")
+          prod.change()
+          prod.select2("close")
+          // texto comodin
+          let textoComodin = prod.parent().find('[id*="_textoComodin"]')
+          textoComodin.val(item.comodin)
+          //cantidad
+          $('[name*="[cantidad]"]').last().val(item.cant)
+          // precio
+          let precioComodin = prod.closest('.item').find('.precioUnitarioComodin')
+          if (precioComodin.length > 0) {
+            precioComodin.val(item.precio)
+            let precio = prod.closest('.item').find('[id*="_precio"]')
+            precio.val( item.precio)
+            let alicuota = prod.closest('.item').find('[id*="_alicuota"]')
+            alicuota.val( item.alicuota )
+          }
+        })
+        setTimeout(function () {
+          $("#ventasbundle_notadebcred_tipoComprobante").focus()
+          $(".divcarga").addClass("hidden")
+					}, 500)
+			}
+    )
+  }
+
+  async function prueba(item) {
+    addNewItem()
           $('[name*="[cantidad]"]').last().val(item.cant)
 
           const newOption = new Option(item.text, item.id, true, true)
@@ -82,14 +114,8 @@ jQuery(document).ready(function ($) {
             precio.val( item.precio)
             let alicuota = prod.closest('.item').find('[id*="_alicuota"]')
             alicuota.val( item.alicuota )
-          }
-					//var newOption = new Option(item.text, item.id, true, true)
-					// $('[name*="[producto]"]').last().append(newOption).trigger("change")
-					$(".divcarga").addClass("hidden")
-				})
-				actualizarImportes()
-			}
-		)
+    }
+    return 1
   }
 
   function filtrarTipoComprobante(id) {

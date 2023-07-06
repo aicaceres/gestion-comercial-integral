@@ -1,0 +1,94 @@
+{% if entity.formaPago.tipoPago != 'CTACTE' %}
+  <fieldset class="detalle_pago">
+    <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;">
+      <h5>DETALLE DEL PAGO:</h5>
+      <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction">
+        <tbody>
+          {% set importe = 0 %}
+          {% for det in cobroDetalles %}
+            {% set importe = importe + det.importe %}
+
+            {% if det.tipoPago == 'EFECTIVO' %}
+              <tr class="item">
+                <td class="monedaTd" style="text-align:right;">
+                  <label>EFECTIVO:</label>
+                </td>
+                <td class="importeTd alignright" width="160px">
+                  <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3, ',', '.') }}</span>
+                </td>
+              </tr>
+            {% endif %}
+
+            {% if det.tipoPago == 'CHEQUE' %}
+              <tr class="item">
+                <td class="chequeTd" style="font-size:11px">
+                  <div style="margin:5px 0">
+                    <label>CHEQUE N°</label>
+                    <span>{{ det.chequeRecibido.nroCheque }}</span>
+                    <label>Fecha:</label>
+                    <span>{{ det.chequeRecibido.fecha|date('d-m-Y') }}</span>
+                    <label>Dador:</label>
+                    <span>{{ det.chequeRecibido.dador }}</span>
+                    <label>Banco:</label>
+                    <span>{{ det.chequeRecibido.banco }}</span>
+                    <label>Sucursal:</label>
+                    <span>{{ det.chequeRecibido.sucursal }}</span>
+                  </div>
+                </td>
+                <td class="importeTd alignright" width="160px">
+                  <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3, ',', '.') }}</span>
+                </td>
+              </tr>
+            {% endif %}
+
+            {% if det.tipoPago == 'TARJETA' %}
+              <tr>
+                <td class="tarjetaTd" style="font-size:11px">
+                  <div style="margin:5px 0">
+                    <label>TARJETA:</label>
+                    <span>{{ det.datosTarjeta.tarjeta }}</span>
+                    <label>Número:</label>
+                    <span>{{ det.datosTarjeta.numero }}</span>
+                    <label>Cupón:</label>
+                    <span>{{ det.datosTarjeta.cupon }}</span>
+                    <label>Cuotas:</label>
+                    <span>{{ det.datosTarjeta.cuota }}</span>
+                    <label>Código Autorización:</label>
+                    <span>{{ det.datosTarjeta.codigoAutorizacion }}</span>
+                  </div>
+                  {% if det.datosTarjeta.firmante %}
+                    <div style="margin:5px 0">
+                      <label>Firmante:</label>
+                      <span>{{ det.datosTarjeta.firmante }}</span>
+                    </div>
+                  {% endif %}
+                </td>
+                <td class="importeTd alignright" width="160px">
+                  <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3, ',', '.') }}</span>
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+      {% set cambio = importe - montoTotal %}
+      {# {% set cambio = cambio|number_format(2, ',', '.') == 0.00 ? 0 : cambio  %} #}
+      <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
+        <thead>
+          <tr>
+            <th style="text-align:right">
+              IMPORTE: &nbsp;
+              <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }}</span>
+              <span class="pago" style="font-size:16px">{{ importe|number_format(3, ',', '.') }}</span>.-
+            </th>
+            <th width="150px" class="vueltoTh">
+              CAMBIO: &nbsp;
+              <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }}</span>
+              <span class="vuelto" style="font-size:16px">{{ cambio|number_format(3, ',', '.') }}</span>
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+  </fieldset>
+{% endif %}

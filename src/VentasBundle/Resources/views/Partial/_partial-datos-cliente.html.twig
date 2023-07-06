@@ -15,7 +15,9 @@
             name="ventasbundle_tipoDocumentoCliente" style="width:100%"
             url_select = "{{ path('get_parametro_autocomplete') }}"
         >
-          <option value="{{detallado.tipoDocumentoCliente}}" selected="selected">{{detallado.tipoDocumentoCliente}}</option>
+        {% if detallado.tipoDocumentoCliente.id is defined %}
+          <option value="{{detallado.tipoDocumentoCliente.id}}" selected="selected">{{detallado.tipoDocumentoCliente}}</option>
+        {% endif %}
         </select>
     </div>
     <div style="width: 18%;">

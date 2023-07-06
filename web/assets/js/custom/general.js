@@ -63,7 +63,9 @@ function checkLoginVentas(url_login,referer) {
                 event.preventDefault();
                 if (!validlogin) {
                     window.location.href = referer;
-                }
+              }
+
+              jQuery('#widgetCliente').select2('focus')
             }
         });
     jQuery('#popup').dialog('open');

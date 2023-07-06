@@ -25,7 +25,7 @@
                         <td>{{ entity.formaPago }}</td>
                         <td class="alignright">
                             <span style="float:left"> {{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(3,',','.') }}</td>
-                        <td>{{entity.createdBy.nombre|upper }}</td>
+                        <td>{{entity.updatedBy.nombre|upper }}</td>
                         <td class="operacion">
                           <a href="{{ path('ventas_cobro_facturar', { 'id': entity.id }) }}" title="Cobrar esta venta" class="btn btnaction btn_dollartag"></a>
                           &nbsp; &nbsp;

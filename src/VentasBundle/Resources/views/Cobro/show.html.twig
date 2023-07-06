@@ -37,138 +37,31 @@
         <fieldset class="fields" >
             <div class="selectorCliente">
                 <label>CLIENTE: </label>
-                    <select class="select2" style="width:80%" disabled="disabled">
-                        <option>{{entity.cliente.nombre}}</option>
-                    </select>
+                <input value="{{entity.cliente.nombre}}" disabled style="width:90%"/>
             </div>
 
             <div class="datos-moneda">
                 <label>MONEDA:
-                  {% if entity.moneda.cotizacion != 1 %}
-                    <small><label> TIPO DE CAMBIO:</label> {{ entity.moneda.cotizacion }}</small>
+                  {% if entity.cotizacion != 1 %}
+                    <small><label> TIPO DE CAMBIO:</label> {{ entity.cotizacion }}</small>
                   {% endif %}
                 </label>
-                <select class="select2" style="width:80%" disabled="disabled">
-                    <option>{{ entity.moneda.nombre}}</option>
-                </select>
+                <input value="{{entity.moneda}}" disabled style="width:80%"/>
             </div>
 
             <div class="selectFormaPago">
                 <label>FORMA DE PAGO: </label>
-                <select class="select2" style="width:80%" disabled="disabled">
-                    <option>{{ entity.formaPago }}
-                </select>
+                <input value="{{entity.formapago}}" disabled style="width:80%"/>
             </div>
-
         </fieldset>
         <fieldset >
-            <div class="datos-cliente">
-                {% if entity.cliente.consumidorfinal and entity.tipoDocumentoCliente %}
-                    {% if entity.nombreCliente %}
-                    <label>NOMBRE: </label><span> {{ entity.nombreCliente}}</span>
-                    {% endif %}
-                    <label> {{ entity.tipoDocumentoCliente }}: </label><span> {{ entity.nroDocumentoCliente}}</span>
-                {% else %}
-                {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
-                {% endif %}
-            </div>
+            {% include "VentasBundle:Partial:_partial-show-datos-cliente.html.twig" with {'entity':entity } %}
 
-            <div class="datos-formapago">
-                {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
-            </div>
+            {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
         </fieldset>
 
-        <fieldset class="detalle_pago" {% if entity.formaPago.tipoPago == 'CTACTE' %} style="display:none" {% endif %} >
-            <div style="display:inline-block; width:85%; margin:0 0 10px 5%;" >
-                <h5>DETALLE DEL PAGO:</h5>
-                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
-                    <tbody>
-                    {% set importe = 0 %}
-                    {% for det in entity.detalles %}
-                        {% set importe = importe + det.importe %}
-                        {% if det.tipoPago == 'EFECTIVO' %}
-                            <tr class="item">
-                                <td class="monedaTd" style="text-align:right;">
-                                    <label>EFECTIVO: </label>
-                                </td>
-                                <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,',','.') }}</span>
-                                </td>
-                            </tr>
-                        {% endif %}
-                        {% if det.tipoPago == 'CHEQUE' %}
-                            <tr class="item">
-                                <td class="chequeTd" style="font-size:11px">
-                                    <div style="margin:5px 0">
-                                        <label>CHEQUE N°</label>
-                                        <span>{{ det.chequeRecibido.nroCheque }}</span>
-                                        <label>Fecha:</label>
-                                        <span>{{ det.chequeRecibido.fecha|date('d-m-Y') }}</span>
-                                        <label>Dador:</label>
-                                        <span>{{ det.chequeRecibido.dador }}</span>
-                                        <label>Banco:</label>
-                                        <span>{{ det.chequeRecibido.banco }}</span>
-                                        <label>Sucursal:</label>
-                                        <span>{{ det.chequeRecibido.sucursal }}</span>
-                                    </div>
-                                </td>
-                                <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,',','.') }}</span>
-                                </td>
-                            </tr>
-                        {% endif %}
-                        {% if det.tipoPago == 'TARJETA' %}
-                            <tr>
-                                <td class="tarjetaTd" style="font-size:11px">
-                                    <div style="margin:5px 0">
-                                        <label>TARJETA:</label>
-                                        <span>{{ det.datosTarjeta.tarjeta }}</span>
-                                        <label>Número: </label>
-                                        <span>{{ det.datosTarjeta.numero }}</span>
-                                        <label>Cupón: </label>
-                                        <span>{{ det.datosTarjeta.cupon }}</span>
-                                        <label>Cuotas: </label>
-                                        <span>{{ det.datosTarjeta.cuota }}</span>
-                                        <label>Código Autorización: </label>
-                                        <span>{{ det.datosTarjeta.codigoAutorizacion }}</span>
-                                    </div>
-                                    {% if det.datosTarjeta.firmante %}
-                                    <div style="margin:5px 0">
-                                        <label>Firmante: </label>
-                                        <span>{{ det.datosTarjeta.firmante }}</span>
-                                    </div>
-                                    {% endif %}
-                                </td>
-                                <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,',','.') }}</span>
-                                </td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                    </tbody>
-                </table>
-                <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
-                    <thead>
-                        <tr>
-                            <th style="text-align:right">
-                                IMPORTE: &nbsp;
-                                <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="pago" style="font-size:16px" >{{importe|number_format(3,',','.')}}</span>.-
-                            </th>
-                            <th width="150px" class="vueltoTh">
-                                CAMBIO: &nbsp;
-                                <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="vuelto" style="font-size:16px"> {{ (importe-entity.venta.montoTotal)|number_format(2,',','.')}}  </span>
-                            </th>
-                        </tr>
-                    </thead>
-                </table>
-
-            </div>
-        </fieldset>
-
-        <fieldset style=" text-align:center; margin-top:10px">
-            <div style="display:inline-block; width:85%;" >
+        <fieldset>
+            <div style="display:inline-block; width:85%;margin:10px 0 10px 5%;" >
                 {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
                 {% set showiva = (cativa != 'C') %}
                 {% set showiibb = (cativa == 'I') %}
@@ -176,23 +69,11 @@
             </div>
         </fieldset>
 
-<fieldset style="padding:10px 0;margin:10px 0 10px 0; width: 100%; background-color:khaki; text-align:center;">
+        {% include "VentasBundle:CobroVenta:_partial-show-detalle-pago.html.twig" with { 'cobroDetalles': entity.detalles, 'montoTotal': entity.venta.montoTotal } %}
 
-        <div style="display:inline-block; width: 40%;">
-            <label>{{ entity.facturaElectronica.comprobanteTxt }}
-                    {% if entity.facturaElectronica.tipoComprobante.valor == 'TICK-B' %}
-                        | Emisión: {{ entity.facturaElectronica.caeVto ?? entity.facturaElectronica.caeVto|date('d-m-Y') }}
-                    {% else %}
-                        | Cae: {{ entity.facturaElectronica.cae }} | VtoCae: {{ entity.facturaElectronica.caeVto ?? entity.facturaElectronica.caeVto|date('d-m-Y') }}
-                    {% endif %}
-            </label>
-        </div>
-
-    </fieldset>
-
+        {% include "VentasBundle:FacturaElectronica:info-banner.html.twig" with {'fe':entity.facturaElectronica, 'id':entity.id, 'entity': 'Cobro'} %}
 
         <fieldset>
-            <br clear="all" />
             <div class="actionbutton">
                 <a class="cancelar" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
             </div>
@@ -206,14 +87,6 @@
 jQuery(function ($) {
     $(window).on('load', function () {
 
-        if('{{entity.cliente.consumidorfinal}}'){
-            $('.datos-cliente').hide();
-            $('.datos-cf').show();
-        }else{
-            $('.datos-cf').hide();
-            $('.datos-cliente').show();
-        }
-
         // si la pantalla es chica expandir
         if ( $('#contentwrapper').width() < 1000) {
             $('.togglemenu').click();
@@ -222,8 +95,6 @@ jQuery(function ($) {
         $(".btn_list").click(function(){
             $(".detalle-venta").toggle();
         });
-
-        $('#ventasbundle_cobro_nombreCliente,#ventasbundle_cobro_direccionCliente').css('width', '95%')
 
     });
 });

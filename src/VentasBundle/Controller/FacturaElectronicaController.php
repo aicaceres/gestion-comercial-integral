@@ -19,6 +19,16 @@ use Endroid\QrCode\QrCode;
  */
 class FacturaElectronicaController extends Controller {
 
+    public $webserviceError = array(
+                                      10013 => "Para comprobantes clase A y M el tipo de documento debe ser CUIT",
+                                      10015 => "Debe ingresar tipo y nro de documento del cliente.",
+                                      10016 => "Se está intentando autorizar un comprobante con fecha anterior al último informado.",
+                                      10024 => "Si ImpTrib es mayor a 0 el objeto Tributos y Tributo son obligatorios.",
+                                      10047 => "El campo ImpIVA (Importe de IVA) para comprobantes tipo C debe ser igual a cero (0)",
+                                      10048 => "El campo  'Importe Total' ImpTotal, debe ser igual  a la  suma de ImpNeto + ImpTrib. Donde ImpNeto es igual al Sub Total",
+                                      10071 => "Para comprobantes tipo C el objeto IVA no debe informarse.",
+                                    );
+
     /**
      * @Route("/", name="ventas_factura_emitir")
      * @Method("POST")
@@ -215,17 +225,8 @@ class FacturaElectronicaController extends Controller {
       } catch (\Exception $ex) {
         $em->getConnection()->rollback();
 
-        switch ($ex->getCode()) {
-          case 10015:
-            $msg = "Debe ingresar tipo y nro de documento del cliente.";
-            break;
-          case 10016:
-            $msg = "Se está intentando autorizar un comprobante con fecha anterior al último informado o hay inconvenientes con la conexión a internet";
-            break;
-          default:
-            $msg = $ex->getMessage();
-            break;
-        }
+        $msg =  array_key_exists($ex->getCode(), $this->webserviceError) ? $this->webserviceError[$ex->getCode()] : $ex->getMessage() ;
+
         $response['res'] = 'ERROR';
         $response['msg'] = $msg;
 
@@ -312,5 +313,6 @@ class FacturaElectronicaController extends Controller {
       'Content-Disposition' => 'filename=' . $filename
     ));
   }
+
 
 }

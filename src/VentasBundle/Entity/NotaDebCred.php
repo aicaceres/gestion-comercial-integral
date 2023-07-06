@@ -201,6 +201,7 @@ class NotaDebCred {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->signo = '+';
         $this->estado = 'ACREDITADO';
+        $this->cotizacion = 1;
     }
 
     public function getPagoTxt(){

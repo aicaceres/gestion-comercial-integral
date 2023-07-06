@@ -526,7 +526,7 @@ class ProveedorController extends Controller {
      * @Method("GET")
      * @Template("ComprasBundle:Proveedor:pago_edit.html.twig")
      */
-    public function pagosNewAction(Request $request) {
+    public function pagosNewActBienion(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_proveedor_pagos');
         $entity = new PagoProveedor();
         $em = $this->getDoctrine()->getManager();

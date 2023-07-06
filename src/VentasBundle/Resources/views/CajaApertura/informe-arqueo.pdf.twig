@@ -94,7 +94,8 @@
 
             {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
 
-            {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] %}
+            {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] and mov.estado == 'FINALIZADO' %}
+
                 {% set cnt, vuelto, importe = (cnt + 1), (vuelto + (mov.vuelto*mov.signoCaja)), (mov.importe * mov.signoCaja)  %}
                 {% if mov.tipoPago=='EFECTIVO' %}
                     {% set efectivo = efectivo + importe %}
@@ -106,6 +107,7 @@
                     {% set ctacte = ctacte + importe %}
                 {% endif %}
                 {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
+
             {% endfor %}
 
             {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}

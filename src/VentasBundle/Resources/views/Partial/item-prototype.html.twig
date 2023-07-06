@@ -9,7 +9,7 @@
               data-urlpopup = "{{ path('get_lista_productos') }}"
               data-urltable = "{{ path('producto_list_datatables') }}"
       >
-        {% if item.vars.data %}
+        {% if item.vars.data.producto.id is defined %}
           {% set inclIva = not (entity.cliente.categoriaIva == 'I' or entity.cliente.categoriaIva == 'M') %}
           <option value="{{item.vars.data.producto.id}}" selected="selected">{{item.vars.data.producto}} | ${{ item.vars.data.producto.getPrecioContadoByLista( entity.precioLista.id, descuentoContado, inclIva )  }} </option>
         {% endif %}
@@ -18,7 +18,7 @@
         <a href="javascript:void(0)" class="btn btnaction btn_search" onclick="handleSearchProducto(this)"></a>
         <small class="bajominimo hidden">Bajo Mínimo</small>
         {% if item.textoComodin is defined %}
-            {% set comodin = item.vars.data ? item.vars.data.producto.comodin : false %}
+            {% set comodin = item.vars.data.producto.comodin is defined ? item.vars.data.producto.comodin : false %}
             {% set display = comodin ? '' : 'display:none' %}
             {% set required = comodin ? true : false %}
             {{ form_widget(item.textoComodin, {'attr': {'class':'largeinput', 'style':display, 'required' : required }}) }}

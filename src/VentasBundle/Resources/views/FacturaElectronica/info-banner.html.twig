@@ -1,0 +1,6 @@
+<fieldset style="padding:10px 0;margin:10px 0 10px 0; width: 100%; background-color:antiquewhite; text-align:center;">
+  <div class="divForm" style="display:inline-block; width: 100%;">
+    <label>{{ fe.comprobanteTxt }} | Cae: {{ fe.cae }} | VtoCae: {{ fe.caeVto|date('d-m-Y') }}
+    <a href="javascript:void(0)" url="{{ path('ventas_factura_print', { 'id': id, 'entity': entity }) }}" title="Imprimir" class="btn btnaction btn_print"></a></label>
+  </div>
+</fieldset>

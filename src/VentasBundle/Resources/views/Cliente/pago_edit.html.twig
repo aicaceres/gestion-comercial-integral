@@ -39,7 +39,7 @@
             </div>
         </fieldset>
         <fieldset >
-            {% include "VentasBundle:CobroVenta:_partial-datos-cliente.html.twig" with {'item':entity.cliente} %}
+            {% include "VentasBundle:Partial:_partial-show-datos-cliente.html.twig" %}
         </fieldset>
         <fieldset class="fields" >
             <div style="display: inline-block; width: 55%">
@@ -112,13 +112,11 @@
     </fieldset>
 
         <fieldset>
-            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" id="guardar" type="button">Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('ventas_cliente_pagos')}}">Cancelar</a>
             </div>
         </fieldset>
-
         <div name="rest" class="hiddenformrest"> {{ form_rest(form) }} </div>
         {{ form_end(form) }}
 </div>
@@ -153,23 +151,26 @@ jQuery(function ($) {
         }, 1000);
         $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
         $('.btn_search').remove();
-        $('#ventasbundle_pagocliente_cliente').attr('readonly', true);
 
-        $('#ventasbundle_pagocliente_moneda').on('change',function(){
-            label = $(this).prev('label');
-            label.find('small').remove();
-            id = $(this).val();
-            url_datos = $(this).attr('url_datos');
-            $.getJSON( url_datos , {'id': id}).done(function(data){
-                // actualizar datos
-                if(data){
-                    span = $('<small></small>').html(data.partial);
-                    label.append(span);
-                    $('.simbolo').html(data.simbolo);
-                    $('[id*="_cotizacion"]').val( data.cotizacion );
-                }
-            });
-        });
+        $(".ventasbundle_moneda")
+        .on("change", function () {
+          let small = $(this).parent().find("small")
+          let id = $(this).val()
+          let url_datos = $(this).attr("url_datos")
+          $.getJSON(url_datos, { id: id }).done(function (data) {
+            // actualizar datos
+            if (data) {
+              $(".datos-moneda").data("cotizacion", data.cotizacion)
+              $(".datos-moneda").data("simbolo", data.simbolo)
+              let smallText =
+                data.cotizacion > 1 ? "TIPO DE CAMBIO: " + data.cotizacion : ""
+              small.html(smallText)
+              $(".simbolo").html(data.simbolo)
+              actualizarPagos()
+            }
+          })
+        })
+        .change()
 
         $('#ventasbundle_pagocliente_comprobantes').on('change',function(){
             calcularTotal();
@@ -197,7 +198,6 @@ jQuery(function ($) {
             addNewPago(tipo);
         })
 
-        $('#ventasbundle_pagocliente_moneda').change();
         calcularTotal();
         actualizarPagos();
         addNewPago('EFECTIVO');

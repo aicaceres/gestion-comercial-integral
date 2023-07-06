@@ -29,7 +29,7 @@
               {% endif %}
             </td>
             {% if not owns  %}
-            <td>{{entity.createdBy.nombre|upper }}</td>
+            <td>{{entity.updatedBy.nombre|upper }}</td>
             {% endif %}
             <td class="buttons">
                   <a href="{{ path('ventas_cobro_show',{ 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Cobro"></a>

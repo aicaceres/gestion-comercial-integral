@@ -63,19 +63,19 @@
 
           {% include "VentasBundle:Partial:_partial-datos-cliente.html.twig" with {'item':entity.cliente, 'detallado': entity } %}
 
-            {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
+          {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
 
       </fieldset>
 
-      <fieldset style=" text-align:center; margin-top:10px">
-            <div style="display:inline-block; width:85%;" >
+      <fieldset>
+            <div style="display:inline-block; width:85%;margin:10px 0 10px 5%;" >
                 {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
                 {% set showiva = (cativa != 'C') %}
                 {% set showiibb = (cativa == 'I') %}
 
                 {% include "VentasBundle:CobroVenta:_partial-detalle.html.twig" with {'venta':entity.venta,'showiva': showiva, 'showiibb': showiibb } %}
             </div>
-        </fieldset>
+      </fieldset>
 
       {% include "VentasBundle:CobroVenta:_partial-detalle-pago.html.twig" with { 'cobroDetalles': form.detalles } %}
 
@@ -218,7 +218,6 @@ function registrarCobro(){
   const url = jQuery("#ventasbundle_cobro").attr("action")
   setFacturando(true)
   jQuery.post(url, formdata, function(data){
-
     if(data.res  === 'OK'){
       jQuery('#ventasbundle_cobro_id').val(data.id)
       enviarEmision(data.id)
@@ -239,6 +238,7 @@ function emitirFactura(cobroId){
   jQuery('#guardar span').html('Emitiendo Factura...')
   const url = jQuery('#guardar').data('urlemitir')
   jQuery.post(url, {id:cobroId, entity: 'Cobro'}, function(data){
+console.log(data)
     if(data.res === 'OK'){
       jQuery("#divEmitirTicket").remove()
       setFacturando(false)
@@ -248,6 +248,9 @@ function emitirFactura(cobroId){
       alert(data.msg)
       setFacturando(false)
     }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+    setFacturando(false)
   })
 }
 

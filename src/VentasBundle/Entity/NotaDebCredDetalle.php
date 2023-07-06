@@ -79,12 +79,13 @@ class NotaDebCredDetalle {
     // valor del precio unitario segun categoria de iva
     public function getPrecioUnitarioItem(){
         $categIva = $this->getNotaDebCred()->getCliente()->getCategoriaIva()->getNombre();
+        $cotizacion = $this->getNotaDebCred()->getCotizacion();
         if( $categIva == 'I' || $categIva == 'M'){
             // precio sin iva convertido a la cotizacion
-            $precio = $this->getPrecio() / $this->getNotaDebCred()->getCotizacion();
+            $precio = $this->getPrecio() / $cotizacion;
         }else{
             // precio con iva incluido convertido a la cotizacion
-            $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $this->getNotaDebCred()->getCotizacion();
+            $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $cotizacion;
         }
         return round( $precio, 3);
     }
