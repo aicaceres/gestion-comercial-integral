@@ -39,7 +39,7 @@ class PresupuestoType extends AbstractType
       // ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
       //     'required' => true, 'label' => 'FORMA DE PAGO: '))
 
-      // ->add('tipo','hidden')
+      ->add('tipo','hidden')
       // ->add('validez',null,array('label' => 'VALIDEZ [días]:','required'=>false))
       ->add('detalles', 'collection', array(
         'type' => new PresupuestoDetalleType($type, $data),

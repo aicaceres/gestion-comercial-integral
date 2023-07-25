@@ -1,0 +1,9 @@
+<pdf>
+
+{% include "VentasBundle:Cobro:hoja.pdf.twig" with {'texto': 'ORIGINAL' } %}
+
+{% if cbte.cliente.categoriaIva=='I' %}
+    {% include "VentasBundle:Cobro:hoja.pdf.twig" with {'texto': 'DUPLICADO' } %}
+{% endif %}
+
+</pdf>

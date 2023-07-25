@@ -18,7 +18,7 @@ class CobroDetalle {
     protected $id;
     /**
      * @var integer $tipoPago
-     * @ORM\Column(name="tipo_pago", type="string", nullable=true)
+     * @ORM\Column(name="tipo_pago", type="string")
      */
     protected $tipoPago = 'CTACTE';
     /**

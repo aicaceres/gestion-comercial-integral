@@ -265,6 +265,9 @@ function handleItemDelete(item) {
 		jQuery("#linkAdd").focus()
 	}
 }
+function handleBlurDelete() {
+  jQuery("#linkAdd").focus()
+}
 
 function setSelect2ToProduct(selProducto) {
 	let urlselect = selProducto.data("urlselect")

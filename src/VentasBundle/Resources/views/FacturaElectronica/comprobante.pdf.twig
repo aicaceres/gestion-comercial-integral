@@ -1,0 +1,9 @@
+<pdf>
+
+{% include "VentasBundle:FacturaElectronica:hoja.pdf.twig" with {'texto': 'ORIGINAL' } %}
+
+{% if duplicado %}
+    {% include "VentasBundle:FacturaElectronica:hoja.pdf.twig" with {'texto': 'DUPLICADO' } %}
+{% endif %}
+
+</pdf>

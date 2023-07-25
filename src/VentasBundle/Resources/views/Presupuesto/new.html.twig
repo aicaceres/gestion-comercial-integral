@@ -126,7 +126,7 @@ jQuery(function ($) {
 
             if( $('tbody tr.item').length > 0 ){
                 // funcionalidad de remito anulada por pedido de aides
-                {# txt = txt + '\n\n' +'Seleccionar Tipo:';
+                txt = txt + '\n\n' +'Seleccionar Tipo:';
                 jPresupuesto(txt, 'P', 'Impresión de Presupuestos', function(r) {
                     if (r) {
                         if( r=='R' ){
@@ -135,9 +135,9 @@ jQuery(function ($) {
                         $('#ventasbundle_presupuesto_tipo').val(r);
                         $('#ventasbundle_presupuesto').submit();
                     }
-                }); #}
+                });
 
-                $('#ventasbundle_presupuesto').submit();
+                {# $('#ventasbundle_presupuesto').submit(); #}
             }else{
                 alert('Debe ingresar items al presupuesto');
                 return false;
@@ -146,7 +146,7 @@ jQuery(function ($) {
 
         $(document).on('change','#popup_prompt',function() {
             let txt = '<span>';
-            txt += 'PRESUPUESTO:   #'+$('#ventasbundle_presupuesto_nroPresupuesto').val();
+            txt += 'PRESUPUESTO:   '+$('.nroOperacion').html();
             txt += '<br>' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
             if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") || $('#popup_prompt').val() ==='R' ){
                 txt += '<br>' +'<b>Se realizará el descuento de los productos en el stock!</b>';

@@ -275,6 +275,7 @@ class CobroController extends Controller
 
         // completar datos de detalles
         // $saldo = 0;
+
         $efectivo = true;
         if (count($entity->getDetalles()) == 0) {
           if ($formapago->getTipoPago() === 'CTACTE') {
@@ -310,7 +311,7 @@ class CobroController extends Controller
         $entity->getVenta()->setEstado('COBRADO');
         $entity->setEstado('CREADO');
         $em->persist($entity);
-         $em->flush();
+        $em->flush();
         $em->getConnection()->commit();
 
         $response['res'] = 'OK';
