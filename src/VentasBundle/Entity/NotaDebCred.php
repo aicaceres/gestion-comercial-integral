@@ -207,6 +207,25 @@ class NotaDebCred {
     public function getPagoTxt(){
         return ($this->getFormaPago()->getCuentaCorriente()) ? '' : $this->getFormaPago()->getNombre();
     }
+    public function getTextoPagosParaFactura(){
+        $txt = '';
+        foreach( $this->cobroDetalles as $det){
+            $aux = ($txt) ? ' - ' : '';
+            $monto = $det->getMoneda()->getSimbolo() . ' ' .  $det->getImporte();
+            switch ($det->getTipoPago()){
+                case 'EFECTIVO':
+                    $txt = $txt . $aux . 'EFECTIVO: '. $monto;
+                    break;
+                case 'CHEQUE':
+                    $txt = $txt . $aux . 'CHEQUE: '. $monto;
+                    break;
+                case 'TARJETA':
+                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() .': ' . $monto;
+                    break;
+            }
+        }
+        return $txt;
+    }
 
     public function __toString() {
         return $this->getNotaElectronica()->getComprobanteTxt();
@@ -222,6 +241,10 @@ class NotaDebCred {
             $nombre = $nombre . ' - ' . $this->nombreCliente;
         }
         return $nombre;
+    }
+
+    public function getNombreClienteTxt(){
+      return $this->getNombreCliente() ? $this->getNombreCliente() : $this->getCliente()->getNombre();
     }
 
     /**

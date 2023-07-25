@@ -106,8 +106,9 @@ class ImpuestoController extends Controller {
 
         foreach ($datos as $dato){
             $fe = $em->getRepository('VentasBundle:FacturaElectronica')->find($dato['fe']);
-            $cliente = ($fe->getCobro()) ? $fe->getCobro()->getCliente() : $fe->getNotaDebCred()->getCliente();
-            $comp = ($fe->getCobro()) ? $fe->getCobro()->getVenta() : $fe->getNotaDebCred();
+            $esCobro = $fe->getCobro();
+            $cliente = $esCobro ? $fe->getCobro()->getCliente() : $fe->getNotaDebCred()->getCliente();
+            $comp = $esCobro ? $fe->getCobro()->getVenta() : $fe->getNotaDebCred();
 
             $neto = ($comp->getTotalIva()==0) ? 0 : $comp->getSubTotal();
             $nograv = ($comp->getTotalIva()==0) ? $comp->getSubTotal() : 0;

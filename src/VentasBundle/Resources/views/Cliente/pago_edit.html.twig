@@ -5,7 +5,7 @@
 <link rel="stylesheet" href="{{ asset('assets/css/style.ventas.css') }}" type="text/css" media="all" />
 {% endblock %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Cliente: {{entity.cliente.nombre}}</h1>
+    <h1 class="pagetitle">Cliente: {{ entity.cliente ? entity.cliente.nombre : ''}}</h1>
 </div><!--pageheader-->
 {% endblock %}
 
@@ -20,62 +20,65 @@
     <div class="divForm">
         {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_pagocliente'}}) }}
 
-        <fieldset class="fields" >
-            {# {% include "VentasBundle:Partial:block-cliente.html.twig" %} #}
-          <div class="selectorCliente">
-            <label> CLIENTE: </label>
-            <input value="{{entity.cliente.nombre}}" disabled style="width:90%"/>
-          </div>
+    <fieldset class="fields" >
+        <div class="selectorCliente" data-categiva="{{entity.cliente.categoriaIva}}">
+          <label> CLIENTE: </label>
+          <input value="{{entity.cliente.nombre}}" disabled style="width:90%"/>
+        </div>
 
-            {# {% include "VentasBundle:Partial:block-moneda.html.twig" %} #}
+        <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
 
-          <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
-              {% include "VentasBundle:Partial:block-select-moneda.html.twig" %}
-          </div>
+          {% include "VentasBundle:Partial:block-select-moneda.html.twig" %}
+        </div>
 
-            <div style="display: inline-block; width: 20%">
-                {{ form_label(form.fecha) }}
-                {{ form_widget(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
-            </div>
-        </fieldset>
-        <fieldset >
-            {% include "VentasBundle:Partial:_partial-show-datos-cliente.html.twig" %}
-        </fieldset>
-        <fieldset class="fields" >
-            <div style="display: inline-block; width: 55%">
-                {{ form_label(form.comprobantes) }}
-                {{ form_widget(form.comprobantes,
-                        {'attr':
-                            {'style':'width:90%',
-                             'url': path('get_saldo_comprobante'),
-                            }
-                        })
-                    }}
-                {{ form_errors(form.comprobantes) }}
-            </div>
-            <div style="display: inline-block; width: 15%">
-                {{ form_label(form.total,'TOTAL:') }}
-                <strong class="simbolo">{{ entity.moneda.simbolo }}</strong>
-                {{ form_widget(form.total,{'attr':{'class':'number mediuminput', 'readonly':'readonly'}}) }}
-            </div>
-            <div style="display: inline-block; width: 20%;">
-                {{ form_label(form.generaNotaCredito, null, {'label_attr': {'style': 'width:30%'}}) }}
-                {{ form_widget(form.generaNotaCredito) }}
-                <span class="nota-credito" style="padding:5px;">
-                    <strong class="simbolo"> {{ entity.moneda.simbolo }} </strong>
-                    <span> 0.00 </span>
-                </span>
-                <input id="nota_credito" class="number smallinput" value="0" type="hidden"/>
-            </div>
-        </fieldset>
-        <fieldset class="fields" >
-            <div>
-                {{ form_label(form.observaciones,'OBSERVACIONES:') }}
-                {{ form_widget(form.observaciones,{'attr': {'style': 'height:20px'}}) }}
-            </div>
-        </fieldset>
+        <div style="display: inline-block; width: 20%">
+            {{ form_label(form.fecha) }}
+            {{ form_widget(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
+        </div>
+    </fieldset>
+    <fieldset >
+        {% include "VentasBundle:Partial:_partial-show-datos-cliente.html.twig" %}
+    </fieldset>
+    <fieldset class="fields" >
+        <div style="display: inline-block; width: 55%">
+            {{ form_label(form.comprobantes) }}
+            {{ form_widget(form.comprobantes,
+                    {'attr':
+                        {'style':'width:90%',
+                          'url': path('get_saldo_comprobante'),
+                          'onchange': 'calcularTotal()',
+                        }
+                    })
+                }}
+            {{ form_errors(form.comprobantes) }}
+        </div>
+        <div style="display: inline-block; width: 15%">
+            {{ form_label(form.total,'TOTAL:') }}
+            <strong class="simbolo">{{ entity.moneda.simbolo }}</strong>
+            {{ form_widget(form.total,{'attr':{'class':'number mediuminput', 'readonly':'readonly'}}) }}
+        </div>
+        <div style="display: inline-block; width: 20%;">
+            {{ form_label(form.generaNotaCredito, null, {'label_attr': {'style': 'width:30%'}}) }}
+            {{ form_widget(form.generaNotaCredito,
+                {'attr': {'onchange': 'actualizarPagos()'}}
+                ) }}
+            <span class="nota-credito" style="padding:5px;">
+                <strong class="simbolo"> {{ entity.moneda.simbolo }} </strong>
+                <span> 0.00 </span>
+            </span>
+            <input id="nota_credito" class="number smallinput" value="0" type="hidden"/>
+        </div>
+    </fieldset>
+    <fieldset class="fields">
+        <div>
+            {{ form_label(form.observaciones,'OBSERVACIONES:') }}
+            {{ form_widget(form.observaciones,{'attr': {'style': 'height:20px'}}) }}
+        </div>
+    </fieldset>
 
-    <fieldset class="detalle_pago" >
+    {% include "VentasBundle:CobroVenta:_partial-detalle-pago.html.twig" with { 'cobroDetalles': form.cobroDetalles } %}
+
+    {# <fieldset class="detalle_pago" >
         <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
             <h5>DETALLE DEL PAGO:</h5>
             <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
@@ -109,7 +112,7 @@
             </table>
 
         </div>
-    </fieldset>
+    </fieldset> #}
 
         <fieldset>
             <div class="actionbutton">
@@ -121,86 +124,22 @@
         {{ form_end(form) }}
 </div>
 </div>
-<div id="dialog-tipo" title="Elegir Pago" style="display:none">
-<form>
-    <button type="button" class="stdbtn btn_black" data-tipo="EFECTIVO">EFECTIVO</button>
-    <button type="button" class="stdbtn btn_black" data-tipo="CHEQUE">CHEQUE</button>
-    <button type="button" class="stdbtn btn_black" data-tipo="TARJETA">TARJETA</button>
-</form>
-</div>
+{% include "VentasBundle:CobroVenta:_partial-dialog-tipopago.html.twig" %}
+
 {% endblock %}
 {% block extra_javascripts %}
-<script type="text/javascript" src="{{ asset('assets/js/utils/widgetCliente.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/utils/pagoCliente.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
-        $( "#dialog-tipo" ).dialog({
-            autoOpen: false,
-            height: 100,
-            width: 350,
-            modal: true
-        });
-// si la pantalla es chica expandir
-        if ( $('#contentwrapper').width() < 1000) {
-            $('.togglemenu').click();
-        }
-// refresca la hora en un campo fecha-hora
-        horaRefresh = setInterval(function () {
-            $('.js-hora').html( new Date().toLocaleString().slice(9) );
-        }, 1000);
-        $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
-        $('.btn_search').remove();
 
-        $(".ventasbundle_moneda")
-        .on("change", function () {
-          let small = $(this).parent().find("small")
-          let id = $(this).val()
-          let url_datos = $(this).attr("url_datos")
-          $.getJSON(url_datos, { id: id }).done(function (data) {
-            // actualizar datos
-            if (data) {
-              $(".datos-moneda").data("cotizacion", data.cotizacion)
-              $(".datos-moneda").data("simbolo", data.simbolo)
-              let smallText =
-                data.cotizacion > 1 ? "TIPO DE CAMBIO: " + data.cotizacion : ""
-              small.html(smallText)
-              $(".simbolo").html(data.simbolo)
-              actualizarPagos()
-            }
-          })
-        })
-        .change()
-
-        $('#ventasbundle_pagocliente_comprobantes').on('change',function(){
-            calcularTotal();
-        })
-        $('#ventasbundle_pagocliente_generaNotaCredito').on('change',function(){
+        {# $('#ventasbundle_pagocliente_generaNotaCredito').on('change',function(){
             actualizarPagos();
-        })
+        }) #}
 
-        $pagosHolder = $('table.tabla-pagos tbody');
-        $pagosHolder.find('.delTd').each(function() {
-            addPagoDeleteLink($(this));
-        });
-        $pagosHolder.find('.ordTd').each(function(i) {
-            $(this).html(i + 1);
-        });
-        $('#linkAddPago').on('click', function(e) {
-            e.preventDefault();
-            $( "#dialog-tipo" ).dialog('open');
-            $('#dialog-tipo button').first().focus();
-        });
-
-        $('#dialog-tipo button').on('click', function(){
-            tipo = $(this).data('tipo');
-            $( "#dialog-tipo" ).dialog('close');
-            addNewPago(tipo);
-        })
-
-        calcularTotal();
-        actualizarPagos();
-        addNewPago('EFECTIVO');
+        {# calcularTotal(); #}
+        {# actualizarPagos(); #}
 
         $('#guardar').on('click', function(){
             if( !$('#ventasbundle_pagocliente_comprobantes').val() ){
@@ -208,8 +147,10 @@ jQuery(function ($) {
                 $('#ventasbundle_pagocliente_comprobantes').select2('focus');
                 return false;
             }
-            pago = parseFloat($('.pago').html()) ;
-            if( $(':invalid').length>0 || pago<=0 ){
+            pago = parseFloat($('.pago').html());
+            nc = jQuery("#nota_credito").val();
+
+            if( $(':invalid').length>0 || (pago<=0 && nc<=0) ){
                 jAlert( 'Completar todos los datos para registrar el pago!');
                 return false;
             }
@@ -246,105 +187,7 @@ jQuery(function ($) {
 
     });
 
-    function addNewPago( tipo){
-        const prototype = $pagosHolder.data('prototype');
-        const index = $pagosHolder.data('index');
-        const newForm = prototype.replace(/items/g, index);
 
-        $pagosHolder.append(newForm);
-        $pagosHolder.data('index', index + 1);
-        lastTr = $pagosHolder.find('tr').last();
-        addPagoDeleteLink(lastTr.find('.delTd'));
-        lastTr.find('[id*="_tipoPago"]').val(tipo);
-        importe = lastTr.find('[id*="_importe"]');
-        importe.val(0)
-        importe.on('focus',function(e) {
-            $(this).select();
-        })
-        importe.on('change', function() {
-            if( $(this).siblings('[id*="_tipoPago"]').val() == 'CHEQUE' ){
-                // cargar valor al cheque
-                chequeTd = $(this).parent().parent().find('td.chequeTd');
-                chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
-            }
-            actualizarPagos();
-        });
-
-        if(tipo != 'TARJETA'){
-        lastTr.find('.tarjetaTd').remove();
-        }else{
-            // tarjeta
-            lastTr.find('[id*="_datosTarjeta_tarjeta"]').attr('required', true);
-            lastTr.find('[id*="_datosTarjeta_numero"]').inputmask(
-                {"mask": "9999 9999 9999 9999",
-                    onincomplete: function() {
-                        if( $(this).val() ){
-                            $(this).addClass('error');
-                        }else{
-                            $(this).removeClass('error');
-                        }
-                    },
-                    oncomplete: function() {
-                        $(this).removeClass('error');
-                    }
-                }
-                );
-            lastTr.find('[id*="_datosTarjeta_cuota"]').val(1);
-            // chequetd required false
-            lastTr.find('.chequeTd :required').each(function() {
-                $(this).attr('required',false) ;
-            })
-            lastTr.find('[id*="_datosTarjeta_tarjeta"]').focus();
-        }
-        if( tipo != 'CHEQUE'){
-            lastTr.find('.chequeTd').remove();
-        }else{
-            lastTr.find('[id*="_chequeRecibido_fecha"]').datepicker({dateFormat: 'dd-mm-yy'});
-            // tarjetaTd required false
-            lastTr.find('.tarjetaTd :required').each(function() {
-                $(this).attr('required',false) ;
-            })
-            selectBanco = lastTr.find('.selectBanco');
-            selectBanco.select2({
-                tags: true,
-                createTag: function (params) {
-                    var term = $.trim(params.term).toUpperCase();
-                    if (term === '') {
-                        return null;
-                    }
-                    return {
-                        id: term,
-                        text: term,
-                        newTag: true // add additional parameters
-                    }
-                }
-            });
-            lastTr.find('[id*="_chequeRecibido_nroCheque"]').focus();
-        }
-        if( tipo != 'EFECTIVO'){
-            lastTr.find('.monedaTd').hide();
-        }else{
-            lastTr.find('.tarjetaTd :required, .chequeTd :required').each(function() {
-                $(this).attr('required',false) ;
-            })
-            importe.focus();
-        }
-    }
-
-    function addPagoDeleteLink($itemFormTd) {
-        var $removeFormA = $('<a href="#" class="delItem" title="Quitar"><span class="del-item-button">-</span></a>');
-        $itemFormTd.append($removeFormA);
-        $removeFormA.on('click', function(e) {
-            if ( confirm('Desea eliminar este item?')) {
-                e.preventDefault();
-                $itemFormTd.parent().remove();
-                actualizarPagos();
-            }
-        });
-        $removeFormA.on('blur', function(e) {
-            $('#linkAddPago').focus();
-        });
-    }
 
     function actualizarPagos() {
         total = checknumero( $('#ventasbundle_pagocliente_total'),2 );
@@ -385,6 +228,10 @@ jQuery(function ($) {
                             actualizarPagos();
                         }
                     });
+        }else{
+          total = 0
+          $('#ventasbundle_pagocliente_total').val( total.toFixed(2) );
+          actualizarPagos();
         }
     }
 });

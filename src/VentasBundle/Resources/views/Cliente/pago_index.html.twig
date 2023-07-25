@@ -80,6 +80,7 @@ jQuery(document).ready(function($) {
 
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     var oTable = $('#dyntable2').dataTable();
+
     $('#printform').on('submit',function(){
         $('#clienteid').val($('#selectClienteIndex').val());
         $('#fdesde').val($('#desde').val());

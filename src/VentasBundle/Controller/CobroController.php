@@ -71,6 +71,7 @@ class CobroController extends Controller
       'users' => $users,
       'desde' => $desde,
       'hasta' => $hasta,
+      'selectedtab' => $request->get('selectedtab'),
       'printpdf' => $request->get('printpdf')
     ));
   }
@@ -146,58 +147,58 @@ class CobroController extends Controller
    * @Method("GET")
    * @Template()
    */
-  public function xfacturarVentaAction(Request $request, $id)
-  {
-    $session = $this->get('session');
-    $unidneg_id = $session->get('unidneg_id');
-    UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
-    $em = $this->getDoctrine()->getManager();
-    // Verificar si la caja está abierta CAJA=1
-    $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
-    if (!$caja->getAbierta()) {
-      $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
-      return $this->redirect($request->headers->get('referer'));
-    }
-    $cantidadItemsParaFactura = 0;
-    $entity = new Cobro();
-    $entity->setFechaCobro(new \DateTime());
-    $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
-    if ($param) {
-      // ultimo nro de operacion de cobro
-      $entity->setNroOperacion($param->getUltimoNroOperacionCobro() + 1);
-      $cantidadItemsParaFactura = $param->getCantidadItemsParaFactura();
-    }
-    $venta = $em->getRepository('VentasBundle:Venta')->find($id);
-    if (!$venta) {
-      throw $this->createNotFoundException('No se encuentra la venta.');
-    }
-    $entity->setVenta($venta);
-    $entity->setCliente($venta->getCliente());
-    if( $venta->getNombreCliente() ) $entity->setNombreCliente($venta->getNombreCliente() );
-    $entity->setMoneda($venta->getMoneda());
-    $entity->setFormaPago($venta->getFormaPago());
-    //$facturaElectronica = new FacturaElectronica();
-    //$facturaElectronica->setPuntoVenta( $param->getPuntoVentaFactura() );
-    // definir tipo de factura segun cliente
-    /*$categoriaIva = $entity->getCliente()->getCategoriaIva()->getNombre();
-        $tipo = 'FAC-B';
-        if( $categoriaIva =='I' || $categoriaIva == 'M' ){
-            $tipo = 'FAC-A';
-        }
-        /*elseif( $categoriaIva == 'C' && $entity->getFormaPago()->getContado()){
-            $tipo = 'TIQUE';
-        }
-        $tipoFactura = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($tipo);
-        $facturaElectronica->setTipoComprobante($tipoFactura);*/
-    //$entity->setFacturaElectronica($facturaElectronica);
+  // public function xfacturarVentaAction(Request $request, $id)
+  // {
+  //   $session = $this->get('session');
+  //   $unidneg_id = $session->get('unidneg_id');
+  //   UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_factura_new');
+  //   $em = $this->getDoctrine()->getManager();
+  //   // Verificar si la caja está abierta CAJA=1
+  //   $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
+  //   if (!$caja->getAbierta()) {
+  //     $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+  //     return $this->redirect($request->headers->get('referer'));
+  //   }
+  //   $cantidadItemsParaFactura = 0;
+  //   $entity = new Cobro();
+  //   $entity->setFechaCobro(new \DateTime());
+  //   $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+  //   if ($param) {
+  //     // ultimo nro de operacion de cobro
+  //     $entity->setNroOperacion($param->getUltimoNroOperacionCobro() + 1);
+  //     $cantidadItemsParaFactura = $param->getCantidadItemsParaFactura();
+  //   }
+  //   $venta = $em->getRepository('VentasBundle:Venta')->find($id);
+  //   if (!$venta) {
+  //     throw $this->createNotFoundException('No se encuentra la venta.');
+  //   }
+  //   $entity->setVenta($venta);
+  //   $entity->setCliente($venta->getCliente());
+  //   if( $venta->getNombreCliente() ) $entity->setNombreCliente($venta->getNombreCliente() );
+  //   $entity->setMoneda($venta->getMoneda());
+  //   $entity->setFormaPago($venta->getFormaPago());
+  //   //$facturaElectronica = new FacturaElectronica();
+  //   //$facturaElectronica->setPuntoVenta( $param->getPuntoVentaFactura() );
+  //   // definir tipo de factura segun cliente
+  //   /*$categoriaIva = $entity->getCliente()->getCategoriaIva()->getNombre();
+  //       $tipo = 'FAC-B';
+  //       if( $categoriaIva =='I' || $categoriaIva == 'M' ){
+  //           $tipo = 'FAC-A';
+  //       }
+  //       /*elseif( $categoriaIva == 'C' && $entity->getFormaPago()->getContado()){
+  //           $tipo = 'TIQUE';
+  //       }
+  //       $tipoFactura = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($tipo);
+  //       $facturaElectronica->setTipoComprobante($tipoFactura);*/
+  //   //$entity->setFacturaElectronica($facturaElectronica);
 
-    $form = $this->createCreateForm($entity,'new');
-    return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
-      'entity' => $entity,
-      'form' => $form->createView(),
-      'cantidadItemsParaFactura' => $cantidadItemsParaFactura,
-    ));
-  }
+  //   $form = $this->createCreateForm($entity,'new');
+  //   return $this->render('VentasBundle:Cobro:facturar-venta.html.twig', array(
+  //     'entity' => $entity,
+  //     'form' => $form->createView(),
+  //     'cantidadItemsParaFactura' => $cantidadItemsParaFactura,
+  //   ));
+  // }
 
 
   /**
@@ -306,7 +307,7 @@ class CobroController extends Controller
           }
         }
 
-        $entity->getVenta()->setEstado('FACTURADO');
+        $entity->getVenta()->setEstado('COBRADO');
         $entity->setEstado('CREADO');
         $em->persist($entity);
          $em->flush();
@@ -326,7 +327,9 @@ class CobroController extends Controller
 
     }
 
-
+$response['res'] = 'ERROR';
+$response['msg'] = 'Formulario inválido';
+return new JsonResponse($response);
 die;
 
 
@@ -685,69 +688,69 @@ die;
    * name="xventas_cobro_print")
    * @Method("GET")
    */
-  public function printCobroVentasAction(Request $request, $id)
-  {
-    $em = $this->getDoctrine()->getManager();
-    $cobro = $em->getRepository('VentasBundle:Cobro')->find($id);
-    $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
+  // public function printCobroVentasAction(Request $request, $id)
+  // {
+  //   $em = $this->getDoctrine()->getManager();
+  //   $cobro = $em->getRepository('VentasBundle:Cobro')->find($id);
+  //   $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
 
-    $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante.png';
-    $qr = __DIR__ . '/../../../web/assets/imagesafip/qr.png';
-    $logoafip = __DIR__ . '/../../../web/assets/imagesafip/logoafip.png';
+  //   $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante.png';
+  //   $qr = __DIR__ . '/../../../web/assets/imagesafip/qr.png';
+  //   $logoafip = __DIR__ . '/../../../web/assets/imagesafip/logoafip.png';
 
-    $url = $this->getParameter('url_qr_afip');
-    $cuit = $this->getParameter('cuit_afip');
-    $ptovta = $this->getParameter('ptovta_ws_factura');
+  //   $url = $this->getParameter('url_qr_afip');
+  //   $cuit = $this->getParameter('cuit_afip');
+  //   $ptovta = $this->getParameter('ptovta_ws_factura');
 
-    $data = array(
-      "ver" => 1,
-      "fecha" => $cobro->getFechaCobro()->format('Y-m-d'),
-      "cuit" => $cuit,
-      "ptoVta" => $ptovta,
-      "tipoCmp" => $cobro->getFacturaElectronica()->getCodigoComprobante(),
-      "nroCmp" => $cobro->getFacturaElectronica()->getNroComprobante(),
-      "importe" => round($cobro->getVenta()->getMontoTotal(), 2),
-      "moneda" => $cobro->getMoneda()->getCodigoAfip(),
-      "ctz" => $cobro->getCotizacion(),
-      "tipoDocRec" => 0,
-      "nroDocRec" => 0,
-      "tipoCodAut" => "E",
-      "codAut" => $cobro->getFacturaElectronica()->getCae()
-    );
-    $base64 = base64_encode(json_encode($data));
+  //   $data = array(
+  //     "ver" => 1,
+  //     "fecha" => $cobro->getFechaCobro()->format('Y-m-d'),
+  //     "cuit" => $cuit,
+  //     "ptoVta" => $ptovta,
+  //     "tipoCmp" => $cobro->getFacturaElectronica()->getCodigoComprobante(),
+  //     "nroCmp" => $cobro->getFacturaElectronica()->getNroComprobante(),
+  //     "importe" => round($cobro->getVenta()->getMontoTotal(), 2),
+  //     "moneda" => $cobro->getMoneda()->getCodigoAfip(),
+  //     "ctz" => $cobro->getCotizacion(),
+  //     "tipoDocRec" => 0,
+  //     "nroDocRec" => 0,
+  //     "tipoCodAut" => "E",
+  //     "codAut" => $cobro->getFacturaElectronica()->getCae()
+  //   );
+  //   $base64 = base64_encode(json_encode($data));
 
-    $qrCode = new QrCode();
-    $qrCode
-      ->setText($url . $base64)
-      ->setSize(120)
-      ->setPadding(5)
-      ->setErrorCorrection('low')
-      ->setImageType(QrCode::IMAGE_TYPE_PNG);
-    $qrCode->render($qr);
+  //   $qrCode = new QrCode();
+  //   $qrCode
+  //     ->setText($url . $base64)
+  //     ->setSize(120)
+  //     ->setPadding(5)
+  //     ->setErrorCorrection('low')
+  //     ->setImageType(QrCode::IMAGE_TYPE_PNG);
+  //   $qrCode->render($qr);
 
-    $facade = $this->get('ps_pdf.facade');
-    $response = new Response();
-    $this->render(
-      'VentasBundle:Cobro:comprobante.pdf.twig',
-      array('cobro' => $cobro, 'venta' => $cobro->getVenta(), 'empresa' => $empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip' => $logoafip),
-      $response
-    );
+  //   $facade = $this->get('ps_pdf.facade');
+  //   $response = new Response();
+  //   $this->render(
+  //     'VentasBundle:Cobro:comprobante.pdf.twig',
+  //     array('cobro' => $cobro, 'venta' => $cobro->getVenta(), 'empresa' => $empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip' => $logoafip),
+  //     $response
+  //   );
 
-    $xml = $response->getContent();
-    $content = $facade->render($xml);
-    $hoy = new \DateTime();
-    $filename = $cobro->getFacturaElectronica()->getComprobanteTxt() . '.pdf';
-    if ($this->getParameter('billing_folder')) {
-      $file = $this->getParameter('billing_folder') . $filename;
-      if (!file_exists($file)) {
-        file_put_contents($file, $content, FILE_APPEND);
-      }
-    }
-    return new Response($content, 200, array(
-      'content-type' => 'application/pdf',
-      'Content-Disposition' => 'filename=' . $filename
-    ));
-  }
+  //   $xml = $response->getContent();
+  //   $content = $facade->render($xml);
+  //   $hoy = new \DateTime();
+  //   $filename = $cobro->getFacturaElectronica()->getComprobanteTxt() . '.pdf';
+  //   if ($this->getParameter('billing_folder')) {
+  //     $file = $this->getParameter('billing_folder') . $filename;
+  //     if (!file_exists($file)) {
+  //       file_put_contents($file, $content, FILE_APPEND);
+  //     }
+  //   }
+  //   return new Response($content, 200, array(
+  //     'content-type' => 'application/pdf',
+  //     'Content-Disposition' => 'filename=' . $filename
+  //   ));
+  // }
 
   /**
    * @Route("/getAutocompleteFacturas", name="get_autocomplete_facturas")

@@ -10,7 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
-
+use Doctrine\Common\Collections\ArrayCollection;
 use ConfigBundle\Controller\UtilsController;
 use ConfigBundle\Controller\MonedaController;
 use ConfigBundle\Controller\FormaPagoController;
@@ -382,22 +382,58 @@ class VentaController extends Controller
         }
 
         if ($entity->getDescuentaStock()) {
-          // realizar los ajustes en el stock - deshacer el movimiento y rehacer
+          // realizar los ajustes en el stock
           $depositoNuevo = $entity->getDeposito();
           $detalleNuevo = $entity->getDetalles();
           $difDetalle =  strcmp($detalleAnteriorJson, $this->getDetalleJson($detalleNuevo));
-
-          if ($difDetalle || ($depositoAnterior->getId() != $depositoNuevo->getId())) {
-
-            // reingresar anteriores articulos al stock
+          // si cambia deposito - deshacer movimientos anteriores y rehacer en el nuevo deposito
+          if( $depositoAnterior->getId() !== $depositoNuevo->getId() ){
+            // reingresar articulos al stock del deposito anterior
             $res = $this->registrarMovimientoStock($entity->getId(), $depositoAnterior, $detalleAnterior, '+', $em);
             if ($res) {
-              // descontar los nuevos
+              // descontar los articulos al nuevo deposito
               $res = $this->registrarMovimientoStock($entity->getId(), $depositoNuevo, $detalleNuevo, '-', $em);
             }
             if (!$res) {
               throw $this->createNotFoundException('No se realizó el ajuste en el stock.');
             }
+          }elseif($difDetalle){
+            // detectar diferencias y ajustar historico
+            $detalleHistorico = $em->getRepository('AppBundle:StockMovimiento')->findBy(['tipo'=>'ventas_venta', 'movimiento'=>$entity->getId()]);
+            $detItemNuevo = new ArrayCollection();
+            $histItemAusente = new ArrayCollection();
+            foreach($detalleNuevo as $det){
+              $found = false;
+              foreach($detalleHistorico as $key=>$hist){
+                if( $det->getProducto()->getId() == $hist->getProducto()->getId()){
+                  $found = true;
+                  $hist->setCantidad( $det->getCantidad() );
+                  break;
+                }
+              }
+              if(!$found){
+                $detItemNuevo->add($det);
+              }
+            }
+            // registrar los articulos nuevos
+            if($detItemNuevo ){
+              $res = $this->registrarMovimientoStock($entity->getId(), $depositoNuevo, $detItemNuevo, '-', $em);
+              if (!$res) {
+                throw $this->createNotFoundException('No se realizó el ajuste en el stock.');
+              }
+            }
+            // eliminar del historico items ausentes
+            foreach($detalleHistorico as $key=>$hist){
+              $found = false;
+              foreach($detalleNuevo as $det){
+                if( $det->getProducto()->getId() == $hist->getProducto()->getId()){
+                  $found = true;
+                  break;
+                }
+              }
+              if(!$found) $em->remove($hist);
+            }
+
           }
         }
         $em->flush();

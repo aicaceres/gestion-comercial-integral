@@ -53,6 +53,39 @@ class UtilsController extends Controller {
         throw new AccessDeniedException('No posee permiso para acceder a esta página!');
     }
 
+    /**
+     * @Route("/getSemanaActual", name="get_semana_actual")
+     * @Method("GET")
+     */
+    public function getSemanaActual(){
+// Período 1; día 1 a día 7; período 2, día 8 a día 14; período 3, día 15 a día 21; período 4, día 22 al último día del mes
+    $dia = 15;
+    if( $dia < 7){
+      echo '22-u mes anterior';
+    }elseif($dia <14){
+      echo '1-7';
+    }elseif($dia<21){
+      echo '8-14';
+    }else{
+      echo '15-21';
+    }
+
+// debe tomarse periodos 1-7 8-14 15-21 22-fin del mes
+// obtener mes y año... luego tomar el periodo anterior al día
+// dia= 10 -> tomar 1-7
+// dia >= 22 -> tomar 22-ultimo dia del mes
+
+      if (date("D")=="Mon"){
+        $week_start = date("Y-m-d");
+      } else {
+        $week_start = date("Y-m-d", strtotime('last Monday', time()));
+      }
+
+      $week_end =  date("Y-m-d", strtotime('next Sunday', time())) ;
+
+      return new JsonResponse( array('rangoInicial'=> $week_start, 'rangoFinal'=> $week_end));
+    }
+
     /*
      * Pad string con caracteres especiales
      */

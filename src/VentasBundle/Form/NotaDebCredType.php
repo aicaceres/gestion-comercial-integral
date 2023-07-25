@@ -135,7 +135,8 @@ class NotaDebCredType extends AbstractType {
      */
     public function configureOptions(OptionsResolver $resolver) {
         $resolver->setDefaults(array(
-            'data_class' => 'VentasBundle\Entity\NotaDebCred'
+            'data_class' => 'VentasBundle\Entity\NotaDebCred',
+            'error_bubbling' => true,
         ));
     }
 

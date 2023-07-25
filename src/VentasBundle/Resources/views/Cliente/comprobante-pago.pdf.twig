@@ -57,7 +57,7 @@
             </header>
             {% set totalpago = pago.generaNotaCredito ? (pago.total - pago.montoNc) : pago.total  %}
             <footer>
-                <div height="200px" width="100%">
+                <div height="100px" width="100%">
                     <table>
                         <tr>
                             <td border.type="none" font-size="7px" vertical-align="middle">
@@ -127,7 +127,7 @@
                     1
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" padding-left="10px">
-                    Descuento por pago adelantado ( NC {{pago.notaDebCred.notaElectronica.comprobanteTxt}} )
+                    Descuento por pago adelantado ( NC {{fe.comprobanteTxt}} )
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
                     {{pago.montoNc*-1|number_format(2,',','.')}}
@@ -139,7 +139,7 @@
 </dynamic-page>
 
 {% if pago.generaNotaCredito %}
-    {% include "VentasBundle:Cliente:notacredito.pdf.twig" with {'texto': 'ORIGINAL', 'nota' : pago.notaDebCred } %}
+    {% include "VentasBundle:FacturaElectronica:hoja.pdf.twig" with {'texto': 'ORIGINAL' } %}
 {% endif %}
 
 </pdf>

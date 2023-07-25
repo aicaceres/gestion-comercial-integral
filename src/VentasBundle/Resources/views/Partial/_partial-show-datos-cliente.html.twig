@@ -1,35 +1,38 @@
 
 <div class="datos-cliente datos-cf">
-{% set cliente = entity.cliente %}
 
-{% if cliente.consumidorFinal %}
+{% if entity.cliente %}
+  {% set cliente = entity.cliente %}
 
-        <label>Nombre: </label>
-        {{entity.nombreCliente}}
+  {% if cliente.consumidorFinal %}
 
-        <label>Tipo Documento: </label>
-        {{entity.tipoDocumentoCliente}}
+          <label>Nombre: </label>
+          {{entity.nombreCliente}}
 
-        <label>N° Documento: </label>
-        {{entity.nroDocumentoCliente}}
+          <label>Tipo Documento: </label>
+          {{entity.tipoDocumentoCliente}}
 
-{% else %}
+          <label>N° Documento: </label>
+          {{entity.nroDocumentoCliente}}
 
-    <label> CUIT: </label>
-    <span class="cuitcliente">
-      {{cliente.cuit}}
-    </span>
+  {% else %}
 
-    <label> IVA: </label>
-      {{ cliente.categoriaIva ? cliente.categoriaIva.descripcion|upper : "No definido" }}
+      <label> CUIT: </label>
+      <span class="cuitcliente">
+        {{cliente.cuit}}
+      </span>
 
-    <label> RENTAS: </label>
-    {{ cliente.categoriaRentas ? cliente.categoriaRentas.nombre|upper : "No definido" }}
+      <label> IVA: </label>
+        {{ cliente.categoriaIva ? cliente.categoriaIva.descripcion|upper : "No definido" }}
 
-    {% if cliente.direccion is defined %}
-      <label> DIRECCIÓN: </label> {{cliente.domicilioCompleto|upper}}
-    {% endif %}
+      <label> RENTAS: </label>
+      {{ cliente.categoriaRentas ? cliente.categoriaRentas.nombre|upper : "No definido" }}
 
+      {% if cliente.direccion is defined %}
+        <label> DIRECCIÓN: </label> {{cliente.domicilioCompleto|upper}}
+      {% endif %}
+
+  {% endif %}
 {% endif %}
 
 </div>

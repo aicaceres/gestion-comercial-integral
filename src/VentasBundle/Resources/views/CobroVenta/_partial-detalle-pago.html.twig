@@ -1,5 +1,5 @@
 
-<fieldset class="detalle_pago" {{ (entity.formaPago.tipoPago == 'CTACTE') ? 'style="display:none"' : '' }} >
+<fieldset class="detalle_pago" {% if entity.formapago is defined %} {{ (entity.formaPago.tipoPago == 'CTACTE') ? 'style="display:none"' : '' }} {% endif %}>
         <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
             <h5>DETALLE DEL PAGO:</h5>
             <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >

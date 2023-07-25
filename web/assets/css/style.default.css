@@ -1555,6 +1555,8 @@ a.btn_table { background-position: -82px -480px; }
 .btn_lime { background-position: 0 -152px; border-color: #59bf04; color: #367501; }
 .btn_orange { background-position: 0 -190px; border-color: #cd7a03; color: #6e3c17; }
 .btn_red { background-position: 0 -228px; border-color: #a31314; color: #fff; }
+.btn_grey { background: #eee; border-color: #ccc; color: #333; }
+.btn_grey:hover, .btn_grey:focus { text-decoration: none; opacity: 1; color:#999 !important }
 
 .stdbtn:active { background: #eee; }
 .btn_yellow:active { background: #ffde06; }
@@ -2091,7 +2093,9 @@ form select.width10 { min-width: 130px !important; }
 .cuitinvalido{
   color: orangered;
 }
-
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove{
+  font-size: 140%;
+}
   /* Estilo para focus */
   .divEdicion select:focus, .divEdicion input:focus, .divEdicion button:focus, .divEdicion a:focus, .divEdicion .select2-container *:focus, #popup_prompt, a:focus{
       color:blue ;

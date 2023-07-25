@@ -29,7 +29,7 @@ class Venta {
      */
     protected $fechaVenta;
     /**
-     * Estados: PENDIENTE - FACTURADO - ANULADO
+     * Estados: PENDIENTE - COBRADO - FACTURADO - ANULADO
      */
     /**
      * @var string $estado
@@ -410,6 +410,7 @@ class Venta {
      */
     public function __construct()
     {
+        $this->estado = 'PENDIENTE';
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 

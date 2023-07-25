@@ -16,9 +16,9 @@ jQuery(document).ready(function ($) {
 	}, 1000)
 
 	//  detectar atajos de teclado
-	$(document).on("keydown", (e) => detectarControles(e))
+  $(document).on("keydown", (e) => detectarControles(e))
 
-	// change moneda
+  // change moneda
 	$(".ventasbundle_moneda")
 		.on("change", function () {
 			let small = $(this).parent().find("small")
@@ -83,7 +83,7 @@ function addNewItem() {
 }
 
 function actualizarImportes() {
-	let iva = (iibb = descrec = subTotal = totalIVA = totalIIBB = subtotalTh = 0)
+  let iva = (iibb = descrec = subTotal = totalIVA = totalIIBB = subtotalTh = 0)
   const cotizacion = jQuery(".datos-moneda").data("cotizacion")
   const categoriaIva = jQuery(".selectorCliente").data("categiva")
   const porcentaje = checknumero(jQuery('[id*="_descuentoRecargo"]'))
@@ -97,8 +97,8 @@ function actualizarImportes() {
 
 		const cant = checknumero(item.find(".cantTd input"))
     let precio = checknumero(item.find('[id*="_precio"]'))
-		let alicuota = checknumero(item.find('[id*="_alicuota"]'))
-		if (categoriaIva == "I" || categoriaIva == "M") {
+    let alicuota = checknumero(item.find('[id*="_alicuota"]'))
+		if (categoriaIva === "I" || categoriaIva === "M") {
 			// aplicar dto para calcular el iva
 			dto = precio * (porcentaje / 100)
 			iva = (precio + dto) * (alicuota / 100)
@@ -133,7 +133,7 @@ function actualizarImportes() {
 	jQuery("#subtotalTh").html(subtotalTh.toFixed(3))
 	jQuery("#importeSubtotal").html(subTotalResumen.toFixed(3).replace(".", ","))
 
-	if (categoriaIva != "I" && categoriaIva != "M") {
+	if (categoriaIva !== "I" && categoriaIva !== "M") {
 		descrec = subTotalResumen * (porcentaje / 100)
 	}
 	const totalgral =

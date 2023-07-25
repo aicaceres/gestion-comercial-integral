@@ -67,6 +67,7 @@ class NotaDebCredController extends Controller
     $unidneg_id = $this->get('session')->get('unidneg_id');
     UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_notadebcred');
     $em = $this->getDoctrine()->getManager();
+    $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
     // Verificar si la caja está abierta CAJA=1
     $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
     if (!$caja->getAbierta()) {
@@ -87,9 +88,10 @@ class NotaDebCredController extends Controller
       $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneBy(array('byDefault' => 1));
       $entity->setMoneda($moneda);
       $entity->setCotizacion($moneda->getCotizacion());
-      $notaElectronica = new FacturaElectronica();
-      $notaElectronica->setPuntoVenta($this->getParameter('ptovta_ws_factura'));
-      $entity->setNotaElectronica($notaElectronica);
+      // $notaElectronica = new FacturaElectronica();
+      // $notaElectronica->setUnidadNegocio($unidneg);
+      // $notaElectronica->setPuntoVenta($this->getParameter('ptovta_ws_factura'));
+      // $entity->setNotaElectronica($notaElectronica);
     }
 
     $form = $this->createCreateForm($entity, 'new');
@@ -125,6 +127,8 @@ class NotaDebCredController extends Controller
     // credito - (descuenta la deuda del cliente)
     // debito + (aumenta la deuda del cliente)
     $em = $this->getDoctrine()->getManager();
+    $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
+
     // Verificar si la caja está abierta CAJA=1
     $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
     if (!$apertura) {
@@ -138,9 +142,10 @@ class NotaDebCredController extends Controller
 
     if ($form->isValid()) {
       $em->getConnection()->beginTransaction();
-      $notaElectronica = new FacturaElectronica();
-      $notaElectronica->setPuntoVenta($this->getParameter('ptovta_ws_factura'));
-      $entity->setNotaElectronica($notaElectronica);
+      // $notaElectronica = new FacturaElectronica();
+      // $notaElectronica->setUnidadNegocio($unidneg);
+      // $notaElectronica->setPuntoVenta($this->getParameter('ptovta_ws_factura'));
+      // $entity->setNotaElectronica($notaElectronica);
       // $notaElectronica = $entity->getNotaElectronica();
       try {
 
@@ -158,8 +163,9 @@ class NotaDebCredController extends Controller
           $docNro = $request->get('ventasbundle_nroDocumentoCliente') ? $request->get('ventasbundle_nroDocumentoCliente') : 0;
           $entity->setTipoDocumentoCliente($tipoDoc);
           $entity->setNroDocumentoCliente($docNro);
-          $docTipo = $tipoDoc->getCodigo();
-        }else{
+          //$docTipo = $tipoDoc->getCodigo();
+        }
+/*else{
           $docTipo = 99;
           $docNro = 0;
           if ($entity->getCliente()->getCuit()) {
@@ -170,35 +176,36 @@ class NotaDebCredController extends Controller
             $docNro = $entity->getNroDocumentoCliente();
           }
         }
-
+*/
         $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
         $entity->setComprobanteAsociado($compAsoc);
-        $cbtesAsoc = $periodoAsoc = array();
-        if ($entity->getComprobanteAsociado()) {
-          /* array(
-                        'Tipo' 		=> 6, // Tipo de comprobante (ver tipos disponibles)
-                        'PtoVta' 	=> 1, // Punto de venta
-                        'Nro' 		=> 1 // Numero de comprobante
-                        )
-                    )*/
-          $factura = $entity->getComprobanteAsociado();
-          $cbtesAsoc[] = array(
-            'Tipo' =>                             $factura->getCodigoComprobante(),
-            'PtoVta' => $factura->getPuntoVenta(),
-            'Nro' => $factura->getNroComprobante()
-          );
-        } else {
-          /* array(
-                        'FchDesde' => Ymd
-                        'FchHasta'  => Ymd
-                        )
-                  */
-          $periodoAsoc = array('FchDesde' => intval($entity->getFecha()->format('Ymd')), 'FchHasta' => intval($entity->getFecha()->format('Ymd')));
-        }
+        // $cbtesAsoc = $periodoAsoc = array();
+        // if ($entity->getComprobanteAsociado()) {
+        //   /* array(
+        //                 'Tipo' 		=> 6, // Tipo de comprobante (ver tipos disponibles)
+        //                 'PtoVta' 	=> 1, // Punto de venta
+        //                 'Nro' 		=> 1 // Numero de comprobante
+        //                 )
+        //             )*/
+        //   $factura = $entity->getComprobanteAsociado();
+        //   $cbtesAsoc[] = array(
+        //     'Tipo' =>                             $factura->getCodigoComprobante(),
+        //     'PtoVta' => $factura->getPuntoVenta(),
+        //     'Nro' => $factura->getNroComprobante()
+        //   );
+        // } else {
+        //   /* array(
+        //                 'FchDesde' => Ymd
+        //                 'FchHasta'  => Ymd
+        //                 )
+        //           */
+        //   $periodoAsoc = array('FchDesde' => intval($entity->getFecha()->format('Ymd')), 'FchHasta' => intval($entity->getFecha()->format('Ymd')));
+        // }
+
+        $entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo());
 
         $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
-        $entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo());
-        $iva = $tributos = array();
+        // $iva = $tributos = array();
         if ($entity->getDetalles()) {
           $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
           $productos = $request->get('ventasbundle_producto');
@@ -210,33 +217,33 @@ class NotaDebCredController extends Controller
                 $entity->removeDetalle($item);
               }
 
-            $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $item->getProducto()->getIva()));
-            $codigo = intval($alicuota->getCodigo());
+            // $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $item->getProducto()->getIva()));
+            // $codigo = intval($alicuota->getCodigo());
             $dtoRec = $item->getTotalDtoRecItem();
             $baseImp = $item->getTotalItem() + $dtoRec;
             $importe = $item->getTotalIvaItem();
-            $key = array_search($codigo, array_column($iva, 'Id'));
+            // $key = array_search($codigo, array_column($iva, 'Id'));
             // IVA
             /*  array(
                             'Id' 		=> 5, // Id del tipo de IVA (ver tipos disponibles)
                             'BaseImp' 	=> 100, // Base imponible
                             'Importe' 	=> 21 // Importe
                         )*/
-            if ($key === false) {
-              $iva[] = array(
-                'Id' => $codigo,
-                'BaseImp' => round($baseImp, 2),
-                'Importe' => round($importe, 2)
-              );
-            } else {
-              $iva[$key] = array(
-                'Id' => $codigo,
-                'BaseImp' => round($iva[$key]['BaseImp'] + $baseImp, 2),
-                'Importe' => round($iva[$key]['Importe'] + $importe, 2)
-              );
-            }
+            // if ($key === false) {
+            //   $iva[] = array(
+            //     'Id' => $codigo,
+            //     'BaseImp' => round($baseImp, 2),
+            //     'Importe' => round($importe, 2)
+            //   );
+            // } else {
+            //   $iva[$key] = array(
+            //     'Id' => $codigo,
+            //     'BaseImp' => round($iva[$key]['BaseImp'] + $baseImp, 2),
+            //     'Importe' => round($iva[$key]['Importe'] + $importe, 2)
+            //   );
+            // }
             // TOTALES
-            $impDtoRec += $dtoRec;
+            // $impDtoRec += $dtoRec;
             $impNeto += $baseImp;
             $impIVA += $importe;
             $impTotal += ($baseImp + $importe);
@@ -255,12 +262,12 @@ class NotaDebCredController extends Controller
             $neto = round($impNeto, 2);
             $iibb = round(($neto * $this->getParameter('iibb_percent')/100 ), 2);
             $impTrib = $iibb;
-            $tributos = array(
-              'Id' => 7,
-              'BaseImp' => $neto,
-              'Alic' => $this->getParameter('iibb_percent'),
-              'Importe' => $iibb
-            );
+          //   $tributos = array(
+          //     'Id' => 7,
+          //     'BaseImp' => $neto,
+          //     'Alic' => $this->getParameter('iibb_percent'),
+          //     'Importe' => $iibb
+          //   );
           }
           $impTotal += $impTrib;
         }
@@ -294,63 +301,62 @@ class NotaDebCredController extends Controller
         }
 
         // realizar nota electronica
-        $afip = new Afip(array('CUIT' => $this->getParameter('cuit_afip')));
-        $ptovta = $this->getParameter('ptovta_ws_factura');
-        $data = array(
-          'CantReg'   => 1,  // Cantidad de comprobantes a registrar
-          'PtoVta'   => $ptovta,  // Punto de venta
-          'CbteTipo'   => $entity->getTipoComprobante()->getCodigo(),  // Tipo de comprobante (ver tipos disponibles)
-          'Concepto'   => 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
-          'DocTipo'   => $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
-          'DocNro'   => $docNro,  // Número de documento del comprador (0 consumidor final)
-          'CbteFch'   => intval($entity->getFecha()->format('Ymd')), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
-          'ImpTotal'   => round($impTotal, 2), // Importe total del comprobante
-          'ImpTotConc'   => 0,   // Importe neto no gravado
-          'ImpNeto'   => round($impNeto, 2), // Importe neto gravado
-          'ImpOpEx'   => 0,   // Importe exento de IVA
-          'ImpIVA'   => round($impIVA, 2),  //Importe total de IVA
-          'ImpTrib'   => round($impTrib, 2),   //Importe total de tributos
-          'MonId'   => $entity->getMoneda()->getCodigoAfip(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
-          'MonCotiz'   => $entity->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
-          'Tributos' => $tributos,
-          'CbtesAsoc'   => $cbtesAsoc,
-          'PeriodoAsoc' => $periodoAsoc,
-          'Iva'       => $iva,
-        );
-        // si no hay combrobante asociado
-        if (empty($cbtesAsoc)) {
-          unset($data['CbtesAsoc']);
-        }
-        if (empty($periodoAsoc)) {
-          unset($data['PeriodoAsoc']);
-        }
-        // si no hay tributos
-        if (empty($tributos)) {
-          unset($data['Tributos']);
-        }
+        // $afip = new Afip(array('CUIT' => $this->getParameter('cuit_afip')));
+        // $ptovta = $this->getParameter('ptovta_ws_factura');
+        // $data = array(
+        //   'CantReg'   => 1,  // Cantidad de comprobantes a registrar
+        //   'PtoVta'   => $ptovta,  // Punto de venta
+        //   'CbteTipo'   => $entity->getTipoComprobante()->getCodigo(),  // Tipo de comprobante (ver tipos disponibles)
+        //   'Concepto'   => 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
+        //   'DocTipo'   => $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+        //   'DocNro'   => $docNro,  // Número de documento del comprador (0 consumidor final)
+        //   'CbteFch'   => intval($entity->getFecha()->format('Ymd')), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
+        //   'ImpTotal'   => round($impTotal, 2), // Importe total del comprobante
+        //   'ImpTotConc'   => 0,   // Importe neto no gravado
+        //   'ImpNeto'   => round($impNeto, 2), // Importe neto gravado
+        //   'ImpOpEx'   => 0,   // Importe exento de IVA
+        //   'ImpIVA'   => round($impIVA, 2),  //Importe total de IVA
+        //   'ImpTrib'   => round($impTrib, 2),   //Importe total de tributos
+        //   'MonId'   => $entity->getMoneda()->getCodigoAfip(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
+        //   'MonCotiz'   => $entity->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
+        //   'Tributos' => $tributos,
+        //   'CbtesAsoc'   => $cbtesAsoc,
+        //   'PeriodoAsoc' => $periodoAsoc,
+        //   'Iva'       => $iva,
+        // );
+        // // si no hay combrobante asociado
+        // if (empty($cbtesAsoc)) {
+        //   unset($data['CbtesAsoc']);
+        // }
+        // if (empty($periodoAsoc)) {
+        //   unset($data['PeriodoAsoc']);
+        // }
+        // // si no hay tributos
+        // if (empty($tributos)) {
+        //   unset($data['Tributos']);
+        // }
 
         // create voucher
-        $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
+        // $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
         // seteo ultimos valores
         $tipo = $entity->getTipoComprobante();
         $entity->setIva($impIVA);
         $entity->setPercIibb($impTrib);
         $entity->setTotal($impTotal);
-        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
         $entity->setUnidadNegocio($unidneg);
         // signo
         $entity->setSigno($tipo->getSigno());
         // Guardar datos en factura electronica
-        $notaElectronica->setNotaDebCred($entity);
-        $notaElectronica->setPuntoVenta($ptovta);
-        $notaElectronica->setTotal(round($impTotal, 2));
-        $notaElectronica->setSaldo(($tipo->getClase() == 'CRE') ? 0 : $saldo);
-        $notaElectronica->setCae($wsResult['CAE']);
-        $notaElectronica->setCaeVto($wsResult['CAEFchVto']);
-        $notaElectronica->setNroComprobante($wsResult['voucher_number']);
-        $notaElectronica->setTipoComprobante($entity->getTipoComprobante());
+        // $notaElectronica->setNotaDebCred($entity);
+        // $notaElectronica->setPuntoVenta($ptovta);
+        // $notaElectronica->setTotal(round($impTotal, 2));
+        // $notaElectronica->setSaldo(($tipo->getClase() == 'CRE') ? 0 : $saldo);
+        // $notaElectronica->setCae($wsResult['CAE']);
+        // $notaElectronica->setCaeVto($wsResult['CAEFchVto']);
+        // $notaElectronica->setNroComprobante($wsResult['voucher_number']);
+        // $notaElectronica->setTipoComprobante($entity->getTipoComprobante());
 
-        $em->persist($notaElectronica);
+        // $em->persist($notaElectronica);
         $em->persist($entity);
         $em->flush();
 
@@ -383,31 +389,34 @@ class NotaDebCredController extends Controller
           }
         }
 
-        $em->getConnection()->commit();
-        $this->addFlash('success', 'Emitido el comprobante ' . $notaElectronica->getComprobanteTxt());
+        //* Emitir nota fiscal afip
+        $serviceFacturar = $this->get('factura_electronica_webservice');
+        $result = $serviceFacturar->emitir($entity->getId(), 'NotaDebCred');
+        if($result['res'] == 'OK'){
+          $em->getConnection()->commit();
+          $this->addFlash('success', 'Comprobante emitido correctamente!');
 
-        return $this->redirectToRoute('ventas_notadebcred', array('printpdf' => $entity->getId()));
+          return $this->redirectToRoute('ventas_notadebcred', array('printpdf' => $entity->getId()));
+        }else{
+          throw new \Exception($result['msg']);
+        }
+
+
       } catch (\Exception $ex) {
 
-        switch ($ex->getCode()) {
-          case 10015:
-            $msg = "Debe ingresar tipo y nro de documento del cliente.";
-            break;
-          case 10016:
-            $msg = "Se está intentando autorizar un comprobante con fecha anterior al último informado o hay inconvenientes con la conexión a internet";
-            break;
-          case 10013:
-            $msg = "Para comprobantes clase A y M el tipo de documento debe ser CUIT";
-            break;
-          default:
-            $msg = $ex->getMessage();
-            break;
-        }
-        $this->addFlash('error', $msg);
+        $this->addFlash('error', $ex->getMessage());
         $em->getConnection()->rollback();
       }
     }
-
+// $errors = array();
+//         if ($form->count() > 0) {
+//             foreach ($form->all() as $child) {
+//                 if (!$child->isValid()) {
+//                     $errors[$child->getName()] = (String) $form[$child->getName()]->getErrors();
+//                 }
+//             }
+//         }
+// var_dump($errors);die;
     return $this->render('VentasBundle:NotaDebCred:new.html.twig', array(
       'entity' => $entity,
       'form' => $form->createView(),
@@ -537,69 +546,69 @@ class NotaDebCredController extends Controller
    * name="xprint_notadebcred_ventas")
    * @Method("GET")
    */
-  public function printNotaDebCredAction(Request $request, $id)
-  {
-    $em = $this->getDoctrine()->getManager();
-    $nota = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
-    $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
+  // public function xprintNotaDebCredAction(Request $request, $id)
+  // {
+  //   $em = $this->getDoctrine()->getManager();
+  //   $nota = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
+  //   $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
 
-    $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante.png';
-    $qr = __DIR__ . '/../../../web/assets/imagesafip/qr.png';
-    $logoafip = __DIR__ . '/../../../web/assets/imagesafip/logoafip.png';
+  //   $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante.png';
+  //   $qr = __DIR__ . '/../../../web/assets/imagesafip/qr.png';
+  //   $logoafip = __DIR__ . '/../../../web/assets/imagesafip/logoafip.png';
 
-    $url = $this->getParameter('url_qr_afip');
-    $cuit = $this->getParameter('cuit_afip');
-    $ptovta = $this->getParameter('ptovta_ws_factura');
+  //   $url = $this->getParameter('url_qr_afip');
+  //   $cuit = $this->getParameter('cuit_afip');
+  //   $ptovta = $this->getParameter('ptovta_ws_factura');
 
-    $data = array(
-      "ver" => 1,
-      "fecha" => $nota->getFecha()->format('Y-m-d'),
-      "cuit" => $cuit,
-      "ptoVta" => $ptovta,
-      "tipoCmp" => $nota->getNotaElectronica()->getCodigoComprobante(),
-      "nroCmp" => $nota->getNotaElectronica()->getNroComprobante(),
-      "importe" => round($nota->getMontoTotal(), 2),
-      "moneda" => $nota->getMoneda()->getCodigoAfip(),
-      "ctz" => $nota->getCotizacion(),
-      "tipoDocRec" => 0,
-      "nroDocRec" => 0,
-      "tipoCodAut" => "E",
-      "codAut" => $nota->getNotaElectronica()->getCae()
-    );
-    $base64 = base64_encode(json_encode($data));
+  //   $data = array(
+  //     "ver" => 1,
+  //     "fecha" => $nota->getFecha()->format('Y-m-d'),
+  //     "cuit" => $cuit,
+  //     "ptoVta" => $ptovta,
+  //     "tipoCmp" => $nota->getNotaElectronica()->getCodigoComprobante(),
+  //     "nroCmp" => $nota->getNotaElectronica()->getNroComprobante(),
+  //     "importe" => round($nota->getMontoTotal(), 2),
+  //     "moneda" => $nota->getMoneda()->getCodigoAfip(),
+  //     "ctz" => $nota->getCotizacion(),
+  //     "tipoDocRec" => 0,
+  //     "nroDocRec" => 0,
+  //     "tipoCodAut" => "E",
+  //     "codAut" => $nota->getNotaElectronica()->getCae()
+  //   );
+  //   $base64 = base64_encode(json_encode($data));
 
-    $qrCode = new QrCode();
-    $qrCode
-      ->setText($url . $base64)
-      ->setSize(120)
-      ->setPadding(5)
-      ->setErrorCorrection('low')
-      ->setImageType(QrCode::IMAGE_TYPE_PNG);
-    $qrCode->render($qr);
+  //   $qrCode = new QrCode();
+  //   $qrCode
+  //     ->setText($url . $base64)
+  //     ->setSize(120)
+  //     ->setPadding(5)
+  //     ->setErrorCorrection('low')
+  //     ->setImageType(QrCode::IMAGE_TYPE_PNG);
+  //   $qrCode->render($qr);
 
-    $facade = $this->get('ps_pdf.facade');
-    $response = new Response();
-    $this->render(
-      'VentasBundle:NotaDebCred:comprobante.pdf.twig',
-      array('nota' => $nota, 'empresa' => $empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip' => $logoafip),
-      $response
-    );
+  //   $facade = $this->get('ps_pdf.facade');
+  //   $response = new Response();
+  //   $this->render(
+  //     'VentasBundle:NotaDebCred:comprobante.pdf.twig',
+  //     array('nota' => $nota, 'empresa' => $empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip' => $logoafip),
+  //     $response
+  //   );
 
-    $xml = $response->getContent();
-    $content = $facade->render($xml);
-    $hoy = new \DateTime();
-    $filename = $nota->getNotaElectronica()->getComprobanteTxt() . '.pdf';
-    if ($this->getParameter('billing_folder')) {
-      $file = $this->getParameter('billing_folder') . $filename;
-      if (!file_exists($file)) {
-        file_put_contents($file, $content, FILE_APPEND);
-      }
-    }
-    return new Response($content, 200, array(
-      'content-type' => 'application/pdf',
-      'Content-Disposition' => 'filename=' . $filename
-    ));
-  }
+  //   $xml = $response->getContent();
+  //   $content = $facade->render($xml);
+  //   $hoy = new \DateTime();
+  //   $filename = $nota->getNotaElectronica()->getComprobanteTxt() . '.pdf';
+  //   if ($this->getParameter('billing_folder')) {
+  //     $file = $this->getParameter('billing_folder') . $filename;
+  //     if (!file_exists($file)) {
+  //       file_put_contents($file, $content, FILE_APPEND);
+  //     }
+  //   }
+  //   return new Response($content, 200, array(
+  //     'content-type' => 'application/pdf',
+  //     'Content-Disposition' => 'filename=' . $filename
+  //   ));
+  // }
 
 
 

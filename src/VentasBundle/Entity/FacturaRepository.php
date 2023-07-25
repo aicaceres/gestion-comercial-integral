@@ -51,25 +51,40 @@ class FacturaRepository extends EntityRepository {
         return $query->getArrayResult();
     }
 
-    public function findByCriteria($unidneg, $cliId = NULL, $desde = NULL, $hasta = NULL) {
-        $query = $this->_em->createQueryBuilder();
-        $query->select('p')
-                ->from('VentasBundle\Entity\Factura', 'p')
-                ->innerJoin('p.unidadNegocio', 'u')
-                ->where("u.id=" . $unidneg);
-        if ($cliId) {
-            $query->innerJoin('p.cliente', 'pr')
-                    ->andWhere('pr.id=' . $cliId);
-        }
-        if ($desde) {
-            $cadena = " p.fechaFactura >= '" . UtilsController::toAnsiDate($desde) . "'";
-            $query->andWhere($cadena);
-        }
-        if ($hasta) {
-            $cadena = " p.fechaFactura <= '" . UtilsController::toAnsiDate($hasta) . "'";
-            $query->andWhere($cadena);
-        }
-        return $query->getQuery()->getResult();
+    // public function findByCriteria($unidneg, $cliId = NULL, $desde = NULL, $hasta = NULL) {
+    //     $query = $this->_em->createQueryBuilder();
+    //     $query->select('p')
+    //             ->from('VentasBundle\Entity\Factura', 'p')
+    //             ->innerJoin('p.unidadNegocio', 'u')
+    //             ->where("u.id=" . $unidneg);
+    //     if ($cliId) {
+    //         $query->innerJoin('p.cliente', 'pr')
+    //                 ->andWhere('pr.id=' . $cliId);
+    //     }
+    //     if ($desde) {
+    //         $cadena = " p.fechaFactura >= '" . UtilsController::toAnsiDate($desde) . "'";
+    //         $query->andWhere($cadena);
+    //     }
+    //     if ($hasta) {
+    //         $cadena = " p.fechaFactura <= '" . UtilsController::toAnsiDate($hasta) . "'";
+    //         $query->andWhere($cadena);
+    //     }
+    //     return $query->getQuery()->getResult();
+    // }
+
+    /** AFIP VENTAS */
+
+
+    public function findByFeventasPeriodoUnidadNegocio($desde, $hasta, $unidneg){
+      $query = $this->_em->createQueryBuilder('fe')
+            ->select('fe')
+            ->from('VentasBundle:FacturaElectronica', 'fe')
+            ->innerJoin('fe.unidadNegocio','u')
+            ->where('u.id=' . $unidneg)
+            ->andWhere("fe.cbteFch >= '".$desde."'")
+            ->andWhere("fe.cbteFch <= '".$hasta."'")
+            ->orderBy('fe.cbteFch');
+            return $query->getQuery()->getResult();
     }
 
     public function findComprobantesByPeriodoUnidadNegocio($desde, $hasta, $unidneg) {

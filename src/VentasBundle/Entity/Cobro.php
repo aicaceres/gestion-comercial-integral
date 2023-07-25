@@ -138,6 +138,7 @@ class Cobro {
         return ($this->getFormaPago()->getCuentaCorriente()) ? '' : $this->getFormaPago()->getNombre();
     }
 
+    //* datos para la impresion de la factura electronica
     public function getTextoPagosParaFactura(){
         $txt = '';
         foreach( $this->detalles as $det){
@@ -156,6 +157,33 @@ class Cobro {
             }
         }
         return $txt;
+    }
+    public function getNombreClienteTxt(){
+      return $this->getNombreCliente() ? $this->getNombreCliente() : $this->getCliente()->getNombre();
+    }
+    public function getSubtotal(){
+      return $this->getVenta()->getSubtotal();
+    }
+    public function getRefVenta(){
+      return "Ref. #". $this->getVenta()->getNroOperacion();
+    }
+    public function getDescuentoRecargo(){
+      return $this->getVenta()->getDescuentoRecargo();
+    }
+    public function getTotalDescuentoRecargo(){
+      return $this->getVenta()->getTotalDescuentoRecargo();
+    }
+    public function getTotalIva(){
+      return $this->getVenta()->getTotalIva();
+    }
+    public function getTotalIibb(){
+      return $this->getVenta()->getTotalIibb();
+    }
+    public function getVentaDetalles(){
+      return $this->getVenta()->getDetalles();
+    }
+    public function getConcepto(){
+      return $this->getVenta()->getConcepto();
     }
 
     /**

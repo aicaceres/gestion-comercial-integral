@@ -31,6 +31,7 @@
             <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
         </div>
+        <input type="hidden" value="{{selectedtab}}" name="selectedtab" id="selectedtab" />
     </form>
 
 </div>
@@ -104,12 +105,12 @@ jQuery(document).ready(function($){
       partialDetalleVenta($(this))
     })
 
-    {# function detectarControles(e) {
-    // ctrl + alt + C
-      if( e.ctrlKey && e.altKey && e.keyCode == 67 ){
-        $('.facturarVentas').click();
-      }
-    } #}
+    $('.hornav li a').on('click', function(){
+      $('#selectedtab').val( $(this).attr('href') )
+    });
+    let selectedtab = "{{selectedtab}}"
+    $('#selectedtab').val( selectedtab ? selectedtab : "#tab-porcobrar" )
+    $('.hornav li a[href="' + selectedtab + '"]').click()
 });
 
 function partialDetalleVenta(obj) {

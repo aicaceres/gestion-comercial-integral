@@ -29,12 +29,15 @@
         </div>
 <!-- Botones para cierres X y Z -->
         <div style="display: inline-block;float:right;" >
-            <label><strong>TICKEADORA FISCAL:</strong></label>
-            <button type="button" class="stdbtn btn_yellow" onclick="cierreX()" style="padding:7px 20px">
+            <label><strong>TICKEADORA FISCAL: </strong></label>
+            <button type="button" class="stdbtn btn_orange" onclick="cierreX()" style="padding:7px 20px">
                 Cierre X <img class="loader_cierrex hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
             <button type="button" class="stdbtn btn_red" onclick="cierreZ()" style="padding:7px 20px">
                 Cierre Z <img class="loader_cierrez hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
+            </button>
+            <button type="button" class="stdbtn btn_grey" onclick="resumenSemanal()" style="padding:7px 20px">
+                Resumen Semanal <img class="loader_resumensemanal hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
         </div>
     </form>
@@ -163,5 +166,36 @@ function cierreZ(){
     }
     jQuery('.loader_cierrez').addClass('hidden');
 }
+
+function resumenSemanal(){
+  jQuery('.loader_resumensemanal').removeClass('hidden')
+  jQuery.ajax({
+      type: 'get',
+      url: '{{ path("get_semana_actual") }}',
+      dataType: 'JSON',
+      success: function(data) {
+          var driver = new Driver();
+            driver.modelo = modelo;
+            driver.puerto = puerto;
+            driver.baudios = baudios;
+            try {
+                driver.iniciarTrabajo();
+                nombreArchivo = "c:\\datos\\reporte.zip"
+                tipoReporte = "1"
+                driver.obtenerPrimerBloqueReporteElectronico(data.rangoInicial, data.rangoFinal, nombreArchivo, tipoReporte)
+                driver.finalizarTrabajo()
+                alert("Operación realizada con éxito!")
+            } catch (e){
+                alert(e)
+            }
+            jQuery('.loader_resumensemanal').addClass('hidden')
+      }
+  }).fail( function(){
+    alert(error)
+    jQuery('.loader_resumensemanal').addClass('hidden')
+  } );
+
+}
+
 </script>
 {% endblock %}

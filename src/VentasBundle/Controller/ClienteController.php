@@ -10,6 +10,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use ConfigBundle\Controller\UtilsController;
+use ConfigBundle\Controller\MonedaController;
+
 use VentasBundle\Entity\Cliente;
 use VentasBundle\Form\ClienteType;
 use VentasBundle\Entity\PagoCliente;
@@ -18,6 +20,7 @@ use VentasBundle\Entity\NotaDebCred;
 use VentasBundle\Entity\NotaDebCredDetalle;
 use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Entity\CobroDetalle;
+
 use VentasBundle\Afip\src\Afip;
 use Endroid\QrCode\QrCode;
 
@@ -476,11 +479,11 @@ class ClienteController extends Controller
   }
 
   /**
-   * @Route("/pagos/new", name="ventas_cliente_pagos_new")
+   * @Route("/pagos/{id}/new", name="ventas_cliente_pagos_new")
    * @Method("GET")
    * @Template("VentasBundle:Cliente:pago_edit.html.twig")
    */
-  public function pagosNewAction(Request $request)
+  public function pagosNewAction($id)
   {
     $session = $this->get('session');
     $unidneg_id = $session->get('unidneg_id');
@@ -488,20 +491,19 @@ class ClienteController extends Controller
     $entity = new PagoCliente();
     $em = $this->getDoctrine()->getManager();
 
-    $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('id'));
+    $cliente = $em->getRepository('VentasBundle:Cliente')->find($id);
     $entity->setCliente($cliente);
+    $valido = UtilsController::validarCuit($cliente->getCuit());
 
     $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
     if ($param) {
       // ultimo nro de operacion de cobro
       $entity->setPagoNro($param->getUltimoNroPagoCliente() + 1);
     }
-    $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneBy(array('byDefault' => 1));
+    $moneda = MonedaController::getMonedaByDefault();
     $entity->setMoneda($moneda);
     $entity->setFecha(new \DateTime());
     $form = $this->pagosCreateCreateForm($entity);
-
-    $valido = UtilsController::validarCuit($cliente->getCuit());
 
     return $this->render('VentasBundle:Cliente:pago_edit.html.twig', array(
       'entity' => $entity,
@@ -575,11 +577,16 @@ class ClienteController extends Controller
     UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
     $msg = 'OK';
     $entity = new PagoCliente();
+    $data = $request->get('ventasbundle_pagocliente');
+    $em = $this->getDoctrine()->getManager();
+    $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
+    $cliente = $em->getRepository('VentasBundle:Cliente')->find($data['cliente']);
+    $entity->setCliente($cliente);
+
     $form = $this->pagosCreateCreateForm($entity);
     $form->handleRequest($request);
     if ($form->isValid()) {
       try {
-        $em = $this->getDoctrine()->getManager();
         $em->getConnection()->beginTransaction();
         // checkear apertura de caja
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
@@ -624,12 +631,17 @@ class ClienteController extends Controller
           $notacredito->setMoneda($entity->getMoneda());
           $notacredito->setCotizacion($entity->getCotizacion());
           $notacredito->setSigno('-');
-          $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
           $notacredito->setUnidadNegocio($unidneg);
           $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find(21);
           $notacredito->setFormaPago($formaPago);
           $notaElectronica = new FacturaElectronica();
+          $notaElectronica->setUnidadNegocio($unidneg);
           $notaElectronica->setPuntoVenta($this->getParameter('ptovta_ws_factura'));
+          $notaElectronica->setConcepto(1); // Productos
+          $notaElectronica->setCbteFch( intval( $notacredito->getFecha()->format('Ymd')) );
+          $notaElectronica->setNombreCliente($notacredito->getNombreClienteTxt());
+          $notaElectronica->setTipoComprobante($notacredito->getTipoComprobante());
+
           $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
           $letra = ($catIva == 'I' || $catIva == 'M') ? 'A' : 'B';
           $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->getIdByTipo('CRE-' . $letra);
@@ -641,6 +653,9 @@ class ClienteController extends Controller
             $docTipo = 80;
             $docNro = trim($entity->getCliente()->getCuit());
           }
+          $notaElectronica->setDocTipo($docTipo);
+          $notaElectronica->setDocNro($docNro);
+
           $cbtesAsoc = array();
           if ($entity->getComprobantes()) {
             foreach ($entity->getComprobantes() as $comp) {
@@ -656,7 +671,10 @@ class ClienteController extends Controller
           $iva = $tributos = array();
           // armar item
           // calculos
-          $grav = ($catIva == 'I') ? 1.245 : 1.21;
+          $ivaPercent = '21.00';
+          $iibbPercent = $this->getParameter('iibb_percent');
+
+          $grav = ($catIva == 'I') ?  1+(($ivaPercent+$iibbPercent)/100) : 1+($ivaPercent/100);
           $impNeto = $montoNotaCredito / $grav;
           $detalle = new NotaDebCredDetalle();
           $detalle->setCantidad(1);
@@ -664,12 +682,12 @@ class ClienteController extends Controller
           $detalle->setProducto($producto);
           $detalle->setTextoComodin('Descuento por pago anticipado');
           $detalle->setPrecio($impNeto);
-          $detalle->setAlicuota('21.00');
+          $detalle->setAlicuota($ivaPercent);
           $notacredito->addDetalle($detalle);
-          $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => '21.00'));
+          $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $ivaPercent));
           $codigo = intval($alicuota->getCodigo());
 
-          $impIVA = $impNeto * (0.21);
+          $impIVA = $impNeto * ($ivaPercent/100);
           $iva[] = array(
             'Id' => $codigo,
             'BaseImp' => round($impNeto, 2),
@@ -680,34 +698,49 @@ class ClienteController extends Controller
           $impTrib = 0;
           if ($catIva == 'I') {
             $neto = round($impNeto, 2);
-            $iibb = round(($neto *  ($this->getParameter('iibb_percent')/100) ), 2);
+            $iibb = round(($neto *  ($iibbPercent/100) ), 2);
             $impTrib = $iibb;
             $tributos = array(
               'Id' => 7,
               'BaseImp' => $neto,
-              'Alic' => $this->getParameter('iibb_percent'),
+              'Alic' => $iibbPercent,
               'Importe' => $iibb
             );
           }
           $impTotal += $impTrib;
+
+        $notaElectronica->setTotal( round($impTotal, 2) );
+        $notaElectronica->setImpTotConc(0);
+        $notaElectronica->setImpNeto(round($impNeto, 2));
+        $notaElectronica->setImpOpEx(0);
+        $notaElectronica->setImpIva(round($impIVA, 2));
+        $notaElectronica->setImpTrib(round($impTrib, 2));
+        $notaElectronica->setMonId($notacredito->getMoneda()->getCodigoAfip());
+        $notaElectronica->setMonCotiz($notacredito->getMoneda()->getCotizacion());
+        // guardar json
+        $notaElectronica->setTributos( json_encode($tributos));
+        $notaElectronica->setCbtesAsoc(json_encode($cbtesAsoc));
+        $notaElectronica->setPeriodoAsoc('[]');
+        $notaElectronica->setIva(json_encode($iva));
+
           // realizar nota electronica
           $afip = new Afip(array('CUIT' => $this->getParameter('cuit_afip')));
           $data = array(
             'CantReg'   => 1,  // Cantidad de comprobantes a registrar
             'PtoVta'   => $notaElectronica->getPuntoVenta(),  // Punto de venta
             'CbteTipo'   => $notaElectronica->getCodigoComprobante(),  // Tipo de comprobante (ver tipos disponibles)
-            'Concepto'   => 1,  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
-            'DocTipo'   => $docTipo, // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
-            'DocNro'   => $docNro,  // Número de documento del comprador (0 consumidor final)
-            'CbteFch'   => intval($notacredito->getFecha()->format('Ymd')), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
-            'ImpTotal'   => round($impTotal, 2), // Importe total del comprobante
-            'ImpTotConc'   => 0,   // Importe neto no gravado
-            'ImpNeto'   => round($impNeto, 2), // Importe neto gravado
-            'ImpOpEx'   => 0,   // Importe exento de IVA
-            'ImpIVA'   => round($impIVA, 2),  //Importe total de IVA
-            'ImpTrib'   => round($impTrib, 2),   //Importe total de tributos
-            'MonId'   => $notacredito->getMoneda()->getCodigoAfip(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
-            'MonCotiz'   => $notacredito->getMoneda()->getCotizacion(),     // Cotización de la moneda usada (1 para pesos argentinos)
+            'Concepto'   => $notaElectronica->getConcepto(),  // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
+            'DocTipo'   => $notaElectronica->getDocTipo(), // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+            'DocNro'   => $notaElectronica->getDocNro(),  // Número de documento del comprador (0 consumidor final)
+            'CbteFch'   => $notaElectronica->getCbteFch(), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
+            'ImpTotal'   => $notaElectronica->getTotal(), // Importe total del comprobante
+            'ImpTotConc'   => $notaElectronica->getImpTotConc(),   // Importe neto no gravado
+            'ImpNeto'   => $notaElectronica->getImpNeto(), // Importe neto gravado
+            'ImpOpEx'   => $notaElectronica->getImpOpEx(),   // Importe exento de IVA
+            'ImpIVA'   => $notaElectronica->getImpIva(),  //Importe total de IVA
+            'ImpTrib'   => $notaElectronica->getImpTrib(),   //Importe total de tributos
+            'MonId'   => $notaElectronica->getMonId(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
+            'MonCotiz'   => $notaElectronica->getMonCotiz(),     // Cotización de la moneda usada (1 para pesos argentinos)
             'Tributos' => $tributos,
             'CbtesAsoc'   => $cbtesAsoc,
             'Iva'       => $iva,
@@ -721,7 +754,7 @@ class ClienteController extends Controller
           $notacredito->setIva($impIVA);
           $notacredito->setPercIibb($impTrib);
           $notacredito->setTotal($impTotal);
-          $notaElectronica->setTotal($impTotal);
+
           $notaElectronica->setSaldo(0);
           $notaElectronica->setCae($wsResult['CAE']);
           $notaElectronica->setCaeVto($wsResult['CAEFchVto']);
@@ -734,6 +767,7 @@ class ClienteController extends Controller
           $cobroDetalle->setMoneda($notacredito->getMoneda());
           $cobroDetalle->setImporte($impTotal);
           $notacredito->addCobroDetalle($cobroDetalle);
+
           $em->persist($notaElectronica);
           $em->persist($notacredito);
           $entity->setNotaDebCred($notacredito);
@@ -810,27 +844,39 @@ class ClienteController extends Controller
     $facade = $this->get('ps_pdf.facade');
     $response = new Response();
 
+    $array = array(
+      'pago' => $pago,
+      'cbte' => $nota,
+      'fe' => null,
+      'empresa' => $empresa,
+      'logo' => $logo,
+      'qr' => null,
+      'logoafip' => null
+    );
+
     if ($nota) {
       $qr = __DIR__ . '/../../../web/assets/imagesafip/qr.png';
-      $logoafip = __DIR__ . '/../../../web/assets/imagesafip/logoafip.png';
+      $array['qr'] = $qr;
+      $array['logoafip'] = __DIR__ . '/../../../web/assets/imagesafip/logoafip.png';
       $url = $this->getParameter('url_qr_afip');
       $cuit = $this->getParameter('cuit_afip');
-      $ptovta = $this->getParameter('ptovta_ws_factura');
+      $fe = $nota->getNotaElectronica();
+      $array['fe'] = $fe;
 
       $data = array(
         "ver" => 1,
-        "fecha" => $nota->getFecha()->format('Y-m-d'),
+        "fecha" =>  $fe->getCbteFchFormatted('Y-m-d'),
         "cuit" => $cuit,
-        "ptoVta" => $ptovta,
-        "tipoCmp" => $nota->getNotaElectronica()->getCodigoComprobante(),
-        "nroCmp" => $nota->getNotaElectronica()->getNroComprobante(),
-        "importe" => round($nota->getMontoTotal(), 2),
-        "moneda" => $nota->getMoneda()->getCodigoAfip(),
-        "ctz" => $nota->getCotizacion(),
+        "ptoVta" => $fe->getPuntoVenta(),
+        "tipoCmp" => $fe->getCodigoComprobante(),
+        "nroCmp" => $fe->getNroComprobante(),
+        "importe" => round($fe->getTotal(), 2),
+        "moneda" => $fe->getMonId(),
+        "ctz" => $fe->getMonCotiz(),
         "tipoDocRec" => 0,
         "nroDocRec" => 0,
         "tipoCodAut" => "E",
-        "codAut" => $nota->getNotaElectronica()->getCae()
+        "codAut" => $fe->getCae()
       );
       $base64 = base64_encode(json_encode($data));
 
@@ -842,12 +888,6 @@ class ClienteController extends Controller
         ->setErrorCorrection('low')
         ->setImageType(QrCode::IMAGE_TYPE_PNG);
       $qrCode->render($qr);
-      $array = array(
-        'pago' => $pago, 'nota' => $nota,
-        'empresa' => $empresa, 'logo' => $logo, 'qr' => $qr, 'logoafip' => $logoafip
-      );
-    } else {
-      $array = array('pago' => $pago, 'nota' => $nota, 'empresa' => $empresa, 'logo' => $logo);
     }
     $this->render('VentasBundle:Cliente:comprobante-pago.pdf.twig', $array, $response);
 

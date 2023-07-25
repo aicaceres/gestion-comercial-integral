@@ -216,7 +216,7 @@ class Cliente
         $saldo = 0;
 
         foreach( $this->getCobros() as $cobro){
-            $saldo += $cobro->getFacturaElectronica()->getSaldo();
+            $saldo += $cobro->getFacturaElectronica() ? $cobro->getFacturaElectronica()->getSaldo() : 0;
         }
 
         foreach( $this->getNotasDebCredVenta() as $debcred){

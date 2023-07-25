@@ -192,7 +192,8 @@ jQuery(function ($) {
 });
 
 function setPeriodoAsociado(){
-  let hoy = new Date().toJSON().slice(0,10).split('-').reverse().join('-')
+  let hoy = new Date().toLocaleString("en-GB").slice(0,10).split('-').reverse().join('-').replaceAll('/','-')
+
   jQuery('#ventasbundle_notadebcred_periodoAsocDesde').val( hoy )
   jQuery('#ventasbundle_notadebcred_periodoAsocHasta').val( hoy )
 }

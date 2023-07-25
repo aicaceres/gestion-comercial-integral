@@ -86,6 +86,14 @@ class ParametroRepository extends EntityRepository {
         return $query->getQuery()->getOneOrNullResult();
     }
 
+    public function findTipoDocumento($codigo=99) {
+        $codigo = $codigo ? $codigo : 99;
+        $agrupador = $this->findOneByNombre('tipo-documento');
+        $query = $this->_em->createQuery("Select r.nombre from ConfigBundle\Entity\Parametro r
+          where r.codigo=".$codigo." and r.agrupador_id=" . $agrupador->getId());
+        $res = $query->getOneOrNullResult();
+        return $res['nombre'];
+    }
     /**
      * Escalas impositivas
      */

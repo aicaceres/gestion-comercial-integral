@@ -238,7 +238,6 @@ function emitirFactura(cobroId){
   jQuery('#guardar span').html('Emitiendo Factura...')
   const url = jQuery('#guardar').data('urlemitir')
   jQuery.post(url, {id:cobroId, entity: 'Cobro'}, function(data){
-console.log(data)
     if(data.res === 'OK'){
       jQuery("#divEmitirTicket").remove()
       setFacturando(false)

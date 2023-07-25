@@ -37,45 +37,64 @@ class PagoClienteType extends AbstractType
                     'attr' => array(
                         'class' => 'row item'
                 )))
+            ->add('cliente')
+            ->add('comprobantes', 'entity', array(
+                  'required' => false, 'label' => 'COMPROBANTES PENDIENTES:', 'multiple' => true,
+                  'placeholder' => 'Seleccionar...', 'attr' => array('class' => 'select2'),
+                  'choice_label' => 'comprobanteCtaCtePendienteTxt',
+                  'class' => 'VentasBundle:FacturaElectronica',
+                  'query_builder' => function(EntityRepository $repository) use ($cliente) {
+                      $qb = $repository->createQueryBuilder('f')
+                              ->leftJoin('f.cobro', 'c')
+                              ->leftJoin('f.notaDebCred', 'n')
+                              ->where('c.cliente = :cli')
+                              ->orWhere('n.cliente = :cli')
+                              ->andWhere('f.saldo>0')
+                              ->setParameter('cli', $cliente);
+                      return $qb;
+                  },))
         ;
-        if ($cliente) {
-            // en render de nueva venta solo traer el cliente seleccionado
-            $builder->add('cliente', 'entity', array('required' => true,
-                        'class' => 'VentasBundle:Cliente', 'label' => 'DATOS DEL CLIENTE: ',
-                        'query_builder' => function (EntityRepository $repository) use ($cliente) {
-                            return $qb = $repository->createQueryBuilder('c')
-                                ->where("c.id=" . $cliente->getId());
-                           }
-                        ))
-                    ->add('comprobantes', 'entity', array(
-                        'required' => false, 'label' => 'COMPROBANTES PENDIENTES:', 'multiple' => true,
-                        'placeholder' => 'Seleccionar...', 'attr' => array('class' => 'select2'),
-                        'choice_label' => 'comprobanteCtaCtePendienteTxt',
-                        'class' => 'VentasBundle:FacturaElectronica',
-                        'query_builder' => function(EntityRepository $repository) use ($cliente) {
-                            $qb = $repository->createQueryBuilder('f')
-                                    ->leftJoin('f.cobro', 'c')
-                                    ->leftJoin('f.notaDebCred', 'n')
-                                    ->where('c.cliente = :cli')
-                                    ->orWhere('n.cliente = :cli')
-                                    ->andWhere('f.saldo>0')
-                                    ->setParameter('cli', $cliente);
-                            return $qb;
-                        },))
-                ;
-        } else {
-            // al crear traer objeto completo para match del cliente
-            $builder->add('cliente', 'entity', array(
-                    'class' => 'VentasBundle:Cliente',
-                    'required' => true
-                    ))
-                    ->add('comprobantes', 'entity', array(
-                        'required' => false, 'label' => 'COMPROBANTES PENDIENTES:',
-                        'choice_label' => 'comprobanteCtaCtePendienteTxt', 'multiple' => true,
-                        'class' => 'VentasBundle:FacturaElectronica'
-                        ))
-            ;
-        }
+
+
+
+        // if ($cliente) {
+        //     // en render de nueva venta solo traer el cliente seleccionado
+        //     $builder->add('cliente', 'entity', array('required' => true,
+        //                 'class' => 'VentasBundle:Cliente', 'label' => 'DATOS DEL CLIENTE: ',
+        //                 'query_builder' => function (EntityRepository $repository) use ($cliente) {
+        //                     return $qb = $repository->createQueryBuilder('c')
+        //                         ->where("c.id=" . $cliente->getId());
+        //                    }
+        //                 ))
+        //             ->add('comprobantes', 'entity', array(
+        //                 'required' => false, 'label' => 'COMPROBANTES PENDIENTES:', 'multiple' => true,
+        //                 'placeholder' => 'Seleccionar...', 'attr' => array('class' => 'select2'),
+        //                 'choice_label' => 'comprobanteCtaCtePendienteTxt',
+        //                 'class' => 'VentasBundle:FacturaElectronica',
+        //                 'query_builder' => function(EntityRepository $repository) use ($cliente) {
+        //                     $qb = $repository->createQueryBuilder('f')
+        //                             ->leftJoin('f.cobro', 'c')
+        //                             ->leftJoin('f.notaDebCred', 'n')
+        //                             ->where('c.cliente = :cli')
+        //                             ->orWhere('n.cliente = :cli')
+        //                             ->andWhere('f.saldo>0')
+        //                             ->setParameter('cli', $cliente);
+        //                     return $qb;
+        //                 },))
+        //         ;
+        // } else {
+        //     // al crear traer objeto completo para match del cliente
+        //     $builder->add('cliente', 'entity', array(
+        //             'class' => 'VentasBundle:Cliente',
+        //             'required' => true
+        //             ))
+        //             ->add('comprobantes', 'entity', array(
+        //                 'required' => false, 'label' => 'COMPROBANTES PENDIENTES:',
+        //                 'choice_label' => 'comprobanteCtaCtePendienteTxt', 'multiple' => true,
+        //                 'class' => 'VentasBundle:FacturaElectronica'
+        //                 ))
+        //     ;
+        // }
     }
 
     /**

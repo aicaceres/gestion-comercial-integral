@@ -87,7 +87,7 @@ class NotaDebCredDetalle {
             // precio con iva incluido convertido a la cotizacion
             $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $cotizacion;
         }
-        return round( $precio, 3);
+        return round( $precio, 4);
     }
     // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
     public function getDtoRecItem(){
@@ -115,6 +115,10 @@ class NotaDebCredDetalle {
 
     public function getNombreProducto(){
         return ( $this->getProducto()->getComodin() ) ? $this->getTextoComodin() : $this->getProducto()->getNombre();
+    }
+    public function getBaseImponibleItem(){
+        $precio = ($this->getPrecio() / $this->getNotaDebCred()->getCotizacion()) * $this->getCantidad();
+        return round( $precio, 3);
     }
 
 
