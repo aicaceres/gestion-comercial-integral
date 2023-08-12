@@ -10,10 +10,15 @@ class PermisoRepository extends EntityRepository {
     public function getPadres() {
         $query = $this->_em->createQueryBuilder();
         $query->select('p')
-              ->from('ConfigBundle\Entity\Permiso', 'p')  
+              ->from('ConfigBundle\Entity\Permiso', 'p')
               ->where("p.padre IS NULL")
-              ->orderBy('p.orden','DESC')  ;       
-        return $query->getQuery()->getResult();  
+              ->orderBy('p.orden','DESC')  ;
+        return $query->getQuery()->getResult();
     }
-        
+
+    public function bulkPermisos($csv){
+      
+
+    }
+
 }

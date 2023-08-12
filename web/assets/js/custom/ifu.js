@@ -317,7 +317,7 @@ function Driver(){
         }
     }
 
-    this.sendData = function(request) {
+  this.sendData = function (request) {
         if (this.usarHttps){
             url = "https://" + this.host +  ":3011";
         } else {
@@ -614,7 +614,7 @@ function Driver(){
         request.params.rangoFinal = rangoFinal;
         request.params.nombreArchivo = nombreArchivo;
         request.params.tipoReporte = tipoReporte;
-        this.work.requests.push(request);
+      this.work.requests.push(request);
     }
 
     this.obtenerSiguienteBloqueReporteElectronico = function(){

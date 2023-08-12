@@ -190,8 +190,8 @@ function resumenSemanal(){
             }
             jQuery('.loader_resumensemanal').addClass('hidden')
       }
-  }).fail( function(){
-    alert(error)
+  }).fail( function(e){
+     alert(e)
     jQuery('.loader_resumensemanal').addClass('hidden')
   } );
 

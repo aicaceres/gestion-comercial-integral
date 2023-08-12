@@ -1,8 +1,10 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Escalas
  * @ORM\Table(name="escalas")
@@ -21,54 +23,70 @@ class Escalas {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
      */
     protected $nombre;
+
     /**
      * @var string $tipo
      * @ORM\Column(name="tipo", type="string", nullable=false)
      */
     protected $tipo;
+
     /**
      * @var string $retencion
      * @ORM\Column(name="retencion", type="decimal", scale=2, nullable=true)
      */
     protected $retencion = 0;
+
     /**
      * @var string $adicional
      * @ORM\Column(name="adicional", type="decimal", scale=2, nullable=true)
      */
     protected $adicional = 0;
+
     /**
      * @var string $minimo
      * @ORM\Column(name="minimo", type="decimal", scale=2, nullable=true)
      */
     protected $minimo = 0;
+
     /**
      * @var string $codigoAtp
      * @ORM\Column(name="codigo_atp", type="integer", nullable=true)
      */
     protected $codigoAtp = 0;
 
+    /**
+     * @var string $idImportado
+     * @ORM\Column(name="id_importado", type="integer", nullable=true)
+     */
+    protected $idImportado = 0;
+
     public function __toString() {
         return $this->nombre;
     }
+
     // escala G o H
-    public function getDesde(){
+    public function getDesde() {
         return $this->retencion;
     }
+
     // escala G o H
-    public function getHasta(){
+    public function getHasta() {
         return $this->adicional;
     }
+
     // escala G o H
-    public function getFijo(){
+    public function getFijo() {
         return $this->minimo;
     }
+
     // escala G o H
-    public function getPorcExcedente(){
+    public function getPorcExcedente() {
         return $this->codigoAtp;
     }
 
@@ -77,8 +95,7 @@ class Escalas {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -88,8 +105,7 @@ class Escalas {
      * @param string $nombre
      * @return Escalas
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -100,8 +116,7 @@ class Escalas {
      *
      * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -111,8 +126,7 @@ class Escalas {
      * @param string $tipo
      * @return Escalas
      */
-    public function setTipo($tipo)
-    {
+    public function setTipo($tipo) {
         $this->tipo = $tipo;
 
         return $this;
@@ -123,8 +137,7 @@ class Escalas {
      *
      * @return string
      */
-    public function getTipo()
-    {
+    public function getTipo() {
         return $this->tipo;
     }
 
@@ -134,8 +147,7 @@ class Escalas {
      * @param string $retencion
      * @return Escalas
      */
-    public function setRetencion($retencion)
-    {
+    public function setRetencion($retencion) {
         $this->retencion = $retencion;
 
         return $this;
@@ -146,8 +158,7 @@ class Escalas {
      *
      * @return string
      */
-    public function getRetencion()
-    {
+    public function getRetencion() {
         return $this->retencion;
     }
 
@@ -157,8 +168,7 @@ class Escalas {
      * @param string $adicional
      * @return Escalas
      */
-    public function setAdicional($adicional)
-    {
+    public function setAdicional($adicional) {
         $this->adicional = $adicional;
 
         return $this;
@@ -169,8 +179,7 @@ class Escalas {
      *
      * @return string
      */
-    public function getAdicional()
-    {
+    public function getAdicional() {
         return $this->adicional;
     }
 
@@ -180,8 +189,7 @@ class Escalas {
      * @param string $minimo
      * @return Escalas
      */
-    public function setMinimo($minimo)
-    {
+    public function setMinimo($minimo) {
         $this->minimo = $minimo;
 
         return $this;
@@ -192,8 +200,7 @@ class Escalas {
      *
      * @return string
      */
-    public function getMinimo()
-    {
+    public function getMinimo() {
         return $this->minimo;
     }
 
@@ -203,8 +210,7 @@ class Escalas {
      * @param integer $codigoAtp
      * @return Escalas
      */
-    public function setCodigoAtp($codigoAtp)
-    {
+    public function setCodigoAtp($codigoAtp) {
         $this->codigoAtp = $codigoAtp;
 
         return $this;
@@ -215,8 +221,27 @@ class Escalas {
      *
      * @return integer
      */
-    public function getCodigoAtp()
-    {
+    public function getCodigoAtp() {
         return $this->codigoAtp;
     }
+
+    /**
+     * @param integer $idImportado
+     * @return Escalas
+     */
+    public function setIdImportado($idImportado) {
+        $this->idImportado = $idImportado;
+
+        return $this;
+    }
+
+    /**
+     * Get idImportado
+     *
+     * @return integer
+     */
+    public function getIdImportado() {
+        return $this->idImportado;
+    }
+
 }

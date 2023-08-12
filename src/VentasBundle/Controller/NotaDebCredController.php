@@ -220,7 +220,7 @@ class NotaDebCredController extends Controller
             // $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $item->getProducto()->getIva()));
             // $codigo = intval($alicuota->getCodigo());
             $dtoRec = $item->getTotalDtoRecItem();
-            $baseImp = $item->getTotalItem() + $dtoRec;
+            $baseImp = $item->getBaseImponibleItem() + $dtoRec;
             $importe = $item->getTotalIvaItem();
             // $key = array_search($codigo, array_column($iva, 'Id'));
             // IVA

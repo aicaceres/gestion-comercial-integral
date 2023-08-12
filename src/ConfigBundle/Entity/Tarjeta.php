@@ -1,8 +1,10 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Tarjeta
  * @ORM\Table(name="tarjeta")
@@ -21,57 +23,68 @@ class Tarjeta {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false, unique=true)
      */
     protected $nombre;
-   /**
+
+    /**
      * @var integer $maximoCuotas
      * @ORM\Column(name="maximo_cuotas", type="integer", nullable=true)
      */
     protected $maximoCuotas;
-   /**
+
+    /**
      * @var float $limiteSinAutorizacion
      * @ORM\Column(name="limite_sin_autorizacion", type="decimal", scale=2, nullable=true)
      */
     protected $limiteSinAutorizacion;
+
     /**
      * @var boolean $presentarAlFacturar
      * @ORM\Column(name="presentar_al_facturar", type="boolean", nullable=true)
      */
     protected $presentarAlFacturar = false;
+
     /**
      * @var string $presentar
      * @ORM\Column(name="presentar", type="string", nullable=true)
      */
     protected $presentar;
-   /**
+
+    /**
      * @var integer $diaPresentar
      * @ORM\Column(name="dia_presentar", type="integer", nullable=true)
      */
     protected $diaPresentar;
+
     /**
      * @var string $tipoCobro
      * @ORM\Column(name="tipo_cobro", type="string", nullable=true)
      */
     protected $tipoCobro;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Banco")
      * @ORM\JoinColumn(name="banco_id", referencedColumnName="id")
      */
     protected $banco;
+
     /**
      * @var string $cuenta
      * @ORM\Column(name="cuenta", type="string", nullable=true)
      */
     protected $cuenta;
-   /**
+
+    /**
      * @var integer $diaParaCobrar
      * @ORM\Column(name="dia_para_cobrar", type="integer", nullable=true)
      */
     protected $diaParaCobrar;
-   /**
+
+    /**
      * @var integer $comisionTarjeta
      * @ORM\Column(name="comision_tarjeta", type="integer", nullable=true)
      */
@@ -81,14 +94,20 @@ class Tarjeta {
         return $this->getNombre();
     }
 
+    /**
+     * Set id para importacion
+     */
+    public function setId($id) {
+        $this->id = $id;
+        return $this;
+    }
 
     /**
      * Get id
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -98,8 +117,7 @@ class Tarjeta {
      * @param string $nombre
      * @return Tarjeta
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -110,8 +128,7 @@ class Tarjeta {
      *
      * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -121,8 +138,7 @@ class Tarjeta {
      * @param integer $maximoCuotas
      * @return Tarjeta
      */
-    public function setMaximoCuotas($maximoCuotas)
-    {
+    public function setMaximoCuotas($maximoCuotas) {
         $this->maximoCuotas = $maximoCuotas;
 
         return $this;
@@ -133,8 +149,7 @@ class Tarjeta {
      *
      * @return integer
      */
-    public function getMaximoCuotas()
-    {
+    public function getMaximoCuotas() {
         return $this->maximoCuotas;
     }
 
@@ -144,8 +159,7 @@ class Tarjeta {
      * @param string $limiteSinAutorizacion
      * @return Tarjeta
      */
-    public function setLimiteSinAutorizacion($limiteSinAutorizacion)
-    {
+    public function setLimiteSinAutorizacion($limiteSinAutorizacion) {
         $this->limiteSinAutorizacion = $limiteSinAutorizacion;
 
         return $this;
@@ -156,8 +170,7 @@ class Tarjeta {
      *
      * @return string
      */
-    public function getLimiteSinAutorizacion()
-    {
+    public function getLimiteSinAutorizacion() {
         return $this->limiteSinAutorizacion;
     }
 
@@ -167,8 +180,7 @@ class Tarjeta {
      * @param boolean $presentarAlFacturar
      * @return Tarjeta
      */
-    public function setPresentarAlFacturar($presentarAlFacturar)
-    {
+    public function setPresentarAlFacturar($presentarAlFacturar) {
         $this->presentarAlFacturar = $presentarAlFacturar;
 
         return $this;
@@ -179,8 +191,7 @@ class Tarjeta {
      *
      * @return boolean
      */
-    public function getPresentarAlFacturar()
-    {
+    public function getPresentarAlFacturar() {
         return $this->presentarAlFacturar;
     }
 
@@ -190,8 +201,7 @@ class Tarjeta {
      * @param string $presentar
      * @return Tarjeta
      */
-    public function setPresentar($presentar)
-    {
+    public function setPresentar($presentar) {
         $this->presentar = $presentar;
 
         return $this;
@@ -202,8 +212,7 @@ class Tarjeta {
      *
      * @return string
      */
-    public function getPresentar()
-    {
+    public function getPresentar() {
         return $this->presentar;
     }
 
@@ -213,8 +222,7 @@ class Tarjeta {
      * @param integer $diaPresentar
      * @return Tarjeta
      */
-    public function setDiaPresentar($diaPresentar)
-    {
+    public function setDiaPresentar($diaPresentar) {
         $this->diaPresentar = $diaPresentar;
 
         return $this;
@@ -225,8 +233,7 @@ class Tarjeta {
      *
      * @return integer
      */
-    public function getDiaPresentar()
-    {
+    public function getDiaPresentar() {
         return $this->diaPresentar;
     }
 
@@ -236,8 +243,7 @@ class Tarjeta {
      * @param string $tipoCobro
      * @return Tarjeta
      */
-    public function setTipoCobro($tipoCobro)
-    {
+    public function setTipoCobro($tipoCobro) {
         $this->tipoCobro = $tipoCobro;
 
         return $this;
@@ -248,8 +254,7 @@ class Tarjeta {
      *
      * @return string
      */
-    public function getTipoCobro()
-    {
+    public function getTipoCobro() {
         return $this->tipoCobro;
     }
 
@@ -259,8 +264,7 @@ class Tarjeta {
      * @param string $cuenta
      * @return Tarjeta
      */
-    public function setCuenta($cuenta)
-    {
+    public function setCuenta($cuenta) {
         $this->cuenta = $cuenta;
 
         return $this;
@@ -271,8 +275,7 @@ class Tarjeta {
      *
      * @return string
      */
-    public function getCuenta()
-    {
+    public function getCuenta() {
         return $this->cuenta;
     }
 
@@ -282,8 +285,7 @@ class Tarjeta {
      * @param integer $diaParaCobrar
      * @return Tarjeta
      */
-    public function setDiaParaCobrar($diaParaCobrar)
-    {
+    public function setDiaParaCobrar($diaParaCobrar) {
         $this->diaParaCobrar = $diaParaCobrar;
 
         return $this;
@@ -294,8 +296,7 @@ class Tarjeta {
      *
      * @return integer
      */
-    public function getDiaParaCobrar()
-    {
+    public function getDiaParaCobrar() {
         return $this->diaParaCobrar;
     }
 
@@ -305,8 +306,7 @@ class Tarjeta {
      * @param integer $comisionTarjeta
      * @return Tarjeta
      */
-    public function setComisionTarjeta($comisionTarjeta)
-    {
+    public function setComisionTarjeta($comisionTarjeta) {
         $this->comisionTarjeta = $comisionTarjeta;
 
         return $this;
@@ -317,8 +317,7 @@ class Tarjeta {
      *
      * @return integer
      */
-    public function getComisionTarjeta()
-    {
+    public function getComisionTarjeta() {
         return $this->comisionTarjeta;
     }
 
@@ -328,8 +327,7 @@ class Tarjeta {
      * @param \ConfigBundle\Entity\Banco $banco
      * @return Tarjeta
      */
-    public function setBanco(\ConfigBundle\Entity\Banco $banco = null)
-    {
+    public function setBanco(\ConfigBundle\Entity\Banco $banco = null) {
         $this->banco = $banco;
 
         return $this;
@@ -340,8 +338,8 @@ class Tarjeta {
      *
      * @return \ConfigBundle\Entity\Banco
      */
-    public function getBanco()
-    {
+    public function getBanco() {
         return $this->banco;
     }
+
 }

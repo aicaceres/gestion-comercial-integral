@@ -25,6 +25,7 @@ class FacturaElectronicaWebservice
         10016 => "Se está intentando autorizar un comprobante con fecha anterior al último informado.",
         10208 => 'La fecha hasta del periodo asociado tiene que ser anterior o igual a la Fecha de Emision del comprobante.',
         10024 => "Si ImpTrib es mayor a 0 el objeto Tributos y Tributo son obligatorios.",
+        10040 => "Tipo de comprobante asociado inválido. Debe ser de tipo B.",
         10047 => "El campo ImpIVA (Importe de IVA) para comprobantes tipo C debe ser igual a cero (0)",
         10048 => "El campo  'Importe Total' ImpTotal, debe ser igual  a la  suma de ImpNeto + ImpTrib. Donde ImpNeto es igual al Sub Total",
         10071 => "Para comprobantes tipo C el objeto IVA no debe informarse.",
@@ -69,6 +70,7 @@ class FacturaElectronicaWebservice
         $fe->setConcepto(1); // Productos
         $cbteFch = $esCobro ? $comprobante->getFechaCobro() : $comprobante->getFecha();
         $fe->setCbteFch( intval( $cbteFch->format('Ymd')) );
+        // set datos cliente
         $docTipo = 99;
         $docNro = 0;
         $fe->setNombreCliente($comprobante->getNombreClienteTxt());
@@ -271,4 +273,36 @@ class FacturaElectronicaWebservice
       return $response;
 
     }
+
+    public function setDatosClienteTicket($comprobante){
+    // Tipos de documento
+    // tdCUIT = 0;
+    // tdDNI = 1;
+    // tdPasaporte = 2;
+    // tdCedula = 3;
+    // otro = 9
+
+    // Responsabilidad ante IVA
+    // riResponsableInscripto = 0;
+    // riMonotributo = 1;
+    // riExento = 3;
+    // riConsumidorFinal = 4;
+
+      $nombre = $comprobante->getNombreClienteTxt();
+      $docTipo = $docNro = '';
+      $direccion = ' ';
+      $cliente = $comprobante->getCliente();
+      if ($cliente->getCuit()) {
+        $docTipo = 0;
+        $docNro = trim($cliente->getCuit());
+        $direccion = $cliente->getDomicilioCompleto();
+      } elseif ($comprobante->getTipoDocumentoCliente()) {
+        $docTipo = $comprobante->getTipoDocumentoCliente()->getNumerico() ? intVal($comprobante->getTipoDocumentoCliente()->getNumerico()) : 9;
+        $docNro = $docTipo ? $comprobante->getNroDocumentoCliente() : '';
+      }
+      $catIva = $cliente->getCategoriaIva()->getNumerico2() ? intVal($cliente->getCategoriaIva()->getNumerico2()) : '';
+
+      return array( $nombre, $docTipo, $docNro, $catIva, $direccion );
+    }
+
 }

@@ -61,7 +61,7 @@
                             {% set imp = imp + item.impuestos%}
                             {% set retiva = retiva + item.retIVA%}
                             {% set total = total + item.total%}
-                            <td>{{item.nrocomprobante}}</td>
+                            <td>{{item.tipoComprobante}}-{{item.nrocomp}}</td>
                             <td>{{item.fecha|date('d-m-Y')}}</td>
                             <td>{{item.cuit}} {{item.razon}} {{item.iibb}}</td>
                             <td class="alignright">{{item.neto|number_format(3,'.','')}}</td>

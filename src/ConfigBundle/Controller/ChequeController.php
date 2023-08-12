@@ -1,13 +1,12 @@
 <?php
-namespace ConfigBundle\Controller;
 
+namespace ConfigBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-
 use ConfigBundle\Controller\UtilsController;
 use ConfigBundle\Entity\Cheque;
 use ConfigBundle\Form\ChequeType;
@@ -15,20 +14,19 @@ use ConfigBundle\Form\ChequeType;
 /**
  * @Route("/cheque")
  */
-class ChequeController extends Controller
-{
+class ChequeController extends Controller {
+
     /**
      * @Route("/", name="sistema_cheque")
      * @Method("GET")
      * @Template()
      */
-    public function indexAction()
-    {
+    public function indexAction() {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $em = $this->getDoctrine()->getManager();
         $entities = $em->getRepository('ConfigBundle:Cheque')->findAll();
         return $this->render('ConfigBundle:Cheque:index.html.twig', array(
-            'entities' => $entities,
+                'entities' => $entities,
         ));
     }
 
@@ -37,8 +35,7 @@ class ChequeController extends Controller
      * @Method("POST")
      * @Template("ConfigBundle:Cheque:edit.html.twig")
      */
-    public function createAction(Request $request)
-    {
+    public function createAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $entity = new Cheque();
         $form = $this->createCreateForm($entity);
@@ -49,25 +46,27 @@ class ChequeController extends Controller
             $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
 
             $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
-            $entity->setChequeNro(sprintf("%06d", $equipo->getNroInternoCheque() + 1));
+            $nro = $equipo->getNroInternoCheque() + 1;
+            $entity->setChequeNro(sprintf("%06d", $nro));
+            $equipo->setNroInternoCheque($nro);
             $em->persist($entity);
+            $em->persist($equipo);
             $em->flush();
 
             return $this->redirect($this->generateUrl('sistema_cheque'));
         }
         return $this->render('ConfigBundle:Cheque:edit.html.twig', array(
-            'entity' => $entity,
-            'form'   => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
     /**
-    * Creates a form to create a Cheque entity.
-    * @param Cheque $entity The entity
-    * @return \Symfony\Component\Form\Form The form
-    */
-    private function createCreateForm(Cheque $entity)
-    {
+     * Creates a form to create a Cheque entity.
+     * @param Cheque $entity The entity
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createCreateForm(Cheque $entity) {
         $form = $this->createForm(new ChequeType(), $entity, array(
             'action' => $this->generateUrl('sistema_cheque_create'),
             'method' => 'POST',
@@ -80,14 +79,13 @@ class ChequeController extends Controller
      * @Method("GET")
      * @Template("ConfigBundle:Cheque:edit.html.twig")
      */
-    public function newAction()
-    {
+    public function newAction() {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $entity = new Cheque();
-        $form   = $this->createCreateForm($entity);
+        $form = $this->createCreateForm($entity);
         return $this->render('ConfigBundle:Cheque:edit.html.twig', array(
-            'entity' => $entity,
-            'form'   => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -96,8 +94,7 @@ class ChequeController extends Controller
      * @Method("GET")
      * @Template()
      */
-    public function editAction($id)
-    {
+    public function editAction($id) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Cheque')->find($id);
@@ -108,19 +105,18 @@ class ChequeController extends Controller
         //$deleteForm = $this->createDeleteForm($id);
 
         return $this->render('ConfigBundle:Cheque:edit.html.twig', array(
-            'entity'      => $entity,
-            'form'   => $editForm->createView(),
-            //'delete_form' => $deleteForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
+                //'delete_form' => $deleteForm->createView(),
         ));
     }
 
     /**
-    * Creates a form to edit a Cheque entity.
-    * @param Cheque $entity The entity
-    * @return \Symfony\Component\Form\Form The form
-    */
-    private function createEditForm(Cheque $entity)
-    {
+     * Creates a form to edit a Cheque entity.
+     * @param Cheque $entity The entity
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createEditForm(Cheque $entity) {
         $form = $this->createForm(new ChequeType(), $entity, array(
             'action' => $this->generateUrl('sistema_cheque_update', array('id' => $entity->getId())),
             'method' => 'PUT',
@@ -133,8 +129,7 @@ class ChequeController extends Controller
      * @Method("PUT")
      * @Template("ConfigBundle:Cheque:edit.html.twig")
      */
-    public function updateAction(Request $request, $id)
-    {
+    public function updateAction(Request $request, $id) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Cheque')->find($id);
@@ -142,7 +137,7 @@ class ChequeController extends Controller
             throw $this->createNotFoundException('Unable to find Cheque entity.');
         }
 
-       // $deleteForm = $this->createDeleteForm($id);
+        // $deleteForm = $this->createDeleteForm($id);
         $editForm = $this->createEditForm($entity);
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
@@ -151,9 +146,9 @@ class ChequeController extends Controller
             return $this->redirect($this->generateUrl('sistema_cheque'));
         }
         return $this->render('ConfigBundle:Cheque:edit.html.twig', array(
-            'entity'      => $entity,
-            'form'   => $editForm->createView(),
-            //'delete_form' => $deleteForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
+                //'delete_form' => $deleteForm->createView(),
         ));
     }
 
@@ -161,16 +156,19 @@ class ChequeController extends Controller
      * @Route("/delete/{id}", name="sistema_cheque_delete")
      * @Method("POST")
      */
-    public function deleteAction($id)
-    {
+    public function deleteAction($id) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Cheque')->find($id);
-        try{
+        try {
             $em->remove($entity);
             $em->flush();
-            $msg ='OK';
-        } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }
+            $msg = 'OK';
+        }
+        catch (\Exception $ex) {
+            $msg = $ex->getTraceAsString();
+        }
         return new Response(json_encode($msg));
     }
+
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -7,8 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="localidad")
  * @ORM\Entity(repositoryClass="ConfigBundle\Entity\LocalidadRepository")
  */
-class Localidad
-{
+class Localidad {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -49,13 +49,21 @@ class Localidad
     public function __toString() {
         return ($this->name) ? $this->name : '';
     }
+
+    /**
+     * Set id para importacion
+     */
+    public function setId($id) {
+        $this->id = $id;
+        return $this;
+    }
+
     /**
      * Get id
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -65,8 +73,7 @@ class Localidad
      * @param string $name
      * @return Localidad
      */
-    public function setName($name)
-    {
+    public function setName($name) {
         $this->name = $name;
 
         return $this;
@@ -77,8 +84,7 @@ class Localidad
      *
      * @return string
      */
-    public function getName()
-    {
+    public function getName() {
         return $this->name;
     }
 
@@ -88,8 +94,7 @@ class Localidad
      * @param string $shortname
      * @return Localidad
      */
-    public function setShortName($shortname)
-    {
+    public function setShortName($shortname) {
         $this->shortname = $shortname;
 
         return $this;
@@ -100,8 +105,7 @@ class Localidad
      *
      * @return string
      */
-    public function getShortName()
-    {
+    public function getShortName() {
         return $this->shortname;
     }
 
@@ -111,8 +115,7 @@ class Localidad
      * @param \ConfigBundle\Entity\Provincia $provincia
      * @return Localidad
      */
-    public function setProvincia(\ConfigBundle\Entity\Provincia $provincia = null)
-    {
+    public function setProvincia(\ConfigBundle\Entity\Provincia $provincia = null) {
         $this->provincia = $provincia;
 
         return $this;
@@ -123,8 +126,7 @@ class Localidad
      *
      * @return \ConfigBundle\Entity\Provincia
      */
-    public function getProvincia()
-    {
+    public function getProvincia() {
         return $this->provincia;
     }
 
@@ -134,8 +136,7 @@ class Localidad
      * @param string $codpostal
      * @return Localidad
      */
-    public function setCodpostal($codpostal)
-    {
+    public function setCodpostal($codpostal) {
         $this->codpostal = $codpostal;
 
         return $this;
@@ -146,8 +147,7 @@ class Localidad
      *
      * @return string
      */
-    public function getCodpostal()
-    {
+    public function getCodpostal() {
         return $this->codpostal;
     }
 
@@ -157,8 +157,7 @@ class Localidad
      * @param boolean $byDefault
      * @return Localidad
      */
-    public function setByDefault($byDefault)
-    {
+    public function setByDefault($byDefault) {
         $this->byDefault = $byDefault;
 
         return $this;
@@ -169,22 +168,22 @@ class Localidad
      *
      * @return boolean
      */
-    public function getByDefault()
-    {
+    public function getByDefault() {
         return $this->byDefault;
     }
 
     /**
      * Return localidad - provincia
      */
-    public function getNombreProvincia(){
-        return $this->getName().' ('.$this->getProvincia()->getName().')';
+    public function getNombreProvincia() {
+        return $this->getName() . ' (' . $this->getProvincia()->getName() . ')';
     }
+
     /**
      * Return Pais - Provincia - Localidad
      */
-    public function getCompleto(){
-        return $this->getProvincia()->getPais()->getName() .' | '. $this->getProvincia()->getName(). ' | ' .$this->getName();
+    public function getCompleto() {
+        return $this->getProvincia()->getPais()->getName() . ' | ' . $this->getProvincia()->getName() . ' | ' . $this->getName();
     }
 
 }

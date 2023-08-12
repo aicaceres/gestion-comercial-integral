@@ -86,7 +86,7 @@
               <input type="checkbox" name="emitirTicket" id="emitirTicket"/>
             </div>
             <div class="actionbutton">
-                <button class="guardar" id="guardar" type="button" data-urlemitir="{{ path('ventas_factura_emitir') }}">
+                <button class="guardar" id="guardar" type="button" data-urlemitir="{{ path('ventas_factura_emitir') }}" data-urlticket="{{ path('ventas_factura_setticket')}}">
                   <span>Guardar y Facturar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
                 </button>
                 <a class="cancelar" onclick="return confirm('Confirma cancelar el cobro?')" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
@@ -253,12 +253,6 @@ function emitirFactura(cobroId){
   })
 }
 
-function imprimirTicket(cobroId){
-  jQuery('#guardar span').html('Emitiendo Ticket...')
-  alert('Emitiendo Ticket...');
-  setFacturando(false)
-}
-
 function setFacturando(on){
   if(on){
     jQuery('.cancelar').hide()
@@ -273,6 +267,120 @@ function setFacturando(on){
         jQuery('#guardar').removeAttr('disabled')
       }, 1000);
   }
+}
+
+function imprimirTicket(cobroId){
+  jQuery('#guardar span').html('Emitiendo Ticket...')
+
+  modelo = '{{modelo_tickeadora}}'
+  puerto = '{{puerto_tickeadora}}'
+  baudios = '{{baudios_tickeadora}}'
+  host = '{{host_tickeadora}}'
+  // verificar si falta configuracion
+  if( !modelo || !puerto || !baudios || !host ){
+    alert( ' No se pueden emitir tickets en este momento. Faltan configuraciones de la impresora!');
+    setFacturando(false)
+    return false;
+  }
+  url = jQuery('#guardar').data('urlticket')
+  jQuery.get(url, {id:cobroId, entity: 'Cobro'}, function(data){
+    if(data.res === 'OK'){
+      var driver = new Driver();
+      driver.host = host
+      driver.modelo = modelo;
+      driver.puerto = puerto;
+      driver.baudios = baudios;
+      try {
+        driver.iniciarTrabajo();
+        driver.cancelarComprobante();
+        let params = data.cliente
+        driver.datosCliente(...params);
+
+        driver.abrirComprobante(data.tipo);
+        // items
+console.log('items',data.items)
+        data.items.forEach(function(i){
+          driver.imprimirItem2g(...i)
+        })
+
+        // descuentos
+        driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
+
+        driver.cerrarComprobante();
+        driver.finalizarTrabajo();
+
+        //  nro comprobante emitido
+        driver.iniciarTrabajo();
+        driver.ultimoComprobante(tcFactura_A);
+        driver.finalizarTrabajo();
+        let nroTicket = driver.response.ultimoNumero
+
+        if(confirm('Se ha registrado la impresión del ticket N° '+nroTicket)){
+            setFacturando(false)
+            alert('GUARDAR INFO EN FACTURA ELECTRONICA')
+            {# location.href = jQuery('.cancelar').attr('href') #}
+          }
+
+      } catch (e){
+        alert(e);
+      }
+
+    }else{
+      alert(data.msg)
+      setFacturando(false)
+    }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+    setFacturando(false)
+  })
+
+  {# var driver = new Driver();
+  driver.host = host
+  driver.modelo = modelo;
+  driver.puerto = puerto;
+  driver.baudios = baudios;
+  try {
+    driver.iniciarTrabajo();
+    driver.cancelarComprobante();
+
+    // DATOS CLIENTE
+    if( jQuery('#ventasbundle_nroDocumentoCliente').val() ){
+        tipoDoc = jQuery('#ventasbundle_tipoDocumentoCliente option:selected').html();
+        if( tipoDoc != 'DNI' ){
+            alert('El tipo de documento válido para ticket es DNI');
+            return false;
+        }
+
+        driver.datosCliente(
+            jQuery('#ventasbundle_nombreCliente').val() ? jQuery('#ventasbundle_nombreCliente').val() : 'CONSUMIDOR FINAL',
+            tdDNI,
+            jQuery('#ventasbundle_nroDocumentoCliente').val() ,
+            riConsumidorFinal,
+            " ");
+    }
+
+    driver.abrirComprobante(tcFactura_B);
+
+
+
+    driver.cerrarComprobante();
+    driver.finalizarTrabajo();
+
+    //  nro comprobante emitido
+    driver.iniciarTrabajo();
+    driver.ultimoComprobante(tcFactura_B);
+    driver.finalizarTrabajo();
+    alert(driver.response.ultimoNumero)
+
+
+
+
+
+  } catch (e){
+    alert(e);
+  } #}
+
+
 }
 
 </script>

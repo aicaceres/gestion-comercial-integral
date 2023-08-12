@@ -4,21 +4,21 @@ security:
 
     role_hierarchy:
         ROLE_SUPER_ADMIN: [ROLE_OPERATOR, ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
-        
+
     # http://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
     providers:
         usuarios:
             entity: { class: ConfigBundle\Entity\Usuario, property: username }
-            
+
     encoders:
         ConfigBundle\Entity\Usuario: { algorithm: 'bcrypt' }
-        
+
     firewalls:
         # disables authentication for assets and the profiler, adapt it according to your needs
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-            
+
         secured_area:
             pattern: ^/
             provider: usuarios
@@ -33,7 +33,7 @@ security:
                 invalidate_session: false
             remember_me:
                 key: dm3600
-                lifetime: 604800 
+                lifetime: 604800
                 # 7 * 24 * 3600 = 604.800 = 1 semana
             # activate different ways to authenticate
 
@@ -45,5 +45,5 @@ security:
 
     access_control:
         - { path: ^/usuario/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        #- { path: ^/, roles: ROLE_USER }
+        - { path: ^/dataload, roles: IS_AUTHENTICATED_ANONYMOUSLY }
         #- { path: ^/usuario/*, roles: ROLE_INTERNO }

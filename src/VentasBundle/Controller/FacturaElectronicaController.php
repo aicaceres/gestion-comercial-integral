@@ -115,4 +115,62 @@ class FacturaElectronicaController extends Controller {
   }
 
 
+    /**
+     * @Route("/", name="ventas_factura_setticket")
+     * @Method("GET")
+     * @Template()
+     */
+    public function setTicketAction(Request $request) {
+      // setear la info para el ticket
+      $id = $request->get('id');
+      $entity = $request->get('entity');
+      $dataTicket = array('res' => 'OK', 'msg'=> 'Ha ocurrido un error al preparar los datos para la impresión');
+      $em = $this->getDoctrine()->getManager();
+      $comprobante = $em->getRepository('VentasBundle:'.$entity)->find($id);
+      $feWs = $this->get('factura_electronica_webservice');
+      // datos del cliente
+      $dataTicket['cliente'] = $feWs->setDatosClienteTicket($comprobante);
+      // tipo comprobante
+      // tcFactura_A = 1;
+      // tcFactura_B = 2;
+      // tcFactura_C = 3;
+      // tcNota_Debito_A = 4;
+      // tcNota_Debito_B = 5;
+      // tcNota_Debito_C = 6;
+      // tcNota_Credito_A = 7;
+      // tcNota_Credito_B = 8;
+      // tcNota_Credito_C = 9;
+      $cliente = $comprobante->getCliente();
+      $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
+      $dataTicket['tipo'] = ($catIva == 'I' || $catIva == 'M') ? 1 : 2;
+      $dataTicket['tipo'] = ($catIva == 'I' || $catIva == 'M') ? 1 : 2;
+
+      // descuento
+      $dataTicket['porcdto'] = $comprobante->getDescuentoRecargo() ;
+      $dataTicket['montodto'] = $comprobante->getTotalDescuentoRecargo() * -1;
+
+      // items
+      // descripcion, cantidad, precio, iva, impuestosInternos,g2CondicionIVA, g2TipoImpuestoInterno, g2UnidadReferencia, g2CodigoProducto, g2CodigoInterno, g2UnidadMedida
+      $dataTicket['items'] = null;
+      foreach ($comprobante->getVenta()->getDetalles() as $item) {
+        $dataTicket['items'][] = array(
+          $item->getProducto()->getNombre(),
+          $item->getCantidad(),
+          $item->getPrecio(),
+          $item->getAlicuota(),
+          0, //impuestosInternos
+          7, //Gravado
+          0, //tiFijo
+          1,
+          $item->getProducto()->getCodigo(),
+          "",
+          7 //Unidad
+        );
+      }
+
+
+
+      return new JsonResponse($dataTicket);
+    }
+
 }

@@ -259,6 +259,8 @@ class CobroController extends Controller
           if($request->get('ventasbundle_tipoDocumentoCliente')){
             $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($request->get('ventasbundle_tipoDocumentoCliente'));
             $entity->setTipoDocumentoCliente($tipoDoc);
+          }else{
+            $entity->setTipoDocumentoCliente(null);
           }
           $entity->setNroDocumentoCliente($request->get('ventasbundle_nroDocumentoCliente'));
         }

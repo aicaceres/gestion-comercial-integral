@@ -1,7 +1,9 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+
 /**
  * ConfigBundle\Entity\Parametrizacion
  * @ORM\Table(name="parametrizacion")
@@ -21,6 +23,7 @@ class Parametrizacion {
      * @ORM\JoinColumn(name="ventas_cliente_bydefault_id", referencedColumnName="id")
      */
     protected $ventasClienteBydefault;
+
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="ventas_deposito_bydefault_id", referencedColumnName="id")
@@ -50,6 +53,7 @@ class Parametrizacion {
      * @ORM\Column(name="ultimo_nro_presupuesto", type="integer")
      */
     protected $ultimoNroPresupuesto = 0;
+
     /**
      * @var integer $ultimoNroPagoCliente
      * @ORM\Column(name="ultimo_nro_pago_cliente", type="integer")
@@ -64,17 +68,6 @@ class Parametrizacion {
     protected $validezPresupuesto = 7;
 
     /**
-     * @var string $puntoVentaFactura
-     * @ORM\Column(name="punto_venta_factura", type="string", nullable=false)
-     */
-    protected $puntoVentaFactura = '0012';
-    /**
-     * @var string $puntoVentaTicket
-     * @ORM\Column(name="punto_venta_ticket", type="string", nullable=false)
-     */
-    protected $puntoVentaTicket = '0011';
-
-    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
@@ -85,8 +78,7 @@ class Parametrizacion {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -96,8 +88,7 @@ class Parametrizacion {
      * @param \VentasBundle\Entity\Cliente $ventasClienteBydefault
      * @return Parametrizacion
      */
-    public function setVentasClienteBydefault(\VentasBundle\Entity\Cliente $ventasClienteBydefault = null)
-    {
+    public function setVentasClienteBydefault(\VentasBundle\Entity\Cliente $ventasClienteBydefault = null) {
         $this->ventasClienteBydefault = $ventasClienteBydefault;
 
         return $this;
@@ -108,11 +99,9 @@ class Parametrizacion {
      *
      * @return \VentasBundle\Entity\Cliente
      */
-    public function getVentasClienteBydefault()
-    {
+    public function getVentasClienteBydefault() {
         return $this->ventasClienteBydefault;
     }
-
 
     /**
      * Set ventasDepositoBydefault
@@ -120,8 +109,7 @@ class Parametrizacion {
      * @param \AppBundle\Entity\Deposito $ventasDepositoBydefault
      * @return Parametrizacion
      */
-    public function setVentasDepositoBydefault(\AppBundle\Entity\Deposito $ventasDepositoBydefault = null)
-    {
+    public function setVentasDepositoBydefault(\AppBundle\Entity\Deposito $ventasDepositoBydefault = null) {
         $this->ventasDepositoBydefault = $ventasDepositoBydefault;
 
         return $this;
@@ -132,8 +120,7 @@ class Parametrizacion {
      *
      * @return \AppBundle\Entity\Deposito
      */
-    public function getVentasDepositoBydefault()
-    {
+    public function getVentasDepositoBydefault() {
         return $this->ventasDepositoBydefault;
     }
 
@@ -143,8 +130,7 @@ class Parametrizacion {
      * @param integer $cantidadItemsParaFactura
      * @return Parametrizacion
      */
-    public function setCantidadItemsParaFactura($cantidadItemsParaFactura)
-    {
+    public function setCantidadItemsParaFactura($cantidadItemsParaFactura) {
         $this->cantidadItemsParaFactura = $cantidadItemsParaFactura;
 
         return $this;
@@ -155,8 +141,7 @@ class Parametrizacion {
      *
      * @return integer
      */
-    public function getCantidadItemsParaFactura()
-    {
+    public function getCantidadItemsParaFactura() {
         return $this->cantidadItemsParaFactura;
     }
 
@@ -166,8 +151,7 @@ class Parametrizacion {
      * @param integer $ultimoNroOperacionVenta
      * @return Parametrizacion
      */
-    public function setUltimoNroOperacionVenta($ultimoNroOperacionVenta)
-    {
+    public function setUltimoNroOperacionVenta($ultimoNroOperacionVenta) {
         $this->ultimoNroOperacionVenta = $ultimoNroOperacionVenta;
 
         return $this;
@@ -178,8 +162,7 @@ class Parametrizacion {
      *
      * @return integer
      */
-    public function getUltimoNroOperacionVenta()
-    {
+    public function getUltimoNroOperacionVenta() {
         return $this->ultimoNroOperacionVenta;
     }
 
@@ -189,8 +172,7 @@ class Parametrizacion {
      * @param integer $ultimoNroOperacionCobro
      * @return Parametrizacion
      */
-    public function setUltimoNroOperacionCobro($ultimoNroOperacionCobro)
-    {
+    public function setUltimoNroOperacionCobro($ultimoNroOperacionCobro) {
         $this->ultimoNroOperacionCobro = $ultimoNroOperacionCobro;
 
         return $this;
@@ -201,8 +183,7 @@ class Parametrizacion {
      *
      * @return integer
      */
-    public function getUltimoNroOperacionCobro()
-    {
+    public function getUltimoNroOperacionCobro() {
         return $this->ultimoNroOperacionCobro;
     }
 
@@ -212,8 +193,7 @@ class Parametrizacion {
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
      * @return Parametrizacion
      */
-    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
-    {
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null) {
         $this->unidadNegocio = $unidadNegocio;
 
         return $this;
@@ -224,8 +204,7 @@ class Parametrizacion {
      *
      * @return \ConfigBundle\Entity\UnidadNegocio
      */
-    public function getUnidadNegocio()
-    {
+    public function getUnidadNegocio() {
         return $this->unidadNegocio;
     }
 
@@ -235,8 +214,7 @@ class Parametrizacion {
      * @param integer $ultimoNroPresupuesto
      * @return Parametrizacion
      */
-    public function setUltimoNroPresupuesto($ultimoNroPresupuesto)
-    {
+    public function setUltimoNroPresupuesto($ultimoNroPresupuesto) {
         $this->ultimoNroPresupuesto = $ultimoNroPresupuesto;
 
         return $this;
@@ -247,8 +225,7 @@ class Parametrizacion {
      *
      * @return integer
      */
-    public function getUltimoNroPresupuesto()
-    {
+    public function getUltimoNroPresupuesto() {
         return $this->ultimoNroPresupuesto;
     }
 
@@ -258,8 +235,7 @@ class Parametrizacion {
      * @param integer $validezPresupuesto
      * @return Parametrizacion
      */
-    public function setValidezPresupuesto($validezPresupuesto)
-    {
+    public function setValidezPresupuesto($validezPresupuesto) {
         $this->validezPresupuesto = $validezPresupuesto;
 
         return $this;
@@ -270,55 +246,8 @@ class Parametrizacion {
      *
      * @return integer
      */
-    public function getValidezPresupuesto()
-    {
+    public function getValidezPresupuesto() {
         return $this->validezPresupuesto;
-    }
-
-    /**
-     * Set puntoVentaFactura
-     *
-     * @param string $puntoVentaFactura
-     * @return Parametrizacion
-     */
-    public function setPuntoVentaFactura($puntoVentaFactura)
-    {
-        $this->puntoVentaFactura = $puntoVentaFactura;
-
-        return $this;
-    }
-
-    /**
-     * Get puntoVentaFactura
-     *
-     * @return string
-     */
-    public function getPuntoVentaFactura()
-    {
-        return $this->puntoVentaFactura;
-    }
-
-    /**
-     * Set puntoVentaTicket
-     *
-     * @param string $puntoVentaTicket
-     * @return Parametrizacion
-     */
-    public function setPuntoVentaTicket($puntoVentaTicket)
-    {
-        $this->puntoVentaTicket = $puntoVentaTicket;
-
-        return $this;
-    }
-
-    /**
-     * Get puntoVentaTicket
-     *
-     * @return string
-     */
-    public function getPuntoVentaTicket()
-    {
-        return $this->puntoVentaTicket;
     }
 
     /**
@@ -327,8 +256,7 @@ class Parametrizacion {
      * @param integer $ultimoNroPagoCliente
      * @return Parametrizacion
      */
-    public function setUltimoNroPagoCliente($ultimoNroPagoCliente)
-    {
+    public function setUltimoNroPagoCliente($ultimoNroPagoCliente) {
         $this->ultimoNroPagoCliente = $ultimoNroPagoCliente;
 
         return $this;
@@ -339,8 +267,8 @@ class Parametrizacion {
      *
      * @return integer
      */
-    public function getUltimoNroPagoCliente()
-    {
+    public function getUltimoNroPagoCliente() {
         return $this->ultimoNroPagoCliente;
     }
+
 }

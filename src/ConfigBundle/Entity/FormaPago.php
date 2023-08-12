@@ -1,8 +1,10 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\FormaPago
  * @ORM\Table(name="forma_pago")
@@ -21,90 +23,113 @@ class FormaPago {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false, unique=true)
      */
     protected $nombre;
+
     /**
      * @var string $cuentaCorriente
      * @ORM\Column(name="cuenta_corriente", type="boolean", nullable=true)
      */
     protected $cuentaCorriente = false;
+
     /**
      * @var string $tarjeta
      * @ORM\Column(name="tarjeta", type="boolean", nullable=true)
      */
     protected $tarjeta = false;
+
     /**
      * @var string $contado
      * @ORM\Column(name="contado", type="boolean", nullable=true)
      */
     protected $contado = false;
+
     /**
      * @var integer $cuotas
      * @ORM\Column(name="cuotas", type="integer", nullable=true)
      */
     protected $cuotas;
+
     /**
      * @var string $vencimiento
      * @ORM\Column(name="vencimiento", type="string", nullable=false)
      */
     protected $vencimiento = 'M';
+
     /**
      * @var integer $plazo
      * @ORM\Column(name="plazo", type="integer", nullable=true)
      */
     protected $plazo;
+
     /**
      * @var integer $tipoRecargo
      * @ORM\Column(name="tipo_recargo", type="string", nullable=true)
      */
     protected $tipoRecargo;
+
     /**
      * @var integer $porcentajeRecargo
      * @ORM\Column(name="porcentaje_recargo", type="decimal",scale=2, nullable=true)
      */
     protected $porcentajeRecargo;
+
     /**
      * @var integer $descuentoPagoAnticipado
      * @ORM\Column(name="descuento_pago_anticipado", type="integer", nullable=true)
      */
     protected $descuentoPagoAnticipado;
+
     /**
      * @var integer $mora
      * @ORM\Column(name="mora", type="decimal",scale=2,nullable=true)
      */
     protected $mora;
+
     /**
      * @var integer $diasMora
      * @ORM\Column(name="dias_mora", type="integer", nullable=true)
      */
     protected $diasMora;
+
     /**
      * @var integer $copiasComprobante
      * @ORM\Column(name="copias_comprobante", type="integer", nullable=true)
      */
     protected $copiasComprobante;
 
-    public function getTipoPago(){
+    public function getTipoPago() {
         $tipo = 'EFECTIVO';
-        if( $this->cuentaCorriente ){
+        if ($this->cuentaCorriente) {
             $tipo = 'CTACTE';
-        }elseif( $this->tarjeta ){
+        }
+        elseif ($this->tarjeta) {
             $tipo = 'TARJETA';
-        }elseif( $this->contado ){
+        }
+        elseif ($this->contado) {
             $tipo = 'EFECTIVO';
         }
         return $tipo;
     }
 
     public function __toString() {
-        return  $this->id.' - ' . $this->nombre;
+        return $this->id . ' - ' . $this->nombre;
     }
 
-    public function getTextSelect(){
-        return $this->nombre.' [%'.$this->porcentajeRecargo.']';
+    public function getTextSelect() {
+        return $this->nombre . ' [%' . $this->porcentajeRecargo . ']';
+    }
+
+    /**
+     * Set id para importacion
+     */
+    public function setId($id) {
+        $this->id = $id;
+        return $this;
     }
 
     /**
@@ -112,8 +137,7 @@ class FormaPago {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -123,8 +147,7 @@ class FormaPago {
      * @param string $nombre
      * @return FormaPago
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -135,8 +158,7 @@ class FormaPago {
      *
      * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -146,8 +168,7 @@ class FormaPago {
      * @param boolean $cuentaCorriente
      * @return FormaPago
      */
-    public function setCuentaCorriente($cuentaCorriente)
-    {
+    public function setCuentaCorriente($cuentaCorriente) {
         $this->cuentaCorriente = $cuentaCorriente;
 
         return $this;
@@ -158,8 +179,7 @@ class FormaPago {
      *
      * @return boolean
      */
-    public function getCuentaCorriente()
-    {
+    public function getCuentaCorriente() {
         return $this->cuentaCorriente;
     }
 
@@ -169,8 +189,7 @@ class FormaPago {
      * @param boolean $tarjeta
      * @return FormaPago
      */
-    public function setTarjeta($tarjeta)
-    {
+    public function setTarjeta($tarjeta) {
         $this->tarjeta = $tarjeta;
 
         return $this;
@@ -181,8 +200,7 @@ class FormaPago {
      *
      * @return boolean
      */
-    public function getTarjeta()
-    {
+    public function getTarjeta() {
         return $this->tarjeta;
     }
 
@@ -192,8 +210,7 @@ class FormaPago {
      * @param integer $cuotas
      * @return FormaPago
      */
-    public function setCuotas($cuotas)
-    {
+    public function setCuotas($cuotas) {
         $this->cuotas = $cuotas;
 
         return $this;
@@ -204,8 +221,7 @@ class FormaPago {
      *
      * @return integer
      */
-    public function getCuotas()
-    {
+    public function getCuotas() {
         return $this->cuotas;
     }
 
@@ -215,8 +231,7 @@ class FormaPago {
      * @param string $vencimiento
      * @return FormaPago
      */
-    public function setVencimiento($vencimiento)
-    {
+    public function setVencimiento($vencimiento) {
         $this->vencimiento = $vencimiento;
 
         return $this;
@@ -227,8 +242,7 @@ class FormaPago {
      *
      * @return string
      */
-    public function getVencimiento()
-    {
+    public function getVencimiento() {
         return $this->vencimiento;
     }
 
@@ -238,8 +252,7 @@ class FormaPago {
      * @param integer $plazo
      * @return FormaPago
      */
-    public function setPlazo($plazo)
-    {
+    public function setPlazo($plazo) {
         $this->plazo = $plazo;
 
         return $this;
@@ -250,8 +263,7 @@ class FormaPago {
      *
      * @return integer
      */
-    public function getPlazo()
-    {
+    public function getPlazo() {
         return $this->plazo;
     }
 
@@ -261,8 +273,7 @@ class FormaPago {
      * @param string $tipoRecargo
      * @return FormaPago
      */
-    public function setTipoRecargo($tipoRecargo)
-    {
+    public function setTipoRecargo($tipoRecargo) {
         $this->tipoRecargo = $tipoRecargo;
 
         return $this;
@@ -273,8 +284,7 @@ class FormaPago {
      *
      * @return string
      */
-    public function getTipoRecargo()
-    {
+    public function getTipoRecargo() {
         return $this->tipoRecargo;
     }
 
@@ -284,8 +294,7 @@ class FormaPago {
      * @param string $porcentajeRecargo
      * @return FormaPago
      */
-    public function setPorcentajeRecargo($porcentajeRecargo)
-    {
+    public function setPorcentajeRecargo($porcentajeRecargo) {
         $this->porcentajeRecargo = $porcentajeRecargo;
 
         return $this;
@@ -296,8 +305,7 @@ class FormaPago {
      *
      * @return string
      */
-    public function getPorcentajeRecargo()
-    {
+    public function getPorcentajeRecargo() {
         return $this->porcentajeRecargo;
     }
 
@@ -307,8 +315,7 @@ class FormaPago {
      * @param integer $descuentoPagoAnticipado
      * @return FormaPago
      */
-    public function setDescuentoPagoAnticipado($descuentoPagoAnticipado)
-    {
+    public function setDescuentoPagoAnticipado($descuentoPagoAnticipado) {
         $this->descuentoPagoAnticipado = $descuentoPagoAnticipado;
 
         return $this;
@@ -319,8 +326,7 @@ class FormaPago {
      *
      * @return integer
      */
-    public function getDescuentoPagoAnticipado()
-    {
+    public function getDescuentoPagoAnticipado() {
         return $this->descuentoPagoAnticipado;
     }
 
@@ -330,8 +336,7 @@ class FormaPago {
      * @param string $mora
      * @return FormaPago
      */
-    public function setMora($mora)
-    {
+    public function setMora($mora) {
         $this->mora = $mora;
 
         return $this;
@@ -342,8 +347,7 @@ class FormaPago {
      *
      * @return string
      */
-    public function getMora()
-    {
+    public function getMora() {
         return $this->mora;
     }
 
@@ -353,8 +357,7 @@ class FormaPago {
      * @param integer $diasMora
      * @return FormaPago
      */
-    public function setDiasMora($diasMora)
-    {
+    public function setDiasMora($diasMora) {
         $this->diasMora = $diasMora;
 
         return $this;
@@ -365,8 +368,7 @@ class FormaPago {
      *
      * @return integer
      */
-    public function getDiasMora()
-    {
+    public function getDiasMora() {
         return $this->diasMora;
     }
 
@@ -376,8 +378,7 @@ class FormaPago {
      * @param integer $copiasComprobante
      * @return FormaPago
      */
-    public function setCopiasComprobante($copiasComprobante)
-    {
+    public function setCopiasComprobante($copiasComprobante) {
         $this->copiasComprobante = $copiasComprobante;
 
         return $this;
@@ -388,8 +389,7 @@ class FormaPago {
      *
      * @return integer
      */
-    public function getCopiasComprobante()
-    {
+    public function getCopiasComprobante() {
         return $this->copiasComprobante;
     }
 
@@ -399,8 +399,7 @@ class FormaPago {
      * @param boolean $contado
      * @return FormaPago
      */
-    public function setContado($contado)
-    {
+    public function setContado($contado) {
         $this->contado = $contado;
 
         return $this;
@@ -411,8 +410,8 @@ class FormaPago {
      *
      * @return boolean
      */
-    public function getContado()
-    {
+    public function getContado() {
         return $this->contado;
     }
+
 }

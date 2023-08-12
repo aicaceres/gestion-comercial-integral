@@ -76,12 +76,13 @@ class Proveedor {
      * */
     protected $categoria_iva;
 
-     /**
+    /**
      * @var string $representanteLocal
      * @ORM\Column(name="representante_local", type="string", nullable=true)
      */
     protected $representanteLocal;
-     /**
+
+    /**
      * @var string $representanteSede
      * @ORM\Column(name="representante_sede", type="string", nullable=true)
      */
@@ -109,12 +110,13 @@ class Proveedor {
      * @var date $vencCertNoRetenerRentas
      * @ORM\Column(name="venc_cert_no_retener_rentas", type="date", nullable=true)
      */
-    private $vencCertNoRetenerRentas ;
+    private $vencCertNoRetenerRentas;
+
     /**
      * @var date $vencCertExcepcionGanancias
      * @ORM\Column(name="venc_cert_excepcion_ganancias", type="date", nullable=true)
      */
-    private $vencCertExcepcionGanancias ;
+    private $vencCertExcepcionGanancias;
 
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
@@ -178,8 +180,8 @@ class Proveedor {
     private $createdBy;
     private $saldoxFechas;
 
-    public function getDomicilioCompleto(){
-        return $this->direccion.', '.$this->getLocalidad().', '.$this->getLocalidad()->getProvincia();
+    public function getDomicilioCompleto() {
+        return $this->direccion . ', ' . $this->getLocalidad() . ', ' . $this->getLocalidad()->getProvincia();
     }
 
     public function getSaldoxFechas() {
@@ -198,6 +200,11 @@ class Proveedor {
 
     public function getText() {
         return $this->nombre;
+    }
+
+    public function setProvId($id) {
+        $this->id = $id;
+        return $this;
     }
 
     /**
@@ -720,15 +727,13 @@ class Proveedor {
         return $this->pedidos;
     }
 
-
     /**
      * Set representanteLocal
      *
      * @param string $representanteLocal
      * @return Proveedor
      */
-    public function setRepresentanteLocal($representanteLocal)
-    {
+    public function setRepresentanteLocal($representanteLocal) {
         $this->representanteLocal = $representanteLocal;
 
         return $this;
@@ -739,8 +744,7 @@ class Proveedor {
      *
      * @return string
      */
-    public function getRepresentanteLocal()
-    {
+    public function getRepresentanteLocal() {
         return $this->representanteLocal;
     }
 
@@ -750,8 +754,7 @@ class Proveedor {
      * @param string $representanteSede
      * @return Proveedor
      */
-    public function setRepresentanteSede($representanteSede)
-    {
+    public function setRepresentanteSede($representanteSede) {
         $this->representanteSede = $representanteSede;
 
         return $this;
@@ -762,8 +765,7 @@ class Proveedor {
      *
      * @return string
      */
-    public function getRepresentanteSede()
-    {
+    public function getRepresentanteSede() {
         return $this->representanteSede;
     }
 
@@ -773,8 +775,7 @@ class Proveedor {
      * @param \DateTime $vencCertNoRetenerRentas
      * @return Proveedor
      */
-    public function setVencCertNoRetenerRentas($vencCertNoRetenerRentas)
-    {
+    public function setVencCertNoRetenerRentas($vencCertNoRetenerRentas) {
         $this->vencCertNoRetenerRentas = $vencCertNoRetenerRentas;
 
         return $this;
@@ -785,8 +786,7 @@ class Proveedor {
      *
      * @return \DateTime
      */
-    public function getVencCertNoRetenerRentas()
-    {
+    public function getVencCertNoRetenerRentas() {
         return $this->vencCertNoRetenerRentas;
     }
 
@@ -796,8 +796,7 @@ class Proveedor {
      * @param \DateTime $vencCertExcepcionGanancias
      * @return Proveedor
      */
-    public function setVencCertExcepcionGanancias($vencCertExcepcionGanancias)
-    {
+    public function setVencCertExcepcionGanancias($vencCertExcepcionGanancias) {
         $this->vencCertExcepcionGanancias = $vencCertExcepcionGanancias;
 
         return $this;
@@ -808,8 +807,7 @@ class Proveedor {
      *
      * @return \DateTime
      */
-    public function getVencCertExcepcionGanancias()
-    {
+    public function getVencCertExcepcionGanancias() {
         return $this->vencCertExcepcionGanancias;
     }
 
@@ -819,8 +817,7 @@ class Proveedor {
      * @param \ConfigBundle\Entity\RubroCompras $rubroCompras
      * @return Proveedor
      */
-    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null)
-    {
+    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null) {
         $this->rubroCompras = $rubroCompras;
 
         return $this;
@@ -831,8 +828,7 @@ class Proveedor {
      *
      * @return \ConfigBundle\Entity\RubroCompras
      */
-    public function getRubroCompras()
-    {
+    public function getRubroCompras() {
         return $this->rubroCompras;
     }
 
@@ -842,8 +838,7 @@ class Proveedor {
      * @param \ConfigBundle\Entity\Escalas $categoriaRentas
      * @return Proveedor
      */
-    public function setCategoriaRentas(\ConfigBundle\Entity\Escalas $categoriaRentas = null)
-    {
+    public function setCategoriaRentas(\ConfigBundle\Entity\Escalas $categoriaRentas = null) {
         $this->categoriaRentas = $categoriaRentas;
 
         return $this;
@@ -854,8 +849,7 @@ class Proveedor {
      *
      * @return \ConfigBundle\Entity\Escalas
      */
-    public function getCategoriaRentas()
-    {
+    public function getCategoriaRentas() {
         return $this->categoriaRentas;
     }
 
@@ -865,8 +859,7 @@ class Proveedor {
      * @param \ConfigBundle\Entity\ActividadComercial $actividadComercial
      * @return Proveedor
      */
-    public function setActividadComercial(\ConfigBundle\Entity\ActividadComercial $actividadComercial = null)
-    {
+    public function setActividadComercial(\ConfigBundle\Entity\ActividadComercial $actividadComercial = null) {
         $this->actividadComercial = $actividadComercial;
 
         return $this;
@@ -877,8 +870,7 @@ class Proveedor {
      *
      * @return \ConfigBundle\Entity\ActividadComercial
      */
-    public function getActividadComercial()
-    {
+    public function getActividadComercial() {
         return $this->actividadComercial;
     }
 
@@ -888,8 +880,7 @@ class Proveedor {
      * @param \ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias
      * @return Proveedor
      */
-    public function addAcumuladosGanancia(\ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias)
-    {
+    public function addAcumuladosGanancia(\ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias) {
         $acumuladosGanancias->setProveedor($this);
         $this->acumuladosGanancias[] = $acumuladosGanancias;
         return $this;
@@ -900,8 +891,7 @@ class Proveedor {
      *
      * @param \ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias
      */
-    public function removeAcumuladosGanancia(\ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias)
-    {
+    public function removeAcumuladosGanancia(\ComprasBundle\Entity\RetencionGanancia $acumuladosGanancias) {
         $this->acumuladosGanancias->removeElement($acumuladosGanancias);
     }
 
@@ -910,8 +900,8 @@ class Proveedor {
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getAcumuladosGanancias()
-    {
+    public function getAcumuladosGanancias() {
         return $this->acumuladosGanancias;
     }
+
 }

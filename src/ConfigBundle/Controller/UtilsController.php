@@ -6,8 +6,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
+//use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use ConfigBundle\Entity\BulkInsertQuery;
 
 class UtilsController extends Controller {
 
@@ -57,33 +58,33 @@ class UtilsController extends Controller {
      * @Route("/getSemanaActual", name="get_semana_actual")
      * @Method("GET")
      */
-    public function getSemanaActual(){
+    public function getSemanaActual() {
 // Período 1; día 1 a día 7; período 2, día 8 a día 14; período 3, día 15 a día 21; período 4, día 22 al último día del mes
-    $dia = 15;
-    if( $dia < 7){
-      echo '22-u mes anterior';
-    }elseif($dia <14){
-      echo '1-7';
-    }elseif($dia<21){
-      echo '8-14';
-    }else{
-      echo '15-21';
-    }
-
+        // $dia = 15;
+        // if( $dia < 7){
+        //   echo '22-u mes anterior';
+        // }elseif($dia <14){
+        //   echo '1-7';
+        // }elseif($dia<21){
+        //   echo '8-14';
+        // }else{
+        //   echo '15-21';
+        // }
 // debe tomarse periodos 1-7 8-14 15-21 22-fin del mes
 // obtener mes y año... luego tomar el periodo anterior al día
 // dia= 10 -> tomar 1-7
 // dia >= 22 -> tomar 22-ultimo dia del mes
 
-      if (date("D")=="Mon"){
-        $week_start = date("Y-m-d");
-      } else {
-        $week_start = date("Y-m-d", strtotime('last Monday', time()));
-      }
+        if (date("D") == "Mon") {
+            $week_start = date("Y-m-d");
+        }
+        else {
+            $week_start = date("Y-m-d", strtotime('last Monday', time()));
+        }
 
-      $week_end =  date("Y-m-d", strtotime('next Sunday', time())) ;
+        $week_end = date("Y-m-d", strtotime('next Sunday', time()));
 
-      return new JsonResponse( array('rangoInicial'=> $week_start, 'rangoFinal'=> $week_end));
+        return new JsonResponse(array('rangoInicial' => $week_start, 'rangoFinal' => $week_end));
     }
 
     /*
@@ -188,7 +189,7 @@ class UtilsController extends Controller {
             }
             //$factura = $em->getRepository('ComprasBundle:Factura')->find($item->id);
             //$text = $tipo . $comprob->getNroComprobante() . ' $' . $item->monto . ' ';
-            $comprobantes[] = array( 'concepto' => $tipo . $comprob->getNroComprobante(), 'monto' =>  $item->monto );
+            $comprobantes[] = array('concepto' => $tipo . $comprob->getNroComprobante(), 'monto' => $item->monto);
         }
         return $comprobantes;
     }
@@ -241,7 +242,6 @@ class UtilsController extends Controller {
 
         return $date;
     }
-
 
     public static function longDateSpanish($fecha, $dayname = FALSE) {
         $date = strtotime($fecha->format('Y-m-d'));
@@ -385,43 +385,76 @@ class UtilsController extends Controller {
         $string = trim($string);
 
         $string = str_replace(
-                array('á', 'à', 'ä', 'â', 'ª', 'Á', 'À', 'Â', 'Ä'),
-                array('a', 'a', 'a', 'a', 'a', 'A', 'A', 'A', 'A'),
-                $string
+            array('á', 'à', 'ä', 'â', 'ª', 'Á', 'À', 'Â', 'Ä'),
+            array('a', 'a', 'a', 'a', 'a', 'A', 'A', 'A', 'A'),
+            $string
         );
 
         $string = str_replace(
-                array('é', 'è', 'ë', 'ê', 'É', 'È', 'Ê', 'Ë'),
-                array('e', 'e', 'e', 'e', 'E', 'E', 'E', 'E'),
-                $string
+            array('é', 'è', 'ë', 'ê', 'É', 'È', 'Ê', 'Ë'),
+            array('e', 'e', 'e', 'e', 'E', 'E', 'E', 'E'),
+            $string
         );
 
         $string = str_replace(
-                array('í', 'ì', 'ï', 'î', 'Í', 'Ì', 'Ï', 'Î'),
-                array('i', 'i', 'i', 'i', 'I', 'I', 'I', 'I'),
-                $string
+            array('í', 'ì', 'ï', 'î', 'Í', 'Ì', 'Ï', 'Î'),
+            array('i', 'i', 'i', 'i', 'I', 'I', 'I', 'I'),
+            $string
         );
 
         $string = str_replace(
-                array('ó', 'ò', 'ö', 'ô', 'Ó', 'Ò', 'Ö', 'Ô'),
-                array('o', 'o', 'o', 'o', 'O', 'O', 'O', 'O'),
-                $string
+            array('ó', 'ò', 'ö', 'ô', 'Ó', 'Ò', 'Ö', 'Ô'),
+            array('o', 'o', 'o', 'o', 'O', 'O', 'O', 'O'),
+            $string
         );
 
         $string = str_replace(
-                array('ú', 'ù', 'ü', 'û', 'Ú', 'Ù', 'Û', 'Ü'),
-                array('u', 'u', 'u', 'u', 'U', 'U', 'U', 'U'),
-                $string
+            array('ú', 'ù', 'ü', 'û', 'Ú', 'Ù', 'Û', 'Ü'),
+            array('u', 'u', 'u', 'u', 'U', 'U', 'U', 'U'),
+            $string
         );
 
         $string = str_replace(
-                array('ñ', 'Ñ', 'ç', 'Ç'),
-                array('n', 'N', 'c', 'C',),
-                $string
+            array('ñ', 'Ñ', 'ç', 'Ç'),
+            array('n', 'N', 'c', 'C',),
+            $string
         );
         $string = str_replace('"', '', $string);
 
         return $string;
+    }
+
+    public static function convertCsvToArray($filename, $changeBool = true, $delimiter = ',', $enclosure = '"') {
+        if (!file_exists($filename) || !is_readable($filename)) {
+            throw new AccessDeniedException('No se encuentra el archivo ' . $filename);
+        }
+        $data = array();
+        if (($handle = fopen($filename, 'r')) !== FALSE) {
+            while (($row = fgetcsv($handle, 0, $delimiter, $enclosure)) !== FALSE) {
+                // reemplazar "NULL"
+                $newRow = array_map(function($r) {
+                    $r = ($r === "NULL") ? null : $r;
+                    return $r;
+                }, $row);
+                // cambiar booleano
+                if ($changeBool) {
+                    $newRow = array_map(function($r) {
+                        $r = $r === 'S' ? 1 : ($r === 'N' ? 0 : $r);
+                        return $r;
+                    }, $row);
+                }
+                $data[] = $newRow;
+            }
+            fclose($handle);
+        }
+        return $data;
+    }
+
+    public static function loadCsvToTable($em, $data, $table, $columns) {
+        $bulkInserQuery = new BulkInsertQuery($em->getConnection(), $table);
+        $bulkInserQuery->setColumns($columns);
+        $bulkInserQuery->setValues($data);
+        $bulkInserQuery->execute();
     }
 
 }

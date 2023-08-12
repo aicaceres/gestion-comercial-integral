@@ -27,3 +27,4 @@
 *.php~
 *.sql
 .htaccess
+.vscode/
