@@ -16,16 +16,18 @@ class CobroDetalle {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var integer $tipoPago
      * @ORM\Column(name="tipo_pago", type="string")
      */
     protected $tipoPago = 'CTACTE';
+
     /**
      * @var integer $importe
      * @ORM\Column(name="importe", type="decimal", scale=3 )
      */
-    protected $importe=0;
+    protected $importe = 0;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
@@ -33,7 +35,7 @@ class CobroDetalle {
      */
     protected $moneda;
 
-     /**
+    /**
      * @ORM\OneToOne(targetEntity="VentasBundle\Entity\CobroDetalleTarjeta", cascade={"persist","remove"}, orphanRemoval=true)
      */
     private $datosTarjeta;
@@ -49,143 +51,181 @@ class CobroDetalle {
      * @ORM\JoinColumn(name="ventas_cobro_id", referencedColumnName="id")
      */
     protected $cobro;
+
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\NotaDebCred", inversedBy="cobroDetalles")
      * @ORM\JoinColumn(name="ventas_notadebcred_id", referencedColumnName="id")
      */
     protected $notaDebCred;
+
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\PagoCliente", inversedBy="cobroDetalles")
      * @ORM\JoinColumn(name="ventas_pago_cliente_id", referencedColumnName="id")
      */
     protected $pagoCliente;
+
     /**
      * @ORM\ManyToOne(targetEntity="ComprasBundle\Entity\PagoProveedor", inversedBy="cobroDetalles")
      * @ORM\JoinColumn(name="compras_pago_proveedor_id", referencedColumnName="id")
      */
     protected $pagoProveedor;
+
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\CajaApertura", inversedBy="movimientos")
      * @ORM\JoinColumn(name="ventas_caja_apertura_id", referencedColumnName="id")
      */
     protected $cajaApertura;
 
-    public function getEstado(){
-      return  $this->getCobro() ? $this->getCobro()->getEstado() : 'FINALIZADO';
+    public function getEstado() {
+        return $this->getCobro() ? $this->getCobro()->getEstado() : 'FINALIZADO';
     }
 
-    public function getVuelto(){
+    public function getVuelto() {
         $incluir = true;
         $total = 0;
-        if( $this->getCobro() ){
+        if ($this->getCobro()) {
             // buscar factura
-            if($this->getCobro()->getFacturaElectronica()){
-              $total = $this->getCobro()->getVenta()->getMontoTotal();
-            }else{
-              $incluir = false;
+            if ($this->getCobro()->getFacturaElectronica()) {
+                $total = $this->getCobro()->getVenta()->getMontoTotal();
+            }
+            else {
+                $incluir = false;
             }
         }
-        if( $this->getNotaDebCred()){
+        if ($this->getNotaDebCred()) {
             // buscar nota
             $total = $this->getNotaDebCred()->getMontoTotal();
         }
-        if( $this->getPagoCliente()){
+        if ($this->getPagoCliente()) {
             // buscar nota
             $total = $this->getPagoCliente()->getTotal();
         }
-        if( $this->getPagoProveedor()){
+        if ($this->getPagoProveedor()) {
             // buscar nota
             $total = $this->getPagoProveedor()->getImporte();
         }
 
-           $tipos = array('EFECTIVO','CHEQUE');
-        $calcular = in_array( $this->getTipoPago(), $tipos );
+        $tipos = array('EFECTIVO', 'CHEQUE');
+        $calcular = in_array($this->getTipoPago(), $tipos);
 
-        return  $calcular && $incluir ? ($this->getImporte() -  $total) : 0 ;
+        return $calcular && $incluir ? ($this->getImporte() - $total) : 0;
     }
 
-    public function getTipoComprobante(){
-        if( $this->getCobro() ){
+    public function getMontoComprobante() {
+        $incluir = true;
+        $total = 0;
+        if ($this->getCobro()) {
+            // buscar factura
+            if ($this->getCobro()->getFacturaElectronica()) {
+                $total = $this->getCobro()->getVenta()->getMontoTotal();
+            }
+            else {
+                $incluir = false;
+            }
+        }
+        if ($this->getNotaDebCred()) {
+            // buscar nota
+            $total = $this->getNotaDebCred()->getMontoTotal();
+        }
+        if ($this->getPagoCliente()) {
+            // buscar nota
+            $total = $this->getPagoCliente()->getTotal();
+        }
+        if ($this->getPagoProveedor()) {
+            // buscar nota
+            $total = $this->getPagoProveedor()->getImporte();
+        }
+
+        $tipos = array('EFECTIVO', 'CHEQUE');
+        $calcular = in_array($this->getTipoPago(), $tipos);
+
+        return $calcular && $incluir ? $total : 0;
+    }
+
+    public function getTipoComprobante() {
+        if ($this->getCobro()) {
             // buscar factura
             $tipo = $this->getCobro()->getFacturaElectronica() ? $this->getCobro()->getFacturaElectronica()->getTipo() : '';
         }
-        if( $this->getNotaDebCred()){
+        if ($this->getNotaDebCred()) {
             // buscar nota
             $tipo = $this->getNotaDebCred()->getNotaElectronica()->getTipo();
         }
-        if( $this->getPagoCliente()){
+        if ($this->getPagoCliente()) {
             // recibo
             $tipo = 'REC';
         }
-        if( $this->getPagoProveedor()){
+        if ($this->getPagoProveedor()) {
             // opag
             $tipo = 'PAG';
         }
         return $tipo;
     }
 
-    public function getComprobanteTxt(){
-        if( $this->getCobro() ){
+    public function getComprobanteTxt() {
+        if ($this->getCobro()) {
             // buscar factura
             $comprobante = $this->getCobro()->getFacturaElectronica()->getComprobanteTxt();
         }
-        if( $this->getNotaDebCred()){
+        if ($this->getNotaDebCred()) {
             // buscar nota
             $comprobante = $this->getNotaDebCred()->getNotaElectronica()->getComprobanteTxt();
         }
-        if( $this->getPagoCliente()){
+        if ($this->getPagoCliente()) {
             // buscar nota
             $comprobante = 'REC-X ' . $this->getPagoCliente()->getComprobanteNro();
         }
-        if( $this->getPagoProveedor()){
+        if ($this->getPagoProveedor()) {
             // buscar nota
             $comprobante = 'O.PAG ' . $this->getPagoProveedor()->getComprobanteNro();
         }
         return $comprobante;
     }
-    public function getFecha(){
-        if( $this->getCobro() ){
+
+    public function getFecha() {
+        if ($this->getCobro()) {
             $fecha = $this->getCobro()->getFechaCobro();
         }
-        if( $this->getNotaDebCred()){
+        if ($this->getNotaDebCred()) {
             // buscar nota
             $fecha = $this->getNotaDebCred()->getFecha();
         }
-        if( $this->getpagoCliente()){
+        if ($this->getpagoCliente()) {
             // buscar nota
             $fecha = $this->getpagoCliente()->getFecha();
         }
-        if( $this->getpagoProveedor()){
+        if ($this->getpagoProveedor()) {
             // buscar nota
             $fecha = $this->getpagoProveedor()->getFecha();
         }
         return $fecha;
     }
-    public function getCliente(){
-        if( $this->getCobro() ){
+
+    public function getCliente() {
+        if ($this->getCobro()) {
             $obj = $this->getCobro();
         }
-        if( $this->getNotaDebCred()){
+        if ($this->getNotaDebCred()) {
             // buscar nota
             $obj = $this->getNotaDebCred();
         }
-        if( $this->getPagoCliente()){
+        if ($this->getPagoCliente()) {
             // buscar nota
             $obj = $this->getPagoCliente();
         }
-        if( $this->getPagoProveedor()){
+        if ($this->getPagoProveedor()) {
             // buscar nota
             return $this->getPagoProveedor()->getProveedor()->getNombre();
         }
         return $obj->getCliente()->getNombre();
     }
 
-    public function getSignoCaja(){
+    public function getSignoCaja() {
         $signo = 1;
-        if( $this->getNotaDebCred() ){
+        if ($this->getNotaDebCred()) {
             $signo = ( $this->getNotaDebCred()->getNotaElectronica()->getTipo() == 'CRE' ) ? -1 : 1;
         }
-        if( $this->getPagoProveedor() ){
+        if ($this->getPagoProveedor()) {
             $signo = -1;
         }
         return $signo;
@@ -196,8 +236,7 @@ class CobroDetalle {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -207,8 +246,7 @@ class CobroDetalle {
      * @param string $tipoPago
      * @return CobroDetalle
      */
-    public function setTipoPago($tipoPago)
-    {
+    public function setTipoPago($tipoPago) {
         $this->tipoPago = $tipoPago;
 
         return $this;
@@ -219,8 +257,7 @@ class CobroDetalle {
      *
      * @return string
      */
-    public function getTipoPago()
-    {
+    public function getTipoPago() {
         return $this->tipoPago;
     }
 
@@ -230,8 +267,7 @@ class CobroDetalle {
      * @param string $importe
      * @return CobroDetalle
      */
-    public function setImporte($importe)
-    {
+    public function setImporte($importe) {
         $this->importe = $importe;
 
         return $this;
@@ -242,8 +278,7 @@ class CobroDetalle {
      *
      * @return string
      */
-    public function getImporte()
-    {
+    public function getImporte() {
         return $this->importe;
     }
 
@@ -253,8 +288,7 @@ class CobroDetalle {
      * @param \ConfigBundle\Entity\Moneda $moneda
      * @return CobroDetalle
      */
-    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
-    {
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null) {
         $this->moneda = $moneda;
 
         return $this;
@@ -265,8 +299,7 @@ class CobroDetalle {
      *
      * @return \ConfigBundle\Entity\Moneda
      */
-    public function getMoneda()
-    {
+    public function getMoneda() {
         return $this->moneda;
     }
 
@@ -276,8 +309,7 @@ class CobroDetalle {
      * @param \VentasBundle\Entity\CobroDetalleTarjeta $datosTarjeta
      * @return CobroDetalle
      */
-    public function setDatosTarjeta(\VentasBundle\Entity\CobroDetalleTarjeta $datosTarjeta = null)
-    {
+    public function setDatosTarjeta(\VentasBundle\Entity\CobroDetalleTarjeta $datosTarjeta = null) {
         $this->datosTarjeta = $datosTarjeta;
 
         return $this;
@@ -288,8 +320,7 @@ class CobroDetalle {
      *
      * @return \VentasBundle\Entity\CobroDetalleTarjeta
      */
-    public function getDatosTarjeta()
-    {
+    public function getDatosTarjeta() {
         return $this->datosTarjeta;
     }
 
@@ -299,8 +330,7 @@ class CobroDetalle {
      * @param \ConfigBundle\Entity\Cheque $chequeRecibido
      * @return CobroDetalle
      */
-    public function setChequeRecibido(\ConfigBundle\Entity\Cheque $chequeRecibido = null)
-    {
+    public function setChequeRecibido(\ConfigBundle\Entity\Cheque $chequeRecibido = null) {
         $this->chequeRecibido = $chequeRecibido;
 
         return $this;
@@ -311,8 +341,7 @@ class CobroDetalle {
      *
      * @return \ConfigBundle\Entity\Cheque
      */
-    public function getChequeRecibido()
-    {
+    public function getChequeRecibido() {
         return $this->chequeRecibido;
     }
 
@@ -322,8 +351,7 @@ class CobroDetalle {
      * @param \VentasBundle\Entity\Cobro $cobro
      * @return CobroDetalle
      */
-    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null)
-    {
+    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null) {
         $this->cobro = $cobro;
 
         return $this;
@@ -334,8 +362,7 @@ class CobroDetalle {
      *
      * @return \VentasBundle\Entity\Cobro
      */
-    public function getCobro()
-    {
+    public function getCobro() {
         return $this->cobro;
     }
 
@@ -345,8 +372,7 @@ class CobroDetalle {
      * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
      * @return CobroDetalle
      */
-    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
-    {
+    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null) {
         $this->notaDebCred = $notaDebCred;
 
         return $this;
@@ -357,8 +383,7 @@ class CobroDetalle {
      *
      * @return \VentasBundle\Entity\NotaDebCred
      */
-    public function getNotaDebCred()
-    {
+    public function getNotaDebCred() {
         return $this->notaDebCred;
     }
 
@@ -368,8 +393,7 @@ class CobroDetalle {
      * @param \VentasBundle\Entity\CajaApertura $cajaApertura
      * @return CobroDetalle
      */
-    public function setCajaApertura(\VentasBundle\Entity\CajaApertura $cajaApertura = null)
-    {
+    public function setCajaApertura(\VentasBundle\Entity\CajaApertura $cajaApertura = null) {
         $this->cajaApertura = $cajaApertura;
 
         return $this;
@@ -380,8 +404,7 @@ class CobroDetalle {
      *
      * @return \VentasBundle\Entity\CajaApertura
      */
-    public function getCajaApertura()
-    {
+    public function getCajaApertura() {
         return $this->cajaApertura;
     }
 
@@ -391,8 +414,7 @@ class CobroDetalle {
      * @param \VentasBundle\Entity\PagoCliente $pagoCliente
      * @return CobroDetalle
      */
-    public function setPagoCliente(\VentasBundle\Entity\PagoCliente $pagoCliente = null)
-    {
+    public function setPagoCliente(\VentasBundle\Entity\PagoCliente $pagoCliente = null) {
         $this->pagoCliente = $pagoCliente;
 
         return $this;
@@ -403,8 +425,7 @@ class CobroDetalle {
      *
      * @return \VentasBundle\Entity\PagoCliente
      */
-    public function getPagoCliente()
-    {
+    public function getPagoCliente() {
         return $this->pagoCliente;
     }
 
@@ -414,8 +435,7 @@ class CobroDetalle {
      * @param \ComprasBundle\Entity\PagoProveedor $pagoProveedor
      * @return CobroDetalle
      */
-    public function setPagoProveedor(\ComprasBundle\Entity\PagoProveedor $pagoProveedor = null)
-    {
+    public function setPagoProveedor(\ComprasBundle\Entity\PagoProveedor $pagoProveedor = null) {
         $this->pagoProveedor = $pagoProveedor;
 
         return $this;
@@ -426,8 +446,8 @@ class CobroDetalle {
      *
      * @return \ComprasBundle\Entity\PagoProveedor
      */
-    public function getPagoProveedor()
-    {
+    public function getPagoProveedor() {
         return $this->pagoProveedor;
     }
+
 }

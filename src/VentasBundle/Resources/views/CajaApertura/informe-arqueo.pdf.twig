@@ -89,34 +89,66 @@
                                 {'tag': 'TIC', 'title': 'TICKETS'}] %}
 
     <table font-size="8px">
-
+        
         {% for tipoComp in tiposFacturacion %}
-
-            {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
-
+            {% set resumen = {} %} 
             {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] and mov.estado == 'FINALIZADO' %}
-
-                {% set cnt, vuelto, importe = (cnt + 1), (vuelto + (mov.vuelto*mov.signoCaja)), (mov.importe * mov.signoCaja)  %}
-                {% if mov.tipoPago=='EFECTIVO' %}
-                    {% set efectivo = efectivo + importe %}
-                {% elseif mov.tipoPago=='CHEQUE' %}
-                    {% set cheque = cheque + importe %}
-                {% elseif mov.tipoPago=='TARJETA' %}
-                    {% set tarjeta = tarjeta + importe %}
-                {% elseif mov.tipoPago=='CTACTE' %}
-                    {% set ctacte = ctacte + importe %}
-                {% endif %}
-                {% include "VentasBundle:CajaApertura:tr-item-arqueo.pdf.twig" %}
-
+                {% set monto = mov.importe*mov.moneda.cotizacion*mov.signoCaja %}
+                {% set detResumen = {"fecha": mov.fecha|date('d/m/Y'), 
+                            "cliente": mov.cliente,
+                            "moneda": mov.moneda.simbolo,
+                            "cotiz": mov.moneda.cotizacion,
+                            "montoComp": mov.montoComprobante, 
+                            "efectivo": (mov.tipoPago=='EFECTIVO') ? monto : 0,
+                            "cheque": (mov.tipoPago=='CHEQUE') ? monto : 0,
+                            "tarjeta": (mov.tipoPago=='TARJETA') ? monto : 0,
+                            "ctacte": (mov.tipoPago=='CTACTE') ? monto : 0, 
+                            "total": (mov.montoComprobante) ? monto : 0 } 
+                %}
+                {#cargar solo la primera vez#} 
+                {% if not resumen|first %}
+                    {% set resumen = { (mov.comprobanteTxt) : detResumen } %}   
+                {% else %}
+                    {% if resumen[mov.comprobanteTxt] is defined %}
+                        {# actualizar solo el valor del tipo nuevo cuando ya esta repetido#}
+                        {% set updateResumen = {"fecha": mov.fecha|date('d/m/Y'), 
+                            "cliente": mov.cliente,
+                            "moneda": mov.moneda.simbolo,
+                            "cotiz": mov.moneda.cotizacion,
+                            "montoComp": mov.montoComprobante, 
+                            "efectivo": (mov.tipoPago=='EFECTIVO') ? monto : resumen[mov.comprobanteTxt].efectivo ,
+                            "cheque": (mov.tipoPago=='CHEQUE') ? monto : resumen[mov.comprobanteTxt].cheque,
+                            "tarjeta": (mov.tipoPago=='TARJETA') ? monto : resumen[mov.comprobanteTxt].tarjeta,
+                            "ctacte": (mov.tipoPago=='CTACTE') ? monto : resumen[mov.comprobanteTxt].ctacte, 
+                            "total" : (mov.montoComprobante) ? resumen[mov.comprobanteTxt].total + monto : 0} 
+                        %}
+                        {% set resumen = resumen|merge({
+                             (mov.comprobanteTxt):updateResumen,                             
+                        }) %}
+                    {% else %}  
+                        {#merge todo completo#}
+                        {% set resumen = resumen|merge({
+                             (mov.comprobanteTxt):detResumen,                             
+                        }) %}
+                    {% endif %}  
+                {% endif %}   
             {% endfor %}
-
+            
+            {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
+            {% for key, value in resumen %}
+                {% set cnt, efectivo, cheque, tarjeta, ctacte, vuelto = cnt+1 , efectivo + value.efectivo, cheque + value.cheque, 
+                       tarjeta + value.tarjeta, ctacte + value.ctacte, vuelto + (value.total - value.montoComp) %}
+                
+                {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'comp':key, 'detail':value} %}
+                
+            {% endfor %}
+            
             {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
             {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
             {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
             {% set tot_vuelto = tot_vuelto + vuelto %}
 
         {% endfor %}
-
 
         <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
 
@@ -155,6 +187,66 @@
                           {'tag': 'REC', 'title': 'RECIBOS'}] %}
 
     {% for tipoComp in tiposPagos %}
+        {% set resumen = {} %} 
+        {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] and mov.estado == 'FINALIZADO' %}
+            {% set monto = mov.importe*mov.moneda.cotizacion*mov.signoCaja %}
+            {% set detResumen = {"fecha": mov.fecha|date('d/m/Y'), 
+                        "cliente": mov.cliente,
+                        "moneda": mov.moneda.simbolo,
+                        "cotiz": mov.moneda.cotizacion,
+                        "montoComp": mov.montoComprobante, 
+                        "efectivo": (mov.tipoPago=='EFECTIVO') ? monto : 0,
+                        "cheque": (mov.tipoPago=='CHEQUE') ? monto : 0,
+                        "tarjeta": (mov.tipoPago=='TARJETA') ? monto : 0,
+                        "ctacte": (mov.tipoPago=='CTACTE') ? monto : 0, 
+                        "total": (mov.montoComprobante) ? monto : 0 } 
+            %}
+            {#cargar solo la primera vez#} 
+            {% if not resumen|first %}
+                {% set resumen = { (mov.comprobanteTxt) : detResumen } %}   
+            {% else %}
+                {% if resumen[mov.comprobanteTxt] is defined %}
+                    {# actualizar solo el valor del tipo nuevo cuando ya esta repetido#}
+                    {% set updateResumen = {"fecha": mov.fecha|date('d/m/Y'), 
+                        "cliente": mov.cliente,
+                        "moneda": mov.moneda.simbolo,
+                        "cotiz": mov.moneda.cotizacion,
+                        "montoComp": mov.montoComprobante, 
+                        "efectivo": (mov.tipoPago=='EFECTIVO') ? monto : resumen[mov.comprobanteTxt].efectivo ,
+                        "cheque": (mov.tipoPago=='CHEQUE') ? monto : resumen[mov.comprobanteTxt].cheque,
+                        "tarjeta": (mov.tipoPago=='TARJETA') ? monto : resumen[mov.comprobanteTxt].tarjeta,
+                        "ctacte": (mov.tipoPago=='CTACTE') ? monto : resumen[mov.comprobanteTxt].ctacte, 
+                        "total" : (mov.montoComprobante) ? resumen[mov.comprobanteTxt].total + monto : 0} 
+                    %}
+                    {% set resumen = resumen|merge({
+                         (mov.comprobanteTxt):updateResumen,                             
+                    }) %}
+                {% else %}  
+                    {#merge todo completo#}
+                    {% set resumen = resumen|merge({
+                         (mov.comprobanteTxt):detResumen,                             
+                    }) %}
+                {% endif %}  
+            {% endif %}   
+        {% endfor %}
+
+        {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
+        {% for key, value in resumen %}
+            {% set cnt, efectivo, cheque, tarjeta, ctacte, vuelto = cnt+1 , efectivo + value.efectivo, cheque + value.cheque, 
+                   tarjeta + value.tarjeta, ctacte + value.ctacte, vuelto + (value.total|abs - value.montoComp|abs) %}
+
+            {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'comp':key, 'detail':value} %}
+
+        {% endfor %}
+
+        {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
+        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
+        {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
+        {% set tot_vuelto = tot_vuelto + vuelto %}
+
+    {% endfor %}
+        
+    {#{% for tipoComp in tiposPagos %}
 
         {% set cnt, efectivo, cheque, tarjeta, ctacte, egreso, vuelto = 0,0,0,0,0,0,0 %}
 
@@ -177,7 +269,7 @@
         {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
         {% set tot_vuelto = tot_vuelto + vuelto %}
 
-    {% endfor %}
+    {% endfor %}#}
 
 <!-- TOTALES -->
         <tr font-size="9px">

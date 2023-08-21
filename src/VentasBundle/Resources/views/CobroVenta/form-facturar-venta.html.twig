@@ -86,7 +86,9 @@
               <input type="checkbox" name="emitirTicket" id="emitirTicket"/>
             </div>
             <div class="actionbutton">
-                <button class="guardar" id="guardar" type="button" data-urlemitir="{{ path('ventas_factura_emitir') }}" data-urlticket="{{ path('ventas_factura_setticket')}}">
+                <button class="guardar" id="guardar" type="button" 
+                        data-urlemitir="{{ path('ventas_factura_emitir') }}" 
+                        data-urlticket="{{ path('ventas_factura_getticket')}}">
                   <span>Guardar y Facturar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
                 </button>
                 <a class="cancelar" onclick="return confirm('Confirma cancelar el cobro?')" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
@@ -269,9 +271,7 @@ function setFacturando(on){
   }
 }
 
-function imprimirTicket(cobroId){
-  jQuery('#guardar span').html('Emitiendo Ticket...')
-
+function getDriver(){
   modelo = '{{modelo_tickeadora}}'
   puerto = '{{puerto_tickeadora}}'
   baudios = '{{baudios_tickeadora}}'
@@ -280,53 +280,59 @@ function imprimirTicket(cobroId){
   if( !modelo || !puerto || !baudios || !host ){
     alert( ' No se pueden emitir tickets en este momento. Faltan configuraciones de la impresora!');
     setFacturando(false)
-    return false;
+    return false
   }
+  const driver = new Driver();
+  driver.host = host
+  driver.modelo = modelo;
+  driver.puerto = puerto;
+  driver.baudios = baudios;
+  return driver
+}
+function imprimirTicket(cobroId){
+  jQuery('#guardar span').html('Emitiendo Ticket...')
   url = jQuery('#guardar').data('urlticket')
+  const driver = getDriver()
   jQuery.get(url, {id:cobroId, entity: 'Cobro'}, function(data){
-    if(data.res === 'OK'){
-      var driver = new Driver();
-      driver.host = host
-      driver.modelo = modelo;
-      driver.puerto = puerto;
-      driver.baudios = baudios;
-      try {
+    if(data.res === 'OK' && driver){
+      try {       
         driver.iniciarTrabajo();
         driver.cancelarComprobante();
         let params = data.cliente
-        driver.datosCliente(...params);
+        if(data.cliente) driver.datosCliente(...params);
 
         driver.abrirComprobante(data.tipo);
         // items
-console.log('items',data.items)
         data.items.forEach(function(i){
           driver.imprimirItem2g(...i)
         })
 
         // descuentos
         driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
+        // tributos (iibb)
+        if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
 
         driver.cerrarComprobante();
         driver.finalizarTrabajo();
 
         //  nro comprobante emitido
         driver.iniciarTrabajo();
-        driver.ultimoComprobante(tcFactura_A);
+        driver.ultimoComprobante(data.tipo);
         driver.finalizarTrabajo();
         let nroTicket = driver.response.ultimoNumero
 
         if(confirm('Se ha registrado la impresión del ticket N° '+nroTicket)){
-            setFacturando(false)
-            alert('GUARDAR INFO EN FACTURA ELECTRONICA')
-            {# location.href = jQuery('.cancelar').attr('href') #}
+            procesarTicket(cobroId,'Cobro',nroTicket)
+            jQuery('#guardar span').html('Guardando Ticket...')
           }
 
       } catch (e){
-        alert(e);
+        cancelarTicket(driver)
+        alert(e)
+        setFacturando(false)
       }
-
     }else{
-      alert(data.msg)
+      alert(data.msg ? data.msg : 'Impresión cancelada!')
       setFacturando(false)
     }
   },'json').fail(function(data){
@@ -382,6 +388,29 @@ console.log('items',data.items)
 
 
 }
+function cancelarTicket(){
+    const driver = getDriver()
+    driver.iniciarTrabajo()
+    driver.cancelarComprobante()
+    driver.finalizarTrabajo()
+}
 
+function procesarTicket(id, entity, nroticket){
+    const url = "{{path('ventas_factura_procesarticket')}}"
+    console.log(url)
+    jQuery.post(url, {id, entity, nroticket}, function(data){
+        console.log(data)
+    if(data.res === 'OK'){
+      setFacturando(false)
+      location.href = jQuery('.cancelar').attr('href')
+    }else{
+      alert(data.msg)
+      setFacturando(false)
+    }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+    setFacturando(false)
+  })
+}
 </script>
 {% endblock %}

@@ -58,7 +58,7 @@
                 {% set simbolo = cbte.moneda.simbolo %}
                 {% set cliente = cbte.cliente %}
                 <div height="180px" width="100%">
-                    {% if fe.letra == 'M' %}
+                    {% if cliente.categoriaIva.nombre == 'M' %}
                     <div font-size="8px" padding="10px">
                     Crédito fiscal discriminado en el presente comprobante sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes Ley 27618
                     </div>

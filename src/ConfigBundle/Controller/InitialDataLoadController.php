@@ -6,7 +6,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Response;
 use ConfigBundle\Controller\UtilsController;
-use ConfigBundle\Entity\BulkInsertQuery;
 use ConfigBundle\Entity\Empresa;
 use ConfigBundle\Entity\UnidadNegocio;
 use ConfigBundle\Entity\Caja;
@@ -21,6 +20,8 @@ use AppBundle\Entity\Deposito;
  * @Route("initialDataLoad")
  */
 class InitialDataLoadController extends Controller {
+    private $csvPath;
+    private $csvSystemPath;
     private $empresa;
     private $unidadNegocio;
     private $permisos;
@@ -37,6 +38,8 @@ class InitialDataLoadController extends Controller {
             try {
                 $em = $this->getDoctrine()->getManager();
                 $em->getConnection()->beginTransaction();
+                $this->csvPath = $this->get('kernel')->getRootDir() . '/../web/uploads/import/';
+                $this->csvSystemPath = $this->csvPath . 'system/';
                 // PARA ACCESO INICIAL
                 $this->loadPermisos($em);
                 $this->addEmpresa($em);
@@ -44,8 +47,8 @@ class InitialDataLoadController extends Controller {
                 $this->addEquipo($em);
                 $this->addParametrizacion($em);
                 // PARAMETROS AFIP
-                $this->loadCsvToTable($em, 'afip_alicuota', array('id', 'codigo', 'nombre', 'valor', 'activo'));
-                $this->loadCsvToTable($em, 'afip_comprobante', array('id', 'codigo', 'nombre', 'valor', 'activo', 'visible_compras'));
+                $this->loadAfipAlicuota($em);
+                $this->loadAfipComprobante($em);
 
                 $em->getConnection()->commit();
                 return new Response('Importación inicial exitosa!');
@@ -61,14 +64,10 @@ class InitialDataLoadController extends Controller {
     }
 
     private function loadPermisos($em) {
-        $this->loadCsvToTable($em, 'permiso', array('id', 'padre_id', 'route', 'text', 'orden'));
-//        $filename = $this->get('kernel')->getRootDir() . '/../web/uploads/import/system/permiso.csv';
-//        $data = UtilsController::convertCsvToArray($filename);
-//
-//        $bulkInserQuery = new BulkInsertQuery($em->getConnection(), 'permiso');
-//        $bulkInserQuery->setColumns(array('id', 'padre_id', 'route', 'text', 'orden'));
-//        $bulkInserQuery->setValues($data);
-//        $bulkInserQuery->execute();
+        $filename = $this->csvSystemPath . 'permiso.csv';
+        $data = UtilsController::convertCsvToArray($filename);
+        $columns = array('id', 'padre_id', 'route', 'text', 'orden');
+        UtilsController::loadCsvToTable($em, $data, 'permiso', $columns);
         $this->permisos = $em->getRepository('ConfigBundle:Permiso')->findAll();
     }
 
@@ -160,14 +159,20 @@ class InitialDataLoadController extends Controller {
         $em->flush();
     }
 
-    private function loadCsvToTable($em, $table, $columns) {
-        $file = $this->get('kernel')->getRootDir() . '/../web/uploads/import/system/' . $table . '.csv';
+    private function loadAfipAlicuota($em) {
+        $table = 'afip_comprobante';
+        $file = $this->csvSystemPath . $table . '.csv';
         $data = UtilsController::convertCsvToArray($file);
+        $columns = array('id', 'codigo', 'nombre', 'valor', 'activo');
+        UtilsController::loadCsvToTable($em, $data, $table, $columns);
+    }
 
-        $bulkInserQuery = new BulkInsertQuery($em->getConnection(), $table);
-        $bulkInserQuery->setColumns($columns);
-        $bulkInserQuery->setValues($data);
-        $bulkInserQuery->execute();
+    private function loadAfipComprobante($em) {
+        $table = 'afip_comprobante';
+        $file = $this->csvSystemPath . $table . '.csv';
+        $data = UtilsController::convertCsvToArray($file);
+        $columns = array('id', 'codigo', 'nombre', 'valor', 'activo', 'visible_compras');
+        UtilsController::loadCsvToTable($em, $data, $table, $columns);
     }
 
 }

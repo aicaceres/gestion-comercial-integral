@@ -35,6 +35,7 @@ twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
     globals:
+      ptovta_ws_factura: '%ptovta_ws_factura%'
       ptovta_ifu_ticket: '%ptovta_ifu_ticket%'
       modelo_tickeadora: '%modelo_tickeadora%'
       puerto_tickeadora: '%puerto_tickeadora%'
@@ -129,4 +130,4 @@ ps_pdf:
 services:
     factura_electronica_webservice:
       class: VentasBundle\Service\FacturaElectronicaWebservice
-      arguments: [ '@doctrine.orm.entity_manager', '@session', '%ptovta_ws_factura%', '%iibb_percent%', '%cuit_afip%' ]
+      arguments: [ '@doctrine.orm.entity_manager', '@session', '%ptovta_ws_factura%', '%ptovta_ifu_ticket%', '%iibb_percent%', '%cuit_afip%' ]

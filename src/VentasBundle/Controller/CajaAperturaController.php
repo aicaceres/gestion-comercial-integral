@@ -1,14 +1,12 @@
 <?php
 
 namespace VentasBundle\Controller;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-
 use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\CajaApertura;
 use VentasBundle\Form\CajaAperturaType;
@@ -17,8 +15,7 @@ use VentasBundle\Form\CajaCierreType;
 /**
  * @Route("/cajaApertura")
  */
-class CajaAperturaController extends Controller
-{
+class CajaAperturaController extends Controller {
 
     /**
      * @Route("/", name="ventas_apertura")
@@ -36,20 +33,21 @@ class CajaAperturaController extends Controller
         $cajaId = $request->get('cajaId');
 
         $cajas = $em->getRepository('ConfigBundle:Caja')->findAll();
-        if( $cajaId ){
+        if ($cajaId) {
             $caja = $em->getRepository('ConfigBundle:Caja')->find($cajaId);
-        }else{
+        }
+        else {
             $caja = $cajas[0];
         }
 
-        $entities = $em->getRepository('VentasBundle:CajaApertura')->findByCriteria($unidneg,$desde, $hasta, $cajaId);
+        $entities = $em->getRepository('VentasBundle:CajaApertura')->findByCriteria($unidneg, $desde, $hasta, $cajaId);
         return $this->render('VentasBundle:CajaApertura:index.html.twig', array(
-                    'entities' => $entities,
-                    'cajaId' => $cajaId,
-                    'caja' => $caja,
-                    'cajas' => $cajas,
-                    'desde' => $desde,
-                    'hasta' => $hasta
+                'entities' => $entities,
+                'cajaId' => $cajaId,
+                'caja' => $caja,
+                'cajas' => $cajas,
+                'desde' => $desde,
+                'hasta' => $hasta
         ));
     }
 
@@ -58,8 +56,7 @@ class CajaAperturaController extends Controller
      * @Method("POST")
      * @Template()
      */
-    public function newAperturaAction(Request $request)
-    {
+    public function newAperturaAction(Request $request) {
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_apertura');
 
@@ -67,19 +64,19 @@ class CajaAperturaController extends Controller
         $em = $this->getDoctrine()->getManager();
         $caja = $em->getRepository('ConfigBundle:Caja')->find($id);
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($caja->getId());
-        if($caja->getAbierta() || $apertura ){
+        if ($caja->getAbierta() || $apertura) {
             $this->addFlash('error', 'Esta caja ya se encuentra abierta.<br> Debe realizar el cierre primero!');
             $partial = $this->renderView('AppBundle::notificacion.html.twig');
             return new Response($partial);
         }
         $entity = new CajaApertura();
-        $entity->setCaja( $caja );
-        $entity->setFechaApertura( new \DateTime() );
+        $entity->setCaja($caja);
+        $entity->setFechaApertura(new \DateTime());
         $form = $this->createAperturaForm($entity);
         $form->get('referer')->setData($request->headers->get('referer'));
         return $this->render('VentasBundle:CajaApertura:new.html.twig', array(
-            'entity' => $entity,
-            'form' => $form->createView()
+                'entity' => $entity,
+                'form' => $form->createView()
         ));
     }
 
@@ -97,20 +94,20 @@ class CajaAperturaController extends Controller
         $em = $this->getDoctrine()->getManager();
         $caja = $entity->getCaja();
         // definir ruta
-        $ruta = $this->redirect($this->generateUrl('ventas_apertura', array( 'cajaId' => $caja->getId()) ));
+        $ruta = $this->redirect($this->generateUrl('ventas_apertura', array('cajaId' => $caja->getId())));
         if ($form->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
                 $referer = $request->get('ventasbundle_apertura')['referer'];
                 // verificar que no exista caja abierta
                 $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($caja->getId());
-                if($apertura){
+                if ($apertura) {
                     $this->addFlash('error', 'Esta caja ya se encuentra abierta!');
                     return $ruta;
                 }
 
                 $entity->getCaja()->setAbierta(true);
-                $entity->setFechaApertura( new \DateTime() );
+                $entity->setFechaApertura(new \DateTime());
                 $em->persist($entity);
                 $em->flush();
                 $em->getConnection()->commit();
@@ -138,29 +135,28 @@ class CajaAperturaController extends Controller
         return $form;
     }
 
-   /**
+    /**
      * @Route("/newCierre", name="ventas_cierre_new")
      * @Method("POST")
      * @Template()
      */
-    public function newCierreAction(Request $request)
-    {
+    public function newCierreAction(Request $request) {
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_cierre');
 
         $cajaId = $request->get('id');
         $em = $this->getDoctrine()->getManager();
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($cajaId);
-        if(!$apertura){
+        if (!$apertura) {
             $this->addFlash('error', 'No se encuentra una apertura de caja para realizar el cierre.');
             $partial = $this->renderView('AppBundle::notificacion.html.twig');
             return new Response($partial);
         }
-        $apertura->setFechaCierre( new \DateTime() );
+        $apertura->setFechaCierre(new \DateTime());
         $form = $this->createCierreForm($apertura);
         return $this->render('VentasBundle:CajaApertura:cierre.html.twig', array(
-            'entity' => $apertura,
-            'form' => $form->createView(),
+                'entity' => $apertura,
+                'form' => $form->createView(),
         ));
     }
 
@@ -184,27 +180,26 @@ class CajaAperturaController extends Controller
             $em->getConnection()->beginTransaction();
             try {
                 $entity->getCaja()->setAbierta(false);
-                $entity->setFechaCierre( new \DateTime() );
+                $entity->setFechaCierre(new \DateTime());
                 $em->persist($entity);
                 $em->flush();
                 $em->getConnection()->commit();
                 $session->set('caja_abierta', false);
                 // url arqueo
-                $url_arqueo = $this->generateUrl('ventas_apertura_arqueo', array( 'id' => $entity->getId()) );
-                if( COUNT($entity->getMovimientos()) == 0 ){
+                $url_arqueo = $this->generateUrl('ventas_apertura_arqueo', array('id' => $entity->getId()));
+                if (COUNT($entity->getMovimientos()) == 0) {
                     $this->addFlash('warning', 'No se registraron movimientos!');
                     $url_arqueo = null;
                 }
                 $logger->info($url_arqueo);
-                return new Response( json_encode(['message'=>'URL', 'url'=> $url_arqueo]) );
+                return new Response(json_encode(['message' => 'URL', 'url' => $url_arqueo]));
             }
             catch (\Exception $ex) {
                 $em->getConnection()->rollback();
-                return new Response( json_encode(['message'=>'ERROR', 'error'=> $ex->getMessage()]) );
+                return new Response(json_encode(['message' => 'ERROR', 'error' => $ex->getMessage()]));
             }
-
         }
-        return new Response( json_encode(['message'=>'ERROR', 'error'=> 'invalid form!' ]) );
+        return new Response(json_encode(['message' => 'ERROR', 'error' => 'invalid form!']));
     }
 
     /**
@@ -232,13 +227,15 @@ class CajaAperturaController extends Controller
         $em = $this->getDoctrine()->getManager();
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($id);
         $movimientos = $em->getRepository('VentasBundle:CajaApertura')->getMovimientosById($id);
+        $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante_bn.png';
+//        return $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
+//                array('apertura' => $apertura, 'movimientos' => $movimientos, 'logo' => $logo));
 
-        $logo = __DIR__.'/../../../web/assets/images/logo_comprobante_bn.png';
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
-                array('apertura' => $apertura, 'movimientos'=>$movimientos, 'logo' => $logo), $response);
+            array('apertura' => $apertura, 'movimientos' => $movimientos, 'logo' => $logo), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
