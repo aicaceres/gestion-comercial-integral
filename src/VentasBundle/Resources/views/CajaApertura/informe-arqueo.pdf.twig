@@ -92,7 +92,7 @@
         
         {% for tipoComp in tiposFacturacion %}
             {% set resumen = {} %} 
-            {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] and mov.estado == 'FINALIZADO' %}
+            {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] and mov.incluirEnArqueo %}
                 {% set monto = mov.importe*mov.moneda.cotizacion*mov.signoCaja %}
                 {% set detResumen = {"fecha": mov.fecha|date('d/m/Y'), 
                             "cliente": mov.cliente,

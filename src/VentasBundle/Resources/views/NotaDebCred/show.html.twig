@@ -14,7 +14,7 @@
 {% endblock %}
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >Nota {{entity.notaElectronica.comprobanteTxt}}</h1>
+<h1 id="popup_title" >Nota {{ entity.notaElectronica ? entity.notaElectronica.comprobanteTxt : ''}}</h1>
 <div class="divEdicion">
     <form action="#" method="post" class="stdform">
         <fieldset >
@@ -35,15 +35,6 @@
                 {% else %}
                   &nbsp;&nbsp;<strong>CUIT: {{ entity.cliente.cuit }}</strong>
                 {% endif %}
-            </div>
-            <div class="two_fields">
-                <div><label for="nroPedido">CAE:</label>
-                    <input type="text" value="{{entity.notaElectronica.cae}}" disabled="disabled" class="smallinput">
-                </div>
-
-                <div><label for="nroPedido">Vto CAE:</label>
-                    <input type="text" value="{{entity.notaElectronica.caeVto|date('d/m/Y')}}" disabled="disabled" class="width100">
-                </div>
             </div>
             <div>
             {% if entity.comprobanteAsociado %}
@@ -86,8 +77,9 @@
           <div class="divForm" >
             {% include "VentasBundle:CobroVenta:_partial-show-detalle-pago.html.twig" with { 'cobroDetalles': entity.cobroDetalles, 'montoTotal': entity.montoTotal } %}
           </div>
+          {% if entity.notaElectronica %}
             {% include "VentasBundle:FacturaElectronica:info-banner.html.twig" with {'fe':entity.notaElectronica, 'id':entity.id, 'entity': 'NotaDebCred'} %}
-
+          {% endif %}  
             </div>
             <br clear="all" />
             <div class="actionbutton">

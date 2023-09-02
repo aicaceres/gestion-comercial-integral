@@ -58,12 +58,12 @@
             <tr>
                 <td class="alignright">{{entity.nroOperacion}}</td>
                 <td><span class="hidden">{{ entity.fechaVenta|date('YmdHi') }}</span>{{ entity.fechaVenta|date('d-m-Y H:i') }}</td>
-                <td>{{ entity.cliente }}{{ entity.nombreCliente ? ('<br>' ~ entity.nombreCliente) |raw : '' }}</td>
+                <td>{{ entity.cliente }}{{ entity.nombreCliente != 'CONSUMIDOR FINAL' ? ('<br>' ~ entity.nombreCliente) |raw : '' }}</td>
                 <td>{{ entity.formaPago }}</td>
                 <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span> {{ entity.montoTotal|number_format(3,',','.') }}</td>
                 <td class="estado">{{ entity.estado }}</td>
                 {% if not owns  %}
-                <td>{{entity.updatedBy.username|upper }}- {{entity.detalles|length }}</td>
+                <td>{{entity.updatedBy.username|upper }}</td>
                 {% endif %}
                 <td class="buttons">
                     <a href="{{ path('ventas_venta_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Venta"></a>

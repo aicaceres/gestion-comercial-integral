@@ -57,24 +57,7 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 var printpdf = '{{printpdf}}';
-jQuery(document).ready(function($){
-    if ( $('#contentwrapper').width() < 1000) {
-            $('.togglemenu').click();
-        }
-    $(document).on('keydown',function(e){ detectarControles(e); })
-    $('#selectUser').change(function(){
-        $('#searchform').submit();
-    });
-    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
-
-    var oTable = $('.table-cobrados').dataTable();
-    oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
-    if( printpdf ){
-        console.log( '[facid="'+printpdf+'"]')
-        $('[facid="'+printpdf+'"]').click()
-    }
-{# VENTAS POR COBRAR #}
-    $('#ventasxcobrar').dataTable({
+var ventasxcobrarOptions = {
             "bSort": false,
             "sPaginationType": "full_numbers",
                 "oLanguage": {
@@ -92,7 +75,25 @@ jQuery(document).ready(function($){
             "sSearch": "Buscar:",
             "sSelect": "%d seleccionados"
         }
+    };
+jQuery(document).ready(function($){
+    if ( $('#contentwrapper').width() < 1000) {
+            $('.togglemenu').click();
+        }
+    $(document).on('keydown',function(e){ detectarControles(e); })
+    $('#selectUser').change(function(){
+        $('#searchform').submit();
     });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+
+    var oTable = $('.table-cobrados').dataTable();
+    oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
+    if( printpdf ){
+        console.log( '[facid="'+printpdf+'"]')
+        $('[facid="'+printpdf+'"]').click()
+    }
+{# VENTAS POR COBRAR #}
+    $('#ventasxcobrar').dataTable(ventasxcobrarOptions);
     $('#ventasxcobrar_filter input').val('#');
     $('#ventasxcobrar_filter input').focus();
     /// hover de nro operacion resalta toda la fila
@@ -111,6 +112,7 @@ jQuery(document).ready(function($){
     let selectedtab = "{{selectedtab}}"
     $('#selectedtab').val( selectedtab ? selectedtab : "#tab-porcobrar" )
     $('.hornav li a[href="' + selectedtab + '"]').click()
+
 });
 
 function partialDetalleVenta(obj) {
@@ -122,6 +124,29 @@ function partialDetalleVenta(obj) {
             close: function() { obj.focus() }
         });
         jQuery('#popup').dialog('open');
+}
+
+function recargarVentasPorCobrar(){
+    jQuery('.loader_refresh').removeClass('hidden');
+    const url = '{{ path("get_ventas_por_cobrar") }}';
+    const filtro = {
+        'id': jQuery("#selectUser").val(),
+        'desde': jQuery("#desde").val(),
+        'hasta': jQuery("#hasta").val()
+    }
+    jQuery.get(url,filtro).done(function (data) {
+        // actualizar datos
+        if(data){
+            jQuery('#ventasxcobrar').html(data);
+            jQuery('#ventasxcobrar').DataTable().draw(ventasxcobrarOptions);
+            jQuery('.loader_refresh').addClass('hidden');
+            jQuery('#ventasxcobrar_filter input').val('#');
+            jQuery('#ventasxcobrar_filter input').focus();
+        }
+    }).fail(function(){ 
+        location.reload() 
+        jQuery('.loader_refresh').addClass('hidden');
+    });
 }
 </script>
 {% endblock %}

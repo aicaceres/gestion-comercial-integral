@@ -70,9 +70,9 @@
         </fieldset>
 
         {% include "VentasBundle:CobroVenta:_partial-show-detalle-pago.html.twig" with { 'cobroDetalles': entity.detalles, 'montoTotal': entity.venta.montoTotal } %}
-
-        {% include "VentasBundle:FacturaElectronica:info-banner.html.twig" with {'fe':entity.facturaElectronica, 'id':entity.id, 'entity': 'Cobro'} %}
-
+        {% if entity.facturaElectronica %}
+            {% include "VentasBundle:FacturaElectronica:info-banner.html.twig" with {'fe':entity.facturaElectronica, 'id':entity.id, 'entity': 'Cobro'} %}
+        {% endif %}
         <fieldset>
             <div class="actionbutton">
                 <a class="cancelar" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>

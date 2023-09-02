@@ -93,48 +93,48 @@ jQuery(document).ready(function ($) {
     )
   }
 
-  async function prueba(item) {
-    addNewItem()
-          $('[name*="[cantidad]"]').last().val(item.cant)
+//  async function prueba(item) {
+//    addNewItem()
+//          $('[name*="[cantidad]"]').last().val(item.cant)
+//
+//          const newOption = new Option(item.text, item.id, true, true)
+//          // producto
+//          let prod = jQuery(".widgetProducto").last()
+//          prod.append(newOption).trigger("select2:selecting")
+//          prod.change()
+//          prod.select2("close")
+//          // texto comodin
+//          let textoComodin = prod.parent().find('[id*="_textoComodin"]')
+//          textoComodin.val(item.comodin)
+//          // precio
+//          let precioComodin = prod.closest('.item').find('.precioUnitarioComodin')
+//          if (precioComodin.length > 0) {
+//            precioComodin.val(item.precio)
+//            let precio = prod.closest('.item').find('[id*="_precio"]')
+//            precio.val( item.precio)
+//            let alicuota = prod.closest('.item').find('[id*="_alicuota"]')
+//            alicuota.val( item.alicuota )
+//    }
+//    return 1
+//  }
 
-          const newOption = new Option(item.text, item.id, true, true)
-          // producto
-          let prod = jQuery(".widgetProducto").last()
-          prod.append(newOption).trigger("select2:selecting")
-          prod.change()
-          prod.select2("close")
-          // texto comodin
-          let textoComodin = prod.parent().find('[id*="_textoComodin"]')
-          textoComodin.val(item.comodin)
-          // precio
-          let precioComodin = prod.closest('.item').find('.precioUnitarioComodin')
-          if (precioComodin.length > 0) {
-            precioComodin.val(item.precio)
-            let precio = prod.closest('.item').find('[id*="_precio"]')
-            precio.val( item.precio)
-            let alicuota = prod.closest('.item').find('[id*="_alicuota"]')
-            alicuota.val( item.alicuota )
-    }
-    return 1
-  }
+function filtrarTipoComprobante(id) {
+    $.getJSON(
+            selectComprobante.data("urltiposvalidos"),
+            {id},
+            function (data) {
+                objTiposComprobante = $('[id*="_tipoComprobante"]')
+                objTiposComprobante.find("option").each(function (e) {
 
-  function filtrarTipoComprobante(id) {
-		$.getJSON(
-			selectComprobante.data("urltiposvalidos"),
-			{ id },
-      function (data) {
-				objTiposComprobante = $('[id*="_tipoComprobante"]')
-        objTiposComprobante.find("option").each(function (e) {
+                    $(this).attr("disabled", !data.includes(parseInt($(this).val())))
 
-          $(this).attr("disabled", !data.includes(parseInt($(this).val())) )
-
-				})
-				objTiposComprobante.val(
-					objTiposComprobante.find("option:not([disabled]):first").val()
-				).focus()
-			}
-		)
-  }
+                })
+                objTiposComprobante.val(
+                        objTiposComprobante.find("option:not([disabled]):first").val()
+                        ).focus()
+            }
+    )
+}
 
 })
 

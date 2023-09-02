@@ -88,14 +88,23 @@
 
     <fieldset>
         <br clear="all" />
+        <div style="text-align: center;" id="divEmitirTicket">
+          <label> EMITIR TICKET</label>
+          <input type="checkbox" name="emitirTicket" id="emitirTicket"/>
+        </div>
         <div class="actionbutton">
-            <button class="guardar" id="guardar" type="button">Guardar</span></button>
-            <a class="cancelar tabbable" type="button" href="{{ path('ventas_notadebcred')}}">Cancelar</a>
+            <button class="guardar" id="guardar" type="button" 
+                    data-urlemitir="{{ path('ventas_factura_emitir') }}" 
+                    data-urlticket="{{ path('ventas_factura_getticket')}}">
+              <span>Guardar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
+            </button>
+            <a class="cancelar" onclick="return confirm('Confirma cancelar?')" type="button" href="{{ path('ventas_notadebcred')}}">Cancelar</a>
         </div>
     </fieldset>
 
     {% include "VentasBundle:Partial:_partial-notifmsg.html.twig" with {'shortcuts': ['cliente', 'formapago', '+pago', '+producto'] } %}
 
+    <input type="hidden" id="ventasbundle_notadebcred_id" name="ventasbundle_notadebcred_id" value="{{entity.id}}"/>
     <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
   {{ form_end(form) }}
 </div>
@@ -112,6 +121,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/utils/moduloVentas.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/utils/detallePago.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
@@ -181,12 +191,16 @@ jQuery(function ($) {
                 }
             }
             if( $('table.detalle tbody tr.item').length > 0 ){
-                if (!confirm('Confirma la generación de la Nota Electrónica?')) {
+                emitirTicket = $('#emitirTicket').is(':checked')
+                let txt = emitirTicket ? '\n\n Se emitirá un Ticket' : '\n\n Se enviarán los datos a la Afip para registrar el comprobante'
+                if (confirm('Confirma la generación de la Nota Electrónica?'+txt)) {
+                    registrarComprobante()
+                }else{
                     return false;
                 }
             }else{  alert('Debe ingresar items a la Nota'); return false;}
 
-            $('#ventasbundle_notadebcred').submit();
+{#            $('#ventasbundle_notadebcred').submit();#}
         })
     });
 });
@@ -197,5 +211,172 @@ function setPeriodoAsociado(){
   jQuery('#ventasbundle_notadebcred_periodoAsocDesde').val( hoy )
   jQuery('#ventasbundle_notadebcred_periodoAsocHasta').val( hoy )
 }
+
+function registrarComprobante(){
+{#  let id = jQuery('#ventasbundle_notadebcred_id').val()#}
+  const formdata = jQuery("#ventasbundle_notadebcred").serialize()
+  const url = jQuery("#ventasbundle_notadebcred").attr("action")
+  setFacturando(true)
+  jQuery.post(url, formdata, function(data){
+    if(data.res  === 'OK'){
+      jQuery('#ventasbundle_notadebcred_id').val(data.id)
+      enviarEmision(data.id)
+    }else{
+      alert(data.msg)
+      setFacturando(false)
+    }
+  })
+}
+
+function enviarEmision(id){
+  jQuery('#emitirTicket').is(':checked') ?
+    imprimirTicket(id) :
+    emitirComprobanteWs(id)
+}
+
+function emitirComprobanteWs(notaId){
+  jQuery('#guardar span').html('Emitiendo Comprobante...')
+  const url = jQuery('#guardar').data('urlemitir')
+  console.log(notaId)
+  jQuery.post(url, {id:notaId, entity: 'NotaDebCred'}, function(data){
+    if(data.res === 'OK'){
+      jQuery("#divEmitirTicket").remove()
+      setFacturando(false)
+      window.open(data.urlprint)
+      location.href = jQuery('.cancelar').attr('href')
+    }else{
+      alert(data.msg)
+      setFacturando(false)
+    }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+    setFacturando(false)
+  })
+}
+
+function imprimirTicket(notaId){
+  jQuery('#guardar span').html('Emitiendo Ticket...')
+  url = jQuery('#guardar').data('urlticket')
+  const driver = getDriver()
+  jQuery.get(url, {id:notaId, entity: 'NotaDebCred'}, function(data){
+    if(data.res === 'OK' && driver){
+      try {       
+        driver.iniciarTrabajo();
+        
+        driver.especificarPie('1'," ") 
+        driver.especificarPie('2',data.pie[0]) 
+        driver.especificarPie('3',data.pie[1]) 
+        
+        driver.cancelarComprobante();
+        let params = data.cliente
+        driver.datosCliente(...params);
+
+        driver.abrirComprobante(data.tipo);
+        // items
+        data.items.forEach(function(i){
+          driver.imprimirItem2g(...i)
+        })
+
+        // descuentos
+        if(data.montodto!=0)
+            driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
+        // tributos (iibb)
+        if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
+        
+        // pagos
+        if(data.pagos){
+           data.pagos.forEach(function(i){
+            driver.imprimirPago2g(...i)
+          }) 
+        }
+
+        driver.cerrarComprobante();
+        driver.finalizarTrabajo();
+
+        //  nro comprobante emitido
+        driver.iniciarTrabajo();
+        driver.ultimoComprobante(data.tipo);
+        driver.finalizarTrabajo();
+        let nroTicket = driver.response.ultimoNumero
+
+        if(confirm('Se ha registrado la impresión del ticket N° '+nroTicket)){
+            jQuery('#guardar span').html('Guardando Ticket...')
+            procesarTicket(notaId,'NotaDebCred',nroTicket)
+          }
+
+      } catch (e){
+        cancelarTicket(driver)
+        alert(e)
+        setFacturando(false)
+      }
+    }else{
+      alert(data.msg ? data.msg : 'Impresión cancelada!')
+      setFacturando(false)
+    }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+    setFacturando(false)
+  })
+}
+
+function procesarTicket(id, entity, nroticket){
+    const url = "{{path('ventas_factura_procesarticket')}}"
+    jQuery.post(url, {id, entity, nroticket}, function(data){
+    if(data.res === 'OK'){
+        
+      setFacturando(false)
+      location.href = jQuery('.cancelar').attr('href')
+    }else{
+      alert(data.msg)
+      setFacturando(false)
+    }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+    setFacturando(false)
+  })
+}
+
+function getDriver(){
+  modelo = '{{modelo_tickeadora}}'
+  puerto = '{{puerto_tickeadora}}'
+  baudios = '{{baudios_tickeadora}}'
+  host = '{{host_tickeadora}}'
+  // verificar si falta configuracion
+  if( !modelo || !puerto || !baudios || !host ){
+    alert( ' No se pueden emitir tickets en este momento. Faltan configuraciones de la impresora!');
+    setFacturando(false)
+    return false
+  }
+  const driver = new Driver();
+  driver.host = host
+  driver.modelo = modelo;
+  driver.puerto = puerto;
+  driver.baudios = baudios;
+  return driver
+}
+
+function cancelarTicket(){
+    const driver = getDriver()
+    driver.iniciarTrabajo()
+    driver.cancelarComprobante()
+    driver.finalizarTrabajo()
+}
+
+function setFacturando(on){
+  if(on){
+    jQuery('.cancelar').hide()
+    jQuery('#guardar').attr('disabled', true)
+    jQuery('.loader_facturar').removeClass('hidden')
+    jQuery('#guardar span').html('Guardando datos...')
+  }else{
+    setTimeout(function(){
+        jQuery('.loader_facturar').addClass('hidden');
+        jQuery('#guardar span').html('Guardar')
+        jQuery('.cancelar').show();
+        jQuery('#guardar').removeAttr('disabled')
+      }, 1000);
+  }
+}
+
 
 </script>{% endblock %}

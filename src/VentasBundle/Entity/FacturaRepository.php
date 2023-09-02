@@ -48,27 +48,6 @@ class FacturaRepository extends EntityRepository {
         return $query->getArrayResult();
     }
 
-    // public function findByCriteria($unidneg, $cliId = NULL, $desde = NULL, $hasta = NULL) {
-    //     $query = $this->_em->createQueryBuilder();
-    //     $query->select('p')
-    //             ->from('VentasBundle\Entity\Factura', 'p')
-    //             ->innerJoin('p.unidadNegocio', 'u')
-    //             ->where("u.id=" . $unidneg);
-    //     if ($cliId) {
-    //         $query->innerJoin('p.cliente', 'pr')
-    //                 ->andWhere('pr.id=' . $cliId);
-    //     }
-    //     if ($desde) {
-    //         $cadena = " p.fechaFactura >= '" . UtilsController::toAnsiDate($desde) . "'";
-    //         $query->andWhere($cadena);
-    //     }
-    //     if ($hasta) {
-    //         $cadena = " p.fechaFactura <= '" . UtilsController::toAnsiDate($hasta) . "'";
-    //         $query->andWhere($cadena);
-    //     }
-    //     return $query->getQuery()->getResult();
-    // }
-
     /** AFIP VENTAS */
     public function findByFeventasPeriodoUnidadNegocio($desde, $hasta, $unidneg) {
         $query = $this->_em->createQueryBuilder('fe')
@@ -124,6 +103,24 @@ class FacturaRepository extends EntityRepository {
             ->where('c.id=:arg')
             ->setParameter('arg', $id);
         return $query->getQuery()->getArrayResult();
+    }
+
+    /**
+     * IMPRESORA FISCAL
+     */
+    public function findUltimotReporte($cajaId) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('if.fechaHasta')
+            ->from('VentasBundle:ImpresoraFiscal', 'if')
+            ->innerJoin('if.caja', 'c')
+            ->where('c.id=' . $cajaId)
+            ->andWhere("if.comando='cmObtenerPrimerBloqueReporteElectronico'")
+            ->andWhere("if.fechaDesde IS NOT NULL")
+            ->andWhere("if.fechaHasta IS NOT NULL")
+            ->orderBy('if.fechaHasta', 'DESC')
+            ->setMaxResults(1);
+
+        return $query->getQuery()->getOneOrNullResult();
     }
 
 }

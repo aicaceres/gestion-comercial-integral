@@ -160,7 +160,7 @@ class InitialDataLoadController extends Controller {
     }
 
     private function loadAfipAlicuota($em) {
-        $table = 'afip_comprobante';
+        $table = 'afip_alicuota';
         $file = $this->csvSystemPath . $table . '.csv';
         $data = UtilsController::convertCsvToArray($file);
         $columns = array('id', 'codigo', 'nombre', 'valor', 'activo');

@@ -39,9 +39,9 @@
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
-                <th>Comprobante</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
+                <th>Comprobante</th>
                 <th>CAE</th>
                 <th>Total</th>
                 <th>Usuario</th>
@@ -70,16 +70,26 @@
         <tbody>
            {% for entity in entities %}
             <tr>
-                <td>{{entity.notaElectronica.comprobanteTxt}}</td>
                 <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
                 <td>{{ entity.clienteTxt }}</td>
-                <td>{{ entity.notaElectronica.cae }}</td>
+                <td>
+                {% if entity.notaElectronica %}
+                    {{ entity.notaElectronica.comprobanteTxt }}
+                {% else %}
+                    <a href="{{ path('ventas_notadebcred_edit',{ 'id': entity.id }) }}" type="button" class="stdbtn btn_red " title="Facturar">Facturar</a>
+                {% endif %}
+                </td>
+                <td>{{ entity.notaElectronica ? entity.notaElectronica.cae : ''}}</td>
                 <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(2,',','.') }}</td>
                 <td>{{ entity.updatedBy.username }}</td>
                 <td class="buttons">
                     {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
-                    <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Nota"></a>
-                    <a href="javascript:void(0)" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'NotaDebCred' })}}" class="editar btn btnaction btn_print" id="nota{{entity.id}}" title="Imprimir Comprobante"></a>
+                        <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Nota"></a>
+                        {% if entity.notaElectronica %}
+                            {% if entity.notaElectronica.cae %}
+                            <a href="javascript:void(0)" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'NotaDebCred' })}}" class="editar btn btnaction btn_print" id="nota{{entity.id}}" title="Imprimir Comprobante"></a>
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
                 </td>
             </tr>
@@ -96,7 +106,7 @@ jQuery(document).ready(function($){
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
     var oTable = $('#dyntable2').dataTable();
-    oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
+    oTable.fnSort( [ [0,'desc'],[2,'desc'] ] );
 
     $('#printform').on('submit',function(){
         $('#clienteid').val($('#selectCliente').val());

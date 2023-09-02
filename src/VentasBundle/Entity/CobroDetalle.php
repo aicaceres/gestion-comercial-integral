@@ -2,10 +2,15 @@
 
 namespace VentasBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * VentasBundle\Entity\CobroDetalle
- * @ORM\Table(name="ventas_cobro_detalle")
+ * @ORM\Table(name="ventas_cobro_detalle" ,
+ * uniqueConstraints={
+ *  @ORM\UniqueConstraint(name="cobro_tipopago_idx", columns={"ventas_cobro_id", "tipo_pago"}),
+ *  @ORM\UniqueConstraint(name="notadc_tipopago_idx", columns={"ventas_notadebcred_id", "tipo_pago"})
+ * })
  * @ORM\Entity()
  */
 class CobroDetalle {
@@ -19,7 +24,7 @@ class CobroDetalle {
 
     /**
      * @var integer $tipoPago
-     * @ORM\Column(name="tipo_pago", type="string")
+     * @ORM\Column(name="tipo_pago", type="string", nullable=false, columnDefinition="ENUM('CTACTE', 'EFECTIVO', 'TARJETA', 'CHEQUE','TRANSFERENCIA')")
      */
     protected $tipoPago = 'CTACTE';
 
@@ -77,7 +82,30 @@ class CobroDetalle {
     protected $cajaApertura;
 
     public function getEstado() {
-        return $this->getCobro() ? $this->getCobro()->getEstado() : 'FINALIZADO';
+        if ($this->getCobro()) {
+            $estado = $this->getCobro()->getEstado();
+        }
+        elseif ($this->getNotaDebCred()) {
+            $estado = $this->getNotaDebCred()->getEstado();
+        }
+        else {
+            $estado = 'FINALIZADO';
+        }
+        return $estado;
+    }
+
+    public function getIncluirEnArqueo() {
+        $res = false;
+        if ($this->getCobro()) {
+            $res = $this->getCobro()->getEstado() === 'FINALIZADO';
+        }
+        elseif ($this->getNotaDebCred()) {
+            $res = $this->getNotaDebCred()->getEstado() === 'ACREDITADO';
+        }
+        else {
+            $res = true;
+        }
+        return $res;
     }
 
     public function getVuelto() {
@@ -149,7 +177,7 @@ class CobroDetalle {
         }
         if ($this->getNotaDebCred()) {
             // buscar nota
-            $tipo = $this->getNotaDebCred()->getNotaElectronica()->getTipo();
+            $tipo = $this->getNotaDebCred()->getNotaElectronica() ? $this->getNotaDebCred()->getNotaElectronica()->getTipo() : '';
         }
         if ($this->getPagoCliente()) {
             // recibo
@@ -165,7 +193,7 @@ class CobroDetalle {
     public function getComprobanteTxt() {
         if ($this->getCobro()) {
             // buscar factura
-            $comprobante = $this->getCobro()->getFacturaElectronica()->getComprobanteTxt();
+            $comprobante = $this->getCobro()->getFacturaElectronica() ? $this->getCobro()->getFacturaElectronica()->getComprobanteTxt() : '';
         }
         if ($this->getNotaDebCred()) {
             // buscar nota

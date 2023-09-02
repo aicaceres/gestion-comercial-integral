@@ -15,6 +15,8 @@ class FacturaElectronicaWebservice {
     private $ptovtaIfuTicket;
     private $iibbPercent;
     private $cuitAfip;
+    private $afipOptionsProd;
+    private $afipOptionsTest;
     private $webserviceError = array(
         10013 => "Para comprobantes clase A y M el tipo de documento debe ser CUIT",
         10015 => "Para facturas B de este monto, debe ingresar tipo y nro de documento del cliente.",
@@ -34,6 +36,8 @@ class FacturaElectronicaWebservice {
         $this->ptovtaIfuTicket = $ptovtaIfuTicket;
         $this->iibbPercent = $iibbPercent;
         $this->cuitAfip = $cuitAfip;
+        $this->afipOptionsProd = array('CUIT' => $cuitAfip, 'production' => true, 'cert' => 'cert.crt', 'key' => 'decr.key');
+        $this->afipOptionsTest = array('CUIT' => '27208373124', 'production' => false, 'cert' => 'cert', 'key' => 'key');
     }
 
     public function procesarComprobante($id, $entity, $modo, $nroTicket = null) {
@@ -64,12 +68,11 @@ class FacturaElectronicaWebservice {
             if ($tipo == 'FAC') {
                 $comprobante->setEstado('FINALIZADO');
                 $comprobante->getVenta()->setEstado('FACTURADO');
-                $em->persist($comprobante);
             }
-            // else{
-            //   $comprobante->setEstado('ACREDITADO');
-            // }
-
+            else {
+                $comprobante->setEstado('ACREDITADO');
+            }
+            $em->persist($comprobante);
             $em->flush();
 
             $em->getConnection()->commit();
@@ -83,7 +86,7 @@ class FacturaElectronicaWebservice {
                 $ex->getMessage();
 
             $response['res'] = 'ERROR';
-            $response['msg'] = $msg;
+            $response['msg'] = $ex->getMessage();
         }
 
         return $response;
@@ -92,7 +95,8 @@ class FacturaElectronicaWebservice {
     public function enviarWs($fe) {
         $em = $this->em;
         $cbteTipo = $em->getRepository('ConfigBundle:AfipComprobante')->find($fe['afipComprobante']);
-        $afip = new Afip(array('CUIT' => $this->cuitAfip));
+        $config = $this->cuitAfip == '27208373124' ? $this->afipOptionsTest : $this->afipOptionsProd;
+        $afip = new Afip($config);
         $data = array(
             'CantReg' => 1, // Cantidad de comprobantes a registrar
             'PtoVta' => $fe['puntoVta'], // Punto de venta
@@ -114,21 +118,21 @@ class FacturaElectronicaWebservice {
             'PeriodoAsoc' => $fe['periodoAsoc'],
             'Iva' => $fe['iva'],
         );
-
-        // si no hay combrobante asociado
-        if (empty($fe['cbtesAsoc'])) {
-            unset($data['CbtesAsoc']);
-        }
-        if (empty($fe['periodoAsoc'])) {
-            unset($data['PeriodoAsoc']);
-        }
         // si no hay tributos
         if (empty($fe['tributos'])) {
             unset($data['Tributos']);
         }
 
+        if (!empty($fe['cbtesAsoc'])) {
+            unset($data['PeriodoAsoc']);
+        }
+        else {
+            unset($data['CbtesAsoc']);
+        }
+
         // create voucher
         $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
+
         // devolver datos para completar fe
         return array(
             'cae' => $wsResult['CAE'],
@@ -160,15 +164,19 @@ class FacturaElectronicaWebservice {
             $detalles = $comprobante->getDetalles();
             $afipComprobante = $comprobante->getTipoComprobante();
             $cbteFch = $comprobante->getFecha() ? $comprobante->getFecha() : $hoy;
-            $cbtesAsoc = array(
-                'Tipo' => null,
-                'PtoVta' => null,
-                'Nro' => null
-            );
+
+            $asoc = $comprobante->getComprobanteAsociado();
+            if ($asoc) {
+                $cbtesAsoc[] = array(
+                    'Tipo' => $asoc->getCodigoComprobante(),
+                    'PtoVta' => $asoc->getPuntoVenta(),
+                    'Nro' => $asoc->getNroComprobante()
+                );
+            }
+
             $periodoAsoc = array(
-                'FchDesde' => null,
-                'FchHasta' => null
-            );
+                'FchDesde' => intval($comprobante->getFecha()->format('Ymd')),
+                'FchHasta' => intval($comprobante->getFecha()->format('Ymd')));
         }
         // punto de venta
         $ptoVta = $modo == 'WS' ? $this->ptovtaWsFactura : $this->ptovtaIfuTicket;
@@ -344,8 +352,8 @@ class FacturaElectronicaWebservice {
         // riConsumidorFinal = 4;
 
         $nombre = $comprobante->getNombreClienteTxt();
-        $docTipo = $docNro = '';
-        $direccion = ' ';
+        $docTipo = $docNro = '1';
+        $direccion = 'MOSTRADOR';
         $cliente = $comprobante->getCliente();
         if ($cliente->getCuit()) {
             $docTipo = 0;
@@ -358,386 +366,23 @@ class FacturaElectronicaWebservice {
         }
         $catIva = $cliente->getCategoriaIva()->getNumerico2() ? intVal($cliente->getCategoriaIva()->getNumerico2()) : '';
         $dataCliente = array($nombre, $docTipo, $docNro, $catIva, $direccion);
-        return $dataCliente[1] === '' ? null : $dataCliente;
+        return $dataCliente;
     }
 
-//    public function saveTicket($id, $entity, $nroTicket) {
-//        $response['res'] = 'ERROR';
-//        $em = $this->em;
-//        try {
-//            $em->getConnection()->beginTransaction();
-//            $comprobante = $em->getRepository('VentasBundle:' . $entity)->find($id);
-//            $tipo = $entity === 'Cobro' ? 'FAC' : 'NDC';
-//            // preparar los datos de FE
-//            $dataFe = $this->setDataFacturaElectronica($tipo, $comprobante, 'TF');
-//            $dataFe['nroComprobante'] = $nroTicket;
-//            var_dump($dataFe);
-//            die;
-//
-//            // guardar FE
-//            $this->guardarFacturaElectronica($dataFe);
-//            //* Marcar como finalizado
-//            if ($tipo == 'FAC') {
-//                $comprobante->setEstado('FINALIZADO');
-//                $comprobante->getVenta()->setEstado('FACTURADO');
-//                $em->persist($comprobante);
-//            }
-//            // else{
-//            //   $comprobante->setEstado('ACREDITADO');
-//            // }
-//
-//            $em->flush();
-//
-//            $em->getConnection()->commit();
-//            $response['res'] = 'OK';
-//            $response['msg'] = 'Comprobante emitido correctamente!';
-//        }
-//        catch (\Exception $ex) {
-//            $em->getConnection()->rollback();
-//            $msg = array_key_exists($ex->getCode(), $this->webserviceError) ?
-//                $this->webserviceError[$ex->getCode()] :
-//                $ex->getMessage();
-//
-//            $response['res'] = 'ERROR';
-//            $response['msg'] = $msg;
-//        }
-//
-//        return $response;
-//
-//        $em = $this->em;
-//        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->session->get('unidneg_id'));
-//        $comprobante = $em->getRepository('VentasBundle:' . $entity)->find($id);
-//        $cliente = $comprobante->getCliente();
-//        // Cobro o NotaDebCred
-//        $esCobro = $entity === 'Cobro';
-//        $detalles = $esCobro ? $comprobante->getVenta()->getDetalles() : $comprobante->getDetalles();
-//        $response['res'] = 'ERROR';
-//        if ($esCobro) {
-//            if ($comprobante->getFacturaElectronica()) {
-//                $response['res'] = 'OK';
-//                $response['msg'] = 'Este comprobante ya ha sido registrado!!';
-//                return $response;
-//            }
-//        }
-//        $response['msg'] = 'Ha ocurrido un error al procesar el comprobante en Afip!';
-//        try {
-//            $em->getConnection()->beginTransaction();
-//            $fe = new FacturaElectronica();
-//            $fe->setUnidadNegocio($unidneg);
-//            $hoy = new \Datetime();
-//            $fe->setCbteFch(intval($hoy->format('Ymd')));
-//            $fe->setPuntoVenta($this->ptovtaIfuTicket);
-//            $fe->setNroComprobante($nroTicket);
-//            $esCobro ? $fe->setCobro($comprobante) : $fe->setNotaDebCred($comprobante);
-//            $fe->setConcepto(1); // Productos
-//            $fe->setMonId($comprobante->getMoneda()->getCodigoAfip());
-//            $fe->setMonCotiz($comprobante->getMoneda()->getCotizacion());
-//
-//            // set datos cliente
-//            $docTipo = 99;
-//            $docNro = 0;
-//            $fe->setNombreCliente($comprobante->getNombreClienteTxt());
-//            if ($cliente->getCuit()) {
-//                $docTipo = 80;
-//                $docNro = trim($cliente->getCuit());
-//            }
-//            elseif ($comprobante->getTipoDocumentoCliente()) {
-//                $docTipo = $comprobante->getTipoDocumentoCliente()->getCodigo();
-//                $docNro = $comprobante->getNroDocumentoCliente();
-//            }
-//            $fe->setDocTipo($docTipo);
-//            $fe->setDocNro($docNro);
-//
-//            $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
-//            if ($esCobro) {
-//                //* COBRO
-//                $valor = ($catIva == 'I' || $catIva == 'M') ? 'TICK-A' : 'TICK-B';
-//                $tipoComprobante = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($valor);
-//            }
-////            else {
-////              completar para nc o nd
-////            }
-//            $fe->setTipoComprobante($tipoComprobante);
-//            if ($esCobro) {
-//                $impTotal = $comprobante->getVenta()->getMontoTotal();
-//                $fe->setTotal($impTotal);
-//                $saldofe = $comprobante->getFormaPago()->getCuentaCorriente() ? $impTotal : 0;
-//            }
-////            else {
-////                $saldofe = ($fe->getTipoComprobante()->getClase() === 'CRE') ? 0 : $impTotal;
-////            }
-//            $fe->setSaldo(round($saldofe, 2));
-//            $fe->setCae('');
-//            $fe->setCaeVto('');
-//            $em->persist($fe);
-//
-//            //* Marcar como finalizado
-//            if ($esCobro) {
-//                $comprobante->setEstado('FINALIZADO');
-//                $comprobante->getVenta()->setEstado('FACTURADO');
-//                $em->persist($comprobante);
-//            }
-//            // else{
-//            //   $comprobante->setEstado('ACREDITADO');
-//            // }
-//            $em->flush();
-//
-//            $em->getConnection()->commit();
-//            $response['res'] = 'OK';
-//            $response['msg'] = 'Factura registrada correctamente!';
-//        }
-//        catch (\Exception $ex) {
-//            $em->getConnection()->rollback();
-//
-//            $msg = array_key_exists($ex->getCode(), $this->webserviceError) ?
-//                $this->webserviceError[$ex->getCode()] :
-//                $ex->getMessage();
-//
-//            $response['res'] = 'ERROR';
-//            $response['msg'] = $msg;
-//        }
-//
-//        return $response;
-//    }
-//    public function emitir($id, $entity) {
-//        $em = $this->em;
-//        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->session->get('unidneg_id'));
-//        $comprobante = $em->getRepository('VentasBundle:' . $entity)->find($id);
-//        $cliente = $comprobante->getCliente();
-//        // Cobro o NotaDebCred
-//        $esCobro = $entity === 'Cobro';
-//        $detalles = $esCobro ? $comprobante->getVenta()->getDetalles() : $comprobante->getDetalles();
-//        $response['res'] = 'ERROR';
-//        if ($esCobro) {
-//            if ($comprobante->getFacturaElectronica()) {
-//                $response['res'] = 'OK';
-//                $response['msg'] = 'Este comprobante ya ha sido facturado!!';
-//                return $response;
-//            }
-//        }
-//
-//        $response['msg'] = 'Ha ocurrido un error al procesar el comprobante en Afip!';
-//
-//        try {
-//            $em->getConnection()->beginTransaction();
-//            // armar datos para webservice
-//            $fe = new FacturaElectronica();
-//            $fe->setUnidadNegocio($unidneg);
-//
-//            $fe->setPuntoVenta($this->ptovtaWsFactura);
-//            $fe->setConcepto(1); // Productos
-//            $cbteFch = $esCobro ? $comprobante->getFechaCobro() : $comprobante->getFecha();
-//            $fe->setCbteFch(intval($cbteFch->format('Ymd')));
-//            // set datos cliente
-//            $docTipo = 99;
-//            $docNro = 0;
-//            $fe->setNombreCliente($comprobante->getNombreClienteTxt());
-//            if ($cliente->getCuit()) {
-//                $docTipo = 80;
-//                $docNro = trim($cliente->getCuit());
-//            }
-//            elseif ($comprobante->getTipoDocumentoCliente()) {
-//                $docTipo = $comprobante->getTipoDocumentoCliente()->getCodigo();
-//                $docNro = $comprobante->getNroDocumentoCliente();
-//            }
-//            $fe->setDocTipo($docTipo);
-//            $fe->setDocNro($docNro);
-//
-//            $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
-//
-//            $cbtesAsoc = $periodoAsoc = array();
-//            if ($esCobro) {
-//                //* COBRO
-//                $valor = ($catIva == 'I' || $catIva == 'M') ? 'FAC-A' : 'FAC-B';
-//                $tipoComprobante = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByValor($valor);
-//            }
-//            else {
-//                //* NOTA DEBITO CREDITO
-//                if ($comprobante->getComprobanteAsociado()) {
-//                    /* array(
-//                      'Tipo' 		=> 6, // Tipo de comprobante (ver tipos disponibles)
-//                      'PtoVta' 	=> 1, // Punto de venta
-//                      'Nro' 		=> 1 // Numero de comprobante
-//                      )
-//                      ) */
-//                    $facturaAsoc = $comprobante->getComprobanteAsociado();
-//                    $cbtesAsoc[] = array(
-//                        'Tipo' => $facturaAsoc->getCodigoComprobante(),
-//                        'PtoVta' => $facturaAsoc->getPuntoVenta(),
-//                        'Nro' => $facturaAsoc->getNroComprobante()
-//                    );
-//                }
-//                else {
-//                    /* array(
-//                      'FchDesde' => Ymd
-//                      'FchHasta'  => Ymd
-//                      )
-//                     */
-//                    $periodoAsoc = array('FchDesde' => intval($comprobante->getPeriodoAsocDesde()->format('Ymd')), 'FchHasta' => intval($comprobante->getPeriodoAsocHasta()->format('Ymd')));
-//                }
-//                $tipoComprobante = $comprobante->getTipoComprobante();
-//            }
-//
-//            $fe->setTipoComprobante($tipoComprobante);
-//
-//            $iva = $tributos = array();
-//            if ($detalles) {
-//                $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
-//                foreach ($detalles as $item) {
-//                    $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $item->getProducto()->getIva()));
-//                    $codigo = intval($alicuota->getCodigo());
-//                    $dtoRec = $item->getTotalDtoRecItem() / $comprobante->getCotizacion();
-//                    $baseImp = $item->getBaseImponibleItem() + $dtoRec;
-//                    $importe = $item->getTotalIvaItem() / $comprobante->getCotizacion();
-//                    $key = array_search($codigo, array_column($iva, 'Id'));
-//                    // IVA
-//                    /*  array(
-//                      'Id' 		=> 5, // Id del tipo de IVA (ver tipos disponibles)
-//                      'BaseImp' 	=> 100, // Base imponible
-//                      'Importe' 	=> 21 // Importe
-//                      ) */
-//                    if ($importe > 0) {
-//                        if ($key === false) {
-//                            $iva[] = array(
-//                                'Id' => $codigo,
-//                                'BaseImp' => round($baseImp, 2),
-//                                'Importe' => round($importe, 2)
-//                            );
-//                        }
-//                        else {
-//                            $iva[$key] = array(
-//                                'Id' => $codigo,
-//                                'BaseImp' => round($iva[$key]['BaseImp'] + $baseImp, 2),
-//                                'Importe' => round($iva[$key]['Importe'] + $importe, 2)
-//                            );
-//                        }
-//                        // TOTALES
-//                        $impDtoRec += $dtoRec;
-//                        $impNeto += $baseImp;
-//                        $impIVA += $importe;
-//                        $impTotal += ($baseImp + $importe);
-//                    }
-//                }
-//            }
-//
-//            // TRIBUTOS
-//            /* array(
-//              'Id' 		=>  99, // Id del tipo de tributo (ver tipos disponibles)
-//              'Desc' 		=> 'Ingresos Brutos', // (Opcional) Descripcion
-//              'BaseImp' 	=> 150, // Base imponible para el tributo
-//              'Alic' 		=> 5.2, // Alícuota
-//              'Importe' 	=> 7.8 // Importe del tributo
-//              ) */
-//            $impTrib = 0;
-//            if ($catIva == 'I') {
-//                $neto = round($impNeto, 2);
-//                $iibb = round(($neto * $this->iibbPercent / 100), 2);
-//                $impTrib = $iibb;
-//                $tributos = array(
-//                    'Id' => 7,
-//                    'BaseImp' => $neto,
-//                    'Alic' => $this->iibbPercent,
-//                    'Importe' => $iibb
-//                );
-//            }
-//            $impTotal += $impTrib;
-//            $fe->setTotal(round($impTotal, 2));
-//            $fe->setImpTotConc(0);
-//            $fe->setImpNeto(round($impNeto, 2));
-//            $fe->setImpOpEx(0);
-//            $fe->setImpIva(round($impIVA, 2));
-//            $fe->setImpTrib(round($impTrib, 2));
-//            $fe->setMonId($comprobante->getMoneda()->getCodigoAfip());
-//            $fe->setMonCotiz($comprobante->getMoneda()->getCotizacion());
-//            // guardar json
-//            $fe->setTributos(json_encode($tributos));
-//            $fe->setCbtesAsoc(json_encode($cbtesAsoc));
-//            $fe->setPeriodoAsoc(json_encode($periodoAsoc));
-//            $fe->setIva(json_encode($iva));
-//
-//            $afip = new Afip(array('CUIT' => $this->cuitAfip));
-//
-//            $data = array(
-//                'CantReg' => 1, // Cantidad de comprobantes a registrar
-//                'PtoVta' => $fe->getPuntoVenta(), // Punto de venta
-//                'CbteTipo' => $fe->getCodigoComprobante(), // Tipo de comprobante (ver tipos disponibles)
-//                'Concepto' => $fe->getConcepto(), // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
-//                'DocTipo' => $fe->getDocTipo(), // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
-//                'DocNro' => $fe->getDocNro(), // Número de documento del comprador (0 consumidor final)
-//                'CbteFch' => $fe->getCbteFch(), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
-//                'ImpTotal' => $fe->getTotal(), // Importe total del comprobante
-//                'ImpTotConc' => $fe->getImpTotConc(), // Importe neto no gravado
-//                'ImpNeto' => $fe->getImpNeto(), // Importe neto gravado
-//                'ImpOpEx' => $fe->getImpOpEx(), // Importe exento de IVA
-//                'ImpIVA' => $fe->getImpIva(), //Importe total de IVA
-//                'ImpTrib' => $fe->getImpTrib(), //Importe total de tributos
-//                'MonId' => $fe->getMonId(), //Tipo de moneda usada en el comprobante (ver tipos disponibles)('PES' para pesos argentinos)
-//                'MonCotiz' => $fe->getMonCotiz(), // Cotización de la moneda usada (1 para pesos argentinos)
-//                'Tributos' => $tributos,
-//                'CbtesAsoc' => $cbtesAsoc,
-//                'PeriodoAsoc' => $periodoAsoc,
-//                'Iva' => $iva,
-//            );
-//
-//            // si no hay combrobante asociado
-//            if (empty($cbtesAsoc)) {
-//                unset($data['CbtesAsoc']);
-//            }
-//            if (empty($periodoAsoc)) {
-//                unset($data['PeriodoAsoc']);
-//            }
-//            // si no hay tributos
-//            if (empty($tributos)) {
-//                unset($data['Tributos']);
-//            }
-//
-//            // create voucher
-//            $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
-//
-//            //* completar datos del registro factura electronica
-//            $fe->setCae($wsResult['CAE']);
-//            $fe->setCaeVto($wsResult['CAEFchVto']);
-//            $fe->setNroComprobante($wsResult['voucher_number']);
-//
-//            $esCobro ? $fe->setCobro($comprobante) : $fe->setNotaDebCred($comprobante);
-//            if ($esCobro) {
-//                $saldofe = $comprobante->getFormaPago()->getCuentaCorriente() ? $impTotal : 0;
-//            }
-//            else {
-//                $saldofe = ($fe->getTipoComprobante()->getClase() === 'CRE') ? 0 : $impTotal;
-//            }
-////            $saldofe = $esCobro ? $impTotal : ($fe->getTipoComprobante()->getClase() === 'CRE') ? 0 : $impTotal;
-//            $fe->setSaldo(round($saldofe, 2));
-//            $em->persist($fe);
-//
-//            //* Marcar como finalizado
-//            if ($esCobro) {
-//                $comprobante->setEstado('FINALIZADO');
-//                $comprobante->getVenta()->setEstado('FACTURADO');
-//                $em->persist($comprobante);
-//            }
-//            // else{
-//            //   $comprobante->setEstado('ACREDITADO');
-//            // }
-//
-//
-//            $em->flush();
-//
-//            $em->getConnection()->commit();
-//            $response['res'] = 'OK';
-//            $response['msg'] = 'Factura emitida correctamente!';
-//        }
-//        catch (\Exception $ex) {
-//            $em->getConnection()->rollback();
-//
-//            $msg = array_key_exists($ex->getCode(), $this->webserviceError) ?
-//                $this->webserviceError[$ex->getCode()] :
-//                $ex->getMessage();
-//
-//            $response['res'] = 'ERROR';
-//            $response['msg'] = $msg;
-//        }
-//
-//        return $response;
-//    }
+    public function getTiposComprobantesValidos($modo) {
+//      30525882086  2147483647
+        $afipOptionsProd = array('CUIT' => '30525882086', 'production' => true, 'cert' => 'cert.crt', 'key' => 'decr.key');
+        $afipOptionsTest = array('CUIT' => '27208373124', 'production' => false, 'cert' => 'cert', 'key' => 'key');
+        $config = $modo == 'PRODUCCION' ? $afipOptionsProd : $afipOptionsTest;
+        try {
+            $afip = new Afip($config);
+            $wsResult = $afip->ElectronicBilling->GetAliquotTypes();
+
+            return array('MODO' => $modo, 'STATUS' => $wsResult);
+        }
+        catch (\Exception $ex) {
+            return $ex->getMessage();
+        }
+    }
+
 }

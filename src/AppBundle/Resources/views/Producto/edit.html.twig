@@ -57,7 +57,7 @@
                 {{ form_errors(form.iva) }}  %
             </div>
         </div>
-        <div class="widgetbox" id="stockMinimo" style="width: 50%;margin-left: 150px;background: beige;padding: 15px;display:none;">
+        <div class="widgetbox" id="stockMinimo" style="width: 50%;margin-left: 150px;background: beige;padding: 15px;display:block;">
             <div class="title" style="margin:0;"><h5>Stock mínimo por depósito <a href="#" id="addStockxDeposito" title="Agregar otro depósito">[ + ]</a></h5></div>
             <div class="widgetcontent">
                 {{ form_errors(form.stock) }}
@@ -106,7 +106,7 @@
             </div>
         </div>
 
-        <div class="widgetbox" id="divprecios" style="width:60%;margin-left: 150px;background: beige;padding: 15px;display:none;">
+        <div class="widgetbox" id="divprecios" style="width:60%;margin-left: 150px;background: beige;padding: 15px;display:block;">
             <div class="title" style="margin:0;"><h5>Precios de Venta
                 <a href="javascript:void(0)" id="addPrecioVenta" onclick="addNewPrecio(this)" title="Agregar otro precio">[ + ]</a></h5>
             </div>
@@ -139,7 +139,7 @@
 
         <br clear="all" />
         <div class="actionbutton">
-            <button class="guardar" type="submit" >Guardar</button>
+            <button class="guardar" id="guardar" type="submit" >Guardar</button>
             <a class="cancelar" type="button" href="{{ path('stock_producto')}}">Cancelar</a>
         </div>
     </fieldset>
@@ -155,10 +155,6 @@
         $('[id*="deposito"]').attr('readonly','readonly');
         $(":file").uniform();
         $(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
-
-        {# $('.stkmin').on('change',function(){
-            checkStock($(this));
-        }); #}
         // stock x deposito
         $holder = $('table.stockxDeposito tbody');
         $('#addStockxDeposito').on('click',function(e){
@@ -166,7 +162,18 @@
             addNewDeposito();
             e.stopPropagation();
         });
-
+        $('#guardar').on('click',function(){
+            $('[required]').each(function (i, el) {
+                if ($(el).val() == '' || $(el).val() == undefined) {
+                    alert('Faltan completar datos requeridos!');
+                    jQuery('#divprecios').show()
+                    jQuery('#stockMinimo').show()
+                    $(el).focus()
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        })
     });
 
 function addNewDeposito(){

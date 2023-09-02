@@ -89,7 +89,7 @@
                 <button class="guardar" id="guardar" type="button" 
                         data-urlemitir="{{ path('ventas_factura_emitir') }}" 
                         data-urlticket="{{ path('ventas_factura_getticket')}}">
-                  <span>Guardar y Facturar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
+                  <span>Guardar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
                 </button>
                 <a class="cancelar" onclick="return confirm('Confirma cancelar el cobro?')" type="button" href="{{ path('ventas_cobro')}}">Cancelar</a>
             </div>
@@ -116,7 +116,6 @@
 <script type="text/javascript" src="{{ asset('assets/js/utils/detallePago.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/utils/widgetFormapago.js') }}"></script>
-<script type="text/javascript" src="{{ asset('assets/js/utils/imprimirTicket.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
 
@@ -178,7 +177,7 @@ jQuery(function ($) {
       emitirTicket = $('#emitirTicket').is(':checked')
       let txt = emitirTicket ? '\n\n Se emitirá un Ticket' : '\n\n Se enviarán los datos a la Afip para registrar la factura'
       if( confirm('Comfirma la registración del pago y la emisión de la factura?'+txt)){
-        registrarCobro()
+        registrarComprobante()
       }else{
         return false
       }
@@ -214,15 +213,15 @@ function checkEmitirTicket(){
   jQuery.uniform.update();
 }
 
-function registrarCobro(){
-  let id = jQuery('#ventasbundle_cobro_id').val()
+function registrarComprobante(){
+{#  let id = jQuery('#ventasbundle_cobro_id').val()#}
   const formdata = jQuery("#ventasbundle_cobro").serialize()
   const url = jQuery("#ventasbundle_cobro").attr("action")
   setFacturando(true)
   jQuery.post(url, formdata, function(data){
     if(data.res  === 'OK'){
       jQuery('#ventasbundle_cobro_id').val(data.id)
-      enviarEmision(data.id)
+      enviarEmision(data.id,'Cobro')
     }else{
       alert(data.msg)
       setFacturando(false)
@@ -233,10 +232,10 @@ function registrarCobro(){
 function enviarEmision(id){
   jQuery('#emitirTicket').is(':checked') ?
     imprimirTicket(id) :
-    emitirFactura(id)
+    emitirComprobanteWs(id)
 }
 
-function emitirFactura(cobroId){
+function emitirComprobanteWs(cobroId){
   jQuery('#guardar span').html('Emitiendo Factura...')
   const url = jQuery('#guardar').data('urlemitir')
   jQuery.post(url, {id:cobroId, entity: 'Cobro'}, function(data){
@@ -289,42 +288,55 @@ function getDriver(){
   driver.baudios = baudios;
   return driver
 }
+
 function imprimirTicket(cobroId){
   jQuery('#guardar span').html('Emitiendo Ticket...')
   url = jQuery('#guardar').data('urlticket')
   const driver = getDriver()
   jQuery.get(url, {id:cobroId, entity: 'Cobro'}, function(data){
     if(data.res === 'OK' && driver){
-      try {       
+      try {    
         driver.iniciarTrabajo();
+
+        driver.especificarPie('1'," ") 
+        driver.especificarPie('2',data.pie[0]) 
+        driver.especificarPie('3',data.pie[1]) 
+
         driver.cancelarComprobante();
         let params = data.cliente
-        if(data.cliente) driver.datosCliente(...params);
+        driver.datosCliente(...params);
 
         driver.abrirComprobante(data.tipo);
         // items
         data.items.forEach(function(i){
           driver.imprimirItem2g(...i)
         })
-
+        
         // descuentos
-        driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
+        if(data.montodto!=0)
+            driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
         // tributos (iibb)
         if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
-
+        
+        // pagos
+        if(data.pagos){
+           data.pagos.forEach(function(i){
+            driver.imprimirPago2g(...i)
+          }) 
+        }
+        
         driver.cerrarComprobante();
         driver.finalizarTrabajo();
-
+        
         //  nro comprobante emitido
         driver.iniciarTrabajo();
         driver.ultimoComprobante(data.tipo);
         driver.finalizarTrabajo();
         let nroTicket = driver.response.ultimoNumero
 
-        if(confirm('Se ha registrado la impresión del ticket N° '+nroTicket)){
-            procesarTicket(cobroId,'Cobro',nroTicket)
-            jQuery('#guardar span').html('Guardando Ticket...')
-          }
+        alert('Se ha registrado la impresión del ticket N° '+nroTicket)
+        jQuery('#guardar span').html('Guardando Ticket...')
+        procesarTicket(cobroId,'Cobro',nroTicket)
 
       } catch (e){
         cancelarTicket(driver)
@@ -339,55 +351,8 @@ function imprimirTicket(cobroId){
     alert('Ha ocurrido un error')
     setFacturando(false)
   })
-
-  {# var driver = new Driver();
-  driver.host = host
-  driver.modelo = modelo;
-  driver.puerto = puerto;
-  driver.baudios = baudios;
-  try {
-    driver.iniciarTrabajo();
-    driver.cancelarComprobante();
-
-    // DATOS CLIENTE
-    if( jQuery('#ventasbundle_nroDocumentoCliente').val() ){
-        tipoDoc = jQuery('#ventasbundle_tipoDocumentoCliente option:selected').html();
-        if( tipoDoc != 'DNI' ){
-            alert('El tipo de documento válido para ticket es DNI');
-            return false;
-        }
-
-        driver.datosCliente(
-            jQuery('#ventasbundle_nombreCliente').val() ? jQuery('#ventasbundle_nombreCliente').val() : 'CONSUMIDOR FINAL',
-            tdDNI,
-            jQuery('#ventasbundle_nroDocumentoCliente').val() ,
-            riConsumidorFinal,
-            " ");
-    }
-
-    driver.abrirComprobante(tcFactura_B);
-
-
-
-    driver.cerrarComprobante();
-    driver.finalizarTrabajo();
-
-    //  nro comprobante emitido
-    driver.iniciarTrabajo();
-    driver.ultimoComprobante(tcFactura_B);
-    driver.finalizarTrabajo();
-    alert(driver.response.ultimoNumero)
-
-
-
-
-
-  } catch (e){
-    alert(e);
-  } #}
-
-
 }
+
 function cancelarTicket(){
     const driver = getDriver()
     driver.iniciarTrabajo()
@@ -397,9 +362,7 @@ function cancelarTicket(){
 
 function procesarTicket(id, entity, nroticket){
     const url = "{{path('ventas_factura_procesarticket')}}"
-    console.log(url)
     jQuery.post(url, {id, entity, nroticket}, function(data){
-        console.log(data)
     if(data.res === 'OK'){
       setFacturando(false)
       location.href = jQuery('.cancelar').attr('href')

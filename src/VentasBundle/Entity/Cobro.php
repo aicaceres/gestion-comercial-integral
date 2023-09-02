@@ -18,11 +18,13 @@ class Cobro {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var integer $nroOperacion
      * @ORM\Column(name="nro_operacion", type="integer")
      */
     protected $nroOperacion = '';
+
     /**
      * @var datetime $fechaCobro
      * @ORM\Column(name="fecha_cobro", type="datetime", nullable=false)
@@ -31,6 +33,7 @@ class Cobro {
     /**
      * Estados: PENDIENTE - FINALIZADO - ANULADO
      */
+
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
@@ -54,26 +57,29 @@ class Cobro {
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
      */
     protected $nombreCliente;
-     /**
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="tipo_documento_cliente", referencedColumnName="id")
-     **/
+     * */
     protected $tipoDocumentoCliente;
+
     /**
      * @var string $nroDocumentoCliente
      * @ORM\Column(name="nro_documento_cliente", type="string", length=13, nullable=true)
      */
     protected $nroDocumentoCliente;
+
     /**
      * @var string $direccionCliente
      * @ORM\Column(name="direccion_cliente", type="string", nullable=true)
      */
     protected $direccionCliente;
 
-     /**
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
-     **/
+     * */
     protected $formaPago;
 
     /**
@@ -129,61 +135,74 @@ class Cobro {
      */
     private $updatedBy;
 
-     /**
+    /**
      * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="cobro", cascade={"persist"})
      */
     protected $facturaElectronica;
 
-    public function getPagoTxt(){
+    public function getPagoTxt() {
         return ($this->getFormaPago()->getCuentaCorriente()) ? '' : $this->getFormaPago()->getNombre();
     }
 
     //* datos para la impresion de la factura electronica
-    public function getTextoPagosParaFactura(){
+    public function getTextoPagosParaFactura() {
         $txt = '';
-        foreach( $this->detalles as $det){
+        foreach ($this->detalles as $det) {
             $aux = ($txt) ? ' - ' : '';
-            $monto = $det->getMoneda()->getSimbolo() . ' ' .  $det->getImporte();
-            switch ($det->getTipoPago()){
+            $monto = $det->getMoneda()->getSimbolo() . ' ' . $det->getImporte();
+            switch ($det->getTipoPago()) {
                 case 'EFECTIVO':
-                    $txt = $txt . $aux . 'EFECTIVO: '. $monto;
+                    $txt = $txt . $aux . 'EFECTIVO: ' . $monto;
                     break;
                 case 'CHEQUE':
-                    $txt = $txt . $aux . 'CHEQUE: '. $monto;
+                    $txt = $txt . $aux . 'CHEQUE: ' . $monto;
                     break;
                 case 'TARJETA':
-                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() .': ' . $monto;
+                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
                     break;
             }
         }
         return $txt;
     }
-    public function getNombreClienteTxt(){
-      return $this->getNombreCliente() ? $this->getNombreCliente() : $this->getCliente()->getNombre();
+
+    public function getNombreClienteTxt() {
+        return $this->getNombreCliente() ? $this->getNombreCliente() : $this->getCliente()->getNombre();
     }
-    public function getSubtotal(){
-      return $this->getVenta()->getSubtotal();
+
+    public function getSubtotal() {
+        return $this->getVenta()->getSubtotal();
     }
-    public function getRefVenta(){
-      return "Ref. #". $this->getVenta()->getNroOperacion();
+
+    public function getRefVenta() {
+        return "Ref. #" . $this->getVenta()->getNroOperacion();
     }
-    public function getDescuentoRecargo(){
-      return $this->getVenta()->getDescuentoRecargo();
+
+    public function getDescuentoRecargo() {
+        return $this->getVenta()->getDescuentoRecargo();
     }
-    public function getTotalDescuentoRecargo(){
-      return $this->getVenta()->getTotalDescuentoRecargo();
+
+    public function getTotalDescuentoRecargo() {
+        return $this->getVenta()->getTotalDescuentoRecargo();
     }
-    public function getTotalIva(){
-      return $this->getVenta()->getTotalIva();
+
+    public function getTotalIva() {
+        return $this->getVenta()->getTotalIva();
     }
-    public function getTotalIibb(){
-      return $this->getVenta()->getTotalIibb();
+
+    public function getTotalIibb() {
+        return $this->getVenta()->getTotalIibb();
     }
-    public function getVentaDetalles(){
-      return $this->getVenta()->getDetalles();
+
+    public function getVentaDetalles() {
+        return $this->getVenta()->getDetalles();
     }
-    public function getConcepto(){
-      return $this->getVenta()->getConcepto();
+
+    public function getConcepto() {
+        return $this->getVenta()->getConcepto();
+    }
+
+    public function getMontoTotal() {
+        return $this->getVenta()->getMontoTotal();
     }
 
     /**
@@ -191,8 +210,7 @@ class Cobro {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -202,8 +220,7 @@ class Cobro {
      * @param integer $nroOperacion
      * @return Cobro
      */
-    public function setNroOperacion($nroOperacion)
-    {
+    public function setNroOperacion($nroOperacion) {
         $this->nroOperacion = $nroOperacion;
 
         return $this;
@@ -214,8 +231,7 @@ class Cobro {
      *
      * @return integer
      */
-    public function getNroOperacion()
-    {
+    public function getNroOperacion() {
         return $this->nroOperacion;
     }
 
@@ -225,8 +241,7 @@ class Cobro {
      * @param \DateTime $fechaCobro
      * @return Cobro
      */
-    public function setFechaCobro($fechaCobro)
-    {
+    public function setFechaCobro($fechaCobro) {
         $this->fechaCobro = $fechaCobro;
 
         return $this;
@@ -237,8 +252,7 @@ class Cobro {
      *
      * @return \DateTime
      */
-    public function getFechaCobro()
-    {
+    public function getFechaCobro() {
         return $this->fechaCobro;
     }
 
@@ -248,8 +262,7 @@ class Cobro {
      * @param string $estado
      * @return Cobro
      */
-    public function setEstado($estado)
-    {
+    public function setEstado($estado) {
         $this->estado = $estado;
 
         return $this;
@@ -260,8 +273,7 @@ class Cobro {
      *
      * @return string
      */
-    public function getEstado()
-    {
+    public function getEstado() {
         return $this->estado;
     }
 
@@ -271,8 +283,7 @@ class Cobro {
      * @param \DateTime $created
      * @return Cobro
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -283,8 +294,7 @@ class Cobro {
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -294,8 +304,7 @@ class Cobro {
      * @param \DateTime $updated
      * @return Cobro
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -306,8 +315,7 @@ class Cobro {
      *
      * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -317,8 +325,7 @@ class Cobro {
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
      * @return Cobro
      */
-    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
-    {
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null) {
         $this->unidadNegocio = $unidadNegocio;
 
         return $this;
@@ -329,8 +336,7 @@ class Cobro {
      *
      * @return \ConfigBundle\Entity\UnidadNegocio
      */
-    public function getUnidadNegocio()
-    {
+    public function getUnidadNegocio() {
         return $this->unidadNegocio;
     }
 
@@ -340,8 +346,7 @@ class Cobro {
      * @param \VentasBundle\Entity\Cliente $cliente
      * @return Cobro
      */
-    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
-    {
+    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null) {
         $this->cliente = $cliente;
 
         return $this;
@@ -352,8 +357,7 @@ class Cobro {
      *
      * @return \VentasBundle\Entity\Cliente
      */
-    public function getCliente()
-    {
+    public function getCliente() {
         return $this->cliente;
     }
 
@@ -363,8 +367,7 @@ class Cobro {
      * @param \ConfigBundle\Entity\FormaPago $formaPago
      * @return Cobro
      */
-    public function setFormaPago(\ConfigBundle\Entity\FormaPago $formaPago = null)
-    {
+    public function setFormaPago(\ConfigBundle\Entity\FormaPago $formaPago = null) {
         $this->formaPago = $formaPago;
 
         return $this;
@@ -375,8 +378,7 @@ class Cobro {
      *
      * @return \ConfigBundle\Entity\FormaPago
      */
-    public function getFormaPago()
-    {
+    public function getFormaPago() {
         return $this->formaPago;
     }
 
@@ -386,8 +388,7 @@ class Cobro {
      * @param \ConfigBundle\Entity\Moneda $moneda
      * @return Cobro
      */
-    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
-    {
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null) {
         $this->moneda = $moneda;
 
         return $this;
@@ -398,8 +399,7 @@ class Cobro {
      *
      * @return \ConfigBundle\Entity\Moneda
      */
-    public function getMoneda()
-    {
+    public function getMoneda() {
         return $this->moneda;
     }
 
@@ -409,8 +409,7 @@ class Cobro {
      * @param \VentasBundle\Entity\Venta $venta
      * @return Cobro
      */
-    public function setVenta(\VentasBundle\Entity\Venta $venta = null)
-    {
+    public function setVenta(\VentasBundle\Entity\Venta $venta = null) {
         $this->venta = $venta;
 
         return $this;
@@ -421,8 +420,7 @@ class Cobro {
      *
      * @return \VentasBundle\Entity\Venta
      */
-    public function getVenta()
-    {
+    public function getVenta() {
         return $this->venta;
     }
 
@@ -432,8 +430,7 @@ class Cobro {
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Cobro
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -444,8 +441,7 @@ class Cobro {
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -455,8 +451,7 @@ class Cobro {
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Cobro
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -467,8 +462,7 @@ class Cobro {
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -478,8 +472,7 @@ class Cobro {
      * @param string $nombreCliente
      * @return Cobro
      */
-    public function setNombreCliente($nombreCliente)
-    {
+    public function setNombreCliente($nombreCliente) {
         $this->nombreCliente = $nombreCliente;
 
         return $this;
@@ -490,8 +483,7 @@ class Cobro {
      *
      * @return string
      */
-    public function getNombreCliente()
-    {
+    public function getNombreCliente() {
         return $this->nombreCliente;
     }
 
@@ -501,8 +493,7 @@ class Cobro {
      * @param string $nroDocumentoCliente
      * @return Cobro
      */
-    public function setNroDocumentoCliente($nroDocumentoCliente)
-    {
+    public function setNroDocumentoCliente($nroDocumentoCliente) {
         $this->nroDocumentoCliente = $nroDocumentoCliente;
 
         return $this;
@@ -513,8 +504,7 @@ class Cobro {
      *
      * @return string
      */
-    public function getNroDocumentoCliente()
-    {
+    public function getNroDocumentoCliente() {
         return $this->nroDocumentoCliente;
     }
 
@@ -524,8 +514,7 @@ class Cobro {
      * @param string $direccionCliente
      * @return Cobro
      */
-    public function setDireccionCliente($direccionCliente)
-    {
+    public function setDireccionCliente($direccionCliente) {
         $this->direccionCliente = $direccionCliente;
 
         return $this;
@@ -536,8 +525,7 @@ class Cobro {
      *
      * @return string
      */
-    public function getDireccionCliente()
-    {
+    public function getDireccionCliente() {
         return $this->direccionCliente;
     }
 
@@ -547,8 +535,7 @@ class Cobro {
      * @param string $cotizacion
      * @return Cobro
      */
-    public function setCotizacion($cotizacion)
-    {
+    public function setCotizacion($cotizacion) {
         $this->cotizacion = $cotizacion;
 
         return $this;
@@ -559,8 +546,7 @@ class Cobro {
      *
      * @return string
      */
-    public function getCotizacion()
-    {
+    public function getCotizacion() {
         return $this->cotizacion;
     }
 
@@ -570,8 +556,7 @@ class Cobro {
      * @param \VentasBundle\Entity\FacturaElectronica $facturaElectronica
      * @return Cobro
      */
-    public function setFacturaElectronica(\VentasBundle\Entity\FacturaElectronica $facturaElectronica = null)
-    {
+    public function setFacturaElectronica(\VentasBundle\Entity\FacturaElectronica $facturaElectronica = null) {
         $this->facturaElectronica = $facturaElectronica;
 
         return $this;
@@ -582,15 +567,14 @@ class Cobro {
      *
      * @return \VentasBundle\Entity\FacturaElectronica
      */
-    public function getFacturaElectronica()
-    {
+    public function getFacturaElectronica() {
         return $this->facturaElectronica;
     }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -600,8 +584,7 @@ class Cobro {
      * @param \VentasBundle\Entity\CobroDetalle $detalles
      * @return Cobro
      */
-    public function addDetalle(\VentasBundle\Entity\CobroDetalle $detalles)
-    {
+    public function addDetalle(\VentasBundle\Entity\CobroDetalle $detalles) {
         $detalles->setCobro($this);
         $this->detalles[] = $detalles;
         return $this;
@@ -612,8 +595,7 @@ class Cobro {
      *
      * @param \VentasBundle\Entity\CobroDetalle $detalles
      */
-    public function removeDetalle(\VentasBundle\Entity\CobroDetalle $detalles)
-    {
+    public function removeDetalle(\VentasBundle\Entity\CobroDetalle $detalles) {
         $detalles->setCobro($this);
         $this->detalles->removeElement($detalles);
     }
@@ -623,8 +605,7 @@ class Cobro {
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDetalles()
-    {
+    public function getDetalles() {
         return $this->detalles;
     }
 
@@ -634,8 +615,7 @@ class Cobro {
      * @param \ConfigBundle\Entity\Parametro $tipoDocumentoCliente
      * @return Cobro
      */
-    public function setTipoDocumentoCliente(\ConfigBundle\Entity\Parametro $tipoDocumentoCliente = null)
-    {
+    public function setTipoDocumentoCliente(\ConfigBundle\Entity\Parametro $tipoDocumentoCliente = null) {
         $this->tipoDocumentoCliente = $tipoDocumentoCliente;
 
         return $this;
@@ -646,8 +626,8 @@ class Cobro {
      *
      * @return \ConfigBundle\Entity\Parametro
      */
-    public function getTipoDocumentoCliente()
-    {
+    public function getTipoDocumentoCliente() {
         return $this->tipoDocumentoCliente;
     }
+
 }

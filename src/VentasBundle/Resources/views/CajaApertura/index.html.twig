@@ -31,13 +31,16 @@
         <div style="display: inline-block;float:right;" >
             <label><strong>TICKEADORA FISCAL: </strong></label>
             <button type="button" class="stdbtn btn_orange" onclick="cierreX()" style="padding:7px 20px">
-                Cierre X <img class="loader_cierrex hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
+                Cierre X <img class="loader_cmCierreX hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
             <button type="button" class="stdbtn btn_red" onclick="cierreZ()" style="padding:7px 20px">
-                Cierre Z <img class="loader_cierrez hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
+                Cierre Z <img class="loader_cmCierreZ hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
-            <button type="button" class="stdbtn btn_grey" onclick="resumenSemanal()" style="padding:7px 20px">
-                Resumen Semanal <img class="loader_resumensemanal hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
+            <button type="button" class="stdbtn btn_grey" onclick="test()" style="padding:7px 20px">
+                Test <img class="loader_cmObtenerDatosDeInicializacion hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
+            </button>
+            <button type="button" class="stdbtn btn_grey" onclick="reporteSemanal()" style="padding:7px 20px">
+                Reporte Semanal <img class="loader_cmObtenerPrimerBloqueReporteElectronico hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
         </div>
     </form>
@@ -111,9 +114,7 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
 <script type="text/javascript">
-var modelo = '{{modelo_tickeadora}}'
-var puerto = '{{puerto_tickeadora}}'
-var baudios = '{{baudios_tickeadora}}'
+
 jQuery(document).ready(function($){
     $('#selectCaja').change(function(){
         $('#searchform').submit();
@@ -133,68 +134,157 @@ jQuery(document).ready(function($){
 });
 // cierres de tickeadora fiscal
 function cierreX(){
-   jQuery('.loader_cierrex').removeClass('hidden');
-    var driver = new Driver();
-    driver.modelo = modelo;
-    driver.puerto = puerto;
-    driver.baudios = baudios;
-
-    try {
-        driver.iniciarTrabajo();
-        driver.cierreX();
-        driver.finalizarTrabajo();
-        alert("Operación realizada con éxito!")
-    } catch (e){
-        alert(e);
-    }
-    jQuery('.loader_cierrex').addClass('hidden');
+    const comando = 'cmCierreX'
+    setFacturando(true,comando)
+    setTimeout(function(){
+        const driver = getDriver()
+        try {
+            driver.iniciarTrabajo();
+            driver.cierreX();
+            driver.finalizarTrabajo();
+            const result = driver.response
+            registrarMovimientoIfu(comando,result)
+        } catch (e){
+            alert(e);
+            setFacturando(false,comando)
+        }
+    }, 1000);
 }
 
 function cierreZ(){
-    jQuery('.loader_cierrez').removeClass('hidden');
-    var driver = new Driver();
-    driver.modelo = modelo;
-    driver.puerto = puerto;
-    driver.baudios = baudios;
-    try {
-        driver.iniciarTrabajo();
-        driver.cierreZ();
-        driver.finalizarTrabajo();
-        alert("Operación realizada con éxito!")
-    } catch (e){
-        alert(e);
-    }
-    jQuery('.loader_cierrez').addClass('hidden');
+    const comando = 'cmCierreZ'
+    setFacturando(true,comando)
+    setTimeout(function(){
+        const driver = getDriver()
+        try {
+            driver.iniciarTrabajo();
+            driver.cierreZ();
+            driver.finalizarTrabajo();
+            const result = driver.response
+            registrarMovimientoIfu(comando,result)
+        } catch (e){
+            alert(e);
+            setFacturando(false,comando)
+        }
+    }, 1000);
 }
 
-function resumenSemanal(){
-  jQuery('.loader_resumensemanal').removeClass('hidden')
-  jQuery.ajax({
-      type: 'get',
-      url: '{{ path("get_semana_actual") }}',
-      dataType: 'JSON',
-      success: function(data) {
-          var driver = new Driver();
-            driver.modelo = modelo;
-            driver.puerto = puerto;
-            driver.baudios = baudios;
+function test(){
+    const comando = 'cmObtenerDatosDeInicializacion'
+    setFacturando(true,comando)
+    setTimeout(function(){
+        const driver = getDriver()
+        try {
+            driver.iniciarTrabajo();
+            driver.obtenerDatosDeInicializacion();
+            driver.finalizarTrabajo();
+            registrarMovimientoIfu(comando,result)
+            
+        } catch (e){
+            alert(e);
+            setFacturando(false,comando)
+        }
+    }, 1000);
+}
+
+function reporteSemanal(){
+    const comando = 'cmObtenerPrimerBloqueReporteElectronico'
+    setFacturando(true,comando)
+    const url = "{{ path('get_datos_reporte_semanal') }}" 
+    msg = 'Ha ocurrido un error obteniendo los datos para el reporte'
+    jQuery.getJSON( url , {'id': "{{caja.id}}"}).done(function(data){
+        if(data.desde  && data.hasta){
+            const driver = getDriver()
             try {
                 driver.iniciarTrabajo();
-                nombreArchivo = "c:\\datos\\reporte.zip"
-                tipoReporte = "1"
-                driver.obtenerPrimerBloqueReporteElectronico(data.rangoInicial, data.rangoFinal, nombreArchivo, tipoReporte)
-                driver.finalizarTrabajo()
-                alert("Operación realizada con éxito!")
+                const trfecha = 0
+                const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,"c:\\datos\\reporte.zip",trfecha)
+                console.log('1er ',resp)
+                if( resp ){
+                    do{
+                        resp = driver.obtenerSiguienteBloqueReporteElectronico()
+                        console.log('sig ', resp)
+                    }while(resp)
+                }
+                driver.finalizarTrabajo();
+                const result = driver.response
+                console.log('result ', result)
+                registrarMovimientoIfu(comando,result,data)
             } catch (e){
-                alert(e)
+                registrarMovimientoIfu(comando,'',data,e)
+                alert('ERROR: '+e);
+                setFacturando(false,comando)
             }
-            jQuery('.loader_resumensemanal').addClass('hidden')
-      }
-  }).fail( function(e){
-     alert(e)
-    jQuery('.loader_resumensemanal').addClass('hidden')
-  } );
+        }else{
+            alert(msg)
+            setFacturando(false,comando)
+        }
+    }).fail(function(data){
+        alert(msg)
+      }).always(function(){
+          setFacturando(false)
+      })
+}
 
+function getDriver(){
+  modelo = '{{modelo_tickeadora}}'
+  puerto = '{{puerto_tickeadora}}'
+  baudios = '{{baudios_tickeadora}}'
+  host = '{{host_tickeadora}}'
+  // verificar si falta configuracion
+  if( !modelo || !puerto || !baudios || !host ){
+    alert( ' No se pueden acceder a la impresora en este momento. Faltan configuraciones!');
+    setFacturando(false)
+    return false
+  }
+  const driver = new Driver();
+  driver.host = host
+  driver.modelo = modelo;
+  driver.puerto = puerto;
+  driver.baudios = baudios;
+  return driver
+}
+
+function setFacturando(on,action=''){
+  if(on){
+     jQuery('.loader_'+action).removeClass('hidden')
+  }else{
+     jQuery('[class^="loader_"]').addClass('hidden');
+  }
+}
+
+function registrarMovimientoIfu(comando, result, fechas=null, error=null){
+   url = "{{ path('ifu_registrar_movimiento') }}" 
+   driverResult = JSON.stringify(result)
+   data = {caja:"{{caja.id}}", comando, driverResult, fechas, error } 
+   jQuery.post(url, data, function(data){
+    if(data.res === 'OK'){
+        switch (comando) {
+            case 'cmCierreZ':
+            case 'cmCierreX':
+              const cierre = result.cierreZTotales.nroCierre
+              message = 'Cierre finalizado! Numero: '+ cierre
+              break;
+            case 'cmObtenerDatosDeInicializacion':
+              const nroSerie = result.nroSerie
+              message = 'Datos obtenidos... Nro Serie: '+ nroSerie
+              break;
+            case 'cmObtenerPrimerBloqueReporteElectronico':
+              message = 'Reporte Semanal'
+              break;
+            default:
+              message = null
+          }
+        if(!error) alert(message)
+    }else{
+      alert(data.msg)
+    }
+    setFacturando(false)
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+  }).always(function(){
+      setFacturando(false)
+  })
 }
 
 </script>
