@@ -49,42 +49,42 @@ class ImportDataLoadController extends Controller {
                     $this->container->get('profiler')->disable();
                 }
                 $log = $this->logger;
-                $log->addInfo('Region');
-                $this->loadRegion($em);
-                $log->addInfo('FormaPago');
-                $this->loadFormaPago($em);
-                $log->addInfo('Moneda');
-                $this->loadMoneda($em);
-                $log->addInfo('Tarjeta');
-                $this->loadTarjeta($em);
-                $log->addInfo('ActividadComercial');
-                $this->loadActividadComercial($em);
-                $log->addInfo('RubroCompras');
-                $this->loadRubroCompras($em);
+//                $log->addInfo('Region');
+//                $this->loadRegion($em);
+//                $log->addInfo('FormaPago');
+//                $this->loadFormaPago($em);
+//                $log->addInfo('Moneda');
+//                $this->loadMoneda($em);
+//                $log->addInfo('Tarjeta');
+//                $this->loadTarjeta($em);
+//                $log->addInfo('ActividadComercial');
+//                $this->loadActividadComercial($em);
+//                $log->addInfo('RubroCompras');
+//                $this->loadRubroCompras($em);
 //                 PARAMETROS
-                $this->addUnidadMedida($em);
-                $log->addInfo('SitImpositiva');
-                $this->loadSitImpositiva($em);
-                $log->addInfo('Rubro');
-                $this->loadRubro($em);
-                $log->addInfo('TipoDocumento');
-                $this->addTipoDocumento($em);
-                $this->addParametroPadre($em, 'calificacion-proveedor', 'Calificacion de Proveedor');
-                $log->addInfo('Escalas');
-                $this->loadEscalas($em);
-                $log->addInfo('Transporte');
-                $this->loadTransporte($em);
-                $log->addInfo('PrecioLista');
-                $this->addPrecioLista($em);
+//                $this->addUnidadMedida($em);
+//                $log->addInfo('SitImpositiva');
+//                $this->loadSitImpositiva($em);
+//                $log->addInfo('Rubro');
+//                $this->loadRubro($em);
+//                $log->addInfo('TipoDocumento');
+//                $this->addTipoDocumento($em);
+//                $this->addParametroPadre($em, 'calificacion-proveedor', 'Calificacion de Proveedor');
+//                $log->addInfo('Escalas');
+//                $this->loadEscalas($em);
+//                $log->addInfo('Transporte');
+//                $this->loadTransporte($em);
+//                $log->addInfo('PrecioLista');
+//                $this->addPrecioLista($em);
 //                 MAESTROS
-                $log->addInfo('Proveedor');
-                $this->loadProveedor($em);
-                $log->addInfo('Cliente');
-                $this->loadCliente($em);
+//                $log->addInfo('Proveedor');
+//                $this->loadProveedor($em);
+//                $log->addInfo('Cliente');
+//                $this->loadCliente($em);
                 $log->addInfo('Producto');
                 $this->loadProducto($em);
-                $log->addInfo('Precio');
-                $this->loadPrecio($em);
+//                $log->addInfo('Precio');
+//                $this->loadPrecio($em);
 
                 $em->getConnection()->commit();
                 $log->addInfo('FIN IMPORTACION');
@@ -504,7 +504,7 @@ class ImportDataLoadController extends Controller {
     private function loadProducto($em) {
         $file = $this->csvPath . 'producto.csv';
         $data = UtilsController::convertCsvToArray($file, false);
-        $columns = array('id', 'rubro_id', 'unidad_medida_id', 'proveedor_id', 'codigo', 'codigo_barra', 'nombre', 'descripcion', 'iva',
+        $columns = array('id', 'rubro_id', 'unidad_medida_id', 'proveedor_id', 'codigo', 'codigo_barra', 'nombre', 'descripcion', 'costo', 'iva',
             'activo', 'comodin', 'created');
         $array = array();
         $unidMed = $em->getRepository('ConfigBundle:Parametro')->findOneByNombre('Unid');
@@ -518,16 +518,17 @@ class ImportDataLoadController extends Controller {
                 $rubroId = $rubro ? $rubro->getId() : null;
                 $prov = $em->getRepository('ComprasBundle:Proveedor')->find($row[2]);
                 $provId = $prov ? $prov->getId() : null;
-                $comodin = $row[5] == '999999' ? '1' : '0';
+                $comodin = trim($row[5]) == '999999' ? '1' : '0';
                 $array[] = array(
                     $row[0],
                     $rubroId,
                     $unidMed->getId(),
                     $provId,
-                    $row[5],
+                    trim($row[5]),
                     $row[6],
                     $row[7],
                     $row[8],
+                    $row[9],
                     $row[10],
                     '1',
                     $comodin,

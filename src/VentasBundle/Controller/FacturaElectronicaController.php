@@ -198,7 +198,7 @@ class FacturaElectronicaController extends Controller {
                 0, //tiFijo
                 1,
                 $item->getProducto()->getCodigo(),
-                $item->getProducto()->getCodigo(),
+                '',
                 7 //Unidad
             );
         }

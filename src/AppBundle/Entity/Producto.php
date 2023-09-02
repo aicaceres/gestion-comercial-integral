@@ -24,7 +24,7 @@ class Producto {
 
     /**
      * @var string $codigo
-     * @ORM\Column(name="codigo", type="string", length=6, nullable=false)
+     * @ORM\Column(name="codigo", type="string", length=10, nullable=false)
      * @Assert\NotBlank()
      */
     protected $codigo;

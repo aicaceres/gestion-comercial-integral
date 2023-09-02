@@ -198,7 +198,7 @@ function reporteSemanal(){
             try {
                 driver.iniciarTrabajo();
                 const trfecha = 0
-                const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,"c:\\datos\\reporte.zip",trfecha)
+                const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,data.file,trfecha)
                 console.log('1er ',resp)
                 if( resp ){
                     do{

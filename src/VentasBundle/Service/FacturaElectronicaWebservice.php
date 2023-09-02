@@ -123,11 +123,11 @@ class FacturaElectronicaWebservice {
             unset($data['Tributos']);
         }
 
-        if (!empty($fe['cbtesAsoc'])) {
-            unset($data['PeriodoAsoc']);
-        }
-        else {
+        if (empty($fe['cbtesAsoc'])) {
             unset($data['CbtesAsoc']);
+        }
+        if (empty($fe['periodoAsoc'])) {
+            unset($data['PeriodoAsoc']);
         }
 
         // create voucher
