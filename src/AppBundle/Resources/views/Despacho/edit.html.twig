@@ -101,9 +101,13 @@
 {% block extra_javascripts %}
     {% include "AppBundle::block-deposito-js.html.twig" %} 
 
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.16/datatables.min.js"></script>
+{#<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.16/datatables.min.js"></script>
 <link type="text/css" href="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/css/dataTables.checkboxes.css" rel="stylesheet" />
-<script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>
+<script type="text/javascript" src="//gyrocode.github.io/jquery-datatables-checkboxes/1.2.11/js/dataTables.checkboxes.min.js"></script>#}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/datatables/datatables.min.js') }}"></script>
+<link type="text/css" href="{{ asset('assets/js/plugins/datatables/dataTables.checkboxes.css') }}" rel="stylesheet" />
+<script type="text/javascript" src="{{ asset('assets/js/plugins/datatables/dataTables.checkboxes.min.js') }}"></script>
+
 <script type="text/javascript">
 jQuery(document).ready(function($){
 
