@@ -142,10 +142,10 @@ function cierreX(){
             driver.iniciarTrabajo();
             driver.cierreX();
             driver.finalizarTrabajo();
-            const result = driver.response
-            registrarMovimientoIfu(comando,result)
+            registrarMovimientoIfu(comando,driver.response)
         } catch (e){
-            alert(e);
+            registrarMovimientoIfu(comando,'','',e)
+            alert('ERROR: '+e);
             setFacturando(false,comando)
         }
     }, 1000);
@@ -160,10 +160,10 @@ function cierreZ(){
             driver.iniciarTrabajo();
             driver.cierreZ();
             driver.finalizarTrabajo();
-            const result = driver.response
-            registrarMovimientoIfu(comando,result)
+            registrarMovimientoIfu(comando,driver.response)
         } catch (e){
-            alert(e);
+            registrarMovimientoIfu(comando,'','',e)
+            alert('ERROR: '+e);
             setFacturando(false,comando)
         }
     }, 1000);
@@ -178,6 +178,7 @@ function test(){
             driver.iniciarTrabajo();
             driver.obtenerDatosDeInicializacion();
             driver.finalizarTrabajo();
+            const result = driver.response
             registrarMovimientoIfu(comando,result)
             
         } catch (e){
@@ -199,16 +200,13 @@ function reporteSemanal(){
                 driver.iniciarTrabajo();
                 const trfecha = 0
                 const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,data.file,trfecha)
-                console.log('1er ',resp)
                 if( resp ){
                     do{
                         resp = driver.obtenerSiguienteBloqueReporteElectronico()
-                        console.log('sig ', resp)
                     }while(resp)
                 }
                 driver.finalizarTrabajo();
-                const result = driver.response
-                console.log('result ', result)
+                const result = driver.response ? driver.response : 'OK'
                 registrarMovimientoIfu(comando,result,data)
             } catch (e){
                 registrarMovimientoIfu(comando,'',data,e)
@@ -255,8 +253,7 @@ function setFacturando(on,action=''){
 
 function registrarMovimientoIfu(comando, result, fechas=null, error=null){
    url = "{{ path('ifu_registrar_movimiento') }}" 
-   driverResult = JSON.stringify(result)
-   data = {caja:"{{caja.id}}", comando, driverResult, fechas, error } 
+   data = {caja:"{{caja.id}}", comando, result, fechas, error } 
    jQuery.post(url, data, function(data){
     if(data.res === 'OK'){
         switch (comando) {

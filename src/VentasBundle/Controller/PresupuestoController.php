@@ -15,6 +15,7 @@ use VentasBundle\Entity\Presupuesto;
 use VentasBundle\Form\PresupuestoType;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
+
 /**
  * @Route("/presupuestoVentas")
  */
@@ -34,20 +35,20 @@ class PresupuestoController extends Controller {
         $printpdf = null;
         $cliId = $request->get('cliId');
         $cliente = null;
-        if($cliId){
+        if ($cliId) {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
         $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $desde, $hasta);
-        if( $this->getUser()->getAccess($unidneg, 'ventas_presupuesto_print') ){
+        if ($this->getUser()->getAccess($unidneg, 'ventas_presupuesto_print')) {
             $printpdf = $request->get('printpdf');
         }
         return $this->render('VentasBundle:Presupuesto:index.html.twig', array(
-                    'entities' => $entities,
-                    'cliId' => $cliId,
-                    'cliente' => $cliente,
-                    'desde' => $desde,
-                    'hasta' => $hasta,
-                    'printpdf' => $printpdf
+                'entities' => $entities,
+                'cliId' => $cliId,
+                'cliente' => $cliente,
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'printpdf' => $printpdf
         ));
     }
 
@@ -56,8 +57,7 @@ class PresupuestoController extends Controller {
      * @Method("GET")
      * @Template("VentasBundle:Presupuesto:new.html.twig")
      */
-    public function newAction(Request $request)
-    {
+    public function newAction(Request $request) {
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
@@ -68,27 +68,28 @@ class PresupuestoController extends Controller {
         $entity = new Presupuesto();
 
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
-        if($param){
+        if ($param) {
             // cargar datos parametrizados por defecto
-            $entity->setNroPresupuesto( $param->getUltimoNroPresupuesto() + 1 );
+            $entity->setNroPresupuesto($param->getUltimoNroPresupuesto() + 1);
 
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
 
-            $entity->setFormaPago( $cliente->getFormaPago() );
-            $entity->setDescuentoRecargo( $cliente->getFormaPago()->getPorcentajeRecargo() );
-            $entity->setPrecioLista( $cliente->getPrecioLista() );
-            $entity->setValidez( $param->getValidezPresupuesto());
-        }else{
-          $this->addFlash('error','No se ha podido acceder a la parametrización. Intente nuevamente o contacte a servicio técnico.');
-          return $this->redirect($referer);
+            $entity->setFormaPago($cliente->getFormaPago());
+            $entity->setDescuentoRecargo($cliente->getFormaPago()->getPorcentajeRecargo());
+            $entity->setPrecioLista($cliente->getPrecioLista());
+            $entity->setValidez($param->getValidezPresupuesto());
+        }
+        else {
+            $this->addFlash('error', 'No se ha podido acceder a la parametrización. Intente nuevamente o contacte a servicio técnico.');
+            return $this->redirect($referer);
         }
 
-        $form = $this->createCreateForm($entity,'new');
-        return  $this->render(
-                  'VentasBundle:Presupuesto:new.html.twig',
-                  $this->arrayParameters($entity, $form->createView())
-                );
+        $form = $this->createCreateForm($entity);
+        return $this->render(
+                'VentasBundle:Presupuesto:new.html.twig',
+                $this->arrayParameters($entity, $form->createView())
+        );
     }
 
     /**
@@ -96,11 +97,11 @@ class PresupuestoController extends Controller {
      * @param Presupuesto $entity The entity
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createCreateForm(Presupuesto $entity,$type) {
+    private function createCreateForm(Presupuesto $entity) {
         $form = $this->createForm(new PresupuestoType(), $entity, array(
             'action' => $this->generateUrl('ventas_presupuesto_create'),
             'method' => 'POST',
-            'attr' => array('type'=>$type ) ,
+//            'attr' => array('type' => $type),
         ));
         return $form;
     }
@@ -116,108 +117,118 @@ class PresupuestoController extends Controller {
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
 
         $entity = new Presupuesto();
-        $entity->setFechaPresupuesto( new \DateTime() );
-        $form = $this->createCreateForm($entity,'create');
+        $entity->setFechaPresupuesto(new \DateTime());
+        $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
+
         if ($form->isValid()) {
+            $em->getConnection()->beginTransaction();
+            try {
+                // cargar referencias faltantes
+                $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('ventasbundle_cliente'));
+                $entity->setCliente($cliente);
+                $entity->setNombreCliente($request->get('ventasbundle_nombreCliente'));
+                $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
+                $entity->setFormaPago($formapago);
 
-          $em->getConnection()->beginTransaction();
-          try {
-            // cargar referencias faltantes
-            $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('ventasbundle_cliente'));
-            $entity->setCliente($cliente);
-            $entity->setNombreCliente( $request->get('ventasbundle_nombreCliente') );
-            $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
-            $entity->setFormaPago($formapago);
-
-            $entity->setEstado('EMITIDO');
-            // set Unidad de negocio
-            $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
-            $entity->setUnidadNegocio($unidneg);
-            // set numeracion
-            $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
-            if($param){
-              // cargar datos parametrizados por defecto
-              $entity->setNroPresupuesto( $param->getUltimoNroPresupuesto() + 1 );
-              $param->setUltimoNroPresupuesto( $entity->getNroPresupuesto() );
-              $em->persist($param);
-            }
-            // cargar productos y verificar que no haya items sin producto.
-            $productos = $request->get('ventasbundle_producto');
-            foreach ($entity->getDetalles() as $key => $detalle){
-              $producto = $em->getRepository('AppBundle:Producto')->find($productos[$key]);
-              if($producto){
-                $detalle->setProducto($producto);
-              }else{
-                $entity->removeDetalle($detalle);
-              }
-            }
-
-            $em->persist($entity);
-            $em->flush();
-            if( $entity->getDescuentaStock() ){
-              // Descuento de stock
-              $deposito = $entity->getDeposito();
-              foreach ($entity->getDetalles() as $detalle){
-                $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
-                if ($stock) {
-                    $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
-                }else {
-                    $stock = new Stock();
-                    $stock->setProducto($detalle->getProducto());
-                    $stock->setDeposito($deposito);
-                    $stock->setCantidad( 0 - $detalle->getCantidad());
+                $entity->setEstado('EMITIDO');
+                // set Unidad de negocio
+                $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
+                $entity->setUnidadNegocio($unidneg);
+                // set numeracion
+                $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+                if ($param) {
+                    // cargar datos parametrizados por defecto
+                    $entity->setNroPresupuesto($param->getUltimoNroPresupuesto() + 1);
+                    $param->setUltimoNroPresupuesto($entity->getNroPresupuesto());
+                    $em->persist($param);
                 }
-                $em->persist($stock);
+                // cargar productos y verificar que no haya items sin producto.
+                $productos = $request->get('ventasbundle_producto');
+                foreach ($entity->getDetalles() as $key => $detalle) {
+                    $producto = $em->getRepository('AppBundle:Producto')->find($productos[$key]);
+                    if ($producto) {
+                        $detalle->setProducto($producto);
+                    }
+                    else {
+                        $entity->removeDetalle($detalle);
+                    }
+                }
 
-                // Cargar movimiento
-                $movim = new StockMovimiento();
-                $movim->setFecha($entity->getFechaPresupuesto());
-                $movim->setTipo('ventas_presupuesto');
-                $movim->setSigno('-');
-                $movim->setMovimiento($entity->getId());
-                $movim->setProducto($detalle->getProducto());
-                $movim->setCantidad($detalle->getCantidad());
-                $movim->setDeposito($deposito);
-                $em->persist($movim);
+                $em->persist($entity);
                 $em->flush();
+                if ($entity->getDescuentaStock()) {
+                    // Descuento de stock
+                    $deposito = $entity->getDeposito();
+                    foreach ($entity->getDetalles() as $detalle) {
+                        $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                        if ($stock) {
+                            $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
+                        }
+                        else {
+                            $stock = new Stock();
+                            $stock->setProducto($detalle->getProducto());
+                            $stock->setDeposito($deposito);
+                            $stock->setCantidad(0 - $detalle->getCantidad());
+                        }
+                        $em->persist($stock);
 
-              }
+                        // Cargar movimiento
+                        $movim = new StockMovimiento();
+                        $movim->setFecha($entity->getFechaPresupuesto());
+                        $movim->setTipo('ventas_presupuesto');
+                        $movim->setSigno('-');
+                        $movim->setMovimiento($entity->getId());
+                        $movim->setProducto($detalle->getProducto());
+                        $movim->setCantidad($detalle->getCantidad());
+                        $movim->setDeposito($deposito);
+                        $em->persist($movim);
+                        $em->flush();
+                    }
+                }
 
+                $em->getConnection()->commit();
+
+                // return $this->redirect($this->generateUrl('ventas_presupuesto', array('printpdf' => $entity->getId())));
+                return $this->redirect($this->generateUrl('ventas_presupuesto'));
             }
-
-            $em->getConnection()->commit();
-
-            // return $this->redirect($this->generateUrl('ventas_presupuesto', array('printpdf' => $entity->getId())));
-            return $this->redirect($this->generateUrl('ventas_presupuesto'));
-          }
-          catch (\Exception $ex) {
-            $this->addFlash('error', $ex->getMessage());
-            $em->getConnection()->rollback();
-          }
+            catch (\Exception $ex) {
+                $this->addFlash('error', $ex->getMessage());
+                $em->getConnection()->rollback();
+            }
         }
 
-// $errors = array();
-
-//     foreach ($form->getErrors() as $key => $error) {
-//         if ($form->isRoot()) {
-//             $errors['#'][] = $error->getMessage();
-//         } else {
-//             $errors[] = $error->getMessage();
-//         }
-//     }
-
-//     foreach ($form->all() as $child) {
-//         if (!$child->isValid()) {
-//             $errors[$child->getName()] = $this->getErrorMessages($child);
-//         }
-//     }
-// var_dump($errors);
-
-// echo 'invalid';
-// die;
+        $errors = array();
+        foreach ($form->getErrors() as $key => $error) {
+            if ($form->isRoot()) {
+                $errors['#'][] = $error->getMessage();
+            }
+            else {
+                $errors[] = $error->getMessage();
+            }
+        }
+        foreach ($form->all() as $child) {
+            if (!$child->isValid()) {
+                $errors[$child->getName()] = $this->getErrorMessages($child);
+            }
+        }
+        var_dump($errors);
+        echo 'invalid';
+        die;
         return $this->render('VentasBundle:Presupuesto:new.html.twig',
-                $this->arrayParameters($entity, $form->createView()) );
+                $this->arrayParameters($entity, $form->createView()));
+    }
+
+    protected function getErrorMessages(\Symfony\Component\Form\Form $form) {
+        $errors = array();
+        if ($form->count() > 0) {
+            foreach ($form->all() as $child) {
+                if (!$child->isValid()) {
+                    $errors[$child->getName()] = (String) $form[$child->getName()]->getErrors();
+                }
+            }
+        }
+        return $errors;
     }
 
     /**
@@ -236,9 +247,9 @@ class PresupuestoController extends Controller {
             $this->addFlash('error', 'El presupuesto ya no puede ser editado una vez impreso.');
             return $this->redirectToRoute('ventas_presupuesto');
         }
-        $editForm = $this->createEditForm($entity,'new');
+        $editForm = $this->createEditForm($entity, 'new');
         return $this->render('VentasBundle:Presupuesto:new.html.twig',
-                $this->arrayParameters($entity, $editForm->createView()) );
+                $this->arrayParameters($entity, $editForm->createView()));
     }
 
     /**
@@ -250,7 +261,7 @@ class PresupuestoController extends Controller {
         $form = $this->createForm(new PresupuestoType(), $entity, array(
             'action' => $this->generateUrl('ventas_presupuesto_update', array('id' => $entity->getId())),
             'method' => 'PUT',
-            'attr' => array('type'=>$type) ,
+            'attr' => array('type' => $type),
         ));
         return $form;
     }
@@ -268,46 +279,47 @@ class PresupuestoController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra Presupuesto.');
         }
-        $editForm = $this->createEditForm($entity,'create');
+        $editForm = $this->createEditForm($entity, 'create');
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
             $em->getConnection()->beginTransaction();
-            try{
+            try {
 
                 // cargar referencias faltantes
                 $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('ventasbundle_cliente'));
                 $entity->setCliente($cliente);
-                $entity->setNombreCliente( $request->get('ventasbundle_nombreCliente') );
+                $entity->setNombreCliente($request->get('ventasbundle_nombreCliente'));
                 $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
                 $entity->setFormaPago($formapago);
 
                 // actualizar los productos
                 $productos = $request->get('ventasbundle_producto');
                 $i = 0;
-                foreach ($entity->getDetalles() as $detalle){
-                  $producto = $em->getRepository('AppBundle:Producto')->find($productos[$i]);
-                  $detalle->setProducto( $producto );
-                  $i++;
+                foreach ($entity->getDetalles() as $detalle) {
+                    $producto = $em->getRepository('AppBundle:Producto')->find($productos[$i]);
+                    $detalle->setProducto($producto);
+                    $i++;
                 }
 
                 $em->persist($entity);
                 $em->flush();
 
-                if( !$descuentaStock && $entity->getDescuentaStock() ){
+                if (!$descuentaStock && $entity->getDescuentaStock()) {
                     // Descuento de stock
                     $deposito = $entity->getDeposito();
-                    foreach ($entity->getDetalles() as $detalle){
+                    foreach ($entity->getDetalles() as $detalle) {
                         $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
                         if ($stock) {
                             $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
-                        }else {
+                        }
+                        else {
                             $stock = new Stock();
                             $stock->setProducto($detalle->getProducto());
                             $stock->setDeposito($deposito);
-                            $stock->setCantidad( 0 - $detalle->getCantidad());
+                            $stock->setCantidad(0 - $detalle->getCantidad());
                         }
                         $em->persist($stock);
-        // Cargar movimiento
+                        // Cargar movimiento
                         $movim = new StockMovimiento();
                         $movim->setFecha(new \DateTime());
                         $movim->setTipo('ventas_presupuesto');
@@ -329,7 +341,6 @@ class PresupuestoController extends Controller {
                 $this->addFlash('error', $ex->getMessage());
                 $em->getConnection()->rollback();
             }
-
         }
         $errors = array();
         if ($editForm->count() > 0) {
@@ -340,7 +351,7 @@ class PresupuestoController extends Controller {
             }
         }
         return $this->render('VentasBundle:Presupuesto:new.html.twig',
-               $this->arrayParameters($entity, $editForm->createView()) );
+                $this->arrayParameters($entity, $editForm->createView()));
     }
 
     /**
@@ -356,9 +367,8 @@ class PresupuestoController extends Controller {
             throw $this->createNotFoundException('Unable to find Presupuesto entity.');
         }
         return $this->render('VentasBundle:Presupuesto:show.html.twig', array(
-                    'entity' => $entity));
+                'entity' => $entity));
     }
-
 
     /**
      * @Route("/{id}/printPresupuesto.{_format}",
@@ -366,19 +376,19 @@ class PresupuestoController extends Controller {
      * name="ventas_presupuesto_print")
      * @Method("GET")
      */
-    public function printPresupuestoAction(Request $request,$id){
+    public function printPresupuestoAction(Request $request, $id) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_presupuesto_print');
         $em = $this->getDoctrine()->getManager();
         $presupuesto = $em->getRepository('VentasBundle:Presupuesto')->find($id);
         $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
 
-        $logo = __DIR__.'/../../../web/assets/images/logo_comprobante.png';
-    //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
+        $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante.png';
+        //    $logo2 = __DIR__.'/../../../web/bundles/app/img/logobanner2.jpg';
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:Presupuesto:presupuesto.pdf.twig',
-                array( 'presupuesto' => $presupuesto, 'empresa'=>$empresa, 'logo' => $logo ), $response);
+            array('presupuesto' => $presupuesto, 'empresa' => $empresa, 'logo' => $logo), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -389,7 +399,7 @@ class PresupuestoController extends Controller {
         $em->flush();
 
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition'=>'filename=presupuesto_'.$presupuesto->getNroPresupuesto().'_'.$hoy->format('dmY_Hi').'.pdf'));
+            'Content-Disposition' => 'filename=presupuesto_' . $presupuesto->getNroPresupuesto() . '_' . $hoy->format('dmY_Hi') . '.pdf'));
     }
 
     /**
@@ -405,14 +415,15 @@ class PresupuestoController extends Controller {
             $entity->setEstado('ANULADO');
             $em->persist($entity);
             $em->flush();
-            if( $entity->getDescuentaStock() ){
+            if ($entity->getDescuentaStock()) {
                 // Revertir descuento de stock
                 $deposito = $entity->getDeposito();
-                foreach ($entity->getDetalles() as $detalle){
+                foreach ($entity->getDetalles() as $detalle) {
                     $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
                     if ($stock) {
                         $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
-                    }else{
+                    }
+                    else {
                         $stock = new Stock();
                         $stock->setProducto($detalle->getProducto());
                         $stock->setDeposito($deposito);
@@ -423,7 +434,7 @@ class PresupuestoController extends Controller {
                     }
                     $em->persist($stock);
 
-                // Cargar movimiento
+                    // Cargar movimiento
                     $movim = new StockMovimiento();
                     $movim->setFecha($entity->getUpdated());
                     $movim->setTipo('ventas_presupuesto');
@@ -438,24 +449,22 @@ class PresupuestoController extends Controller {
             }
 
             $em->getConnection()->commit();
-            $this->addFlash('success', 'Se ha anulado el Presupuesto #'.$entity->getNroPresupuesto());
-
-        }catch (\Exception $ex) {
+            $this->addFlash('success', 'Se ha anulado el Presupuesto #' . $entity->getNroPresupuesto());
+        }
+        catch (\Exception $ex) {
             $em->getConnection()->rollback();
-            $this->addFlash('error', 'No se ha podido anular el presupuesto. '.$ex->getMessage());
+            $this->addFlash('error', 'No se ha podido anular el presupuesto. ' . $ex->getMessage());
             return $this->redirect($this->generateUrl('ventas_presupuesto_show', array('id' => $entity->getId())));
         }
         return $this->redirect($this->generateUrl('ventas_presupuesto'));
     }
-
 
     /**
      * @Route("/{id}/repeat", name="ventas_presupuesto_repeat")
      * @Method("GET")
      * @Template()
      */
-    public function repeatAction($id)
-    {
+    public function repeatAction($id) {
         $unidneg_id = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta_new');
         $em = $this->getDoctrine()->getManager();
@@ -465,25 +474,24 @@ class PresupuestoController extends Controller {
         }
 
         $entity = clone $presupuesto;
-        $entity->setFechaPresupuesto( new \DateTime() );
+        $entity->setFechaPresupuesto(new \DateTime());
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
-        if($param){
+        if ($param) {
             // cargar datos parametrizados por defecto
-            $entity->setNroPresupuesto( $param->getUltimoNroPresupuesto() + 1 );
+            $entity->setNroPresupuesto($param->getUltimoNroPresupuesto() + 1);
         }
         $entity->setEstado('EMITIDO');
         // actualizar los precios
-        foreach($entity->getDetalles() as $det){
-          $det->setPrecio( $det->getProducto()->getPrecioByLista($entity->getPrecioLista()->getId())  );
+        foreach ($entity->getDetalles() as $det) {
+            $det->setPrecio($det->getProducto()->getPrecioByLista($entity->getPrecioLista()->getId()));
         }
-        $form = $this->createCreateForm($entity,'new');
+        $form = $this->createCreateForm($entity, 'new');
 
-        return $this->render('VentasBundle:Presupuesto:new.html.twig', $this->arrayParameters($entity, $form->createView()) );
+        return $this->render('VentasBundle:Presupuesto:new.html.twig', $this->arrayParameters($entity, $form->createView()));
     }
 
-    private function arrayParameters($entity, $view)
-    {
-      return array(
+    private function arrayParameters($entity, $view) {
+        return array(
             'entity' => $entity,
             'moneda' => MonedaController::getMonedaByDefault(),
             'descuentoContado' => FormaPagoController::getDescuentoContado(),

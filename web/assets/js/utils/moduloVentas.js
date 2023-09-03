@@ -40,14 +40,14 @@ jQuery(document).ready(function ($) {
 		.change()
 
 	$('[id*="_descuentoRecargo"]').on("change", function (e) {
-		let value = 0
-		if (jQuery(this).val() > 0) {
-			alert("No se pueden realizar recargos!!")
-		} else {
-			value = parseFloat(e.target.value)
-			actualizarImportes()
-		}
+		const value = e.target.value > 0 ? 0 : parseFloat(e.target.value)
+                const alerta = e.target.value > 0
+                console.log(value, e.target.value)
 		jQuery(this).val(value.toFixed(3))
+                actualizarImportes()
+		if (alerta) {
+			alert("No se pueden realizar recargos!!")
+		} 
   })
 
   $('[id*="_precioLista"]').on("change", function (e) {

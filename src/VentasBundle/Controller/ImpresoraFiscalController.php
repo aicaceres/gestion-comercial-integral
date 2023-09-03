@@ -27,9 +27,10 @@ class ImpresoraFiscalController extends Controller {
         $cajaId = $request->get('caja');
         $comando = $request->get('comando');
         $error = $request->get('error');
-        $driverResult = $error ? $error : $request->get('driverResult');
-        $result = array('res' => 'OK', 'msg' => '');
 
+        $result = $error != 'null' ? $error : $request->get('result');
+
+        $salida = array('res' => 'OK', 'msg' => '');
         $unidneg_id = $this->get('session')->get('unidneg_id');
         $em = $this->getDoctrine()->getManager();
         $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
@@ -40,21 +41,23 @@ class ImpresoraFiscalController extends Controller {
             $if->setUnidadNegocio($unidneg);
             $if->setCaja($caja);
             $if->setComando($comando);
-            $if->setData($driverResult);
+            $if->setData(json_encode($result));
             if ($comando == 'cmObtenerPrimerBloqueReporteElectronico') {
                 $rango = $request->get('fechas');
                 $if->setFechaDesde(\DateTime::createFromFormat('dmy', $rango['desde']));
                 $if->setFechaHasta(\DateTime::createFromFormat('dmy', $rango['hasta']));
             }
+            if ($error != 'null')
+                $if->setError(true);
 
             $em->persist($if);
             $em->flush();
         }
         catch (\Exception $ex) {
-            $result['res'] = 'ERROR';
-            $result['msg'] = $ex->getMessage();
+            $salida['res'] = 'ERROR';
+            $salida['msg'] = $ex->getMessage();
         }
-        return new JsonResponse($result);
+        return new JsonResponse($salida);
     }
 
     /**
@@ -72,7 +75,7 @@ class ImpresoraFiscalController extends Controller {
         $hasta = date("dmy");
 
         $repAnterior = $em->getRepository('VentasBundle:ImpresoraFiscal')->findUltimotReporte($cajaId);
-        $desde = $repAnterior['fechaHasta'] ? $repAnterior['fechaHasta']->format("dmy") : date("dmy", strtotime($hoy . "- 7 days"));
+        $desde = $repAnterior['fechaHasta'] ? $repAnterior['fechaHasta']->format("dmy") : date("dmy", strtotime($hasta . "- 7 days"));
         $file = 'M:\\Cierres\\semanal' . $desde . 'al' . $hasta . '.zip';
         $rango = array('desde' => $desde, 'hasta' => $hasta, 'file' => $file);
         return new JsonResponse($rango);

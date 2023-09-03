@@ -311,7 +311,6 @@ function imprimirTicket(cobroId){
         data.items.forEach(function(i){
           driver.imprimirItem2g(...i)
         })
-        
         // descuentos
         if(data.montodto!=0)
             driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
@@ -321,7 +320,9 @@ function imprimirTicket(cobroId){
         // pagos
         if(data.pagos){
            data.pagos.forEach(function(i){
-            driver.imprimirPago2g(...i)
+               if(i.length){
+                    driver.imprimirPago2g(...i)
+               }
           }) 
         }
         
@@ -340,6 +341,7 @@ function imprimirTicket(cobroId){
 
       } catch (e){
         cancelarTicket(driver)
+        registrarMovimientoIfu("cmAbrirComprobante",e)
         alert(e)
         setFacturando(false)
       }
@@ -373,6 +375,19 @@ function procesarTicket(id, entity, nroticket){
   },'json').fail(function(data){
     alert('Ha ocurrido un error')
     setFacturando(false)
+  })
+}
+
+function registrarMovimientoIfu(comando, error=null){
+   url = "{{ path('ifu_registrar_movimiento') }}" 
+   data = {caja:"1", comando, error } 
+   console.log(data)
+   jQuery.post(url, data, function(data){
+    if(data.res !== 'OK'){
+        alert(data.msg)
+    }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
   })
 }
 </script>

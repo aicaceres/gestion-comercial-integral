@@ -86,7 +86,7 @@ class FacturaElectronicaWebservice {
                 $ex->getMessage();
 
             $response['res'] = 'ERROR';
-            $response['msg'] = $ex->getMessage();
+            $response['msg'] = $msg;
         }
 
         return $response;

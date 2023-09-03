@@ -393,7 +393,7 @@ class ProveedorController extends Controller {
                     $text = $text . ' [ ' . $doc[0] . ' ' . $comprob->getNroComprobante() . ' $' . $item->monto . '] ';
                 }
                 $var['concepto'] = 'Pago: ' . UtilsController::myTruncate($text, 30);
-                $var['importe'] = $pago->getImporte();
+                $var['importe'] = $pago->getImporte() + $pago->getMontoRetencionRentas() + $pago->getMontoGanancias();
             }
         }
         $ord = usort($ctacte, function($a1, $a2) {
@@ -707,7 +707,7 @@ class ProveedorController extends Controller {
                 $equipo->setNroPagoCompra($equipo->getNroPagoCompra() + 1);
                 $baseImponibleGanancias = $formData['baseImponibleRentas'];
                 // si hay retencion ganancias guardar el acumulado
-                if ($entity->getRetencionGanancias() == 0) {
+                if ($entity->getRetencionGanancias() > 0) {
                     // buscar periodo
                     $hoy = new \DateTime();
                     $retencionGanancia = $em->getRepository('ComprasBundle:RetencionGanancia')->findOneBy(

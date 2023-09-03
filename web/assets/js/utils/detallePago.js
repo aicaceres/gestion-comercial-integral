@@ -14,15 +14,18 @@ jQuery(document).ready(function ($) {
 
 function checkStatusDetallePago() {
   let tipopago = jQuery(".datos-formapago").data('tipopago')
-  jQuery(".detalle_pago").toggle(tipopago != "CTACTE")
+//  jQuery(".detalle_pago").toggle(tipopago != "CTACTE")
   if (tipopago === "CTACTE") {
+    jQuery(".detalle_pago").css('display','none')
     pagosHolder.find("tr").remove()
   } else {
-    if (pagosHolder.find('tr').length === 0 ) {
-      addNewPago(tipopago)
-    } else {
-      quitarElementosSegunTipo(pagosHolder.find('tr'))
-    }
+    quitarElementosSegunTipo(pagosHolder.find('tr'))  
+    jQuery(".detalle_pago").css('display','block')
+//    if (pagosHolder.find('tr').length === 0 ) {
+//      addNewPago(tipopago)
+//    } else {
+//      quitarElementosSegunTipo(pagosHolder.find('tr'))
+//    }
   }
 }
 
@@ -175,7 +178,7 @@ function actualizarSumaPagos() {
     vuelto = pagos.toFixed(3) - total.toFixed(3)
     //vuelto = ( Math.abs(vuelto.toFixed(3)) < 0.100) ? 0 : vuelto
 		jQuery(".vuelto").html(vuelto.toFixed(3).replace(".", ","))
-		jQuery("#linkAddPago").toggle(vuelto < 0)
+//		jQuery("#linkAddPago").toggle(vuelto < 0)
 	}
 	jQuery(".vuelto").html(vuelto.toFixed(3).replace(".", ","))
 }

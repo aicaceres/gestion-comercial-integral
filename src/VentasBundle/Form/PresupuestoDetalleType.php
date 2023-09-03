@@ -8,14 +8,13 @@ use AppBundle\Entity\ProductoRepository;
 use Doctrine\ORM\EntityRepository;
 
 class PresupuestoDetalleType extends AbstractType {
-
-    private $type;
-    private $data;
-    public function __construct($type,$data)
-    {
-        $this->type= $type;
-        $this->data= $data;
-    }
+//    private $type;
+//    private $data;
+//    public function __construct($type,$data)
+//    {
+//        $this->type= $type;
+//        $this->data= $data;
+//    }
 
     /**
      * @param FormBuilderInterface $builder
@@ -23,13 +22,13 @@ class PresupuestoDetalleType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $builder->add('cantidad', null, array('required' => true, 'label' => 'Cantidad:',
-                    'attr' => array('onchange' => 'actualizarImportes()', 'onfocus' => 'this.select()')
-                ))
-                //->add('bulto', null, array('required' => false))
-                //->add('cantidadxBulto', null, array('required' => false))
-                ->add('textoComodin','text', array('required' => false))
-                ->add('precio', 'hidden')
-                ->add('alicuota', 'hidden')
+                'attr' => array('onchange' => 'actualizarImportes()', 'onfocus' => 'this.select()')
+            ))
+            //->add('bulto', null, array('required' => false))
+            //->add('cantidadxBulto', null, array('required' => false))
+            ->add('textoComodin', 'text', array('required' => false))
+            ->add('precio', 'hidden')
+            ->add('alicuota', 'hidden')
         ;
         // if($this->type=='new'){
         //     $prodsId = [];
@@ -39,7 +38,6 @@ class PresupuestoDetalleType extends AbstractType {
         //             $prodsId[] = $d->getProducto()->getId();
         //         }
         //     }
-
         //     $builder->add('producto', 'entity', array(
         //             'required' => true,
         //             'placeholder' => 'Seleccionar Producto...',
@@ -51,7 +49,6 @@ class PresupuestoDetalleType extends AbstractType {
         //                 return $qb;
         //             }
         //     ));
-
         // }else{
         //     $builder->add('producto', 'entity', array(
         //             'required' => true,

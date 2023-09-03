@@ -50,6 +50,11 @@ class ImpresoraFiscal {
     protected $data;
 
     /**
+     * @ORM\Column(name="error", type="boolean",nullable=true)
+     */
+    protected $error = false;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
@@ -304,4 +309,27 @@ class ImpresoraFiscal {
         return $this->comando;
     }
 
+
+    /**
+     * Set error
+     *
+     * @param boolean $error
+     * @return ImpresoraFiscal
+     */
+    public function setError($error)
+    {
+        $this->error = $error;
+
+        return $this;
+    }
+
+    /**
+     * Get error
+     *
+     * @return boolean 
+     */
+    public function getError()
+    {
+        return $this->error;
+    }
 }

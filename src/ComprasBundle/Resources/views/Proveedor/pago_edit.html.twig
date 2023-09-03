@@ -188,15 +188,17 @@ jQuery(function ($) {
             jAlert( 'Completar todos los datos para registrar el pago! Debe ingresar algún monto para el pago.');
             return false;
         }
-        /*else{
+        else{
+            importeTotal = parseFloat($('#comprasbundle_pagoproveedor_importe').val())
+            
             // controlar que el pago cubra los impuestos
             impuestos = parseFloat($('#comprasbundle_pagoproveedor_montoGanancias').val())  + parseFloat($('#comprasbundle_pagoproveedor_montoRentas').val());
-            if( pago < impuestos ){
-                jAlert( `El monto mínimo del pago debe ser $ ${impuestos} ` );
+            if( pago < importeTotal ){
+{#                jAlert( `El monto mínimo del pago debe ser $ ${impuestos} ` );#}
+                jAlert('El monto del pago no cubre el total del comprobante!');
                 return false;
             }
-        }*/
-
+        }
         if( !confirm('CONFIRMA LA REGISTRACIÓN DEL PAGO?')){
             return false;
         }
@@ -246,7 +248,7 @@ jQuery(function ($) {
 
     //calcularTotal();
     actualizarPagos();
-    addNewPago('EFECTIVO');
+{#    addNewPago('EFECTIVO');#}
 
 
 });
@@ -378,6 +380,10 @@ function cargarCheques(objTd){
             })
             importe.focus();
         }
+        const imp = jQuery(".vuelto").html()
+		? jQuery(".vuelto").html().replace(",", ".")
+		: 0
+	importe.val(Math.abs(parseFloat(imp)).toFixed(3)).change()
     }
 
     function addPagoDeleteLink($itemFormTd) {

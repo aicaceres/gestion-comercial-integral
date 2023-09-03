@@ -117,6 +117,7 @@ class FacturaRepository extends EntityRepository {
             ->andWhere("if.comando='cmObtenerPrimerBloqueReporteElectronico'")
             ->andWhere("if.fechaDesde IS NOT NULL")
             ->andWhere("if.fechaHasta IS NOT NULL")
+            ->andWhere("if.error != 1")
             ->orderBy('if.fechaHasta', 'DESC')
             ->setMaxResults(1);
 
