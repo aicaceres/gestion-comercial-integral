@@ -88,6 +88,7 @@ jQuery(document).ready(function ($) {
         setTimeout(function () {
           $("#ventasbundle_notadebcred_tipoComprobante").focus()
           $(".divcarga").addClass("hidden")
+          actualizarImportes()
 					}, 500)
 			}
     )

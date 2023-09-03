@@ -126,6 +126,9 @@ class FacturaElectronicaWebservice {
         if (empty($fe['cbtesAsoc'])) {
             unset($data['CbtesAsoc']);
         }
+        else {
+            unset($data['PeriodoAsoc']);
+        }
         if (empty($fe['periodoAsoc'])) {
             unset($data['PeriodoAsoc']);
         }

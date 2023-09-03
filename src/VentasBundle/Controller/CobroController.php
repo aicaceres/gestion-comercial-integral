@@ -366,8 +366,9 @@ class CobroController extends Controller {
      */
     public function getAutocompleteFacturasAction(Request $request) {
         $cliente = $request->get('id');
+        $term = $request->get('searchTerm');
         $em = $this->getDoctrine()->getManager();
-        $results = $em->getRepository('VentasBundle:Cobro')->filterByCliente($cliente);
+        $results = $em->getRepository('VentasBundle:Cobro')->filterByCliente($cliente, $term);
         $facturas = array();
         if ($results) {
             foreach ($results as $row) {
