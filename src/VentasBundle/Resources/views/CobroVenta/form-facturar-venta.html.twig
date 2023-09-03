@@ -247,6 +247,8 @@ function emitirComprobanteWs(cobroId){
     }else{
       alert(data.msg)
       setFacturando(false)
+      console.log('salida x error ws')
+      location.href = '{{ path("ventas_cobro") }}'+'?selectedtab=%23tab-cobrados'
     }
   },'json').fail(function(data){
     alert('Ha ocurrido un error')
@@ -344,6 +346,8 @@ function imprimirTicket(cobroId){
         registrarMovimientoIfu("cmAbrirComprobante",e)
         alert(e)
         setFacturando(false)
+        console.log('salida x error ifu')
+        location.href = '{{ path("ventas_cobro") }}'+'?selectedtab=%23tab-cobrados'
       }
     }else{
       alert(data.msg ? data.msg : 'Impresión cancelada!')
@@ -386,9 +390,7 @@ function registrarMovimientoIfu(comando, error=null){
     if(data.res !== 'OK'){
         alert(data.msg)
     }
-  },'json').fail(function(data){
-    alert('Ha ocurrido un error')
-  })
+  },'json')
 }
 </script>
 {% endblock %}

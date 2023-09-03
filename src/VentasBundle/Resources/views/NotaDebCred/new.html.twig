@@ -247,6 +247,9 @@ function emitirComprobanteWs(notaId){
     }else{
       alert(data.msg)
       setFacturando(false)
+      // salir
+      console.log('salida x error ws')
+      location.href = '{{ path("ventas_notadebcred") }}'
     }
   },'json').fail(function(data){
     alert('Ha ocurrido un error')
@@ -306,8 +309,11 @@ function imprimirTicket(notaId){
 
       } catch (e){
         cancelarTicket(driver)
+        registrarMovimientoIfu("cmAbrirComprobante",e)
         alert(e)
         setFacturando(false)
+        console.log('salida x error ifu')
+        location.href = '{{ path("ventas_notadebcred") }}'
       }
     }else{
       alert(data.msg ? data.msg : 'Impresión cancelada!')
@@ -377,6 +383,17 @@ function setFacturando(on){
       }, 1000);
   }
 }
-
+function registrarMovimientoIfu(comando, error=null){
+   url = "{{ path('ifu_registrar_movimiento') }}" 
+   data = {caja:"1", comando, error } 
+   console.log(data)
+   jQuery.post(url, data, function(data){
+    if(data.res !== 'OK'){
+        alert(data.msg)
+    }
+  },'json').fail(function(data){
+    alert('Ha ocurrido un error')
+  })
+}
 
 </script>{% endblock %}
