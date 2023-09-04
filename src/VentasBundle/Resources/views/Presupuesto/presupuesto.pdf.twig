@@ -141,20 +141,35 @@
             </tr>
             {% endfor %}
         </table>
-{% if (presupuesto.tipo=='P') %}
+        {% set cativa = (presupuesto.cliente.categoriaIva) ? presupuesto.cliente.categoriaIva.nombre : 'C' %}
+        {% set showiva = (cativa == 'I' or cativa == 'M') %}
+        {% set showiibb = (cativa == 'I') %}
+        {% if (presupuesto.tipo=='P') %}
         <table font-size="9px" padding-top="100px">
             <tr margin-bottom="8px">
-                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" width="20%" vertical-align="middle" text-align="center">
                     Subtotal: $ {{presupuesto.subTotal|number_format(3,',','.')}}
                 </td>
-                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    Descuento/Recargo [{{presupuesto.descuentoRecargo}}%]: $ {{presupuesto.totalDescuentoRecargo|number_format(3,',','.')}}
+                <td border.color="#555555" background.color="#EEEEEE" height="20px"  vertical-align="middle" text-align="center">
+                    Desc/Rec [{{presupuesto.descuentoRecargo}}%]: $ {{presupuesto.totalDescuentoRecargo|number_format(3,',','.')}}
                 </td>
+                {% if showiva %}
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                    IVA: $ {{presupuesto.totalIva|number_format(3,',','.')}}
+                </td>
+                {% endif %}
+                {% if showiibb %}
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
+                    Perc.IIBB [{{iibb_percent|number_format(2,'.',',')}}%]: $ {{presupuesto.totalIibb|number_format(3,',','.')}}
+                </td>
+                {% endif %}
+                
+                
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" width="20%" vertical-align="middle" text-align="center">
                     TOTAL: $ {{presupuesto.montoTotal|number_format(3,',','.')}}
                 </td>
             </tr>
         </table>
-{% endif %}
+        {% endif %}
     </dynamic-page>
 </pdf>
