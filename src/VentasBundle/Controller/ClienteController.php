@@ -710,7 +710,7 @@ class ClienteController extends Controller {
                     // realizar nota electronica
                     $afipOptionsProd = array('CUIT' => $this->getParameter('cuit_afip'), 'production' => true, 'cert' => 'cert.crt', 'key' => 'decr.key');
                     $afipOptionsTest = array('CUIT' => '27208373124', 'production' => false, 'cert' => 'cert', 'key' => 'key');
-                    $config = $this->cuitAfip == '27208373124' ? $afipOptionsTest : $afipOptionsProd;
+                    $config = $this->getParameter('cuit_afip') == '27208373124' ? $afipOptionsTest : $afipOptionsProd;
                     $afip = new Afip($config);
                     $data = array(
                         'CantReg' => 1, // Cantidad de comprobantes a registrar
