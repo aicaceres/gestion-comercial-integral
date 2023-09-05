@@ -142,8 +142,9 @@
             {% endfor %}
         </table>
         {% set cativa = (presupuesto.cliente.categoriaIva) ? presupuesto.cliente.categoriaIva.nombre : 'C' %}
+        {% set retrentas = presupuesto.cliente.categoriaRentas ? presupuesto.cliente.categoriaRentas.retencion : 0 %}
         {% set showiva = (cativa == 'I' or cativa == 'M') %}
-        {% set showiibb = (cativa == 'I') %}
+        {% set showiibb = (cativa == 'I' and retrentas>0) %}
         {% if (presupuesto.tipo=='P') %}
         <table font-size="9px" padding-top="100px">
             <tr margin-bottom="8px">

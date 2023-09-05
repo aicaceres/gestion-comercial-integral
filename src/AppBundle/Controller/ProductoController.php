@@ -1129,16 +1129,6 @@ class ProductoController extends Controller {
 
         $precio = $producto->getPrecioByLista($lista);
         $iva = $producto->getIva();
-        // $montoIva = round( ($precio * ( $iva/100 )) ,3);
-        // $total = round( ($precio + $montoIva) ,3);
-        // $data = array(
-        //     'precio' => $precio,
-        //     'alicuota' => $iva,
-        //     'iva' => $montoIva,
-        //     'total' => $total,
-        //     'bajominimo' => $bajominimo,
-        //     'comodin' => $producto->getComodin(),
-        // );
         $data = array(
             'precio' => $precio,
             'alicuota' => $iva,

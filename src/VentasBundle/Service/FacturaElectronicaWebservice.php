@@ -149,6 +149,7 @@ class FacturaElectronicaWebservice {
         $em = $this->em;
         $cliente = $comprobante->getCliente();
         $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
+        $retRentas = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : null;
         $cobroId = $notaId = null;
         $cbtesAsoc = $periodoAsoc = $tributos = $iva = [];
 
@@ -200,7 +201,8 @@ class FacturaElectronicaWebservice {
         if ($detalles) {
             $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
             foreach ($detalles as $item) {
-                $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $item->getProducto()->getIva()));
+                $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => number_format($item->getAlicuota(), 2, '.', '')));
+
                 $codigo = intval($alicuota->getCodigo());
                 $dtoRec = $item->getTotalDtoRecItem() / $comprobante->getCotizacion();
                 $baseImp = $item->getBaseImponibleItem() + $dtoRec;
@@ -245,7 +247,7 @@ class FacturaElectronicaWebservice {
           'Importe' 	=> 7.8 // Importe del tributo
           ) */
         $impTrib = 0;
-        if ($catIva == 'I') {
+        if ($catIva == 'I' && $retRentas > 0) {
             $neto = round($impNeto, 2);
             $iibb = round(($neto * $this->iibbPercent / 100), 2);
             $impTrib = $iibb;

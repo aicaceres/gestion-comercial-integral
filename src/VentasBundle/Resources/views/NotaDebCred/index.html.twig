@@ -71,7 +71,7 @@
            {% for entity in entities %}
             <tr>
                 <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
-                <td>{{ entity.clienteTxt }}</td>
+                <td>{{ entity.nombreClienteTxt }}</td>
                 <td>
                 {% if entity.notaElectronica %}
                     {{ entity.notaElectronica.comprobanteTxt }}

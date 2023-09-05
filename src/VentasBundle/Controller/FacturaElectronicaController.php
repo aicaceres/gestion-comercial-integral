@@ -157,6 +157,7 @@ class FacturaElectronicaController extends Controller {
         // tcNota_Credito_A = 7 // tcNota_Credito_B = 8 // tcNota_Credito_C = 9;
         $cliente = $comprobante->getCliente();
         $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
+        $retRentas = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : null;
         if ($entity == 'Cobro') {
             $dataTicket['tipo'] = ($catIva == 'I' || $catIva == 'M') ? 1 : 2;
             $detalles = $comprobante->getVenta()->getDetalles();
@@ -229,7 +230,8 @@ class FacturaElectronicaController extends Controller {
 
         // tributos (iibb)
         $neto = round($baseImp, 2);
-        if ($catIva == 'I') {
+
+        if ($catIva == 'I' && $retRentas > 0) {
             // PercepcionIIBB = 7
             $alicuota = $this->getParameter('iibb_percent');
             $iibb = round(($neto * $alicuota / 100), 2);
@@ -263,43 +265,48 @@ class FacturaElectronicaController extends Controller {
             // Reponer stock si es credito
             $comprobante = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
             $tipo = $comprobante->getTipoComprobante();
-            if ($tipo->getClase() == 'CRE' && $comprobante->getDetalles()) {
-                $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
+            if ($tipo->getClase() == 'CRE') {
                 $cbteAsoc = $comprobante->getComprobanteAsociado();
+                $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
+                $cargarItems = $cbteAsoc->getSaldo() === $cbteAsoc->getTotal();
                 if ($cbteAsoc) {
                     if ($cbteAsoc->getCobro()) {
                         $deposito = $cbteAsoc->getCobro()->getVenta()->getDeposito();
                     }
+                    // ajuste del comprobante asociado
+                    $nuevoSaldo = $cbteAsoc->getSaldo() - $comprobante->getTotal();
+                    $cbteAsoc->setSaldo($nuevoSaldo >= 0 ? $nuevoSaldo : 0 );
                 }
-//                else {
-//                    $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
-//                }
-                foreach ($comprobante->getDetalles() as $detalle) {
-                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
-                    if ($stock) {
-                        $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
-                    }
-                    else {
-                        $stock = new Stock();
-                        $stock->setProducto($detalle->getProducto());
-                        $stock->setDeposito($deposito);
-                        $stock->setCantidad(0 - $detalle->getCantidad());
-                    }
-                    $em->persist($stock);
+                if ($comprobante->getDetalles() && $cargarItems) {
+                    // ajuste del stock
+                    foreach ($comprobante->getDetalles() as $detalle) {
+                        $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                        if ($stock) {
+                            $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
+                        }
+                        else {
+                            $stock = new Stock();
+                            $stock->setProducto($detalle->getProducto());
+                            $stock->setDeposito($deposito);
+                            $stock->setCantidad(0 - $detalle->getCantidad());
+                        }
+                        $em->persist($stock);
 
-                    // Cargar movimiento
-                    $movim = new StockMovimiento();
-                    $movim->setFecha($comprobante->getFecha());
-                    $movim->setTipo('ventas_notadebcred');
-                    $movim->setSigno('+');
-                    $movim->setMovimiento($comprobante->getId());
-                    $movim->setProducto($detalle->getProducto());
-                    $movim->setCantidad($detalle->getCantidad());
-                    $movim->setDeposito($deposito);
-                    $em->persist($movim);
-                    $em->flush();
+                        // Cargar movimiento
+                        $movim = new StockMovimiento();
+                        $movim->setFecha($comprobante->getFecha());
+                        $movim->setTipo('ventas_notadebcred');
+                        $movim->setSigno('+');
+                        $movim->setMovimiento($comprobante->getId());
+                        $movim->setProducto($detalle->getProducto());
+                        $movim->setCantidad($detalle->getCantidad());
+                        $movim->setDeposito($deposito);
+                        $em->persist($movim);
+                        $em->flush();
+                    }
                 }
             }
+
             $em->getConnection()->commit();
             $result['res'] = 'OK';
 

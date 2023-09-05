@@ -102,8 +102,9 @@
     <fieldset>
         <div style="margin:auto; width: 90%;">
                 {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
+                {% set retrentas = entity.cliente.categoriaRentas ? entity.cliente.categoriaRentas.retencion : 0 %}
                 {% set showiva = (cativa != 'C') %}
-                {% set showiibb = (cativa == 'I') %}
+                {% set showiibb = (cativa == 'I' and retrentas>0) %}
                 {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': showiva, 'showiibb': showiibb } %}
         </div>
     </fieldset>

@@ -34,6 +34,7 @@ class Presupuesto {
     /**
      * Estados: EMITIDO - IMPRESO - ANULADO
      */
+
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
@@ -51,11 +52,13 @@ class Presupuesto {
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      */
     protected $cliente;
-   /**
+
+    /**
      * @var string $nombreCliente
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
      */
     protected $nombreCliente;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
@@ -68,19 +71,22 @@ class Presupuesto {
      */
     protected $precioLista;
 
-     /**
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
     protected $deposito;
+
     /**
      * @ORM\Column(name="descuenta_stock", type="boolean",nullable=true)
      */
     protected $descuentaStock = false;
+
     /**
      * @ORM\Column(name="tipo", type="string")
      */
     protected $tipo = 'P';
+
     /**
      * @var integer $validez
      * validez en dias
@@ -132,8 +138,7 @@ class Presupuesto {
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->validez = 1;
     }
@@ -142,39 +147,40 @@ class Presupuesto {
         $this->id = null;
     }
 
-    public function getNroPresupuestoTxt(){
-        return str_pad( $this->nroPresupuesto, 8, "0", STR_PAD_LEFT) ;
+    public function getNroPresupuestoTxt() {
+        return str_pad($this->nroPresupuesto, 8, "0", STR_PAD_LEFT);
     }
 
     /**
      *  TOTALIZADOS DE LA OPERACION
      *
-    public function getSubTotal() {
-        $total = 0;
-        foreach ($this->detalles as $item) {
-            $total = $total + $item->getTotalItem();
-        }
-        return $total;
-    }
-    public function getTotalDescuentoRecargo() {
-        $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
-        return round( ($total ) ,3);
-    }
-    public function getTotalIva(){
-        $total = 0;
-        foreach ($this->detalles as $item) {
-            $total = $total + $item->getIvaItem();
-        }
-        return round( $total ,3);
-    }
-    public function getTotalIibb(){
-        $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * $this->getParameter('iibb_percent')/100 ;
-    }
-    public function getMontoTotal(){
-        $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo()  ;
-        return round($total,2) ;
-    }*/
+      public function getSubTotal() {
+      $total = 0;
+      foreach ($this->detalles as $item) {
+      $total = $total + $item->getTotalItem();
+      }
+      return $total;
+      }
+      public function getTotalDescuentoRecargo() {
+      $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
+      return round( ($total ) ,3);
+      }
+      public function getTotalIva(){
+      $total = 0;
+      foreach ($this->detalles as $item) {
+      $total = $total + $item->getIvaItem();
+      }
+      return round( $total ,3);
+      }
+      public function getTotalIibb(){
+      $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
+      return $monto * $this->getParameter('iibb_percent')/100 ;
+      }
+      public function getMontoTotal(){
+      $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo()  ;
+      return round($total,2) ;
+      } */
+
     /**
      *  TOTALIZADOS DE LA OPERACION
      */
@@ -185,45 +191,53 @@ class Presupuesto {
         }
         return $total;
     }
+
     public function getTotalDescuentoRecargo() {
         $total = 0;
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
-        if( $categIva == 'I' || $categIva == 'M'){
+        if ($categIva == 'I' || $categIva == 'M') {
             // suma de descuentos x item
             foreach ($this->detalles as $item) {
                 $total = $total + $item->getTotalDtoRecItem();
             }
-        }else{
-            // descuento sobre el subtotal
-            $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
         }
-        return round( ($total ) ,3);
+        else {
+            // descuento sobre el subtotal
+            $total = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
+        }
+        return round(($total), 3);
     }
-    public function getTotalIva(){
+
+    public function getTotalIva() {
         $total = 0;
         foreach ($this->detalles as $item) {
             $total = $total + $item->getTotalIvaItem();
         }
-        return round( ($total) ,3);
+        return round(($total), 3);
     }
-    public function getTotalIibb($iibbPercent = 3.5){
+
+    public function getTotalIibb($iibbPercent = 3.5) {
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * $iibbPercent/100 ;
+        return $monto * $iibbPercent / 100;
     }
-    public function getMontoTotal(){
+
+    public function getMontoTotal() {
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
-        if( $categIva == 'I' || $categIva == 'M'){
+        $retRentas = $this->getCliente()->getCategoriaRentas() ? $this->getCliente()->getCategoriaRentas()->getRetencion() : null;
+        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        if ($categIva == 'I' || $categIva == 'M') {
             // total con iva e iibb
             $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo() + $this->getTotalIva();
-            if( $categIva == 'I' ){
+            if ($categIva == 'I' && $retRentas > 0) {
                 $total = $total + $this->getTotalIibb();
             }
-        }else{
-            // subtotal +/- descuentoRecargo
-            $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
-            $total = $this->getSubTotal() + $descRec  ;
         }
-        return round($total,2) ;
+        else {
+            // subtotal +/- descuentoRecargo
+            $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
+            $total = $this->getSubTotal() + $descRec;
+        }
+        return round($total, 2);
     }
 
     /**
@@ -235,8 +249,7 @@ class Presupuesto {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -246,8 +259,7 @@ class Presupuesto {
      * @param string $nroPresupuesto
      * @return Presupuesto
      */
-    public function setNroPresupuesto($nroPresupuesto)
-    {
+    public function setNroPresupuesto($nroPresupuesto) {
         $this->nroPresupuesto = $nroPresupuesto;
 
         return $this;
@@ -258,8 +270,7 @@ class Presupuesto {
      *
      * @return string
      */
-    public function getNroPresupuesto()
-    {
+    public function getNroPresupuesto() {
         return $this->nroPresupuesto;
     }
 
@@ -269,8 +280,7 @@ class Presupuesto {
      * @param \DateTime $fechaPresupuesto
      * @return Presupuesto
      */
-    public function setFechaPresupuesto($fechaPresupuesto)
-    {
+    public function setFechaPresupuesto($fechaPresupuesto) {
         $this->fechaPresupuesto = $fechaPresupuesto;
 
         return $this;
@@ -281,8 +291,7 @@ class Presupuesto {
      *
      * @return \DateTime
      */
-    public function getFechaPresupuesto()
-    {
+    public function getFechaPresupuesto() {
         return $this->fechaPresupuesto;
     }
 
@@ -292,8 +301,7 @@ class Presupuesto {
      * @param string $estado
      * @return Presupuesto
      */
-    public function setEstado($estado)
-    {
+    public function setEstado($estado) {
         $this->estado = $estado;
 
         return $this;
@@ -304,8 +312,7 @@ class Presupuesto {
      *
      * @return string
      */
-    public function getEstado()
-    {
+    public function getEstado() {
         return $this->estado;
     }
 
@@ -315,8 +322,7 @@ class Presupuesto {
      * @param string $descuentoRecargo
      * @return Presupuesto
      */
-    public function setDescuentoRecargo($descuentoRecargo)
-    {
+    public function setDescuentoRecargo($descuentoRecargo) {
         $this->descuentoRecargo = $descuentoRecargo;
 
         return $this;
@@ -327,8 +333,7 @@ class Presupuesto {
      *
      * @return string
      */
-    public function getDescuentoRecargo()
-    {
+    public function getDescuentoRecargo() {
         return $this->descuentoRecargo;
     }
 
@@ -338,8 +343,7 @@ class Presupuesto {
      * @param \DateTime $created
      * @return Presupuesto
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -350,8 +354,7 @@ class Presupuesto {
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -361,8 +364,7 @@ class Presupuesto {
      * @param \DateTime $updated
      * @return Presupuesto
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -373,8 +375,7 @@ class Presupuesto {
      *
      * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -384,8 +385,7 @@ class Presupuesto {
      * @param \VentasBundle\Entity\Cliente $cliente
      * @return Presupuesto
      */
-    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
-    {
+    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null) {
         $this->cliente = $cliente;
 
         return $this;
@@ -396,8 +396,7 @@ class Presupuesto {
      *
      * @return \VentasBundle\Entity\Cliente
      */
-    public function getCliente()
-    {
+    public function getCliente() {
         return $this->cliente;
     }
 
@@ -407,8 +406,7 @@ class Presupuesto {
      * @param \AppBundle\Entity\PrecioLista $precioLista
      * @return Presupuesto
      */
-    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null)
-    {
+    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null) {
         $this->precioLista = $precioLista;
 
         return $this;
@@ -419,8 +417,7 @@ class Presupuesto {
      *
      * @return \AppBundle\Entity\PrecioLista
      */
-    public function getPrecioLista()
-    {
+    public function getPrecioLista() {
         return $this->precioLista;
     }
 
@@ -430,8 +427,7 @@ class Presupuesto {
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
      * @return Presupuesto
      */
-    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
-    {
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null) {
         $this->unidadNegocio = $unidadNegocio;
 
         return $this;
@@ -442,8 +438,7 @@ class Presupuesto {
      *
      * @return \ConfigBundle\Entity\UnidadNegocio
      */
-    public function getUnidadNegocio()
-    {
+    public function getUnidadNegocio() {
         return $this->unidadNegocio;
     }
 
@@ -453,8 +448,7 @@ class Presupuesto {
      * @param \VentasBundle\Entity\PresupuestoDetalle $detalles
      * @return Presupuesto
      */
-    public function addDetalle(\VentasBundle\Entity\PresupuestoDetalle $detalles)
-    {
+    public function addDetalle(\VentasBundle\Entity\PresupuestoDetalle $detalles) {
         $detalles->setPresupuesto($this);
         $this->detalles[] = $detalles;
         return $this;
@@ -465,8 +459,7 @@ class Presupuesto {
      *
      * @param \VentasBundle\Entity\PresupuestoDetalle $detalles
      */
-    public function removeDetalle(\VentasBundle\Entity\PresupuestoDetalle $detalles)
-    {
+    public function removeDetalle(\VentasBundle\Entity\PresupuestoDetalle $detalles) {
         $this->detalles->removeElement($detalles);
     }
 
@@ -475,8 +468,7 @@ class Presupuesto {
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDetalles()
-    {
+    public function getDetalles() {
         return $this->detalles;
     }
 
@@ -486,8 +478,7 @@ class Presupuesto {
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Presupuesto
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -498,8 +489,7 @@ class Presupuesto {
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -509,8 +499,7 @@ class Presupuesto {
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Presupuesto
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -521,8 +510,7 @@ class Presupuesto {
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -532,8 +520,7 @@ class Presupuesto {
      * @param \ConfigBundle\Entity\FormaPago $formaPago
      * @return Presupuesto
      */
-    public function setFormaPago(\ConfigBundle\Entity\FormaPago $formaPago = null)
-    {
+    public function setFormaPago(\ConfigBundle\Entity\FormaPago $formaPago = null) {
         $this->formaPago = $formaPago;
 
         return $this;
@@ -544,8 +531,7 @@ class Presupuesto {
      *
      * @return \ConfigBundle\Entity\FormaPago
      */
-    public function getFormaPago()
-    {
+    public function getFormaPago() {
         return $this->formaPago;
     }
 
@@ -555,8 +541,7 @@ class Presupuesto {
      * @param string $nombreCliente
      * @return Presupuesto
      */
-    public function setNombreCliente($nombreCliente)
-    {
+    public function setNombreCliente($nombreCliente) {
         $this->nombreCliente = $nombreCliente;
 
         return $this;
@@ -567,8 +552,7 @@ class Presupuesto {
      *
      * @return string
      */
-    public function getNombreCliente()
-    {
+    public function getNombreCliente() {
         return $this->nombreCliente;
     }
 
@@ -578,8 +562,7 @@ class Presupuesto {
      * @param boolean $descuentaStock
      * @return Presupuesto
      */
-    public function setDescuentaStock($descuentaStock)
-    {
+    public function setDescuentaStock($descuentaStock) {
         $this->descuentaStock = $descuentaStock;
 
         return $this;
@@ -590,8 +573,7 @@ class Presupuesto {
      *
      * @return boolean
      */
-    public function getDescuentaStock()
-    {
+    public function getDescuentaStock() {
         return $this->descuentaStock;
     }
 
@@ -601,8 +583,7 @@ class Presupuesto {
      * @param \AppBundle\Entity\Deposito $deposito
      * @return Presupuesto
      */
-    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null)
-    {
+    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null) {
         $this->deposito = $deposito;
 
         return $this;
@@ -613,8 +594,7 @@ class Presupuesto {
      *
      * @return \AppBundle\Entity\Deposito
      */
-    public function getDeposito()
-    {
+    public function getDeposito() {
         return $this->deposito;
     }
 
@@ -624,8 +604,7 @@ class Presupuesto {
      * @param integer $validez
      * @return Presupuesto
      */
-    public function setValidez($validez)
-    {
+    public function setValidez($validez) {
         $this->validez = $validez;
 
         return $this;
@@ -636,8 +615,7 @@ class Presupuesto {
      *
      * @return integer
      */
-    public function getValidez()
-    {
+    public function getValidez() {
         return $this->validez;
     }
 
@@ -647,8 +625,7 @@ class Presupuesto {
      * @param string $tipo
      * @return Presupuesto
      */
-    public function setTipo($tipo)
-    {
+    public function setTipo($tipo) {
         $this->tipo = $tipo;
 
         return $this;
@@ -659,8 +636,8 @@ class Presupuesto {
      *
      * @return string
      */
-    public function getTipo()
-    {
+    public function getTipo() {
         return $this->tipo;
     }
+
 }

@@ -48,6 +48,8 @@ jQuery(document).ready(function ($) {
           if (data) {
             divDatos.replaceWith(data.partial)
             $(".selectorCliente").data("categiva", data.categoriaIva)
+            let showiibb = data.showiibb ? 1 : 0
+            $(".selectorCliente").data("showiibb", showiibb)
 						// Forma de pago
 						let cf = data.esConsumidorFinal ? 1 : 0
 						selectFormaPago = $("#widgetFormaPago")

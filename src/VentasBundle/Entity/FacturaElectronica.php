@@ -1,4 +1,5 @@
 <?php
+
 namespace VentasBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -10,8 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\FacturaRepository")
  * COMPROBANTE ELECTRONICO
  */
-class FacturaElectronica
-{
+class FacturaElectronica {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -31,22 +31,26 @@ class FacturaElectronica
      * @ORM\Column(name="punto_venta", type="integer")
      */
     protected $puntoVenta;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipComprobante")
      * @ORM\JoinColumn(name="afip_comprobante_id", referencedColumnName="id")
      * */
     protected $tipoComprobante;
+
     /**
      * @var integer $nroComprobante
      * voucher_number
      * @ORM\Column(name="nro_comprobante", type="integer")
      */
     protected $nroComprobante;
+
     /**
      * @var string $cae
      * @ORM\Column(name="cae", type="string", length=14)
      */
     protected $cae;
+
     /**
      * @var string $caeVto
      * CAEFchVto
@@ -59,6 +63,7 @@ class FacturaElectronica
      * @ORM\Column(name="total", type="decimal", scale=2 )
      */
     protected $total;
+
     /**
      * @var decimal $saldo
      * @ORM\Column(name="saldo", type="decimal", scale=2 )
@@ -66,79 +71,95 @@ class FacturaElectronica
     protected $saldo;
 
     //** DATOS ENVIADOS WEBSERVICE / IMP FISCAL / REPORTES AFIP */
+
     /**
      * (1)Productos, (2)Servicios, (3)Productos y Servicios
      * @ORM\Column(name="concepto", type="integer", nullable=true)
      */
     protected $concepto = 1;
-     /**
+
+    /**
      * 99 consumidor final
      * @ORM\Column(name="doc_tipo", type="integer", nullable=true)
      */
     protected $docTipo = 99;
+
     /**
      * @ORM\Column(name="doc_nro", type="string", length=13, nullable=true)
      */
     protected $docNro;
+
     /**
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
      */
     protected $nombreCliente;
+
     /**
      * Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
      * @ORM\Column(name="cbte_fch", type="integer", nullable=true)
      */
     protected $cbteFch;
+
     /**
      * Importe neto no gravado
      * @ORM\Column(name="imp_tot_conc", type="decimal", scale=2, nullable=true )
      */
     protected $impTotConc;
+
     /**
      * Importe neto gravado
      * @ORM\Column(name="imp_neto", type="decimal", scale=2, nullable=true )
      */
     protected $impNeto;
+
     /**
      * Importe exento de IVA
      * @ORM\Column(name="imp_op_ex", type="decimal", scale=2, nullable=true )
      */
     protected $impOpEx;
+
     /**
      * Importe total de IVA
      * @ORM\Column(name="imp_iva", type="decimal", scale=2, nullable=true )
      */
     protected $impIva;
+
     /**
      * Importe total de tributos
      * @ORM\Column(name="imp_trib", type="decimal", scale=2, nullable=true )
      */
     protected $impTrib;
+
     /**
      * 'PES' para pesos argentinos
      * @ORM\Column(name="mon_id", type="string", length=3, nullable=true)
      */
     protected $monId = 'PES';
+
     /**
      * 1 para pesos argentinos
      * @ORM\Column(name="mon_cotiz", type="string", length=10, nullable=true)
      */
     protected $monCotiz = 1;
+
     /**
      * Detalle de tributos
      * @ORM\Column(name="tributos", type="text", nullable=true )
      */
     protected $tributos;
+
     /**
      * Detalle de comprobantes asociados - ND NC
      * @ORM\Column(name="cbtes_asoc", type="text", nullable=true )
      */
     protected $cbtesAsoc;
+
     /**
      * Periodo asociado - ND NC
      * @ORM\Column(name="periodo_asoc", type="text", nullable=true )
      */
     protected $periodoAsoc;
+
     /**
      * Detalle de alicuotas
      * @ORM\Column(name="iva", type="text", nullable=true )
@@ -148,16 +169,17 @@ class FacturaElectronica
     //***/
 
     /**
-    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Cobro", inversedBy="facturaElectronica")
-    * @ORM\JoinColumn(name="ventas_cobro_id", referencedColumnName="id")
-    * Registro del cobro por el cual se genero el voucher
-    */
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\Cobro", inversedBy="facturaElectronica")
+     * @ORM\JoinColumn(name="ventas_cobro_id", referencedColumnName="id")
+     * Registro del cobro por el cual se genero el voucher
+     */
     protected $cobro;
+
     /**
-    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred", inversedBy="notaElectronica")
-    * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
-    * Registro de la nota de deb/cred por el cual se genero el voucher
-    */
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred", inversedBy="notaElectronica")
+     * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
+     * Registro de la nota de deb/cred por el cual se genero el voucher
+     */
     protected $notaDebCred;
 
     /**
@@ -179,7 +201,6 @@ class FacturaElectronica
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-
     // protected $qr;
     // public function getQr()
     // {
@@ -191,63 +212,68 @@ class FacturaElectronica
     //     return $this;
     // }
     protected $docTipoTxt;
-    public function getDocTipoTxt()
-    {
+
+    public function getDocTipoTxt() {
         return $this->docTipoTxt;
     }
-    public function setDocTipoTxt($docTipoTxt)
-    {
+
+    public function setDocTipoTxt($docTipoTxt) {
         $this->docTipoTxt = $docTipoTxt;
         return $this;
     }
 
-
-    public function __toString(){
+    public function __toString() {
         return $this->getComprobanteTxt();
     }
 
-    public function getNroComprobanteTxt(){
-        return str_pad($this->getPuntoVenta(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getNroComprobante(), 8, "0", STR_PAD_LEFT);
+    public function getNroComprobanteTxt() {
+        return str_pad($this->getPuntoVenta(), 4, "0", STR_PAD_LEFT) . '-' . str_pad($this->getNroComprobante(), 8, "0", STR_PAD_LEFT);
     }
 
-    public function getComprobanteTxt(){
-        return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt();
+    public function getComprobanteTxt() {
+        return $this->getTipoComprobante()->getValor() . ' ' . $this->getNroComprobanteTxt();
     }
-    public function getSelectComprobanteTxt(){
-        if( $this->getCobro() ){
+
+    public function getSelectComprobanteTxt() {
+        if ($this->getCobro()) {
             $fecha = $this->getCobro()->getFechaCobro()->format('d/m/Y');
             $simbolo = $this->getCobro()->getMoneda()->getSimbolo();
-        }else{
+        }
+        else {
             $fecha = $this->getNotaDebCred()->getFecha()->format('d/m/Y');
             $simbolo = $this->getNotaDebCred()->getMoneda()->getSimbolo();
         }
-        return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt().
-        ' | '. $fecha . ' | '. $simbolo . $this->getTotal();
+        return $this->getTipoComprobante()->getValor() . ' ' . $this->getNroComprobanteTxt() .
+            ' | ' . $fecha . ' | ' . $simbolo . $this->getSaldo();
     }
-    public function getComprobanteCtaCtePendienteTxt(){
-        if( $this->getCobro() ){
+
+    public function getComprobanteCtaCtePendienteTxt() {
+        if ($this->getCobro()) {
             $fecha = $this->getCobro()->getFechaCobro()->format('d/m/Y');
             $simbolo = $this->getCobro()->getMoneda()->getSimbolo();
-        }else{
+        }
+        else {
             $fecha = $this->getNotaDebCred()->getFecha()->format('d/m/Y');
             $simbolo = $this->getNotaDebCred()->getMoneda()->getSimbolo();
         }
-        return $this->getTipoComprobante()->getValor(). ' ' . $this->getNroComprobanteTxt().
-        ' | '. $fecha . ' | '. $simbolo . $this->getSaldo();
+        return $this->getTipoComprobante()->getValor() . ' ' . $this->getNroComprobanteTxt() .
+            ' | ' . $fecha . ' | ' . $simbolo . $this->getSaldo();
     }
 
-    public function getCodigoComprobante(){
-        return intval( $this->getTipoComprobante()->getCodigo() );
+    public function getCodigoComprobante() {
+        return intval($this->getTipoComprobante()->getCodigo());
     }
 
     public function getLetra() {
-        return substr($this->getTipoComprobante()->getValor(),4,1);
+        return substr($this->getTipoComprobante()->getValor(), 4, 1);
     }
-    public function getTipo(){
-        return substr($this->getTipoComprobante()->getValor(),0,3);
+
+    public function getTipo() {
+        return substr($this->getTipoComprobante()->getValor(), 0, 3);
     }
+
     public function getTituloPdf() {
-        $tipo = substr($this->getTipoComprobante()->getValor(),0,3);
+        $tipo = substr($this->getTipoComprobante()->getValor(), 0, 3);
         switch ($tipo) {
             case 'FAC':
                 return 'FACTURA';
@@ -261,17 +287,17 @@ class FacturaElectronica
         return false;
     }
 
-    public function getCbteFchFormatted($format='Y-m-d'){
-      $cbteFch = new \DateTime( $this->getCbteFch());
-      return $cbteFch->format($format);
+    public function getCbteFchFormatted($format = 'Y-m-d') {
+        $cbteFch = new \DateTime($this->getCbteFch());
+        return $cbteFch->format($format);
     }
+
     /**
      * Get id
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -281,8 +307,7 @@ class FacturaElectronica
      * @param integer $puntoVenta
      * @return FacturaElectronica
      */
-    public function setPuntoVenta($puntoVenta)
-    {
+    public function setPuntoVenta($puntoVenta) {
         $this->puntoVenta = $puntoVenta;
 
         return $this;
@@ -293,8 +318,7 @@ class FacturaElectronica
      *
      * @return integer
      */
-    public function getPuntoVenta()
-    {
+    public function getPuntoVenta() {
         return $this->puntoVenta;
     }
 
@@ -304,8 +328,7 @@ class FacturaElectronica
      * @param integer $nroComprobante
      * @return FacturaElectronica
      */
-    public function setNroComprobante($nroComprobante)
-    {
+    public function setNroComprobante($nroComprobante) {
         $this->nroComprobante = $nroComprobante;
 
         return $this;
@@ -316,8 +339,7 @@ class FacturaElectronica
      *
      * @return integer
      */
-    public function getNroComprobante()
-    {
+    public function getNroComprobante() {
         return $this->nroComprobante;
     }
 
@@ -327,8 +349,7 @@ class FacturaElectronica
      * @param string $cae
      * @return FacturaElectronica
      */
-    public function setCae($cae)
-    {
+    public function setCae($cae) {
         $this->cae = $cae;
 
         return $this;
@@ -339,8 +360,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getCae()
-    {
+    public function getCae() {
         return $this->cae;
     }
 
@@ -350,8 +370,7 @@ class FacturaElectronica
      * @param string $caeVto
      * @return FacturaElectronica
      */
-    public function setCaeVto($caeVto)
-    {
+    public function setCaeVto($caeVto) {
         $this->caeVto = $caeVto;
 
         return $this;
@@ -362,8 +381,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getCaeVto()
-    {
+    public function getCaeVto() {
         return $this->caeVto;
     }
 
@@ -373,8 +391,7 @@ class FacturaElectronica
      * @param \VentasBundle\Entity\Cobro $cobro
      * @return FacturaElectronica
      */
-    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null)
-    {
+    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null) {
         $this->cobro = $cobro;
 
         return $this;
@@ -385,8 +402,7 @@ class FacturaElectronica
      *
      * @return \VentasBundle\Entity\Cobro
      */
-    public function getCobro()
-    {
+    public function getCobro() {
         return $this->cobro;
     }
 
@@ -396,8 +412,7 @@ class FacturaElectronica
      * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
      * @return FacturaElectronica
      */
-    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
-    {
+    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null) {
         $this->notaDebCred = $notaDebCred;
 
         return $this;
@@ -408,8 +423,7 @@ class FacturaElectronica
      *
      * @return \VentasBundle\Entity\NotaDebCred
      */
-    public function getNotaDebCred()
-    {
+    public function getNotaDebCred() {
         return $this->notaDebCred;
     }
 
@@ -419,8 +433,7 @@ class FacturaElectronica
      * @param \ConfigBundle\Entity\AfipComprobante $tipoComprobante
      * @return FacturaElectronica
      */
-    public function setTipoComprobante(\ConfigBundle\Entity\AfipComprobante $tipoComprobante = null)
-    {
+    public function setTipoComprobante(\ConfigBundle\Entity\AfipComprobante $tipoComprobante = null) {
         $this->tipoComprobante = $tipoComprobante;
 
         return $this;
@@ -431,8 +444,7 @@ class FacturaElectronica
      *
      * @return \ConfigBundle\Entity\AfipComprobante
      */
-    public function getTipoComprobante()
-    {
+    public function getTipoComprobante() {
         return $this->tipoComprobante;
     }
 
@@ -442,8 +454,7 @@ class FacturaElectronica
      * @param string $total
      * @return FacturaElectronica
      */
-    public function setTotal($total)
-    {
+    public function setTotal($total) {
         $this->total = $total;
 
         return $this;
@@ -454,8 +465,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getTotal()
-    {
+    public function getTotal() {
         return $this->total;
     }
 
@@ -465,8 +475,7 @@ class FacturaElectronica
      * @param string $saldo
      * @return FacturaElectronica
      */
-    public function setSaldo($saldo)
-    {
+    public function setSaldo($saldo) {
         $this->saldo = $saldo;
 
         return $this;
@@ -477,15 +486,14 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getSaldo()
-    {
+    public function getSaldo() {
         return $this->saldo;
     }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->pagos = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -495,8 +503,7 @@ class FacturaElectronica
      * @param \VentasBundle\Entity\PagoCliente $pagos
      * @return FacturaElectronica
      */
-    public function addPago(\VentasBundle\Entity\PagoCliente $pagos)
-    {
+    public function addPago(\VentasBundle\Entity\PagoCliente $pagos) {
         $this->pagos[] = $pagos;
 
         return $this;
@@ -507,8 +514,7 @@ class FacturaElectronica
      *
      * @param \VentasBundle\Entity\PagoCliente $pagos
      */
-    public function removePago(\VentasBundle\Entity\PagoCliente $pagos)
-    {
+    public function removePago(\VentasBundle\Entity\PagoCliente $pagos) {
         $this->pagos->removeElement($pagos);
     }
 
@@ -517,8 +523,7 @@ class FacturaElectronica
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getPagos()
-    {
+    public function getPagos() {
         return $this->pagos;
     }
 
@@ -528,8 +533,7 @@ class FacturaElectronica
      * @param integer $concepto
      * @return FacturaElectronica
      */
-    public function setConcepto($concepto)
-    {
+    public function setConcepto($concepto) {
         $this->concepto = $concepto;
 
         return $this;
@@ -540,8 +544,7 @@ class FacturaElectronica
      *
      * @return integer
      */
-    public function getConcepto()
-    {
+    public function getConcepto() {
         return $this->concepto;
     }
 
@@ -551,8 +554,7 @@ class FacturaElectronica
      * @param integer $docTipo
      * @return FacturaElectronica
      */
-    public function setDocTipo($docTipo)
-    {
+    public function setDocTipo($docTipo) {
         $this->docTipo = $docTipo;
 
         return $this;
@@ -563,8 +565,7 @@ class FacturaElectronica
      *
      * @return integer
      */
-    public function getDocTipo()
-    {
+    public function getDocTipo() {
         return $this->docTipo;
     }
 
@@ -574,8 +575,7 @@ class FacturaElectronica
      * @param string $docNro
      * @return FacturaElectronica
      */
-    public function setDocNro($docNro)
-    {
+    public function setDocNro($docNro) {
         $this->docNro = $docNro;
 
         return $this;
@@ -586,8 +586,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getDocNro()
-    {
+    public function getDocNro() {
         return $this->docNro;
     }
 
@@ -597,8 +596,7 @@ class FacturaElectronica
      * @param string $nombreCliente
      * @return FacturaElectronica
      */
-    public function setNombreCliente($nombreCliente)
-    {
+    public function setNombreCliente($nombreCliente) {
         $this->nombreCliente = $nombreCliente;
 
         return $this;
@@ -609,8 +607,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getNombreCliente()
-    {
+    public function getNombreCliente() {
         return $this->nombreCliente;
     }
 
@@ -620,8 +617,7 @@ class FacturaElectronica
      * @param string $impTotConc
      * @return FacturaElectronica
      */
-    public function setImpTotConc($impTotConc)
-    {
+    public function setImpTotConc($impTotConc) {
         $this->impTotConc = $impTotConc;
 
         return $this;
@@ -632,8 +628,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getImpTotConc()
-    {
+    public function getImpTotConc() {
         return $this->impTotConc;
     }
 
@@ -643,8 +638,7 @@ class FacturaElectronica
      * @param string $impNeto
      * @return FacturaElectronica
      */
-    public function setImpNeto($impNeto)
-    {
+    public function setImpNeto($impNeto) {
         $this->impNeto = $impNeto;
 
         return $this;
@@ -655,8 +649,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getImpNeto()
-    {
+    public function getImpNeto() {
         return $this->impNeto;
     }
 
@@ -666,8 +659,7 @@ class FacturaElectronica
      * @param string $impOpEx
      * @return FacturaElectronica
      */
-    public function setImpOpEx($impOpEx)
-    {
+    public function setImpOpEx($impOpEx) {
         $this->impOpEx = $impOpEx;
 
         return $this;
@@ -678,8 +670,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getImpOpEx()
-    {
+    public function getImpOpEx() {
         return $this->impOpEx;
     }
 
@@ -689,8 +680,7 @@ class FacturaElectronica
      * @param string $impIva
      * @return FacturaElectronica
      */
-    public function setImpIva($impIva)
-    {
+    public function setImpIva($impIva) {
         $this->impIva = $impIva;
 
         return $this;
@@ -701,8 +691,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getImpIva()
-    {
+    public function getImpIva() {
         return $this->impIva;
     }
 
@@ -712,8 +701,7 @@ class FacturaElectronica
      * @param string $impTrib
      * @return FacturaElectronica
      */
-    public function setImpTrib($impTrib)
-    {
+    public function setImpTrib($impTrib) {
         $this->impTrib = $impTrib;
 
         return $this;
@@ -724,8 +712,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getImpTrib()
-    {
+    public function getImpTrib() {
         return $this->impTrib;
     }
 
@@ -735,8 +722,7 @@ class FacturaElectronica
      * @param string $monId
      * @return FacturaElectronica
      */
-    public function setMonId($monId)
-    {
+    public function setMonId($monId) {
         $this->monId = $monId;
 
         return $this;
@@ -747,8 +733,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getMonId()
-    {
+    public function getMonId() {
         return $this->monId;
     }
 
@@ -758,8 +743,7 @@ class FacturaElectronica
      * @param string $monCotiz
      * @return FacturaElectronica
      */
-    public function setMonCotiz($monCotiz)
-    {
+    public function setMonCotiz($monCotiz) {
         $this->monCotiz = $monCotiz;
 
         return $this;
@@ -770,8 +754,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getMonCotiz()
-    {
+    public function getMonCotiz() {
         return $this->monCotiz;
     }
 
@@ -781,8 +764,7 @@ class FacturaElectronica
      * @param string $tributos
      * @return FacturaElectronica
      */
-    public function setTributos($tributos)
-    {
+    public function setTributos($tributos) {
         $this->tributos = $tributos;
 
         return $this;
@@ -793,8 +775,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getTributos()
-    {
+    public function getTributos() {
         return $this->tributos;
     }
 
@@ -804,8 +785,7 @@ class FacturaElectronica
      * @param string $cbtesAsoc
      * @return FacturaElectronica
      */
-    public function setCbtesAsoc($cbtesAsoc)
-    {
+    public function setCbtesAsoc($cbtesAsoc) {
         $this->cbtesAsoc = $cbtesAsoc;
 
         return $this;
@@ -816,8 +796,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getCbtesAsoc()
-    {
+    public function getCbtesAsoc() {
         return $this->cbtesAsoc;
     }
 
@@ -827,8 +806,7 @@ class FacturaElectronica
      * @param string $periodoAsoc
      * @return FacturaElectronica
      */
-    public function setPeriodoAsoc($periodoAsoc)
-    {
+    public function setPeriodoAsoc($periodoAsoc) {
         $this->periodoAsoc = $periodoAsoc;
 
         return $this;
@@ -839,8 +817,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getPeriodoAsoc()
-    {
+    public function getPeriodoAsoc() {
         return $this->periodoAsoc;
     }
 
@@ -850,8 +827,7 @@ class FacturaElectronica
      * @param string $iva
      * @return FacturaElectronica
      */
-    public function setIva($iva)
-    {
+    public function setIva($iva) {
         $this->iva = $iva;
 
         return $this;
@@ -862,8 +838,7 @@ class FacturaElectronica
      *
      * @return string
      */
-    public function getIva()
-    {
+    public function getIva() {
         return $this->iva;
     }
 
@@ -873,8 +848,7 @@ class FacturaElectronica
      * @param integer $cbteFch
      * @return FacturaElectronica
      */
-    public function setCbteFch($cbteFch)
-    {
+    public function setCbteFch($cbteFch) {
         $this->cbteFch = $cbteFch;
 
         return $this;
@@ -885,8 +859,7 @@ class FacturaElectronica
      *
      * @return integer
      */
-    public function getCbteFch()
-    {
+    public function getCbteFch() {
         return $this->cbteFch;
     }
 
@@ -896,8 +869,7 @@ class FacturaElectronica
      * @param \DateTime $created
      * @return FacturaElectronica
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -908,8 +880,7 @@ class FacturaElectronica
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -919,8 +890,7 @@ class FacturaElectronica
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return FacturaElectronica
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -931,8 +901,7 @@ class FacturaElectronica
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -942,8 +911,7 @@ class FacturaElectronica
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
      * @return FacturaElectronica
      */
-    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
-    {
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null) {
         $this->unidadNegocio = $unidadNegocio;
 
         return $this;
@@ -954,8 +922,7 @@ class FacturaElectronica
      *
      * @return \ConfigBundle\Entity\UnidadNegocio
      */
-    public function getUnidadNegocio()
-    {
+    public function getUnidadNegocio() {
         return $this->unidadNegocio;
     }
 

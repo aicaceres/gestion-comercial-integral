@@ -372,7 +372,8 @@ class CobroController extends Controller {
         $facturas = array();
         if ($results) {
             foreach ($results as $row) {
-                $facturas[] = array('id' => $row->getId(), 'text' => $row->getSelectComprobanteTxt());
+                if (!$row->getNotaDebCred())
+                    $facturas[] = array('id' => $row->getId(), 'text' => $row->getSelectComprobanteTxt());
             }
         }
         return new JsonResponse($facturas);

@@ -93,7 +93,7 @@
                                 <span>{{simbolo}} {{ cbte.totalIva|number_format(2,',','.')}}</span>
                             </td>
                         </tr>
-                            {% if cliente.categoriaIva == 'I' %}
+                            {% if cliente.categoriaIva == 'I' and (cliente.categoriaRentas ? cliente.categoriaRentas.retencion : 0)>0 %}
                             <tr>
                                 <td border.type="none"></td>
                                 <td border.type="none"></td>

@@ -4,13 +4,13 @@ namespace VentasBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+
 /**
  * VentasBundle\Entity\Venta
  * @ORM\Table(name="ventas_venta")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\VentaRepository")
  */
 class Venta {
-
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -18,11 +18,13 @@ class Venta {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var integer $nroOperacion
      * @ORM\Column(name="nro_operacion", type="integer")
      */
     protected $nroOperacion = '';
+
     /**
      * @var datetime $fechaVenta
      * @ORM\Column(name="fecha_venta", type="datetime", nullable=false)
@@ -31,15 +33,18 @@ class Venta {
     /**
      * Estados: PENDIENTE - COBRADO - FACTURADO - ANULADO
      */
+
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
      */
     protected $estado = 'PENDIENTE';
+
     /**
      * @ORM\Column(name="descuenta_stock", type="boolean",nullable=true)
      */
     protected $descuentaStock = true;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
@@ -51,21 +56,25 @@ class Venta {
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      */
     protected $cliente;
-   /**
+
+    /**
      * @var string $nombreCliente
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
      */
     protected $nombreCliente;
-     /**
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
-     **/
+     * */
     protected $formaPago;
+
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
      */
     protected $precioLista;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
@@ -83,6 +92,7 @@ class Venta {
      * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
      */
     protected $descuentoRecargo;
+
     /**
      * @ORM\Column(name="concepto", type="text", nullable=true)
      */
@@ -94,7 +104,7 @@ class Venta {
      */
     protected $transporte;
 
-     /**
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
@@ -144,7 +154,7 @@ class Venta {
         $this->id = null;
     }
 
-    public function __toString(){
+    public function __toString() {
         return strval($this->getNroOperacion());
     }
 
@@ -158,67 +168,73 @@ class Venta {
         }
         return $total;
     }
+
     public function getTotalDescuentoRecargo() {
         $total = 0;
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
-        if( $categIva == 'I' || $categIva == 'M'){
+        if ($categIva == 'I' || $categIva == 'M') {
             // suma de descuentos x item
             foreach ($this->detalles as $item) {
                 $total = $total + $item->getTotalDtoRecItem();
             }
             $total = $total / $this->getCotizacion();
-        }else{
-            // descuento sobre el subtotal
-            $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
         }
-        return round( ($total) ,3);
+        else {
+            // descuento sobre el subtotal
+            $total = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
+        }
+        return round(($total), 3);
     }
-    public function getTotalIva(){
+
+    public function getTotalIva() {
         $total = 0;
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
-        if ($categIva == 'E'){
+        if ($categIva == 'E') {
             return 0;
-        }else{
+        }
+        else {
             foreach ($this->detalles as $item) {
                 $total = $total + $item->getTotalIvaItem();
             }
-            return round( ($total / $this->getCotizacion()) ,3);
+            return round(($total / $this->getCotizacion()), 3);
         }
     }
-    public function getTotalIibb($iibbPercent=3.5){
+
+    public function getTotalIibb($iibbPercent = 3.5) {
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
         $categRentas = $this->getCliente()->getCategoriaRentas()->getId();
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return ( $categIva == 'I' && $categRentas != 18 ) ? $monto * $iibbPercent/100  : 0;
+        return ( $categIva == 'I' && $categRentas != 18 ) ? $monto * $iibbPercent / 100 : 0;
     }
-    public function getMontoTotal(){
+
+    public function getMontoTotal() {
         $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
-        if( $categIva == 'I' || $categIva == 'M'){
+        $retRentas = $this->getCliente()->getCategoriaRentas() ? $this->getCliente()->getCategoriaRentas()->getRetencion() : null;
+        if ($categIva == 'I' || $categIva == 'M') {
             // total con iva e iibb
             $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo() + $this->getTotalIva();
-            if( $categIva == 'I' ){
+            if ($categIva == 'I' && $retRentas > 0) {
                 $total = $total + $this->getTotalIibb();
             }
-        }else{
-            // subtotal +/- descuentoRecargo
-            $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
-            $total = $this->getSubTotal() + $descRec  ;
         }
-        return round($total,3) ;
+        else {
+            // subtotal +/- descuentoRecargo
+            $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
+            $total = $this->getSubTotal() + $descRec;
+        }
+        return round($total, 3);
     }
 
     /**
      *  FIN TOTALIZADOS
      */
 
-
     /**
      * Get id
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -228,8 +244,7 @@ class Venta {
      * @param \DateTime $fechaVenta
      * @return Venta
      */
-    public function setFechaVenta($fechaVenta)
-    {
+    public function setFechaVenta($fechaVenta) {
         $this->fechaVenta = $fechaVenta;
 
         return $this;
@@ -240,8 +255,7 @@ class Venta {
      *
      * @return \DateTime
      */
-    public function getFechaVenta()
-    {
+    public function getFechaVenta() {
         return $this->fechaVenta;
     }
 
@@ -251,8 +265,7 @@ class Venta {
      * @param string $estado
      * @return Venta
      */
-    public function setEstado($estado)
-    {
+    public function setEstado($estado) {
         $this->estado = $estado;
 
         return $this;
@@ -263,8 +276,7 @@ class Venta {
      *
      * @return string
      */
-    public function getEstado()
-    {
+    public function getEstado() {
         return $this->estado;
     }
 
@@ -274,8 +286,7 @@ class Venta {
      * @param \VentasBundle\Entity\Cliente $cliente
      * @return Venta
      */
-    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
-    {
+    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null) {
         $this->cliente = $cliente;
 
         return $this;
@@ -286,8 +297,7 @@ class Venta {
      *
      * @return \VentasBundle\Entity\Cliente
      */
-    public function getCliente()
-    {
+    public function getCliente() {
         return $this->cliente;
     }
 
@@ -297,8 +307,7 @@ class Venta {
      * @param string $nombreCliente
      * @return Cliente
      */
-    public function setNombreCliente($nombreCliente)
-    {
+    public function setNombreCliente($nombreCliente) {
         $this->nombreCliente = $nombreCliente;
 
         return $this;
@@ -309,8 +318,7 @@ class Venta {
      *
      * @return string
      */
-    public function getNombreCliente()
-    {
+    public function getNombreCliente() {
         return $this->nombreCliente;
     }
 
@@ -320,8 +328,7 @@ class Venta {
      * @param \ConfigBundle\Entity\FormaPago $formaPago
      * @return Venta
      */
-    public function setFormaPago(\ConfigBundle\Entity\FormaPago $formaPago = null)
-    {
+    public function setFormaPago(\ConfigBundle\Entity\FormaPago $formaPago = null) {
         $this->formaPago = $formaPago;
 
         return $this;
@@ -332,8 +339,7 @@ class Venta {
      *
      * @return \ConfigBundle\Entity\FormaPago
      */
-    public function getFormaPago()
-    {
+    public function getFormaPago() {
         return $this->formaPago;
     }
 
@@ -343,8 +349,7 @@ class Venta {
      * @param \AppBundle\Entity\PrecioLista $precioLista
      * @return Venta
      */
-    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null)
-    {
+    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null) {
         $this->precioLista = $precioLista;
 
         return $this;
@@ -355,8 +360,7 @@ class Venta {
      *
      * @return \AppBundle\Entity\PrecioLista
      */
-    public function getPrecioLista()
-    {
+    public function getPrecioLista() {
         return $this->precioLista;
     }
 
@@ -366,8 +370,7 @@ class Venta {
      * @param \ConfigBundle\Entity\Transporte $transporte
      * @return Venta
      */
-    public function setTransporte(\ConfigBundle\Entity\Transporte $transporte = null)
-    {
+    public function setTransporte(\ConfigBundle\Entity\Transporte $transporte = null) {
         $this->transporte = $transporte;
 
         return $this;
@@ -378,8 +381,7 @@ class Venta {
      *
      * @return \ConfigBundle\Entity\Transporte
      */
-    public function getTransporte()
-    {
+    public function getTransporte() {
         return $this->transporte;
     }
 
@@ -389,8 +391,7 @@ class Venta {
      * @param \ConfigBundle\Entity\Moneda $moneda
      * @return Venta
      */
-    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
-    {
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null) {
         $this->moneda = $moneda;
 
         return $this;
@@ -401,15 +402,14 @@ class Venta {
      *
      * @return \ConfigBundle\Entity\Moneda
      */
-    public function getMoneda()
-    {
+    public function getMoneda() {
         return $this->moneda;
     }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->estado = 'PENDIENTE';
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
@@ -420,8 +420,7 @@ class Venta {
      * @param \VentasBundle\Entity\VentaDetalle $detalles
      * @return Venta
      */
-    public function addDetalle(\VentasBundle\Entity\VentaDetalle $detalles)
-    {
+    public function addDetalle(\VentasBundle\Entity\VentaDetalle $detalles) {
         $detalles->setVenta($this);
         $this->detalles[] = $detalles;
         return $this;
@@ -432,8 +431,7 @@ class Venta {
      *
      * @param \VentasBundle\Entity\VentaDetalle $detalles
      */
-    public function removeDetalle(\VentasBundle\Entity\VentaDetalle $detalles)
-    {
+    public function removeDetalle(\VentasBundle\Entity\VentaDetalle $detalles) {
         $this->detalles->removeElement($detalles);
     }
 
@@ -442,8 +440,7 @@ class Venta {
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDetalles()
-    {
+    public function getDetalles() {
         return $this->detalles;
     }
 
@@ -453,8 +450,7 @@ class Venta {
      * @param integer $nroOperacion
      * @return Venta
      */
-    public function setNroOperacion($nroOperacion)
-    {
+    public function setNroOperacion($nroOperacion) {
         $this->nroOperacion = $nroOperacion;
 
         return $this;
@@ -465,8 +461,7 @@ class Venta {
      *
      * @return integer
      */
-    public function getNroOperacion()
-    {
+    public function getNroOperacion() {
         return $this->nroOperacion;
     }
 
@@ -476,8 +471,7 @@ class Venta {
      * @param \DateTime $created
      * @return Venta
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -488,8 +482,7 @@ class Venta {
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -499,8 +492,7 @@ class Venta {
      * @param \DateTime $updated
      * @return Venta
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -511,8 +503,7 @@ class Venta {
      *
      * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -522,8 +513,7 @@ class Venta {
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Venta
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -534,8 +524,7 @@ class Venta {
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -545,8 +534,7 @@ class Venta {
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Venta
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -557,8 +545,7 @@ class Venta {
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -568,8 +555,7 @@ class Venta {
      * @param \AppBundle\Entity\Deposito $deposito
      * @return Venta
      */
-    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null)
-    {
+    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null) {
         $this->deposito = $deposito;
 
         return $this;
@@ -580,8 +566,7 @@ class Venta {
      *
      * @return \AppBundle\Entity\Deposito
      */
-    public function getDeposito()
-    {
+    public function getDeposito() {
         return $this->deposito;
     }
 
@@ -612,8 +597,7 @@ class Venta {
      * @param string $cotizacion
      * @return Venta
      */
-    public function setCotizacion($cotizacion)
-    {
+    public function setCotizacion($cotizacion) {
         $this->cotizacion = $cotizacion;
 
         return $this;
@@ -624,8 +608,7 @@ class Venta {
      *
      * @return string
      */
-    public function getCotizacion()
-    {
+    public function getCotizacion() {
         return $this->cotizacion;
     }
 
@@ -635,8 +618,7 @@ class Venta {
      * @param string $descuentoRecargo
      * @return Venta
      */
-    public function setDescuentoRecargo($descuentoRecargo)
-    {
+    public function setDescuentoRecargo($descuentoRecargo) {
         $this->descuentoRecargo = $descuentoRecargo;
 
         return $this;
@@ -647,8 +629,7 @@ class Venta {
      *
      * @return string
      */
-    public function getDescuentoRecargo()
-    {
+    public function getDescuentoRecargo() {
         return $this->descuentoRecargo;
     }
 
@@ -658,8 +639,7 @@ class Venta {
      * @param \VentasBundle\Entity\Cobro $cobro
      * @return Venta
      */
-    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null)
-    {
+    public function setCobro(\VentasBundle\Entity\Cobro $cobro = null) {
         $this->cobro = $cobro;
 
         return $this;
@@ -670,8 +650,7 @@ class Venta {
      *
      * @return \VentasBundle\Entity\Cobro
      */
-    public function getCobro()
-    {
+    public function getCobro() {
         return $this->cobro;
     }
 
@@ -681,8 +660,7 @@ class Venta {
      * @param string $concepto
      * @return Venta
      */
-    public function setConcepto($concepto)
-    {
+    public function setConcepto($concepto) {
         $this->concepto = $concepto;
 
         return $this;
@@ -693,8 +671,7 @@ class Venta {
      *
      * @return string
      */
-    public function getConcepto()
-    {
+    public function getConcepto() {
         return $this->concepto;
     }
 
@@ -704,8 +681,7 @@ class Venta {
      * @param boolean $descuentaStock
      * @return Venta
      */
-    public function setDescuentaStock($descuentaStock)
-    {
+    public function setDescuentaStock($descuentaStock) {
         $this->descuentaStock = $descuentaStock;
 
         return $this;
@@ -716,8 +692,8 @@ class Venta {
      *
      * @return boolean
      */
-    public function getDescuentaStock()
-    {
+    public function getDescuentaStock() {
         return $this->descuentaStock;
     }
+
 }

@@ -85,6 +85,12 @@ class ClienteController extends Controller {
 
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            if (!$entity->getLocalidad()) {
+                $localidad = $em->getRepository('ConfigBundle:Localidad')->findOneByByDefault(1);
+                $entity->setLocalidad($localidad);
+            }
+            $cuit = str_replace('-', '', $entity->getCuit());
+            $entity->setCuit($cuit);
             $em->persist($entity);
             $em->flush();
             $this->addFlash('success', 'El cliente fue creado con éxito!');
@@ -260,8 +266,8 @@ class ClienteController extends Controller {
         $showiibb = false;
         $hoy = new \DateTime();
         $vencNoRetencion = $entity->getVencCertNoRetener() ? $entity->getVencCertNoRetener()->format('Ymd') : null;
-        $categRentas = $entity->getCategoriaRentas() ? $entity->getCategoriaRentas()->getId() : null;
-        if ($categIva == 'I' && ($vencNoRetencion < $hoy->format('Ymd') || is_null($vencNoRetencion)) && $categRentas != 18) {
+        $retRentas = $entity->getCategoriaRentas() ? $entity->getCategoriaRentas()->getRetencion() : null;
+        if ($categIva == 'I' && ($vencNoRetencion < $hoy->format('Ymd') || is_null($vencNoRetencion)) && $retRentas > 0) {
             $showiibb = true;
         }
 
@@ -656,7 +662,8 @@ class ClienteController extends Controller {
                     // armar item
                     // calculos
                     $ivaPercent = '21.00';
-                    $iibbPercent = $this->getParameter('iibb_percent');
+                    $retRentas = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : 0;
+                    $iibbPercent = $retRentas > 0 ? $this->getParameter('iibb_percent') : 0;
 
                     $grav = ($catIva == 'I') ? 1 + (($ivaPercent + $iibbPercent) / 100) : 1 + ($ivaPercent / 100);
                     $impNeto = $montoNotaCredito / $grav;

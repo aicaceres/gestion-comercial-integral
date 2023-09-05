@@ -81,6 +81,7 @@ function actualizarImportes() {
   let iva = (iibb = descrec = subTotal = totalIVA = totalIIBB = subtotalTh = 0)
   const cotizacion = jQuery(".datos-moneda").data("cotizacion")
   const categoriaIva = jQuery(".selectorCliente").data("categiva")
+  const retrentas = jQuery(".selectorCliente").data("showiibb")
   const porcentaje = checknumero(jQuery('[id*="_descuentoRecargo"]'))
   jQuery('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(3))
   jQuery('span.descuentoRecargo').html(porcentaje.toFixed(2))
@@ -97,7 +98,7 @@ function actualizarImportes() {
 			// aplicar dto para calcular el iva
 			dto = precio * (porcentaje / 100)
 			iva = (precio + dto) * (alicuota / 100)
-      if (categoriaIva == "I") {
+      if (retrentas == 1) {
         iibb_percent = jQuery('#iibbPercent').val()
 				iibb = (precio + dto) * (parseFloat(iibb_percent)/100)
 			}
@@ -299,13 +300,14 @@ function setSelect2ToProduct(selProducto) {
 				listaprecio: jQuery('[id*="_precioLista"]').val(),
 				deposito: jQuery('[id*="_deposito"]').val()
 			}
-
+                                    console.log(urldatos)
 			jQuery.ajax({
 				dataType: "json",
 				url: urldatos,
 				async: false,
 				data: data,
 				success: function (data) {
+                                    console.log(data)
 					const tr = jQuery(obj).closest("tr")
 					//bajominimo
 					jQuery(obj).siblings(".bajominimo").toggle(data.bajominimo)
