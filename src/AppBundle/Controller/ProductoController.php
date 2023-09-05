@@ -29,8 +29,8 @@ class ProductoController extends Controller {
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
 
         return $this->render('AppBundle:Producto:index.html.twig', array(
-                    'proveedores' => $proveedores,
-                    'provId' => $provId,
+                'proveedores' => $proveedores,
+                'provId' => $provId,
         ));
     }
 
@@ -43,13 +43,14 @@ class ProductoController extends Controller {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'stock_producto_new');
         $entity = new Producto();
         $em = $this->getDoctrine()->getManager();
-        $unid = $em->getRepository('ConfigBundle:Parametro')->find(29);
+        $unid = $em->getRepository('ConfigBundle:Parametro')->find(2);
         $entity->setUnidadMedida($unid);
+        $entity->setCodigo('XXXXXXXX');
         $form = $this->createCreateForm($entity);
 
         return $this->render('AppBundle:Producto:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -82,11 +83,15 @@ class ProductoController extends Controller {
             $em->persist($entity);
             $em->flush();
 
+            $entity->setCodigo($entity->getid());
+            $em->persist($entity);
+            $em->flush();
+
             return $this->redirect($this->generateUrl('stock_producto'));
         }
         return $this->render('AppBundle:Producto:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -106,9 +111,9 @@ class ProductoController extends Controller {
         //$deleteForm = $this->createDeleteForm($id);
 
         return $this->render('AppBundle:Producto:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
-                        //'delete_form' => $deleteForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
+                //'delete_form' => $deleteForm->createView(),
         ));
     }
 
@@ -148,9 +153,9 @@ class ProductoController extends Controller {
             return $this->redirect($this->generateUrl('stock_producto'));
         }
         return $this->render('AppBundle:Producto:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
-                        //'delete_form' => $deleteForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
+                //'delete_form' => $deleteForm->createView(),
         ));
     }
 
@@ -172,7 +177,7 @@ class ProductoController extends Controller {
         //  return $this->redirect($this->generateUrl('stock_producto'));
 
         return $this->render('AppBundle:Producto:show.html.twig', array(
-                    'entity' => $entity,
+                'entity' => $entity,
         ));
     }
 
@@ -231,11 +236,11 @@ class ProductoController extends Controller {
           }
          */
         return $this->render('AppBundle:Producto:listado.html.twig', array(
-                    'entities' => $entities,
-                    'proveedores' => $proveedores,
-                    'depositos' => $depositos,
-                    'provId' => $provId,
-                    'depId' => $depId
+                'entities' => $entities,
+                'proveedores' => $proveedores,
+                'depositos' => $depositos,
+                'provId' => $provId,
+                'depId' => $depId
         ));
     }
 
@@ -258,7 +263,7 @@ class ProductoController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('AppBundle:Producto:pdf-productos.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -289,7 +294,7 @@ class ProductoController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('AppBundle:Producto:pdf-enstock.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -305,15 +310,15 @@ class ProductoController extends Controller {
      */
     public function exportProductosAction(Request $request) {
         $em = $this->getDoctrine()->getManager();
-        $search =  $request->get('searchterm');
+        $search = $request->get('searchterm');
         $proveedorId = $request->get('proveedorid');
         $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
-        $items = $em->getRepository('AppBundle:Producto')->getProductosForExportXls($proveedorId,$search);
+        $items = $em->getRepository('AppBundle:Producto')->getProductosForExportXls($proveedorId, $search);
 
         $textoFiltro = array(($proveedor ? $proveedor->getNombre() : 'Todos'));
 
         $partial = $this->renderView('AppBundle:Producto:export-xls.html.twig',
-                array('items' => $items, 'filtro' => $textoFiltro, 'search' => $search));
+            array('items' => $items, 'filtro' => $textoFiltro, 'search' => $search));
         $hoy = new \DateTime();
         $fileName = 'Productos_' . $hoy->format('dmY_Hi');
         $response = new Response();
@@ -323,6 +328,7 @@ class ProductoController extends Controller {
         $response->setContent($partial);
         return $response;
     }
+
     /**
      * @Route("/exportInventarioEnStock",
      * name="export_inventario_enstock")
@@ -339,7 +345,7 @@ class ProductoController extends Controller {
         $textoFiltro = array(($deposito ? $deposito->getNombre() : 'Todos'), ($proveedor ? $proveedor->getNombre() : 'Todos'));
 
         $partial = $this->renderView('AppBundle:Producto:inventario-xls.html.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $request->get('searchterm')));
+            array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $request->get('searchterm')));
         $hoy = new \DateTime();
         $fileName = 'Inventario_' . $hoy->format('dmY_Hi');
         $response = new Response();
@@ -388,10 +394,10 @@ class ProductoController extends Controller {
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         $entities = $em->getRepository('AppBundle:Producto')->findBajoMinimo($provId, $depId);
         return $this->render('AppBundle:Producto:bajominimo.html.twig', array(
-                    'entities' => $entities,
-                    'proveedores' => $proveedores,
-                    'depositos' => $depositos,
-                    'provId' => $provId, 'depId' => $depId
+                'entities' => $entities,
+                'proveedores' => $proveedores,
+                'depositos' => $depositos,
+                'provId' => $provId, 'depId' => $depId
         ));
     }
 
@@ -417,8 +423,8 @@ class ProductoController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('AppBundle:Producto:pdf-bajominimo.pdf.twig',
-                array('items' => json_decode($items), 'proveedor' => $textoFiltroProveedor,
-                    'deposito' => $deposito->getEmpresaUnidadDeposito(), 'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'proveedor' => $textoFiltroProveedor,
+                'deposito' => $deposito->getEmpresaUnidadDeposito(), 'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -449,11 +455,11 @@ class ProductoController extends Controller {
         }
 
         return $this->render('AppBundle:Producto:valorizado.html.twig', array(
-                    'entities' => $entities,
-                    'proveedores' => $proveedores,
-                    'depositos' => $depositos,
-                    'provId' => $provId,
-                    'depId' => $depId
+                'entities' => $entities,
+                'proveedores' => $proveedores,
+                'depositos' => $depositos,
+                'provId' => $provId,
+                'depId' => $depId
         ));
     }
 
@@ -483,9 +489,9 @@ class ProductoController extends Controller {
 
             $user = $this->getUser()->getUsername();
             $phpExcelObject->getProperties()->setCreator($user)
-                    ->setLastModifiedBy($user)
-                    ->setTitle($filename)
-                    ->setDescription("Listado de Proveedores");
+                ->setLastModifiedBy($user)
+                ->setTitle($filename)
+                ->setDescription("Listado de Proveedores");
 
             // Escribir títulos
             $sheet->setCellValue('A1', 'INVENTARIO VALORIZADO');
@@ -506,13 +512,13 @@ class ProductoController extends Controller {
             $i++;
             // Escribir encabezado
             $sheet->setCellValue('A' . $i, 'DEPOSITO')
-                    ->setCellValue('B' . $i, 'RUBRO')
-                    ->setCellValue('C' . $i, 'CODIGO')
-                    ->setCellValue('D' . $i, 'PRODUCTO')
-                    ->setCellValue('E' . $i, 'PROVEEDOR')
-                    ->setCellValue('F' . $i, 'MINIMO')
-                    ->setCellValue('G' . $i, 'ACTUAL')
-                    ->setCellValue('H' . $i, 'VALORIZADO');
+                ->setCellValue('B' . $i, 'RUBRO')
+                ->setCellValue('C' . $i, 'CODIGO')
+                ->setCellValue('D' . $i, 'PRODUCTO')
+                ->setCellValue('E' . $i, 'PROVEEDOR')
+                ->setCellValue('F' . $i, 'MINIMO')
+                ->setCellValue('G' . $i, 'ACTUAL')
+                ->setCellValue('H' . $i, 'VALORIZADO');
 
             // Escribir contenido
             $i++;
@@ -523,13 +529,13 @@ class ProductoController extends Controller {
                 $valoriz = str_replace(',', '', $item['7']);
 
                 $sheet->setCellValue('A' . $i, $item['0'])
-                        ->setCellValue('B' . $i, $item['1'])
-                        ->setCellValue('C' . $i, $item['2'])
-                        ->setCellValue('D' . $i, $item['3'])
-                        ->setCellValue('E' . $i, $item['4'])
-                        ->setCellValue('F' . $i, $item['5'])
-                        ->setCellValue('G' . $i, $item['6'])
-                        ->setCellValue('H' . $i, $valoriz);
+                    ->setCellValue('B' . $i, $item['1'])
+                    ->setCellValue('C' . $i, $item['2'])
+                    ->setCellValue('D' . $i, $item['3'])
+                    ->setCellValue('E' . $i, $item['4'])
+                    ->setCellValue('F' . $i, $item['5'])
+                    ->setCellValue('G' . $i, $item['6'])
+                    ->setCellValue('H' . $i, $valoriz);
                 $i++;
                 $total = $total + $valoriz;
             }
@@ -548,8 +554,8 @@ class ProductoController extends Controller {
 
 
             $dispositionHeader = $response->headers->makeDisposition(
-                    ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                    $filename
+                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+                $filename
             );
             $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
             $response->headers->set('Pragma', 'public');
@@ -563,7 +569,7 @@ class ProductoController extends Controller {
             $facade = $this->get('ps_pdf.facade');
             $response = new Response();
             $this->render('AppBundle:Producto:pdf-valorizado.pdf.twig',
-                    array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $search), $response);
+                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'search' => $search), $response);
 
             $xml = $response->getContent();
             $content = $facade->render($xml);
@@ -588,7 +594,7 @@ class ProductoController extends Controller {
             $entities = $em->getRepository('AppBundle:Producto')->findAll();
         }
         $html = $this->renderView('AppBundle:Producto:valorizadoPdf.html.twig',
-                array('listado' => $entities, 'idprov' => $id));
+            array('listado' => $entities, 'idprov' => $id));
         return new Response($html);
     }
 
@@ -671,6 +677,7 @@ class ProductoController extends Controller {
         $depositos = $em->getRepository('AppBundle:Producto')->findDepositosSinstockPorProducto($id, $unidneg);
         return new Response(json_encode($depositos));
     }
+
     /**
      * @Route("/getListasSinPrecioPorProducto", name="get_listas_sinprecio_por_producto")
      * @Method("GET")
@@ -678,13 +685,14 @@ class ProductoController extends Controller {
     public function getListasSinPrecioPorProducto(Request $request) {
         $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
-        if($id){
+        if ($id) {
             $listas = $em->getRepository('AppBundle:Producto')->findListasSinPrecioPorProducto($id);
-        }else{
+        }
+        else {
             $aux = $em->getRepository('AppBundle:PrecioLista')->findByActivo(1);
             $listas = array();
-            foreach($aux as $lista){
-              array_push( $listas, array('id'=> $lista->getId(), 'nombre' => $lista->getNombre() ) );
+            foreach ($aux as $lista) {
+                array_push($listas, array('id' => $lista->getId(), 'nombre' => $lista->getNombre()));
             }
         }
         return new JsonResponse($listas);
@@ -709,7 +717,7 @@ class ProductoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $entities = $em->getRepository('AdminBundle:Producto')->findAll();
         return $this->render('AdminBundle:Producto:listmodvtas.html.twig', array(
-                    'entities' => $entities,
+                'entities' => $entities,
         ));
     }
 
@@ -769,6 +777,7 @@ class ProductoController extends Controller {
     }
 
 /// PARA VENTA RAPIDA
+
     /**
      * @Route("/getListaProductos", name="get_lista_productos")
      * @Method("GET")
@@ -777,7 +786,7 @@ class ProductoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $productos = $em->getRepository('AppBundle:Producto')->findByActivo(1);
         $partial = $this->renderView('AppBundle:Producto:_partial-lista-productos.html.twig',
-                array('productos' => $productos));
+            array('productos' => $productos));
         return new Response($partial);
     }
 
@@ -804,8 +813,7 @@ class ProductoController extends Controller {
             $cotizacion = $request->get('cotizacion');
             $categoriaIva = $request->get('categoriaIva');
             $descuento = $request->get('descuento');
-            $esPresupuesto = json_decode( $request->get('esPresupuesto') );
-
+            $esPresupuesto = json_decode($request->get('esPresupuesto'));
         }
         else // If the request is not a POST one, die hard
             die;
@@ -855,32 +863,34 @@ class ProductoController extends Controller {
                 $precio = $alicuota = 0;
 
                 if ($rowPrecio !== null) {
-                    if( $esPresupuesto ){
+                    if ($esPresupuesto) {
                         $precio = $precioConv = $rowPrecio->getPrecio();
                         $alicuota = 0;
-                    }else{
+                    }
+                    else {
                         $alicuota = $producto->getIva();
                         $precio = $rowPrecio->getPrecio();
-                        if( in_array( $categoriaIva , array('I','M') ) ){
-                            $precioConv = round( ($precio / $cotizacion) ,3);
-                        }else{
-                            $precioConv = round( ( $precio * ( 1 + $alicuota/100) ) / $cotizacion ,3);
+                        if (in_array($categoriaIva, array('I', 'M'))) {
+                            $precioConv = round(($precio / $cotizacion), 3);
+                        }
+                        else {
+                            $precioConv = round(( $precio * ( 1 + $alicuota / 100) ) / $cotizacion, 3);
                         }
                     }
 
                     // si hay descuento aplicar al precio a mostrar
-                    if( $descuento <0 ){
-                        $precioConv = round($precioConv * ( 1 + $descuento/100),3);
+                    if ($descuento < 0) {
+                        $precioConv = round($precioConv * ( 1 + $descuento / 100), 3);
                     }
 
-                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv ));
+                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv));
                 }
-                $codigo =  htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getCodigo()));
+                $codigo = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getCodigo()));
                 switch ($column['name']) {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
-                            $responseTemp = "<a class='nombre-producto' data-contado='".$precioTemp."' data-id='".$producto->getId()."' data-codigo='".$codigo."' href='javascript:void(0);'>".$name."</a>";
+                            $responseTemp = "<a class='nombre-producto' data-contado='" . $precioTemp . "' data-id='" . $producto->getId() . "' data-codigo='" . $codigo . "' href='javascript:void(0);'>" . $name . "</a>";
                             break;
                         }
                     case 'codigo': {
@@ -1001,8 +1011,9 @@ class ProductoController extends Controller {
                             // However it can happen if left or right joins are used
                             if ($prov !== null) {
                                 $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r"), ' ', $prov->getNombre()));
-                            }else{
-                              $responseTemp = "";
+                            }
+                            else {
+                                $responseTemp = "";
                             }
                             break;
                         }
@@ -1012,8 +1023,9 @@ class ProductoController extends Controller {
                             // However it can happen if left or right joins are used
                             if ($rubro !== null) {
                                 $responseTemp = htmlentities(str_replace(array("\r\n", "\n", "\r"), ' ', $rubro->getNombre()));
-                            }else{
-                              $responseTemp = "";
+                            }
+                            else {
+                                $responseTemp = "";
                             }
                             break;
                         }
@@ -1025,9 +1037,9 @@ class ProductoController extends Controller {
                     case 'activo': {
                             $activo = ($producto->getActivo()) ? " checked='checked'" : "";
                             $title = ($producto->getActivo()) ? " title='Activo'" : " title='Inactivo'";
-                            $responseTemp = "<input type='checkbox' disabled='disabled' ".$activo.$title. " />" ;
+                            $responseTemp = "<input type='checkbox' disabled='disabled' " . $activo . $title . " />";
                             break;
-                    }
+                        }
                     case 'actions': {
                             $user = $this->getUser();
                             $responseTemp = "<a href='" . $this->generateUrl('stock_producto_show', array('id' => $producto->getId())) . "' class='editar btn btnaction btn_folder' title='Ver' ></a>&nbsp;";
@@ -1066,29 +1078,30 @@ class ProductoController extends Controller {
      * @Route("/getAutocompleteProductos", name="get_autocomplete_productos")
      * @Method("POST")
      */
-    public function getAutocompleteProductosAction( Request $request) {
+    public function getAutocompleteProductosAction(Request $request) {
         $term = $request->get('searchTerm');
         $lista = $request->get('lista');
         $categoriaIva = $request->get('cativa');
         $em = $this->getDoctrine()->getManager();
         $results = $em->getRepository('AppBundle:Producto')->filterByTerm($term);
-        foreach($results as &$res){
+        foreach ($results as &$res) {
             $producto = $em->getRepository('AppBundle:Producto')->find($res['id']);
-            $precio = floatval( $producto->getPrecioByLista($lista) );
-            if( in_array($categoriaIva, ['I','M'] ) ){
-                $total = round( $precio, 3);
-            }else{
+            $precio = floatval($producto->getPrecioByLista($lista));
+            if (in_array($categoriaIva, ['I', 'M'])) {
+                $total = round($precio, 3);
+            }
+            else {
                 $iva = $producto->getIva();
-                $montoIva =  ($precio * ( $iva/100 )) ;
-                $total = round( ($precio + $montoIva) ,3) ;
+                $montoIva = ($precio * ( $iva / 100 ));
+                $total = round(($precio + $montoIva), 3);
             }
 
             $contado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
-            if( $contado ){
-                $total = round( $total * ( 1 + $contado->getPorcentajeRecargo()/100 ),3);
+            if ($contado) {
+                $total = round($total * ( 1 + $contado->getPorcentajeRecargo() / 100 ), 3);
             }
 
-            $res['text'] = $res['text'] . ' | $'. $total;
+            $res['text'] = $res['text'] . ' | $' . $total;
         }
         return new JsonResponse($results);
     }
@@ -1105,10 +1118,10 @@ class ProductoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $producto = $em->getRepository('AppBundle:Producto')->find($id);
         $bajominimo = false;
-        if( $deposito){
+        if ($deposito) {
             $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito);
-            if($stock){
-                $minimo =  $stock->getStockMinimo() ? $stock->getStockMinimo() : $producto->getStockMinimo();
+            if ($stock) {
+                $minimo = $stock->getStockMinimo() ? $stock->getStockMinimo() : $producto->getStockMinimo();
                 $dif = $stock->getCantidad() - $minimo;
                 $bajominimo = ( $dif < 0 );
             }
@@ -1133,8 +1146,7 @@ class ProductoController extends Controller {
             'comodin' => $producto->getComodin(),
         );
 
-        return new Response( json_encode($data));
+        return new Response(json_encode($data));
     }
-
 
 }

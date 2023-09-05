@@ -264,13 +264,16 @@ class FacturaElectronicaController extends Controller {
             $comprobante = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
             $tipo = $comprobante->getTipoComprobante();
             if ($tipo->getClase() == 'CRE' && $comprobante->getDetalles()) {
+                $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
                 $cbteAsoc = $comprobante->getComprobanteAsociado();
                 if ($cbteAsoc) {
-                    $deposito = $comprobante->getVenta()->getDeposito();
+                    if ($cbteAsoc->getCobro()) {
+                        $deposito = $cbteAsoc->getCobro()->getVenta()->getDeposito();
+                    }
                 }
-                else {
-                    $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
-                }
+//                else {
+//                    $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
+//                }
                 foreach ($comprobante->getDetalles() as $detalle) {
                     $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
                     if ($stock) {

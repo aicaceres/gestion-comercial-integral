@@ -81,10 +81,10 @@ class ImportDataLoadController extends Controller {
 //                $this->loadProveedor($em);
 //                $log->addInfo('Cliente');
 //                $this->loadCliente($em);
-                $log->addInfo('Producto');
-                $this->loadProducto($em);
-//                $log->addInfo('Precio');
-//                $this->loadPrecio($em);
+//                $log->addInfo('Producto');
+//                $this->loadProducto($em);
+                $log->addInfo('Precio');
+                $this->loadPrecio($em);
 
                 $em->getConnection()->commit();
                 $log->addInfo('FIN IMPORTACION');

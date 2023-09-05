@@ -13,7 +13,7 @@
 <div class="divEdicion">
     {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
     <fieldset >
-        <p>
+        <p {% if not entity.id %}style="display:none" {% endif %} >
             {{ form_label(form.codigo) }}
             {{ form_widget(form.codigo, { 'attr': {'class' : 'width100' } }) }}
             {{ form_errors(form.codigo) }}

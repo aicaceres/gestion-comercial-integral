@@ -237,7 +237,6 @@ function enviarEmision(id){
 function emitirComprobanteWs(notaId){
   jQuery('#guardar span').html('Emitiendo Comprobante...')
   const url = jQuery('#guardar').data('urlemitir')
-  console.log(notaId)
   jQuery.post(url, {id:notaId, entity: 'NotaDebCred'}, function(data){
     if(data.res === 'OK'){
       jQuery("#divEmitirTicket").remove()
@@ -252,7 +251,7 @@ function emitirComprobanteWs(notaId){
       location.href = '{{ path("ventas_notadebcred") }}'
     }
   },'json').fail(function(data){
-    alert('Ha ocurrido un error')
+    alert('Ha ocurrido un error al emitir el comprobante por WS' + data)
     setFacturando(false)
   })
 }

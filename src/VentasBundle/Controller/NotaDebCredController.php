@@ -154,15 +154,33 @@ class NotaDebCredController extends Controller {
                 // cargar referencias faltantes
                 $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('ventasbundle_cliente'));
                 $entity->setCliente($cliente);
-                $entity->setNombreCliente($request->get('ventasbundle_nombreCliente') ? $request->get('ventasbundle_nombreCliente') : 'CONSUMIDOR FINAL');
+
                 $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
                 $entity->setFormaPago($formapago);
                 $entity->setCotizacion($entity->getMoneda()->getCotizacion());
 
+//                $tipoDocReq = $request->get('ventasbundle_tipoDocumentoCliente');
+//                if ($tipoDocReq) {
+//                    $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($tipoDocReq);
+//                    $docNro = $request->get('ventasbundle_nroDocumentoCliente') ? $request->get('ventasbundle_nroDocumentoCliente') : 1;
+//                    $entity->setTipoDocumentoCliente($tipoDoc);
+//                    $entity->setNroDocumentoCliente($docNro);
+//                }
+//                else if ($cliente->getCuit()) {
+//                    $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->filterByCodigo(80, 'tipo-documento');
+//                    $entity->setTipoDocumentoCliente($tipoDoc);
+//                    $entity->setNroDocumentoCliente($cliente->getCuit());
+//                }
+//                else {
+//                    $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->filterByCodigo(96, 'tipo-documento');
+//                    $entity->setTipoDocumentoCliente($tipoDoc);
+//                    $entity->setNroDocumentoCliente(1);
+//                    $entity->setNombreCliente($request->get('ventasbundle_nombreCliente') ? $request->get('ventasbundle_nombreCliente') : 'CONSUMIDOR FINAL');
+//                }
                 $tipoDocReq = $request->get('ventasbundle_tipoDocumentoCliente');
                 if ($tipoDocReq) {
                     $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($tipoDocReq);
-                    $docNro = $request->get('ventasbundle_nroDocumentoCliente') ? $request->get('ventasbundle_nroDocumentoCliente') : 0;
+                    $docNro = $request->get('ventasbundle_nroDocumentoCliente') ? $request->get('ventasbundle_nroDocumentoCliente') : 1;
                     $entity->setTipoDocumentoCliente($tipoDoc);
                     $entity->setNroDocumentoCliente($docNro);
                 }
@@ -175,6 +193,12 @@ class NotaDebCredController extends Controller {
                     $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->filterByCodigo(96, 'tipo-documento');
                     $entity->setTipoDocumentoCliente($tipoDoc);
                     $entity->setNroDocumentoCliente(1);
+                }
+                if ($cliente->getConsumidorFinal()) {
+                    $entity->setNombreCliente($request->get('ventasbundle_nombreCliente') ? $request->get('ventasbundle_nombreCliente') : 'CONSUMIDOR FINAL');
+                }
+                else {
+                    $entity->setNombreCliente($cliente->getNombre());
                 }
 
                 $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
