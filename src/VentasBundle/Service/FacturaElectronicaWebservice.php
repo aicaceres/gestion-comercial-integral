@@ -86,7 +86,7 @@ class FacturaElectronicaWebservice {
                 $ex->getMessage();
 
             $response['res'] = 'ERROR';
-            $response['msg'] = $msg;
+            $response['msg'] = $ex->getMessage();
         }
 
         return $response;
@@ -149,7 +149,7 @@ class FacturaElectronicaWebservice {
         $em = $this->em;
         $cliente = $comprobante->getCliente();
         $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
-        $retRentas = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : null;
+        $percRentas = $cliente->getPercepcionRentas();
         $cobroId = $notaId = null;
         $cbtesAsoc = $periodoAsoc = $tributos = $iva = [];
 
@@ -247,14 +247,14 @@ class FacturaElectronicaWebservice {
           'Importe' 	=> 7.8 // Importe del tributo
           ) */
         $impTrib = 0;
-        if ($catIva == 'I' && $retRentas > 0) {
+        if ($percRentas > 0) {
             $neto = round($impNeto, 2);
-            $iibb = round(($neto * $this->iibbPercent / 100), 2);
+            $iibb = round(($neto * $percRentas / 100), 2);
             $impTrib = $iibb;
             $tributos = array(
                 'Id' => 7,
                 'BaseImp' => $neto,
-                'Alic' => $this->iibbPercent,
+                'Alic' => $percRentas,
                 'Importe' => $iibb
             );
         }

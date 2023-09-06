@@ -289,7 +289,8 @@ class ClienteController extends Controller {
             'categoriaIva' => $categIva,
             'cuitValido' => $valido,
             'esConsumidorFinal' => $entity->getConsumidorFinal(),
-            'showiibb' => $showiibb
+            'showiibb' => $showiibb,
+            'percRentas' => $entity->getPercepcionRentas()
         );
         return new JsonResponse($data);
     }

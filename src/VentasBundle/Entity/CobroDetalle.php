@@ -197,7 +197,7 @@ class CobroDetalle {
         }
         if ($this->getNotaDebCred()) {
             // buscar nota
-            $comprobante = $this->getNotaDebCred()->getNotaElectronica()->getComprobanteTxt();
+            $comprobante = $this->getNotaDebCred()->getNotaElectronica() ? $this->getNotaDebCred()->getNotaElectronica()->getComprobanteTxt() : '';
         }
         if ($this->getPagoCliente()) {
             // buscar nota

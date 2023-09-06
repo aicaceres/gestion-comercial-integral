@@ -45,7 +45,7 @@
 
       <fieldset class="fields">
 
-      <div class="selectorCliente" data-categiva="{{entity.cliente.categoriaIva}}">
+      <div class="selectorCliente" data-categiva="{{entity.cliente.categoriaIva}}" data-percrentas="{{ entity.cliente.percepcionRentas }}">
         <label> CLIENTE: </label>
         <input value="{{entity.cliente.nombre}}" disabled style="width:90%"/>
       </div>
@@ -70,11 +70,9 @@
       <fieldset>
             <div style="display:inline-block; width:85%;margin:10px 0 10px 5%;" >
                 {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
-                {% set retrentas = entity.cliente.categoriaRentas ? entity.cliente.categoriaRentas.retencion : 0 %}
                 {% set showiva = (cativa != 'C') %}
-                {% set showiibb = (cativa == 'I' and retrentas>0) %}
 
-                {% include "VentasBundle:CobroVenta:_partial-detalle.html.twig" with {'venta':entity.venta,'showiva': showiva, 'showiibb': showiibb } %}
+                {% include "VentasBundle:CobroVenta:_partial-detalle.html.twig" with {'venta':entity.venta,'showiva': showiva } %}
             </div>
       </fieldset>
 

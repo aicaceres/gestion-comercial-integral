@@ -138,6 +138,7 @@ class FacturaElectronicaController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $comprobante = $em->getRepository('VentasBundle:' . $entity)->find($id);
         $detallesPago = $entity == 'Cobro' ? $comprobante->getDetalles() : $comprobante->getCobroDetalles();
+        $operador = ($entity == 'Cobro') ? $comprobante->getVenta()->getCreatedBy()->getNombre() : $comprobante->getCreatedBy()->getNombre();
         $feWs = $this->get('factura_electronica_webservice');
         // datos del cliente
         $dataCliente = $feWs->setDatosClienteTicket($comprobante);
@@ -149,7 +150,7 @@ class FacturaElectronicaController extends Controller {
         // detalle al pie
         $dataTicket['pie'][0] = 'Condicion Venta ' . $comprobante->getFormapago()->getNombre();
         $ref = $entity == 'Cobro' ? $comprobante->getRefVenta() : '';
-        $dataTicket['pie'][1] = $ref . ' - Oper. ' . $this->getUser()->getNombre();
+        $dataTicket['pie'][1] = $ref . ' - Oper. ' . $operador;
 
         // tipo comprobante
         // tcFactura_A = 1 // tcFactura_B = 2 // tcFactura_C = 3;
@@ -157,7 +158,7 @@ class FacturaElectronicaController extends Controller {
         // tcNota_Credito_A = 7 // tcNota_Credito_B = 8 // tcNota_Credito_C = 9;
         $cliente = $comprobante->getCliente();
         $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
-        $retRentas = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : null;
+        $percRentas = $cliente->getPercepcionRentas();
         if ($entity == 'Cobro') {
             $dataTicket['tipo'] = ($catIva == 'I' || $catIva == 'M') ? 1 : 2;
             $detalles = $comprobante->getVenta()->getDetalles();
@@ -188,7 +189,7 @@ class FacturaElectronicaController extends Controller {
         foreach ($detalles as $item) {
             $dtoRec = $item->getTotalDtoRecItem() / $comprobante->getCotizacion();
             $baseImp += $item->getBaseImponibleItem() + $dtoRec;
-            $textoItem = "Cod:" . $item->getProducto()->getCodigo() . " " . $item->getProducto()->getNombre();
+            $textoItem = "Cod:" . $item->getProducto()->getCodigo() . " " . $item->getNombreProducto();
             $dataTicket['items'][] = array(
                 $textoItem,
                 $item->getCantidad(),
@@ -231,11 +232,10 @@ class FacturaElectronicaController extends Controller {
         // tributos (iibb)
         $neto = round($baseImp, 2);
 
-        if ($catIva == 'I' && $retRentas > 0) {
+        if ($percRentas > 0) {
             // PercepcionIIBB = 7
-            $alicuota = $this->getParameter('iibb_percent');
-            $iibb = round(($neto * $alicuota / 100), 2);
-            $dataTicket['iibb'] = array(7, 'Perc. IIBB ' . $alicuota . '%', $baseImp, $iibb, $alicuota);
+            $iibb = round(($neto * $percRentas / 100), 2);
+            $dataTicket['iibb'] = array(7, 'Perc. IIBB ' . $percRentas . '%', $baseImp, $iibb, $percRentas);
         }
         return new JsonResponse($dataTicket);
     }
@@ -268,7 +268,6 @@ class FacturaElectronicaController extends Controller {
             if ($tipo->getClase() == 'CRE') {
                 $cbteAsoc = $comprobante->getComprobanteAsociado();
                 $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
-                $cargarItems = $cbteAsoc->getSaldo() === $cbteAsoc->getTotal();
                 if ($cbteAsoc) {
                     if ($cbteAsoc->getCobro()) {
                         $deposito = $cbteAsoc->getCobro()->getVenta()->getDeposito();
@@ -277,7 +276,7 @@ class FacturaElectronicaController extends Controller {
                     $nuevoSaldo = $cbteAsoc->getSaldo() - $comprobante->getTotal();
                     $cbteAsoc->setSaldo($nuevoSaldo >= 0 ? $nuevoSaldo : 0 );
                 }
-                if ($comprobante->getDetalles() && $cargarItems) {
+                if ($comprobante->getDetalles()) {
                     // ajuste del stock
                     foreach ($comprobante->getDetalles() as $detalle) {
                         $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());

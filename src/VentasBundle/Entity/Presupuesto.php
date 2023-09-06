@@ -217,6 +217,7 @@ class Presupuesto {
     }
 
     public function getTotalIibb($iibbPercent = 3.5) {
+        $iibbPercent = $this->getCliente()->getPercepcionRentas();
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
         return $monto * $iibbPercent / 100;
     }

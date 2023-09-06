@@ -166,7 +166,8 @@ class VentaController extends Controller {
                 // set unidad negocio desde session
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
                 $entity->setUnidadNegocio($unidneg);
-                if (!$entity->getDescuentoRecargo()) {
+
+                if (is_null($entity->getDescuentoRecargo())) {
                     $entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo());
                 }
 

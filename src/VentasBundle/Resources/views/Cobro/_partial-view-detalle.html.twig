@@ -1,8 +1,6 @@
 {% set simbolo = ( venta.moneda is defined ) ? venta.moneda.simbolo : '$' %}
 {% set cativa = (venta.cliente.categoriaIva) ? venta.cliente.categoriaIva.nombre : 'C' %}
-{% set retrentas = venta.cliente.categoriaRentas ? venta.cliente.categoriaRentas.retencion : 0 %}
                 {% set showiva = (cativa != 'C') %}
-                {% set showiibb = (cativa == 'I' and retrentaas >0 ) %}
 <table style="width:100%;" cellspacing="0" border="0" class="stdtable noaction">
     <thead>
         <tr>
@@ -58,8 +56,8 @@
         IVA: <span class="simbolo">{{simbolo}}</span>&nbsp;
         <span id="importeIVA">{{ venta.totalIva|number_format(3,',','.') }}</span>.-
         </th>
-        <th id="iibbTd" style="{% if not showiibb %} display:none; {% endif %}width:20%">
-            Perc.IIBB [{{iibb_percent|number_format(2,'.',',')}}%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+        <th id="iibbTd" style="{% if venta.cliente.percepcionRentas == 0 %} display:none; {% endif %}width:20%">
+            Perc.IIBB [{{venta.cliente.percepcionRentas|number_format(2,'.',',')}}%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
             <span id="importeIIBB">{{ venta.totalIibb|number_format(3,',','.') }}</span>.-
         </th>
         <th style="width:18%" class="gralTotalTd red">

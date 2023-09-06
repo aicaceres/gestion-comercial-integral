@@ -89,6 +89,8 @@
                             {% if entity.notaElectronica.cae %}
                             <a href="javascript:void(0)" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'NotaDebCred' })}}" class="editar btn btnaction btn_print" id="nota{{entity.id}}" title="Imprimir Comprobante"></a>
                             {% endif %}
+                        {% else %}
+                            <a href="{{ path('ventas_notadebcred_delete', { 'id': entity.id }) }}" style="display:none" class="btn btnaction btn_trash" title="Eliminar"></a>
                         {% endif %}
                     {% endif %}
                 </td>

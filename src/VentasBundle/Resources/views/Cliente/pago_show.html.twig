@@ -153,7 +153,7 @@
                             <th width="150px" class="vueltoTh">
                                 CAMBIO: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="vuelto" style="font-size:16px"> {{ 0|number_format(2,',','.')}}  </span>
+                                <span class="vuelto" style="font-size:16px">{{ (importe - entity.total)|number_format(2,',','.')}}  </span>
                             </th>
                         </tr>
                     </thead>

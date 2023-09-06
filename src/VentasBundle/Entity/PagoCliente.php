@@ -1,4 +1,5 @@
 <?php
+
 namespace VentasBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -8,8 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="ventas_pago_cliente")
  * @ORM\Entity()
  */
-class PagoCliente
-{
+class PagoCliente {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -23,31 +23,36 @@ class PagoCliente
      * @ORM\Column(name="fecha", type="datetime")
      */
     private $fecha;
+
     /**
      * @var integer $prefijoNro
      * @ORM\Column(name="prefijo_nro", type="string", length=3)
      */
     protected $prefijoNro = '011';
+
     /**
      * @var integer $pagoNro
      * @ORM\Column(name="pago_nro", type="string", length=6)
      */
     protected $pagoNro;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
      */
     protected $moneda;
+
     /**
      * @var string $cotizacion
      * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
      */
     protected $cotizacion = 1;
+
     /**
      * @var integer $total
      * @ORM\Column(name="total", type="decimal", scale=2 )
      */
-    protected $total=0;
+    protected $total = 0;
 
     /**
      * @ORM\Column(name="genera_nota_credito", type="boolean",nullable=true)
@@ -55,13 +60,13 @@ class PagoCliente
     protected $generaNotaCredito = false;
 
     /**
-    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred")
-    * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
-    * Registro de la nota de credito generada por pago adelantado
-    */
+     * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred")
+     * @ORM\JoinColumn(name="ventas_nota_debcred_id", referencedColumnName="id")
+     * Registro de la nota de credito generada por pago adelantado
+     */
     protected $notaDebCred;
 
-     /**
+    /**
      * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\FacturaElectronica", inversedBy="pagos")
      * @ORM\JoinTable(name="comprobantes_x_pagocliente",
      *      joinColumns={@ORM\JoinColumn(name="ventas_factura_electronica_id", referencedColumnName="id")},
@@ -81,9 +86,9 @@ class PagoCliente
      */
     protected $observaciones;
 
-     /**
-     *@ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="pagos")
-     *@ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
+    /**
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="pagos")
+     * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      */
     protected $cliente;
 
@@ -105,21 +110,20 @@ class PagoCliente
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->comprobantes = new \Doctrine\Common\Collections\ArrayCollection();
         $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
-    public function __toString(){
-         return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
+    public function __toString() {
+        return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' . str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
     }
 
-    public function getComprobanteNro(){
+    public function getComprobanteNro() {
         return $this->__toString();
     }
 
-    public function getComprobantesTxt(){
+    public function getComprobantesTxt() {
         $txt = '';
         foreach ($this->getComprobantes() as $comp) {
             $aux = ($txt) ? ' | ' : '';
@@ -128,28 +132,28 @@ class PagoCliente
         return $txt;
     }
 
-    public function getMontoNc(){
+    public function getMontoNc() {
         $totpagos = 0;
         foreach ($this->getCobroDetalles() as $det) {
-            $totpagos +=  $det->getImporte() ;
+            $totpagos += $det->getImporte();
         }
         return $this->getTotal() - $totpagos;
     }
 
-    public function getTextoPagosParaRecibo(){
+    public function getTextoPagosParaRecibo() {
         $txt = '';
-        foreach( $this->cobroDetalles as $det){
+        foreach ($this->cobroDetalles as $det) {
             $aux = ($txt) ? ' - ' : '';
-            $monto = $det->getMoneda()->getSimbolo() . ' ' .  $det->getImporte();
-            switch ($det->getTipoPago()){
+            $monto = $det->getMoneda()->getSimbolo() . ' ' . $det->getImporte();
+            switch ($det->getTipoPago()) {
                 case 'EFECTIVO':
-                    $txt = $txt . $aux . 'EFECTIVO: '. $monto;
+                    $txt = $txt . $aux . 'EFECTIVO: ' . $monto;
                     break;
                 case 'CHEQUE':
-                    $txt = $txt . $aux . 'CHEQUE: '. $monto;
+                    $txt = $txt . $aux . 'CHEQUE N° ' . ($det->getChequeRecibido() ? $det->getChequeRecibido()->getNroCheque() : '') . ': ' . $monto;
                     break;
                 case 'TARJETA':
-                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() .': ' . $monto;
+                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
                     break;
             }
         }
@@ -161,8 +165,7 @@ class PagoCliente
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -172,8 +175,7 @@ class PagoCliente
      * @param \DateTime $fecha
      * @return PagoCliente
      */
-    public function setFecha($fecha)
-    {
+    public function setFecha($fecha) {
         $this->fecha = $fecha;
 
         return $this;
@@ -184,8 +186,7 @@ class PagoCliente
      *
      * @return \DateTime
      */
-    public function getFecha()
-    {
+    public function getFecha() {
         return $this->fecha;
     }
 
@@ -195,8 +196,7 @@ class PagoCliente
      * @param string $prefijoNro
      * @return PagoCliente
      */
-    public function setPrefijoNro($prefijoNro)
-    {
+    public function setPrefijoNro($prefijoNro) {
         $this->prefijoNro = $prefijoNro;
 
         return $this;
@@ -207,8 +207,7 @@ class PagoCliente
      *
      * @return string
      */
-    public function getPrefijoNro()
-    {
+    public function getPrefijoNro() {
         return $this->prefijoNro;
     }
 
@@ -218,8 +217,7 @@ class PagoCliente
      * @param string $pagoNro
      * @return PagoCliente
      */
-    public function setPagoNro($pagoNro)
-    {
+    public function setPagoNro($pagoNro) {
         $this->pagoNro = $pagoNro;
 
         return $this;
@@ -230,8 +228,7 @@ class PagoCliente
      *
      * @return string
      */
-    public function getPagoNro()
-    {
+    public function getPagoNro() {
         return $this->pagoNro;
     }
 
@@ -241,8 +238,7 @@ class PagoCliente
      * @param string $total
      * @return PagoCliente
      */
-    public function setTotal($total)
-    {
+    public function setTotal($total) {
         $this->total = $total;
 
         return $this;
@@ -253,8 +249,7 @@ class PagoCliente
      *
      * @return string
      */
-    public function getTotal()
-    {
+    public function getTotal() {
         return $this->total;
     }
 
@@ -264,8 +259,7 @@ class PagoCliente
      * @param string $observaciones
      * @return PagoCliente
      */
-    public function setObservaciones($observaciones)
-    {
+    public function setObservaciones($observaciones) {
         $this->observaciones = $observaciones;
 
         return $this;
@@ -276,8 +270,7 @@ class PagoCliente
      *
      * @return string
      */
-    public function getObservaciones()
-    {
+    public function getObservaciones() {
         return $this->observaciones;
     }
 
@@ -287,8 +280,7 @@ class PagoCliente
      * @param \DateTime $created
      * @return PagoCliente
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -299,8 +291,7 @@ class PagoCliente
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -310,8 +301,7 @@ class PagoCliente
      * @param \VentasBundle\Entity\FacturaElectronica $comprobantes
      * @return PagoCliente
      */
-    public function addComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes)
-    {
+    public function addComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes) {
         $this->comprobantes[] = $comprobantes;
 
         return $this;
@@ -322,8 +312,7 @@ class PagoCliente
      *
      * @param \VentasBundle\Entity\FacturaElectronica $comprobantes
      */
-    public function removeComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes)
-    {
+    public function removeComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes) {
         $this->comprobantes->removeElement($comprobantes);
     }
 
@@ -332,8 +321,7 @@ class PagoCliente
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getComprobantes()
-    {
+    public function getComprobantes() {
         return $this->comprobantes;
     }
 
@@ -343,8 +331,7 @@ class PagoCliente
      * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
      * @return PagoCliente
      */
-    public function addCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
-    {
+    public function addCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles) {
         $cobroDetalles->setPagoCliente($this);
         $this->cobroDetalles[] = $cobroDetalles;
 
@@ -356,8 +343,7 @@ class PagoCliente
      *
      * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
      */
-    public function removeCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
-    {
+    public function removeCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles) {
         $this->cobroDetalles->removeElement($cobroDetalles);
     }
 
@@ -366,8 +352,7 @@ class PagoCliente
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getCobroDetalles()
-    {
+    public function getCobroDetalles() {
         return $this->cobroDetalles;
     }
 
@@ -377,8 +362,7 @@ class PagoCliente
      * @param \VentasBundle\Entity\Cliente $cliente
      * @return PagoCliente
      */
-    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
-    {
+    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null) {
         $this->cliente = $cliente;
 
         return $this;
@@ -389,8 +373,7 @@ class PagoCliente
      *
      * @return \VentasBundle\Entity\Cliente
      */
-    public function getCliente()
-    {
+    public function getCliente() {
         return $this->cliente;
     }
 
@@ -400,8 +383,7 @@ class PagoCliente
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return PagoCliente
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -412,8 +394,7 @@ class PagoCliente
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -423,8 +404,7 @@ class PagoCliente
      * @param boolean $generaNotaCredito
      * @return PagoCliente
      */
-    public function setGeneraNotaCredito($generaNotaCredito)
-    {
+    public function setGeneraNotaCredito($generaNotaCredito) {
         $this->generaNotaCredito = $generaNotaCredito;
 
         return $this;
@@ -435,8 +415,7 @@ class PagoCliente
      *
      * @return boolean
      */
-    public function getGeneraNotaCredito()
-    {
+    public function getGeneraNotaCredito() {
         return $this->generaNotaCredito;
     }
 
@@ -446,8 +425,7 @@ class PagoCliente
      * @param \ConfigBundle\Entity\Moneda $moneda
      * @return PagoCliente
      */
-    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
-    {
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null) {
         $this->moneda = $moneda;
 
         return $this;
@@ -458,8 +436,7 @@ class PagoCliente
      *
      * @return \ConfigBundle\Entity\Moneda
      */
-    public function getMoneda()
-    {
+    public function getMoneda() {
         return $this->moneda;
     }
 
@@ -469,8 +446,7 @@ class PagoCliente
      * @param string $cotizacion
      * @return PagoCliente
      */
-    public function setCotizacion($cotizacion)
-    {
+    public function setCotizacion($cotizacion) {
         $this->cotizacion = $cotizacion;
 
         return $this;
@@ -481,11 +457,9 @@ class PagoCliente
      *
      * @return string
      */
-    public function getCotizacion()
-    {
+    public function getCotizacion() {
         return $this->cotizacion;
     }
-
 
     /**
      * Set notaDebCred
@@ -493,8 +467,7 @@ class PagoCliente
      * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
      * @return PagoCliente
      */
-    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
-    {
+    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null) {
         $this->notaDebCred = $notaDebCred;
 
         return $this;
@@ -505,8 +478,8 @@ class PagoCliente
      *
      * @return \VentasBundle\Entity\NotaDebCred
      */
-    public function getNotaDebCred()
-    {
+    public function getNotaDebCred() {
         return $this->notaDebCred;
     }
+
 }

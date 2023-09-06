@@ -391,7 +391,7 @@ class CobroController extends Controller {
         $items = array();
         if ($comprobante) {
             $detalle = ($comprobante->getCobro()) ? $comprobante->getCobro()->getVenta()->getDetalles() : $comprobante->getNotaDebCred()->getDetalles();
-
+            $dtorec = ($comprobante->getCobro()) ? $comprobante->getCobro()->getVenta() : $comprobante->getNotaDebCred();
             foreach ($detalle as $row) {
                 $items[] = array(
                     'id' => $row->getProducto()->getId(),
@@ -403,7 +403,7 @@ class CobroController extends Controller {
                 );
             }
         }
-        return new JsonResponse($items);
+        return new JsonResponse(array('items' => $items, 'dtorec' => $dtorec->getDescuentoRecargo()));
     }
 
     /**

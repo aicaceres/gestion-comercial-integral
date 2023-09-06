@@ -48,34 +48,29 @@ jQuery(document).ready(function ($) {
           if (data) {
             divDatos.replaceWith(data.partial)
             $(".selectorCliente").data("categiva", data.categoriaIva)
-            let showiibb = data.showiibb ? 1 : 0
-            $(".selectorCliente").data("showiibb", showiibb)
+            $(".selectorCliente").data("percrentas", data.percRentas)
+            $("#percrentas").html(data.percRentas)
 						// Forma de pago
 						let cf = data.esConsumidorFinal ? 1 : 0
 						selectFormaPago = $("#widgetFormaPago")
 						selectFormaPago.data("consumidorfinal", cf)
 
-						if (
-							selectFormaPago.find("option[value='" + data.formapago + "']")
-								.length
-						) {
-              selectFormaPago.val(data.formapago).trigger("change")
-              selectFormaPago.trigger("select2:selecting")
+						if (selectFormaPago.find("option[value='" + data.formapago + "']").length) {
+                                                    selectFormaPago.val(data.formapago).trigger("change")
+                                                    selectFormaPago.trigger("select2:selecting")
 						} else {
-							select2_search(
-								selectFormaPago,
-								data.formapagotext
-							)
-            }
+                                                    select2_search(selectFormaPago,data.formapagotext)
+                                                }
 						$('[id*="_precioLista"]').val(data.listaprecio)
             $('[id*="_transporte"]').val(data.transporte)
             // mostrar resumen de iva e iibb si corresponde
             if (data.categoriaIva == "M" || data.categoriaIva == "I") {
 							$("#ivaTd").show()
-							if (data.showiibb) {
+							
+						}
+                                                if (data.percRentas>0) {
 								$("#iibbTd").show()
 							}
-						}
             // cuit
             color = data.cuitValido ? "#666666" : "orangered"
             $(".cuitcliente").css("color", color)

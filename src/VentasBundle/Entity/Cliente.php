@@ -217,9 +217,19 @@ class Cliente {
      */
     private $updatedBy;
 
-    public function setCliId($id) {
-        $this->id = $id;
-        return $this;
+//    public function setCliId($id) {
+//        $this->id = $id;
+//        return $this;
+//    }
+
+    public function getPercepcionRentas() {
+        $porcRentas = 0;
+        $hoy = new \DateTime();
+        $vencNoRetencion = $this->getVencCertNoRetener() ? $this->getVencCertNoRetener()->format('Ymd') : null;
+        if ($vencNoRetencion < $hoy->format('Ymd') || is_null($vencNoRetencion)) {
+            $porcRentas = floatval($this->getCategoriaRentas()->getRetencion());
+        }
+        return $porcRentas;
     }
 
     /**

@@ -77,11 +77,11 @@ function addNewItem() {
   lastProduct.select2("open")
 }
 
-function actualizarImportes() {
+function actualizarImportes(ndc=0) {
   let iva = (iibb = descrec = subTotal = totalIVA = totalIIBB = subtotalTh = 0)
   const cotizacion = jQuery(".datos-moneda").data("cotizacion")
   const categoriaIva = jQuery(".selectorCliente").data("categiva")
-  const retrentas = jQuery(".selectorCliente").data("showiibb")
+  const percrentas = jQuery(".selectorCliente").data("percrentas")
   const porcentaje = checknumero(jQuery('[id*="_descuentoRecargo"]'))
   jQuery('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(3))
   jQuery('span.descuentoRecargo').html(porcentaje.toFixed(2))
@@ -98,9 +98,8 @@ function actualizarImportes() {
 			// aplicar dto para calcular el iva
 			dto = precio * (porcentaje / 100)
 			iva = (precio + dto) * (alicuota / 100)
-      if (retrentas == 1) {
-        iibb_percent = jQuery('#iibbPercent').val()
-				iibb = (precio + dto) * (parseFloat(iibb_percent)/100)
+                        if (percrentas > 0) {
+                            iibb = (precio + dto) * (parseFloat(percrentas)/100)
 			}
 			dtoTot = (dto * cant) / cotizacion
 			descrec += dtoTot
@@ -111,8 +110,8 @@ function actualizarImportes() {
 		//}
 		// calcular la cotización si es distinta a 1
 		precUnit = precio / cotizacion
-		// calcular precio con descuento para la vista
-		precUnit = precUnit * (1 + porcentaje / 100)
+                // calcular precio con descuento para la vista
+                precUnit = precUnit * (1 + porcentaje / 100)
 		precTot = precUnit * cant
 		// subtotal para vista
 		subtotalTh += precTot
@@ -300,14 +299,12 @@ function setSelect2ToProduct(selProducto) {
 				listaprecio: jQuery('[id*="_precioLista"]').val(),
 				deposito: jQuery('[id*="_deposito"]').val()
 			}
-                                    console.log(urldatos)
 			jQuery.ajax({
 				dataType: "json",
 				url: urldatos,
 				async: false,
 				data: data,
 				success: function (data) {
-                                    console.log(data)
 					const tr = jQuery(obj).closest("tr")
 					//bajominimo
 					jQuery(obj).siblings(".bajominimo").toggle(data.bajominimo)

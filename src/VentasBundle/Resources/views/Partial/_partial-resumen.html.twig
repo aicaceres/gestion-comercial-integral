@@ -1,8 +1,6 @@
 {% set simbolo = ( entity.moneda is defined ) ? entity.moneda.simbolo : '$' %}
 {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
-{% set retrentas = entity.cliente.categoriaRentas ? entity.cliente.categoriaRentas.retencion : 0 %}
 {% set showiva = (cativa == 'I' or cativa == 'M') %}
-{% set showiibb = (cativa == 'I' and retrentas >0) %}
 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
   <thead>
     <tr class="resumen">
@@ -26,8 +24,8 @@
         IVA: <span class="simbolo">{{simbolo}}</span>&nbsp;
         <span id="importeIVA">{{ entity.totalIva|number_format(3,',','.') }}</span>.-
       </th>
-      <th id="iibbTd" style="{% if not showiibb %} display:none; {% endif %}width:20%">
-        Perc.IIBB [{{iibb_percent|number_format(2,'.',',')}}%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
+      <th id="iibbTd" style="{% if entity.cliente.percepcionRentas == 0 %} display:none; {% endif %}width:20%">
+          Perc.IIBB [<span id="percrentas">{{entity.cliente.percepcionRentas|number_format(2,'.',',')}}</span>%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
         <span id="importeIIBB">{{ entity.totalIibb|number_format(3,',','.') }}</span>.-
       </th>
       <th style="width:18%" class="gralTotalTd red">

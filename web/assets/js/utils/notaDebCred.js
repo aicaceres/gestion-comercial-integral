@@ -60,9 +60,11 @@ jQuery(document).ready(function ($) {
 			selectComprobante.data("urlitems"),
 			{ id },
       function (data) {
-        const itemsCount = data.length - 1;
+        const itemsCount = data.items.length - 1;
+        console.log(data.dtorec)
+        $("#ventasbundle_notadebcred_descuentoRecargo").val(data.dtorec)
         
-        $.each(data, function (i, item) {
+        $.each(data.items, function (i, item) {
           addNewItem()
           const newOption = new Option(item.text, item.id, true, true)
           // producto

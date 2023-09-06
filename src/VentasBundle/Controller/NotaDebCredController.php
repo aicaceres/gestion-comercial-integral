@@ -203,7 +203,10 @@ class NotaDebCredController extends Controller {
 
                 $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
                 $entity->setComprobanteAsociado($compAsoc);
-                $entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo());
+
+                if (is_null($entity->getDescuentoRecargo())) {
+                    $entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo());
+                }
 
                 $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
 //                 $iva = $tributos = array();
@@ -578,6 +581,33 @@ class NotaDebCredController extends Controller {
             'content-type' => 'application/pdf',
             'Content-Disposition' => 'filename=listado_ventas_notasdebcred_' . $hoy->format('dmY_Hi') . '.pdf'
         ));
+    }
+
+    /**
+     * @Route("/delete/{id}", name="ventas_notadebcred_delete")
+     * @Method("GET")
+     */
+    public function deleteAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_notadebcred');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
+        try {
+            if ($entity->getNotaElectronica()) {
+                throw $this->createNotFoundException('No se puede eliminar una nota emitida fiscalmente.');
+            }
+            if ($entity->getComprobanteAsociado()) {
+
+                die;
+            }
+
+            $em->remove($entity);
+            $em->flush();
+            $this->addFlash('success', 'La nota fue eliminada!');
+        }
+        catch (\Exception $ex) {
+            $this->addFlash('error', 'Error de eliminación. ' . $ex->getMessage());
+        }
+        return $this->redirectToRoute('ventas_notadebcred');
     }
 
 }

@@ -189,6 +189,7 @@
     {% for tipoComp in tiposPagos %}
         {% set resumen = {} %} 
         {% for mov in apertura.movimientos if mov.tipoComprobante == tipoComp['tag'] and mov.estado == 'FINALIZADO' %}
+{#            {{ dump(mov.comprobanteTxt) }}#}
             {% set monto = mov.importe*mov.moneda.cotizacion*mov.signoCaja %}
             {% set detResumen = {"fecha": mov.fecha|date('d/m/Y'), 
                         "cliente": mov.cliente,
@@ -213,11 +214,12 @@
                         "cotiz": mov.moneda.cotizacion,
                         "montoComp": mov.montoComprobante, 
                         "efectivo": (mov.tipoPago=='EFECTIVO') ? monto : resumen[mov.comprobanteTxt].efectivo ,
-                        "cheque": (mov.tipoPago=='CHEQUE') ? monto : resumen[mov.comprobanteTxt].cheque,
+                        "cheque": (mov.tipoPago=='CHEQUE') ? resumen[mov.comprobanteTxt].cheque + monto : monto,
                         "tarjeta": (mov.tipoPago=='TARJETA') ? monto : resumen[mov.comprobanteTxt].tarjeta,
                         "ctacte": (mov.tipoPago=='CTACTE') ? monto : resumen[mov.comprobanteTxt].ctacte, 
                         "total" : (mov.montoComprobante) ? resumen[mov.comprobanteTxt].total + monto : 0} 
                     %}
+{#                    {{ dump(updateResumen) }}#}
                     {% set resumen = resumen|merge({
                          (mov.comprobanteTxt):updateResumen,                             
                     }) %}
@@ -235,7 +237,7 @@
             {% set cnt, efectivo, cheque, tarjeta, ctacte, vuelto = cnt+1 , efectivo + value.efectivo, cheque + value.cheque, 
                    tarjeta + value.tarjeta, ctacte + value.ctacte, vuelto + (value.total|abs - value.montoComp|abs) %}
 
-            {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'comp':key, 'detail':value} %}
+            {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'comp':key, 'detail':value, 'vuelto':vuelto} %}
 
         {% endfor %}
 

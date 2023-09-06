@@ -244,7 +244,7 @@ class FacturaElectronica {
             $simbolo = $this->getNotaDebCred()->getMoneda()->getSimbolo();
         }
         return $this->getTipoComprobante()->getValor() . ' ' . $this->getNroComprobanteTxt() .
-            ' | ' . $fecha . ' | ' . $simbolo . $this->getSaldo();
+            ' | ' . $fecha . ' | ' . $simbolo . $this->getTotal();
     }
 
     public function getComprobanteCtaCtePendienteTxt() {

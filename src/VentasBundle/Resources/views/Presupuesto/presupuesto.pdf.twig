@@ -58,7 +58,7 @@
             <footer>
                 <div height="100px" width="100%">
                     <div border.color="#555555" height="1px" ></div>
-                    <div font-size="7px" padding="10px"> Op: {{app.user|upper}} - Ref. #{{presupuesto.nroPresupuesto}} - {{'now'|date('d-m-Y H:i')}} </div>
+                    <div font-size="7px" padding="10px"> Op: {{presupuesto.createdBy.nombre|upper}} - Ref. #{{presupuesto.nroPresupuesto}} - {{'now'|date('d-m-Y H:i')}} </div>
                 </div>
             </footer>
         </placeholders>
@@ -141,12 +141,14 @@
             </tr>
             {% endfor %}
         </table>
+                            
+
         {% set cativa = (presupuesto.cliente.categoriaIva) ? presupuesto.cliente.categoriaIva.nombre : 'C' %}
         {% set retrentas = presupuesto.cliente.categoriaRentas ? presupuesto.cliente.categoriaRentas.retencion : 0 %}
         {% set showiva = (cativa == 'I' or cativa == 'M') %}
-        {% set showiibb = (cativa == 'I' and retrentas>0) %}
         {% if (presupuesto.tipo=='P') %}
-        <table font-size="9px" padding-top="100px">
+        <div font-size="9px" padding-top="100px"><i> Precios y Stock sujeto a variaciones </i></div>    
+        <table font-size="9px" padding-top="10px">
             <tr margin-bottom="8px">
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" width="20%" vertical-align="middle" text-align="center">
                     Subtotal: $ {{presupuesto.subTotal|number_format(3,',','.')}}
@@ -159,9 +161,9 @@
                     IVA: $ {{presupuesto.totalIva|number_format(3,',','.')}}
                 </td>
                 {% endif %}
-                {% if showiibb %}
+                {% if presupuesto.cliente.percepcionRentas > 0 %}
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    Perc.IIBB [{{iibb_percent|number_format(2,'.',',')}}%]: $ {{presupuesto.totalIibb|number_format(3,',','.')}}
+                    Perc.IIBB [{{presupuesto.cliente.percepcionRentas|number_format(2,'.',',')}}%]: $ {{presupuesto.totalIibb|number_format(3,',','.')}}
                 </td>
                 {% endif %}
                 

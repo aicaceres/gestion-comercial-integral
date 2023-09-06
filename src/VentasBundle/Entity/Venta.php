@@ -201,10 +201,9 @@ class Venta {
     }
 
     public function getTotalIibb($iibbPercent = 3.5) {
-        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
-        $categRentas = $this->getCliente()->getCategoriaRentas()->getId();
+        $iibbPercent = $this->getCliente()->getPercepcionRentas();
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return ( $categIva == 'I' && $categRentas != 18 ) ? $monto * $iibbPercent / 100 : 0;
+        return $monto * $iibbPercent / 100;
     }
 
     public function getMontoTotal() {

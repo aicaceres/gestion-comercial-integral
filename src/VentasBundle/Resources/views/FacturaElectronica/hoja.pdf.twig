@@ -1,5 +1,5 @@
 
-    <dynamic-page page-size="A4" margin-left="20px" margin-right="20px" margin-top="20px" >
+    <dynamic-page page-size="A4" margin-left="20px" margin-right="20px" margin-top="20px" margin-bottom="20px" >
         <placeholders>
             <header>
                 <div height="170px" width="100%" >
@@ -57,7 +57,8 @@
             <footer>
                 {% set simbolo = cbte.moneda.simbolo %}
                 {% set cliente = cbte.cliente %}
-                <div height="180px" width="100%">
+                {% set operador = cbte.venta is defined ? cbte.venta.createdBy.nombre : cbte.createdBy.nombre %}
+                <div height="220px" width="100%">
                     {% if cliente.categoriaIva.nombre == 'M' %}
                     <div font-size="8px" padding="10px">
                     Crédito fiscal discriminado en el presente comprobante sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes Ley 27618
@@ -77,7 +78,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td border.type="none" font-size="8px">Op: {{app.user|upper}} - {{ cbte.refVenta is defined ? cbte.refVenta ~' - ' : ''}} {{'now'|date('d-m-Y H:i')}} </td>
+                            <td border.type="none" font-size="8px">Op: {{operador|upper}} - {{ cbte.refVenta is defined ? cbte.refVenta ~' - ' : ''}} {{'now'|date('d-m-Y H:i')}} </td>
                             <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{cbte.descuentoRecargo}}%]: {{simbolo}} {{cbte.totalDescuentoRecargo|number_format(3,',','.')}}</td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
@@ -93,11 +94,11 @@
                                 <span>{{simbolo}} {{ cbte.totalIva|number_format(2,',','.')}}</span>
                             </td>
                         </tr>
-                            {% if cliente.categoriaIva == 'I' and (cliente.categoriaRentas ? cliente.categoriaRentas.retencion : 0)>0 %}
+                            {% if cliente.percepcionRentas >0 %}
                             <tr>
                                 <td border.type="none"></td>
                                 <td border.type="none"></td>
-                                <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Perc. IIBB {{iibb_percent|number_format(2,'.',',')}}%:</span></td>
+                                <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Perc. IIBB {{cliente.percepcionRentas|number_format(2,'.',',')}}%:</span></td>
                                 <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
                                     <span>{{simbolo}} {{ (cbte.totalIibb)|number_format(2,',','.')}}</span>
                                 </td>
