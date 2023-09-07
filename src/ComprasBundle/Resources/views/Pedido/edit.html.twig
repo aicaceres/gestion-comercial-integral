@@ -147,7 +147,7 @@
 </tr>
 <tr>
   <th><span style="float:right;"> I.V.A.: $</span></th>
-  <th class="alignright">{{ form_widget(form.montoIva, { 'attr': {'class' : 'input-hidden' } }) }}</th>
+  <th class="ivaTotal alignright">{{ form_widget(form.montoIva, { 'attr': {'class' : 'input-hidden' } }) }}</th>
 
 </tr>
 <tr>
@@ -242,7 +242,7 @@ jQuery(document).ready(function($) {
             if(data==='OK'){
                 // eliminar de la tabla
                 tr.remove();
-                actualizarTotales();
+                recalcularTotales();
             }else{
                 alert( 'error '+data.msg );
             }
@@ -303,7 +303,7 @@ jQuery(document).ready(function($) {
                                         '<td class="alignright">'+data.total+'</td><td><a class="delTd" href="javascript:void(0)" title="Quitar" data-id="'+data.id+'" tabIndex="-1"><span class="minus"></span></a></td> </tr>');
 */
 
-                                    actualizarTotales();
+                                    recalcularTotales();
                                 } else {
                                     alert('error ' + data.msg);
                                 }
@@ -356,7 +356,7 @@ jQuery(document).ready(function($) {
                              if(data.msg==='OK'){
                                  // reemplazar en la tabla
                                  tr.replaceWith(data.tr);
-                                  actualizarTotales();
+                                  recalcularTotales();
                             } else {
                                 alert('error ' + data.msg);
                             }
@@ -375,6 +375,7 @@ jQuery(document).ready(function($) {
         myWindow=window.open(url,"","toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=yes, titlebar=no,copyhistory=no, width=800, height=450")
         myWindow.focus();
     });
+    recalcularTotales()
   //  $('#comprasbundle_pedido_deposito').change();
     {%endif%}
 });
@@ -394,6 +395,7 @@ function changeProducto(producto) {
             data: 'prod=' + producto.val() + '&dep=' + jQuery('#comprasbundle_pedido_deposito').val(),
             success: function (data) {
                 form.find('#comprasbundle_pedidodetalle_cantidad').val(1);
+                form.find('#alicuota').val(data.iva);
                 form.find('#comprasbundle_pedidodetalle_precio').val(data.costo);
                 form.find('.unidmed').text(data.unidmed);
                 if (data.bulto) {
@@ -445,20 +447,30 @@ function cargarBajominimo(){
   }
 }
 
-function actualizarTotales(){
+{#function actualizarTotales(){
   let items = jQuery('tbody tr.item');
   let subtotal = 0;
+  let ivaTotal = 0;
   // calcular subtotal
   items.each(function(i){
     item = jQuery(this);
     item.find('.ordTd').html(i+1);
+    const montoTd = item.find('.montoTd')
+    const cantTd = item.find('.cantTd')
+    const cantidad = parseFloat(cantTd.data('cantidad'))
+    const alicuota = montoTd.data('alicuota')
+    const precio = parseFloat(montoTd.text())
+    const ivaItem = (precio * (alicuota/100)) * cantidad
+    montoTd.data('montoiva',ivaItem)
+    ivaTotal += ivaItem
     subtotal = subtotal + parseFloat( item.find('.montototalTd').text() );
   })
   jQuery('.subtotal').html( subtotal.toFixed(3) );
+  jQuery('#comprasbundle_pedido_montoIva').val( ivaTotal.toFixed(3) );
   calcularTotales()
-}
+}#}
 
-function calcularTotales(){
+{#function calcularTotales(){
   let descuentos = descuentosToArray()
   let subtotal = parseFloat( jQuery('.subtotal').html() )
   // DEFINIR COMO APLICAR LOS DESCUENTOS
@@ -469,11 +481,47 @@ function calcularTotales(){
     monto = monto + calc
   })
   jQuery('#comprasbundle_pedido_montoDescuento').val( monto.toFixed(3) )
-  let iva = subtotal * (10.5/100)
-  let total = subtotal + iva
-  jQuery('#comprasbundle_pedido_montoIva').val( iva.toFixed(3) );
+  iva = jQuery('#comprasbundle_pedido_montoIva').val()
+  let total = subtotal + parseFloat(iva)
   jQuery('.total').html( total.toFixed(3) );
+}#}
+
+function recalcularTotales(){
+  let items = jQuery('tbody tr.item');
+  let subtotal = 0;
+  let ivaTotal = 0;
+  let dtoTotal = 0;
+  let descuentos = descuentosToArray()
+  items.each(function(i){
+    item = jQuery(this);
+    item.find('.ordTd').html(i+1);
+    const montoTd = item.find('.montoTd')
+    const cantTd = item.find('.cantTd')
+    const cantidad = parseFloat(cantTd.data('cantidad'))
+    const alicuota = montoTd.data('alicuota')
+    const precio = parseFloat(montoTd.text())
+    let subtotalItem = cantidad * precio 
+    let subTotalFinal = subtotalItem
+    /// aplicar dto
+    let montoDto = 0
+    descuentos.forEach(function(desc){
+      calc = subtotalItem * ( parseFloat(desc) /100 )
+      subtotalItem = subtotalItem - calc
+      montoDto += calc
+    })
+    const ivaItem = subtotalItem * (alicuota/100)
+    montoTd.data('montoiva',ivaItem) 
+    subtotal += subTotalFinal
+    ivaTotal += ivaItem
+    dtoTotal += montoDto
+  })
+  jQuery('.subtotal').html( subtotal.toFixed(3) );
+  jQuery('#comprasbundle_pedido_montoDescuento').val( dtoTotal.toFixed(3) )
+  jQuery('#comprasbundle_pedido_montoIva').val( ivaTotal.toFixed(3) )
+  let total = subtotal - dtoTotal + ivaTotal
+  jQuery('.total').html( total.toFixed(3) );  
 }
+
 
 function agregarDescuentos(){
   let values = descuentosToArray()
@@ -489,7 +537,7 @@ function agregarDescuentos(){
           jQuery('#comprasbundle_pedido_descuentos').val( values  )
 
           renderDescuentos()
-          calcularTotales()
+          recalcularTotales()
         }else{
           alert('El porcentaje ingresado no es válido!')
         }
