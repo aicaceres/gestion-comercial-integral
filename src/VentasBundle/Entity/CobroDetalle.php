@@ -133,7 +133,7 @@ class CobroDetalle {
             $total = $this->getPagoProveedor()->getImporte();
         }
 
-        $tipos = array('EFECTIVO', 'CHEQUE');
+        $tipos = array('EFECTIVO', 'CHEQUE', 'TARJETA');
         $calcular = in_array($this->getTipoPago(), $tipos);
 
         return $calcular && $incluir ? ($this->getImporte() - $total) : 0;
@@ -164,7 +164,7 @@ class CobroDetalle {
             $total = $this->getPagoProveedor()->getImporte();
         }
 
-        $tipos = array('EFECTIVO', 'CHEQUE');
+        $tipos = array('EFECTIVO', 'CHEQUE', 'TARJETA');
         $calcular = in_array($this->getTipoPago(), $tipos);
 
         return $calcular && $incluir ? $total : 0;

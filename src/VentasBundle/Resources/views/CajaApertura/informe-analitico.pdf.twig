@@ -56,7 +56,7 @@
         </table>
         <table width="80%" margin-left="20%" margin-top="5px">
             {% for mov in apertura.movimientos %}
-            {% if mov.tipoPago == 'TARJETA' %}
+            {% if mov.tipoPago == 'TARJETA' and mov.datosTarjeta.tarjeta.nombre != 'TRANSFERENCIA' %}
                 <tr font-size="8px">
                     <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
                         {{ mov.comprobanteTxt }}
@@ -92,21 +92,22 @@
 <!-- CHEQUE -->
         <table padding-top="20px" width="80%" margin-left="20%" border.type="bottom">
             <tr font-size="9px">
-                <td border.type="none" padding="8px" width="100px">Moneda: PESOS</td>
                 <td border.type="none" padding="8px" text-align="center">
                     CHEQUES
                 </td>
             </tr>
         </table>
         <table width="80%" margin-left="20%" margin-top="5px">
+            {% set total_cheques = 0 %}
             {% for mov in apertura.movimientos %}
-            {% if mov.tipoPago == 'CHEQUE' %}
+            {% if mov.tipoPago == 'CHEQUE' and not ( mov.chequeRecibido.banco.nombre in ['RETENCION DGR','RETENCION GANANCIAS','RETENCION IVA','RETENCION SUSS']) %}
+                {% set total_cheques = total_cheques + (mov.importe * mov.moneda.cotizacion) %}
                 <tr font-size="8px">
                     <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
-                        {{ mov.comprobanteTxt }}
+                        {{ mov.comprobanteTxt }} -{{ ('RETENCION' in mov.chequeRecibido.banco.nombre) }}-
                     </td>
                     <td border.type="none" vertical-align="middle" width="3 cm">
-                        {{ mov.chequeRecibido.banco }}
+                        {{ mov.chequeRecibido.banco }} 
                     </td>
                     <td border.type="none" vertical-align="middle">
                         {{ mov.chequeRecibido.nroCheque }}
@@ -128,7 +129,49 @@
             <tr font-size="9px" margin-top="10px">
                 <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL CHEQUES</b></td>
                 <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                   <b> {{ tot_cheque|number_format(3,',','.') }} </b>
+                   <b> {{ total_cheques|number_format(3,',','.') }} </b>
+                </td>
+            </tr>
+        </table>
+        <table padding-top="20px" width="80%" margin-left="20%" border.type="bottom">
+            <tr font-size="9px">
+                <td border.type="none" padding="8px" text-align="center">
+                    RETENCIONES
+                </td>
+            </tr>
+        </table>        
+        <table width="80%" margin-left="20%" margin-top="5px">
+            {% set total_retenciones = 0 %}
+            {% for mov in apertura.movimientos %}
+            {% if mov.tipoPago == 'CHEQUE' and (mov.chequeRecibido.banco.nombre in ['RETENCION DGR','RETENCION GANANCIAS','RETENCION IVA','RETENCION SUSS']) %}
+                {% set total_retenciones = total_retenciones + (mov.importe * mov.moneda.cotizacion) %}
+                <tr font-size="8px">
+                    <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
+                        {{ mov.comprobanteTxt }} 
+                    </td>
+                    <td border.type="none" vertical-align="middle" width="3 cm">
+                        {{ mov.chequeRecibido.banco }}
+                    </td>
+                    <td border.type="none" vertical-align="middle">
+                        .
+                    </td>
+                    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,',','.') }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr border.type="none">
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                </tr>
+            {% endif %}
+            {% endfor %}
+            <tr font-size="9px" margin-top="10px">
+                <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL RETENCIONES</b></td>
+                <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ total_retenciones|number_format(3,',','.') }} </b>
                 </td>
             </tr>
         </table>
@@ -144,7 +187,7 @@
             <tr font-size="10px" margin-top="10px" font-type="DejaVuSansMono">
                 <td border.color="#999999" padding="10px"><b>TOTAL CAJA ANALÍTICA</b></td>
                 <td border.color="#999999" vertical-align="middle" text-align="right"  width="3 cm">
-                   <b> {{ (tot_efectivo - tot_vuelto + tot_tarjeta + tot_cheque)|number_format(3,',','.') }} </b>
+                   <b> {{ (tot_efectivo + tot_vuelto + tot_tarjeta + tot_cheque)|number_format(3,',','.') }} </b>
                 </td>
             </tr>
         </table>

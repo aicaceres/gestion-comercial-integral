@@ -568,7 +568,7 @@ function removeDescuento(){
     values.push( parseFloat( jQuery(this).data('value') ) );
   })
   jQuery('#comprasbundle_pedido_descuentos').val(values)
-  calcularTotales()
+  recalcularTotales()
 }
 
 function descuentosToArray(){

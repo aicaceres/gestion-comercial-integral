@@ -189,7 +189,7 @@ class FacturaElectronicaController extends Controller {
         foreach ($detalles as $item) {
             $dtoRec = $item->getTotalDtoRecItem() / $comprobante->getCotizacion();
             $baseImp += $item->getBaseImponibleItem() + $dtoRec;
-            $textoItem = "Cod:" . $item->getProducto()->getCodigo() . " " . $item->getNombreProducto();
+            $textoItem = "Cod:" . $item->getProducto()->getCodigo();
             $dataTicket['items'][] = array(
                 $textoItem,
                 $item->getCantidad(),
@@ -203,6 +203,7 @@ class FacturaElectronicaController extends Controller {
                 '',
                 7 //Unidad
             );
+            $dataTicket['adicItem'][] = $item->getNombreProducto();
         }
 
         foreach ($detallesPago as $pago) {

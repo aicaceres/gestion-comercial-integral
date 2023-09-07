@@ -230,12 +230,83 @@ class CajaAperturaController extends Controller {
         $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante_bn.png';
 //        return $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
 //                array('apertura' => $apertura, 'movimientos' => $movimientos, 'logo' => $logo));
+//        $resumen = array(
+//            'nroComprobante' => '',
+//            'fecha' => '',
+//            'cliente' => '',
+//            'moneda' => '',
+//            'cotiz' => '',
+//            'montoComp' => 0,
+//            'efectivo' => 0,
+//            'cheque' => 0,
+//            'tarjeta' => 0,
+//            'ctacte' => 0,
+//            'total' => 0,
+//            'tipoComprobante' => '');
+        $resumen = $resumenMov = array();
+        foreach ($movimientos as $mov) {
+            if (!$mov->getIncluirEnArqueo()) {
+                continue;
+            }
+            $tipoPago = $mov->getTipoPago();
+            if ($tipoPago == 'CHEQUE') {
+                $banco = $mov->getChequeRecibido()->getBanco()->getNombre();
+                if (strpos($banco, 'RETENCION') != false) {
+                    $tipoPago = 'RETENCION';
+                }
+            }
+            if ($tipoPago == 'TARJETA') {
+                $tarjeta = $mov->getDatosTarjeta()->getTarjeta()->getNombre();
+                if ($tarjeta == 'TRANSFERENCIA') {
+                    $tipoPago = 'TRANSFERENCIA';
+                }
+            }
+            $monto = $mov->getImporte() * $mov->getMoneda()->getCotizacion() * $mov->getSignoCaja();
+            $key = array_search($mov->getComprobanteTxt(), array_column($resumen, 'nroComprobante'));
+            if ($key) {
+                // cargar en el mismo item
+                $resumen[$key][$tipoPago] += $monto;
+                // actualizar el vuelto si corresponde
+                if ($tipoPago !== 'CTACTE') {
+                    // si tiene importe el movimiento
+                    $resumen[$key]['vuelto'] -= $mov->getImporte();
+                }
+            }
+            else {
 
+                $resumenMov['id'] = $mov->getId();
+                $resumenMov['tipoComprobante'] = $mov->getTipoComprobante();
+                $resumenMov['nroComprobante'] = $mov->getComprobanteTxt();
+                $resumenMov['fecha'] = $mov->getFecha()->format('d/m/Y');
+                $resumenMov['cliente'] = $mov->getCliente();
+                $resumenMov['moneda'] = $mov->getMoneda()->getSimbolo();
+                $resumenMov['cotiz'] = $mov->getMoneda()->getCotizacion();
+                $resumenMov['montoComp'] = $mov->getMontoComprobante();
+                // armar los tipos para el array
+                $resumenMov['EFECTIVO'] = 0;
+                $resumenMov['CHEQUE'] = 0;
+                $resumenMov['TARJETA'] = 0;
+                $resumenMov['TRANSFERENCIA'] = 0;
+                $resumenMov['CTACTE'] = 0;
+                $resumenMov['RETENCION'] = 0;
+                $resumenMov['vuelto'] = 0;
+                // asignar el monto en el que corresponda
+                $resumenMov[$tipoPago] = $monto;
+                if ($tipoPago !== 'CTACTE') {
+                    // si tiene importe el movimiento
+                    $resumenMov['vuelto'] = $mov->getMontoComprobante() - $mov->getImporte();
+                }
+                array_push($resumen, $resumenMov);
+            }
+//            var_dump($mov->getTipoComprobante());
+//            var_dump($mov->getTipoPago());
+            $monto = 0;
+        }
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
-            array('apertura' => $apertura, 'movimientos' => $movimientos, 'logo' => $logo), $response);
+            array('apertura' => $apertura, 'arqueo' => $resumen, 'movimientos' => $movimientos, 'logo' => $logo), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

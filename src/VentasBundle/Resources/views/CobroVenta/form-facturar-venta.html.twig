@@ -309,9 +309,11 @@ function imprimirTicket(cobroId){
 
         driver.abrirComprobante(data.tipo);
         // items
-        data.items.forEach(function(i){
-          driver.imprimirItem2g(...i)
+        data.items.forEach(function(item,i){
+          driver.imprimirTextoFiscal(data.adicItem[i])  
+          driver.imprimirItem2g(...item)
         })
+{#        return false;#}
         // descuentos
         if(data.montodto!=0)
             driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
