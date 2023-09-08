@@ -134,6 +134,13 @@
                 </td>
             </tr>
             {% endif %}
+            {% if pago.observaciones %}
+            <tr>
+                <td border.type="none" colspan="3" height="15px" vertical-align="middle" padding-left="10px" padding-top="20px">
+                    Obs. {{ pago.observaciones }}
+                </td>
+            </tr>    
+            {% endif %}    
         </table>
 
 </dynamic-page>

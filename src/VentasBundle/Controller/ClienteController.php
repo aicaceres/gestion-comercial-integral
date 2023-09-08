@@ -481,6 +481,10 @@ class ClienteController extends Controller {
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+        if (!$apertura) {
+            throw $this->createNotFoundException('La caja está cerrada. Debe realizar la apertura para iniciar cobros.');
+        }
         $entity = new PagoCliente();
         $em = $this->getDoctrine()->getManager();
 

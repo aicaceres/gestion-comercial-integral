@@ -9,7 +9,7 @@
         {{ item.cliente }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="center" width="0.6 cm">
-        {{ item.moneda }} {% if item.vuelto>0 %}*{% endif %}
+        {{ item.moneda }} -{{ item.vuelto|number_format(3,',','.') }} 
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="1.2 cm">
         {{ item.cotiz|number_format(3,',','.') }}
