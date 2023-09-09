@@ -77,6 +77,13 @@ doctrine:
         auto_generate_proxy_classes: '%kernel.debug%'
         naming_strategy: doctrine.orm.naming_strategy.underscore
         auto_mapping: true
+        mappings:
+            gedmo_loggable:
+                type: annotation
+                prefix: Gedmo\Loggable\Entity
+                dir: %kernel.root_dir%/../vendor/gedmo/doctrine-extensions/lib/Gedmo/Loggable/Entity
+                is_bundle: false
+        
         dql:
             numeric_functions:
                 ROUND: AppBundle\DoctrineFunctions\Round
@@ -112,6 +119,7 @@ stof_doctrine_extensions:
             timestampable: true
             sluggable: true
             blameable: true
+            loggable: false
             softdeleteable: false
 
 ps_pdf:
@@ -128,6 +136,11 @@ ps_pdf:
     document_parser_type: ~
 
 services:
+    gedmo.listener.loggable:
+        class: Gedmo\Loggable\LoggableListener
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }    
+            
     factura_electronica_webservice:
       class: VentasBundle\Service\FacturaElectronicaWebservice
       arguments: [ '@doctrine.orm.entity_manager', '@session', '%ptovta_ws_factura%', '%ptovta_ifu_ticket%', '%iibb_percent%', '%cuit_afip%' ]

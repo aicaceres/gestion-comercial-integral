@@ -2,11 +2,13 @@
 
 namespace VentasBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * VentasBundle\Entity\PresupuestoDetalle
  * @ORM\Table(name="ventas_presupuesto_detalle")
  * @ORM\Entity()
+ * @Gedmo\Loggable()
  */
 class PresupuestoDetalle {
     /**
@@ -26,91 +28,107 @@ class PresupuestoDetalle {
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $producto;
+
     /**
      * @var string $textoComodin
      * @ORM\Column(name="texto_comodin", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $textoComodin;
+
     /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3)
+     * @Gedmo\Versioned()
      */
     protected $cantidad = 1;
 
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $bulto = false;
 
     /**
      * @var integer $cantidadxBulto
      * @ORM\Column(name="cantidad_x_bulto", type="integer", nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $cantidadxBulto;
 
     /**
      * @var integer $precio
      * @ORM\Column(name="precio", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
     protected $precio;
+
     /**
      * @var integer $alicuota
      * @ORM\Column(name="alicuota", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
-    protected $alicuota=0;
+    protected $alicuota = 0;
+
     /**
      * @var integer $dtoRec
      * monto descuento o recargo
      * @ORM\Column(name="dtoRec", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
-    protected $dtoRec=0;
+    protected $dtoRec = 0;
+
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Presupuesto", inversedBy="detalles")
      * @ORM\JoinColumn(name="ventas_presupuesto_id", referencedColumnName="id")
      */
     protected $presupuesto;
 
-
-    public function getPrecioUnitarioItem(){
+    public function getPrecioUnitarioItem() {
         $categIva = $this->getPresupuesto()->getCliente()->getCategoriaIva()->getNombre();
-        if( $categIva == 'I' || $categIva == 'M'){
+        if ($categIva == 'I' || $categIva == 'M') {
             // precio sin iva convertido a la cotizacion
             $precio = $this->getPrecio();
-        }else{
-            // precio con iva incluido convertido a la cotizacion
-            $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) ;
         }
-        return round( $precio, 3);
+        else {
+            // precio con iva incluido convertido a la cotizacion
+            $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) );
+        }
+        return round($precio, 3);
     }
+
     // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
-    public function getDtoRecItem(){
+    public function getDtoRecItem() {
         $porcDtoRec = $this->getPresupuesto()->getDescuentoRecargo();
-        return ($this->getPrecio() * ($porcDtoRec / 100) ) ;
+        return ($this->getPrecio() * ($porcDtoRec / 100) );
     }
+
     // total del descuento
-    public function getTotalDtoRecItem(){
+    public function getTotalDtoRecItem() {
         $porcDtoRec = $this->getPresupuesto()->getDescuentoRecargo();
-        return ($this->getPrecio() * ($porcDtoRec / 100) ) * $this->getCantidad() ;
+        return ($this->getPrecio() * ($porcDtoRec / 100) ) * $this->getCantidad();
     }
+
     // monto del iva del item para sumariar total si categoriaIva I o M
-    public function getIvaItem(){
+    public function getIvaItem() {
         return ($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100);
     }
+
     // total del iva x item
-    public function getTotalIvaItem(){
-        return (($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100)) * $this->getCantidad() ;
-    }
-    // total del item
-    public function getTotalItem(){
-        return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
+    public function getTotalIvaItem() {
+        return (($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100)) * $this->getCantidad();
     }
 
+    // total del item
+    public function getTotalItem() {
+        return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 3);
+    }
 
     /** FIN VALORES ITEM */
-
-    public function getNombreProducto(){
+    public function getNombreProducto() {
         return ( $this->getProducto()->getComodin() ) ? $this->getTextoComodin() : $this->getProducto()->getNombre();
     }
 
@@ -119,8 +137,7 @@ class PresupuestoDetalle {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -130,8 +147,7 @@ class PresupuestoDetalle {
      * @param integer $orden
      * @return PresupuestoDetalle
      */
-    public function setOrden($orden)
-    {
+    public function setOrden($orden) {
         $this->orden = $orden;
 
         return $this;
@@ -142,8 +158,7 @@ class PresupuestoDetalle {
      *
      * @return integer
      */
-    public function getOrden()
-    {
+    public function getOrden() {
         return $this->orden;
     }
 
@@ -153,8 +168,7 @@ class PresupuestoDetalle {
      * @param string $cantidad
      * @return PresupuestoDetalle
      */
-    public function setCantidad($cantidad)
-    {
+    public function setCantidad($cantidad) {
         $this->cantidad = $cantidad;
 
         return $this;
@@ -165,8 +179,7 @@ class PresupuestoDetalle {
      *
      * @return string
      */
-    public function getCantidad()
-    {
+    public function getCantidad() {
         return $this->cantidad;
     }
 
@@ -176,8 +189,7 @@ class PresupuestoDetalle {
      * @param boolean $bulto
      * @return PresupuestoDetalle
      */
-    public function setBulto($bulto)
-    {
+    public function setBulto($bulto) {
         $this->bulto = $bulto;
 
         return $this;
@@ -188,8 +200,7 @@ class PresupuestoDetalle {
      *
      * @return boolean
      */
-    public function getBulto()
-    {
+    public function getBulto() {
         return $this->bulto;
     }
 
@@ -199,8 +210,7 @@ class PresupuestoDetalle {
      * @param integer $cantidadxBulto
      * @return PresupuestoDetalle
      */
-    public function setCantidadxBulto($cantidadxBulto)
-    {
+    public function setCantidadxBulto($cantidadxBulto) {
         $this->cantidadxBulto = $cantidadxBulto;
 
         return $this;
@@ -211,8 +221,7 @@ class PresupuestoDetalle {
      *
      * @return integer
      */
-    public function getCantidadxBulto()
-    {
+    public function getCantidadxBulto() {
         return $this->cantidadxBulto;
     }
 
@@ -222,8 +231,7 @@ class PresupuestoDetalle {
      * @param string $precio
      * @return PresupuestoDetalle
      */
-    public function setPrecio($precio)
-    {
+    public function setPrecio($precio) {
         $this->precio = $precio;
 
         return $this;
@@ -234,8 +242,7 @@ class PresupuestoDetalle {
      *
      * @return string
      */
-    public function getPrecio()
-    {
+    public function getPrecio() {
         return $this->precio;
     }
 
@@ -245,8 +252,7 @@ class PresupuestoDetalle {
      * @param \AppBundle\Entity\Producto $producto
      * @return PresupuestoDetalle
      */
-    public function setProducto(\AppBundle\Entity\Producto $producto = null)
-    {
+    public function setProducto(\AppBundle\Entity\Producto $producto = null) {
         $this->producto = $producto;
 
         return $this;
@@ -257,8 +263,7 @@ class PresupuestoDetalle {
      *
      * @return \AppBundle\Entity\Producto
      */
-    public function getProducto()
-    {
+    public function getProducto() {
         return $this->producto;
     }
 
@@ -268,8 +273,7 @@ class PresupuestoDetalle {
      * @param \VentasBundle\Entity\Presupuesto $presupuesto
      * @return PresupuestoDetalle
      */
-    public function setPresupuesto(\VentasBundle\Entity\Presupuesto $presupuesto = null)
-    {
+    public function setPresupuesto(\VentasBundle\Entity\Presupuesto $presupuesto = null) {
         $this->presupuesto = $presupuesto;
 
         return $this;
@@ -280,8 +284,7 @@ class PresupuestoDetalle {
      *
      * @return \VentasBundle\Entity\Presupuesto
      */
-    public function getPresupuesto()
-    {
+    public function getPresupuesto() {
         return $this->presupuesto;
     }
 
@@ -291,8 +294,7 @@ class PresupuestoDetalle {
      * @param string $alicuota
      * @return PresupuestoDetalle
      */
-    public function setAlicuota($alicuota)
-    {
+    public function setAlicuota($alicuota) {
         $this->alicuota = $alicuota;
 
         return $this;
@@ -303,8 +305,7 @@ class PresupuestoDetalle {
      *
      * @return string
      */
-    public function getAlicuota()
-    {
+    public function getAlicuota() {
         return $this->alicuota;
     }
 
@@ -314,8 +315,7 @@ class PresupuestoDetalle {
      * @param string $dtoRec
      * @return PresupuestoDetalle
      */
-    public function setDtoRec($dtoRec)
-    {
+    public function setDtoRec($dtoRec) {
         $this->dtoRec = $dtoRec;
 
         return $this;
@@ -326,8 +326,7 @@ class PresupuestoDetalle {
      *
      * @return string
      */
-    public function getDtoRec()
-    {
+    public function getDtoRec() {
         return $this->dtoRec;
     }
 
@@ -337,8 +336,7 @@ class PresupuestoDetalle {
      * @param string $textoComodin
      * @return PresupuestoDetalle
      */
-    public function setTextoComodin($textoComodin)
-    {
+    public function setTextoComodin($textoComodin) {
         $this->textoComodin = $textoComodin;
 
         return $this;
@@ -349,8 +347,8 @@ class PresupuestoDetalle {
      *
      * @return string
      */
-    public function getTextoComodin()
-    {
+    public function getTextoComodin() {
         return $this->textoComodin;
     }
+
 }

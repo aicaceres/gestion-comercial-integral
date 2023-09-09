@@ -11,11 +11,14 @@
       >
         {% if item.vars.data.producto.id is defined %}
           {% set inclIva = not (entity.cliente.categoriaIva == 'I' or entity.cliente.categoriaIva == 'M') %}
-          <option value="{{item.vars.data.producto.id}}" selected="selected">{{item.vars.data.producto}} | ${{ item.vars.data.producto.getPrecioContadoByLista( entity.precioLista.id, descuentoContado, inclIva )  }} </option>
+          <option value="{{item.vars.data.producto.id}}" selected="selected" data-alicuota="{{ item.vars.data.alicuota }}" data-precio="{{ item.vars.data.precio }}" 
+                  data-comodin="{{ item.vars.data.producto.comodin ?? 0 }}" data-bajominimo="" >
+              {{item.vars.data.producto}} | ${{ item.vars.data.producto.getPrecioContadoByLista( entity.precioLista.id, descuentoContado, inclIva )  }} 
+          </option>
         {% endif %}
       </select>
 
-        <a href="javascript:void(0)" class="btn btnaction btn_search" onclick="handleSearchProducto(this)"></a>
+        <a href="javascript:void(0)" style="display:none" class="btn btnaction btn_search" onclick="handleSearchProducto(this)"></a>
         <small class="bajominimo hidden">Bajo Mínimo</small>
         {% if item.textoComodin is defined %}
             {% set comodin = item.vars.data.producto.comodin is defined ? item.vars.data.producto.comodin : false %}

@@ -9,6 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * VentasBundle\Entity\Cobro
  * @ORM\Table(name="ventas_cobro")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\CobroRepository")
+ * @Gedmo\Loggable()
  */
 class Cobro {
     /**
@@ -28,6 +29,7 @@ class Cobro {
     /**
      * @var datetime $fechaCobro
      * @ORM\Column(name="fecha_cobro", type="datetime", nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $fechaCobro;
     /**
@@ -37,6 +39,7 @@ class Cobro {
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
+     * @Gedmo\Versioned()
      */
     protected $estado = 'PENDIENTE';
 
@@ -49,48 +52,56 @@ class Cobro {
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="cobros")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $cliente;
 
     /**
      * @var string $nombreCliente
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nombreCliente;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="tipo_documento_cliente", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $tipoDocumentoCliente;
 
     /**
      * @var string $nroDocumentoCliente
      * @ORM\Column(name="nro_documento_cliente", type="string", length=13, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nroDocumentoCliente;
 
     /**
      * @var string $direccionCliente
      * @ORM\Column(name="direccion_cliente", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $direccionCliente;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $formaPago;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $moneda;
 
     /**
      * @var string $cotizacion
      * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $cotizacion = 0;
 

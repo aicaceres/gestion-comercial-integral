@@ -9,6 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * VentasBundle\Entity\Venta
  * @ORM\Table(name="ventas_venta")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\VentaRepository")
+ * @Gedmo\Loggable()
  */
 class Venta {
     /**
@@ -28,6 +29,7 @@ class Venta {
     /**
      * @var datetime $fechaVenta
      * @ORM\Column(name="fecha_venta", type="datetime", nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $fechaVenta;
     /**
@@ -37,11 +39,13 @@ class Venta {
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
+     * @Gedmo\Versioned()
      */
     protected $estado = 'PENDIENTE';
 
     /**
      * @ORM\Column(name="descuenta_stock", type="boolean",nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $descuentaStock = true;
 
@@ -54,47 +58,55 @@ class Venta {
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="Ventas")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $cliente;
 
     /**
      * @var string $nombreCliente
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nombreCliente;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $formaPago;
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $precioLista;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $moneda;
 
     /**
      * @var string $cotizacion
      * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $cotizacion = 0;
 
     /**
      * @var integer $descuentoRecargo
      * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $descuentoRecargo;
 
     /**
      * @ORM\Column(name="concepto", type="text", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $concepto;
 
@@ -107,6 +119,7 @@ class Venta {
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $deposito;
 

@@ -2,11 +2,13 @@
 
 namespace VentasBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * VentasBundle\Entity\CobroDetalleTarjeta
  * @ORM\Table(name="ventas_cobro_detalle_tarjeta")
  * @ORM\Entity()
+ * @Gedmo\Loggable()
  */
 class CobroDetalleTarjeta {
     /**
@@ -21,40 +23,55 @@ class CobroDetalleTarjeta {
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Tarjeta")
      * @ORM\JoinColumn(name="tarjeta_id", referencedColumnName="id")
      * @ORM\OrderBy({"nombre" = "ASC"})
+     * @Gedmo\Versioned()
      */
     protected $tarjeta;
+
     /**
      * @var string $cupon
      * @ORM\Column(name="cupon", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $cupon;
+
     /**
      * @var string $cuota
      * @ORM\Column(name="cuota", type="integer", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $cuota;
+
     /**
      * @var string $numero
      * @ORM\Column(name="numero", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $numero;
+
     /**
      * @var string $firmante
      * @ORM\Column(name="firmante", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $firmante;
+
     /**
      * @ORM\Column(name="presentar_al_facturar", type="boolean",nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $presentarAlFacturar = false;
+
     /**
      * @var date $presentar
      * @ORM\Column(name="presentar", type="date", nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $presentar;
+
     /**
      * @var string $codigoAutorizacion
      * @ORM\Column(name="codigo_autorizacion", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $codigoAutorizacion;
 
@@ -65,14 +82,12 @@ class CobroDetalleTarjeta {
         $this->presentar = new \DateTime();
     }
 
-
     /**
      * Get id
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -82,8 +97,7 @@ class CobroDetalleTarjeta {
      * @param string $cupon
      * @return CobroDetalleTarjeta
      */
-    public function setCupon($cupon)
-    {
+    public function setCupon($cupon) {
         $this->cupon = $cupon;
 
         return $this;
@@ -94,8 +108,7 @@ class CobroDetalleTarjeta {
      *
      * @return string
      */
-    public function getCupon()
-    {
+    public function getCupon() {
         return $this->cupon;
     }
 
@@ -105,8 +118,7 @@ class CobroDetalleTarjeta {
      * @param integer $cuota
      * @return CobroDetalleTarjeta
      */
-    public function setCuota($cuota)
-    {
+    public function setCuota($cuota) {
         $this->cuota = $cuota;
 
         return $this;
@@ -117,8 +129,7 @@ class CobroDetalleTarjeta {
      *
      * @return integer
      */
-    public function getCuota()
-    {
+    public function getCuota() {
         return $this->cuota;
     }
 
@@ -128,8 +139,7 @@ class CobroDetalleTarjeta {
      * @param string $numero
      * @return CobroDetalleTarjeta
      */
-    public function setNumero($numero)
-    {
+    public function setNumero($numero) {
         $this->numero = $numero;
 
         return $this;
@@ -140,8 +150,7 @@ class CobroDetalleTarjeta {
      *
      * @return string
      */
-    public function getNumero()
-    {
+    public function getNumero() {
         return $this->numero;
     }
 
@@ -151,8 +160,7 @@ class CobroDetalleTarjeta {
      * @param string $firmante
      * @return CobroDetalleTarjeta
      */
-    public function setFirmante($firmante)
-    {
+    public function setFirmante($firmante) {
         $this->firmante = $firmante;
 
         return $this;
@@ -163,8 +171,7 @@ class CobroDetalleTarjeta {
      *
      * @return string
      */
-    public function getFirmante()
-    {
+    public function getFirmante() {
         return $this->firmante;
     }
 
@@ -174,8 +181,7 @@ class CobroDetalleTarjeta {
      * @param boolean $presentarAlFacturar
      * @return CobroDetalleTarjeta
      */
-    public function setPresentarAlFacturar($presentarAlFacturar)
-    {
+    public function setPresentarAlFacturar($presentarAlFacturar) {
         $this->presentarAlFacturar = $presentarAlFacturar;
 
         return $this;
@@ -186,8 +192,7 @@ class CobroDetalleTarjeta {
      *
      * @return boolean
      */
-    public function getPresentarAlFacturar()
-    {
+    public function getPresentarAlFacturar() {
         return $this->presentarAlFacturar;
     }
 
@@ -197,8 +202,7 @@ class CobroDetalleTarjeta {
      * @param \DateTime $presentar
      * @return CobroDetalleTarjeta
      */
-    public function setPresentar($presentar)
-    {
+    public function setPresentar($presentar) {
         $this->presentar = $presentar;
 
         return $this;
@@ -209,8 +213,7 @@ class CobroDetalleTarjeta {
      *
      * @return \DateTime
      */
-    public function getPresentar()
-    {
+    public function getPresentar() {
         return $this->presentar;
     }
 
@@ -220,8 +223,7 @@ class CobroDetalleTarjeta {
      * @param string $codigoAutorizacion
      * @return CobroDetalleTarjeta
      */
-    public function setCodigoAutorizacion($codigoAutorizacion)
-    {
+    public function setCodigoAutorizacion($codigoAutorizacion) {
         $this->codigoAutorizacion = $codigoAutorizacion;
 
         return $this;
@@ -232,8 +234,7 @@ class CobroDetalleTarjeta {
      *
      * @return string
      */
-    public function getCodigoAutorizacion()
-    {
+    public function getCodigoAutorizacion() {
         return $this->codigoAutorizacion;
     }
 
@@ -243,8 +244,7 @@ class CobroDetalleTarjeta {
      * @param \ConfigBundle\Entity\Tarjeta $tarjeta
      * @return CobroDetalleTarjeta
      */
-    public function setTarjeta(\ConfigBundle\Entity\Tarjeta $tarjeta = null)
-    {
+    public function setTarjeta(\ConfigBundle\Entity\Tarjeta $tarjeta = null) {
         $this->tarjeta = $tarjeta;
 
         return $this;
@@ -255,8 +255,8 @@ class CobroDetalleTarjeta {
      *
      * @return \ConfigBundle\Entity\Tarjeta
      */
-    public function getTarjeta()
-    {
+    public function getTarjeta() {
         return $this->tarjeta;
     }
+
 }

@@ -10,6 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="ventas_factura_electronica")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\FacturaRepository")
  * COMPROBANTE ELECTRONICO
+ * @Gedmo\Loggable()
  */
 class FacturaElectronica {
     /**
@@ -29,12 +30,14 @@ class FacturaElectronica {
     /**
      * @var integer $puntoVenta
      * @ORM\Column(name="punto_venta", type="integer")
+     * @Gedmo\Versioned()
      */
     protected $puntoVenta;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipComprobante")
      * @ORM\JoinColumn(name="afip_comprobante_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $tipoComprobante;
 
@@ -42,12 +45,14 @@ class FacturaElectronica {
      * @var integer $nroComprobante
      * voucher_number
      * @ORM\Column(name="nro_comprobante", type="integer")
+     * @Gedmo\Versioned()
      */
     protected $nroComprobante;
 
     /**
      * @var string $cae
      * @ORM\Column(name="cae", type="string", length=14)
+     * @Gedmo\Versioned()
      */
     protected $cae;
 
@@ -55,18 +60,21 @@ class FacturaElectronica {
      * @var string $caeVto
      * CAEFchVto
      * @ORM\Column(name="cae_vto", type="string", length=10)
+     * @Gedmo\Versioned()
      */
     protected $caeVto;
 
     /**
      * @var decimal $total
      * @ORM\Column(name="total", type="decimal", scale=2 )
+     * @Gedmo\Versioned()
      */
     protected $total;
 
     /**
      * @var decimal $saldo
      * @ORM\Column(name="saldo", type="decimal", scale=2 )
+     * @Gedmo\Versioned()
      */
     protected $saldo;
 
@@ -81,16 +89,19 @@ class FacturaElectronica {
     /**
      * 99 consumidor final
      * @ORM\Column(name="doc_tipo", type="integer", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $docTipo = 99;
 
     /**
      * @ORM\Column(name="doc_nro", type="string", length=13, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $docNro;
 
     /**
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nombreCliente;
 
@@ -109,6 +120,7 @@ class FacturaElectronica {
     /**
      * Importe neto gravado
      * @ORM\Column(name="imp_neto", type="decimal", scale=2, nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $impNeto;
 
@@ -121,6 +133,7 @@ class FacturaElectronica {
     /**
      * Importe total de IVA
      * @ORM\Column(name="imp_iva", type="decimal", scale=2, nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $impIva;
 
@@ -145,12 +158,14 @@ class FacturaElectronica {
     /**
      * Detalle de tributos
      * @ORM\Column(name="tributos", type="text", nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $tributos;
 
     /**
      * Detalle de comprobantes asociados - ND NC
      * @ORM\Column(name="cbtes_asoc", type="text", nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $cbtesAsoc;
 
@@ -163,6 +178,7 @@ class FacturaElectronica {
     /**
      * Detalle de alicuotas
      * @ORM\Column(name="iva", type="text", nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $iva;
 

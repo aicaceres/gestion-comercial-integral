@@ -2,11 +2,13 @@
 
 namespace VentasBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * VentasBundle\Entity\NotaDebCredDetalle
  * @ORM\Table(name="ventas_nota_debcred_detalle")
  * @ORM\Entity()
+ * @Gedmo\Loggable()
  */
 class NotaDebCredDetalle {
     /**
@@ -26,46 +28,55 @@ class NotaDebCredDetalle {
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $producto;
 
     /**
      * @var integer $textoComodin
      * @ORM\Column(name="texto_comodin", type="string",nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $textoComodin;
 
     /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3)
+     * @Gedmo\Versioned()
      */
     protected $cantidad = 1;
 
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $bulto = false;
 
     /**
      * @var integer $cantidadxBulto
      * @ORM\Column(name="cantidad_x_bulto", type="integer", nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $cantidadxBulto;
 
     /**
      * @var integer $precio
      * @ORM\Column(name="precio", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
     protected $precio = 0;
+
     /**
      * @var integer $alicuota
      * @ORM\Column(name="alicuota", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
     protected $alicuota = 0;
 
     /**
      * @var integer $descuento
      * @ORM\Column(name="descuento", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
     protected $descuento = 0;
 
@@ -77,61 +88,68 @@ class NotaDebCredDetalle {
 
     /** VALORES ITEM  */
     // valor del precio unitario segun categoria de iva
-    public function getPrecioUnitarioItem(){
+    public function getPrecioUnitarioItem() {
         $categIva = $this->getNotaDebCred()->getCliente()->getCategoriaIva()->getNombre();
         $cotizacion = $this->getNotaDebCred()->getCotizacion();
-        if( $categIva == 'I' || $categIva == 'M'){
+        if ($categIva == 'I' || $categIva == 'M') {
             // precio sin iva convertido a la cotizacion
             $precio = $this->getPrecio() / $cotizacion;
-        }else{
+        }
+        else {
             // precio con iva incluido convertido a la cotizacion
             $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $cotizacion;
         }
-        return round( $precio, 4);
+        return round($precio, 4);
     }
+
     // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
-    public function getDtoRecItem(){
+    public function getDtoRecItem() {
         $porcDtoRec = $this->getNotaDebCred()->getDescuentoRecargo();
-        return ($this->getPrecio() * ($porcDtoRec / 100) ) ;
+        return ($this->getPrecio() * ($porcDtoRec / 100) );
     }
+
     // total del descuento
-    public function getTotalDtoRecItem(){
+    public function getTotalDtoRecItem() {
         $porcDtoRec = $this->getNotaDebCred()->getDescuentoRecargo();
-        return ($this->getPrecio() * ($porcDtoRec / 100) ) * $this->getCantidad() ;
+        return ($this->getPrecio() * ($porcDtoRec / 100) ) * $this->getCantidad();
     }
+
     // monto del iva del item para sumariar total si categoriaIva I o M
-    public function getIvaItem(){
+    public function getIvaItem() {
         return ($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100);
     }
-    // total del iva x item
-    public function getTotalIvaItem(){
-        return (($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100)) * $this->getCantidad() ;
-    }
-    // total del item
-    public function getTotalItem(){
-        return round( ($this->getPrecioUnitarioItem() * $this->getCantidad()) ,3);
-    }
-    /** FIN VALORES ITEM */
 
-    public function getNombreProducto(){
+    // total del iva x item
+    public function getTotalIvaItem() {
+        return (($this->getPrecio() + $this->getDtoRecItem() ) * ($this->getAlicuota() / 100)) * $this->getCantidad();
+    }
+
+    // total del item
+    public function getTotalItem() {
+        return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 3);
+    }
+
+    /** FIN VALORES ITEM */
+    public function getNombreProducto() {
         return ( $this->getProducto()->getComodin() ) ? $this->getTextoComodin() : $this->getProducto()->getNombre();
     }
-    public function getBaseImponibleItem(){
-        $precio = ($this->getPrecio() / $this->getNotaDebCred()->getCotizacion()) * $this->getCantidad();
-        return round( $precio, 3);
-    }
 
+    public function getBaseImponibleItem() {
+        $precio = ($this->getPrecio() / $this->getNotaDebCred()->getCotizacion()) * $this->getCantidad();
+        return round($precio, 3);
+    }
 
     /** Calculos * */
     public function getSubTotal() {
         return $this->precio * $this->cantidad;
     }
-    public function getPrecioMasIva(){
-        return $this->precio * (1 + ($this->alicuota/100));
+
+    public function getPrecioMasIva() {
+        return $this->precio * (1 + ($this->alicuota / 100));
     }
 
     public function getMontoIva() {
-        return ($this->getSubTotal() + $this->getDescuento()) * ( $this->getAlicuota()/100 );
+        return ($this->getSubTotal() + $this->getDescuento()) * ( $this->getAlicuota() / 100 );
     }
 
     public function getTotal() {
@@ -153,8 +171,7 @@ class NotaDebCredDetalle {
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -164,8 +181,7 @@ class NotaDebCredDetalle {
      * @param integer $orden
      * @return NotaDebCredDetalle
      */
-    public function setOrden($orden)
-    {
+    public function setOrden($orden) {
         $this->orden = $orden;
 
         return $this;
@@ -176,8 +192,7 @@ class NotaDebCredDetalle {
      *
      * @return integer
      */
-    public function getOrden()
-    {
+    public function getOrden() {
         return $this->orden;
     }
 
@@ -187,8 +202,7 @@ class NotaDebCredDetalle {
      * @param string $textoComodin
      * @return NotaDebCredDetalle
      */
-    public function setTextoComodin($textoComodin)
-    {
+    public function setTextoComodin($textoComodin) {
         $this->textoComodin = $textoComodin;
 
         return $this;
@@ -199,8 +213,7 @@ class NotaDebCredDetalle {
      *
      * @return string
      */
-    public function getTextoComodin()
-    {
+    public function getTextoComodin() {
         return $this->textoComodin;
     }
 
@@ -210,8 +223,7 @@ class NotaDebCredDetalle {
      * @param string $cantidad
      * @return NotaDebCredDetalle
      */
-    public function setCantidad($cantidad)
-    {
+    public function setCantidad($cantidad) {
         $this->cantidad = $cantidad;
 
         return $this;
@@ -222,8 +234,7 @@ class NotaDebCredDetalle {
      *
      * @return string
      */
-    public function getCantidad()
-    {
+    public function getCantidad() {
         return $this->cantidad;
     }
 
@@ -233,8 +244,7 @@ class NotaDebCredDetalle {
      * @param boolean $bulto
      * @return NotaDebCredDetalle
      */
-    public function setBulto($bulto)
-    {
+    public function setBulto($bulto) {
         $this->bulto = $bulto;
 
         return $this;
@@ -245,8 +255,7 @@ class NotaDebCredDetalle {
      *
      * @return boolean
      */
-    public function getBulto()
-    {
+    public function getBulto() {
         return $this->bulto;
     }
 
@@ -256,8 +265,7 @@ class NotaDebCredDetalle {
      * @param integer $cantidadxBulto
      * @return NotaDebCredDetalle
      */
-    public function setCantidadxBulto($cantidadxBulto)
-    {
+    public function setCantidadxBulto($cantidadxBulto) {
         $this->cantidadxBulto = $cantidadxBulto;
 
         return $this;
@@ -268,8 +276,7 @@ class NotaDebCredDetalle {
      *
      * @return integer
      */
-    public function getCantidadxBulto()
-    {
+    public function getCantidadxBulto() {
         return $this->cantidadxBulto;
     }
 
@@ -279,8 +286,7 @@ class NotaDebCredDetalle {
      * @param string $precio
      * @return NotaDebCredDetalle
      */
-    public function setPrecio($precio)
-    {
+    public function setPrecio($precio) {
         $this->precio = $precio;
 
         return $this;
@@ -291,8 +297,7 @@ class NotaDebCredDetalle {
      *
      * @return string
      */
-    public function getPrecio()
-    {
+    public function getPrecio() {
         return $this->precio;
     }
 
@@ -302,8 +307,7 @@ class NotaDebCredDetalle {
      * @param string $descuento
      * @return NotaDebCredDetalle
      */
-    public function setDescuento($descuento)
-    {
+    public function setDescuento($descuento) {
         $this->descuento = $descuento;
 
         return $this;
@@ -314,8 +318,7 @@ class NotaDebCredDetalle {
      *
      * @return string
      */
-    public function getDescuento()
-    {
+    public function getDescuento() {
         return $this->descuento;
     }
 
@@ -325,8 +328,7 @@ class NotaDebCredDetalle {
      * @param \AppBundle\Entity\Producto $producto
      * @return NotaDebCredDetalle
      */
-    public function setProducto(\AppBundle\Entity\Producto $producto = null)
-    {
+    public function setProducto(\AppBundle\Entity\Producto $producto = null) {
         $this->producto = $producto;
 
         return $this;
@@ -337,8 +339,7 @@ class NotaDebCredDetalle {
      *
      * @return \AppBundle\Entity\Producto
      */
-    public function getProducto()
-    {
+    public function getProducto() {
         return $this->producto;
     }
 
@@ -348,8 +349,7 @@ class NotaDebCredDetalle {
      * @param \VentasBundle\Entity\NotaDebCred $notaDebCred
      * @return NotaDebCredDetalle
      */
-    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null)
-    {
+    public function setNotaDebCred(\VentasBundle\Entity\NotaDebCred $notaDebCred = null) {
         $this->notaDebCred = $notaDebCred;
 
         return $this;
@@ -360,8 +360,7 @@ class NotaDebCredDetalle {
      *
      * @return \VentasBundle\Entity\NotaDebCred
      */
-    public function getNotaDebCred()
-    {
+    public function getNotaDebCred() {
         return $this->notaDebCred;
     }
 
@@ -371,8 +370,7 @@ class NotaDebCredDetalle {
      * @param string $alicuota
      * @return NotaDebCredDetalle
      */
-    public function setAlicuota($alicuota)
-    {
+    public function setAlicuota($alicuota) {
         $this->alicuota = $alicuota;
 
         return $this;
@@ -383,8 +381,8 @@ class NotaDebCredDetalle {
      *
      * @return string
      */
-    public function getAlicuota()
-    {
+    public function getAlicuota() {
         return $this->alicuota;
     }
+
 }

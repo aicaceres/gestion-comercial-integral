@@ -74,7 +74,9 @@ jQuery(document).ready(function ($) {
             // cuit
             color = data.cuitValido ? "#666666" : "orangered"
             $(".cuitcliente").css("color", color)
+            
             setTimeout(function () {
+              setTipoComprobante()
               jQuery("#updating-data").addClass("hidden")
               selectCliente.select2('focus')
             }, 2000)

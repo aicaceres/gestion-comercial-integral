@@ -150,10 +150,14 @@
         {% set retrentas = presupuesto.cliente.categoriaRentas ? presupuesto.cliente.categoriaRentas.retencion : 0 %}
         {% set showiva = (cativa == 'I' or cativa == 'M') %}
         {% if (presupuesto.tipo=='P') %}
-        <table font-size="9px" padding-top="100px">
+         <div font-size="9px" padding-top="100px"><i> Precios y Stock sujeto a variaciones </i></div>    
+        <table font-size="9px" padding-top="10px">    
             <tr margin-bottom="8px">
-                <td border.color="#555555" background.color="#EEEEEE" height="20px"  vertical-align="middle" padding-left="10px">
-                    <i> Precios y Stock sujeto a variaciones </i>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px" width="20%" vertical-align="middle" text-align="center">
+                    Subtotal: $ {{presupuesto.subTotal|number_format(3,',','.')}}
+                </td>
+                <td border.color="#555555" background.color="#EEEEEE" height="20px"  vertical-align="middle" text-align="center">
+                    Desc/Rec: $ {{presupuesto.totalDescuentoRecargo|number_format(3,',','.')}}
                 </td>
                 {% if showiva %}
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">

@@ -54,7 +54,10 @@
                         <a href="{{ path('ventas_presupuesto_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a>
                         {% if app.user.access(app.session.get('unidneg_id'),'ventas_presupuesto_print') %}
                         {# PRINT #}
-                          <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id })}}" class="editar btn btnaction btn_print" presid="{{entity.id}}"  title="Imprimir"></a>
+                          <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id, 'valorizado':false })}}" class="editar btn btnaction btn_print" presid="{{entity.id}}"  title="{% if entity.tipo=='P' %} Presupuesto {% else %} Remito {% endif %}"></a>
+                            {% if entity.tipo=='P' %}
+                                <a href="#" url="{{ path('ventas_presupuesto_print', { 'id': entity.id, 'valorizado':true })}}" class="editar btn btnaction btn_print btn_black" presid="{{entity.id}}"  title="Valorizado detallado"></a>
+                            {% endif %}
                         {% endif %}
 
                         {% if not entity.descuentaStock and entity.estado != 'IMPRESO' %}

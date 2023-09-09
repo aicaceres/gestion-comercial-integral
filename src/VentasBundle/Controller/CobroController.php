@@ -393,13 +393,16 @@ class CobroController extends Controller {
             $detalle = ($comprobante->getCobro()) ? $comprobante->getCobro()->getVenta()->getDetalles() : $comprobante->getNotaDebCred()->getDetalles();
             $dtorec = ($comprobante->getCobro()) ? $comprobante->getCobro()->getVenta() : $comprobante->getNotaDebCred();
             foreach ($detalle as $row) {
+
+                $text = $row->getProducto()->getNombre() . ' | COD ' . $row->getProducto()->getCodigo();
                 $items[] = array(
                     'id' => $row->getProducto()->getId(),
-                    'text' => $row->getProducto()->getNombre(),
+                    'text' => $text,
                     'cant' => $row->getCantidad(),
-                    'comodin' => $row->getTextoComodin(),
+                    'comodin' => $row->getProducto()->getComodin(),
                     'precio' => $row->getPrecio(),
-                    'alicuota' => $row->getAlicuota()
+                    'alicuota' => $row->getAlicuota(),
+                    'bajominimo' => 0
                 );
             }
         }
@@ -418,7 +421,7 @@ class CobroController extends Controller {
         $items = array();
         if ($comprobante) {
             $valor = explode('-', $comprobante->getTipoComprobante()->getValor());
-            $tipos = $em->getRepository('ConfigBundle:AfipComprobante')->findByValor(array('CRE-' . $valor[1], 'DEB-' . $valor[1]));
+            $tipos = $em->getRepository('ConfigBundle:AfipComprobante')->findByValor(array('CRE-' . $valor[1]));
             foreach ($tipos as $tipo) {
                 $items[] = $tipo->getId();
             }
@@ -452,6 +455,33 @@ class CobroController extends Controller {
             array('ventas' => $ventas)
         );
         return new JsonResponse($partial);
+    }
+
+    /**
+     * @Route("/delete/{id}", name="ventas_cobro_delete")
+     * @Method("GET")
+     */
+    public function deleteAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura_cancel');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Cobro')->find($id);
+        try {
+            if ($entity->getFacturaElectronica()) {
+                throw $this->createNotFoundException('No se puede eliminar un cobro emitido fiscalmente.');
+            }
+            $operacion = $entity->getNroOperacion();
+            $venta = $entity->getVenta();
+            $venta = $venta->setEstado('PENDIENTE');
+            $em->persist($venta);
+
+            $em->remove($entity);
+            $em->flush();
+            $this->addFlash('success', 'El cobro #' . $operacion . ' correspondiente a la venta #' . $venta->getNroOperacion() . ' fue eliminado!');
+        }
+        catch (\Exception $ex) {
+            $this->addFlash('error', 'Error de eliminación. ' . $ex->getMessage());
+        }
+        return $this->redirectToRoute('ventas_cobro', ['selectedtab' => '#tab-cobrados']);
     }
 
 }

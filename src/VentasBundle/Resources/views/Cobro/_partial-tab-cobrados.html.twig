@@ -34,9 +34,11 @@
             <td class="buttons">
                   <a href="{{ path('ventas_cobro_show',{ 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Cobro"></a>
                 {% if entity.facturaElectronica %}
-                  {% if entity.facturaElectronica.cae %}
-                  <a href="#" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'Cobro' })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
-                  {% endif %}
+                    {% if entity.facturaElectronica.cae %}
+                    <a href="#" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'Cobro' })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
+                    {% endif %}
+                {% else %}
+                  <a href="{{ path('ventas_cobro_delete', { 'id': entity.id }) }}" onclick="confirm('Confirma la eliminación! Esta acción no se puede deshacer')" class="btn btnaction btn_trash btn_yellow" title="Eliminar"></a>
                 {% endif %}
 
             </td>

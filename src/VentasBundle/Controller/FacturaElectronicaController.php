@@ -203,7 +203,8 @@ class FacturaElectronicaController extends Controller {
                 '',
                 7 //Unidad
             );
-            $dataTicket['adicItem'][] = $item->getNombreProducto();
+            $lineas = explode('$', wordwrap($item->getNombreProducto(), 30, "$"));
+            $dataTicket['adicItem'][] = $lineas;
         }
 
         foreach ($detallesPago as $pago) {

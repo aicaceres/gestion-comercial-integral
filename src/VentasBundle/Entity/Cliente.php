@@ -9,6 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * VentasBundle\Entity\Cliente
  * @ORM\Table(name="cliente",indexes={@ORM\Index(name="activo_idx",columns={"activo"}),@ORM\Index(name="nombre_idx",columns={"nombre"})}))
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\ClienteRepository")
+ * @Gedmo\Loggable()
  */
 class Cliente {
     /**
@@ -23,48 +24,56 @@ class Cliente {
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
      * @Assert\NotBlank()
+     * @Gedmo\Versioned()
      */
     protected $nombre;
 
     /**
      * @var string $dni
      * @ORM\Column(name="dni", type="string", length=8, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $dni;
 
     /**
      * @var string $cuit
      * @ORM\Column(name="cuit", type="string", length=13, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $cuit;
 
     /**
      * @var string $nroInscripcion
      * @ORM\Column(name="nro_inscripcion", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nroInscripcion;
 
     /**
      * @var string $direccion
      * @ORM\Column(name="direccion", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $direccion;
 
     /**
      * @var string $telefono
      * @ORM\Column(name="telefono", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $telefono;
 
     /**
      * @var string $email
      * @ORM\Column(name="email", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $email;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
      * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $localidad;
 
@@ -76,6 +85,7 @@ class Cliente {
     /**
      * @var integer $saldoInicial
      * @ORM\Column(name="saldo_inicial", type="decimal", scale=2, nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $saldoInicial;
 
@@ -94,6 +104,7 @@ class Cliente {
     /**
      * @var date $vencCertNoRetener
      * @ORM\Column(name="venc_cert_no_retener", type="date", nullable=true)
+     * @Gedmo\Versioned()
      */
     private $vencCertNoRetener;
 
@@ -104,42 +115,49 @@ class Cliente {
 
     /**
      * @ORM\Column(name="activo", type="boolean",nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $activo = true;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="categoria_iva_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $categoria_iva;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Escalas")
      * @ORM\JoinColumn(name="categoria_rentas_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $categoriaRentas;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $formaPago;
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $precioLista;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Transporte")
      * @ORM\JoinColumn(name="transporte_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $transporte;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Provincia")
      * @ORM\JoinColumn(name="provincia_rentas_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $provinciaRentas;
 
@@ -150,18 +168,21 @@ class Cliente {
     /**
      * @var string $trabajo
      * @ORM\Column(name="trabajo", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $trabajo;
 
     /**
      * @var string $direccionTrabajo
      * @ORM\Column(name="direccion_trabajo", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $direccionTrabajo;
 
     /**
      * @var string $telefonoTrabajo
      * @ORM\Column(name="telefono_trabajo", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $telefonoTrabajo;
 
@@ -169,6 +190,7 @@ class Cliente {
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
      * @ORM\JoinColumn(name="localidad_trabajo_id", referencedColumnName="id")
      * @ORM\OrderBy({"name" = "ASC"})
+     * @Gedmo\Versioned()
      */
     protected $localidadTrabajo;
 

@@ -1082,26 +1082,42 @@ class ProductoController extends Controller {
         $term = $request->get('searchTerm');
         $lista = $request->get('lista');
         $categoriaIva = $request->get('cativa');
+        $deposito = $request->get('deposito');
         $em = $this->getDoctrine()->getManager();
         $results = $em->getRepository('AppBundle:Producto')->filterByTerm($term);
         foreach ($results as &$res) {
             $producto = $em->getRepository('AppBundle:Producto')->find($res['id']);
-            $precio = floatval($producto->getPrecioByLista($lista));
+            $iva = $producto->getIva();
+            $precioUnit = floatval($producto->getPrecioByLista($lista));
             if (in_array($categoriaIva, ['I', 'M'])) {
-                $total = round($precio, 3);
+                $precio = round($precioUnit, 3);
             }
             else {
-                $iva = $producto->getIva();
-                $montoIva = ($precio * ( $iva / 100 ));
-                $total = round(($precio + $montoIva), 3);
+                $montoIva = ($precioUnit * ( $iva / 100 ));
+                $precio = round(($precioUnit + $montoIva), 3);
             }
 
-            $contado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
-            if ($contado) {
-                $total = round($total * ( 1 + $contado->getPorcentajeRecargo() / 100 ), 3);
+            $pagoContado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
+            if ($pagoContado) {
+                $precio = round($precio * ( 1 + $pagoContado->getPorcentajeRecargo() / 100 ), 3);
+            }
+            $bajominimo = false;
+            $stock = 0;
+            if ($deposito) {
+                $regStock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito);
+                if ($regStock) {
+                    $minimo = $regStock->getStockMinimo() ? $regStock->getStockMinimo() : $producto->getStockMinimo();
+                    $stock = $regStock->getCantidad();
+                    $dif = $stock - $minimo;
+                    $bajominimo = ( $dif < 0 );
+                }
             }
 
-            $res['text'] = $res['text'] . ' | $' . $total;
+            $res['text'] = $res['nombre'] . ' | COD ' . $res['codigo'] . ' | Contado: $' . $precio . ' | Stock:' . $stock;
+            $res['alicuota'] = $iva;
+            $res['precio'] = $precioUnit;
+            $res['comodin'] = $producto->getComodin();
+            $res['bajominimo'] = $bajominimo;
         }
         return new JsonResponse($results);
     }

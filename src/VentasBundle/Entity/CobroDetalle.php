@@ -2,6 +2,7 @@
 
 namespace VentasBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
@@ -12,6 +13,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *  @ORM\UniqueConstraint(name="notadc_tipopago_idx", columns={"ventas_notadebcred_id", "tipo_pago"})
  * })
  * @ORM\Entity()
+ * @Gedmo\Loggable()
  */
 class CobroDetalle {
     /**
@@ -24,30 +26,35 @@ class CobroDetalle {
 
     /**
      * @var integer $tipoPago
-     * @ORM\Column(name="tipo_pago", type="string", nullable=false, columnDefinition="ENUM('CTACTE', 'EFECTIVO', 'TARJETA', 'CHEQUE','TRANSFERENCIA')")
+     * @ORM\Column(name="tipo_pago", type="string", nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $tipoPago = 'CTACTE';
 
     /**
      * @var integer $importe
      * @ORM\Column(name="importe", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
     protected $importe = 0;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $moneda;
 
     /**
      * @ORM\OneToOne(targetEntity="VentasBundle\Entity\CobroDetalleTarjeta", cascade={"persist","remove"}, orphanRemoval=true)
+     * @Gedmo\Versioned()
      */
     private $datosTarjeta;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Cheque", cascade={"persist"})
      * @ORM\JoinColumn(name="cheque_recibido_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     private $chequeRecibido;
 

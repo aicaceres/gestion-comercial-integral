@@ -6,7 +6,7 @@
 {% endblock %}
 
 <div class="pageheader notab">
-    <h1 class="pagetitle">Notas de Débito y Crédito
+    <h1 class="pagetitle">NOTA DE {% if entity.signo == '+' %}DÉBITO{% else %}CRÉDITO{% endif %}
         <span class="floatright fechahora">
             {{entity.fecha|date('d/m/Y')}}
             <span class="js-hora"> {{entity.fecha|date('H:i:s')}}</span> &nbsp; | &nbsp; {{app.user.username}}
@@ -45,9 +45,11 @@
     </fieldset>
 
     <fieldset class="fields" >
+        {% if entity.signo == '-' %}
         <div style="display:inline-block; width: 40%">
             {% include "VentasBundle:NotaDebCred:block-select-comprobanteasociado.html.twig" %}
         </div>
+        {% endif %}
         <div style="display:inline-block; width: 25%;">
             {{ form_row(form.tipoComprobante) }}
         </div>
@@ -62,11 +64,11 @@
         </div>
     </fieldset>
     <fieldset class="fields" style="margin-top:10px">
-        <div style="display:inline-block; width:30%;">
-            {{ form_row(form.precioLista) }}
-        </div>
         <div style="display:inline-block; width:65%;">
             {{ form_row(form.concepto) }}
+        </div>
+        <div style="display:inline-block; width:30%;">
+            {{ form_row(form.precioLista, { 'attr': {'style' : 'width:70%'} }) }}
         </div>
     </fieldset>
 
@@ -187,10 +189,24 @@ jQuery(function ($) {
             if( $('.datos-formapago').data('tipopago') != 'CTACTE' ){
                 if(  $(':invalid').length>0 || parseFloat(vuelto) <0 ){
                     alert( 'Completar todos los datos para facturar!' );
+                    if(vuelto<0) jQuery('#linkAddPago').click()
+                    
                     return false;
                 }
             }
-            if( $('table.detalle tbody tr.item').length > 0 ){
+            const trs = $('table.detalle tbody tr.item')
+            if( trs.length > 0 ){
+                let hayVacios = false
+                trs.each(function(i,tr){
+                    obj = jQuery(tr)
+                    if(!obj.find('.widgetProducto').find('option:selected').data('comodin') && (!obj.find('.widgetProducto').val() || obj.find('[id*="_precio"]').val()==0) ){
+                            alert('Controle los items ingresados!! Elimine los items vacíos o sin precio')
+                            hayVacios = true
+                            return false
+                    }
+                })
+                if(hayVacios) return false
+                
                 emitirTicket = $('#emitirTicket').is(':checked')
                 let txt = emitirTicket ? '\n\n Se emitirá un Ticket' : '\n\n Se enviarán los datos a la Afip para registrar el comprobante'
                 if (confirm('Confirma la generación de la Nota Electrónica?'+txt)) {
@@ -202,8 +218,24 @@ jQuery(function ($) {
 
 {#            $('#ventasbundle_notadebcred').submit();#}
         })
+        
+        // setear tipo comprobante segun cliente
+        setTipoComprobante()
     });
 });
+
+function setTipoComprobante(){
+    const letras = (jQuery('.selectorCliente').data('categiva') === 'I' || jQuery('.selectorCliente').data('categiva') === 'M') ? ['A','M'] : ['B']
+    jQuery('#ventasbundle_notadebcred_tipoComprobante').find("option").each(function (e) {
+        option = jQuery(this)
+        disabled = true
+        letras.forEach(function(l){
+            if( option.text().slice(-1).includes(l) ) disabled = false
+        })
+        option.attr("disabled", disabled )
+    })
+    jQuery('#ventasbundle_notadebcred_tipoComprobante').children('option:enabled').eq(0).prop('selected',true);
+}
 
 function setPeriodoAsociado(){
   let hoy = new Date().toLocaleString("en-GB").slice(0,10).split('-').reverse().join('-').replaceAll('/','-')
@@ -275,8 +307,11 @@ function imprimirTicket(notaId){
 
         driver.abrirComprobante(data.tipo);
         // items
-        data.items.forEach(function(i){
-          driver.imprimirItem2g(...i)
+        data.items.forEach(function(item,i){
+            data.adicItem[i].forEach(function(linea){
+                driver.imprimirTextoFiscal(linea)  
+            })
+          driver.imprimirItem2g(...item)
         })
 
         // descuentos
@@ -284,11 +319,13 @@ function imprimirTicket(notaId){
             driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
         // tributos (iibb)
         if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
-        
+         console.log(data.pagos)
         // pagos
         if(data.pagos){
            data.pagos.forEach(function(i){
-            driver.imprimirPago2g(...i)
+                if(i.length){
+                    driver.imprimirPago2g(...i)
+               }
           }) 
         }
 
@@ -385,7 +422,6 @@ function setFacturando(on){
 function registrarMovimientoIfu(comando, error=null){
    url = "{{ path('ifu_registrar_movimiento') }}" 
    data = {caja:"1", comando, error } 
-   console.log(data)
    jQuery.post(url, data, function(data){
     if(data.res !== 'OK'){
         alert(data.msg)

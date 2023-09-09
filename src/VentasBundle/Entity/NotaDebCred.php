@@ -10,6 +10,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * VentasBundle\Entity\NotaDebCred
  * @ORM\Table(name="ventas_nota_debcred")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\NotaDebCredRepository")
+ * @Gedmo\Loggable()
  */
 class NotaDebCred {
     /**
@@ -29,6 +30,7 @@ class NotaDebCred {
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
+     * @Gedmo\Versioned()
      */
     protected $estado;
 
@@ -36,118 +38,138 @@ class NotaDebCred {
      * 'CRE' = '-'; 'DEB' = '+'
      * @var string $signo
      * @ORM\Column(name="signo", type="string",length=1)
+     * @Gedmo\Versioned()
      */
     protected $signo = '+';
 
     /**
      * @ORM\OneToOne(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="notaDebCred", cascade={"persist"})
+     * @Gedmo\Versioned()
      */
     protected $notaElectronica;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipComprobante")
      * @ORM\JoinColumn(name="afip_comprobante_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $tipoComprobante;
 
     /**
      * @var integer $descuentoRecargo
      * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $descuentoRecargo = 0;
 
     /**
      * @var integer $iva
      * @ORM\Column(name="iva", type="decimal", scale=2,nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $iva;
 
     /**
      * @var integer $percIibb
      * @ORM\Column(name="perc_iibb", type="decimal", scale=2,nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $percIibb = 0;
 
     /**
      * @var integer $total
      * @ORM\Column(name="total", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
     protected $total;
 
     /**
      * @var integer $saldo
      * @ORM\Column(name="saldo", type="decimal", scale=3,nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $saldo = 0;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $formaPago;
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $precioLista;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $moneda;
 
     /**
      * @var string $cotizacion
      * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $cotizacion = 0;
 
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="notasDebCredVenta")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $cliente;
 
     /**
      * @var string $nombreCliente
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nombreCliente;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="tipo_documento_cliente", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $tipoDocumentoCliente;
 
     /**
      * @var string $nroDocumentoCliente
      * @ORM\Column(name="nro_documento_cliente", type="string", length=13, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nroDocumentoCliente;
 
     /**
      * @ORM\Column(name="concepto", type="text", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $concepto;
 
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\FacturaElectronica")
      * @ORM\JoinColumn(name="ventas_factura_electronica_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $comprobanteAsociado;
 
     /**
      * @var datetime $periodoAsocDesde
      * @ORM\Column(name="periodo_asoc_desde", type="datetime", nullable=true)
+     * @Gedmo\Versioned()
      */
     private $periodoAsocDesde;
 
     /**
      * @var datetime $periodoAsocHasta
      * @ORM\Column(name="periodo_asoc_hasta", type="datetime", nullable=true)
+     * @Gedmo\Versioned()
      */
     private $periodoAsocHasta;
 

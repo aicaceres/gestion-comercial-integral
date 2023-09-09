@@ -9,9 +9,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  * VentasBundle\Entity\CajaApertura
  * @ORM\Table(name="ventas_caja_apertura")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\CajaAperturaRepository")
+ * @Gedmo\Loggable()
  */
-class CajaApertura
-{
+class CajaApertura {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -21,14 +21,15 @@ class CajaApertura
     protected $id;
 
     /**
-     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Caja", inversedBy="aperturas")
-     *@ORM\JoinColumn(name="caja_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Caja", inversedBy="aperturas")
+     * @ORM\JoinColumn(name="caja_id", referencedColumnName="id")
      */
     protected $caja;
 
     /**
      * @var date $fechaApertura
      * @ORM\Column(name="fecha_apertura", type="datetime", nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $fechaApertura;
 
@@ -36,19 +37,21 @@ class CajaApertura
      * @var integer $montoApertura
      * @ORM\Column(name="monto_apertura", type="decimal", scale=2 )
      */
-    protected $montoApertura=0;
+    protected $montoApertura = 0;
 
     /**
      * @var date $fechaCierre
      * @ORM\Column(name="fecha_cierre", type="datetime", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $fechaCierre;
 
     /**
      * @var integer $montoCierre
      * @ORM\Column(name="monto_cierre", type="decimal", scale=2, nullable=true )
+     * @Gedmo\Versioned()
      */
-    protected $montoCierre=0;
+    protected $montoCierre = 0;
 
     /**
      * @var integer $cambios
@@ -92,13 +95,13 @@ class CajaApertura
     private $updatedBy;
 
     /**   Diferencia encontrada entre la apertura y cierre    */
-    public function getDiferencia(){
+    public function getDiferencia() {
         return ($this->getMontoApertura() + $this->getTotalMovimientos()) - $this->getMontoCierre();
     }
 
     /** suma total de movimientos entre apertura y cierre */
-   public function getTotalMovimientos(){
-        $total=0;
+    public function getTotalMovimientos() {
+        $total = 0;
         // foreach($this->getIngresos() as $mov ){
         //         $total += $mov->getPago();
         // }
@@ -113,8 +116,7 @@ class CajaApertura
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -124,8 +126,7 @@ class CajaApertura
      * @param \DateTime $fechaApertura
      * @return CajaApertura
      */
-    public function setFechaApertura($fechaApertura)
-    {
+    public function setFechaApertura($fechaApertura) {
         $this->fechaApertura = $fechaApertura;
 
         return $this;
@@ -136,8 +137,7 @@ class CajaApertura
      *
      * @return \DateTime
      */
-    public function getFechaApertura()
-    {
+    public function getFechaApertura() {
         return $this->fechaApertura;
     }
 
@@ -147,8 +147,7 @@ class CajaApertura
      * @param string $montoApertura
      * @return CajaApertura
      */
-    public function setMontoApertura($montoApertura)
-    {
+    public function setMontoApertura($montoApertura) {
         $this->montoApertura = $montoApertura;
 
         return $this;
@@ -159,8 +158,7 @@ class CajaApertura
      *
      * @return string
      */
-    public function getMontoApertura()
-    {
+    public function getMontoApertura() {
         return $this->montoApertura;
     }
 
@@ -170,8 +168,7 @@ class CajaApertura
      * @param \DateTime $fechaCierre
      * @return CajaApertura
      */
-    public function setFechaCierre($fechaCierre)
-    {
+    public function setFechaCierre($fechaCierre) {
         $this->fechaCierre = $fechaCierre;
 
         return $this;
@@ -182,8 +179,7 @@ class CajaApertura
      *
      * @return \DateTime
      */
-    public function getFechaCierre()
-    {
+    public function getFechaCierre() {
         return $this->fechaCierre;
     }
 
@@ -193,8 +189,7 @@ class CajaApertura
      * @param string $montoCierre
      * @return CajaApertura
      */
-    public function setMontoCierre($montoCierre)
-    {
+    public function setMontoCierre($montoCierre) {
         $this->montoCierre = $montoCierre;
 
         return $this;
@@ -205,8 +200,7 @@ class CajaApertura
      *
      * @return string
      */
-    public function getMontoCierre()
-    {
+    public function getMontoCierre() {
         return $this->montoCierre;
     }
 
@@ -216,8 +210,7 @@ class CajaApertura
      * @param \DateTime $created
      * @return CajaApertura
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -228,8 +221,7 @@ class CajaApertura
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -239,8 +231,7 @@ class CajaApertura
      * @param \DateTime $updated
      * @return CajaApertura
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -251,8 +242,7 @@ class CajaApertura
      *
      * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -262,8 +252,7 @@ class CajaApertura
      * @param \ConfigBundle\Entity\Caja $caja
      * @return CajaApertura
      */
-    public function setCaja(\ConfigBundle\Entity\Caja $caja = null)
-    {
+    public function setCaja(\ConfigBundle\Entity\Caja $caja = null) {
         $this->caja = $caja;
 
         return $this;
@@ -274,8 +263,7 @@ class CajaApertura
      *
      * @return \ConfigBundle\Entity\Caja
      */
-    public function getCaja()
-    {
+    public function getCaja() {
         return $this->caja;
     }
 
@@ -285,8 +273,7 @@ class CajaApertura
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return CajaApertura
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -297,8 +284,7 @@ class CajaApertura
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -308,8 +294,7 @@ class CajaApertura
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return CajaApertura
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -320,15 +305,14 @@ class CajaApertura
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->movimientos = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -338,8 +322,7 @@ class CajaApertura
      * @param \VentasBundle\Entity\CobroDetalle $movimientos
      * @return CajaApertura
      */
-    public function addMovimiento(\VentasBundle\Entity\CobroDetalle $movimientos)
-    {
+    public function addMovimiento(\VentasBundle\Entity\CobroDetalle $movimientos) {
         $this->movimientos[] = $movimientos;
 
         return $this;
@@ -350,8 +333,7 @@ class CajaApertura
      *
      * @param \VentasBundle\Entity\CobroDetalle $movimientos
      */
-    public function removeMovimiento(\VentasBundle\Entity\CobroDetalle $movimientos)
-    {
+    public function removeMovimiento(\VentasBundle\Entity\CobroDetalle $movimientos) {
         $this->movimientos->removeElement($movimientos);
     }
 
@@ -360,8 +342,7 @@ class CajaApertura
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getMovimientos()
-    {
+    public function getMovimientos() {
         return $this->movimientos;
     }
 
@@ -371,8 +352,7 @@ class CajaApertura
      * @param string $cambios
      * @return CajaApertura
      */
-    public function setCambios($cambios)
-    {
+    public function setCambios($cambios) {
         $this->cambios = $cambios;
 
         return $this;
@@ -383,8 +363,8 @@ class CajaApertura
      *
      * @return string
      */
-    public function getCambios()
-    {
+    public function getCambios() {
         return $this->cambios;
     }
+
 }

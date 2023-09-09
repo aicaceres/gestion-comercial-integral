@@ -169,6 +169,7 @@ jQuery(function ($) {
       if( $('.datos-formapago').data('tipopago') != 'CTACTE' ){
           if(  $(':invalid').length>0 || parseFloat(vuelto) <0 ){
               alert( 'Completar todos los datos para facturar!' );
+              if(vuelto<0) jQuery('#linkAddPago').click()
               return false;
           }
       }
@@ -310,20 +311,22 @@ function imprimirTicket(cobroId){
         driver.abrirComprobante(data.tipo);
         // items
         data.items.forEach(function(item,i){
-          driver.imprimirTextoFiscal(data.adicItem[i])  
+            data.adicItem[i].forEach(function(linea){
+                driver.imprimirTextoFiscal(linea)  
+            })
           driver.imprimirItem2g(...item)
         })
-{#        return false;#}
+        return false;
         // descuentos
         if(data.montodto!=0)
             driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
         // tributos (iibb)
         if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
-        
+        console.log(data.pagos)
         // pagos
         if(data.pagos){
            data.pagos.forEach(function(i){
-               if(i.length){
+               if(i.length>0){
                     driver.imprimirPago2g(...i)
                }
           }) 

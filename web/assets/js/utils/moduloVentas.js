@@ -47,7 +47,7 @@ jQuery(document).ready(function ($) {
 
   $('[id*="_precioLista"]').on("change", function (e) {
     $(".widgetProducto").each(function (_,item) {
-       jQuery(item).trigger('select2:selecting')
+       jQuery(item).trigger('select2:select')
     })
 
   })
@@ -111,7 +111,9 @@ function actualizarImportes(ndc=0) {
 		// calcular la cotización si es distinta a 1
 		precUnit = precio / cotizacion
                 // calcular precio con descuento para la vista
-                precUnit = precUnit * (1 + porcentaje / 100)
+                if(!ndc){
+                    precUnit = precUnit * (1 + porcentaje / 100)
+                }    
 		precTot = precUnit * cant
 		// subtotal para vista
 		subtotalTh += precTot
@@ -202,7 +204,7 @@ function loadModalProductos(prod) {
 						text: item.text()+ ' | '+ item.data("codigo")+ ' | $'+ item.data("contado")
 					}
 					var newOption = new Option(data.text, data.id, true, true)
-					prod.append(newOption).trigger("select2:selecting")
+					prod.append(newOption).trigger("select2:select")
           jQuery("#popup").dialog("destroy")
           prod.change()
 					prod.select2("focus")
@@ -274,66 +276,91 @@ function setSelect2ToProduct(selProducto) {
 				type: "post",
 				dataType: "json",
 				delay: 300,
-				cache: true,
+				cache: false,
 				data: (params) => {
 					return {
 						searchTerm: params.term,
 						lista: jQuery('[id*="_precioLista"]').val(),
-						cativa: jQuery(".selectorCliente").data("categiva")
+						cativa: jQuery(".selectorCliente").data("categiva"),
+                                                deposito: jQuery('[id*="_deposito"]').val()
 					}
 				},
-				processResults: function (response) {
-					return {
-						results: response
-					}
-				}
+				processResults: (response) => {
+					results = response.map((x) => {
+						return {
+							id: x.id,
+							text: x.text,
+							alicuota: x.alicuota,
+							precio: x.precio,
+                                                        comodin: x.comodin,
+                                                        bajominimo: x.bajominimo
+						}
+					})
+					return { results }
+				},                                
 			},
+                        templateResult: (data) => {
+                            return data.text
+                        },
+                        templateSelection: function (data) {
+                            jQuery(data.element).attr('data-precio', data.precio);
+                            jQuery(data.element).attr('data-alicuota', data.alicuota);
+                            jQuery(data.element).attr('data-comodin', data.comodin);
+                            jQuery(data.element).attr('data-bajominimo', data.bajominimo);
+                            return data.text;
+                          },
 			minimumInputLength: 3,
-			width: "style"
+			width: "style",
+                        cache: false,
 		})
-    .on("select2:selecting", function (e) {
-      const obj = e.target
-      const id = (e.params) ? e.params.args.data.id : parseInt(e.currentTarget.value)
-			const data = {
-				id: id,
-				listaprecio: jQuery('[id*="_precioLista"]').val(),
-				deposito: jQuery('[id*="_deposito"]').val()
-			}
-			jQuery.ajax({
-				dataType: "json",
-				url: urldatos,
-				async: false,
-				data: data,
-				success: function (data) {
-					const tr = jQuery(obj).closest("tr")
-					//bajominimo
-					jQuery(obj).siblings(".bajominimo").toggle(data.bajominimo)
-					//precios
-					const precTd = tr.find(".precTd")
-					precTd.find('[id*="_precio"]').val(data.precio)
-					precTd.find('[id*="_alicuota"]').val(data.alicuota)
-					//comodin
-					const textoComodin = tr.find('[id*="_textoComodin"]')
-					textoComodin.toggle(data.comodin)
-					textoComodin.attr("required", data.comodin)
+                .on("select2:select",function(e){
+                    const obj = e.target
+                    const tr = jQuery(obj).closest("tr")
+                    const precTd = tr.find(".precTd")
+                    const textoComodin = tr.find('[id*="_textoComodin"]')
+                    let precio = 0
+                    let alicuota = 0
+                    let bajominimo = false
+                    let comodin = false
+                    if(!e.params){
+                        const option = jQuery(e.currentTarget).find('option:selected')
+                        precio = option.data().precio
+                        alicuota = option.data().alicuota
+                        comodin = option.data().comodin == 0 ? false : true
+                        bajominimo = option.data().bajominimo == 0 ? false : true
+                    }else{
+                        const data = e.params.data
+                        precio = data.precio
+                        alicuota = data.alicuota
+                        comodin = data.comodin == 0 ? false : true
+                        bajominimo = data.bajominimo == 0 ? false : true 
+                    }
 
-					actualizarImportes()
+                    //precios
+                    precTd.find('[id*="_precio"]').val(precio)
+                    precTd.find('[id*="_alicuota"]').val(alicuota)
+                    //bajominimo
+                     jQuery(obj).siblings(".bajominimo").toggle(bajominimo)
+                     //comodin
+                     textoComodin.toggle(comodin)
+                     textoComodin.attr("required", comodin)   
+                        
+                    actualizarImportes()
 
-					setTimeout(function () {
-						const objFocus = data.comodin
-							? textoComodin
-							: tr.find('.cantTd [id*="_cantidad"]')
-						objFocus.focus()
-					}, 500)
-				}
-			})
-		})
+                    setTimeout(function () {
+                            const objFocus = comodin
+                                    ? textoComodin
+                                    : tr.find('.cantTd [id*="_cantidad"]')
+                            objFocus.focus()
+                    }, 500)
+                })
 }
 
 function detectarControles(e) {
 	// tecla + ver detalle venta
 	if (e.keyCode == 171) {
-		if (jQuery("#linkAdd").is(":visible")) addNewItem()
+            e.preventDefault()
+            if (jQuery("#linkAdd").is(":visible")) addNewItem()
 	}
 
 	if (e.ctrlKey && e.altKey) {

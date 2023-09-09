@@ -387,8 +387,14 @@ class PresupuestoController extends Controller {
 
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
-        $this->render('VentasBundle:Presupuesto:presupuesto.pdf.twig',
-            array('presupuesto' => $presupuesto, 'empresa' => $empresa, 'logo' => $logo), $response);
+        if ($request->get('valorizado')) {
+            $this->render('VentasBundle:Presupuesto:presupuesto-valorizado-detalle.pdf.twig',
+                array('presupuesto' => $presupuesto, 'empresa' => $empresa, 'logo' => $logo), $response);
+        }
+        else {
+            $this->render('VentasBundle:Presupuesto:presupuesto.pdf.twig',
+                array('presupuesto' => $presupuesto, 'empresa' => $empresa, 'logo' => $logo), $response);
+        }
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

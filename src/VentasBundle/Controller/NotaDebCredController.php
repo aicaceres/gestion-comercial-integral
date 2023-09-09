@@ -62,6 +62,7 @@ class NotaDebCredController extends Controller {
     public function newAction(Request $request) {
         $unidneg_id = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_notadebcred');
+        $tipoNota = $request->get('tipo');
         $em = $this->getDoctrine()->getManager();
         $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
         // Verificar si la caja está abierta CAJA=1
@@ -72,7 +73,6 @@ class NotaDebCredController extends Controller {
         }
         $entity = new NotaDebCred();
         $entity->setFecha(new \DateTime());
-
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if ($param) {
             // cargar datos parametrizados por defecto
@@ -85,6 +85,10 @@ class NotaDebCredController extends Controller {
             $entity->setMoneda($moneda);
             $entity->setCotizacion($moneda->getCotizacion());
         }
+        $entity->setSigno($tipoNota == 'CRE' ? '-' : '+' );
+        // tipo de comprobante B para consumidor final que es cliente x defecto al inicio
+        $tipoComprobante = $em->getRepository('ConfigBundle:AfipComprobante')->getIdByTipo($tipoNota . '-B');
+        $entity->setTipoComprobante($tipoComprobante);
         $hoy = new \DateTime();
         $entity->setPeriodoAsocDesde($hoy);
         $entity->setPeriodoAsocHasta($hoy);
@@ -143,7 +147,6 @@ class NotaDebCredController extends Controller {
             $entity->setFecha(new \DateTime());
             $entity->setUnidadNegocio($unidneg);
         }
-
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
 
@@ -201,8 +204,10 @@ class NotaDebCredController extends Controller {
                     $entity->setNombreCliente($cliente->getNombre());
                 }
 
-                $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
-                $entity->setComprobanteAsociado($compAsoc);
+                if ($request->get('ventasbundle_notadebcred_comprobanteAsociado')) {
+                    $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
+                    $entity->setComprobanteAsociado($compAsoc);
+                }
 
                 if (is_null($entity->getDescuentoRecargo())) {
                     $entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo());
@@ -275,7 +280,7 @@ class NotaDebCredController extends Controller {
                 $entity->setPercIibb($impTrib);
                 $entity->setTotal($impTotal);
                 // signo
-                $entity->setSigno($tipo->getSigno());
+//                $entity->setSigno($tipo->getSigno());
                 $entity->setEstado('CREADO');
                 $em->persist($entity);
                 $em->flush();
@@ -595,14 +600,11 @@ class NotaDebCredController extends Controller {
             if ($entity->getNotaElectronica()) {
                 throw $this->createNotFoundException('No se puede eliminar una nota emitida fiscalmente.');
             }
-            if ($entity->getComprobanteAsociado()) {
-
-                die;
-            }
-
+            $cliente = $entity->getNombreClienteTxt();
+            $operacion = $entity->getId();
             $em->remove($entity);
             $em->flush();
-            $this->addFlash('success', 'La nota fue eliminada!');
+            $this->addFlash('success', 'La nota #' . $operacion . ' de ' . $cliente . ' fue eliminada!');
         }
         catch (\Exception $ex) {
             $this->addFlash('error', 'Error de eliminación. ' . $ex->getMessage());

@@ -1,14 +1,15 @@
 <?php
 
 namespace VentasBundle\Entity;
-use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * VentasBundle\Entity\Presupuesto
  * @ORM\Table(name="ventas_presupuesto")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\PresupuestoRepository")
+ * @Gedmo\Loggable()
  */
 class Presupuesto {
     /**
@@ -28,6 +29,7 @@ class Presupuesto {
     /**
      * @var datetime $fechaPresupuesto
      * @ORM\Column(name="fecha_presupuesto", type="datetime", nullable=false)
+     * @Gedmo\Versioned()
      */
     private $fechaPresupuesto;
 
@@ -38,52 +40,61 @@ class Presupuesto {
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
+     * @Gedmo\Versioned()
      */
     protected $estado = 'EMITIDO';
 
     /**
      * @var integer $descuentoRecargo
      * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $descuentoRecargo;
 
     /**
      * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="facturasVenta")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $cliente;
 
     /**
      * @var string $nombreCliente
      * @ORM\Column(name="nombre_cliente", type="string", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $nombreCliente;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      * */
     protected $formaPago;
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $precioLista;
 
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $deposito;
 
     /**
      * @ORM\Column(name="descuenta_stock", type="boolean",nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $descuentaStock = false;
 
     /**
      * @ORM\Column(name="tipo", type="string")
+     * @Gedmo\Versioned()
      */
     protected $tipo = 'P';
 

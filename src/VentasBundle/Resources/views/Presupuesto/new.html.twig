@@ -124,7 +124,19 @@ jQuery(function ($) {
                 return false;
             }
 
-            if( $('tbody tr.item').length > 0 ){
+            const trs = $('table tbody tr.item')
+            if( trs.length > 0 ){
+                let hayVacios = false
+                trs.each(function(i,tr){
+                    obj = jQuery(tr)
+                    if(!obj.find('.widgetProducto').find('option:selected').data('comodin') && (!obj.find('.widgetProducto').val() || obj.find('[id*="_precio"]').val()==0) ){
+                            alert('Controle los items ingresados!! Elimine los items vacíos o sin precio')
+                            hayVacios = true
+                            return false
+                    }
+                })
+                if(hayVacios) return false
+                
                 // funcionalidad de remito anulada por pedido de aides
                 txt = txt + '\n\n' +'Seleccionar Tipo:';
                 jPresupuesto(txt, 'P', 'Impresión de Presupuestos', function(r) {
@@ -138,7 +150,6 @@ jQuery(function ($) {
                     }
                 });
 
-                {# $('#ventasbundle_presupuesto').submit(); #}
             }else{
                 alert('Debe ingresar items al presupuesto');
                 return false;
