@@ -44,7 +44,7 @@
 
         <fieldset class="fields">
             <div style="display: inline-block; width: 55%">
-                <label >COMPROBANTES PENDIENTES:</label>
+                <label >COMPROBANTES IMPUTADOS:</label>
                 <select class="select2" style="width:90%">
                     <option> {{ entity.comprobantesTxt }} </option>
                 </select>
@@ -54,7 +54,7 @@
                 <strong> {{ entity.moneda.simbolo }} </strong>
                 <input class="number width100" disabled="disabled" value="{{ entity.total|number_format(2,',','.') }}">
             </div>
-            <div style="display: inline-block; width: 20%;">
+            <div style="display: none; width: 20%;">
                 <label>Generar NC:</label>
                 <input type="checkbox" {% if entity.generaNotaCredito %} checked="checked" {% endif %} >
                 {% if entity.generaNotaCredito %}
@@ -79,6 +79,17 @@
                 <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
                     <tbody>
                     {% set importe = 0 %}
+                    {% if entity.generaNotaCredito %}
+                        {% set importe = importe + entity.montoNc %}
+                        <tr class="item">
+                            <td class="monedaTd" style="text-align:right;">
+                                <label>NOTA DE CRÉDITO {{ entity.notaDebCred }}: </label>
+                            </td>
+                            <td class="importeTd alignright" width="160px">
+                                <span style="font-size:16px;font-weight:bold">{{ entity.moneda.simbolo }} {{ entity.montoNc|number_format(3,',','.') }}</span>
+                            </td>
+                        </tr>
+                    {% endif %}
                     {% for det in entity.cobroDetalles %}
                         {% set importe = importe + det.importe %}
                         {% if det.tipoPago == 'EFECTIVO' %}
