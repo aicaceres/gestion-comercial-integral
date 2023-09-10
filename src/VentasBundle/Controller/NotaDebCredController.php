@@ -93,7 +93,7 @@ class NotaDebCredController extends Controller {
         $entity->setPeriodoAsocDesde($hoy);
         $entity->setPeriodoAsocHasta($hoy);
 
-        $form = $this->createCreateForm($entity);
+        $form = $this->createCreateForm($entity, null);
         return $this->render('VentasBundle:NotaDebCred:new.html.twig', array(
                 'entity' => $entity,
                 'form' => $form->createView(),
@@ -105,10 +105,11 @@ class NotaDebCredController extends Controller {
      * @param NotaCredito $entity The entity
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createCreateForm(NotaDebCred $entity) {
+    private function createCreateForm(NotaDebCred $entity, $tipoComp) {
         $form = $this->createForm(new NotaDebCredType(), $entity, array(
             'action' => $this->generateUrl('ventas_notadebcred_create'),
             'method' => 'POST',
+            'attr' => array('tipoComp' => $tipoComp),
         ));
         return $form;
     }
@@ -147,7 +148,11 @@ class NotaDebCredController extends Controller {
             $entity->setFecha(new \DateTime());
             $entity->setUnidadNegocio($unidneg);
         }
-        $form = $this->createCreateForm($entity);
+        $form = $this->createCreateForm($entity, $datos['tipoComprobante']);
+
+//        $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->find($datos['tipoComprobante']);
+//        $form->get('tipoComprobante')->setData(null);
+
         $form->handleRequest($request);
 
         if ($form->isValid()) {
@@ -239,7 +244,7 @@ class NotaDebCredController extends Controller {
                     $impTrib = 0;
                     if ($catIva == 'I') {
                         $neto = round($impNeto, 2);
-                        $iibb = round(($neto * $this->getParameter('iibb_percent') / 100), 2);
+                        $iibb = round(($neto * $cliente->getPercepcionRentas() / 100), 2);
                         $impTrib = $iibb;
                     }
                     $impTotal += $impTrib;
@@ -298,15 +303,16 @@ class NotaDebCredController extends Controller {
                 return new JsonResponse($response);
             }
         }
-// $errors = array();
-//         if ($form->count() > 0) {
-//             foreach ($form->all() as $child) {
-//                 if (!$child->isValid()) {
-//                     $errors[$child->getName()] = (String) $form[$child->getName()]->getErrors();
-//                 }
-//             }
-//         }
-// var_dump($errors);die;
+        $errors = array();
+        if ($form->count() > 0) {
+            foreach ($form->all() as $child) {
+                if (!$child->isValid()) {
+                    $errors[$child->getName()] = (String) $form[$child->getName()]->getErrors();
+                }
+            }
+        }
+        var_dump($errors);
+        die;
         $response['res'] = 'ERROR';
         $response['msg'] = 'Formulario inválido';
         return new JsonResponse($response);

@@ -27,27 +27,28 @@ class FacturaController extends Controller {
         $unidneg = $this->get('session')->get('unidneg_id');
         $user = $this->getUser();
         UtilsController::haveAccess($user, $unidneg, 'ventas_factura');
-        $em = $this->getDoctrine()->getManager();                
-        
+        $em = $this->getDoctrine()->getManager();
+
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
-        
-        if( $user->getAccess($unidneg, 'ventas_venta_own') && !$user->isAdmin($unidneg)){
+
+        if ($user->getAccess($unidneg, 'ventas_venta_own') && !$user->isAdmin($unidneg)) {
             $id = $user->getId();
             $owns = true;
-        }else{
+        }
+        else {
             $id = $request->get('userId');
             $owns = false;
-        }        
+        }
         $entities = $em->getRepository('VentasBundle:Venta')->findByCriteria($unidneg, $desde, $hasta, $id);
-        $users = $em->getRepository('VentasBundle:Venta')->getUsers();                
+        $users = $em->getRepository('VentasBundle:Venta')->getUsers();
         return $this->render('VentasBundle:Venta:index.html.twig', array(
-                    'entities' => $entities,
-                    'id' => $id,
-                    'owns' => $owns,
-                    'users' => $users,                    
-                    'desde' => $desde,
-                    'hasta' => $hasta
+                'entities' => $entities,
+                'id' => $id,
+                'owns' => $owns,
+                'users' => $users,
+                'desde' => $desde,
+                'hasta' => $hasta
         ));
 
 
@@ -57,15 +58,15 @@ class FacturaController extends Controller {
         $cliId = $request->get('cliId');
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
-        /*$clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array('activo' => 1), array('nombre' => 'ASC'));*/
+        /* $clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array('activo' => 1), array('nombre' => 'ASC')); */
         $entities = $em->getRepository('VentasBundle:Factura')->findByCriteria($unidneg, $cliId, $desde, $hasta);
         //$entities = $em->getRepository('VentasBundle:Factura')->findByUnidadNegocio($this->get('session')->get('unidneg_id'));
         return $this->render('VentasBundle:Factura:index.html.twig', array(
-                    'entities' => $entities,
-                    //'clientes' => $clientes,
-                    'cliId' => $cliId,
-                    'desde' => $desde,
-                    'hasta' => $hasta
+                'entities' => $entities,
+                //'clientes' => $clientes,
+                'cliId' => $cliId,
+                'desde' => $desde,
+                'hasta' => $hasta
         ));
     }
 
@@ -85,8 +86,8 @@ class FacturaController extends Controller {
 
         $form = $this->createCreateForm($entity);
         return $this->render('VentasBundle:Factura:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -109,6 +110,7 @@ class FacturaController extends Controller {
      * @Template("VentasBundle:Factura:edit.html.twig")
      */
     public function createAction(Request $request) {
+        die;
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_factura_new');
         $entity = new Factura();
         $form = $this->createCreateForm($entity);
@@ -134,8 +136,8 @@ class FacturaController extends Controller {
                     $this->addFlash('error', 'Debe ingresar punto de venta y número de comprobante!');
                     $em->getConnection()->rollback();
                     return $this->render('VentasBundle:Factura:edit.html.twig', array(
-                                'entity' => $entity,
-                                'form' => $form->createView(),
+                            'entity' => $entity,
+                            'form' => $form->createView(),
                     ));
                 }
 
@@ -165,8 +167,8 @@ class FacturaController extends Controller {
             }
         }
         return $this->render('VentasBundle:Factura:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -183,7 +185,7 @@ class FacturaController extends Controller {
             throw $this->createNotFoundException('Unable to find Factura entity.');
         }
         return $this->render('VentasBundle:Factura:show.html.twig', array(
-                    'entity' => $entity));
+                'entity' => $entity));
     }
 
     /**
@@ -219,10 +221,10 @@ class FacturaController extends Controller {
      */
     private function createDeleteForm($id) {
         return $this->createFormBuilder()
-                        ->setAction($this->generateUrl('factura_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->add('submit', 'submit', array('label' => 'Delete'))
-                        ->getForm()
+                ->setAction($this->generateUrl('factura_delete', array('id' => $id)))
+                ->setMethod('DELETE')
+                ->add('submit', 'submit', array('label' => 'Delete'))
+                ->getForm()
         ;
     }
 
@@ -294,8 +296,8 @@ class FacturaController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:Factura:pdf-facturas.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro,
-                    'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'filtro' => $textoFiltro,
+                'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

@@ -336,6 +336,7 @@ class ProductoRepository extends EntityRepository {
             ->where('p.nombre LIKE :key')
             ->orWhere('p.codigo LIKE :key')
             ->orWhere('p.codigoBarra LIKE :key')
+            ->andWhere('p.activo=1')
             ->orderBy('p.nombre')
             ->setParameter('key', '%' . $key . '%')
             ->setMaxResults(20);

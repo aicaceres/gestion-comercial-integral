@@ -76,7 +76,8 @@ class ImpresoraFiscalController extends Controller {
 
         $repAnterior = $em->getRepository('VentasBundle:ImpresoraFiscal')->findUltimotReporte($cajaId);
         $desde = $repAnterior['fechaHasta'] ? $repAnterior['fechaHasta']->format("dmy") : date("dmy", strtotime($hasta . "- 7 days"));
-        $file = 'M:\\Cierres\\semanal' . $desde . 'al' . $hasta . '.zip';
+//        $file = 'M:\\Cierres\\semanal' . $desde . 'al' . $hasta . '.zip';
+        $file = "c:\\datos\\reporte.zip";
         $rango = array('desde' => $desde, 'hasta' => $hasta, 'file' => $file);
         return new JsonResponse($rango);
     }

@@ -583,7 +583,7 @@ jQuery(function ($) {
 // implementacion por agregado de precio unitario editable en comodin
 						idInputPrecio = objprecio.find('[id*="_precio"]').attr("id")
 						inputPrecioUnitario = $(
-							`<input type="text" class="precioUnitarioComodin" data-precio="${idInputPrecio}" 						value="0" style="text-align:right" onchange="handleChangePrecio()"/>`
+							`<input type="text" data-venta="si" class="precioUnitarioComodin" data-precio="${idInputPrecio}" value="0" style="text-align:right" onchange="handleChangePrecio()"/>`
 						)
 
 						if (data.comodin) {

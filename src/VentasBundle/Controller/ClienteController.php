@@ -51,6 +51,8 @@ class ClienteController extends Controller {
         $localidad = $em->getRepository('ConfigBundle:Localidad')->findOneByByDefault(1);
         $entity = new Cliente();
         $entity->setLocalidad($localidad);
+        $catRentas = $em->getRepository('ConfigBundle:Escalas')->findOneBy(['tipo' => 'P', 'nombre' => 'SIN DEFINIR']);
+        $entity->setCategoriaRentas($catRentas);
         $form = $this->createCreateForm($entity);
 
         return $this->render('VentasBundle:Cliente:edit.html.twig', array(
@@ -306,12 +308,12 @@ class ClienteController extends Controller {
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
         $em = $this->getDoctrine()->getManager();
-        $clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array(), array('nombre' => 'ASC'));
-        if ($clientes) {
-            if ($cliId)
-                $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
-            else
-                $cliente = $clientes[0];
+//        $clientes = $em->getRepository('VentasBundle:Cliente')->findBy(array(), array('nombre' => 'ASC'));
+        if ($cliId) {
+//            if ($cliId)
+            $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
+//            else
+//                $cliente = $clientes[0];
 
             $ctacte = $em->getRepository('VentasBundle:Cliente')->getDetalleCtaCte($cliente->getId(), $desde, $hasta);
             foreach ($ctacte as $key => &$var) {
@@ -631,6 +633,7 @@ class ClienteController extends Controller {
                     $notacredito->setFormaPago($formaPago);
                     $notaElectronica = new FacturaElectronica();
                     $notaElectronica->setUnidadNegocio($unidneg);
+                    $notaElectronica->setCliente($entity->getCliente());
                     $notaElectronica->setPuntoVenta($this->getParameter('ptovta_ws_factura'));
                     $notaElectronica->setConcepto(1); // Productos
                     $notaElectronica->setCbteFch(intval($notacredito->getFecha()->format('Ymd')));
@@ -667,8 +670,8 @@ class ClienteController extends Controller {
                     // armar item
                     // calculos
                     $ivaPercent = '21.00';
-                    $retRentas = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : 0;
-                    $iibbPercent = $retRentas > 0 ? $this->getParameter('iibb_percent') : 0;
+                    $iibbPercent = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : 0;
+//                    $iibbPercent = $retRentas > 0 ? $this->getParameter('iibb_percent') : 0;
 
                     $grav = ($catIva == 'I') ? 1 + (($ivaPercent + $iibbPercent) / 100) : 1 + ($ivaPercent / 100);
                     $impNeto = $montoNotaCredito / $grav;

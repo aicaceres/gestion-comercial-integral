@@ -18,7 +18,7 @@
         {% endif %}
       </select>
 
-        <a href="javascript:void(0)" style="display:none" class="btn btnaction btn_search" onclick="handleSearchProducto(this)"></a>
+        <a href="javascript:void(0)" class="btn btnaction btn_search" onclick="handleSearchProducto(this)"></a>
         <small class="bajominimo hidden">Bajo Mínimo</small>
         {% if item.textoComodin is defined %}
             {% set comodin = item.vars.data.producto.comodin is defined ? item.vars.data.producto.comodin : false %}

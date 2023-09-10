@@ -1,4 +1,5 @@
 <?php
+
 namespace AppBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -14,9 +15,9 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     errorPath="producto",
  *     message="Registro de stock duplicado."
  * )
+ * @Gedmo\Loggable()
  */
-class Stock
-{
+class Stock {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -24,31 +25,33 @@ class Stock
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
-    
-     /**
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
-    protected $deposito; 
-    
-     /**
+    protected $deposito;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="stock")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
-    protected $producto; 
+    protected $producto;
 
-     /**
+    /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3 )
+     * @Gedmo\Versioned()
      */
-    protected $cantidad=0;
+    protected $cantidad = 0;
+
     /**
      * @var string $stock_minimo
      * @ORM\Column(name="stock_minimo", type="decimal", scale=3,  nullable=true)
      */
     protected $stockMinimo;
-    
-     /**
+
+    /**
      * @var integer $costo
      * @ORM\Column(name="costo", type="decimal", scale=3, nullable=true )
      */
@@ -60,7 +63,7 @@ class Stock
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -69,14 +72,12 @@ class Stock
      */
     private $createdBy;
 
-    
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -86,20 +87,18 @@ class Stock
      * @param integer $cantidad
      * @return Stock
      */
-    public function setCantidad($cantidad)
-    {
+    public function setCantidad($cantidad) {
         $this->cantidad = $cantidad;
-    
+
         return $this;
     }
 
     /**
      * Get cantidad
      *
-     * @return integer 
+     * @return integer
      */
-    public function getCantidad()
-    {
+    public function getCantidad() {
         return $this->cantidad;
     }
 
@@ -109,20 +108,18 @@ class Stock
      * @param string $costo
      * @return Stock
      */
-    public function setCosto($costo)
-    {
+    public function setCosto($costo) {
         $this->costo = $costo;
-    
+
         return $this;
     }
 
     /**
      * Get costo
      *
-     * @return string 
+     * @return string
      */
-    public function getCosto()
-    {
+    public function getCosto() {
         return $this->costo;
     }
 
@@ -132,20 +129,18 @@ class Stock
      * @param \DateTime $created
      * @return Stock
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -155,19 +150,17 @@ class Stock
      * @param \AppBundle\Entity\Producto $producto
      * @return Stock
      */
-    public function setProducto(\AppBundle\Entity\Producto $producto = null)
-    {
-        $this->producto = $producto;    
+    public function setProducto(\AppBundle\Entity\Producto $producto = null) {
+        $this->producto = $producto;
         return $this;
     }
 
     /**
      * Get producto
      *
-     * @return \AppBundle\Entity\Producto 
+     * @return \AppBundle\Entity\Producto
      */
-    public function getProducto()
-    {
+    public function getProducto() {
         return $this->producto;
     }
 
@@ -177,19 +170,17 @@ class Stock
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Stock
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
-        $this->createdBy = $createdBy;    
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
+        $this->createdBy = $createdBy;
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -199,19 +190,17 @@ class Stock
      * @param \AppBundle\Entity\Deposito $deposito
      * @return Stock
      */
-    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null)
-    {
-        $this->deposito = $deposito;    
+    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null) {
+        $this->deposito = $deposito;
         return $this;
     }
 
     /**
      * Get deposito
      *
-     * @return \AppBundle\Entity\Deposito 
+     * @return \AppBundle\Entity\Deposito
      */
-    public function getDeposito()
-    {
+    public function getDeposito() {
         return $this->deposito;
     }
 
@@ -221,8 +210,7 @@ class Stock
      * @param string $stockMinimo
      * @return Stock
      */
-    public function setStockMinimo($stockMinimo)
-    {
+    public function setStockMinimo($stockMinimo) {
         $this->stockMinimo = $stockMinimo;
 
         return $this;
@@ -231,15 +219,15 @@ class Stock
     /**
      * Get stockMinimo
      *
-     * @return string 
+     * @return string
      */
-    public function getStockMinimo()
-    {
+    public function getStockMinimo() {
         return $this->stockMinimo;
     }
-    
-/** Calculos    **/ 
-    public function getValorizado(){
+
+    /** Calculos    * */
+    public function getValorizado() {
         return $this->getProducto()->getCosto() * $this->cantidad;
-    }    
+    }
+
 }

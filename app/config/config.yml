@@ -119,7 +119,7 @@ stof_doctrine_extensions:
             timestampable: true
             sluggable: true
             blameable: true
-            loggable: false
+            loggable: true
             softdeleteable: false
 
 ps_pdf:
@@ -136,11 +136,7 @@ ps_pdf:
     document_parser_type: ~
 
 services:
-    gedmo.listener.loggable:
-        class: Gedmo\Loggable\LoggableListener
-        tags:
-            - { name: doctrine.event_subscriber, connection: default }    
-            
+  
     factura_electronica_webservice:
       class: VentasBundle\Service\FacturaElectronicaWebservice
       arguments: [ '@doctrine.orm.entity_manager', '@session', '%ptovta_ws_factura%', '%ptovta_ifu_ticket%', '%iibb_percent%', '%cuit_afip%' ]

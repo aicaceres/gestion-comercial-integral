@@ -125,8 +125,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.inputmask.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/custom/ifu.js') }}"></script>
 <script type="text/javascript">
-jQuery(function ($) {
-    $(window).on('load', function () {
+jQuery(document).ready(function($){
 
       // fecha desde y hasta
       $('.datepicker').datepicker({
@@ -194,6 +193,7 @@ jQuery(function ($) {
                     return false;
                 }
             }
+                        
             const trs = $('table.detalle tbody tr.item')
             if( trs.length > 0 ){
                 let hayVacios = false
@@ -221,20 +221,25 @@ jQuery(function ($) {
         
         // setear tipo comprobante segun cliente
         setTipoComprobante()
-    });
+        
 });
 
 function setTipoComprobante(){
     const letras = (jQuery('.selectorCliente').data('categiva') === 'I' || jQuery('.selectorCliente').data('categiva') === 'M') ? ['A','M'] : ['B']
     jQuery('#ventasbundle_notadebcred_tipoComprobante').find("option").each(function (e) {
         option = jQuery(this)
+        option.attr("selected",false)
         disabled = true
         letras.forEach(function(l){
             if( option.text().slice(-1).includes(l) ) disabled = false
         })
         option.attr("disabled", disabled )
     })
+{#    value = jQuery('#ventasbundle_notadebcred_tipoComprobante').children('option:enabled').eq(0).val()#}
+{#    jQuery('#ventasbundle_notadebcred_tipoComprobante').val(value)#}
     jQuery('#ventasbundle_notadebcred_tipoComprobante').children('option:enabled').eq(0).prop('selected',true);
+{#    console.log()#}
+{#    objTiposComprobante.find("option:not([disabled]):first").val()#}
 }
 
 function setPeriodoAsociado(){

@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
  * @ORM\Table(name="producto")
  * @ORM\Entity(repositoryClass="AppBundle\Entity\ProductoRepository")
  * @ORM\HasLifecycleCallbacks
+ * @Gedmo\Loggable()
  */
 class Producto {
     /**
@@ -32,6 +33,7 @@ class Producto {
     /**
      * @var string $codigoBarra
      * @ORM\Column(name="codigo_barra", type="string", length=16, nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $codigoBarra;
 
@@ -39,6 +41,7 @@ class Producto {
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false)
      * @Assert\NotBlank()
+     * @Gedmo\Versioned()
      */
     protected $nombre;
 
@@ -51,24 +54,28 @@ class Producto {
     /**
      * @var string $costo
      * @ORM\Column(name="costo", type="decimal", scale=3,  nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $costo;
 
     /**
      * @var string $iva
      * @ORM\Column(name="iva", type="decimal", scale=2,  nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $iva = 21;
 
     /**
      * @var string $stock_minimo
      * @ORM\Column(name="stock_minimo", type="decimal", scale=3,  nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $stockMinimo;
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="rubro_id", referencedColumnName="id", onDelete="SET NULL")
+     * @Gedmo\Versioned()
      * */
     protected $rubro;
 
@@ -81,6 +88,7 @@ class Producto {
     /**
      * @ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="productos")
      * @ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $proveedor;
 
@@ -101,6 +109,7 @@ class Producto {
 
     /**
      * @ORM\Column(name="activo", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $activo = true;
 
@@ -111,17 +120,20 @@ class Producto {
 
     /**
      * @ORM\Column(name="comodin", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $comodin = false;
 
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $bulto = false;
 
     /**
      * @var integer $cantidadxBulto
      * @ORM\Column(name="cantidad_x_bulto", type="decimal", scale=2, nullable=true )
+     * @Gedmo\Versioned()
      */
     protected $cantidadxBulto;
 

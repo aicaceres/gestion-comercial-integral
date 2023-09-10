@@ -28,6 +28,13 @@ class FacturaElectronica {
     protected $unidadNegocio;
 
     /**
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente")
+     * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
+     */
+    protected $cliente;
+
+    /**
      * @var integer $puntoVenta
      * @ORM\Column(name="punto_venta", type="integer")
      * @Gedmo\Versioned()
@@ -942,4 +949,27 @@ class FacturaElectronica {
         return $this->unidadNegocio;
     }
 
+
+    /**
+     * Set cliente
+     *
+     * @param \VentasBundle\Entity\Cliente $cliente
+     * @return FacturaElectronica
+     */
+    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
+    {
+        $this->cliente = $cliente;
+
+        return $this;
+    }
+
+    /**
+     * Get cliente
+     *
+     * @return \VentasBundle\Entity\Cliente 
+     */
+    public function getCliente()
+    {
+        return $this->cliente;
+    }
 }

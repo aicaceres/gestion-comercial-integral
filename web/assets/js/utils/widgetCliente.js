@@ -77,7 +77,7 @@ jQuery(document).ready(function ($) {
             
             setTimeout(function () {
               setTipoComprobante()
-              jQuery("#updating-data").addClass("hidden")
+//              jQuery("#updating-data").addClass("hidden")
               selectCliente.select2('focus')
             }, 2000)
 					}
@@ -93,10 +93,10 @@ jQuery(document).ready(function ($) {
 		$search.hide()
 		$search.val(term)
 		$search.trigger("input")
-
 		setTimeout(function () {
 			$(".select2-results__option").trigger("mouseup")
 			$search.show()
-		}, 1000)
+                        jQuery("#updating-data").addClass("hidden")
+		}, 5000)
 	}
 })

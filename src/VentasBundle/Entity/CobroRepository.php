@@ -43,10 +43,12 @@ class CobroRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select("f")
             ->from('VentasBundle:FacturaElectronica', 'f')
-            ->innerJoin('f.cobro', 'c')
-            ->innerJoin('c.cliente', 'cl')
+            ->innerJoin('f.cliente', 'cl')
+            ->innerJoin('f.tipoComprobante', 't')
             ->where('cl.id= :cli')
-            ->orderBy('c.fechaCobro')
+            ->andWhere("t.valor NOT LIKE 'CRE-%'")
+            ->andWhere('f.saldo>0')
+            ->orderBy('f.created', 'DESC')
             ->setParameter('cli', $cliente);
         if ($term) {
             $query->andWhere("f.nroComprobante LIKE '%" . $term . "%'");

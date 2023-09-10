@@ -178,7 +178,7 @@ function loadModalProductos(prod) {
 	const deposito = jQuery('[id*="_deposito"]').val()
 	const cotizacion = jQuery(".datos-moneda").data("cotizacion")
 	const categoriaIva = jQuery(".selectorCliente").data("categiva")
-  const descuento = jQuery('.datos-formapago').data("porcentajerecargo")
+        const descuento = jQuery('.datos-formapago').data("porcentajerecargo")
 
 	const oTable = jQuery("#productos_table").dataTable({
 		columnDefs: [
@@ -201,9 +201,13 @@ function loadModalProductos(prod) {
           let item = jQuery(this)
 					let data = {
 						id: item.data("id"),
-						text: item.text()+ ' | '+ item.data("codigo")+ ' | $'+ item.data("contado")
+						text: item.data('text')
 					}
 					var newOption = new Option(data.text, data.id, true, true)
+                                          newOption.setAttribute('data-precio', item.data('precio'))
+                                          newOption.setAttribute('data-alicuota', item.data('alicuota'))
+                                          newOption.setAttribute('data-comodin', item.data('comodin'))
+                                          newOption.setAttribute('data-bajominimo', item.data('bajominimo'))	
 					prod.append(newOption).trigger("select2:select")
           jQuery("#popup").dialog("destroy")
           prod.change()

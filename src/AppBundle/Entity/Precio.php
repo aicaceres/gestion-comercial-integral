@@ -1,4 +1,5 @@
 <?php
+
 namespace AppBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -15,9 +16,9 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     errorPath="producto",
  *     message="Registro de precio duplicado."
  * )
+ * @Gedmo\Loggable()
  */
-class Precio
-{
+class Precio {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -35,21 +36,21 @@ class Precio
     /**
      * @var string $precio
      * @ORM\Column(name="precio", type="decimal", scale=3,  nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $precio;
 
-     /**
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista", inversedBy="precios")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
      */
     protected $precioLista;
 
-     /**
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="precios")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
     protected $producto;
-
 
     /**
      * @var datetime $updated
@@ -66,8 +67,8 @@ class Precio
      */
     private $updatedBy;
 
-    public function getPrecioConIva(){
-        return $this->precio * ( 1 + $this->getProducto()->getIva()/100);
+    public function getPrecioConIva() {
+        return $this->precio * ( 1 + $this->getProducto()->getIva() / 100);
     }
 
     /**
@@ -75,8 +76,7 @@ class Precio
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -85,8 +85,7 @@ class Precio
      *
      * @return string
      */
-    public function getPrecio()
-    {
+    public function getPrecio() {
         return $this->precio;
     }
 
@@ -96,8 +95,7 @@ class Precio
      * @param string $precio
      * @return Precio
      */
-    public function setPrecio($precio)
-    {
+    public function setPrecio($precio) {
         $this->precio = $precio;
         return $this;
     }
@@ -108,8 +106,7 @@ class Precio
      * @param \DateTime $updated
      * @return Precio
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -120,8 +117,7 @@ class Precio
      *
      * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -131,8 +127,7 @@ class Precio
      * @param \AppBundle\Entity\PrecioLista $precioLista
      * @return Precio
      */
-    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null)
-    {
+    public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null) {
         $this->precioLista = $precioLista;
         return $this;
     }
@@ -142,8 +137,7 @@ class Precio
      *
      * @return \AppBundle\Entity\PrecioLista
      */
-    public function getPrecioLista()
-    {
+    public function getPrecioLista() {
         return $this->precioLista;
     }
 
@@ -153,8 +147,7 @@ class Precio
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Precio
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -165,8 +158,7 @@ class Precio
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -176,8 +168,7 @@ class Precio
      * @param \AppBundle\Entity\Producto $producto
      * @return Precio
      */
-    public function setProducto(\AppBundle\Entity\Producto $producto = null)
-    {
+    public function setProducto(\AppBundle\Entity\Producto $producto = null) {
         $this->producto = $producto;
         return $this;
     }
@@ -187,8 +178,7 @@ class Precio
      *
      * @return \AppBundle\Entity\Producto
      */
-    public function getProducto()
-    {
+    public function getProducto() {
         return $this->producto;
     }
 
@@ -198,8 +188,7 @@ class Precio
      * @param string $costo
      * @return Precio
      */
-    public function setCosto($costo)
-    {
+    public function setCosto($costo) {
         $this->costo = $costo;
 
         return $this;
@@ -210,8 +199,8 @@ class Precio
      *
      * @return string
      */
-    public function getCosto()
-    {
+    public function getCosto() {
         return $this->costo;
     }
+
 }

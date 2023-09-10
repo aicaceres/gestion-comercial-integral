@@ -302,17 +302,20 @@ class FacturaElectronicaWebservice {
         $em = $this->em;
         $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($dataFe['unidadNegocio']);
         $tipoComprobante = $em->getRepository('ConfigBundle:AfipComprobante')->find($dataFe['afipComprobante']);
-        $cobro = $nota = null;
+        $cobro = $nota = $cliente = null;
         if ($dataFe['cobroId']) {
             $cobro = $em->getRepository('VentasBundle:Cobro')->find($dataFe['cobroId']);
+            $cliente = $cobro->getCliente();
         }
         elseif ($dataFe['notaId']) {
             $nota = $em->getRepository('VentasBundle:NotaDebCred')->find($dataFe['notaId']);
+            $cliente = $nota->getCliente();
         }
 
         $fe = new FacturaElectronica();
         $fe->setUnidadNegocio($unidneg);
         $fe->setTipoComprobante($tipoComprobante);
+        $fe->setCliente($cliente);
         $fe->setCobro($cobro);
         $fe->setNotaDebCred($nota);
         $fe->setPuntoVenta($dataFe['puntoVta']);

@@ -195,7 +195,7 @@ class ProductoController extends Controller {
             $msg = 'OK';
         }
         catch (\Exception $ex) {
-            $msg = $ex->getTraceAsString();
+            $msg = "El producto no se puede eliminar si esta siendo utilizado en el sistema";
         }
         return new Response(json_encode($msg));
     }
@@ -784,9 +784,9 @@ class ProductoController extends Controller {
      */
     public function getListaProductosAction() {
         $em = $this->getDoctrine()->getManager();
-        $productos = $em->getRepository('AppBundle:Producto')->findByActivo(1);
+//        $productos = $em->getRepository('AppBundle:Producto')->findByActivo(1);
         $partial = $this->renderView('AppBundle:Producto:_partial-lista-productos.html.twig',
-            array('productos' => $productos));
+            array('productos' => null));
         return new Response($partial);
     }
 
@@ -860,37 +860,65 @@ class ProductoController extends Controller {
                 // In all cases where something does not exist or went wrong, return -
                 $responseTemp = $precioTemp = "-";
                 $rowPrecio = $producto->getPrecios()[0];
-                $precio = $alicuota = 0;
-
+                $precio = 0;
+                $alicuota = $producto->getIva();
                 if ($rowPrecio !== null) {
-                    if ($esPresupuesto) {
-                        $precio = $precioConv = $rowPrecio->getPrecio();
-                        $alicuota = 0;
+                    $precioUnit = floatval($producto->getPrecioByLista($listaprecio));
+                    if (in_array($categoriaIva, ['I', 'M'])) {
+                        $precio = round($precioUnit, 3);
                     }
                     else {
-                        $alicuota = $producto->getIva();
-                        $precio = $rowPrecio->getPrecio();
-                        if (in_array($categoriaIva, array('I', 'M'))) {
-                            $precioConv = round(($precio / $cotizacion), 3);
-                        }
-                        else {
-                            $precioConv = round(( $precio * ( 1 + $alicuota / 100) ) / $cotizacion, 3);
+                        $montoIva = ($precioUnit * ( $alicuota / 100 ));
+                        $precio = round(($precioUnit + $montoIva), 3);
+                    }
+                    $pagoContado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
+                    $precioContado = $precio;
+                    if ($pagoContado) {
+                        $precioContado = round($precio * ( 1 + $pagoContado->getPorcentajeRecargo() / 100 ), 3);
+                    }
+                    $bajominimo = false;
+                    $stock = 0;
+                    if ($deposito) {
+                        $regStock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito);
+                        if ($regStock) {
+                            $minimo = $regStock->getStockMinimo() ? $regStock->getStockMinimo() : $producto->getStockMinimo();
+                            $stock = $regStock->getCantidad();
+                            $dif = $stock - $minimo;
+                            $bajominimo = ( $dif < 0 );
                         }
                     }
-
-                    // si hay descuento aplicar al precio a mostrar
+                    $codigo = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getCodigo()));
+                    $text = $producto->getNombre() . ' | COD ' . $codigo . ' | Contado: $' . $precioContado . ' | Stock:' . $stock;
+                    $comodin = $producto->getComodin() ? 1 : 0;
+                    $bajominimo = $bajominimo ? 1 : 0;
+                    $precioTemp = $precioUnit;
                     if ($descuento < 0) {
-                        $precioConv = round($precioConv * ( 1 + $descuento / 100), 3);
+                        $precioTemp = round($precio * ( 1 + $descuento / 100), 3);
                     }
 
-                    $precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv));
+                    //
+//                    if ($esPresupuesto) {
+//                        $precio = $precioConv = $rowPrecio->getPrecio();
+//                        $alicuota = 0;
+//                    }
+//                    else {
+//                        $alicuota = $producto->getIva();
+//                        $precio = $rowPrecio->getPrecio();
+//                        if (in_array($categoriaIva, array('I', 'M'))) {
+//                            $precioConv = round(($precio / $cotizacion), 3);
+//                        }
+//                        else {
+//                            $precioConv = round(( $precio * ( 1 + $alicuota / 100) ) / $cotizacion, 3);
+//                        }
+//                    }
+                    // si hay descuento aplicar al precio a mostrar
+                    //$precioTemp = htmlentities(str_replace(array("\r\n", "\n", "\r", "\t"), ' ', $precioConv));
                 }
-                $codigo = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getCodigo()));
                 switch ($column['name']) {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
-                            $responseTemp = "<a class='nombre-producto' data-contado='" . $precioTemp . "' data-id='" . $producto->getId() . "' data-codigo='" . $codigo . "' href='javascript:void(0);'>" . $name . "</a>";
+                            $responseTemp = "<a class='nombre-producto' data-id='" . $producto->getId() . "' data-text='" . $text . "' data-precio='" . $precioUnit . "' data-alicuota='" . $alicuota . "' data-comodin='" . $comodin . "' data-bajominimo='" . $bajominimo . "' href='javascript:void(0);'>" . $name . "</a>";
                             break;
                         }
                     case 'codigo': {
@@ -902,7 +930,6 @@ class ProductoController extends Controller {
                             break;
                         }
                     case 'stock': {
-                            $stock = $producto->getStockActualxDeposito($deposito);
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $stock));
                             break;
                         }

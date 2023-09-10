@@ -21,7 +21,7 @@ jQuery(document).ready(function ($) {
     }
   })
 
-	let selectComprobante = $("#ventasbundle_notadebcred_comprobanteAsociado")
+	let selectComprobante = jQuery("#ventasbundle_notadebcred_comprobanteAsociado")
 
 	selectComprobante
 		.select2({
@@ -33,10 +33,19 @@ jQuery(document).ready(function ($) {
 				data: (params) => {
 					return {
 						searchTerm: params.term,
-						id: $("#widgetCliente").val(),
+						id: jQuery("#widgetCliente").val(),
 					}
 				},
-				processResults: (response) => ({ results: response }),
+                                processResults: (response) => {
+					results = response.map((x) => {
+						return {
+							id: x.id,
+							text: x.text,
+							cargaritems: x.cargaritems
+						}
+					})
+					return { results }
+				},  
 			},
 			placeholder: "Seleccionar...",
 			allowClear: true,
@@ -47,10 +56,12 @@ jQuery(document).ready(function ($) {
 		})
                 .on("select2:selecting", function (e) {
                   let id = e.params.args.data.id
-                  if (confirm("Desea cargar los items del comprobante asociado?")) {
-                        eliminarItemsCargados()
-                        cargarItems(id)
-                    }
+//                  if(e.params.args.data.cargaritems){
+                    if (confirm("Desea cargar los items del comprobante asociado?")) {
+                          eliminarItemsCargados()
+                          cargarItems(id)
+                      }
+//                  }
                     filtrarTipoComprobante(id)
                 })
                 .on("select2:unselect", function (e) {
@@ -62,16 +73,17 @@ jQuery(document).ready(function ($) {
                 })
 
 
+
   function cargarItems(id) {
-    $(".divcarga").removeClass("hidden")
-		$.getJSON(
+    jQuery(".divcarga").removeClass("hidden")
+		jQuery.getJSON(
 			selectComprobante.data("urlitems"),
 			{ id },
       function (data) {
         const itemsCount = data.items.length - 1;
-        $("#ventasbundle_notadebcred_descuentoRecargo").val(data.dtorec)
+        jQuery("#ventasbundle_notadebcred_descuentoRecargo").val(data.dtorec)
         
-        $.each(data.items, function (i, item) {
+        jQuery.each(data.items, function (i, item) {
           addNewItem()
           const newOption = new Option(item.text, item.id, true, true)
            newOption.setAttribute('data-precio', item.precio);
@@ -88,7 +100,7 @@ jQuery(document).ready(function ($) {
           let textoComodin = prod.parent().find('[id*="_textoComodin"]')
           textoComodin.val(item.comodin)
           //cantidad
-          $('[name*="[cantidad]"]').last().val(item.cant)
+          jQuery('[name*="[cantidad]"]').last().val(item.cant)
           // precio
           let precioComodin = prod.closest('.item').find('.precioUnitarioComodin')
           if (precioComodin.length > 0) {
@@ -100,8 +112,8 @@ jQuery(document).ready(function ($) {
           }
         })
         setTimeout(function () {
-          $("#ventasbundle_notadebcred_tipoComprobante").focus()
-          $(".divcarga").addClass("hidden")
+//          jQuery("#ventasbundle_notadebcred_tipoComprobante").focus()
+          jQuery(".divcarga").addClass("hidden")
           actualizarImportes(1)
 					}, 500)
 			}
@@ -114,14 +126,14 @@ function eliminarItemsCargados(){
 }
 
 function filtrarTipoComprobante(id) {
-    $.getJSON(
+    jQuery.getJSON(
             selectComprobante.data("urltiposvalidos"),
             {id},
             function (data) {
-                objTiposComprobante = $('[id*="_tipoComprobante"]')
+                objTiposComprobante = jQuery('[id*="_tipoComprobante"]')
                 objTiposComprobante.find("option").each(function (e) {
 
-                    $(this).attr("disabled", !data.includes(parseInt($(this).val())))
+                    jQuery(this).attr("disabled", !data.includes(parseInt(jQuery(this).val())))
 
                 })
                 objTiposComprobante.val(
@@ -130,6 +142,7 @@ function filtrarTipoComprobante(id) {
             }
     )
 }
+})
 
 function handleChangePrecio(el) {
   let input = jQuery(el)
@@ -141,7 +154,3 @@ function handleBlurPrecio(el) {
   let value = parseFloat(jQuery(el).val())
   jQuery(el).val( value.toFixed(3))
 }
-
-})
-
-

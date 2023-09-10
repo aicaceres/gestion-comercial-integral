@@ -22,7 +22,7 @@ use AppBundle\Entity\PrecioLista;
 use ComprasBundle\Entity\Proveedor;
 
 /**
- * @Route("importDataLoad")
+ * @Route("/")
  */
 class ImportDataLoadController extends Controller {
     private $csvPath;
@@ -30,7 +30,7 @@ class ImportDataLoadController extends Controller {
     private $logger;
 
     /**
-     * @Route("/{key}", name="import-dataload")
+     * @Route("/importDataLoad/{key}", name="import-dataload")
      * @Method("GET")
      */
     public function dataLoadAction($key) {
@@ -588,6 +588,36 @@ class ImportDataLoadController extends Controller {
             $fecha = new \DateTime($dateStr);
         }
         return $fecha ? ($format == 'D' ? $fecha : $fecha->format('Y-m-d')) : $fecha;
+    }
+
+    /**
+     * @Route("/updateClienteEnFacturaElectronica", name="update_cliente_facturas")
+     * @Method("GET")
+     */
+    public function updateClienteEnFacturaElectronica() {
+        $em = $this->getDoctrine()->getManager();
+        try {
+            $em->getConnection()->beginTransaction();
+            $facturas = $em->getRepository('VentasBundle:FacturaElectronica')->findAll();
+            foreach ($facturas as $fe) {
+                $cliente = null;
+                if ($fe->getCobro()) {
+                    $cliente = $fe->getCobro()->getCliente();
+                }
+                if ($fe->getNotaDebCred()) {
+                    $cliente = $fe->getNotaDebCred()->getCliente();
+                }
+                $fe->setCliente($cliente);
+                $em->persist($fe);
+                $em->flush();
+            }
+            $em->getConnection()->commit();
+            return new Response('finalizado!');
+        }
+        catch (\Exception $ex) {
+            $em->getConnection()->rollback();
+            return new Response('Ha ocurrido un error ' . $ex->getMessage());
+        }
     }
 
 }

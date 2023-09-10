@@ -47,6 +47,7 @@
                 <th>Forma de Pago</th>
                 <th>Total</th>
                 <th>Estado</th>
+                <th>Factura</th>
                 {% if not owns %}
                 <th>Usuario</th>
                 {% endif %}
@@ -62,6 +63,7 @@
                 <td>{{ entity.formaPago }}</td>
                 <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span> {{ entity.montoTotal|number_format(3,',','.') }}</td>
                 <td class="estado">{{ entity.estado }}</td>
+                <td class="factura">{% if entity.cobro %} {{ entity.cobro.facturaElectronica ? entity.cobro.facturaElectronica.comprobanteTxt : ''}} {% endif %}</td>
                 {% if not owns  %}
                 <td>{{entity.updatedBy.username|upper }}</td>
                 {% endif %}
