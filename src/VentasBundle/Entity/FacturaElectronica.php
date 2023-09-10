@@ -267,7 +267,7 @@ class FacturaElectronica {
             $simbolo = $this->getNotaDebCred()->getMoneda()->getSimbolo();
         }
         return $this->getTipoComprobante()->getValor() . ' ' . $this->getNroComprobanteTxt() .
-            ' | ' . $fecha . ' | ' . $simbolo . $this->getTotal();
+            ' | ' . $fecha . ' | ' . $simbolo . $this->getSaldo();
     }
 
     public function getComprobanteCtaCtePendienteTxt() {
@@ -949,15 +949,13 @@ class FacturaElectronica {
         return $this->unidadNegocio;
     }
 
-
     /**
      * Set cliente
      *
      * @param \VentasBundle\Entity\Cliente $cliente
      * @return FacturaElectronica
      */
-    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null)
-    {
+    public function setCliente(\VentasBundle\Entity\Cliente $cliente = null) {
         $this->cliente = $cliente;
 
         return $this;
@@ -966,10 +964,10 @@ class FacturaElectronica {
     /**
      * Get cliente
      *
-     * @return \VentasBundle\Entity\Cliente 
+     * @return \VentasBundle\Entity\Cliente
      */
-    public function getCliente()
-    {
+    public function getCliente() {
         return $this->cliente;
     }
+
 }
