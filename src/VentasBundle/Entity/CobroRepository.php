@@ -47,7 +47,7 @@ class CobroRepository extends EntityRepository {
             ->innerJoin('f.tipoComprobante', 't')
             ->where('cl.id= :cli')
             ->andWhere("t.valor NOT LIKE 'CRE-%'")
-            ->andWhere('f.saldo>0')
+            //->andWhere('f.saldo>0')
             ->orderBy('f.created', 'DESC')
             ->setParameter('cli', $cliente);
         if ($term) {

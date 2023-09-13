@@ -28,3 +28,4 @@
 *.sql
 .htaccess
 .vscode/
+*.tar.gz

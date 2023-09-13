@@ -918,6 +918,7 @@ class ProductoController extends Controller {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
                             $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $producto->getNombre()));
+                            $text = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $text));
                             $responseTemp = "<a class='nombre-producto' data-id='" . $producto->getId() . "' data-text='" . $text . "' data-precio='" . $precioUnit . "' data-alicuota='" . $alicuota . "' data-comodin='" . $comodin . "' data-bajominimo='" . $bajominimo . "' href='javascript:void(0);'>" . $name . "</a>";
                             break;
                         }

@@ -43,7 +43,7 @@ class ParametroController extends Controller {
         }
         $paramafip = $em->getRepository($entity)->findAll();
         return $this->render('ConfigBundle:Parametro:parametro-afip.html.twig', array(
-                    'entities' => $paramafip, 'slug' => $slug));
+                'entities' => $paramafip, 'slug' => $slug));
     }
 
     /**
@@ -67,11 +67,11 @@ class ParametroController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $dato = $em->getRepository($entity)->find($id);
         try {
-            if($campo === 'activo'){
-              $dato->setActivo( !$dato->getActivo() );
+            if ($campo === 'activo') {
+                $dato->setActivo(!$dato->getActivo());
             }
-            if($campo === 'visiblecompras'){
-              $dato->setVisibleCompras( !$dato->getVisibleCompras() );
+            if ($campo === 'visiblecompras') {
+                $dato->setVisibleCompras(!$dato->getVisibleCompras());
             }
             $em->persist($dato);
             $em->flush();
@@ -119,7 +119,7 @@ class ParametroController extends Controller {
         $em->flush();
         $rubros = $em->getRepository('ConfigBundle:Parametro')->findRubros();
         $partial = $this->renderView('ConfigBundle:Parametro:_partial-rubros.html.twig',
-                array('rubros' => $rubros, 'dato' => $rubro));
+            array('rubros' => $rubros, 'dato' => $rubro));
         return new Response($partial);
     }
 
@@ -135,7 +135,7 @@ class ParametroController extends Controller {
             $rubros = $em->getRepository('ConfigBundle:Parametro')->findRubros();
             $subrubros = $em->getRepository('ConfigBundle:Parametro')->findSubRubros();
             return $this->render('ConfigBundle:Parametro:list-rubro.html.twig', array(
-                        'rubros' => $rubros, 'subrubros' => $subrubros));
+                    'rubros' => $rubros, 'subrubros' => $subrubros));
         }
         elseif ($slug == 'localidad') {
             $parametros = $em->getRepository('ConfigBundle:Localidad')->findAll();
@@ -145,7 +145,7 @@ class ParametroController extends Controller {
             $parametros = $em->getRepository('ConfigBundle:Parametro')->findByAgrupadorDQL($agrupador)->getResult();
         }
         return $this->render('ConfigBundle:Parametro:list-' . $slug . '.html.twig', array(
-                    'entities' => $parametros));
+                'entities' => $parametros));
     }
 
     /**
@@ -165,7 +165,7 @@ class ParametroController extends Controller {
                 'method' => 'PUT',
             ));
             return $this->render('ConfigBundle:Parametro:edit-localidad.html.twig', array(
-                        'entity' => $entity, 'form' => $form->createView()));
+                    'entity' => $entity, 'form' => $form->createView()));
         }
         else {
             $agrupador = $em->getRepository('ConfigBundle:Parametro')->findOneByNombre($slug);
@@ -187,16 +187,16 @@ class ParametroController extends Controller {
                   'method' => 'PUT',
                   )); */
                 return $this->render('ConfigBundle:Parametro:edit-rubro.html.twig', array(
-                            'entity' => $entity,
-                            'rubros' => $rubros,
-                            'dato' => null,
-                            'form' => $form->createView()));
+                        'entity' => $entity,
+                        'rubros' => $rubros,
+                        'dato' => null,
+                        'form' => $form->createView()));
             }
             // $form   = $this->createForm(new ParametroType(), $entity, array('attr'=>array('slug'=>$slug)));
         }
         return $this->render('ConfigBundle:Parametro:edit-' . $slug . '.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView()));
+                'entity' => $entity,
+                'form' => $form->createView()));
     }
 
     /**
@@ -235,15 +235,15 @@ class ParametroController extends Controller {
                 $dato = $em->getRepository('ConfigBundle:Parametro')->find($entity->getAgrupador());
 
                 return $this->render('ConfigBundle:Parametro:edit-rubro.html.twig', array(
-                            'entity' => $entity,
-                            'rubros' => $rubros,
-                            'dato' => $dato,
-                            'form' => $editForm->createView()));
+                        'entity' => $entity,
+                        'rubros' => $rubros,
+                        'dato' => $dato,
+                        'form' => $editForm->createView()));
             }
         }
         return $this->render('ConfigBundle:Parametro:edit-' . $slug . '.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
         ));
     }
 
@@ -349,14 +349,14 @@ class ParametroController extends Controller {
             $rubros = $em->getRepository('ConfigBundle:Parametro')->findRubros();
             $dato = $em->getRepository('ConfigBundle:Parametro')->find($request->get('txtrubro'));
             return $this->render('ConfigBundle:Parametro:edit-' . $slug . '.html.twig', array(
-                        'entity' => $entity,
-                        'rubros' => $rubros,
-                        'dato' => $dato,
-                        'form' => $form->createView()));
+                    'entity' => $entity,
+                    'rubros' => $rubros,
+                    'dato' => $dato,
+                    'form' => $form->createView()));
         }
         return $this->render('ConfigBundle:Parametro:edit-' . $slug . '.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -396,8 +396,8 @@ class ParametroController extends Controller {
         }
 
         return $this->render('ConfigBundle:Parametro:edit-' . $slug . '.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
         ));
     }
 
@@ -430,17 +430,16 @@ class ParametroController extends Controller {
         }
 
         return $this->render('ConfigBundle:Parametro:edit-localidad.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
         ));
     }
-
 
     /**
      * @Route("/getParametroAutocomplete", name="get_parametro_autocomplete")
      * @Method("POST")
      */
-    public function getParametroAutocompleteAction( Request $request) {
+    public function getParametroAutocompleteAction(Request $request) {
         $term = $request->get('searchTerm');
         $slug = $request->get('slug');
         $em = $this->getDoctrine()->getManager();

@@ -36,7 +36,7 @@
             <button type="button" class="stdbtn btn_red" onclick="cierreZ()" style="padding:7px 20px">
                 Cierre Z <img class="loader_cmCierreZ hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
-            <button type="button" class="stdbtn btn_grey" onclick="test()" style="padding:7px 20px">
+            <button type="button" class="stdbtn btn_grey" onclick="test()" style="display:none;padding:7px 20px">
                 Test <img class="loader_cmObtenerDatosDeInicializacion hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
             <button type="button" class="stdbtn btn_grey" onclick="reporteSemanal()" style="padding:7px 20px">
@@ -174,13 +174,13 @@ function test(){
     const comando = 'cmObtenerDatosDeInicializacion'
     setFacturando(true,comando)
     setTimeout(function(){
-        const driver = getDriver()
+{#        const driver = getDriver()#}
         try {
-            driver.iniciarTrabajo();
+            {#driver.iniciarTrabajo();
             driver.obtenerDatosDeInicializacion();
             driver.finalizarTrabajo();
-            const result = driver.response
-            registrarMovimientoIfu(comando,result)
+            const result = driver.response#}
+            registrarMovimientoIfu(comando,'')
             
         } catch (e){
             alert(e);
@@ -196,23 +196,30 @@ function reporteSemanal(){
     msg = 'Ha ocurrido un error obteniendo los datos para el reporte'
     jQuery.getJSON( url , {'id': "{{caja.id}}"}).done(function(data){
         if(data.desde  && data.hasta){
-            const driver = getDriver()
-            try {
-                driver.iniciarTrabajo();
-                const trfecha = 0
-                const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,data.file,trfecha)
-                if( resp ){
-                    do{
-                        resp = driver.obtenerSiguienteBloqueReporteElectronico()
-                    }while(resp)
+            const texto = "Confirme el periodo del reporte semanal: " + data.desde + " al " + data.hasta + "\no\n Ingrese una fecha inicial distinta de ser necesario ('ddmmaa') \n"
+            let desde = prompt( texto, data.desde )
+            if(desde){
+                data.desde = desde
+                console.log(data)
+            
+                const driver = getDriver()
+                try {
+                    driver.iniciarTrabajo();
+                    const trfecha = 0
+                    const resp = driver.obtenerPrimerBloqueReporteElectronico(desde,data.hasta,data.file,trfecha)
+                    if( resp ){
+                        do{
+                            resp = driver.obtenerSiguienteBloqueReporteElectronico()
+                        }while(resp)
+                    }
+                    driver.finalizarTrabajo();
+                    const result = driver.response ? driver.response : 'OK'
+                    registrarMovimientoIfu(comando,result,data)
+                } catch (e){
+                    registrarMovimientoIfu(comando,'',data,e)
+                    alert('ERROR: '+e);
+                    setFacturando(false,comando)
                 }
-                driver.finalizarTrabajo();
-                const result = driver.response ? driver.response : 'OK'
-                registrarMovimientoIfu(comando,result,data)
-            } catch (e){
-                registrarMovimientoIfu(comando,'',data,e)
-                alert('ERROR: '+e);
-                setFacturando(false,comando)
             }
         }else{
             alert(msg)

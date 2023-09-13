@@ -316,13 +316,11 @@ function imprimirTicket(cobroId){
             })
           driver.imprimirItem2g(...item)
         })
-        return false;
         // descuentos
         if(data.montodto!=0)
             driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
         // tributos (iibb)
         if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
-        console.log(data.pagos)
         // pagos
         if(data.pagos){
            data.pagos.forEach(function(i){
@@ -331,7 +329,7 @@ function imprimirTicket(cobroId){
                }
           }) 
         }
-        
+        console.log(datos)
         driver.cerrarComprobante();
         driver.finalizarTrabajo();
         

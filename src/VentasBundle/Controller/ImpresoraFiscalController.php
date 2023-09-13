@@ -36,6 +36,17 @@ class ImpresoraFiscalController extends Controller {
         $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
         $caja = $em->getRepository('ConfigBundle:Caja')->find($cajaId);
 
+        if ($comando == 'cmObtenerDatosDeInicializacion') {
+            $salida['res'] = 'ERROR';
+            if (is_dir('c:\\datos')) {
+                $salida['msg'] = 'El directorio es accesible';
+            }
+            else {
+                $salida['msg'] = 'El directorio NO es accesible';
+            }
+            return new JsonResponse($salida);
+        }
+
         try {
             $if = new ImpresoraFiscal();
             $if->setUnidadNegocio($unidneg);
@@ -76,8 +87,8 @@ class ImpresoraFiscalController extends Controller {
 
         $repAnterior = $em->getRepository('VentasBundle:ImpresoraFiscal')->findUltimotReporte($cajaId);
         $desde = $repAnterior['fechaHasta'] ? $repAnterior['fechaHasta']->format("dmy") : date("dmy", strtotime($hasta . "- 7 days"));
-//        $file = 'M:\\Cierres\\semanal' . $desde . 'al' . $hasta . '.zip';
-        $file = "c:\\datos\\reporte.zip";
+        $file = 'c:\\datos\\semanal_' . $desde . 'al' . $hasta . '.zip';
+//        $file = "c:\\datos\\reporte.zip";
         $rango = array('desde' => $desde, 'hasta' => $hasta, 'file' => $file);
         return new JsonResponse($rango);
     }

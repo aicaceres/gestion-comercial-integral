@@ -611,16 +611,20 @@ function changeBulto(item){
 function actualizaTotales(){
         var Total=0;
         var IvaTotal=0;
+        var tipoC = jQuery('#comprasbundle_factura_afipComprobante option:selected').text().slice(-2) == ' C'
+        
         jQuery("tr.item").each(function(){
             var item = jQuery(this);
             var cant =  checknumero( item.find('.cantTd input') ) ;
             var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
-            var arr = ['A','M'];
+{#            var arr = ['A','M'];#}
             let iva = item.find('.ivaTd [name*="afipAlicuota"] option:selected').text();
             iva = parseFloat(iva.replace('%', '') /100);
             sbtotItm = prec * cant;
             Total += sbtotItm;
-            IvaTotal += (sbtotItm * iva);
+            if( !tipoC){
+                IvaTotal += (sbtotItm * iva);
+            }
             item.find('.totalTd').text( sbtotItm.toFixed(3));
         });
         jQuery('#Total input[type=text]').val(Total.toFixed(3));
