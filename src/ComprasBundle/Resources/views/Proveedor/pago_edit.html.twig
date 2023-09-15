@@ -193,9 +193,9 @@ jQuery(function ($) {
             
             // controlar que el pago cubra los impuestos
             impuestos = parseFloat($('#comprasbundle_pagoproveedor_montoGanancias').val())  + parseFloat($('#comprasbundle_pagoproveedor_montoRentas').val());
-            if( pago < importeTotal ){
-{#                jAlert( `El monto mínimo del pago debe ser $ ${impuestos} ` );#}
-                jAlert('El monto del pago no cubre el total del comprobante!');
+            if( pago < impuestos ){
+                jAlert( `El monto mínimo del pago debe ser $ ${impuestos} ` );
+{#                jAlert('El monto del pago no cubre el total del comprobante!');#}
                 return false;
             }
         }

@@ -12,29 +12,29 @@ class ProveedorRepository extends EntityRepository {
     public function getDetalleCtaCte($id, $desde = NULL, $hasta = NULL) {
         $prov = $this->find($id);
         $facturas = $this->_em->createQueryBuilder('f')
-                ->select('f.id,1 tipo,f.fechaFactura fecha, 0 comprobante, 0 concepto , f.total importe')
-                ->from('ComprasBundle\Entity\Factura', 'f')
-                ->innerJoin('f.proveedor', 'p')
-                ->where('p.id=:agr')
-                // ->andWhere("f.estado!='CANCELADO'")
-                // ->andWhere("f.estado!='ANULADO'")
-                ->setParameter('agr', $prov);
+            ->select('f.id,1 tipo,f.fechaFactura fecha, 0 comprobante, 0 concepto , f.total importe')
+            ->from('ComprasBundle\Entity\Factura', 'f')
+            ->innerJoin('f.proveedor', 'p')
+            ->where('p.id=:agr')
+            // ->andWhere("f.estado!='CANCELADO'")
+            // ->andWhere("f.estado!='ANULADO'")
+            ->setParameter('agr', $prov);
 
         $notacred = $this->_em->createQueryBuilder('c')
-                ->select('c.id,2 tipo,c.fecha, 0 comprobante, 0 concepto , c.total importe')
-                ->from('ComprasBundle\Entity\NotaDebCred', 'c')
-                ->innerJoin('c.proveedor', 'p')
-                ->where('p.id=:agr')
-                // ->andWhere("c.estado='ACREDITADO'")
-                // ->andWhere("c.signo='-'")
-                ->setParameter('agr', $prov);
+            ->select('c.id,2 tipo,c.fecha, 0 comprobante, 0 concepto , c.total importe')
+            ->from('ComprasBundle\Entity\NotaDebCred', 'c')
+            ->innerJoin('c.proveedor', 'p')
+            ->where('p.id=:agr')
+            // ->andWhere("c.estado='ACREDITADO'")
+            // ->andWhere("c.signo='-'")
+            ->setParameter('agr', $prov);
 
         $pagos = $this->_em->createQueryBuilder('f')
-                ->select('g.id,3 tipo,g.fecha, 0 comprobante , 0 concepto, 0 importe')
-                ->from('ComprasBundle\Entity\PagoProveedor', 'g')
-                ->innerJoin('g.proveedor', 'p')
-                ->where('p.id=:agr')
-                ->setParameter('agr', $prov);
+            ->select('g.id,3 tipo,g.fecha, 0 comprobante , 0 concepto, 0 importe')
+            ->from('ComprasBundle\Entity\PagoProveedor', 'g')
+            ->innerJoin('g.proveedor', 'p')
+            ->where('p.id=:agr')
+            ->setParameter('agr', $prov);
         if ($desde) {
             $cadfactura = " f.fechaFactura >= '" . UtilsController::toAnsiDate($desde) . "'";
             $facturas->andWhere($cadfactura);
@@ -124,24 +124,24 @@ class ProveedorRepository extends EntityRepository {
     public function getFacturasImpagas($id) {
         $prov = $this->find($id);
         $facturas = $this->_em->createQueryBuilder('f')
-                ->select("f.id, 'FAC' tipo,f.tipoFactura letra, f.fechaFactura fecha, f.total, f.iva, f.saldo, f.nroComprobante ")
-                ->from('ComprasBundle\Entity\Factura', 'f')
-                ->innerJoin('f.proveedor', 'p')
-                ->where('f.saldo>0')
-                ->andWhere('p.id=:agr')
-                ->andWhere("f.estado!='CANCELADO'")
-                ->setParameter('agr', $prov)
-                ->orderBy('f.fechaFactura');
+            ->select("f.id, 'FAC' tipo,f.tipoFactura letra, f.fechaFactura fecha, f.total, f.iva, f.saldo, f.nroComprobante ")
+            ->from('ComprasBundle\Entity\Factura', 'f')
+            ->innerJoin('f.proveedor', 'p')
+            ->where('f.saldo>0')
+            ->andWhere('p.id=:agr')
+            ->andWhere("f.estado!='CANCELADO'")
+            ->setParameter('agr', $prov)
+            ->orderBy('f.fechaFactura');
         $notacred = $this->_em->createQueryBuilder('c')
-                ->select("c.id,'DEB' tipo,c.tipoNota letra, c.fecha, c.total, c.iva, c.saldo, c.nroComprobante")
-                ->from('ComprasBundle\Entity\NotaDebCred', 'c')
-                ->innerJoin('c.proveedor', 'p')
-                ->where('p.id=:agr')
-                ->andWhere('c.saldo>0')
-                ->andWhere("c.signo='+'")
-                ->andWhere("c.estado!='CANCELADO'")
-                ->setParameter('agr', $prov)
-                ->orderBy('c.fecha');
+            ->select("c.id,'DEB' tipo,c.tipoNota letra, c.fecha, c.total, c.iva, c.saldo, c.nroComprobante")
+            ->from('ComprasBundle\Entity\NotaDebCred', 'c')
+            ->innerJoin('c.proveedor', 'p')
+            ->where('p.id=:agr')
+            ->andWhere('c.saldo>0')
+            ->andWhere("c.signo='+'")
+            ->andWhere("c.estado!='CANCELADO'")
+            ->setParameter('agr', $prov)
+            ->orderBy('c.fecha');
         $datos = array_merge($facturas->getQuery()->getArrayResult(), $notacred->getQuery()->getArrayResult());
         /* $ord = usort($datos, function($a1, $a2) {
           $value1 = strtotime($a1['fecha']->format('Y-m-d'));
@@ -159,11 +159,11 @@ class ProveedorRepository extends EntityRepository {
     public function findPagosByCriteria($provId = NULL, $desde = NULL, $hasta = NULL) {
         $query = $this->_em->createQueryBuilder();
         $query->select('p')
-                ->from('ComprasBundle\Entity\PagoProveedor', 'p')
-                ->where("1=1");
+            ->from('ComprasBundle\Entity\PagoProveedor', 'p')
+            ->where("1=1");
         if ($provId) {
             $query->innerJoin('p.proveedor', 'pr')
-                    ->andWhere('pr.id=' . $provId);
+                ->andWhere('pr.id=' . $provId);
         }
         if ($desde) {
             $cadena = " p.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";
@@ -179,9 +179,9 @@ class ProveedorRepository extends EntityRepository {
     public function checkExiste($txt, $id) {
         $query = $this->_em->createQueryBuilder();
         $query->select('1')
-                ->from('ComprasBundle\Entity\Proveedor', 'p')
-                ->where(" p.cuit = '" . $txt . "'")
-                ->andWhere("p.id != " . $id);
+            ->from('ComprasBundle\Entity\Proveedor', 'p')
+            ->where(" p.cuit = '" . $txt . "'")
+            ->andWhere("p.id != " . $id);
 
         return $query->getQuery()->getScalarResult();
     }
@@ -190,10 +190,10 @@ class ProveedorRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $fact = "'%FAC-" . $factura . "%'";
         $query->select('p')
-                ->from('ComprasBundle\Entity\PagoProveedor', 'p')
-                ->innerJoin('p.proveedor', 'pr')
-                ->where('pr.id=' . $provId)
-                ->andWhere('p.concepto like ' . $fact);
+            ->from('ComprasBundle\Entity\PagoProveedor', 'p')
+            ->innerJoin('p.proveedor', 'pr')
+            ->where('pr.id=' . $provId)
+            ->andWhere('p.concepto like ' . $fact);
 
         return $query->getQuery()->getArrayResult();
     }
@@ -201,11 +201,11 @@ class ProveedorRepository extends EntityRepository {
     public function getNotasByFactura($provId, $factura) {
         $query = $this->_em->createQueryBuilder();
         $query->select('n')
-                ->from('ComprasBundle\Entity\NotaDebCred', 'n')
-                ->innerJoin('n.proveedor', 'pr')
-                ->innerJoin('n.facturas','f')
-                ->where('pr.id=' . $provId)
-                ->andWhere('f.id=' . $factura);
+            ->from('ComprasBundle\Entity\NotaDebCred', 'n')
+            ->innerJoin('n.proveedor', 'pr')
+            ->innerJoin('n.facturas', 'f')
+            ->where('pr.id=' . $provId)
+            ->andWhere('f.id=' . $factura);
 
         return $query->getQuery()->getArrayResult();
     }
@@ -213,12 +213,12 @@ class ProveedorRepository extends EntityRepository {
     public function getFacturasCompraxFecha($id, $desde, $hasta, $rubro) {
         $facturas = $this->_em->createQueryBuilder();
         $facturas->select("sum(f.total) total")
-                ->from('ComprasBundle\Entity\Factura', 'f')
-                ->innerJoin('f.proveedor', 'p')
-                ->where('p.id=:agr')
-                // ->andWhere("f.estado!='CANCELADO'")
-                // ->andWhere("f.estado!='ANULADO'")
-                ->setParameter('agr', $id);
+            ->from('ComprasBundle\Entity\Factura', 'f')
+            ->innerJoin('f.proveedor', 'p')
+            ->where('p.id=:agr')
+            // ->andWhere("f.estado!='CANCELADO'")
+            // ->andWhere("f.estado!='ANULADO'")
+            ->setParameter('agr', $id);
         if ($desde) {
             $cadena = " f.fechaFactura >= '" . UtilsController::toAnsiDate($desde) . "'";
             $facturas->andWhere($cadena);
@@ -227,9 +227,9 @@ class ProveedorRepository extends EntityRepository {
             $cadena = " f.fechaFactura <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $facturas->andWhere($cadena);
         }
-        if($rubro){
-            $facturas->innerJoin('p.rubroCompras','r')
-                     ->andWhere('r.id = '.$rubro);
+        if ($rubro) {
+            $facturas->innerJoin('p.rubroCompras', 'r')
+                ->andWhere('r.id = ' . $rubro);
         }
         return $facturas->getQuery()->getSingleScalarResult();
     }
@@ -237,12 +237,12 @@ class ProveedorRepository extends EntityRepository {
     public function getNotasCompraxFecha($id, $desde, $hasta, $signo = '-', $rubro) {
         $facturas = $this->_em->createQueryBuilder();
         $facturas->select("sum(f.total) total")
-                ->from('ComprasBundle\Entity\NotaDebCred', 'f')
-                ->innerJoin('f.proveedor', 'p')
-                ->where('p.id=:agr')
-                ->andWhere('f.signo=' . "'" . $signo . "'")
-                // ->andWhere("f.estado='ACREDITADO'")
-                ->setParameter('agr', $id);
+            ->from('ComprasBundle\Entity\NotaDebCred', 'f')
+            ->innerJoin('f.proveedor', 'p')
+            ->where('p.id=:agr')
+            ->andWhere('f.signo=' . "'" . $signo . "'")
+            // ->andWhere("f.estado='ACREDITADO'")
+            ->setParameter('agr', $id);
         if ($desde) {
             $cadena = " f.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";
             $facturas->andWhere($cadena);
@@ -251,9 +251,9 @@ class ProveedorRepository extends EntityRepository {
             $cadena = " f.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $facturas->andWhere($cadena);
         }
-        if($rubro){
-            $facturas->innerJoin('p.rubroCompras','r')
-                     ->andWhere('r.id = '.$rubro);
+        if ($rubro) {
+            $facturas->innerJoin('p.rubroCompras', 'r')
+                ->andWhere('r.id = ' . $rubro);
         }
         return $facturas->getQuery()->getSingleScalarResult();
     }
@@ -261,10 +261,10 @@ class ProveedorRepository extends EntityRepository {
     public function getPagosxFecha($id, $desde, $hasta, $rubro) {
         $facturas = $this->_em->createQueryBuilder();
         $facturas->select("f")
-                ->from('ComprasBundle\Entity\PagoProveedor', 'f')
-                ->innerJoin('f.proveedor', 'p')
-                ->where('p.id=:agr')
-                ->setParameter('agr', $id);
+            ->from('ComprasBundle\Entity\PagoProveedor', 'f')
+            ->innerJoin('f.proveedor', 'p')
+            ->where('p.id=:agr')
+            ->setParameter('agr', $id);
         if ($desde) {
             $cadena = " f.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";
             $facturas->andWhere($cadena);
@@ -273,52 +273,65 @@ class ProveedorRepository extends EntityRepository {
             $cadena = " f.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
             $facturas->andWhere($cadena);
         }
-        if($rubro){
-            $facturas->innerJoin('p.rubroCompras','r')
-                     ->andWhere('r.id = '.$rubro);
+        if ($rubro) {
+            $facturas->innerJoin('p.rubroCompras', 'r')
+                ->andWhere('r.id = ' . $rubro);
         }
         return $facturas->getQuery()->getResult();
     }
 
     public function filterByTerm($key) {
         $query = $this->_em->createQueryBuilder();
-            $query->select("c.id,c.nombre text")
-                    ->from('ComprasBundle:Proveedor', 'c')
-                    ->where('c.nombre LIKE :key')
-                    ->orderBy('c.nombre')
-                    ->setParameter('key', '%' . $key . '%')
-                    ->setMaxResults(5);
+        $query->select("c.id,c.nombre text")
+            ->from('ComprasBundle:Proveedor', 'c')
+            ->where('c.nombre LIKE :key')
+            ->orderBy('c.nombre')
+            ->setParameter('key', '%' . $key . '%')
+            ->setMaxResults(5);
         return $query->getQuery()->getArrayResult();
     }
 
     /**
      * Encontrar los pagos con retencion de rentas dentro del periodo indicado
      */
-    public function findRetencionesRentas($desde,$hasta){
+    public function findRetencionesRentas($desde, $hasta) {
         $query = $this->_em->createQueryBuilder();
-            $query->select("p")
-                    ->from('ComprasBundle:PagoProveedor', 'p')
-                    ->where('p.baseImponibleRentas > 0')
-                    ->andWhere(" p.fecha >= '" . $desde . "'")
-                    ->andWhere(" p.fecha <= '" . $hasta . "'")
-                    ->orderBy('p.fecha');
+        $query->select("p")
+            ->from('ComprasBundle:PagoProveedor', 'p')
+            ->where('p.baseImponibleRentas > 0')
+            ->andWhere(" p.fecha >= '" . $desde . "'")
+            ->andWhere(" p.fecha <= '" . $hasta . "'")
+            ->orderBy('p.fecha');
 
         return $query->getQuery()->getResult();
-
     }
+
+    public function findRetencionesRentasProveedor($desde, $hasta, $proveedor) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("p")
+            ->from('ComprasBundle:PagoProveedor', 'p')
+            ->innerJoin('p.proveedor', 'pr')
+            ->where('p.baseImponibleRentas > 0')
+            ->andWhere(" p.fecha >= '" . $desde . "'")
+            ->andWhere(" p.fecha <= '" . $hasta . "'")
+            ->andWhere("pr.id=" . $proveedor)
+            ->orderBy('p.fecha');
+        return $query->getQuery()->getResult();
+    }
+
     /**
      * Encontrar los pagos con retencion de ganancias dentro del periodo indicado
      */
-    public function findRetencionesGanancias($desde,$hasta){
+    public function findRetencionesGanancias($desde, $hasta) {
         $query = $this->_em->createQueryBuilder();
-            $query->select("p")
-                    ->from('ComprasBundle:PagoProveedor', 'p')
-                    ->where('p.retencionGanancias > 0')
-                    ->andWhere(" p.fecha >= '" . $desde . "'")
-                    ->andWhere(" p.fecha <= '" . $hasta . "'")
-                    ->orderBy('p.fecha');
+        $query->select("p")
+            ->from('ComprasBundle:PagoProveedor', 'p')
+            ->where('p.retencionGanancias > 0')
+            ->andWhere(" p.fecha >= '" . $desde . "'")
+            ->andWhere(" p.fecha <= '" . $hasta . "'")
+            ->orderBy('p.fecha');
 
         return $query->getQuery()->getResult();
-
     }
+
 }

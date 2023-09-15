@@ -321,7 +321,7 @@ class NotaDebCred {
         if ($categIva == 'I' || $categIva == 'M') {
             // total con iva e iibb
             $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo() + $this->getTotalIva();
-            if ($categIva == 'I' && $retRentas > 0) {
+            if ($retRentas > 0) {
                 $total = $total + $this->getTotalIibb();
             }
         }

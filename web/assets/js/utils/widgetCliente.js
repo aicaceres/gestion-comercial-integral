@@ -76,8 +76,11 @@ jQuery(document).ready(function ($) {
             $(".cuitcliente").css("color", color)
             
             setTimeout(function () {
-              setTipoComprobante()
-//              jQuery("#updating-data").addClass("hidden")
+                if (typeof setTipoComprobante === "function") {
+                    setTipoComprobante()
+                  }
+              
+              jQuery("#updating-data").addClass("hidden")
               selectCliente.select2('focus')
             }, 2000)
 					}

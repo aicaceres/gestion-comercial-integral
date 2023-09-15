@@ -77,6 +77,9 @@
                     {% if app.user.access(app.session.get('unidneg_id'),'compras_proveedor_delete') %}
                         <a href url="{{ path('compras_proveedor_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
                     {% endif %}
+                    <a href="javascript:void(0)" data-urlretenciones="{{ path('compras_proveedor_retenciones', { 'id': entity.id }) }}"
+                       onclick="getDetalleRetenciones(this)"
+                       class="btn btnaction btn_info2" title="Retenciones del periodo"></a>
                 </td>
             </tr>
            {% endfor %}
@@ -117,5 +120,17 @@ jQuery(document).ready(function($){
         $('#datalist').val(JSON.stringify(datos));
     });
 });
+function getDetalleRetenciones(obj) {
+    const url = jQuery(obj).data('urlretenciones')
+    jQuery('#popup')
+        .html(
+            '<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;">Cargando...</div>'
+	)
+        .load(url)
+        .dialog({
+            modal: true, autoOpen: false, title: "ACUMULADOS DE RETENCIONES"
+        });
+        jQuery('#popup').dialog('open');
+}
 </script>
 {% endblock %}

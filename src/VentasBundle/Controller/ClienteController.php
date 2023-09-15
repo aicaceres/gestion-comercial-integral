@@ -486,7 +486,8 @@ class ClienteController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
         if (!$apertura) {
-            throw $this->createNotFoundException('La caja está cerrada. Debe realizar la apertura para iniciar cobros.');
+            $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+            return $this->redirectToRoute('ventas_cliente_pagos');
         }
         $entity = new PagoCliente();
 

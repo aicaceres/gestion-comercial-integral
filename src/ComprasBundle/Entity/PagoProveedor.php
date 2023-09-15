@@ -1,4 +1,5 @@
 <?php
+
 namespace ComprasBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -8,8 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Table(name="compras_pago_proveedor")
  * @ORM\Entity(repositoryClass="ComprasBundle\Entity\ProveedorRepository")
  */
-class PagoProveedor
-{
+class PagoProveedor {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -23,80 +23,102 @@ class PagoProveedor
      * @ORM\Column(name="fecha", type="datetime")
      */
     private $fecha;
+
     /**
      * @var integer $prefijoNro
      * @ORM\Column(name="prefijo_nro", type="string", length=3)
      */
     protected $prefijoNro;
+
     /**
      * @var integer $pagoNro
      * @ORM\Column(name="pago_nro", type="string", length=6)
      */
     protected $pagoNro;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
      * @ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
      */
     protected $moneda;
+
     /**
      * @var string $cotizacion
      * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
      */
     protected $cotizacion = 1;
+
     /**
      * @var integer $nroComprobante
      * @ORM\Column(name="nro_comprobante", type="string", length=20, nullable=true)
      */
     protected $nroComprobante;
+
     /**
      * @var string $concepto
      * @ORM\Column(name="concepto", type="text", nullable=false)
      */
     protected $concepto;
+
     /**
      * @var string $detalle
      * @ORM\Column(name="detalle", type="text", nullable=true)
      */
     protected $detalle;
 
-     /**
+    /**
      * @var integer $importe
      * @ORM\Column(name="importe", type="decimal", scale=3 )
      */
     protected $importe;
 
-     /**
+    /**
      * @var integer $baseImponibleRentas
      * @ORM\Column(name="base_imponible_rentas", type="decimal", scale=2 )
      */
     protected $baseImponibleRentas = 0;
-     /**
+
+    /**
      * @var integer $retencionRentas
      * @ORM\Column(name="retencion_rentas", type="decimal", scale=2 )
      */
     protected $retencionRentas = 0;
-     /**
+
+    /**
      * @var integer $adicionalRentas
      * @ORM\Column(name="adicional_rentas", type="decimal", scale=2 )
      */
     protected $adicionalRentas = 0;
-     /**
+
+    /**
      * @var integer $retencionGanancias
      * @ORM\Column(name="retencion_ganancias", type="decimal", scale=2 )
      */
     protected $retencionGanancias = 0;
 
-     /**
-     ** Diferencia entre el pago total y los importes abonados.
-     ** Refleja los saldos pendientes de las facturas imputadas
+    /**
+     * @var integer $montoRetRentas
+     * @ORM\Column(name="monto_ret_rentas", type="decimal", scale=3, nullable=true )
+     */
+    protected $montoRetRentas;
+
+    /**
+     * @var integer $montoRetGanancias
+     * @ORM\Column(name="monto_ret_ganancias", type="decimal", scale=3, nullable=true )
+     */
+    protected $montoRetGanancias;
+
+    /**
+     * * Diferencia entre el pago total y los importes abonados.
+     * * Refleja los saldos pendientes de las facturas imputadas
      * @var integer $saldo
      * @ORM\Column(name="saldo", type="decimal", scale=3 )
      */
     protected $saldo = 0;
 
     /**
-     *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pagos")
-     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pagos")
+     * @ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
      */
     protected $proveedor;
 
@@ -119,69 +141,69 @@ class PagoProveedor
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
     private $createdBy;
-
     private $conceptoTxt;
 
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->saldo = 0;
         $this->fecha = new \DateTime();
         $this->baseImponibleRentas = 0;
     }
 
-    public function __toString(){
-         return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' .  str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
+    public function __toString() {
+        return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' . str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
     }
 
-    public function getComprobanteNro(){
+    public function getComprobanteNro() {
         return $this->__toString();
     }
 
-    public function getConceptoTxt(){
+    public function getConceptoTxt() {
         return $this->conceptoTxt;
     }
-    public function setConceptoTxt($txt)
-    {
+
+    public function setConceptoTxt($txt) {
         $this->conceptoTxt = $txt;
         return $this;
     }
 
-    public function getAlicuotaRentasTxt(){
-        $ret = $this->getRetencionRentas() .'%';
-        $alicuota = ( $this->getAdicionalRentas()>0 ) ?  $ret . ' + '. $this->getAdicionalRentas() . '%' : $ret;
+    public function getAlicuotaRentasTxt() {
+        $ret = $this->getRetencionRentas() . '%';
+        $alicuota = ( $this->getAdicionalRentas() > 0 ) ? $ret . ' + ' . $this->getAdicionalRentas() . '%' : $ret;
         return $alicuota;
     }
 
-    public function getMontoRetencionRentas(){
+    public function getMontoRetencionRentas() {
         $retencion = $this->getBaseImponibleRentas() * ( $this->getRetencionRentas() / 100 );
         $adicional = $retencion * ( $this->getAdicionalRentas() / 100 );
         return $retencion + $adicional;
     }
-    public function getAlicuotaGananciasTxt(){
-        return $this->getRetencionGanancias() .'%';
+
+    public function getAlicuotaGananciasTxt() {
+        return $this->getRetencionGanancias() . '%';
     }
-    public function getMontoGanancias(){
+
+    public function getMontoGanancias() {
         return $this->getBaseImponibleRentas() * ( $this->getRetencionGanancias() / 100 );
     }
 
-    public function getTextoPagosParaOrdenPago(){
+    public function getTextoPagosParaOrdenPago() {
         $txt = '';
-        foreach( $this->cobroDetalles as $det){
+        foreach ($this->cobroDetalles as $det) {
             $aux = ($txt) ? ' - ' : '';
-            $monto = $det->getMoneda()->getSimbolo() . ' ' .  $det->getImporte();
-            switch ($det->getTipoPago()){
+            $monto = $det->getMoneda()->getSimbolo() . ' ' . $det->getImporte();
+            switch ($det->getTipoPago()) {
                 case 'EFECTIVO':
-                    $txt = $txt . $aux . 'EFECTIVO: '. $monto;
+                    $txt = $txt . $aux . 'EFECTIVO: ' . $monto;
                     break;
                 case 'CHEQUE':
-                    $txt = $txt . $aux . 'CHEQUE: '. $monto;
+                    $txt = $txt . $aux . 'CHEQUE: ' . $monto;
                     break;
                 case 'TARJETA':
-                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() .': ' . $monto;
+                    $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
                     break;
             }
         }
@@ -193,8 +215,7 @@ class PagoProveedor
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -204,8 +225,7 @@ class PagoProveedor
      * @param \DateTime $fecha
      * @return PagoProveedor
      */
-    public function setFecha($fecha)
-    {
+    public function setFecha($fecha) {
         $this->fecha = $fecha;
 
         return $this;
@@ -216,8 +236,7 @@ class PagoProveedor
      *
      * @return \DateTime
      */
-    public function getFecha()
-    {
+    public function getFecha() {
         return $this->fecha;
     }
 
@@ -227,8 +246,7 @@ class PagoProveedor
      * @param string $prefijoNro
      * @return PagoProveedor
      */
-    public function setPrefijoNro($prefijoNro)
-    {
+    public function setPrefijoNro($prefijoNro) {
         $this->prefijoNro = $prefijoNro;
 
         return $this;
@@ -239,8 +257,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getPrefijoNro()
-    {
+    public function getPrefijoNro() {
         return $this->prefijoNro;
     }
 
@@ -250,8 +267,7 @@ class PagoProveedor
      * @param string $pagoNro
      * @return PagoProveedor
      */
-    public function setPagoNro($pagoNro)
-    {
+    public function setPagoNro($pagoNro) {
         $this->pagoNro = $pagoNro;
 
         return $this;
@@ -262,8 +278,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getPagoNro()
-    {
+    public function getPagoNro() {
         return $this->pagoNro;
     }
 
@@ -271,18 +286,17 @@ class PagoProveedor
      * Get nroPago
      * @return string
      */
-    public function getNroPago()
-    {
-        return $this->prefijoNro.'-'.$this->pagoNro;
+    public function getNroPago() {
+        return $this->prefijoNro . '-' . $this->pagoNro;
     }
+
     /**
      * Set nroComprobante
      *
      * @param string $nroComprobante
      * @return PagoProveedor
      */
-    public function setNroComprobante($nroComprobante)
-    {
+    public function setNroComprobante($nroComprobante) {
         $this->nroComprobante = $nroComprobante;
 
         return $this;
@@ -293,8 +307,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getNroComprobante()
-    {
+    public function getNroComprobante() {
         return $this->nroComprobante;
     }
 
@@ -304,8 +317,7 @@ class PagoProveedor
      * @param string $concepto
      * @return PagoProveedor
      */
-    public function setConcepto($concepto)
-    {
+    public function setConcepto($concepto) {
         $this->concepto = $concepto;
 
         return $this;
@@ -316,8 +328,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getConcepto()
-    {
+    public function getConcepto() {
         return $this->concepto;
     }
 
@@ -327,8 +338,7 @@ class PagoProveedor
      * @param string $detalle
      * @return PagoProveedor
      */
-    public function setDetalle($detalle)
-    {
+    public function setDetalle($detalle) {
         $this->detalle = $detalle;
 
         return $this;
@@ -339,8 +349,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getDetalle()
-    {
+    public function getDetalle() {
         return $this->detalle;
     }
 
@@ -350,8 +359,7 @@ class PagoProveedor
      * @param string $importe
      * @return PagoProveedor
      */
-    public function setImporte($importe)
-    {
+    public function setImporte($importe) {
         $this->importe = $importe;
 
         return $this;
@@ -362,8 +370,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getImporte()
-    {
+    public function getImporte() {
         return $this->importe;
     }
 
@@ -373,8 +380,7 @@ class PagoProveedor
      * @param \DateTime $created
      * @return PagoProveedor
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -385,8 +391,7 @@ class PagoProveedor
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -396,8 +401,7 @@ class PagoProveedor
      * @param \ComprasBundle\Entity\Proveedor $proveedor
      * @return PagoProveedor
      */
-    public function setProveedor(\ComprasBundle\Entity\Proveedor $proveedor = null)
-    {
+    public function setProveedor(\ComprasBundle\Entity\Proveedor $proveedor = null) {
         $this->proveedor = $proveedor;
 
         return $this;
@@ -408,8 +412,7 @@ class PagoProveedor
      *
      * @return \ComprasBundle\Entity\Proveedor
      */
-    public function getProveedor()
-    {
+    public function getProveedor() {
         return $this->proveedor;
     }
 
@@ -419,8 +422,7 @@ class PagoProveedor
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return PagoProveedor
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -431,21 +433,21 @@ class PagoProveedor
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
-    public function getTotalCheques(){
+    public function getTotalCheques() {
         $cant = 0;
         foreach ($this->getCobroDetalles() as $cobro) {
-            if( $cobro->getChequeRecibido() ){
+            if ($cobro->getChequeRecibido()) {
                 $cant = $cant + $cobro->getChequeRecibido()->getValor();
             }
         }
         return $cant;
     }
-    public function getTotal(){
+
+    public function getTotal() {
         $cant = 0;
         foreach ($this->getCobroDetalles() as $cobro) {
             $cant = $cant + $cobro->getImporte();
@@ -459,8 +461,7 @@ class PagoProveedor
      * @param string $saldo
      * @return PagoProveedor
      */
-    public function setSaldo($saldo)
-    {
+    public function setSaldo($saldo) {
         $this->saldo = $saldo;
 
         return $this;
@@ -471,8 +472,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getSaldo()
-    {
+    public function getSaldo() {
         return $this->saldo;
     }
 
@@ -482,8 +482,7 @@ class PagoProveedor
      * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
      * @return PagoProveedor
      */
-    public function addCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
-    {
+    public function addCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles) {
         $cobroDetalles->setPagoProveedor($this);
         $this->cobroDetalles[] = $cobroDetalles;
 
@@ -495,8 +494,7 @@ class PagoProveedor
      *
      * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
      */
-    public function removeCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles)
-    {
+    public function removeCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalles) {
         $this->cobroDetalles->removeElement($cobroDetalles);
     }
 
@@ -505,8 +503,7 @@ class PagoProveedor
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getCobroDetalles()
-    {
+    public function getCobroDetalles() {
         return $this->cobroDetalles;
     }
 
@@ -516,8 +513,7 @@ class PagoProveedor
      * @param string $cotizacion
      * @return PagoProveedor
      */
-    public function setCotizacion($cotizacion)
-    {
+    public function setCotizacion($cotizacion) {
         $this->cotizacion = $cotizacion;
 
         return $this;
@@ -528,8 +524,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getCotizacion()
-    {
+    public function getCotizacion() {
         return $this->cotizacion;
     }
 
@@ -539,8 +534,7 @@ class PagoProveedor
      * @param \ConfigBundle\Entity\Moneda $moneda
      * @return PagoProveedor
      */
-    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
-    {
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null) {
         $this->moneda = $moneda;
 
         return $this;
@@ -551,8 +545,7 @@ class PagoProveedor
      *
      * @return \ConfigBundle\Entity\Moneda
      */
-    public function getMoneda()
-    {
+    public function getMoneda() {
         return $this->moneda;
     }
 
@@ -562,8 +555,7 @@ class PagoProveedor
      * @param string $retencionRentas
      * @return PagoProveedor
      */
-    public function setRetencionRentas($retencionRentas)
-    {
+    public function setRetencionRentas($retencionRentas) {
         $this->retencionRentas = $retencionRentas;
 
         return $this;
@@ -574,8 +566,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getRetencionRentas()
-    {
+    public function getRetencionRentas() {
         return $this->retencionRentas;
     }
 
@@ -585,8 +576,7 @@ class PagoProveedor
      * @param string $adicionalRentas
      * @return PagoProveedor
      */
-    public function setAdicionalRentas($adicionalRentas)
-    {
+    public function setAdicionalRentas($adicionalRentas) {
         $this->adicionalRentas = $adicionalRentas;
 
         return $this;
@@ -597,8 +587,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getAdicionalRentas()
-    {
+    public function getAdicionalRentas() {
         return $this->adicionalRentas;
     }
 
@@ -608,8 +597,7 @@ class PagoProveedor
      * @param string $baseImponibleRentas
      * @return PagoProveedor
      */
-    public function setBaseImponibleRentas($baseImponibleRentas)
-    {
+    public function setBaseImponibleRentas($baseImponibleRentas) {
         $this->baseImponibleRentas = $baseImponibleRentas;
 
         return $this;
@@ -620,8 +608,7 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getBaseImponibleRentas()
-    {
+    public function getBaseImponibleRentas() {
         return $this->baseImponibleRentas;
     }
 
@@ -631,8 +618,7 @@ class PagoProveedor
      * @param string $retencionGanancias
      * @return PagoProveedor
      */
-    public function setRetencionGanancias($retencionGanancias)
-    {
+    public function setRetencionGanancias($retencionGanancias) {
         $this->retencionGanancias = $retencionGanancias;
 
         return $this;
@@ -643,8 +629,54 @@ class PagoProveedor
      *
      * @return string
      */
-    public function getRetencionGanancias()
-    {
+    public function getRetencionGanancias() {
         return $this->retencionGanancias;
+    }
+
+
+    /**
+     * Set montoRetRentas
+     *
+     * @param string $montoRetRentas
+     * @return PagoProveedor
+     */
+    public function setMontoRetRentas($montoRetRentas)
+    {
+        $this->montoRetRentas = $montoRetRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get montoRetRentas
+     *
+     * @return string 
+     */
+    public function getMontoRetRentas()
+    {
+        return $this->montoRetRentas;
+    }
+
+    /**
+     * Set montoRetGanancias
+     *
+     * @param string $montoRetGanancias
+     * @return PagoProveedor
+     */
+    public function setMontoRetGanancias($montoRetGanancias)
+    {
+        $this->montoRetGanancias = $montoRetGanancias;
+
+        return $this;
+    }
+
+    /**
+     * Get montoRetGanancias
+     *
+     * @return string 
+     */
+    public function getMontoRetGanancias()
+    {
+        return $this->montoRetGanancias;
     }
 }

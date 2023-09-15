@@ -44,18 +44,18 @@
                     <option> {{ entity.conceptoTxt }} </option>
                 </select>
             </div>
-            {% if entity.retencionGanancias > 0 %}
+            {% if entity.montoRetGanancias > 0 %}
             <div style="display: inline-block; width: 10%">
                 <label>DGI: {{ entity.alicuotaGananciasTxt }}</label>
                 <strong> {{ entity.moneda.simbolo }} </strong>
-                <input class="number mediuminput" disabled="disabled" value="{{ entity.montoGanancias|number_format(2,'.',',') }}">
+                <input class="number mediuminput" disabled="disabled" value="{{ entity.montoRetGanancias|number_format(2,'.',',') }}">
             </div>
             {% endif %}
-            {% if entity.montoRetencionRentas > 0 %}
+            {% if entity.montoRetRentas > 0 %}
             <div style="display: inline-block; width: 13%">
                 <label>DGR {{entity.alicuotaRentasTxt}}:</label>
                 <strong> {{ entity.moneda.simbolo }} </strong>
-                <input class="number mediuminput" disabled="disabled" value="{{ entity.montoRetencionRentas|number_format(2,'.',',') }}">
+                <input class="number mediuminput" disabled="disabled" value="{{ entity.montoRetRentas|number_format(2,'.',',') }}">
             </div>
             {% endif %}
 

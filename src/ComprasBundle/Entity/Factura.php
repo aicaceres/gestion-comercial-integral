@@ -56,6 +56,12 @@ class Factura {
     private $fechaFactura;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\RubroCompras")
+     * @ORM\JoinColumn(name="rubro_compras_id", referencedColumnName="id")
+     * */
+    protected $rubroCompras;
+
+    /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string")
      */
@@ -101,6 +107,7 @@ class Factura {
      * @ORM\Column(name="modifica_stock", type="boolean",nullable=true)
      */
     protected $modificaStock = false;
+
     /**
      * @ORM\Column(name="retenciones_aplicadas", type="boolean",nullable=true)
      */
@@ -231,18 +238,19 @@ class Factura {
 
     public function getTotalsinBonificacion() {
         return $this->getSubtotalNeto() + $this->getIva() + $this->getPercepcionIva() +
-                $this->getPercepcionDgr() + $this->getPercepcionMunicipal() +
-                $this->getImpuestoInterno() + $this->getTmc();
+            $this->getPercepcionDgr() + $this->getPercepcionMunicipal() +
+            $this->getImpuestoInterno() + $this->getTmc();
     }
 
     // calcula saldo imponible
-    public function getSaldoImponible(){
-        if( !$this->retencionesAplicadas ){
+    public function getSaldoImponible() {
+        if (!$this->retencionesAplicadas) {
             $imp = $this->getTotal() - $this->getIva();
             $porc = ($imp * 100) / $this->getTotal();
             $saldoImponible = ($this->getSaldo() * $porc) / 100;
             return $saldoImponible;
-        }else{
+        }
+        else {
             return $this->getSaldo();
         }
     }
@@ -929,14 +937,14 @@ class Factura {
             return $this->getNroComprobante();
         }
     }
-    public function getNroTipoComprobante(){
-        return  $this->getTipoFactura() . $this->getNroComprobante();
+
+    public function getNroTipoComprobante() {
+        return $this->getTipoFactura() . $this->getNroComprobante();
     }
 
     public function getImpuestoTotal() {
         return $this->getIva();
     }
-
 
     /**
      * Set modificaStock
@@ -944,8 +952,7 @@ class Factura {
      * @param boolean $modificaStock
      * @return Factura
      */
-    public function setModificaStock($modificaStock)
-    {
+    public function setModificaStock($modificaStock) {
         $this->modificaStock = $modificaStock;
 
         return $this;
@@ -956,8 +963,7 @@ class Factura {
      *
      * @return boolean
      */
-    public function getModificaStock()
-    {
+    public function getModificaStock() {
         return $this->modificaStock;
     }
 
@@ -967,8 +973,7 @@ class Factura {
      * @param boolean $retencionesAplicadas
      * @return Factura
      */
-    public function setRetencionesAplicadas($retencionesAplicadas)
-    {
+    public function setRetencionesAplicadas($retencionesAplicadas) {
         $this->retencionesAplicadas = $retencionesAplicadas;
 
         return $this;
@@ -979,8 +984,31 @@ class Factura {
      *
      * @return boolean
      */
-    public function getRetencionesAplicadas()
-    {
+    public function getRetencionesAplicadas() {
         return $this->retencionesAplicadas;
+    }
+
+
+    /**
+     * Set rubroCompras
+     *
+     * @param \ConfigBundle\Entity\RubroCompras $rubroCompras
+     * @return Factura
+     */
+    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null)
+    {
+        $this->rubroCompras = $rubroCompras;
+
+        return $this;
+    }
+
+    /**
+     * Get rubroCompras
+     *
+     * @return \ConfigBundle\Entity\RubroCompras 
+     */
+    public function getRubroCompras()
+    {
+        return $this->rubroCompras;
     }
 }
