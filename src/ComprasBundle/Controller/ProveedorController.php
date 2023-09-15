@@ -652,7 +652,7 @@ class ProveedorController extends Controller {
                         $montoImputar = 0;
                         $comprob->setEstado('PAGO PARCIAL');
                     }
-                    $comprob->setRetencionesAplicadas(1);
+//                    $comprob->setRetencionesAplicadas(1);
                     $comptxt = array('clave' => $item, 'monto' => $montocomp);
                     array_push($txtConcepto, $comptxt);
                     $em->persist($comprob);
@@ -856,7 +856,7 @@ class ProveedorController extends Controller {
                     $comprob->setEstado('PAGO PARCIAL');
                 if ($entity->getBaseImponibleRentas() > 0) {
                     // desmarcar retenciones aplicadas unicamente si se aplicaron en este pago
-                    $comprob->setRetencionesAplicadas(0);
+//                    $comprob->setRetencionesAplicadas(0);
                 }
 
                 $em->persist($comprob);
@@ -955,6 +955,7 @@ class ProveedorController extends Controller {
         // facturas y notas de debito seleccionadas
         $em = $this->getDoctrine()->getManager();
         $id = $request->get('provId');
+        $pago = $request->get('pago');
         $porcRentas = $this->getPorcentajesRentas($id, $em);
         $datos = array(
             'baseImponible' => 0,
@@ -969,8 +970,8 @@ class ProveedorController extends Controller {
         $datos['porcRentas'] = $porcRentas['porcRetRentas'];
         $datos['porcAdicional'] = $porcRentas['porcAdicRentas'];
         $selected = $request->get('selected');
+        $neto = $montoRetRentas = 0;
         if (is_array($selected)) {
-            $montoRetRentas = 0;
             foreach ($selected as $sel) {
                 $comp = explode("-", $sel);
                 if ($comp[0] == 'FAC') {
@@ -979,34 +980,32 @@ class ProveedorController extends Controller {
                 else {
                     $obj = $em->getRepository('ComprasBundle:NotaDebCred')->find($comp[1]);
                 }
-                $datos['total'] += $obj->getSaldo();
                 $proveedor = $obj->getProveedor();
-
-                // si ya se imputaron las retenciones saltar comprobante para calculo
-//                if ($obj->getRetencionesAplicadas())
-//                    continue;
-
-                $neto = $obj->getSaldoImponible();
-                // calcular retencion rentas
-                $monto = $rentas = $adicional = 0;
-                $retrentas = $porcRentas['porcRetRentas'];
-                $adicrentas = $porcRentas['porcAdicRentas'];
-                if ($retrentas > 0) {
-                    if ($neto >= floatval($proveedor->getCategoriaRentas()->getMinimo())) {
-                        $datos['baseImponible'] += $neto;
-                        $rentas = $neto * ( $retrentas / 100 );
-                        $adicional = $rentas * ( $adicrentas / 100 );
-                        $monto = $rentas + $adicional;
-                    }
-                    else {
-                        // setear en cero porque no se aplica retención por ser menor al mínimo
-                        $monto = $rentas = $adicional = 0;
-                    }
-                }
-                $datos['rentas'] += $rentas;
-                $datos['adicional'] += $adicional;
-                $montoRetRentas += $monto;
+                $datos['total'] += $obj->getSaldo();
+                $neto += $obj->getSaldoImponible();
             }
+
+            $montoParaCalculoRetencion = $pago > 0 ? $pago : $neto;
+
+            // calcular retencion rentas
+            $monto = $rentas = $adicional = 0;
+            $retrentas = $porcRentas['porcRetRentas'];
+            $adicrentas = $porcRentas['porcAdicRentas'];
+            if ($retrentas > 0) {
+                if ($montoParaCalculoRetencion >= floatval($proveedor->getCategoriaRentas()->getMinimo())) {
+                    $datos['baseImponible'] = $montoParaCalculoRetencion;
+                    $rentas = $montoParaCalculoRetencion * ( $retrentas / 100 );
+                    $adicional = $rentas * ( $adicrentas / 100 );
+                    $monto = $rentas + $adicional;
+                }
+                else {
+                    // setear en cero porque no se aplica retención por ser menor al mínimo
+                    $monto = $rentas = $adicional = 0;
+                }
+            }
+            $datos['rentas'] = $rentas;
+            $datos['adicional'] = $adicional;
+            $montoRetRentas = $monto;
             // si montoRetRentas es 0 limpiar los porcentajes.
             if ($montoRetRentas == 0) {
                 $datos['porcRentas'] = $datos['porcAdicional'] = 0;

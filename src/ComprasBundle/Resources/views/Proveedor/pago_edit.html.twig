@@ -89,7 +89,7 @@
                             <th style="text-align:right">
                                 IMPORTE: &nbsp;
                                 <span class="simbolo" style="font-size:16px">$ </span>
-                                <span class="pago" style="font-size:16px" >0</span>.-
+                                <span class="pago" style="font-size:16px" onchange="changePago()">0</span>.-
                             </th>
                             <th width="150px" class="vueltoTh">
                                 SALDO: &nbsp;
@@ -159,8 +159,8 @@ jQuery(function ($) {
                 $('#facturas').html(data);
                 $('#selectComprobantes').select2();
                 $('#selectComprobantes').on('change', function(){
-                    let selected = $(this).val();
-                    changeComprobantes( provId, selected )
+{#                    let selected = $(this).val();#}
+                    changeComprobantes()
                 });
                 $('#selectComprobantes').select2('focus');
             },
@@ -315,6 +315,7 @@ function cargarCheques(objTd){
                 chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
             }
             actualizarPagos();
+            changeComprobantes()
         });
 
         if(tipo != 'TARJETA'){
@@ -394,15 +395,22 @@ function cargarCheques(objTd){
                 e.preventDefault();
                 $itemFormTd.parent().remove();
                 actualizarPagos();
+                changeComprobantes()
             }
         });
         $removeFormA.on('blur', function(e) {
             $('#linkAddPago').focus();
         });
+        
     }
 
-    function changeComprobantes(provId,selected){
-        data = { 'provId':provId, 'selected': selected };
+    function changeComprobantes(){
+        provId = $('#comprasbundle_pagoproveedor_proveedor').val()
+        selected = $('#selectComprobantes').val()
+        pago = parseFloat($('.pago').html())
+        total = $('#comprasbundle_pagoproveedor_importe').val()
+        if(pago > 0 && total==pago) return false
+        data = { provId, selected, pago };
         $.ajax({
             url: "{{ path("compras_proveedor_pagos_getMontoAPagar") }}",
             data: data ,
@@ -428,17 +436,23 @@ function cargarCheques(objTd){
 
 
     function actualizarPagos() {
-        total = checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
         pagos = 0;
         items = $(".tabla-pagos tbody tr.item");
         items.each(function(){
             importe = checknumero( $(this).find('[id*="_importe"]'),2 );
             pagos += importe
         });
-
         $('.pago').html( pagos.toFixed(2) );
+        total = checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
         vuelto = pagos - total;
         $('.vuelto').html(vuelto.toFixed(2))
+    }
+    
+    function recalcularRetenciones(){
+        provId = $('#comprasbundle_pagoproveedor_proveedor').val()
+        selected = $('#selectComprobantes').val()
+        pago = parseFloat($('.pago').html())
+        data = { provId, selected, pago  };
     }
 });
 </script>

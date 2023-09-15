@@ -613,7 +613,7 @@ function actualizaTotales(){
         var Total=0;
         var IvaTotal=0;
         var tipoC = jQuery('#comprasbundle_factura_afipComprobante option:selected').text().slice(-2) == ' C'
-        
+        var totbon = checknumero( jQuery('#comprasbundle_factura_totalBonificado') );
         jQuery("tr.item").each(function(){
             var item = jQuery(this);
             var cant =  checknumero( item.find('.cantTd input') ) ;
@@ -637,6 +637,7 @@ function actualizaTotales(){
             jQuery(this).html(index+1);
         });
     }
+    
 function totales(suma){
     var neto = checknumero(jQuery('#comprasbundle_factura_subtotal'));
     jQuery('#comprasbundle_factura_subtotalNeto').val(  neto.toFixed(3)  );
