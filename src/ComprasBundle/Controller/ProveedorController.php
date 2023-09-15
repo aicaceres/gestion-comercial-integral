@@ -623,10 +623,12 @@ class ProveedorController extends Controller {
                     $totalPago += $detalle->getImporte();
                 }
 
-                $montoImputar = round($totalPago + $formData['montoRentas'] + $formData['montoGanancias'], 3);
+//                $montoImputar = round($totalPago + $formData['montoRentas'] + $formData['montoGanancias'], 3);
+                $montoImputar = round($totalPago, 3);
                 $entity->setMontoRetRentas($formData['montoRentas']);
                 $entity->setMontoRetGanancias($formData['montoGanancias']);
-                $saldo = $formData['importe'] - $totalPago;
+                $saldo = ($formData['importe'] + $formData['montoRentas'] + $formData['montoGanancias']) - $totalPago;
+
                 $entity->setSaldo($saldo > 0 ? $saldo : 0 );
                 $entity->setImporte($totalPago);
                 // recorrer comprobantes, imputar el pago y marcar como retencionesAplicadas

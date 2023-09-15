@@ -272,7 +272,7 @@ jQuery(document).ready(function($) {
    $('.cktotal input').change(function(){
         if(isNaN( parseFloat(jQuery(this).val()) ))
             jQuery(this).val(0);
-        totales( ( jQuery(this).attr('id')==='comprasbundle_factura_total' ) ? 0 : 1 );
+        totales( 1 );
     });
     $(document).on('change','.ivaTd select',function(){
         actualizaTotales();
@@ -331,15 +331,16 @@ jQuery(document).ready(function($) {
     /*$('#comprasbundle_factura_tipoFactura').on('change',function(){
         actualizaTotales();
     });*/
-    $('#comprasbundle_factura_totalBonificado').on('focus',function(){
+{#    $('#comprasbundle_factura_totalBonificado').on('focus',function(){
         $(this).data('old', $(this).val());
-    });
+    });#}
     $('#comprasbundle_factura_totalBonificado').on('change',function(){
-        var old = $(this).data('old');
+        {#var old = $(this).data('old');
         var now = $(this).val();
         var subtot = $('#comprasbundle_factura_subtotal').val() - (now-old);
         $('#comprasbundle_factura_subtotal').val( subtot.toFixed(3) );
-        $('#comprasbundle_factura_subtotalNeto').val( subtot.toFixed(3) );
+        $('#comprasbundle_factura_subtotalNeto').val( subtot.toFixed(3) );#}
+        actualizaTotales()
     });
 
         $('.nrofactura > div:first-of-type').css('width','22%');
@@ -420,7 +421,7 @@ $('input[type=radio]').on('focus',function(){
     jQuery(".prodTd .chzn-select").change(function(){ changeProducto( jQuery(this) ); });
     jQuery(".bulto input").last().uniform();
     jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
-    jQuery('.cantTd input, .precTd input[type=text]').change(function(e){
+    jQuery('.cantTd input, .precTd input[type=text], .ivaTd select').change(function(e){
         if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);
         actualizaTotales();
         // si se modifica el precio
@@ -610,25 +611,36 @@ function changeBulto(item){
         }
 }
 function actualizaTotales(){
-        var Total=0;
-        var IvaTotal=0;
-        var tipoC = jQuery('#comprasbundle_factura_afipComprobante option:selected').text().slice(-2) == ' C'
-        var totbon = checknumero( jQuery('#comprasbundle_factura_totalBonificado') );
+{#        var Total=0;#}
+        let IvaTotal=0;
+        var tipoC = jQuery('#comprasbundle_factura_afipComprobante option:selected').text().slice(-2) == ' C'        
+        // calcular subtotal
+        let Total = 0
+        jQuery("tr.item").each(function(){
+            var item = jQuery(this);
+            const cant =  checknumero( item.find('.cantTd input') ) ;
+            const prec =  checknumero( item.find('.precTd input[type=text]') )
+            const sbtotItm = prec*cant
+            item.find('.totalTd').text( sbtotItm.toFixed(3))
+            Total += sbtotItm
+        })
+        jQuery("#comprasbundle_factura_subtotal").val(Total.toFixed(3))
+        // calcular iva teniendo en cuenta el dto
+        const totbon = checknumero( jQuery('#comprasbundle_factura_totalBonificado') );
+        const porcDto = ((totbon * 100) / Total)
         jQuery("tr.item").each(function(){
             var item = jQuery(this);
             var cant =  checknumero( item.find('.cantTd input') ) ;
             var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
-{#            var arr = ['A','M'];#}
+            const precTotal = cant*prec
+            const precDto = precTotal - (precTotal * (porcDto/100))
             let iva = item.find('.ivaTd [name*="afipAlicuota"] option:selected').text();
             iva = parseFloat(iva.replace('%', '') /100);
-            sbtotItm = prec * cant;
-            Total += sbtotItm;
             if( !tipoC){
-                IvaTotal += (sbtotItm * iva);
+                IvaTotal += (precDto * iva);
             }
-            item.find('.totalTd').text( sbtotItm.toFixed(3));
         });
-        jQuery('#Total input[type=text]').val(Total.toFixed(3));
+{#        jQuery('#Total input[type=text]').val(Total.toFixed(3));#}
         //var iva = Total * 0.21;
         jQuery('#comprasbundle_factura_iva').val(  IvaTotal.toFixed(3)  );
         //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));

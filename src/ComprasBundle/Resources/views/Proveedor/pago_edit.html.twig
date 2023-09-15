@@ -189,7 +189,7 @@ jQuery(function ($) {
             return false;
         }
         else{
-            importeTotal = parseFloat($('#comprasbundle_pagoproveedor_importe').val())
+{#            importeTotal = parseFloat($('#comprasbundle_pagoproveedor_importe').val())#}
             
             // controlar que el pago cubra los impuestos
             impuestos = parseFloat($('#comprasbundle_pagoproveedor_montoGanancias').val())  + parseFloat($('#comprasbundle_pagoproveedor_montoRentas').val());
@@ -408,8 +408,7 @@ function cargarCheques(objTd){
         provId = $('#comprasbundle_pagoproveedor_proveedor').val()
         selected = $('#selectComprobantes').val()
         pago = parseFloat($('.pago').html())
-        total = $('#comprasbundle_pagoproveedor_importe').val()
-        if(pago > 0 && total==pago) return false
+        if(pago > 0 && pago==getMontoTotal()) return false
         data = { provId, selected, pago };
         $.ajax({
             url: "{{ path("compras_proveedor_pagos_getMontoAPagar") }}",
@@ -443,17 +442,19 @@ function cargarCheques(objTd){
             pagos += importe
         });
         $('.pago').html( pagos.toFixed(2) );
-        total = checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
-        vuelto = pagos - total;
+        
+        vuelto = pagos - getMontoTotal();
         $('.vuelto').html(vuelto.toFixed(2))
     }
     
-    function recalcularRetenciones(){
-        provId = $('#comprasbundle_pagoproveedor_proveedor').val()
-        selected = $('#selectComprobantes').val()
-        pago = parseFloat($('.pago').html())
-        data = { provId, selected, pago  };
+    function getMontoTotal(){
+        total = checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
+        montoRentas = checknumero( $('#comprasbundle_pagoproveedor_montoRentas'),2)
+        montoGanan = checknumero($('#comprasbundle_pagoproveedor_montoGanancias'),2)
+        console.log(total + montoRentas + montoGanan)
+        return total + montoRentas + montoGanan
     }
+    
 });
 </script>
 {% endblock %}
