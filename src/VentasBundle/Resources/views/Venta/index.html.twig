@@ -65,7 +65,7 @@
                 <td class="estado">{{ entity.estado }}</td>
                 <td class="factura">{% if entity.cobro %} {{ entity.cobro.facturaElectronica ? entity.cobro.facturaElectronica.comprobanteTxt : ''}} {% endif %}</td>
                 {% if not owns  %}
-                <td>{{entity.updatedBy.username|upper }}</td>
+                <td>{{entity.createdBy.username|upper }}</td>
                 {% endif %}
                 <td class="buttons">
                     <a href="{{ path('ventas_venta_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Venta"></a>

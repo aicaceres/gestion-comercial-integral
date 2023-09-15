@@ -6,7 +6,7 @@
 {% endblock %}
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >PRESUPUESTO: #{{ entity.nroPresupuesto }} {% if entity.tipo=='R' %}&nbsp;&nbsp; -- REMITO -- {% endif %}  <span class="floatright">{{entity.fechaPresupuesto|date('d/m/Y H:i')}} &nbsp; | &nbsp; {{app.user.username}}</span></h1>
+<h1 id="popup_title" >PRESUPUESTO: #{{ entity.nroPresupuesto }} {% if entity.tipo=='R' %}&nbsp;&nbsp; -- REMITO -- {% endif %}  <span class="floatright">{{entity.fechaPresupuesto|date('d/m/Y H:i')}} &nbsp; | &nbsp; {{entity.createdBy.username}}</span></h1>
 <div class="divEdicion">
 <style type="text/css">
     fieldset label{
