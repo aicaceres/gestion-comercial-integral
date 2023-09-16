@@ -244,15 +244,19 @@ class Factura {
 
     // calcula saldo imponible
     public function getSaldoImponible() {
-        if (!$this->retencionesAplicadas) {
-            $imp = $this->getTotal() - $this->getIva();
-            $porc = ($imp * 100) / $this->getTotal();
-            $saldoImponible = ($this->getSaldo() * $porc) / 100;
-            return $saldoImponible;
-        }
-        else {
-            return $this->getSaldo();
-        }
+//        if (!$this->retencionesAplicadas) {
+        $imp = $this->getTotal() - $this->getIva();
+        $porc = ($imp * 100) / $this->getTotal();
+        $saldoImponible = ($this->getSaldo() * $porc) / 100;
+        return $saldoImponible;
+//        }
+//        else {
+//            return $this->getSaldo();
+//        }
+    }
+
+    public function getPorcImponible() {
+        return ($this->getIva() * 100) / $this->getSaldoImponible();
     }
 
     /**
@@ -988,15 +992,13 @@ class Factura {
         return $this->retencionesAplicadas;
     }
 
-
     /**
      * Set rubroCompras
      *
      * @param \ConfigBundle\Entity\RubroCompras $rubroCompras
      * @return Factura
      */
-    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null)
-    {
+    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null) {
         $this->rubroCompras = $rubroCompras;
 
         return $this;
@@ -1005,10 +1007,10 @@ class Factura {
     /**
      * Get rubroCompras
      *
-     * @return \ConfigBundle\Entity\RubroCompras 
+     * @return \ConfigBundle\Entity\RubroCompras
      */
-    public function getRubroCompras()
-    {
+    public function getRubroCompras() {
         return $this->rubroCompras;
     }
+
 }

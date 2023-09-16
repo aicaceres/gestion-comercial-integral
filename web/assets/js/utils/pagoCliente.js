@@ -176,6 +176,15 @@ function handleChangeImporte(target) {
 }
 
 function actualizarPagos() {
+    generanc = jQuery("#ventasbundle_pagocliente_generaNotaCredito").is(
+		":checked"
+	)
+    if(!jQuery('#ventasbundle_pagocliente_comprobantes').val() && generanc){
+        alert('No se puede generar NC sin asociar comprobante!')
+        jQuery("#ventasbundle_pagocliente_generaNotaCredito").attr('checked',false)
+        jQuery.uniform.update()
+        return false
+    }
 	total = checknumero(jQuery("#ventasbundle_pagocliente_total"), 2)
 	pagos = nc = 0
 	items = jQuery(".tabla-pagos tbody tr.item")
@@ -184,18 +193,16 @@ function actualizarPagos() {
 		pagos += importe
 	})
 	// si se genera nc calcular y sumar importe
-	generanc = jQuery("#ventasbundle_pagocliente_generaNotaCredito").is(
-		":checked"
-	)
-	if (generanc) {
-		// calcular valor de nc
-		nc = total - pagos
-	}
-	jQuery("#nota_credito").val(nc.toFixed(2))
-	jQuery(".nota-credito span").html(nc.toFixed(2))
-	jQuery(".nota-credito").toggle(generanc)
-	jQuery(".nota-credito").toggleClass("red", nc < 0)
-
+	
+        if (generanc) {
+                // calcular valor de nc
+                nc = total - pagos
+        }
+        jQuery("#nota_credito").val(nc.toFixed(2))
+        jQuery(".nota-credito span").html(nc.toFixed(2))
+        jQuery(".nota-credito").toggle(generanc)
+        jQuery(".nota-credito").toggleClass("red", nc < 0)
+        
 	jQuery(".pago").html(pagos.toFixed(2))
 	vuelto = pagos - total + nc
 	jQuery(".vuelto").html(vuelto.toFixed(2))
@@ -205,6 +212,7 @@ function calcularTotal() {
 	obj = jQuery("#ventasbundle_pagocliente_comprobantes")
 	data = obj.val()
 	if (data) {
+            jQuery('#ventasbundle_pagocliente_total').attr('readonly',true)
 		url = obj.attr("url")
 		jQuery.ajax({
 			url: url,
@@ -217,6 +225,7 @@ function calcularTotal() {
 			}
 		})
 	} else {
+            jQuery('#ventasbundle_pagocliente_total').attr('readonly',false)
 		total = 0
 		jQuery("#ventasbundle_pagocliente_total").val(total.toFixed(2))
 		actualizarPagos()

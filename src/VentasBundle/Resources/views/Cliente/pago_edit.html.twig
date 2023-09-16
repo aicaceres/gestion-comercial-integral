@@ -55,7 +55,7 @@
         <div style="display: inline-block; width: 15%">
             {{ form_label(form.total,'TOTAL:') }}
             <strong class="simbolo">{{ entity.moneda.simbolo }}</strong>
-            {{ form_widget(form.total,{'attr':{'class':'number mediuminput', 'readonly':'readonly'}}) }}
+            {{ form_widget(form.total,{'attr':{'class':'number mediuminput'}}) }}
         </div>
         <div style="display: inline-block; width: 20%;">
             {{ form_label(form.generaNotaCredito, null, {'label_attr': {'style': 'width:30%'}}) }}
@@ -133,20 +133,19 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
-
-        {# $('#ventasbundle_pagocliente_generaNotaCredito').on('change',function(){
+        $('#ventasbundle_pagocliente_total').on('change',function(){
             actualizarPagos();
-        }) #}
+        })
 
         {# calcularTotal(); #}
         {# actualizarPagos(); #}
 
         $('#guardar').on('click', function(){
-            if( !$('#ventasbundle_pagocliente_comprobantes').val() ){
+            {#if( !$('#ventasbundle_pagocliente_comprobantes').val() ){
                 jAlert('Debe indicar los comprobantes a abonar!');
                 $('#ventasbundle_pagocliente_comprobantes').select2('focus');
                 return false;
-            }
+            }#}
             pago = parseFloat($('.pago').html());
             nc = jQuery("#nota_credito").val();
 
@@ -189,7 +188,8 @@ jQuery(function ($) {
 
 
 
-    function actualizarPagos() {
+    {#function actualizarPagos() {
+    alert('pag')
         total = checknumero( $('#ventasbundle_pagocliente_total'),2 );
         pagos = nc = 0;
         items = $(".tabla-pagos tbody tr.item");
@@ -199,19 +199,24 @@ jQuery(function ($) {
         });
         // si se genera nc calcular y sumar importe
         generanc = $('#ventasbundle_pagocliente_generaNotaCredito').is(':checked');
-        if( generanc ){
-            // calcular valor de nc
-            nc = total - pagos;
+        console.log('nc',generanc)
+        if($('#ventasbundle_pagocliente_comprobantes').val()){
+            if( generanc ){
+                // calcular valor de nc
+                nc = total - pagos;
+            }
+            $('#nota_credito').val(nc.toFixed(2));
+            $('.nota-credito span').html(nc.toFixed(2));
+            $('.nota-credito').toggle( generanc );
+            $('.nota-credito').toggleClass('red', nc<0 );
+        }else{
+            if(generanc) alert('No se puede generar nc sin asociar comprobante')
         }
-        $('#nota_credito').val(nc.toFixed(2));
-        $('.nota-credito span').html(nc.toFixed(2));
-        $('.nota-credito').toggle( generanc );
-        $('.nota-credito').toggleClass('red', nc<0 );
 
         $('.pago').html( pagos.toFixed(2) );
         vuelto = pagos - total + nc;
         $('.vuelto').html(vuelto.toFixed(2))
-    }
+    }#}
 
     function calcularTotal(){
         obj = $('#ventasbundle_pagocliente_comprobantes');

@@ -134,6 +134,7 @@ class NotaDebCred {
      * @ORM\Column(name="modifica_stock", type="boolean",nullable=true)
      */
     protected $modificaStock = false;
+
     /**
      * @ORM\Column(name="retenciones_aplicadas", type="boolean",nullable=true)
      */
@@ -230,20 +231,26 @@ class NotaDebCred {
 
     public function getTotalsinBonificacion() {
         return $this->getSubtotalNeto() + $this->getIva() + $this->getPercepcionIva() +
-                $this->getPercepcionDgr() + $this->getPercepcionMunicipal() +
-                $this->getImpuestoInterno() + $this->getTmc();
+            $this->getPercepcionDgr() + $this->getPercepcionMunicipal() +
+            $this->getImpuestoInterno() + $this->getTmc();
     }
+
     // calcula saldo imponible
-    public function getSaldoImponible(){
-        if( !$this->retencionesAplicadas ){
-            $imp = $this->getTotal() - $this->getIva();
-            $porc = ($imp * 100) / $this->getTotal();
-            $saldoImponible = ($this->getSaldo() * $porc) / 100;
-            return $saldoImponible;
-        }else{
-            return $this->getSaldo();
-        }
+    public function getSaldoImponible() {
+//        if( !$this->retencionesAplicadas ){
+        $imp = $this->getTotal() - $this->getIva();
+        $porc = ($imp * 100) / $this->getTotal();
+        $saldoImponible = ($this->getSaldo() * $porc) / 100;
+        return $saldoImponible;
+//        }else{
+//            return $this->getSaldo();
+//        }
     }
+
+    public function getPorcImponible() {
+        return ($this->getIva() * 100) / $this->getSaldoImponible();
+    }
+
     /**
      * Constructor
      */
@@ -264,10 +271,11 @@ class NotaDebCred {
     public function eliminable() {
         if ($this->getSigno() == '-') {
             // si modifo stock no es eliminable
-            if( $this->getModificaStock() ) return FALSE;
+            if ($this->getModificaStock())
+                return FALSE;
             // verificar facturas con pagos
-            foreach( $this->getFacturas() as $fact){
-                if( $fact->getEstado() == 'PAGADO' || $fact->getEstado() == 'PAGO PARCIAL' ){
+            foreach ($this->getFacturas() as $fact) {
+                if ($fact->getEstado() == 'PAGADO' || $fact->getEstado() == 'PAGO PARCIAL') {
                     return false;
                 }
             }
@@ -970,15 +978,13 @@ class NotaDebCred {
         }
     }
 
-
     /**
      * Set retencionesAplicadas
      *
      * @param boolean $retencionesAplicadas
      * @return NotaDebCred
      */
-    public function setRetencionesAplicadas($retencionesAplicadas)
-    {
+    public function setRetencionesAplicadas($retencionesAplicadas) {
         $this->retencionesAplicadas = $retencionesAplicadas;
 
         return $this;
@@ -989,8 +995,8 @@ class NotaDebCred {
      *
      * @return boolean
      */
-    public function getRetencionesAplicadas()
-    {
+    public function getRetencionesAplicadas() {
         return $this->retencionesAplicadas;
     }
+
 }

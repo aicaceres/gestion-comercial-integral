@@ -393,7 +393,7 @@ class ProveedorController extends Controller {
                     $text = $text . ' [ ' . $doc[0] . ' ' . $comprob->getNroComprobante() . ' $' . $item->monto . '] ';
                 }
                 $var['concepto'] = 'Pago: ' . UtilsController::myTruncate($text, 30);
-                $var['importe'] = $pago->getImporte() + $pago->getMontoRetencionRentas() + $pago->getMontoGanancias();
+                $var['importe'] = $pago->getImporte();
             }
         }
         $ord = usort($ctacte, function($a1, $a2) {
@@ -856,10 +856,10 @@ class ProveedorController extends Controller {
                     $comprob->setEstado('PENDIENTE');
                 else
                     $comprob->setEstado('PAGO PARCIAL');
-                if ($entity->getBaseImponibleRentas() > 0) {
-                    // desmarcar retenciones aplicadas unicamente si se aplicaron en este pago
+//                if ($entity->getBaseImponibleRentas() > 0) {
+                // desmarcar retenciones aplicadas unicamente si se aplicaron en este pago
 //                    $comprob->setRetencionesAplicadas(0);
-                }
+//                }
 
                 $em->persist($comprob);
             }
@@ -972,7 +972,8 @@ class ProveedorController extends Controller {
         $datos['porcRentas'] = $porcRentas['porcRetRentas'];
         $datos['porcAdicional'] = $porcRentas['porcAdicRentas'];
         $selected = $request->get('selected');
-        $neto = $montoRetRentas = 0;
+        $neto = $montoRetRentas = $porcImp = 0;
+
         if (is_array($selected)) {
             foreach ($selected as $sel) {
                 $comp = explode("-", $sel);
@@ -985,18 +986,21 @@ class ProveedorController extends Controller {
                 $proveedor = $obj->getProveedor();
                 $datos['total'] += $obj->getSaldo();
                 $neto += $obj->getSaldoImponible();
+                $porcImp += $obj->getPorcImponible();
             }
+            $promPorc = $porcImp / count($selected);
+            $pagoImponible = $pago - ($pago * ($promPorc / 100) );
 
-            $montoParaCalculoRetencion = $pago > 0 ? $pago : $neto;
+            $montoParaCalculo = $pago > 0 ? $pagoImponible : $neto;
 
             // calcular retencion rentas
             $monto = $rentas = $adicional = 0;
             $retrentas = $porcRentas['porcRetRentas'];
             $adicrentas = $porcRentas['porcAdicRentas'];
             if ($retrentas > 0) {
-                if ($montoParaCalculoRetencion >= floatval($proveedor->getCategoriaRentas()->getMinimo())) {
-                    $datos['baseImponible'] = $montoParaCalculoRetencion;
-                    $rentas = $montoParaCalculoRetencion * ( $retrentas / 100 );
+                if ($montoParaCalculo >= floatval($proveedor->getCategoriaRentas()->getMinimo())) {
+                    $datos['baseImponible'] = $montoParaCalculo;
+                    $rentas = $montoParaCalculo * ( $retrentas / 100 );
                     $adicional = $rentas * ( $adicrentas / 100 );
                     $monto = $rentas + $adicional;
                 }
@@ -1036,7 +1040,7 @@ class ProveedorController extends Controller {
             }
             //&& ($datos['baseImponible'] + $acumuladoTotalGanancia) > $exento
             if ($proveedor->getActividadComercial()) {
-                $montoParaEscala = $datos['baseImponible'] + $acumuladoTotalGanancia;
+                $montoParaEscala = $montoParaCalculo + $acumuladoTotalGanancia;
                 $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaByHasta($proveedor->getActividadComercial()->getCodigo(), $montoParaEscala);
                 if ($escala) {
                     //(
@@ -1047,11 +1051,11 @@ class ProveedorController extends Controller {
                     //  *PORCENTAJE EXCEDENTE EN LA ESCALA/100
                     //)
                     //-ACUMULADO DE LO RETENIDO DE GANANCIAS EN EL PERIODO
-                    $datos['ganancias'] = ((($datos['baseImponible'] + $acumuladoTotalGanancia - $exento) - $escala->getDesde()) * ( $escala->getPorcExcedente() / 100)) - $acumuladoRetencionGanancia;
+                    $datos['ganancias'] = ((($montoParaCalculo + $acumuladoTotalGanancia - $exento) - $escala->getDesde()) * ( $escala->getPorcExcedente() / 100)) - $acumuladoRetencionGanancia;
 //                    $datos['ganancias'] = ( $datos['baseImponible'] - $escala->getDesde() ) * ( $escala->getPorcExcedente() / 100) + $escala->getFijo() - $acumuladoRetencionGanancia;
                 }
                 else {
-                    $montoRetencion = ( ($datos['baseImponible'] + $acumuladoTotalGanancia - $exento) * ($datos['porcGanancia'] / 100) ) - $acumuladoRetencionGanancia;
+                    $montoRetencion = ( ($montoParaCalculo + $acumuladoTotalGanancia - $exento) * ($datos['porcGanancia'] / 100) ) - $acumuladoRetencionGanancia;
                 }
                 $minimo = $proveedor->getActividadComercial()->getMinimo();
                 $datos['ganancias'] = ($montoRetencion < $minimo) ? 0 : $montoRetencion;
