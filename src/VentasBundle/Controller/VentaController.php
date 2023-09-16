@@ -97,6 +97,8 @@ class VentaController extends Controller {
 
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
+            $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+            $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas()->getRetencion() : 0);
 
             $deposito = $em->getRepository('AppBundle:Deposito')->find($param->getVentasDepositoBydefault());
             $entity->setDeposito($deposito);

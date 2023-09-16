@@ -70,6 +70,18 @@ class Venta {
     protected $nombreCliente;
 
     /**
+     * @var string $categoriaIva
+     * @ORM\Column(name="categoria_iva", type="string", nullable=true)
+     */
+    protected $categoriaIva;
+
+    /**
+     * @var string $percepcionRentas
+     * @ORM\Column(name="percepcion_rentas", type="decimal", scale=2, nullable=true)
+     */
+    protected $percepcionRentas;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\FormaPago")
      * @ORM\JoinColumn(name="forma_pago_id", referencedColumnName="id")
      * @Gedmo\Versioned()
@@ -184,7 +196,7 @@ class Venta {
 
     public function getTotalDescuentoRecargo() {
         $total = 0;
-        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        $categIva = $this->getCategoriaIva();
         if ($categIva == 'I' || $categIva == 'M') {
             // suma de descuentos x item
             foreach ($this->detalles as $item) {
@@ -201,7 +213,7 @@ class Venta {
 
     public function getTotalIva() {
         $total = 0;
-        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        $categIva = $this->getCategoriaIva();
         if ($categIva == 'E') {
             return 0;
         }
@@ -213,19 +225,17 @@ class Venta {
         }
     }
 
-    public function getTotalIibb($iibbPercent = 0) {
-        $iibbPercent = $this->getCliente()->getPercepcionRentas();
+    public function getTotalIibb() {
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * $iibbPercent / 100;
+        return $monto * $this->getPercepcionRentas() / 100;
     }
 
     public function getMontoTotal() {
-        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
-        $retRentas = $this->getCliente()->getCategoriaRentas() ? $this->getCliente()->getCategoriaRentas()->getRetencion() : null;
+        $categIva = $this->getCategoriaIva();
         if ($categIva == 'I' || $categIva == 'M') {
             // total con iva e iibb
             $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo() + $this->getTotalIva();
-            if ($retRentas > 0) {
+            if ($this->getPercepcionRentas() > 0) {
                 $total = $total + $this->getTotalIibb();
             }
         }
@@ -706,6 +716,48 @@ class Venta {
      */
     public function getDescuentaStock() {
         return $this->descuentaStock;
+    }
+
+    /**
+     * Set categoriaIva
+     *
+     * @param string $categoriaIva
+     * @return Venta
+     */
+    public function setCategoriaIva($categoriaIva) {
+        $this->categoriaIva = $categoriaIva;
+
+        return $this;
+    }
+
+    /**
+     * Get categoriaIva
+     *
+     * @return string
+     */
+    public function getCategoriaIva() {
+        return $this->categoriaIva;
+    }
+
+    /**
+     * Set percepcionRentas
+     *
+     * @param string $percepcionRentas
+     * @return Venta
+     */
+    public function setPercepcionRentas($percepcionRentas) {
+        $this->percepcionRentas = $percepcionRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get percepcionRentas
+     *
+     * @return string
+     */
+    public function getPercepcionRentas() {
+        return $this->percepcionRentas;
     }
 
 }

@@ -147,6 +147,18 @@ class NotaDebCred {
     protected $nroDocumentoCliente;
 
     /**
+     * @var string $categoriaIva
+     * @ORM\Column(name="categoria_iva", type="string", nullable=true)
+     */
+    protected $categoriaIva;
+
+    /**
+     * @var string $percepcionRentas
+     * @ORM\Column(name="percepcion_rentas", type="decimal", scale=2, nullable=true)
+     */
+    protected $percepcionRentas;
+
+    /**
      * @ORM\Column(name="concepto", type="text", nullable=true)
      * @Gedmo\Versioned()
      */
@@ -286,7 +298,7 @@ class NotaDebCred {
 
     public function getTotalDescuentoRecargo() {
         $total = 0;
-        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        $categIva = $this->getCategoriaIva();
         if ($categIva == 'I' || $categIva == 'M') {
             // suma de descuentos x item
             foreach ($this->detalles as $item) {
@@ -309,19 +321,17 @@ class NotaDebCred {
         return round(($total / $this->getCotizacion()), 3);
     }
 
-    public function getTotalIibb($iibbPercent = 3.5) {
-        $iibbPercent = $this->getCliente()->getPercepcionRentas();
+    public function getTotalIibb() {
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * $iibbPercent / 100;
+        return $monto * $this->getPercepcionRentas() / 100;
     }
 
     public function getMontoTotal() {
-        $retRentas = $this->getCliente()->getCategoriaRentas() ? $this->getCliente()->getCategoriaRentas()->getRetencion() : null;
-        $categIva = $this->getCliente()->getCategoriaIva()->getNombre();
+        $categIva = $this->getCategoriaIva();
         if ($categIva == 'I' || $categIva == 'M') {
             // total con iva e iibb
             $total = $this->getSubTotal() + $this->getTotalDescuentoRecargo() + $this->getTotalIva();
-            if ($retRentas > 0) {
+            if ($this->getPercepcionRentas() > 0) {
                 $total = $total + $this->getTotalIibb();
             }
         }
@@ -971,6 +981,48 @@ class NotaDebCred {
      */
     public function getPeriodoAsocHasta() {
         return $this->periodoAsocHasta;
+    }
+
+    /**
+     * Set categoriaIva
+     *
+     * @param string $categoriaIva
+     * @return NotaDebCred
+     */
+    public function setCategoriaIva($categoriaIva) {
+        $this->categoriaIva = $categoriaIva;
+
+        return $this;
+    }
+
+    /**
+     * Get categoriaIva
+     *
+     * @return string
+     */
+    public function getCategoriaIva() {
+        return $this->categoriaIva;
+    }
+
+    /**
+     * Set percepcionRentas
+     *
+     * @param string $percepcionRentas
+     * @return NotaDebCred
+     */
+    public function setPercepcionRentas($percepcionRentas) {
+        $this->percepcionRentas = $percepcionRentas;
+
+        return $this;
+    }
+
+    /**
+     * Get percepcionRentas
+     *
+     * @return string
+     */
+    public function getPercepcionRentas() {
+        return $this->percepcionRentas;
     }
 
 }

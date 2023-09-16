@@ -26,7 +26,6 @@
             {% set required = comodin ? true : false %}
             {{ form_widget(item.textoComodin, {'attr': {'class':'largeinput', 'style':display, 'required' : required }}) }}
         {% endif %}
-
     </td>
     <td class="cantTd">
         {{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft','min':'0'} }) }}

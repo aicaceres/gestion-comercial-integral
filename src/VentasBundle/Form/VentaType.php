@@ -12,13 +12,12 @@ class VentaType extends AbstractType {
      * @param FormBuilderInterface $builder
      * @param array $options
      */
-    public function buildForm(FormBuilderInterface $builder, array $options)
-    {
+    public function buildForm(FormBuilderInterface $builder, array $options) {
         $type = $options['attr']['type'];
         $data = $options['data'];
         $builder
-          //   ->add('nombreCliente',null,array('required'=>false,
-          // 'attr'=> array('placeholder'=>'Nombre y Apellido')))
+            //   ->add('nombreCliente',null,array('required'=>false,
+            // 'attr'=> array('placeholder'=>'Nombre y Apellido')))
             ->add('moneda', 'entity', array(
                 'class' => 'ConfigBundle:Moneda',
                 'required' => true, 'label' => 'MONEDA: '
@@ -37,10 +36,10 @@ class VentaType extends AbstractType {
                 'class' => 'ConfigBundle:Transporte',
                 'required' => false, 'label' => 'TRANSPORTE: '
             ))
-            ->add('descuentaStock',null,array('label' => 'DESCONTAR STOCK:','required'=>false))
-            ->add('concepto','textarea',
-                    array('label'=>'Concepto Adicional:','required'=>false,
-                          'attr'=>array('rows'=>'1','cols'=>'1', 'class'=>'largeinput')))
+            ->add('descuentaStock', null, array('label' => 'DESCONTAR STOCK:', 'required' => false))
+            ->add('concepto', 'textarea',
+                array('label' => 'Concepto Adicional:', 'required' => false,
+                    'attr' => array('rows' => '1', 'cols' => '1', 'class' => 'largeinput')))
 
 
             // ->add('nroOperacion', 'hidden')
@@ -48,10 +47,11 @@ class VentaType extends AbstractType {
             // ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
             //      'required' => true, 'label' => 'FORMA DE PAGO: '))
             // ->add('cotizacion','hidden')
-
-            ->add('descuentoRecargo', null, array('attr'=> array('required' => true)))
+            ->add('descuentoRecargo', null, array('attr' => array('required' => true)))
+            ->add('categoriaIva', 'hidden')
+            ->add('percepcionRentas', 'hidden')
             ->add('detalles', 'collection', array(
-                'type' => new VentaDetalleType($type,$data),
+                'type' => new VentaDetalleType($type, $data),
                 'by_reference' => false,
                 'allow_delete' => true,
                 'allow_add' => true,
@@ -59,7 +59,7 @@ class VentaType extends AbstractType {
                 'attr' => array(
                     'class' => 'row item',
                 )
-            ));
+        ));
         // if ($type == 'new') {
         //     // en render de nueva venta solo traer cliente por defecto
         //     $data = $options['data'];

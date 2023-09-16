@@ -66,7 +66,7 @@ function addNewItem() {
 	const newForm = prototype.replace(/items/g, index)
 	$collectionHolder.append(newForm)
 	$collectionHolder.data("index", index + 1)
-	$collectionHolder.find(".ordTd").last().html($collectionHolder.data("index"))
+	$collectionHolder.find(".ordTd").last().html($collectionHolder.find("tr.item").length)
 	$collectionHolder.find(".cantTd input").last().val(1)
 
   // PROCESO PARA GUARDAR EL NUEVO ITEM AL LOCALSTORAGE
@@ -140,9 +140,6 @@ function actualizarImportes(ndc=0) {
 	// iva e iibb
 	jQuery("#importeIVA").text(totalIvaResumen.toFixed(3).replace(".", ","))
 	jQuery("#importeIIBB").text(totalIibbResumen.toFixed(3).replace(".", ","))
-
-	// set index del holder
-  $collectionHolder.data("index", $collectionHolder.find("tr.item").length)
 
   if (typeof actualizarSumaPagos !== 'undefined' && jQuery.isFunction(actualizarSumaPagos)) {
     actualizarSumaPagos()
@@ -321,19 +318,23 @@ function setSelect2ToProduct(selProducto) {
                     const obj = e.target
                     const tr = jQuery(obj).closest("tr")
                     const precTd = tr.find(".precTd")
+                    const prodTd = tr.find(".prodTd")
                     const textoComodin = tr.find('[id*="_textoComodin"]')
                     let precio = 0
                     let alicuota = 0
                     let bajominimo = false
                     let comodin = false
+                    let id = 0
                     if(!e.params){
                         const option = jQuery(e.currentTarget).find('option:selected')
+//                        id = jQuery(e.currentTarget).val()
                         precio = option.data().precio
                         alicuota = option.data().alicuota
                         comodin = option.data().comodin == 0 ? false : true
                         bajominimo = option.data().bajominimo == 0 ? false : true
                     }else{
                         const data = e.params.data
+//                        id = data.id
                         precio = data.precio
                         alicuota = data.alicuota
                         comodin = data.comodin == 0 ? false : true

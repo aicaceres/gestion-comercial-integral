@@ -74,6 +74,8 @@ class PresupuestoController extends Controller {
 
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
+            $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+            $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas()->getRetencion() : 0);
 
             $entity->setFormaPago($cliente->getFormaPago());
             $entity->setDescuentoRecargo($cliente->getFormaPago()->getPorcentajeRecargo());
@@ -147,6 +149,7 @@ class PresupuestoController extends Controller {
                 $productos = $request->get('ventasbundle_producto');
                 foreach ($entity->getDetalles() as $key => $detalle) {
                     $producto = $em->getRepository('AppBundle:Producto')->find($productos[$key]);
+
                     if ($producto) {
                         $detalle->setProducto($producto);
                     }
@@ -154,7 +157,6 @@ class PresupuestoController extends Controller {
                         $entity->removeDetalle($detalle);
                     }
                 }
-
                 $em->persist($entity);
                 $em->flush();
                 if ($entity->getDescuentaStock()) {

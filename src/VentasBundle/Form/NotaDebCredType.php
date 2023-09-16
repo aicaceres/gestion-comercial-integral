@@ -40,6 +40,8 @@ class NotaDebCredType extends AbstractType {
                 'format' => 'dd-MM-yyyy', 'required' => false))
             ->add('periodoAsocHasta', 'date', array('widget' => 'single_text', 'label' => 'Hasta:',
                 'format' => 'dd-MM-yyyy', 'required' => false))
+            ->add('categoriaIva', 'hidden')
+            ->add('percepcionRentas', 'hidden')
             ->add('detalles', 'collection', array(
                 'type' => new NotaDebCredDetalleType(),
                 'by_reference' => false,

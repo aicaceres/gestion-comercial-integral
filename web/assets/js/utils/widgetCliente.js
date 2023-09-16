@@ -49,6 +49,8 @@ jQuery(document).ready(function ($) {
             divDatos.replaceWith(data.partial)
             $(".selectorCliente").data("categiva", data.categoriaIva)
             $(".selectorCliente").data("percrentas", data.percRentas)
+            $('[id*="_categoriaIva"]').val(data.categoriaIva)
+            $('[id*="_percepcionRentas"]').val(data.percRentas)
             $("#percrentas").html(data.percRentas)
 						// Forma de pago
 						let cf = data.esConsumidorFinal ? 1 : 0

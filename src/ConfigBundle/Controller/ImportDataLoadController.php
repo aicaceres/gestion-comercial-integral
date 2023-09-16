@@ -620,4 +620,48 @@ class ImportDataLoadController extends Controller {
         }
     }
 
+    /**
+     * @Route("/updateRentasIvaCliente", name="update_rentas_iva_cliente")
+     * @Method("GET")
+     */
+    public function updateRentasIvaCliente() {
+        $em = $this->getDoctrine()->getManager();
+        try {
+            $em->getConnection()->beginTransaction();
+            $ventas = $em->getRepository('VentasBundle:Venta')->findAll();
+            foreach ($ventas as $reg) {
+                $cliente = $reg->getCliente();
+                $catIva = $cliente->getCategoriaIva() ? $cliente->getCategoriaIva()->getNombre() : 'C';
+                $reg->setCategoriaIva($catIva);
+                $reg->setPercepcionRentas($cliente->getPercepcionRentas());
+                $em->persist($reg);
+                $em->flush();
+            }
+            $presup = $em->getRepository('VentasBundle:Presupuesto')->findAll();
+            foreach ($presup as $reg) {
+                $cliente = $reg->getCliente();
+                $catIva = $cliente->getCategoriaIva() ? $cliente->getCategoriaIva()->getNombre() : 'C';
+                $reg->setCategoriaIva($catIva);
+                $reg->setPercepcionRentas($cliente->getPercepcionRentas());
+                $em->persist($reg);
+                $em->flush();
+            }
+            $notas = $em->getRepository('VentasBundle:NotaDebCred')->findAll();
+            foreach ($notas as $reg) {
+                $cliente = $reg->getCliente();
+                $catIva = $cliente->getCategoriaIva() ? $cliente->getCategoriaIva()->getNombre() : 'C';
+                $reg->setCategoriaIva($catIva);
+                $reg->setPercepcionRentas($cliente->getPercepcionRentas());
+                $em->persist($reg);
+                $em->flush();
+            }
+            $em->getConnection()->commit();
+            return new Response('finalizado!');
+        }
+        catch (\Exception $ex) {
+            $em->getConnection()->rollback();
+            return new Response('Ha ocurrido un error ' . $ex->getMessage());
+        }
+    }
+
 }

@@ -199,14 +199,14 @@ function reporteSemanal(){
             const texto = "Confirme el periodo del reporte semanal: " + data.desde + " al " + data.hasta + "\no\n Ingrese una fecha inicial distinta de ser necesario ('ddmmaa') \n"
             let desde = prompt( texto, data.desde )
             if(desde){
-                data.desde = desde
+                data.desde = desde.trim()
                 console.log(data)
             
                 const driver = getDriver()
                 try {
                     driver.iniciarTrabajo();
                     const trfecha = 0
-                    const resp = driver.obtenerPrimerBloqueReporteElectronico(desde,data.hasta,data.file,trfecha)
+                    const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,data.file,trfecha)
                     if( resp ){
                         do{
                             resp = driver.obtenerSiguienteBloqueReporteElectronico()
