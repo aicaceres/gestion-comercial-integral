@@ -38,11 +38,16 @@
         </fieldset>
 
         <fieldset class="fields">
-            <div style="display: inline-block; width: 65%">
+            <div style="display: inline-block; width: 60%">
                 <label >COMPROBANTES IMPUTADOS:</label>
                 <select style="width:90%" disabled="disabled" >
                     <option> {{ entity.conceptoTxt }} </option>
                 </select>
+            </div>
+            <div style="display: inline-block; width: 10%">
+                <label>IVA: </label>
+                <strong> {{ entity.moneda.simbolo }} </strong>
+                <input class="number mediuminput" disabled="disabled" value="{{ entity.montoIva|number_format(2,'.',',') }}">
             </div>
             {% if entity.montoRetGanancias > 0 %}
             <div style="display: inline-block; width: 10%">
@@ -61,14 +66,19 @@
 
         </fieldset>
         <fieldset class="fields">
-            <div style="display: inline-block; width: 75%">
+            <div style="display: inline-block; width: 60%">
                 <label>OBSERVACIONES:</label>
                 <textarea rows="1" style="height:20px">{{ entity.detalle|raw }}</textarea>
             </div>
             <div style="display: inline-block; width: 15%">
-                <label>TOTAL:</label>
+                <label>PAGO:</label>
                 <strong> {{ entity.moneda.simbolo }} </strong>
-                <input class="number mediuminput" disabled="disabled" value="{{ ( entity.total + entity.saldo )|number_format(2,'.',',') }}">
+                <input class="number mediuminput" disabled="disabled" value="{{ entity.montoPago|number_format(2,'.',',') }}">
+            </div>
+            <div style="display: inline-block; width: 15%">
+                <label>TOTAL ABONADO:</label>
+                <strong> {{ entity.moneda.simbolo }} </strong>
+                <input class="number mediuminput" disabled="disabled" value="{{ entity.importe|number_format(2,'.',',') }}">
             </div>
         </fieldset>
 
@@ -152,7 +162,7 @@
                             <th width="150px" class="vueltoTh">
                                 SALDO: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="vuelto" style="font-size:16px"> {{ (entity.saldo)|number_format(2,'.',',')}}  </span>
+                                <span class="vuelto" style="font-size:16px"> {{ (entity.importe - importe)|number_format(2,'.',',')}}  </span>
                             </th>
                         </tr>
                     </thead>

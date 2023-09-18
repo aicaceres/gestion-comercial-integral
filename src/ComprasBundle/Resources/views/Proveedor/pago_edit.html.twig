@@ -3,6 +3,11 @@
 {% block pageheader %}
 {% block extra_css %}
 <link rel="stylesheet" href="{{ asset('assets/css/style.ventas.css') }}" type="text/css" media="all" />
+<style>
+    .readonly-text{
+        background-color: gainsboro !important;
+    }
+</style>
 {% endblock %}
 <div class="pageheader notab">
     <h1 class="pagetitle">Proveedor: {{entity.proveedor.nombre}}</h1>
@@ -41,30 +46,43 @@
             </div>
         </fieldset>
         <fieldset class="fields">
-            <div style="display: inline-block; width: 65%">
+            <div style="display: inline-block; width: 60%">
                 {{ form_label(form.concepto)  }}
                 <div id="facturas"></div>
             </div>
             <div style="display: inline-block; width: 10%">
+                {{ form_label(form.montoPago,'PAGO:') }}
+                <strong class="simbolo">$</strong>
+                {{ form_widget(form.montoPago,{'attr':{'class':'number mediuminput', 'title':'Monto del pago a realizar'}}) }}
+            </div>            
+            <div style="display: inline-block; width: 10%">
                 <label for="comprasbundle_pagoproveedor_montoGanancias" class="required">DGI: <span id="lblGanancia"></label>
                 <strong class="simbolo">$</strong>
-                {{ form_widget(form.montoGanancias,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Ganancias'}}) }}
+                {{ form_widget(form.montoGanancias,{'attr':{'class':'number mediuminput readonly-text', 'readonly':'readonly','title':'Retención de Ganancias', 'tabindex':'-1'}}) }}
             </div>
             <div style="display: inline-block; width: 13%">
                 <label for="comprasbundle_pagoproveedor_retencionRentas" class="required">DGR: [ <span id="lblrentas">{{ lblRentas }}</span> ] </label>
                 <strong class="simbolo">$</strong>
-                {{ form_widget(form.montoRentas,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Retención de Rentas'}}) }}
+                {{ form_widget(form.montoRentas,{'attr':{'class':'number mediuminput readonly-text', 'readonly':'readonly','title':'Retención de Rentas', 'tabindex':'-1'}}) }}
             </div>
         </fieldset>
         <fieldset class="fields" >
-            <div style="display: inline-block; width: 75%">
+            <div style="display: inline-block; width: 60%">
                 {{ form_label(form.detalle,'OBSERVACIONES:') }}
                 {{ form_widget(form.detalle,{'attr': {'style': 'height:20px'}}) }}
             </div>
-            <div style="display: inline-block; width: 15%">
-                {{ form_label(form.importe,'TOTAL:') }}
+            <div style="display: inline-block; width: 10%">
+                <label for="comprasbundle_pagoproveedor_montoIva" class="required">IVA: <span id="lblIva"></label>
                 <strong class="simbolo">$</strong>
-                {{ form_widget(form.importe,{'attr':{'class':'number mediuminput', 'readonly':'readonly','title':'Sumatoria de saldos de facturas seleccionadas'}}) }}
+                {{ form_widget(form.montoIva,{'attr':{'class':'number mediuminput', 'title':'Monto del IVA'}}) }}
+            </div>
+            <div style="display: inline-block; width: 10%">
+                <button type="button" id="calcular-valores">Calcular =></button>
+            </div>
+            <div style="display: inline-block; width: 10%">
+                {{ form_label(form.importe,'TOTAL A PAGAR:') }}
+                <strong class="simbolo">$</strong>
+                {{ form_widget(form.importe,{'attr':{'class':'number mediuminput readonly-text', 'readonly':'readonly','title':'Monto a abonar al proveedor', 'tabindex':'-1'}}) }}
             </div>
         </fieldset>
 
@@ -148,7 +166,10 @@ jQuery(function ($) {
         $('.js-hora').html( new Date().toLocaleString().slice(9) );
     }, 1000);
 
-
+    $('#calcular-valores').on("click", function(){changeComprobantes()})
+{#    $('#comprasbundle_pagoproveedor_montoPago').on('blur',function(){ $('#comprasbundle_pagoproveedor_montoIva').val(0) })#}
+    
+    
     $('#comprasbundle_pagoproveedor_proveedor').on('change',function(){
         let provId = $(this).val();
         $.ajax({
@@ -158,10 +179,9 @@ jQuery(function ($) {
             success: function(data) {
                 $('#facturas').html(data);
                 $('#selectComprobantes').select2();
-                $('#selectComprobantes').on('change', function(){
-{#                    let selected = $(this).val();#}
+               {# $('#selectComprobantes').on('change', function(){
                     changeComprobantes()
-                });
+                });#}
                 $('#selectComprobantes').select2('focus');
             },
             error: function() {
@@ -169,7 +189,7 @@ jQuery(function ($) {
             }
        });
     }).trigger('change');
-
+    
     $(document).on('click','.js_get_cheques', function() {
         cargarCheques( $(this).closest('.chequeTd') );
     });
@@ -178,11 +198,11 @@ jQuery(function ($) {
     $('#guardar').on('click', function(){
         $('#txtconcepto').val($("[name='concepto']").val());
 
-        if( !$('#txtconcepto').val() ){
+        {#if( !$('#txtconcepto').val() ){
             jAlert('Debe indicar los comprobantes a abonar!');
             $('#selectComprobantes').select2('focus');
             return false;
-        }
+        }#}
         pago = parseFloat($('.pago').html()) ;
         if( $(':invalid').length>0 || pago<=0 ){
             jAlert( 'Completar todos los datos para registrar el pago! Debe ingresar algún monto para el pago.');
@@ -246,10 +266,7 @@ jQuery(function ($) {
             addNewPago(tipo);
         })
 
-    //calcularTotal();
     actualizarPagos();
-{#    addNewPago('EFECTIVO');#}
-
 
 });
 function cargarCheques(objTd){
@@ -315,7 +332,7 @@ function cargarCheques(objTd){
                 chequeTd.find( '[id*="_valor"]' ).val( $(this).val());
             }
             actualizarPagos();
-            changeComprobantes()
+{#            changeComprobantes()#}
         });
 
         if(tipo != 'TARJETA'){
@@ -395,7 +412,6 @@ function cargarCheques(objTd){
                 e.preventDefault();
                 $itemFormTd.parent().remove();
                 actualizarPagos();
-                changeComprobantes()
             }
         });
         $removeFormA.on('blur', function(e) {
@@ -407,13 +423,14 @@ function cargarCheques(objTd){
     function changeComprobantes(){
         provId = $('#comprasbundle_pagoproveedor_proveedor').val()
         selected = $('#selectComprobantes').val()
-        pago = parseFloat($('.pago').html())
-        if(pago > 0 && pago==getMontoTotal()) return false
-        data = { provId, selected, pago };
+        montopago = $('#comprasbundle_pagoproveedor_montoPago').val()
+        montoiva = $('#comprasbundle_pagoproveedor_montoIva').val()
+        data = { provId, selected, montopago, montoiva };
         $.ajax({
             url: "{{ path("compras_proveedor_pagos_getMontoAPagar") }}",
             data: data ,
             success: function(data) {
+                console.log(data)
                 $('#comprasbundle_pagoproveedor_baseImponibleRentas').val(data.baseImponible);
                 $('#comprasbundle_pagoproveedor_retencionRentas').val(data.porcRentas);
                 $('#comprasbundle_pagoproveedor_adicionalRentas').val(data.porcAdicional);
@@ -424,6 +441,9 @@ function cargarCheques(objTd){
                 $('#comprasbundle_pagoproveedor_montoGanancias').val(data.ganancias.toFixed(3));
                 $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.porcGanancia.toFixed(3));
                 $('#comprasbundle_pagoproveedor_importe').val(data.total.toFixed(3));
+                {#const montoPago = data.total + data.ganancias + data.rentas + data.adicional #}
+                $('#comprasbundle_pagoproveedor_montoPago').val(data.pago);
+                $('#comprasbundle_pagoproveedor_montoIva').val(data.iva);
                 $('#lblGanancia').html( '[ ' + data.porcGanancia.toFixed(2)  + '% ]' );
                 actualizarPagos();
             },
@@ -443,7 +463,7 @@ function cargarCheques(objTd){
         });
         $('.pago').html( pagos.toFixed(2) );
         
-        vuelto = pagos - getMontoTotal();
+        vuelto = pagos - checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
         $('.vuelto').html(vuelto.toFixed(2))
     }
     

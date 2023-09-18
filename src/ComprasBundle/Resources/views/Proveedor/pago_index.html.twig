@@ -40,6 +40,9 @@
                 <th class="nosort">Nº Comprobante</th>
                 <th class="nosort">Concepto</th>
                 <th class="nosort">Detalle</th>
+                <th class="nosort">Pago</th>
+                <th class="nosort">Ret. Rentas</th>
+                <th class="nosort">Ret. Ganacias</th>
                 <th class="nosort">Importe</th>
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'compras_proveedor_pagos') and provId %}
@@ -58,7 +61,10 @@
                 <td>{{ entity.comprobanteNro }}</td>
                 <td title="{{entity.concepto}}"><span class="hidden">{{entity.concepto}}</span>{{ entity.conceptoTxt }}</td>
                 <td>{{entity.detalle}}</td>
-                <td style="text-align: right">{{ entity.getImporte|number_format(3,'.',',') }}</td>
+                <td style="text-align: right">{{ entity.montoPago|number_format(3,'.',',') }}</td>
+                <td style="text-align: right">{{ entity.montoRetRentas|number_format(3,'.',',') }}</td>
+                <td style="text-align: right">{{ entity.montoRetGanancias|number_format(3,'.',',') }}</td>
+                <td style="text-align: right">{{ entity.importe|number_format(3,'.',',') }}</td>
                 <td class="buttons">
                    <a href="{{ path('compras_proveedor_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
                    <a href url="{{ path('compras_proveedor_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a> &nbsp;

@@ -23,6 +23,8 @@ class PagoProveedorType extends AbstractType {
             ->add('concepto', null, array('label' => 'COMPROBANTES PENDIENTES:', 'required' => false))
             ->add('detalle', null, array('required' => false, 'attr' => array('rows' => '1')))
             ->add('importe')
+            ->add('montoPago')
+            ->add('montoIva', null, array('mapped' => false))
             ->add('moneda', 'entity', array(
                 'class' => 'ConfigBundle:Moneda',
                 'required' => true, 'label' => 'MONEDA: '

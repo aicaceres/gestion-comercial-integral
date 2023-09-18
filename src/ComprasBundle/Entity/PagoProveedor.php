@@ -73,6 +73,18 @@ class PagoProveedor {
     protected $importe;
 
     /**
+     * @var integer $montoPago
+     * @ORM\Column(name="monto_pago", type="decimal", scale=3 )
+     */
+    protected $montoPago;
+
+    /**
+     * @var integer $montoIva
+     * @ORM\Column(name="monto_iva", type="decimal", scale=3 )
+     */
+    protected $montoIva;
+
+    /**
      * @var integer $baseImponibleRentas
      * @ORM\Column(name="base_imponible_rentas", type="decimal", scale=2 )
      */
@@ -633,15 +645,13 @@ class PagoProveedor {
         return $this->retencionGanancias;
     }
 
-
     /**
      * Set montoRetRentas
      *
      * @param string $montoRetRentas
      * @return PagoProveedor
      */
-    public function setMontoRetRentas($montoRetRentas)
-    {
+    public function setMontoRetRentas($montoRetRentas) {
         $this->montoRetRentas = $montoRetRentas;
 
         return $this;
@@ -650,10 +660,9 @@ class PagoProveedor {
     /**
      * Get montoRetRentas
      *
-     * @return string 
+     * @return string
      */
-    public function getMontoRetRentas()
-    {
+    public function getMontoRetRentas() {
         return $this->montoRetRentas;
     }
 
@@ -663,8 +672,7 @@ class PagoProveedor {
      * @param string $montoRetGanancias
      * @return PagoProveedor
      */
-    public function setMontoRetGanancias($montoRetGanancias)
-    {
+    public function setMontoRetGanancias($montoRetGanancias) {
         $this->montoRetGanancias = $montoRetGanancias;
 
         return $this;
@@ -673,10 +681,54 @@ class PagoProveedor {
     /**
      * Get montoRetGanancias
      *
+     * @return string
+     */
+    public function getMontoRetGanancias() {
+        return $this->montoRetGanancias;
+    }
+
+    /**
+     * Set montoPago
+     *
+     * @param string $montoPago
+     * @return PagoProveedor
+     */
+    public function setMontoPago($montoPago) {
+        $this->montoPago = $montoPago;
+
+        return $this;
+    }
+
+    /**
+     * Get montoPago
+     *
+     * @return string
+     */
+    public function getMontoPago() {
+        return $this->montoPago;
+    }
+
+
+    /**
+     * Set montoIva
+     *
+     * @param string $montoIva
+     * @return PagoProveedor
+     */
+    public function setMontoIva($montoIva)
+    {
+        $this->montoIva = $montoIva;
+
+        return $this;
+    }
+
+    /**
+     * Get montoIva
+     *
      * @return string 
      */
-    public function getMontoRetGanancias()
+    public function getMontoIva()
     {
-        return $this->montoRetGanancias;
+        return $this->montoIva;
     }
 }
