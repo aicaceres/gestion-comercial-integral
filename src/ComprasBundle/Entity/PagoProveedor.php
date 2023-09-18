@@ -212,7 +212,7 @@ class PagoProveedor {
                     $txt = $txt . $aux . 'EFECTIVO: ' . $monto;
                     break;
                 case 'CHEQUE':
-                    $txt = $txt . $aux . 'CHEQUE: ' . $monto;
+                    $txt = $txt . $aux . 'CHEQUE:  N°' . $det->getChequeRecibido()->getNroCheque() . ' ' . $monto;
                     break;
                 case 'TARJETA':
                     $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
@@ -708,15 +708,13 @@ class PagoProveedor {
         return $this->montoPago;
     }
 
-
     /**
      * Set montoIva
      *
      * @param string $montoIva
      * @return PagoProveedor
      */
-    public function setMontoIva($montoIva)
-    {
+    public function setMontoIva($montoIva) {
         $this->montoIva = $montoIva;
 
         return $this;
@@ -725,10 +723,10 @@ class PagoProveedor {
     /**
      * Get montoIva
      *
-     * @return string 
+     * @return string
      */
-    public function getMontoIva()
-    {
+    public function getMontoIva() {
         return $this->montoIva;
     }
+
 }

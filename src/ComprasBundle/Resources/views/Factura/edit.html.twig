@@ -158,12 +158,12 @@
                     <thead>
                         <tr>
                             <th>Subtotal Neto </th>
-                            <th>Impuesto Interno </th>
+                            <th>Total Bonif. </th>
                             <th>IVA </th>
                             <th>Percep. IVA </th>
                             <th>Percep. DGR </th>
                             <th>Percep. Muni </th>
-                            <th>Total Bonif. </th>
+                            <th>Impuesto Interno </th>
                             <th>No Grav.</th>
                             <th>TOTAL</th>
                         </tr>
@@ -171,12 +171,12 @@
                     <tbody>
                         <tr>
                             <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'readonly':'readonly', 'style':'text-align:right;'} }) }}</td>
-                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>
                             <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>
                             <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>
                             <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>
                             <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>
-                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>
                             <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>
                             <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>
                         </tr>

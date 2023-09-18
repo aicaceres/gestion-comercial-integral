@@ -927,7 +927,7 @@ class ProveedorController extends Controller {
         $id = $request->get('provId');
         $selected = $request->get('selected');
         $montoPago = $request->get('montopago');
-        $montoIva = $request->get('montoiva');
+        $montoIva = $request->get('montoiva') ? $request->get('montoiva') : 0;
         $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($id);
         $porcRentas = $this->getPorcentajesRentas($id, $em);
         $datos = array(
@@ -968,31 +968,40 @@ class ProveedorController extends Controller {
         }
         if ($montoPago) {
             // se ingreso el pago
-            if ($montoIva) {
-                // se cargo un valor de iva
-                $netoImp = $montoPago - $montoIva;
+            if ($porcImp) {
+                // puedo calcular el iva
+                $netoImp = $montoPago - ($montoPago * ($porcImp / 100) );
+                $montoIva = $montoPago * ($porcImp / 100);
             }
             else {
-                if ($porcImp) {
-                    // puedo calcular el iva
-                    $netoImp = $montoPago - ($montoPago * ($porcImp / 100) );
-                    $montoIva = $montoPago * ($porcImp / 100);
-                }
-                else {
-                    return new JsonResponse($datos);
-                }
+                $netoImp = $montoPago - $montoIva;
             }
+//            if ($montoIva) {
+//                // se cargo un valor de iva
+//                $netoImp = $montoPago - $montoIva;
+//            }
+//            else {
+//                if ($porcImp) {
+//                    // puedo calcular el iva
+//                    $netoImp = $montoPago - ($montoPago * ($porcImp / 100) );
+//                    $montoIva = $montoPago * ($porcImp / 100);
+//                }
+//                else {
+//                    return new JsonResponse($datos);
+//                }
+//            }
         }
         else {
             $montoPago = $montoTotal;
             $montoIva = $ivaImp;
         }
+
         $datos['baseImponible'] = round($netoImp, 3);
         // calcular retencion rentas
         $montoRetRentas = $rentas = $adicional = 0;
         $retrentas = $porcRentas['porcRetRentas'];
         $adicrentas = $porcRentas['porcAdicRentas'];
-        if ($retrentas > 0) {
+        if ($retrentas > 0 && $montoIva > 0) {
             if ($netoImp >= floatval($proveedor->getCategoriaRentas()->getMinimo())) {
                 $rentas = $netoImp * ( $retrentas / 100 );
                 $adicional = $rentas * ( $adicrentas / 100 );
@@ -1036,7 +1045,7 @@ class ProveedorController extends Controller {
             }
         }
         //&& ($datos['baseImponible'] + $acumuladoTotalGanancia) > $exento
-        if ($proveedor->getActividadComercial()) {
+        if ($proveedor->getActividadComercial() && $montoIva > 0) {
             $montoParaEscala = $netoImp + $acumuladoTotalGanancia;
 
             $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaByHasta($proveedor->getActividadComercial()->getCodigo(), $montoParaEscala);
