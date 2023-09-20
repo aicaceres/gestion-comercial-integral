@@ -288,7 +288,7 @@ class VentaController extends Controller {
         $entity->setDescuentoRecargo($presupuesto->getDescuentoRecargo());
         $entity->setTransporte($entity->getCliente()->getTransporte());
         $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
-        $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas()->getRetencion() : 0);
+        $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
 
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if ($param) {

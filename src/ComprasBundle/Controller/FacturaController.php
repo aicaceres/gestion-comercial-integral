@@ -17,6 +17,7 @@ use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
 use ComprasBundle\Entity\PagoProveedor;
 use VentasBundle\Entity\CobroDetalle;
+
 /**
  * @Route("/factura")
  */
@@ -36,11 +37,11 @@ class FacturaController extends Controller {
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         $entities = $em->getRepository('ComprasBundle:Factura')->findByCriteria($unidneg, $provId, $periodo['ini'], $periodo['fin']);
         return $this->render('ComprasBundle:Factura:index.html.twig', array(
-                    'entities' => $entities,
-                    'proveedores' => $proveedores,
-                    'provId' => $provId,
-                    'desde' => $periodo['ini'],
-                    'hasta' => $periodo['fin']
+                'entities' => $entities,
+                'proveedores' => $proveedores,
+                'provId' => $provId,
+                'desde' => $periodo['ini'],
+                'hasta' => $periodo['fin']
         ));
     }
 
@@ -60,9 +61,9 @@ class FacturaController extends Controller {
         $centros = $em->getRepository('ConfigBundle:CentroCosto')->findByActivo(true);
         $form = $this->createCreateForm($entity);
         return $this->render('ComprasBundle:Factura:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
-                    'centros' => $centros
+                'entity' => $entity,
+                'form' => $form->createView(),
+                'centros' => $centros
         ));
     }
 
@@ -105,24 +106,14 @@ class FacturaController extends Controller {
                 $entity->setUnidadNegocio($unidneg);
                 $existe = $em->getRepository('ComprasBundle:Factura')->isDuplicado($unidneg->getId(), $entity);
                 if ($existe) {
-                    $this->addFlash('error', 'Ya existe este nro de comprobante para este proveedor!');
-                    $em->getConnection()->rollback();
-                    return $this->render('ComprasBundle:Factura:edit.html.twig', array(
-                                'entity' => $entity,
-                                'centros' => $centros,
-                                'form' => $form->createView(),
-                    ));
+                    return new JsonResponse(array('msg' => 'Ya existe este nro de comprobante para este proveedor!'));
                 }
                 if (intval($entity->getAfipPuntoVenta()) == 0 || intval($entity->getAfipNroComprobante()) == 0) {
-                    $this->addFlash('error', 'Debe ingresar punto de venta y número de comprobante!');
-                    $em->getConnection()->rollback();
-                    return $this->render('ComprasBundle:Factura:edit.html.twig', array(
-                                'entity' => $entity,
-                                'centros' => $centros,
-                                'form' => $form->createView(),
-                    ));
+                    return new JsonResponse(array('msg' => 'Debe ingresar punto de venta y número de comprobante!'));
                 }
-
+                if ($entity->getProveedor()->getCategoriaIva()->getNombre() == 'I' && $entity->getAfipComprobante()->getLetra() != 'A') {
+                    return new JsonResponse(array('msg' => 'Responsable Inscripto debe registrar comprobante tipo A!'));
+                }
                 // set numeracion
                 $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
                 $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
@@ -150,7 +141,7 @@ class FacturaController extends Controller {
                 // REGISTRAR EL PAGO DE CONTADO
                 if (isset($data['pagadoContado'])) {
                     $res = $this->registrarPagoContado($em, $entity);
-                    if(!is_numeric($res)){
+                    if (!is_numeric($res)) {
                         throw $this->createNotFoundException('No se pudo registrar el pago.');
                     }
                     $entity->setSaldo(0);
@@ -159,20 +150,20 @@ class FacturaController extends Controller {
                     $em->persist($entity);
                     $em->flush();
 
-                    $urlcomppago= $this->generateUrl('print_comprobante_pago', array('id' => $res ));
+                    $urlcomppago = $this->generateUrl('print_comprobante_pago', array('id' => $res));
                 }
-                $res = array( 'msg' => 'OK',
-                                'urlback' =>  $this->generateUrl('compras_factura'),
-                                'urlcomppago' => $urlcomppago
-                            );
+                $res = array('msg' => 'OK',
+                    'urlback' => $this->generateUrl('compras_factura'),
+                    'urlcomppago' => $urlcomppago
+                );
                 $em->getConnection()->commit();
                 //return $this->redirect($this->generateUrl('compras_factura'));
-                return new JsonResponse($res) ;
+                return new JsonResponse($res);
             }
             catch (\Exception $ex) {
                 $msg = $ex->getMessage();
                 $em->getConnection()->rollback();
-                return new JsonResponse( array( 'msg' => $msg ) );
+                return new JsonResponse(array('msg' => $msg));
             }
         }
         $errors = array();
@@ -184,12 +175,12 @@ class FacturaController extends Controller {
             }
         }
 
-        return new JsonResponse( array( 'msg' => $errors,'nn'=>'s' ) );
-        /*return $this->render('ComprasBundle:Factura:edit.html.twig', array(
-                    'entity' => $entity,
-                    'centros' => $centros,
-                    'form' => $form->createView(),
-        ));*/
+        return new JsonResponse(array('msg' => $errors, 'nn' => 's'));
+        /* return $this->render('ComprasBundle:Factura:edit.html.twig', array(
+          'entity' => $entity,
+          'centros' => $centros,
+          'form' => $form->createView(),
+          )); */
     }
 
     public function actualizarCostoyStock($em, $factura, $actstock, $actcostos) {
@@ -261,7 +252,7 @@ class FacturaController extends Controller {
                         'id' => $pago['id'],
                         'tipo' => 'PAGO',
                         'fecha' => $pago['fecha'],
-                        'comprobante' =>str_pad($pago['prefijoNro'], 4, "0", STR_PAD_LEFT) . '-' .  str_pad($pago['pagoNro'], 8, "0", STR_PAD_LEFT) ,
+                        'comprobante' => str_pad($pago['prefijoNro'], 4, "0", STR_PAD_LEFT) . '-' . str_pad($pago['pagoNro'], 8, "0", STR_PAD_LEFT),
                         'monto' => $item->monto
                     ));
                 }
@@ -271,17 +262,16 @@ class FacturaController extends Controller {
         foreach ($notas as $nota) {
 
             array_push($arrayPagos, array(
-                    'id' => $nota['id'],
-                    'tipo' => 'NC',
-                    'fecha' => $nota['fecha'],
-                    'comprobante' => $nota['tipoNota'].' '. $nota['nroComprobante'],
-                    'monto' => $nota['total']
-                ));
-
+                'id' => $nota['id'],
+                'tipo' => 'NC',
+                'fecha' => $nota['fecha'],
+                'comprobante' => $nota['tipoNota'] . ' ' . $nota['nroComprobante'],
+                'monto' => $nota['total']
+            ));
         }
 
         return $this->render('ComprasBundle:Factura:show.html.twig', array(
-                    'entity' => $entity, 'pagos' => $arrayPagos));
+                'entity' => $entity, 'pagos' => $arrayPagos));
     }
 
     /**
@@ -313,11 +303,11 @@ class FacturaController extends Controller {
         $editForm = $this->createEditForm($entity);
         $centros = $em->getRepository('ConfigBundle:CentroCosto')->findByActivo(true);
         return $this->render('ComprasBundle:Factura:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
-                    'centros' => $centros
+                'entity' => $entity,
+                'form' => $editForm->createView(),
+                'centros' => $centros
         ));
-    } 
+    }
 
     /**
      * Creates a form to edit a Factura entity.
@@ -365,9 +355,9 @@ class FacturaController extends Controller {
             // REGISTRAR EL PAGO DE CONTADO
             if (isset($data['pagadoContado'])) {
                 $res = $this->registrarPagoContado($em, $entity);
-                    if(!$res){
-                        throw $this->createNotFoundException('No se pudo registrar el pago.');
-                    }
+                if (!$res) {
+                    throw $this->createNotFoundException('No se pudo registrar el pago.');
+                }
                 $entity->setSaldo(0);
                 $entity->setEstado('PAGADO');
             }
@@ -380,10 +370,10 @@ class FacturaController extends Controller {
         }
         $centros = $em->getRepository('ConfigBundle:CentroCosto')->findByActivo(true);
         return $this->render('ComprasBundle:Factura:edit.html.twig', array(
-                    'entity' => $entity,
-                    'centros' => $centros,
-                    'form' => $editForm->createView(),
-                        //'delete_form' => $deleteForm->createView(),
+                'entity' => $entity,
+                'centros' => $centros,
+                'form' => $editForm->createView(),
+                //'delete_form' => $deleteForm->createView(),
         ));
     }
 
@@ -420,10 +410,10 @@ class FacturaController extends Controller {
      */
     private function createDeleteForm($id) {
         return $this->createFormBuilder()
-                        ->setAction($this->generateUrl('factura_delete', array('id' => $id)))
-                        ->setMethod('DELETE')
-                        ->add('submit', 'submit', array('label' => 'Delete'))
-                        ->getForm()
+                ->setAction($this->generateUrl('factura_delete', array('id' => $id)))
+                ->setMethod('DELETE')
+                ->add('submit', 'submit', array('label' => 'Delete'))
+                ->getForm()
         ;
     }
 
@@ -465,10 +455,10 @@ class FacturaController extends Controller {
         $form = $this->createCreateForm($factura);
         $form->get('pedidoId')->setData($id);
         return $this->render('ComprasBundle:Factura:edit.html.twig', array(
-                    //'pedidoId' => $pedido->getId(),
-                    'entity' => $factura,
-                    'centros' => $centros,
-                    'form' => $form->createView(),
+                //'pedidoId' => $pedido->getId(),
+                'entity' => $factura,
+                'centros' => $centros,
+                'form' => $form->createView(),
         ));
     }
 
@@ -486,7 +476,7 @@ class FacturaController extends Controller {
             $entity->setEstado('CANCELADO');
             $em->persist($entity);
             $em->flush();
-            if( $entity->getModificaStock()){
+            if ($entity->getModificaStock()) {
                 // Reingresar al stock
                 $deposito = $em->getRepository('AppBundle:Deposito')->findOneBy(array("central" => "1", "pordefecto" => "1", "unidadNegocio" => $this->get('session')->get('unidneg_id')));
                 foreach ($entity->getDetalles() as $detalle) {
@@ -494,7 +484,8 @@ class FacturaController extends Controller {
                     $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito->getId());
                     if ($stock) {
                         $stock->setCantidad($stock->getCantidad() - $detalle->getCantidad());
-                    }else {
+                    }
+                    else {
                         throw $this->createNotFoundException('Unable to find Stock entity.');
                     }
                     $em->persist($stock);
@@ -520,7 +511,6 @@ class FacturaController extends Controller {
             return new Response($ex);
         }
     }
-
 
     public function getFormaPagoProveedorAction() {
         $id = $this->getRequest()->get('id');
@@ -555,8 +545,8 @@ class FacturaController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('ComprasBundle:Factura:pdf-facturas.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'tipo' => $tipo,
-                    'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'filtro' => $textoFiltro, 'tipo' => $tipo,
+                'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -581,21 +571,21 @@ class FacturaController extends Controller {
         $desde = ($request->get('desde')) ? $request->get('desde') : $inicio;
         $hasta = ($request->get('hasta')) ? $request->get('hasta') : $hoy->format('d-m-Y');
         $periodo = array('desde' => $desde, 'hasta' => $hasta);
-        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo'=>'1'),array('nombre'=>'ASC'));
-        $productos = $em->getRepository('AppBundle:Producto')->findBy(array(),array('nombre'=>'ASC'));
+        $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => '1'), array('nombre' => 'ASC'));
+        $productos = $em->getRepository('AppBundle:Producto')->findBy(array(), array('nombre' => 'ASC'));
         /* if (!$provId) {
           $provId = $proveedores[0]->getId();
           } */
         $entities = $em->getRepository('ComprasBundle:Factura')->findCompradoByCriteria($unidneg, $provId, $prodId, $periodo);
 
         return $this->render('ComprasBundle:Informe:comprados.html.twig', array(
-                    'entities' => $entities,
-                    'proveedores' => $proveedores,
-                    'productos' => $productos,
-                    'provId' => $provId,
-                    'prodId' => $prodId,
-                    'desde' => $desde,
-                    'hasta' => $hasta
+                'entities' => $entities,
+                'proveedores' => $proveedores,
+                'productos' => $productos,
+                'provId' => $provId,
+                'prodId' => $prodId,
+                'desde' => $desde,
+                'hasta' => $hasta
         ));
     }
 
@@ -618,11 +608,11 @@ class FacturaController extends Controller {
         $entities = $em->getRepository('ComprasBundle:Factura')->detalleCentroCostoByCriteria($ccId, $periodo);
 
         return $this->render('ComprasBundle:Informe:centrocosto.html.twig', array(
-                    'entities' => $entities,
-                    'centros' => $centros,
-                    'ccId' => $ccId,
-                    'desde' => $desde,
-                    'hasta' => $hasta
+                'entities' => $entities,
+                'centros' => $centros,
+                'ccId' => $ccId,
+                'desde' => $desde,
+                'hasta' => $hasta
         ));
     }
 
@@ -655,8 +645,8 @@ class FacturaController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('ComprasBundle:Informe:pdf-comprados.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro, 'tipo' => $tipo,
-                    'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'filtro' => $textoFiltro, 'tipo' => $tipo,
+                'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -690,71 +680,73 @@ class FacturaController extends Controller {
             $montoRetRentas = $retrentas = $adicrentas = $ganancias = 0;
             // get periodo de excepción de rentas
             $fechaNoRetenerRentas = $proveedor->getVencCertNoRetenerRentas() ? $proveedor->getVencCertNoRetenerRentas()->format('Y-m-d') : null;
-            if( $proveedor->getCategoriaRentas() && ( $fechaNoRetenerRentas < $hoy->format('Y-m-d') ||  is_null($fechaNoRetenerRentas) ) ){
+            if ($proveedor->getCategoriaRentas() && ( $fechaNoRetenerRentas < $hoy->format('Y-m-d') || is_null($fechaNoRetenerRentas) )) {
                 $retrentas = $proveedor->getCategoriaRentas()->getRetencion();
-                $adicrentas = $proveedor->getCategoriaRentas()->getAdicional() ;
+                $adicrentas = $proveedor->getCategoriaRentas()->getAdicional();
             }
             // TOTAL A PAGAR RENTAS
             $baseImponible = 0;
             $total = $factura->getTotal();
             $neto = $factura->getTotal() - $factura->getIva();
-            if( $retrentas>0 ){
-                if( $neto >= floatval( $proveedor->getCategoriaRentas()->getMinimo())  ){
+            if ($retrentas > 0) {
+                if ($neto >= floatval($proveedor->getCategoriaRentas()->getMinimo())) {
                     $baseImponible = $neto;
                     $rentas = $neto * ( $retrentas / 100 );
                     $adicional = $rentas * ( $adicrentas / 100 );
                     $montoRetRentas = $rentas + $adicional;
-                }else{
+                }
+                else {
                     // setear en cero porque no se aplica retención por ser menor al mínimo
                     $montoRetRentas = $rentas = $adicional = 0;
                 }
             }
-            if($montoRetRentas==0){
+            if ($montoRetRentas == 0) {
                 $retrentas = $adicrentas = 0;
             }
             // TOTAL A PAGAR GANANCIAS
             $fechaExcepcionGanancias = $proveedor->getVencCertExcepcionGanancias() ? $proveedor->getVencCertExcepcionGanancias()->format('Y-m-d') : null;
             $exento = 0;
             $retencionGanancia = $em->getRepository('ComprasBundle:RetencionGanancia')->findOneBy(
-                                            array('proveedor'=>$proveedor->getId(), 'periodo'=> $hoy->format('Ym') ));
+                array('proveedor' => $proveedor->getId(), 'periodo' => $hoy->format('Ym')));
             $acumuladoTotalGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoTotal() : 0;
             $acumuladoRetencionGanancia = $retencionGanancia ? $retencionGanancia->getAcumuladoRetencion() : 0;
 
-            if( $proveedor->getActividadComercial() && $proveedor->getCategoriaIva() && ($fechaExcepcionGanancias < $hoy->format('Y-m-d') ||  is_null($fechaExcepcionGanancias) )  ){
+            if ($proveedor->getActividadComercial() && $proveedor->getCategoriaIva() && ($fechaExcepcionGanancias < $hoy->format('Y-m-d') || is_null($fechaExcepcionGanancias) )) {
                 $catIva = $proveedor->getCategoriaIva()->getNombre();
-                $exento = floatval($proveedor->getActividadComercial()->getExento()) ;
-                if( $catIva == 'N' ){
+                $exento = floatval($proveedor->getActividadComercial()->getExento());
+                if ($catIva == 'N') {
                     $porcGanancia = floatval($proveedor->getActividadComercial()->getNoInscripto());
                     $exento = 0;
-                }elseif( $catIva == 'I' ){
+                }
+                elseif ($catIva == 'I') {
                     $porcGanancia = floatval($proveedor->getActividadComercial()->getInscripto());
                 }
             }
-            if( $proveedor->getActividadComercial() && ($baseImponible + $acumuladoTotalGanancia) > $exento ){
+            if ($proveedor->getActividadComercial() && ($baseImponible + $acumuladoTotalGanancia) > $exento) {
                 $hasta = $baseImponible + $acumuladoTotalGanancia - $exento;
 
-                $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaByHasta( $proveedor->getActividadComercial()->getCodigo(), $hasta );
-                if($escala){
-                    $ganancias = ( $baseImponible - $escala->getDesde() ) * ( $escala->getPorcExcedente()/100) + $escala->getFijo() - $acumuladoRetencionGanancia;
-                }else{
+                $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaByHasta($proveedor->getActividadComercial()->getCodigo(), $hasta);
+                if ($escala) {
+                    $ganancias = ( $baseImponible - $escala->getDesde() ) * ( $escala->getPorcExcedente() / 100) + $escala->getFijo() - $acumuladoRetencionGanancia;
+                }
+                else {
                     $ganancias = ($baseImponible * ($porcGanancia / 100)) - $acumuladoRetencionGanancia;
                 }
 
                 $minimo = $proveedor->getActividadComercial()->getMinimo();
-                if( $acumuladoRetencionGanancia < $minimo){
-                    if( $ganancias < $minimo){
+                if ($acumuladoRetencionGanancia < $minimo) {
+                    if ($ganancias < $minimo) {
                         $ganancias = 0;
                     }
                 }
-
             }
             // total a pagar menos las retenciones
-            $porcGanancia = ($ganancias == 0) ? 0 : $porcGanancia ;
+            $porcGanancia = ($ganancias == 0) ? 0 : $porcGanancia;
             //$total = $total - $montoRetRentas - $ganancias;
 
             $pago->setBaseImponibleRentas($baseImponible);
             $pago->setRetencionGanancias($ganancias);
-            $pago->setRetencionRentas( $retrentas);
+            $pago->setRetencionRentas($retrentas);
             $pago->setAdicionalRentas($adicrentas);
             $pago->setImporte($total);
             $pago->setSaldo(0);
@@ -762,15 +754,15 @@ class FacturaController extends Controller {
             // cobroDetalle
             $cobro = new CobroDetalle();
             $cobro->setTipoPago('EFECTIVO');
-            $cobro->setImporte( $pago->getImporte() );
+            $cobro->setImporte($pago->getImporte());
             $cobro->setMoneda($moneda);
-            $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja'=>1,'fechaCierre'=>null));
-            if( !$apertura ){
+            $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+            if (!$apertura) {
                 $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para registrar pagos');
                 return false;
             }
             $cobro->setCajaApertura($apertura);
-            $cobro->setPagoProveedor( $pago );
+            $cobro->setPagoProveedor($pago);
             $em->persist($cobro);
             $em->flush();
             return $pago->getId();
@@ -778,7 +770,6 @@ class FacturaController extends Controller {
         catch (\Exception $ex) {
             return $ex->getMessage();
         }
-
     }
 
 }
