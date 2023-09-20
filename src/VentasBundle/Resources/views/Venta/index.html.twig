@@ -75,6 +75,7 @@
                         {% endif %}
                         <a href="{{ path('ventas_venta_repeat', { 'id': entity.id }) }}" class="editar btn btnaction btn_refresh" title="Generar Nueva"></a>
                     {% endif %}
+                    <a href="{{ path('ventas_presupuesto_venta', { 'id': entity.id }) }}" class="editar btn btnaction btn_document" title="Generar Presupuesto"></a>
                 </td>
             </tr>
            {% endfor %}

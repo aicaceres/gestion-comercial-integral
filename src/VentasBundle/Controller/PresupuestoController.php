@@ -12,6 +12,7 @@ use ConfigBundle\Controller\UtilsController;
 use ConfigBundle\Controller\MonedaController;
 use ConfigBundle\Controller\FormaPagoController;
 use VentasBundle\Entity\Presupuesto;
+use VentasBundle\Entity\PresupuestoDetalle;
 use VentasBundle\Form\PresupuestoType;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
@@ -496,6 +497,59 @@ class PresupuestoController extends Controller {
         $form = $this->createCreateForm($entity, 'new');
 
         return $this->render('VentasBundle:Presupuesto:new.html.twig', $this->arrayParameters($entity, $form->createView()));
+    }
+
+    /**
+     * @Route("/fromVenta/{id}", name="ventas_presupuesto_venta")
+     * @Method("GET")
+     * @Template()
+     */
+    public function fromVentaAction($id) {
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta');
+        $em = $this->getDoctrine()->getManager();
+        $venta = $em->getRepository('VentasBundle:Venta')->find($id);
+        if (!$venta) {
+            throw $this->createNotFoundException('No se encuentra la Venta.');
+        }
+        $entity = new Presupuesto();
+        $entity->setFechaPresupuesto(new \DateTime());
+        // setear datos del presupuesto
+        $cliente = $venta->getCliente();
+        $entity->setCliente($cliente);
+        $entity->setNombreCliente($venta->getNombreCliente());
+        $entity->setTipo('P');
+        $entity->setDeposito($venta->getDeposito());
+        $entity->setPrecioLista($venta->getPrecioLista());
+        $entity->setFormaPago($venta->getFormaPago());
+        $entity->setDescuentoRecargo($venta->getDescuentoRecargo());
+        $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+        $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas()->getRetencion() : 0);
+
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+        if ($param) {
+            // ultimo nro de operacion
+            $entity->setNroPresupuesto($param->getUltimoNroPresupuesto() + 1);
+        }
+
+        // cargar detalle
+        foreach ($venta->getDetalles() as $det) {
+            $new = new PresupuestoDetalle();
+            $producto = $det->getProducto();
+            $new->setProducto($producto);
+            $new->setCantidad($det->getCantidad());
+            $new->setTextoComodin($det->getTextoComodin());
+            $precio = $producto->getPrecioByLista($venta->getPrecioLista()->getId());
+            $new->setPrecio($precio);
+            $new->setAlicuota($producto->getIva());
+            $entity->addDetalle($new);
+        }
+
+        $form = $this->createCreateForm($entity);
+
+        return $this->render('VentasBundle:Presupuesto:new.html.twig',
+                $this->arrayParameters($entity, $form->createView())
+        );
     }
 
     private function arrayParameters($entity, $view) {

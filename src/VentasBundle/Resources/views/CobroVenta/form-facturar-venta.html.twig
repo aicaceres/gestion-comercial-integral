@@ -66,6 +66,14 @@
           {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
 
       </fieldset>
+      {% if entity.venta.concepto %}    
+      <fieldset>
+        <div style="padding-top: 10px; width: 60%;">
+            <label>Concepto adicional: </label>
+            <input type="text" disabled="disabled" value="{{entity.venta.concepto}}"/>
+        </div>
+      </fieldset>
+      {% endif %}
 
       <fieldset>
             <div style="display:inline-block; width:85%;margin:10px 0 10px 5%;" >

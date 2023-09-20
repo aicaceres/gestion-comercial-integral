@@ -199,13 +199,13 @@ function reporteSemanal(){
             if(res){
                 data.desde = res.desde.trim()
                 data.hasta = res.hasta.trim()
+                const file = data.path+'ReporteSemanal_'+data.desde+'_al_'+data.hasta+'.zip'
                 if(data.desde  && data.hasta){
-                    console.log(data)
                     const driver = getDriver()
                     try {
                         driver.iniciarTrabajo();
                         const trfecha = 0
-                        const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,data.file,trfecha)
+                        const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,file,trfecha)
                         if( resp ){
                             do{
                                 resp = driver.obtenerSiguienteBloqueReporteElectronico()
@@ -222,37 +222,6 @@ function reporteSemanal(){
                 }
             }
         });
-        
-        {#if(data.desde  && data.hasta){
-            const texto = "Confirme el periodo del reporte semanal: " + data.desde + " al " + data.hasta + "\no\n Ingrese una fecha inicial distinta de ser necesario ('ddmmaa') \n"
-            let desde = prompt( texto, data.desde )
-            if(desde){
-                data.desde = desde.trim()
-                console.log(data)
-            
-                const driver = getDriver()
-                try {
-                    driver.iniciarTrabajo();
-                    const trfecha = 0
-                    const resp = driver.obtenerPrimerBloqueReporteElectronico(data.desde,data.hasta,data.file,trfecha)
-                    if( resp ){
-                        do{
-                            resp = driver.obtenerSiguienteBloqueReporteElectronico()
-                        }while(resp)
-                    }
-                    driver.finalizarTrabajo();
-                    const result = driver.response ? driver.response : 'OK'
-                    registrarMovimientoIfu(comando,result,data)
-                } catch (e){
-                    registrarMovimientoIfu(comando,'',data,e)
-                    alert('ERROR: '+e);
-                    setFacturando(false,comando)
-                }
-            }
-        }else{
-            alert(msg)
-            setFacturando(false,comando)
-        }#}
     }).fail(function(data){
         alert(msg)
       }).always(function(){

@@ -94,6 +94,14 @@
                 {% endif %}
             </div>
         </fieldset>
+        {% if entity.concepto %}      
+        <fieldset>
+            <div style="padding-top: 10px; width: 60%;">
+                <label>Concepto adicional: </label>
+                <input type="text" disabled="disabled" value="{{entity.concepto}}"/>
+            </div>
+        </fieldset>
+        {% endif %}    
         <fieldset>
             <div style="padding-top: 20px; margin:auto; width: 100%;">
 

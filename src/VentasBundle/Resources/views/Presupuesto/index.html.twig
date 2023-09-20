@@ -43,7 +43,7 @@
             <tr>
                 <td class="alignright">{% if entity.tipo=='R' %}<small style="float:left; font-size:8px;">REMITO</small>  {% endif %} {{entity.nroPresupuesto}} </td>
                 <td><span class="hidden">{{ entity.fechaPresupuesto|date('Ymd') }}</span>{{ entity.fechaPresupuesto|date('d-m-Y') }}</td>
-                <td>{{ entity.cliente }}{{ entity.nombreCliente ? ('<br><small>' ~ entity.nombreCliente ~ '</small>') |raw : '' }}</td>
+                <td>{{ entity.cliente }}{{ entity.nombreCliente != 'CONSUMIDOR FINAL' ? ('<br><small>' ~ entity.nombreCliente) |raw : '</small>' }}</td>
                 <td class="alignright">{{ entity.montoTotal|number_format(3,',','.') }}</td>
                 <td>{{entity.createdBy.username|upper }}</td>
                 <td class="buttons">
