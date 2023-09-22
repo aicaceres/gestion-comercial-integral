@@ -1,6 +1,7 @@
 <tr class="item" divdata="item_items">
     <td class="monedaTd" style="text-align:right;">
         {{ form_label(item.moneda,'EFECTIVO: ') }}
+        <div style="display:none">{{ form_widget(item.moneda) }}</div>
     </td>
     <td class="tarjetaTd">
         {% set tarjeta = item.datosTarjeta %}
@@ -34,7 +35,7 @@
         <div style="margin:5px 0">
         {{ form_label(cheque.banco) }}
         {{ form_widget(cheque.banco, { 'attr': {'class' : 'selectBanco',
-                'style': 'width:30%',
+                'style': 'width:30%', 'required':'required',
                     'data-url': path("sistema_banco_add") } }) }}
         {{ form_label(cheque.sucursal) }}
         {{ form_widget(cheque.sucursal, { 'attr': {'class':'smallinput'} }) }}

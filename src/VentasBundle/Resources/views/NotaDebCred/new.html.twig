@@ -85,15 +85,15 @@
             {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': false, 'showiibb': false } %}
         </div>
     </fieldset>
-
     {% include "VentasBundle:CobroVenta:_partial-detalle-pago.html.twig" with { 'cobroDetalles': form.cobroDetalles } %}
-
     <fieldset>
         <br clear="all" />
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred_print') %}
         <div style="text-align: center;" id="divEmitirTicket">
           <label> EMITIR TICKET</label>
           <input type="checkbox" name="emitirTicket" id="emitirTicket"/>
         </div>
+        {% endif %}
         <div class="actionbutton">
             <button class="guardar" id="guardar" type="button" 
                     data-urlemitir="{{ path('ventas_factura_emitir') }}" 
@@ -206,17 +206,17 @@ jQuery(document).ready(function($){
                     }
                 })
                 if(hayVacios) return false
-                
-                emitirTicket = $('#emitirTicket').is(':checked')
-                let txt = emitirTicket ? '\n\n Se emitirá un Ticket' : '\n\n Se enviarán los datos a la Afip para registrar el comprobante'
+                let txt = ''
+                if("{{app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred_print')}}"){
+                    emitirTicket = $('#emitirTicket').is(':checked')
+                    txt = emitirTicket ? '\n\n Se emitirá un Ticket' : '\n\n Se enviarán los datos a la Afip para registrar el comprobante'
+                }
                 if (confirm('Confirma la generación de la Nota Electrónica?'+txt)) {
                     registrarComprobante()
                 }else{
                     return false;
                 }
             }else{  alert('Debe ingresar items a la Nota'); return false;}
-
-{#            $('#ventasbundle_notadebcred').submit();#}
         })
         
         // setear tipo comprobante segun cliente
@@ -235,11 +235,7 @@ function setTipoComprobante(){
         })
         option.attr("disabled", disabled )
     })
-{#    value = jQuery('#ventasbundle_notadebcred_tipoComprobante').children('option:enabled').eq(0).val()#}
-{#    jQuery('#ventasbundle_notadebcred_tipoComprobante').val(value)#}
     jQuery('#ventasbundle_notadebcred_tipoComprobante').children('option:enabled').eq(0).prop('selected',true);
-{#    console.log()#}
-{#    objTiposComprobante.find("option:not([disabled]):first").val()#}
 }
 
 function setPeriodoAsociado(){
@@ -257,7 +253,12 @@ function registrarComprobante(){
   jQuery.post(url, formdata, function(data){
     if(data.res  === 'OK'){
       jQuery('#ventasbundle_notadebcred_id').val(data.id)
-      enviarEmision(data.id)
+      if("{{app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred_print')}}"){
+        enviarEmision(data.id)
+      }else{
+          alert('Nota registrada correctamente!')
+          location.href = '{{ path("ventas_notadebcred") }}'
+      }
     }else{
       alert(data.msg)
       setFacturando(false)

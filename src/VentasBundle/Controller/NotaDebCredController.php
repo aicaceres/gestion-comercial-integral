@@ -345,13 +345,13 @@ class NotaDebCredController extends Controller {
     public function editAction($id) {
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
-        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_notadebcred_new');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_notadebcred_print');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra la Nota.');
         }
-        $editForm = $this->createEditForm($entity);
+        $editForm = $this->createEditForm($entity, null);
         return $this->render('VentasBundle:NotaDebCred:new.html.twig', array(
                 'entity' => $entity,
                 'descuentoContado' => FormaPagoController::getDescuentoContado(),
@@ -364,10 +364,11 @@ class NotaDebCredController extends Controller {
      * @param NotaCredito $entity The entity
      * @return \Symfony\Component\Form\Form The form
      */
-    private function createEditForm(NotaDebCred $entity) {
+    private function createEditForm(NotaDebCred $entity, $tipoComp) {
         $form = $this->createForm(new NotaDebCredType(), $entity, array(
             'action' => $this->generateUrl('ventas_notadebcred_create', array('id' => $entity->getId())),
-            'method' => 'POST'
+            'method' => 'POST',
+            'attr' => array('tipoComp' => $tipoComp),
         ));
         return $form;
     }

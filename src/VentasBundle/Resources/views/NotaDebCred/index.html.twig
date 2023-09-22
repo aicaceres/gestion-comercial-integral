@@ -64,6 +64,7 @@
                     <th>Comprobante</th>
                     <th>CAE</th>
                     <th>Total</th>
+                    <th>Estado</th>
                     <th>Usuario</th>
                     <th class="nosort actionbutton addbutton">&nbsp</th>
                 </tr>
@@ -76,13 +77,14 @@
                     <td>
                     {% if entity.notaElectronica %}
                         {{ entity.notaElectronica.comprobanteTxt }}
-                    {% else %}
+                    {% elseif app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred_print') %}
                         <a href="{{ path('ventas_notadebcred_edit',{ 'id': entity.id }) }}" type="button" class="stdbtn btn_red " title="Facturar">Facturar</a>
                     {% endif %}
                     </td>
                     <td>{{ entity.notaElectronica ? entity.notaElectronica.cae : ''}}</td>
                     <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(2,',','.') }}</td>
-                    <td>{{ entity.updatedBy.username }}</td>
+                    <td>{{ entity.estado == 'CREADO' ? 'PENDIENTE' : (entity.estado == 'ACREDITADO' ? 'FACTURADO' : '') }}</td>
+                    <td>{{ entity.createdBy.username }}</td>
                     <td class="buttons">
                         {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
                             <a href="{{ path('ventas_notadebcred_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Nota"></a>

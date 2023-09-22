@@ -23,10 +23,11 @@
 					class="elements">Caja</a>
 				<span class="arrow"></span>
 				<ul id="item_caja">
+                                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
 					<li id="cobro">
 						<a href="{{ path('ventas_cobro') }}">Cobro de Ventas</a>
 					</li>
-
+                                    {% endif %}                                            
                     {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
                     <li id="notadebcred">
 						<a href="{{path('ventas_notadebcred')}}">Notas de Debito/Crédito</a>

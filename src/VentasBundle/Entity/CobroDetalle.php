@@ -7,11 +7,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * VentasBundle\Entity\CobroDetalle
- * @ORM\Table(name="ventas_cobro_detalle" ,
- * uniqueConstraints={
- *  @ORM\UniqueConstraint(name="cobro_tipopago_idx", columns={"ventas_cobro_id", "tipo_pago"}),
- *  @ORM\UniqueConstraint(name="notadc_tipopago_idx", columns={"ventas_notadebcred_id", "tipo_pago"})
- * })
+ * @ORM\Table(name="ventas_cobro_detalle")
  * @ORM\Entity()
  * @Gedmo\Loggable()
  */
@@ -52,8 +48,8 @@ class CobroDetalle {
     private $datosTarjeta;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Cheque", cascade={"persist"})
-     * @ORM\JoinColumn(name="cheque_recibido_id", referencedColumnName="id")
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Cheque", cascade={"persist","remove"})
+     * @ORM\JoinColumn(name="cheque_recibido_id", referencedColumnName="id", onDelete="CASCADE")
      * @Gedmo\Versioned()
      */
     private $chequeRecibido;

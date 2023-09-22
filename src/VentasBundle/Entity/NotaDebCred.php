@@ -197,7 +197,7 @@ class NotaDebCred {
     protected $detalles;
 
     /**
-     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="notaDebCred",cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="notaDebCred",cascade={"persist", "remove"},orphanRemoval=true)
      */
     protected $cobroDetalles;
 

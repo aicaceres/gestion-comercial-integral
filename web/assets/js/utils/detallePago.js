@@ -9,6 +9,11 @@ jQuery(document).ready(function ($) {
     $("#dialog-tipopago").dialog("close")
     addNewPago(tipo)
   })
+  
+  const pagosTr = pagosHolder.find("tr")
+  pagosTr.each(function (i, tr) {
+      addPagoDeleteLink(jQuery(tr).find('.delTd'))
+  })
 
 })
 
