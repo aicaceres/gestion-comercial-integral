@@ -622,6 +622,9 @@ class ClienteController extends Controller {
                     }
                     $montoNotaCredito = round(($entity->getTotal() - $totalPago), 2);
                     // generar nota de credito - comprobante fiscal
+                    $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
+                    $letra = ($catIva == 'I' || $catIva == 'M') ? 'A' : 'B';
+                    $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->getIdByTipo('CRE-' . $letra);
 
                     $notacredito = new NotaDebCred();
                     $notacredito->setFecha(new \DateTime());
@@ -630,8 +633,12 @@ class ClienteController extends Controller {
                     $notacredito->setCotizacion($entity->getCotizacion());
                     $notacredito->setSigno('-');
                     $notacredito->setUnidadNegocio($unidneg);
+                    $notacredito->setTipoComprobante($tipoComp);
+                    $notacredito->setCategoriaIva($catIva);
+                    $notacredito->setPercepcionRentas($entity->getCliente()->getPercepcionRentas());
                     $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find(21);
                     $notacredito->setFormaPago($formaPago);
+
                     $notaElectronica = new FacturaElectronica();
                     $notaElectronica->setUnidadNegocio($unidneg);
                     $notaElectronica->setCliente($entity->getCliente());
@@ -639,12 +646,8 @@ class ClienteController extends Controller {
                     $notaElectronica->setConcepto(1); // Productos
                     $notaElectronica->setCbteFch(intval($notacredito->getFecha()->format('Ymd')));
                     $notaElectronica->setNombreCliente($notacredito->getNombreClienteTxt());
-                    $notaElectronica->setTipoComprobante($notacredito->getTipoComprobante());
-
-                    $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
-                    $letra = ($catIva == 'I' || $catIva == 'M') ? 'A' : 'B';
-                    $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->getIdByTipo('CRE-' . $letra);
                     $notaElectronica->setTipoComprobante($tipoComp);
+
                     // preparar datos para NC
                     $docTipo = 99;
                     $docNro = 0;
@@ -665,7 +668,9 @@ class ClienteController extends Controller {
                             );
                         }
                     }
-
+                    $periodoAsoc = array(
+                        'FchDesde' => intval($notacredito->getFecha()->format('Ymd')),
+                        'FchHasta' => intval($notacredito->getFecha()->format('Ymd')));
 
                     $iva = $tributos = array();
                     // armar item
@@ -720,7 +725,7 @@ class ClienteController extends Controller {
                     // guardar json
                     $notaElectronica->setTributos(json_encode($tributos));
                     $notaElectronica->setCbtesAsoc(json_encode($cbtesAsoc));
-                    $notaElectronica->setPeriodoAsoc('[]');
+                    $notaElectronica->setPeriodoAsoc(json_encode($periodoAsoc));
                     $notaElectronica->setIva(json_encode($iva));
 
                     // realizar nota electronica

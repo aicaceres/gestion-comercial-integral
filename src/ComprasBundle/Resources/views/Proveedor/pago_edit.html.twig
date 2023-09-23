@@ -85,7 +85,12 @@
                 {{ form_widget(form.importe,{'attr':{'class':'number mediuminput readonly-text', 'readonly':'readonly','title':'Monto a abonar al proveedor', 'tabindex':'-1'}}) }}
             </div>
         </fieldset>
-
+            <fieldset style="text-align:center; padding-top:10px;display:none;" class="fields" id="mensaje-control-iva" >
+                <div class="notibar msgalert" style="margin-bottom:10px; background:#ffe9ad !important;height:38px">
+                        <a class="close"></a>
+                        <p style="margin:10px 10px 0 55px">Al modificar el PAGO controle que el IVA se corresponda con el monto ingresado. Para recalcular elimine el valor de IVA!.</p>
+                    </div>
+            </fieldset>    
         <fieldset class="detalle_pago" >
             <div style="display:inline-block; width:95%; margin:10px 0;" >
                 <h5>DETALLE DEL PAGO:</h5>
@@ -167,7 +172,12 @@ jQuery(function ($) {
     }, 1000);
 
     $('#calcular-valores').on("click", function(){changeComprobantes()})
-{#    $('#comprasbundle_pagoproveedor_montoPago').on('blur',function(){ $('#comprasbundle_pagoproveedor_montoIva').val(0) })#}
+    
+    $('#comprasbundle_pagoproveedor_montoPago').on('change',function(){
+        if( $('#comprasbundle_pagoproveedor_montoIva').val()>0 ){
+            $('#mensaje-control-iva').show(); 
+        }
+    })
     
     
     $('#comprasbundle_pagoproveedor_proveedor').on('change',function(){
@@ -474,7 +484,6 @@ function cargarCheques(objTd){
         console.log(total + montoRentas + montoGanan)
         return total + montoRentas + montoGanan
     }
-    
 });
 </script>
 {% endblock %}

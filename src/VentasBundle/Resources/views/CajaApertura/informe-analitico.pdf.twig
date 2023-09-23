@@ -100,11 +100,16 @@
         <table width="80%" margin-left="20%" margin-top="5px">
             {% set total_cheques = 0 %}
             {% for mov in apertura.movimientos %}
-            {% if mov.tipoPago == 'CHEQUE' and not ( mov.chequeRecibido.banco.nombre in ['RETENCION DGR','RETENCION GANANCIAS','RETENCION IVA','RETENCION SUSS']) %}
-                {% set total_cheques = total_cheques + (mov.importe * mov.moneda.cotizacion) %}
+            {% if mov.tipoPago == 'CHEQUE' %}
+                {% set banco = mov.chequeRecibido.banco ? mov.chequeRecibido.banco.nombre : '///' %}
+                {% if not ( banco in ['RETENCION DGR','RETENCION GANANCIAS','RETENCION IVA','RETENCION SUSS']) %}
+                {% set op = mov.pagoProveedor is not null ? -1 : 1 %}    
+                {% set impcheque = (mov.importe * mov.moneda.cotizacion) * op %}    
+                    
+                {% set total_cheques = total_cheques + impcheque %}
                 <tr font-size="8px">
                     <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
-                        {{ mov.comprobanteTxt }} -{{ ('RETENCION' in mov.chequeRecibido.banco.nombre) }}-
+                        {{ mov.comprobanteTxt }} 
                     </td>
                     <td border.type="none" vertical-align="middle" width="3 cm">
                         {{ mov.chequeRecibido.banco }} 
@@ -113,9 +118,10 @@
                         {{ mov.chequeRecibido.nroCheque }}
                     </td>
                     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
-                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,',','.') }}
+                        {{ impcheque|number_format(3,',','.') }}
                     </td>
                 </tr>
+                {% endif %}
             {% else %}
                 <tr border.type="none">
                     <td border.type="none"></td>
@@ -143,7 +149,9 @@
         <table width="80%" margin-left="20%" margin-top="5px">
             {% set total_retenciones = 0 %}
             {% for mov in apertura.movimientos %}
-            {% if mov.tipoPago == 'CHEQUE' and (mov.chequeRecibido.banco.nombre in ['RETENCION DGR','RETENCION GANANCIAS','RETENCION IVA','RETENCION SUSS']) %}
+            {% if mov.tipoPago == 'CHEQUE' %}
+                {% set banco = mov.chequeRecibido.banco ? mov.chequeRecibido.banco.nombre : '///' %}
+                {% if banco in ['RETENCION DGR','RETENCION GANANCIAS','RETENCION IVA','RETENCION SUSS'] %}
                 {% set total_retenciones = total_retenciones + (mov.importe * mov.moneda.cotizacion) %}
                 <tr font-size="8px">
                     <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
@@ -159,6 +167,7 @@
                         {{ (mov.importe * mov.moneda.cotizacion)|number_format(3,',','.') }}
                     </td>
                 </tr>
+                {% endif %}
             {% else %}
                 <tr border.type="none">
                     <td border.type="none"></td>

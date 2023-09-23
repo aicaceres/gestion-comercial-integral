@@ -250,7 +250,7 @@ class CajaAperturaController extends Controller {
             }
             $tipoPago = $mov->getTipoPago();
             if ($tipoPago == 'CHEQUE') {
-                $banco = $mov->getChequeRecibido()->getBanco()->getNombre();
+                $banco = $mov->getChequeRecibido()->getBanco() ? $mov->getChequeRecibido()->getBanco()->getNombre() : '///';
                 if (strpos($banco, 'RETENCION') != false) {
                     $tipoPago = 'RETENCION';
                 }

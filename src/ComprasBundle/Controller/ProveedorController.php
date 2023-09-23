@@ -968,28 +968,25 @@ class ProveedorController extends Controller {
         }
         if ($montoPago) {
             // se ingreso el pago
-            if ($porcImp) {
-                // puedo calcular el iva
-                $netoImp = $montoPago - ($montoPago * ($porcImp / 100) );
-                $montoIva = $montoPago * ($porcImp / 100);
-            }
-            else {
-                $netoImp = $montoPago - $montoIva;
-            }
-//            if ($montoIva) {
-//                // se cargo un valor de iva
-//                $netoImp = $montoPago - $montoIva;
+//            if ($porcImp) {
+//                // puedo calcular el iva
+//                $netoImp = $montoPago - ($montoPago * ($porcImp / 100) );
+//                $montoIva = $montoPago * ($porcImp / 100);
 //            }
 //            else {
-//                if ($porcImp) {
-//                    // puedo calcular el iva
-//                    $netoImp = $montoPago - ($montoPago * ($porcImp / 100) );
-//                    $montoIva = $montoPago * ($porcImp / 100);
-//                }
-//                else {
-//                    return new JsonResponse($datos);
-//                }
+//                $netoImp = $montoPago - $montoIva;
 //            }
+            if ($montoIva) {
+                // se cargo un valor de iva
+                $netoImp = $montoPago - $montoIva;
+            }
+            else {
+                if ($porcImp) {
+                    // puedo calcular el iva
+                    $netoImp = $montoPago - ($montoPago * ($porcImp / 100) );
+                    $montoIva = $montoPago * ($porcImp / 100);
+                }
+            }
         }
         else {
             $montoPago = $montoTotal;
