@@ -120,6 +120,17 @@ class FacturaController extends Controller {
                 $entity->setFacturaNro(sprintf("%08d", $equipo->getNroFacturaCompra() + 1));
                 /* Guardar ultimo nro */
                 $equipo->setNroFacturaCompra($equipo->getNroFacturaCompra() + 1);
+                // cargar productos y verificar que no haya items sin producto.
+                $productos = $request->get('comprasbundle_producto');
+                foreach ($entity->getDetalles() as $key => $detalle) {
+                    $producto = $em->getRepository('AppBundle:Producto')->find($productos[$key]);
+                    if ($producto) {
+                        $detalle->setProducto($producto);
+                    }
+                    else {
+                        $entity->removeDetalle($detalle);
+                    }
+                }
                 $em->persist($entity);
                 $em->persist($equipo);
                 $em->flush();

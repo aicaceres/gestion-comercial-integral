@@ -95,6 +95,13 @@ class ParametroRepository extends EntityRepository {
         return $res['nombre'];
     }
 
+    public function findTipoDocumentoByNombre($nombre = 'DNI') {
+        $agrupador = $this->findOneByNombre('tipo-documento');
+        $query = $this->_em->createQuery("Select r from ConfigBundle\Entity\Parametro r
+          where r.nombre='" . $nombre . "' and r.agrupador_id=" . $agrupador->getId());
+        return $query->getOneOrNullResult();
+    }
+
     /**
      * Escalas impositivas
      */

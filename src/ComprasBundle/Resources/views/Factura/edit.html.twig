@@ -96,8 +96,20 @@
                     {% for det in form.detalles %}
                         <tr class="item" divdata="item_{{loop.index-1}}">
                             <td class="ordTd" data-id="{{ det.vars.data.id }}"></td>
-                            <td class="prodTd" data-iva="{{det.vars.data.producto.iva}}">{{ form_widget(det.producto) }}</td>
-                            <td class="ivaTd">{{ form_widget(det.afipAlicuota) }}</td>
+                            <td class="prodTd" data-iva="{{det.vars.data.producto.iva}}">
+                                <select class="widgetProducto" style="width:85%"
+                                    name="comprasbundle_producto[]"
+                                    data-urlselect = "{{ path('get_autocomplete_productos_compras') }} "
+                                 >
+                                {% if det.vars.data.producto.id is defined %}
+                                  <option value="{{det.vars.data.producto.id}}" selected="selected" data-alicuota="{{ det.vars.data.afipAlicuota }}" data-bulto="{{ det.vars.data.bulto }}" 
+                                    data-cantxBulto="{{ det.vars.data.cantidadxBulto }}" data-unidmed="{{ det.vars.data.producto.unidadmedida.nombre }}"  data-comodin="{{ det.vars.data.producto.comodin ?? 0 }}" >
+                                      {{det.vars.data.producto}}
+                                  </option>
+                                {% endif %}
+                                </select>    
+                            </td>
+                            <td class="afipAlicuota">{{ form_widget(det.afipAlicuota) }}</td>
                             <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'10','style':'text-align:right;'} }) }}
                               <span class="unidmed floatleft" style="padding-left: 5px; {% if det.vars.data.bulto %} display:none; {% endif %} ">{{ det.vars.data.producto.unidadmedida.nombre}}</span> </td>
                             </td>
@@ -264,9 +276,11 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         addNewItem();
         e.stopPropagation();
-        $collectionHolder.find('.chzn-container').last().trigger('mousedown');
+        const lastProduct = $collectionHolder.find('.widgetProducto').last() 
+        setProductSelect2(lastProduct)
+        lastProduct.select2("open")
     });
-   $(".prodTd .chzn-select").change(function(){ changeProducto( $(this) ) });
+{#   $(".prodTd .chzn-select").change(function(){ changeProducto( $(this) ) });#}
    $('.cantTd input, .precTd input[type=text]').change(function(){
        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
    $('.cktotal input').change(function(){
@@ -277,7 +291,6 @@ jQuery(document).ready(function($) {
     $(document).on('change','.ivaTd select',function(){
         actualizaTotales();
     })
-
 
     $('.guardar').click(function() {
         if( $(document).find('.ccred').length >0 ){
@@ -353,6 +366,9 @@ jQuery(document).ready(function($) {
         });
 
     $('.formrows input[type="text"]').css('height','20px');
+    
+    selProducto = $(".widgetProducto")
+    setProductSelect2(selProducto)
     actualizaTotales();
 
     $('body').on('click','.addCC',function(e) {
@@ -569,7 +585,7 @@ function addItemFormCentroCostoLink($itemFormTd) {
         }
     });
 }
-function changeProducto(producto){
+{#function changeProducto(producto){
     if(producto.val()){
         jQuery.ajax({
                 url: "{{ path("get_data_producto") }}",
@@ -595,7 +611,7 @@ function changeProducto(producto){
                 }
             });
     }
-}
+}#}
 function changeBulto(item){
     var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed');
         var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
@@ -611,7 +627,6 @@ function changeBulto(item){
         }
 }
 function actualizaTotales(){
-{#        var Total=0;#}
         let IvaTotal=0;
         var tipoC = jQuery('#comprasbundle_factura_afipComprobante option:selected').text().slice(-2) == ' C'        
         // calcular subtotal
@@ -640,10 +655,8 @@ function actualizaTotales(){
                 IvaTotal += (precDto * iva);
             }
         });
-{#        jQuery('#Total input[type=text]').val(Total.toFixed(3));#}
-        //var iva = Total * 0.21;
+
         jQuery('#comprasbundle_factura_iva').val(  IvaTotal.toFixed(3)  );
-        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));
         totales(1);
         $collectionHolder.find('.ordTd').each(function(index) {
             jQuery(this).html(index+1);
@@ -669,4 +682,65 @@ function totales(suma){
      }
 }
 
+function setProductSelect2(selProducto) {
+    let urlselect = selProducto.data("urlselect")
+    selProducto
+        .select2({
+            ajax: {
+                url: urlselect,
+		type: "post",
+		dataType: "json",
+		delay: 300,
+		cache: false,
+		data: (params) => { return { searchTerm: params.term } },
+		processResults: (response) => {
+                    results = response.map((x) => {
+                        return {
+                            id: x.id,
+                            text: x.text,
+                            alicuota: x.alicuota,
+                            bulto: x.bulto,
+                            comodin: x.comodin,
+                            cantxBulto: x.cantxBulto,
+                            unidmed: x.unidmed
+                        }
+                    })
+                    return { results }
+		},                                
+            },
+            templateResult: (data) => {
+                return data.text
+            },
+            templateSelection: function (data) {
+                jQuery(data.element).attr('data-bulto', data.bulto);
+                jQuery(data.element).attr('data-alicuota', data.alicuota);
+                jQuery(data.element).attr('data-comodin', data.comodin);
+                jQuery(data.element).attr('data-unidmed', data.unidmed);
+                jQuery(data.element).attr('data-cantxBulto', data.cantxBulto);
+                return data.text;
+              },
+            minimumInputLength: 3,
+            width: "style",
+            cache: false,
+	})
+        .on("select2:select",function(e){
+            const obj = e.target
+            const tr = jQuery(obj).closest("tr")
+            const data = e.params.data
+            tr.find('.ivaTd [name*="afipAlicuota"]').val(data.alicuota);
+            tr.find('.cantTd input').val(1);
+            tr.find('span.unidmed').html(data.unidmed);
+            if(data.bulto){
+                tr.find('span.unidmed').hide();
+                tr.find('.cantxBulto input').val(data.cantxBulto);
+            }else{
+                tr.find('span.unidmed').show();
+                tr.find('.cantxBulto input').val('');
+            }
+            tr.find('.bulto input').prop('checked', data.bulto);
+            jQuery.uniform.update();
+            actualizaTotales();
+            tr.find('.cantTd input').select();
+        })
+}
 </script>{% endblock %}

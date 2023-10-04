@@ -93,6 +93,20 @@ class FacturaRepository extends EntityRepository {
         return $datos;
     }
 
+    public function findByPeriodoUnidadNegocio($desde, $hasta, $unidneg) {
+        $fechaDesde = str_replace('-', '', $desde);
+        $fechaHasta = str_replace('-', '', $hasta);
+        $query = $this->_em->createQueryBuilder('fe')
+            ->select('fe')
+            ->from('VentasBundle:FacturaElectronica', 'fe')
+            ->innerJoin('fe.unidadNegocio', 'u')
+            ->where('u.id=' . $unidneg)
+            ->andWhere("fe.cbteFch >='" . $fechaDesde . "'")
+            ->andWhere("fe.cbteFch <='" . $fechaHasta . "'")
+            ->orderBy('fe.cbteFch', 'ASC');
+        return $query->getQuery()->getResult();
+    }
+
     public function getCantidadAlicuotas($tipo, $id) {
         $query = $this->_em->createQueryBuilder();
         $repo = ($tipo == 'FAC') ? 'VentasBundle:VentaDetalle' : 'VentasBundle:NotaDebCredDetalle';

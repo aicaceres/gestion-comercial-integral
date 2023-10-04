@@ -1,101 +1,82 @@
 <div class="vernav2 iconmenu">
-	<ul>
+    <ul>
         {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta') %}
-			<li>
-				<a
-					href="#item_venta"
-					class="elements">Ventas</a>
-				<span class="arrow"></span>
-				<ul id="item_venta">
-					<li id="venta">
-						<a href="{{ path('ventas_venta') }}">Ventas</a>
-					</li>
-					<li id="presupuesto">
-						<a href="{{ path('ventas_presupuesto') }}">Presupuestos / Remitos</a>
-					</li>
-				</ul>
-			</li>
-		{% endif %}
+    	<li>
+            <a href="#item_venta" class="elements">Ventas</a>
+            <span class="arrow"></span>
+            <ul id="item_venta">
+                <li id="venta">
+                    <a href="{{ path('ventas_venta') }}">Ventas</a>
+		</li>
+		<li id="presupuesto">
+                    <a href="{{ path('ventas_presupuesto') }}">Presupuestos / Remitos</a>
+		</li>
+            </ul>
+	</li>
+	{% endif %}
         {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura') %}
-			<li>
-				<a
-					href="#item_caja"
-					class="elements">Caja</a>
-				<span class="arrow"></span>
-				<ul id="item_caja">
-                                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
-					<li id="cobro">
-						<a href="{{ path('ventas_cobro') }}">Cobro de Ventas</a>
-					</li>
-                                    {% endif %}                                            
-                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
-                    <li id="notadebcred">
-						<a href="{{path('ventas_notadebcred')}}">Notas de Debito/Crédito</a>
-					</li>
-                    {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') or app.user.access(app.session.get('unidneg_id'),'ventas_caja_cierre') %}
-					<li id="apertura">
-						<a href="{{ path('ventas_apertura') }}">Apertura / Cierre</a>
-					</li>
-                    {% endif %}
-				</ul>
-			</li>
-		{% endif %}
+	<li>
+            <a href="#item_caja" class="elements">Caja</a>
+            <span class="arrow"></span>
+            <ul id="item_caja">
+                {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
+                <li id="cobro">
+                    <a href="{{ path('ventas_cobro') }}">Cobro de Ventas</a>
+		</li>
+                {% endif %}                                            
+                {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
+                <li id="notadebcred">
+                    <a href="{{path('ventas_notadebcred')}}">Notas de Debito/Crédito</a>
+		</li>
+                {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') or app.user.access(app.session.get('unidneg_id'),'ventas_caja_cierre') %}
+                <li id="apertura">
+                    <a href="{{ path('ventas_apertura') }}">Apertura / Cierre</a>
+		</li>
+                {% endif %}
+            </ul>
+	</li>
+	{% endif %}
 
-		{% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente') %}
-			<li>
-				<a
-					href="#item_cliente"
-					class="elements">Clientes</a>
-				<span class="arrow"></span>
-				<ul
-					id="item_cliente">
-					<li
-						id="cliente">
-						<a
-							href="{{path('ventas_cliente')}}">Administración</a>
-					</li>
-					<li
-						id="ctacte">
-						<a
-							href="{{path('ventas_cliente_ctacte')}}">Cuenta Coriente</a>
-					</li>
-					<li
-						id="pagos">
-						<a
-							href="{{path('ventas_cliente_pagos')}}">Pagos de Clientes</a>
-					</li>
-				</ul>
-			</li>
-		{% endif %}
-		{% if app.user.access(app.session.get('unidneg_id'),'ventas_libroiva') %}
-			<li>
-				<a
-					href="#impuestos"
-					class="elements">Impuestos AFIP</a>
-				<span
-					class="arrow"></span>
-				<ul
-					id="impuestos">
-					<li style="display:none"
-						id="libroiva">
-						<a
-							href="{{path('ventas_libroiva')}}">Libro de IVA</a>
-					</li>
-					<li
-						id="informeafip">
-						<a
-							href="{{path('ventas_afipinforme')}}">Régimen de Información</a>
-					</li>
-				</ul>
-			</li>
-		{% endif %}
+	{% if app.user.access(app.session.get('unidneg_id'),'ventas_cliente') %}
+	<li>
+            <a href="#item_cliente" class="elements">Clientes</a>
+            <span class="arrow"></span>
+            <ul id="item_cliente">
+		<li id="cliente">
+                    <a href="{{path('ventas_cliente')}}">Administración</a>
+		</li>
+		<li id="ctacte">
+                    <a href="{{path('ventas_cliente_ctacte')}}">Cuenta Coriente</a>
+		</li>
+		<li id="pagos">
+                    <a href="{{path('ventas_cliente_pagos')}}">Pagos de Clientes</a>
+		</li>
+            </ul>
+	</li>
+	{% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_libroiva') %}
+            <li>
+                <a href="#impuestos" class="elements">Impuestos AFIP</a>
+                <span class="arrow"></span>
+                <ul id="impuestos">
+                    <li id="libroiva">
+                        <a href="{{path('ventas_libroiva')}}">Libro de IVA</a>
+                    </li>
+                    <li id="informeafip">
+                        <a href="{{path('ventas_afipinforme')}}">Régimen de Información</a>
+                    </li>
+                </ul>
+            </li>
+        {% endif %}
         {% if app.user.access(app.session.get('unidneg_id'),'ventas_parametrizacion') %}
-			<li id="parametrizacion"><a href="{{path('ventas_parametrizacion')}}" class="elements">Parametrización</a></li>
-		{% endif %}
+            <li id="parametrizacion"><a href="{{path('ventas_parametrizacion')}}" class="elements">Parametrización</a></li>
+        {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_importacion') and false %}
+            <li id="importacion"><a href="{{path('ventas_importacion')}}" class="elements">Importación</a></li>
+        {% endif %}
 	</ul>
-	<a
-		class="togglemenu"></a>
+	<a class="togglemenu"></a>
 	<br/><br/>
 </div>
 <!--leftmenu-->

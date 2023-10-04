@@ -1,0 +1,105 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Importación de Facturas</h1>
+    <span class="pagedesc"> Ingresar facturas mediante archivo .csv </span>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+{% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+    <div style="margin-bottom: 15px; text-align: center;">
+        <form action="{{ path('ventas_procesar_importacion')}}" method="POST" enctype="multipart/form-data">
+            {% if entity|length >0 %}
+            <div>
+                <input type="hidden" name="op" value="PROCESAR"/>
+                <button class="submit" type="submit" onclick="if(!confirm('Confirma la importación al sistema de las facturas?')) return false"  id="ingresar-facturas">PROCESAR FACTURAS</button>
+            </div>
+            {% else %}
+            <div>
+                <input type="hidden" name="op" value="IMPORTAR"/>
+                <input type="file" name="csv"/>
+                <button class="guardar" type="submit" id="importar-csv">IMPORTAR DATOS</button>
+            </div>
+            {% endif %}
+        </form>
+    </div>
+
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="impfacturas">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Punto Venta</th>
+                <th>Nro Comp</th>
+                <th>CAE</th>
+                <th>Tipo Doc.</th>
+                <th>Nro Doc.</th>
+                <th>Denominación</th>
+                <th>Tipo Cambio</th>
+                <th>Moneda</th>
+                <th>Neto Gravado</th>
+                <th>No Gravado</th>
+                <th>Exentos</th>
+                <th>IVA</th>
+                <th>IIBB</th>
+                <th>Total</th>
+                
+                <th>Base21</th>
+                <th>Iva21</th>
+                <th>Base105</th>
+                <th>Iva105</th>
+                
+                <th>Cta Cte</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in entity %}
+      
+            <tr>
+                <td>{{item.fecha}}</td>
+                <td>{{item.tipoComprobante}}</td>
+                <td>{{item.puntoVenta}}</td>
+                <td>{{item.nroComprobante}}</td>
+                <td>{{item.cae}}</td>
+                <td>{{item.docTipo}}</td>
+                <td>{{item.docNro}}</td>
+                <td>{{item.nombreCliente}}</td>
+                <td>{{item.tipoCambio}}</td>
+                <td>{{item.moneda}}</td>
+                
+                <td class="alignright">{{item.impNeto|number_format(2,'.','')}}</td>
+                <td class="alignright">{{item.impTotConc|number_format(3,'.','')}}</td>
+                <td class="alignright">{{item.impOpEx|number_format(3,'.','')}}</td>
+                <td class="alignright">{{item.impIva|number_format(2,'.','')}}</td>
+                <td class="alignright">{{item.impTrib|number_format(2,'.','')}} - {{ ((item.impTrib*100)/item.impNeto)|number_format(2,'.','') }}</td>
+                <td class="alignright"><b>{{item.total|number_format(2,'.','')}}</b></td>
+                
+                <td class="alignright">{{item.base21|number_format(2,'.','')}}</td>
+                <td class="alignright">{{item.iva21|number_format(2,'.','')}} </td>
+                <td class="alignright">{{item.base105|number_format(2,'.','')}}</td>
+                <td class="alignright">{{item.iva105|number_format(2,'.','')}}</td>
+                
+                <td>{{item.enCtacte}}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="20"> SIN DATOS </td>
+            </tr>    
+            {% endfor %}
+        </tbody>
+        <tfoot>
+        <th colspan="20"> Facturas por procesar: {{ entity|length }}</th>            
+        </tfoot>
+    </table>
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.togglemenu').click();
+});
+</script>
+{% endblock %}
+

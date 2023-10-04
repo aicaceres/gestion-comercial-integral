@@ -596,32 +596,36 @@ class VentaController extends Controller {
             $em->persist($entity);
             $em->flush();
 
-            // Revertir descuento de stock
-            $deposito = $entity->getDeposito();
-            foreach ($entity->getDetalles() as $detalle) {
-                $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
-                if ($stock) {
-                    $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
-                }
-                else {
-                    $em->getConnection()->rollback();
-                    return new Response('ERROR');
-                }
-                $em->persist($stock);
+            if ($entity->getDescuentaStock()) {
+                // Revertir descuento de stock
+                $deposito = $entity->getDeposito();
+                foreach ($entity->getDetalles() as $detalle) {
+                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($detalle->getProducto()->getId(), $deposito->getId());
+                    if ($stock) {
+                        $stock->setCantidad($stock->getCantidad() + $detalle->getCantidad());
+                    }
+                    else {
+                        $em->getConnection()->rollback();
+                        return new Response('ERROR');
+                    }
+                    $em->persist($stock);
 
-                // Cargar movimiento
-                $movim = new StockMovimiento();
-                $movim->setFecha($entity->getUpdated());
-                $movim->setTipo('ventas_venta');
-                $movim->setSigno('+');
-                $movim->setMovimiento($entity->getId());
-                $movim->setProducto($detalle->getProducto());
-                $movim->setCantidad($detalle->getCantidad());
-                $movim->setDeposito($deposito);
-                $em->persist($movim);
-                $em->flush();
+                    // Cargar movimiento
+                    $movim = new StockMovimiento();
+                    $movim->setFecha($entity->getUpdated());
+                    $movim->setTipo('ventas_venta');
+                    $movim->setSigno('+');
+                    $movim->setMovimiento($entity->getId());
+                    $movim->setProducto($detalle->getProducto());
+                    $movim->setCantidad($detalle->getCantidad());
+                    $movim->setDeposito($deposito);
+                    $em->persist($movim);
+                    $em->flush();
+                }
             }
+
             $em->getConnection()->commit();
+
             $this->addFlash('success', 'Se ha anulado la venta #' . $entity->getNroOperacion());
             return new Response('OK');
         }

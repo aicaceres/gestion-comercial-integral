@@ -34,11 +34,11 @@ class NotaDebCredController extends Controller {
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         $entities = $em->getRepository('ComprasBundle:NotaDebCred')->findByCriteria($unidneg, $provId, $desde, $hasta);
         return $this->render('ComprasBundle:NotaDebCred:index.html.twig', array(
-                    'entities' => $entities,
-                    'proveedores' => $proveedores,
-                    'provId' => $provId,
-                    'desde' => $desde,
-                    'hasta' => $hasta
+                'entities' => $entities,
+                'proveedores' => $proveedores,
+                'provId' => $provId,
+                'desde' => $desde,
+                'hasta' => $hasta
         ));
     }
 
@@ -56,8 +56,8 @@ class NotaDebCredController extends Controller {
         $entity->setNotaDebCredNro(sprintf("%08d", $equipo->getNroNotaDebCredCompra() + 1));
         $form = $this->createCreateForm($entity);
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -100,6 +100,18 @@ class NotaDebCredController extends Controller {
                 /* Guardar ultimo nro */
                 $equipo->setNroNotaDebCredCompra($equipo->getNroNotaDebCredCompra() + 1);
 
+                // cargar productos y verificar que no haya items sin producto.
+                $productos = $request->get('comprasbundle_producto');
+                foreach ($entity->getDetalles() as $key => $detalle) {
+                    $producto = $em->getRepository('AppBundle:Producto')->find($productos[$key]);
+                    if ($producto) {
+                        $detalle->setProducto($producto);
+                    }
+                    else {
+                        $entity->removeDetalle($detalle);
+                    }
+                }
+
                 // set Unidad de negocio
                 $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
                 $entity->setUnidadNegocio($unidneg);
@@ -109,16 +121,16 @@ class NotaDebCredController extends Controller {
                     $this->addFlash('error', 'Ya existe este nro de comprobante para este proveedor!');
                     $em->getConnection()->rollback();
                     return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
-                                'entity' => $entity,
-                                'form' => $form->createView(),
+                            'entity' => $entity,
+                            'form' => $form->createView(),
                     ));
                 }
                 if (intval($entity->getAfipPuntoVenta()) == 0 || intval($entity->getAfipNroComprobante()) == 0) {
                     $this->addFlash('error', 'Debe ingresar punto de venta y número de comprobante!');
                     $em->getConnection()->rollback();
                     return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
-                                'entity' => $entity,
-                                'form' => $form->createView(),
+                            'entity' => $entity,
+                            'form' => $form->createView(),
                     ));
                 }
 
@@ -186,8 +198,8 @@ class NotaDebCredController extends Controller {
 //var_dump( $entity->getNroComprobante());
 //var_dump( $errors ); die;
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $form->createView(),
+                'entity' => $entity,
+                'form' => $form->createView(),
         ));
     }
 
@@ -204,7 +216,7 @@ class NotaDebCredController extends Controller {
             throw $this->createNotFoundException('No se encuentra la Nota de Débito/Crédito.');
         }
         return $this->render('ComprasBundle:NotaDebCred:show.html.twig', array(
-                    'entity' => $entity));
+                'entity' => $entity));
     }
 
     /**
@@ -239,8 +251,8 @@ class NotaDebCredController extends Controller {
         // if($entity->getEstado()=='NUEVO')
         //     $this->get('session')->getFlashBag()->add('alert','Los productos serán reingresados al stock cuando se marque el envío al Proveedor' );
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
         ));
     }
 
@@ -298,8 +310,8 @@ class NotaDebCredController extends Controller {
             }
         }
         return $this->render('ComprasBundle:NotaCredito:edit.html.twig', array(
-                    'entity' => $entity,
-                    'form' => $editForm->createView(),
+                'entity' => $entity,
+                'form' => $editForm->createView(),
         ));
     }
 
@@ -327,11 +339,11 @@ class NotaDebCredController extends Controller {
                         $em->flush();
                     }
                 }
-                if( $entity->getModificaStock() ){
-                // si modifico stock volver a reingresar
-                /*        if ($entity->getModificaStock()) {
-                            $this->registrarDevolucion($entity,'+');
-                        }*/
+                if ($entity->getModificaStock()) {
+                    // si modifico stock volver a reingresar
+                    /*        if ($entity->getModificaStock()) {
+                      $this->registrarDevolucion($entity,'+');
+                      } */
                 }
             }
             $em->remove($entity);
@@ -347,7 +359,7 @@ class NotaDebCredController extends Controller {
     /**
      *  Reingreso al stock y registro de movimiento
      */
-    private function registrarDevolucion($nota,$signo='-') {
+    private function registrarDevolucion($nota, $signo = '-') {
         $em = $this->getDoctrine()->getManager();
         $deposito = $em->getRepository('AppBundle:Deposito')->findOneBy(array("central" => "1", "pordefecto" => "1", "unidadNegocio" => $this->get('session')->get('unidneg_id')));
         foreach ($nota->getDetalles() as $item) {
@@ -356,8 +368,8 @@ class NotaDebCredController extends Controller {
             $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito->getId());
             if ($stock) {
                 $cantidad = ( $signo == '-' ) ?
-                        ($stock->getCantidad() - $item->getCantidadTotal()) :
-                         ($stock->getCantidad() + $item->getCantidadTotal());
+                    ($stock->getCantidad() - $item->getCantidadTotal()) :
+                    ($stock->getCantidad() + $item->getCantidadTotal());
                 $stock->setCantidad($cantidad);
                 $em->persist($stock);
             }
@@ -401,8 +413,8 @@ class NotaDebCredController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('ComprasBundle:NotaDebCred:pdf-notadebcred.pdf.twig',
-                array('items' => json_decode($items), 'filtro' => $textoFiltro,
-                    'search' => $request->get('searchterm')), $response);
+            array('items' => json_decode($items), 'filtro' => $textoFiltro,
+                'search' => $request->get('searchterm')), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

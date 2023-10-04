@@ -1,8 +1,19 @@
 <tr class="item" divdata="item_items">
     <td class="ordTd"></td>
-    <td class="prodTd" data-iva="21">{{ form_widget(item.producto) }}</td>
-    <td class="ivaTd"><span class="alicuota"></span>
-       <span class="hidden"> {{ form_widget(item.afipAlicuota) }}</span> </td>    
+    <td class="prodTd">
+        <select class="widgetProducto" style="width:85%"
+              name="comprasbundle_producto[]"
+              data-urlselect = "{{ path('get_autocomplete_productos_compras') }} "
+        >
+        {% if item.vars.data.producto.id is defined %}
+          <option value="{{item.vars.data.producto.id}}" selected="selected" data-alicuota="{{ item.vars.data.alicuota }}" data-bulto="{{ item.vars.data.bulto }}" 
+            data-cantxBulto="{{ item.vars.data.cantxBulto }}" data-unidmed="{{ item.vars.data.unidmed }}"  data-comodin="{{ item.vars.data.producto.comodin ?? 0 }}" >
+              {{item.vars.data.producto}}
+          </option>
+        {% endif %}
+        </select>
+    </td>
+    <td class="ivaTd">{{ form_widget(item.afipAlicuota) }} </td>    
     <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft','min':'0','style':'text-align:right;'} }) }}
         <span class="unidmed floatleft" style="padding-left: 5px"></span>
     </td>

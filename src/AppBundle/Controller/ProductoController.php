@@ -1183,4 +1183,24 @@ class ProductoController extends Controller {
         return new Response(json_encode($data));
     }
 
+    /**
+     * @Route("/getAutocompleteProductosCompras", name="get_autocomplete_productos_compras")
+     * @Method("POST")
+     */
+    public function getAutocompleteProductosComprasAction(Request $request) {
+        $term = $request->get('searchTerm');
+        $em = $this->getDoctrine()->getManager();
+        $results = $em->getRepository('AppBundle:Producto')->filterByTerm($term);
+        foreach ($results as &$res) {
+            $producto = $em->getRepository('AppBundle:Producto')->find($res['id']);
+            $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByValor($producto->getIva());
+            $res['alicuota'] = $alicuota->getId();
+            $res['unidmed'] = $producto->getUnidadMedida()->getNombre();
+            $res['bulto'] = $producto->getBulto();
+            $res['cantxBulto'] = $producto->getCantidadxBulto();
+            $res['comodin'] = $producto->getComodin();
+        }
+        return new JsonResponse($results);
+    }
+
 }

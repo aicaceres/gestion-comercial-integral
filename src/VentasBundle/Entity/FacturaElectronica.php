@@ -4,12 +4,17 @@ namespace VentasBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * VentasBundle\Entity\FacturaElectronica
  * @ORM\Table(name="ventas_factura_electronica")
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\FacturaRepository")
- * COMPROBANTE ELECTRONICO
+ * @UniqueEntity(
+ *     fields={"puntoVenta", "tipoComprobante", "nroComprobante"},
+ *     errorPath="nroComprobante",
+ *     message="Registro de comprobante duplicado."
+ * )
  * @Gedmo\Loggable()
  */
 class FacturaElectronica {

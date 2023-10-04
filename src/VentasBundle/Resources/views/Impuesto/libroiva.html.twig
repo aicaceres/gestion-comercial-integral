@@ -1,0 +1,126 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Impuestos</h1>
+    <span class="pagedesc">Libros de IVA - VENTAS</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+
+    <div class="" style="margin-bottom: 15px;">
+        <form action="{{ path }}" method="GET">
+            <div style="display: inline-block; margin-right: 30px;">
+                <label><strong>Período:</strong></label>
+                <input name="fecha_desde" required="required" class="datepicker" tabindex="2" type="text" value="{{desde}}">
+                <input name="fecha_hasta" required="required" class="datepicker" tabindex="2" type="text" value="{{hasta}}">
+            </div>
+            <button type="submit" >Buscar</button>
+        </form>
+    </div>
+    <table style="width:400px"  cellpadding="0" cellspacing="0" border="0" class="stdtable">
+            <tr>
+                <th style="border: 1px solid #ddd; width:25%;" > Alícuota</th>            
+                <th style="border: 1px solid #ddd; width:25%;"> 0.00%</th>            
+                <th style="border: 1px solid #ddd; width:25%;"> 10.50%</th>            
+                <th style="border: 1px solid #ddd; width:25%;"> 21.00%</th>            
+            </tr>  
+            <tr>
+                <th style="border: 1px solid #ddd;"> TOTAL </th> 
+    {% for alic in alicuotas %}  
+                <td style="text-align:center" >$ {{ alic }} </td> 
+    {% endfor %}    
+            </tr>
+    </table>
+    {% set neto,iva,impRNI,nograv,exento,imp,retiva,total = 0,0,0,0,0,0,0,0 %}
+        <table cellpadding="0" cellspacing="0" border="0" class="stdtable"  id="libroivaventas">
+            <thead>
+                <tr>
+                    <th>Comprobante</th>
+                    <th>Fecha</th>
+                    <th colspan="2">Identificación Cliente</th>
+                    <th>Neto</th>
+                    <th>IVA</th>
+                    <th>Imp. RNI</th>
+                    <th>No Grav.</th>
+                    <th>Exentos</th>
+                    <th>Impuestos</th>
+                    <th>Ret.IVA</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                            {% set neto = neto + item.neto%}
+                            {% set iva = iva + item.iva%}
+                            {% set impRNI = iva + item.impRNI%}
+                            {% set nograv = nograv + item.nograv%}
+                            {% set exento = nograv + item.exento%}
+                            {% set imp = imp + item.impuestos%}
+                            {% set retiva = retiva + item.retIVA%}
+                            {% set total = total + item.total%}
+                            <td>{{item.comprobante}}</td>
+                            <td>{{item.fecha}}</td>
+                            <td>{{item.cliente|upper}}</td>
+                            <td>{{item.nombre|upper}}</td>
+                            <td class="alignright">{{item.neto|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.iva|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.impRNI|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.nograv|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.exento|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.impuestos|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.retIVA|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.total|number_format(3,'.','')}}</td>
+                        </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+            <th colspan="4"></th>
+            <th class="alignright" >{{neto|number_format(3,'.',',')}}</th>
+            <th class="alignright" >{{iva|number_format(3,'.',',')}}</th>
+            <th class="alignright" >{{impRNI|number_format(3,'.',',')}}</th>
+            <th class="alignright" >{{nograv|number_format(3,'.',',')}} </th>
+            <th class="alignright" >{{exento|number_format(3,'.',',')}}</th>
+            <th class="alignright" >{{imp|number_format(3,'.',',')}} </th>
+            <th class="alignright" >{{retiva|number_format(3,'.',',')}}</th>
+            <th class="alignright" >{{total|number_format(3,'.',',')}}</th>
+            </tfoot>
+        </table>
+
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+    <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('.togglemenu').click();
+    var filename = "IvaVentas{{app.session.get('unidneg_nombre')|slice(0, 10)}}{{'now'|date('mY')}}";
+    
+    tableExporter = $("#libroivaventas").tableExport(
+        {headers: true,
+        footers: true,
+        formats: ['xlsx', 'csv', 'txt'],
+        filename: filename,
+        bootstrap: false,
+        exportButtons: true,
+        position: 'top',
+        ignoreRows: null,
+        ignoreCols: null,
+        trimWhitespace: true}
+                );
+    tableExporter.types.date.assert = function(v){return false;};
+    $('.tableexport-caption').addClass('alignright');
+    $('#libroivaventas caption').prepend('<button class="button-default" id="print-pdf" >Imprimir PDF</button>')
+    $('#print-pdf').on('click',function(){
+        window.open("{{path('ventas_libroiva_print')}}?"+$('form').serialize());
+    })
+});
+</script>
+{% endblock %}

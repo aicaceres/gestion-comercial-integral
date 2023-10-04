@@ -11,9 +11,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
 use ConfigBundle\Controller\UtilsController;
-use VentasBundle\Entity\FacturaElectronica;
-use VentasBundle\Afip\src\Afip;
 use Endroid\QrCode\QrCode;
+use VentasBundle\Entity\Venta;
+use VentasBundle\Entity\VentaDetalle;
+use VentasBundle\Entity\Cobro;
+use VentasBundle\Entity\CobroDetalle;
+use VentasBundle\Entity\NotaDebCred;
+use VentasBundle\Entity\NotaDebCredDetalle;
+use VentasBundle\Entity\FacturaElectronica;
 
 /**
  * @Route("/facturaElectronica")
@@ -330,6 +335,267 @@ class FacturaElectronicaController extends Controller {
         $serviceFacturar = $this->get('factura_electronica_webservice');
         $result = $serviceFacturar->getTiposComprobantesValidos($request->get('modo'));
         return new JsonResponse($result);
+    }
+
+    /**
+     * @Route("/renderImportacion", name="ventas_importacion")
+     * @Method("GET")
+     * @Template()
+     */
+    public function renderImportacionAction() {
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_importacion');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('ConfigBundle:ImportFacturasAfip')->findByProcesado(false);
+
+        return $this->render('VentasBundle:FacturaElectronica:importacion.html.twig', array(
+                'entity' => $entity,
+        ));
+    }
+
+    /**
+     * @Route("/processImportacion", name="ventas_procesar_importacion")
+     * @Method("POST")
+     * @Template()
+     */
+    public function processImportacionAction(Request $request) {
+        $unidneg_id = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_importacion');
+        $em = $this->getDoctrine()->getManager();
+        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
+        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
+        $entity = null;
+        $count = 0;
+        try {
+            $op = $request->get('op');
+            switch ($op) {
+                case 'IMPORTAR':
+                    $file = $request->files->get('csv');
+                    $data = UtilsController::convertCsvToArray($file->getPathName());
+                    $columns = array('fecha', 'tipo_comprobante', 'punto_venta', 'nro_comprobante', 'cae',
+                        'doc_tipo', 'doc_nro', 'nombre_cliente', 'tipo_cambio', 'moneda',
+                        'imp_neto', 'imp_tot_conc', 'imp_op_ex', 'imp_iva', 'total', 'en_ctacte',
+                        'imp_trib', 'base105', 'iva105', 'tasa105', 'base21', 'iva21', 'tasa21');
+                    UtilsController::loadCsvToTable($em, $data, 'import_facturas_afip', $columns);
+                    $entity = $em->getRepository('ConfigBundle:ImportFacturasAfip')->findByProcesado(false);
+                    $this->addFlash('success', 'Facturas preparadas para importacion : ' . count($entity));
+                    break;
+                case 'PROCESAR':
+                    $precioLista = $em->getRepository('AppBundle:PrecioLista')->findOneByPrincipal(1);
+                    $comodin = $em->getRepository('AppBundle:Producto')->findOneByComodin(1);
+                    $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
+                    $entity = $em->getRepository('ConfigBundle:ImportFacturasAfip')->findByProcesado(false);
+                    foreach ($entity as $item) {
+                        $fecha = new \DateTime(str_replace('/', '-', $item->getFecha()));
+                        $tipo = str_pad(trim($item->getTipoComprobante()), 3, "0", STR_PAD_LEFT);
+                        $tipoComprobante = $em->getRepository('ConfigBundle:AfipComprobante')->findOneByCodigo($tipo);
+                        if (!$tipoComprobante) {
+                            continue;
+                        }
+                        $count += 1;
+                        $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->findTipoDocumentoByNombre(trim($item->getDocTipo()));
+                        $cliente = $em->getRepository('VentasBundle:Cliente')->findOneByConsumidorFinal(true);
+                        $nombreCliente = trim($item->getNombreCliente());
+                        if ($item->getEnCtacte()) {
+                            $cliente = $em->getRepository('VentasBundle:Cliente')->find($item->getEnCtacte());
+                            $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find(25);
+                            $tipoPago = 'CTACTE';
+                            $saldo = $item->getTotal();
+                        }
+                        else {
+                            $formaPago = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
+                            $tipoPago = 'EFECTIVO';
+                            $saldo = 0;
+                        }
+                        $moneda = $em->getRepository('ConfigBundle:Moneda')->findOneBySimbolo(trim($item->getMoneda()));
+                        $fe = new FacturaElectronica();
+
+                        // generar cobroDetalle
+                        $detCobro = new CobroDetalle();
+                        $detCobro->setMoneda($moneda);
+                        $detCobro->setTipoPago($tipoPago);
+                        $detCobro->setImporte($item->getTotal());
+
+                        // generar cobro o nota
+                        $prefijoTipo = split('-', $tipoComprobante->getValor());
+                        if (in_array($prefijoTipo[0], array('FAC', 'TICK'))) {
+                            $venta = new Venta();
+                            $venta->setFechaVenta($fecha);
+                            $venta->setCliente($cliente);
+                            $venta->setUnidadNegocio($unidneg);
+                            $venta->setFormaPago($formaPago);
+                            $venta->setPrecioLista($precioLista);
+                            $venta->setMoneda($moneda);
+                            $venta->setDeposito($deposito);
+                            $venta->setNombreCliente($nombreCliente);
+                            $venta->setEstado('FACTURADO');
+                            $nroVenta = $param->getUltimoNroOperacionVenta() + 1;
+                            $venta->setNroOperacion($nroVenta);
+                            $param->setUltimoNroOperacionVenta($nroVenta);
+                            $venta->setDescuentaStock(0);
+                            $venta->setCategoriaIva($cliente->getCategoriaIva());
+                            $venta->setPercepcionRentas($cliente->getPercepcionRentas());
+                            $venta->setCotizacion($item->getTipoCambio());
+                            // agregar un detalle x alicuota
+                            if ($item->getBase21()) {
+                                // item al 21%
+                                $detVta = new VentaDetalle();
+                                $detVta->setProducto($comodin);
+                                $detVta->setTextoComodin('///');
+                                $detVta->setCantidad(1);
+                                $detVta->setAlicuota(21);
+                                $detVta->setPrecio($item->getBase21());
+                                $venta->addDetalle($detVta);
+                            }
+                            if ($item->getBase105()) {
+                                // item al 10.5%
+                                $detVta = new VentaDetalle();
+                                $detVta->setProducto($comodin);
+                                $detVta->setTextoComodin('///');
+                                $detVta->setCantidad(1);
+                                $detVta->setAlicuota(10.50);
+                                $detVta->setPrecio($item->getBase105());
+                                $venta->addDetalle($detVta);
+                            }
+                            $em->persist($venta);
+
+                            $cobro = new Cobro();
+                            $cobro->setFechaCobro($fecha);
+                            $cobro->setCliente($cliente);
+                            $cobro->setCotizacion($item->getTipoCambio());
+                            $cobro->setMoneda($moneda);
+                            $cobro->setFormaPago($formaPago);
+                            $cobro->setEstado('FINALIZADO');
+                            $cobro->setTipoDocumentoCliente($tipoDoc);
+                            $cobro->setNombreCliente($nombreCliente);
+                            $cobro->setNroDocumentoCliente($item->getDocNro());
+                            $cobro->setUnidadNegocio($unidneg);
+                            $nroCobro = $param->getUltimoNroOperacionCobro() + 1;
+                            $cobro->setNroOperacion($nroCobro);
+                            $param->setUltimoNroOperacionCobro($nroCobro);
+                            $cobro->setVenta($venta);
+                            $cobro->addDetalle($detCobro);
+                            $em->persist($cobro);
+                            $fe->setCobro($cobro);
+                        }
+                        else {
+                            $nota = new NotaDebCred();
+                            $nota->setFecha($fecha);
+                            $nota->setCliente($cliente);
+                            $nota->setCotizacion($item->getTipoCambio());
+                            $nota->setMoneda($moneda);
+                            $nota->setTipoComprobante($tipoComprobante);
+                            $nota->setFormaPago($formaPago);
+                            $nota->setCategoriaIva($cliente->getCategoriaIva());
+                            $nota->setPercepcionRentas($cliente->getPercepcionRentas());
+                            $nota->setPrecioLista($precioLista);
+                            $nota->setUnidadNegocio($unidneg);
+                            $nota->setTipoDocumentoCliente($tipoDoc);
+                            $nota->setNombreCliente($nombreCliente);
+                            $nota->setNroDocumentoCliente($item->getDocNro());
+                            $nota->setTotal($item->getTotal());
+                            $nota->setEstado('ACREDITADO');
+                            $signo = $prefijoTipo[0] == 'CRE' ? '-' : '+';
+                            $nota->setSigno($signo);
+                            $nota->addCobroDetalle($detCobro);
+                            // agregar un detalle x alicuota
+                            if ($item->getBase21()) {
+                                // item al 21%
+                                $det = new NotaDebCredDetalle();
+                                $det->setProducto($comodin);
+                                $det->setTextoComodin('///');
+                                $det->setCantidad(1);
+                                $det->setAlicuota(21);
+                                $det->setPrecio($item->getBase21());
+                                $nota->addDetalle($det);
+                            }
+                            if ($item->getBase105()) {
+                                // item al 21%
+                                $det = new NotaDebCredDetalle();
+                                $det->setProducto($comodin);
+                                $det->setTextoComodin('///');
+                                $det->setCantidad(1);
+                                $det->setAlicuota(10.50);
+                                $det->setPrecio($item->getBase105());
+                                $nota->addDetalle($det);
+                            }
+
+                            $em->persist($nota);
+                            $fe->setNotaDebCred($nota);
+                        }
+                        $em->persist($param);
+                        // tributos - IIBB
+                        $tributos = [];
+                        if (floatval($item->getImpTrib()) > 0) {
+                            $tributos = array(
+                                'Id' => 7,
+                                'BaseImp' => $item->getImpNeto(),
+                                'Alic' => round((($item->getImpTrib() * 100) / $item->getImpNeto()), 2),
+                                'Importe' => $item->getImpTrib()
+                            );
+                        }
+                        // iva - alicuotas
+                        $ivas = [];
+                        if ($item->getBase21()) {
+                            $ivas[] = array(
+                                'Id' => 5,
+                                'BaseImp' => round($item->getBase21(), 2),
+                                'Importe' => round($item->getIva21(), 2)
+                            );
+                        }
+                        if ($item->getBase105()) {
+                            $ivas[] = array(
+                                'Id' => 4,
+                                'BaseImp' => round($item->getBase105(), 2),
+                                'Importe' => round($item->getIva105(), 2)
+                            );
+                        }
+
+                        // generar factura electronica
+                        $fe->setUnidadNegocio($unidneg);
+                        $fe->setTipoComprobante($tipoComprobante);
+                        $fe->setPuntoVenta($item->getPuntoVenta());
+                        $fe->setNroComprobante($item->getNroComprobante());
+                        $fe->setCae($item->getCae());
+                        $fe->setCaeVto($item->getCae() ? $fecha->format('Y-m-d') : '');
+                        $fe->setTotal($item->getTotal());
+                        $fe->setSaldo($saldo);
+                        $fe->setConcepto(1);
+                        $fe->setDocTipo($tipoDoc->getCodigo());
+                        $fe->setDocNro($item->getDocNro());
+                        $fe->setNombreCliente($nombreCliente);
+                        $fe->setCbteFch($fecha->format('Ymd'));
+                        $fe->setImpTotConc(0);
+                        $fe->setImpNeto($item->getImpNeto());
+                        $fe->setImpOpEx(0);
+                        $fe->setImpIva($item->getImpIva());
+                        $fe->setImpTrib($item->getImpTrib());
+                        $fe->setMonId($moneda->getCodigoAfip());
+                        $fe->setMonCotiz($item->getTipoCambio());
+                        $fe->setTributos(json_encode($tributos));
+                        $fe->setCbtesAsoc('[]');
+                        $fe->setPeriodoAsoc('[]');
+                        $fe->setIva(json_encode($ivas));
+                        $fe->setCliente($cliente);
+                        $em->persist($fe);
+
+                        $item->setProcesado(1);
+                        $item->setFacturaElectronica($fe);
+                        $em->persist($item);
+
+                        $em->flush();
+                    }
+                    $this->addFlash('success', 'Se ingresaron ' . $count . ' comprobantes.');
+                    $entity = $em->getRepository('ConfigBundle:ImportFacturasAfip')->findByProcesado(false);
+            }
+        }
+        catch (Exception $exc) {
+            $this->addFlash('error', 'Hubo un error en la importacion ' . $exc->getMessage());
+        }
+
+        return $this->render('VentasBundle:FacturaElectronica:importacion.html.twig', array(
+                'entity' => $entity
+        ));
     }
 
 }

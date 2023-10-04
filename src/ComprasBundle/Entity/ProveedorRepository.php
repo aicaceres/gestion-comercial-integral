@@ -16,7 +16,7 @@ class ProveedorRepository extends EntityRepository {
             ->from('ComprasBundle\Entity\Factura', 'f')
             ->innerJoin('f.proveedor', 'p')
             ->where('p.id=:agr')
-            // ->andWhere("f.estado!='CANCELADO'")
+            ->andWhere("f.estado!='CANCELADO'")
             // ->andWhere("f.estado!='ANULADO'")
             ->setParameter('agr', $prov);
 
@@ -299,6 +299,7 @@ class ProveedorRepository extends EntityRepository {
         $query->select("p")
             ->from('ComprasBundle:PagoProveedor', 'p')
             ->where('p.baseImponibleRentas > 0')
+            ->andWhere('p.montoRetRentas >0')
             ->andWhere(" p.fecha >= '" . $desde . "'")
             ->andWhere(" p.fecha <= '" . $hasta . "'")
             ->orderBy('p.fecha');

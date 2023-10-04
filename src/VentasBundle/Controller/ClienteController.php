@@ -1141,11 +1141,11 @@ class ClienteController extends Controller {
             foreach ($columns as $key => $column) {
                 // In all cases where something does not exist or went wrong, return -
                 $responseTemp = "-";
-
+                $nombre = UtilsController::sanear_string($cliente->getNombre());
                 switch ($column['name']) {
                     case 'nombre': {
                             // Do this kind of treatments if you suspect that the string is not JS compatible
-                            $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $cliente->getNombre()));
+                            $name = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $nombre));
                             $responseTemp = "<a class='nombre-cliente' data-id='" . $cliente->getId() . "' href='javascript:void(0);'>" . $name . "</a>";
                             // View permission ?
                             /* if ($this->get('security.authorization_checker')->isGranted('view_town', $town))
@@ -1289,7 +1289,7 @@ class ClienteController extends Controller {
                 $responseTemp = '';
                 switch ($column['name']) {
                     case 'nombre': {
-                            $nombre = $cliente->getNombre();
+                            $nombre = UtilsController::sanear_string($cliente->getNombre());
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $nombre));
                             break;
                         }
@@ -1299,7 +1299,7 @@ class ClienteController extends Controller {
                             break;
                         }
                     case 'direccion': {
-                            $direccion = $cliente->getDireccion();
+                            $direccion = UtilsController::sanear_string($cliente->getDireccion());
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $direccion));
                             break;
                         }

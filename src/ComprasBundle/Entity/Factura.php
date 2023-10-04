@@ -69,7 +69,7 @@ class Factura {
 
     /**
      * @var integer $saldo
-     * @ORM\Column(name="saldo", type="decimal", scale=3 )
+     * @ORM\Column(name="saldo", type="decimal", precision=15, scale=3 )
      */
     protected $saldo;
 
@@ -117,61 +117,61 @@ class Factura {
 
     /**
      * @var integer $subtotal
-     * @ORM\Column(name="subtotal", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="subtotal", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $subtotal;
 
     /**
      * @var integer $subtotalNeto
-     * @ORM\Column(name="subtotal_neto", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="subtotal_neto", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $subtotalNeto;
 
     /**
      * @var integer $impuestoInterno
-     * @ORM\Column(name="impuesto_interno", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="impuesto_interno", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $impuestoInterno;
 
     /**
      * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="iva", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $iva;
 
     /**
      * @var integer $percepcionIva
-     * @ORM\Column(name="percepcion_iva", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="percepcion_iva", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $percepcionIva;
 
     /**
      * @var integer $percepcionDgr
-     * @ORM\Column(name="percepcion_dgr", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="percepcion_dgr", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $percepcionDgr;
 
     /**
      * @var integer $percepcionMunicipal
-     * @ORM\Column(name="percepcion_municipal", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="percepcion_municipal", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $percepcionMunicipal;
 
     /**
      * @var integer $totalBonificado
-     * @ORM\Column(name="total_bonificado", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="total_bonificado", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $totalBonificado;
 
     /**
      * @var integer $tmc
-     * @ORM\Column(name="tmc", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="tmc", type="decimal", precision=15, scale=3,nullable=true )
      */
     protected $tmc;
 
     /**
      * @var integer $total
-     * @ORM\Column(name="total", type="decimal", scale=3 )
+     * @ORM\Column(name="total", type="decimal", precision=15, scale=3 )
      */
     protected $total;
 

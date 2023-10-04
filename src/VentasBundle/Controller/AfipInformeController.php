@@ -1,7 +1,6 @@
 <?php
 
 namespace VentasBundle\Controller;
-
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -13,7 +12,6 @@ use ConfigBundle\Controller\UtilsController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class AfipInformeController extends Controller {
-
 
     /**
      * @Route("/afipInformeVentas", name="ventas_afipinforme")
@@ -28,8 +26,8 @@ class AfipInformeController extends Controller {
         $resultado = $this->getReginfoVentas($em, $unidneg, $periodo, 'A');
 
         return $this->render('VentasBundle:Impuesto:informe-afip.html.twig', array(
-                    'path' => $this->generateUrl('ventas_afipinforme'),'tipo' => 'VENTAS',
-                    'resultado' => $resultado, 'periodo' => $periodo
+                'path' => $this->generateUrl('ventas_afipinforme'), 'tipo' => 'VENTAS',
+                'resultado' => $resultado, 'periodo' => $periodo
         ));
     }
 
@@ -59,7 +57,7 @@ class AfipInformeController extends Controller {
             //* cliente
             $cliente = $comprobante->getCliente();
             $clienteId = $cliente->getId();
-            $clienteNombre = UtilsController::sanear_string( $fe->getNombreCliente() );
+            $clienteNombre = substr(UtilsController::sanear_string($fe->getNombreCliente()), 0, 30);
             //* DATOS FACTURA ELECTRONICA
             $ptovta = str_pad($fe->getPuntoVenta(), 5, "0", STR_PAD_LEFT);
             $nrocomp = str_pad($fe->getNroComprobante(), 20, "0", STR_PAD_LEFT);
@@ -67,34 +65,35 @@ class AfipInformeController extends Controller {
             $total = str_pad(number_format($fe->getTotal(), 2, '', ''), 15, "0", STR_PAD_LEFT);
             //* ALICUOTAS
             $alicuotas = json_decode($fe->getIva());
-            foreach( $alicuotas as $alicuota){
-              $netoGravado = number_format($alicuota->BaseImp, 2, '', '');
-              $liquidado = number_format($alicuota->Importe, 2, '', '');
+            foreach ($alicuotas as $alicuota) {
+                $netoGravado = number_format($alicuota->BaseImp, 2, '', '');
+                $liquidado = number_format($alicuota->Importe, 2, '', '');
 
-              if ($format == 'A') {
-                $alic = array(
-                            'tipoComprobante' => $fe->getTipoComprobante()->getCodigo(),
-                            'puntoVenta' => $ptovta,
-                            'nroComprobante' => $nrocomp,
-                            'netoGravado' => str_pad($netoGravado, 15, "0", STR_PAD_LEFT),
-                            'codAlicuota' => str_pad($alicuota->Id, 4, "0", STR_PAD_LEFT),
-                            'liquidado' => str_pad($liquidado, 15, "0", STR_PAD_LEFT),
-                            'error' => $error
-                        );
-                array_push($reginfoAlicuotas, $alic);
-              }else{
-                $txtalic = $fe->getTipoComprobante()->getCodigo() .
-                                $ptovta .
-                                $nrocomp .
-                                str_pad($netoGravado, 15, "0", STR_PAD_LEFT) .
-                                str_pad($alicuota->Id, 4, "0", STR_PAD_LEFT) .
-                                str_pad($liquidado, 15, "0", STR_PAD_LEFT);
-                $reginfoAlicuotas = ( $reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . PHP_EOL . $txtalic;
-              }
+                if ($format == 'A') {
+                    $alic = array(
+                        'tipoComprobante' => $fe->getTipoComprobante()->getCodigo(),
+                        'puntoVenta' => $ptovta,
+                        'nroComprobante' => $nrocomp,
+                        'netoGravado' => str_pad($netoGravado, 15, "0", STR_PAD_LEFT),
+                        'codAlicuota' => str_pad($alicuota->Id, 4, "0", STR_PAD_LEFT),
+                        'liquidado' => str_pad($liquidado, 15, "0", STR_PAD_LEFT),
+                        'error' => $error
+                    );
+                    array_push($reginfoAlicuotas, $alic);
+                }
+                else {
+                    $txtalic = $fe->getTipoComprobante()->getCodigo() .
+                        $ptovta .
+                        $nrocomp .
+                        str_pad($netoGravado, 15, "0", STR_PAD_LEFT) .
+                        str_pad($alicuota->Id, 4, "0", STR_PAD_LEFT) .
+                        str_pad($liquidado, 15, "0", STR_PAD_LEFT);
+                    $reginfoAlicuotas = ( $reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
+                }
             }
             //* TRIBUTOS - IIBB
             $tributo = json_decode($fe->getTributos());
-            $iibb = array_key_exists('Importe',$tributo) ? $tributo->Importe : 0  ;
+            $iibb = array_key_exists('Importe', $tributo) ? $tributo->Importe : 0;
             $percIIBB = str_pad(number_format($iibb, 2, '', ''), 15, "0", STR_PAD_LEFT);
 
             //* COMPROBANTES
@@ -102,7 +101,7 @@ class AfipInformeController extends Controller {
             $pagovto = '00000000';
             $strpad15 = str_pad("0", 15, "0");
             $nroDoc = str_pad($fe->getDocNro(), 20, "0", STR_PAD_LEFT);
-            $cotiz = str_pad(number_format($fe->getMonCotiz(), 6, '', ''), 10, "0", STR_PAD_LEFT)  ;
+            $cotiz = str_pad(number_format($fe->getMonCotiz(), 6, '', ''), 10, "0", STR_PAD_LEFT);
 
             if ($format == 'A') {
                 $comp = array(
@@ -137,34 +136,38 @@ class AfipInformeController extends Controller {
             else {
 
                 $comp = $fe->getCbteFch() .
-                        $fe->getTipoComprobante()->getCodigo() .
-                        $ptovta .
-                        $nrocomp .
-                        $nrocomp .
-                        $fe->getDocTipo() .
-                        $nroDoc .
-                        UtilsController::mb_str_pad($clienteNombre, 30) .
-                        $total .
-                        $strpad15 .
-                        $strpad15 .
-                        str_pad(number_format($operacionesExentas, 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                        $strpad15 .
-                        $percIIBB .
-                        $strpad15 .
-                        $strpad15 .
-                        $fe->getMonId() .
-                        $cotiz .
-                        count($alicuotas) .
-                        $codOperacion .
-                        $strpad15 .
-                        $pagovto
+                    $fe->getTipoComprobante()->getCodigo() .
+                    $ptovta .
+                    $nrocomp .
+                    $nrocomp .
+                    $fe->getDocTipo() .
+                    $nroDoc .
+                    UtilsController::mb_str_pad($clienteNombre, 30) .
+                    $total .
+                    $strpad15 .
+                    $strpad15 .
+                    str_pad(number_format($operacionesExentas, 2, '', ''), 15, "0", STR_PAD_LEFT) .
+                    $strpad15 .
+                    $percIIBB .
+                    $strpad15 .
+                    $strpad15 .
+                    $fe->getMonId() .
+                    $cotiz .
+                    count($alicuotas) .
+                    $codOperacion .
+                    $strpad15 .
+                    $pagovto
                 ;
-                $reginfoCbtes = ($reginfoCbtes == '') ? $comp : $reginfoCbtes . PHP_EOL . $comp;
+                $reginfoCbtes = ($reginfoCbtes == '') ? $comp : $reginfoCbtes . "\r\n" . $comp;
             }
         }
         /*
          * RESULTADOS
          */
+        if ($format != 'A') {
+            $reginfoCbtes = $reginfoCbtes . "\r\n";
+            $reginfoAlicuotas = $reginfoAlicuotas . "\r\n";
+        }
         $resultado = array('comprobantes' => $reginfoCbtes, 'alicuotas' => $reginfoAlicuotas, 'errores' => $toterrores);
 
         return $resultado;
@@ -184,7 +187,7 @@ class AfipInformeController extends Controller {
         $em = $this->getDoctrine()->getManager();
 
         $resultado = ($tipo == 'COMPRAS') ? $this->getReginfoCompras($em, $unidneg, $periodo, 'T') :
-                $this->getReginfoVentas($em, $unidneg, $periodo, 'T');
+            $this->getReginfoVentas($em, $unidneg, $periodo, 'T');
         /* if ($resultado['errores']['CUIT'] > 0 || $resultado['errores']['COMPROBANTE'] > 0 || $resultado['errores']['ALICUOTA'] > 0) {
           return $this->redirect($this->generateUrl(strtolower($tipo) . '_informeafip') . '?periodo=' . $periodo);
           } */
@@ -207,8 +210,8 @@ class AfipInformeController extends Controller {
 
         // Create the disposition of the file
         $disposition = $response->headers->makeDisposition(
-                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                $filename
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $filename
         );
 
         // Set the content disposition
@@ -217,6 +220,5 @@ class AfipInformeController extends Controller {
         // Dispatch request
         return $response;
     }
-
 
 }

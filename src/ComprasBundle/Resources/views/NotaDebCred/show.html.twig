@@ -87,12 +87,12 @@
                     <thead>
                         <tr>
                             <th>Subtotal Neto </th>                                                       
-                            <th>Imp. Interno </th>                                                       
+                            <th>Total Bonif. </th>                                                       
                             <th>IVA </th>                                                       
                             <th>Percep. IVA </th>                                                       
                             <th>Percep. DGR </th>                                                       
                             <th>Percep. Muni </th>                                                       
-                            <th>Total Bonif. </th>                                                       
+                            <th>Imp. Interno </th>                                                       
                             <th>No Grav.</th> 
                             <th>TOTAL</th> 
                         </tr>
@@ -100,12 +100,12 @@
                     <tbody>
                         <tr>
                             <td>{{ entity.subtotalNeto|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.impuestoInterno|number_format(3,'.',',') }}</td>   
+                            <td>{{ entity.totalBonificado|number_format(3,'.',',') }}</td>   
                             <td>{{ entity.iva|number_format(3,'.',',') }}</td>   
                             <td>{{ entity.percepcionIva|number_format(3,'.',',') }}</td>   
                             <td>{{ entity.percepcionDgr|number_format(3,'.',',') }}</td>   
                             <td>{{ entity.percepcionMunicipal|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.totalBonificado|number_format(3,'.',',') }}</td>   
+                            <td>{{ entity.impuestoInterno|number_format(3,'.',',') }}</td>   
                             <td>{{ entity.tmc|number_format(3,'.',',') }}</td>   
                             <td class="red">{{ entity.total|number_format(3,'.',',') }}</td>   
                         </tr> 

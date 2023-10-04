@@ -99,6 +99,7 @@ class RetencionesController extends Controller {
         $hasta = $ini->format('Y-m-t');
         $pagos = $em->getRepository('ComprasBundle:PagoProveedor')->findRetencionesGanancias($desde, $hasta);
         $sujetos = ($format == 'A') ? array() : '';
+        $proveedores = array();
         $retenciones = $sujetos;
         foreach ($pagos as $pago) {
             $proveedor = $pago->getProveedor();
@@ -107,16 +108,16 @@ class RetencionesController extends Controller {
             $nrocomp = str_pad(str_replace('-', '', $pago->getNroPago()), 16, "0", STR_PAD_LEFT);
             $codimpuesto = str_pad($proveedor->getActividadComercial()->getCodigoImpuesto(), 4, "0", STR_PAD_LEFT);
             $codregimen = str_pad($proveedor->getActividadComercial()->getCodigoRegimen(), 3, "0", STR_PAD_LEFT);
-            $importecomp = str_replace(',', '', str_pad(number_format($pago->getImporte(), 2), 16, "0", STR_PAD_LEFT));
-            $basecalculo = str_replace(',', '', str_pad(number_format($pago->getBaseImponibleRentas(), 2), 14, "0", STR_PAD_LEFT));
-            $importeret = str_replace(',', '', str_pad(number_format($pago->getMontoGanancias(), 2), 14, "0", STR_PAD_LEFT));
-            $docret = substr(str_pad($proveedor->getCuit(), 20, " ", STR_PAD_RIGHT), -20, 20);
+            $importecomp = str_replace(',', '', str_pad(number_format($pago->getImporte(), 2, '.', ''), 16, "0", STR_PAD_LEFT));
+            $basecalculo = str_replace(',', '', str_pad(number_format($pago->getBaseImponibleRentas(), 2, '.', ''), 14, "0", STR_PAD_LEFT));
+            $importeret = str_replace(',', '', str_pad(number_format($pago->getMontoGanancias(), 2, '.', ''), 14, "0", STR_PAD_LEFT));
+            $docret = substr(str_pad($proveedor->getCuit(), 20, " ", STR_PAD_RIGHT), 0, 20);
             // sujetos
             $cuit = substr(str_pad($proveedor->getCuit(), 11, " ", STR_PAD_LEFT), -11, 11);
-            $nombre = substr(str_pad(UtilsController::sanear_string($proveedor->getNombre()), 20, " ", STR_PAD_RIGHT), -20, 20);
-            $domicilio = substr(str_pad(UtilsController::sanear_string($proveedor->getDireccion()), 20, " ", STR_PAD_RIGHT), -20, 20);
-            $localidad = substr(str_pad(UtilsController::sanear_string($proveedor->getLocalidad()->getName()), 20, " ", STR_PAD_RIGHT), -20, 20);
-            $cp = substr(str_pad(UtilsController::sanear_string($proveedor->getLocalidad()->getCodPostal()), 8, " ", STR_PAD_RIGHT), -8, 8);
+            $nombre = substr(str_pad(UtilsController::sanear_string($proveedor->getNombre()), 20, " ", STR_PAD_RIGHT), 0, 20);
+            $domicilio = substr(str_pad(UtilsController::sanear_string(trim($proveedor->getDireccion())), 20, " ", STR_PAD_RIGHT), 0, 20);
+            $localidad = substr(str_pad(UtilsController::sanear_string($proveedor->getLocalidad()->getName()), 20, " ", STR_PAD_RIGHT), 0, 20);
+            $cp = substr(str_pad(UtilsController::sanear_string($proveedor->getLocalidad()->getCodPostal()), 8, " ", STR_PAD_RIGHT), 0, 8);
             if ($format == 'A') {
                 $retenciones[] = array(
                     'codcomp' => '06',
@@ -137,15 +138,18 @@ class RetencionesController extends Controller {
                     'nrodoc' => $docret,
                     'nrocert' => ''
                 );
-                $sujetos[] = array(
-                    'nrodoc' => $cuit,
-                    'razonsocial' => $nombre,
-                    'domicilio' => $domicilio,
-                    'localidad' => $localidad,
-                    'provincia' => $proveedor->getLocalidad()->getProvincia()->getCodSicore(),
-                    'cp' => $cp,
-                    'tipodoc' => '80'
-                );
+                if (!in_array($cuit, $proveedores)) {
+                    $proveedores[] = $cuit;
+                    $sujetos[] = array(
+                        'nrodoc' => $cuit,
+                        'razonsocial' => $nombre,
+                        'domicilio' => $domicilio,
+                        'localidad' => $localidad,
+                        'provincia' => $proveedor->getLocalidad()->getProvincia()->getCodSicore(),
+                        'cp' => $cp,
+                        'tipodoc' => '80'
+                    );
+                }
             }
             else {
                 $txtret = '06' .
@@ -165,22 +169,24 @@ class RetencionesController extends Controller {
                     '80' .
                     $docret .
                     str_pad('', 14, " ", STR_PAD_LEFT);
-                $retenciones = ( $retenciones == '') ? $txtret : $retenciones . PHP_EOL . $txtret;
+                $retenciones = ( $retenciones == '') ? $txtret : $retenciones . "\r\n" . $txtret;
 
-
-                $txtsuj = substr(str_pad($pago->getProveedor()->getCuit(), 11, " ", STR_PAD_LEFT), -11, 11) .
-                    $nombre .
-                    $domicilio .
-                    $localidad .
-                    $proveedor->getLocalidad()->getProvincia()->getCodSicore() .
-                    $cp .
-                    '80';
-                $sujetos = ( $sujetos == '') ? $txtsuj : $sujetos . PHP_EOL . $txtsuj;
+                if (!in_array($cuit, $proveedores)) {
+                    $proveedores[] = $cuit;
+                    $txtsuj = substr(str_pad($pago->getProveedor()->getCuit(), 11, " ", STR_PAD_LEFT), -11, 11) .
+                        $nombre .
+                        $domicilio .
+                        $localidad .
+                        $proveedor->getLocalidad()->getProvincia()->getCodSicore() .
+                        $cp .
+                        '80';
+                    $sujetos = ( $sujetos == '') ? $txtsuj : $sujetos . "\r\n" . $txtsuj;
+                }
             }
         }
         if ($format == 'T') {
-            $retenciones = $retenciones . PHP_EOL;
-            $sujetos = $sujetos . PHP_EOL;
+            $retenciones = $retenciones . "\r\n";
+            $sujetos = $sujetos . "\r\n";
         }
         return array('retenciones' => $retenciones, 'sujetos' => $sujetos);
     }
@@ -238,11 +244,11 @@ class RetencionesController extends Controller {
                     '0' .
                     str_pad(str_replace('.', ',', $pago->getRetencionGanancias()), 17, "0", STR_PAD_LEFT) .
                     str_pad($alicuota, 11, "0", STR_PAD_LEFT);
-                $retenciones = ( $retenciones == '') ? $txtret : $retenciones . PHP_EOL . $txtret;
+                $retenciones = ( $retenciones == '') ? $txtret : $retenciones . "\r\n" . $txtret;
             }
         }
         if ($format == 'T') {
-            $retenciones = $retenciones . PHP_EOL;
+            $retenciones = $retenciones . "\r\n";
         }
         return $retenciones;
     }
