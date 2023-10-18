@@ -10,11 +10,6 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  * ComprasBundle\Entity\Factura
  * @ORM\Table(name="compras_factura")
  * @ORM\Entity(repositoryClass="ComprasBundle\Entity\FacturaRepository")
- * @UniqueEntity(
- *     fields={"unidadNegocio","proveedor","tipoFactura","nroComprobante"},
- *     errorPath="nroComprobante",
- *     message="El N° de Comprobante ya existe para este Proveedor en esta Unidad de Negocio."
- * )
  */
 class Factura {
     /**

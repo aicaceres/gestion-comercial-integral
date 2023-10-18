@@ -57,7 +57,7 @@
 	{% endif %}
         {% if app.user.access(app.session.get('unidneg_id'),'ventas_libroiva') %}
             <li>
-                <a href="#impuestos" class="elements">Impuestos AFIP</a>
+                <a href="#impuestos" class="elements">Impuestos AFIP/Rentas</a>
                 <span class="arrow"></span>
                 <ul id="impuestos">
                     <li id="libroiva">
@@ -66,6 +66,7 @@
                     <li id="informeafip">
                         <a href="{{path('ventas_afipinforme')}}">Régimen de Información</a>
                     </li>
+                    <li id="percepcionrentas"><a href="{{path('ventas_percepcionrentas')}}">Percepciones de Rentas</a></li>
                 </ul>
             </li>
         {% endif %}

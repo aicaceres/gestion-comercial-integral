@@ -30,7 +30,6 @@
         <span>Para exportar los libros de IVA digital debe seleccionar un período de mes completo.</span>
     {% endif %}
 {% endif %}
-
             {% set neto,iva,nograv,imp,retiva,dgr,muni,total = 0,0,0,0,0,0,0,0 %}
         <table cellpadding="0" cellspacing="0" border="0" class="stdtable"  id="libroivacompras">
             <thead>
@@ -45,10 +44,8 @@
                     <th>Exentos</th>
                     <th>Impuestos</th>
                     <th>Ret.IVA</th>
-                    {% if tipo == 'COMPRAS'%}
                     <th>Perc. IIBB</th>
                     <th>Imp. Muni</th>
-                    {% endif %}
                     <th>Total</th>
                 </tr>
             </thead>
@@ -61,6 +58,8 @@
                             {% set imp = imp + item.impuestos%}
                             {% set retiva = retiva + item.retIVA%}
                             {% set total = total + item.total%}
+                            {% set dgr = dgr + item.percDgr%}
+                            {% set muni = muni + item.percMuni%}                            
                             <td>{{item.tipoComprobante}}-{{item.nrocomp}}</td>
                             <td>{{item.fecha|date('d-m-Y')}}</td>
                             <td>{{item.cuit}} {{item.razon}} {{item.iibb}}</td>
@@ -71,33 +70,52 @@
                             <td class="alignright">{{item.exento|number_format(3,'.','')}}</td>
                             <td class="alignright">{{item.impuestos|number_format(3,'.','')}}</td>
                             <td class="alignright">{{item.retIVA|number_format(3,'.','')}}</td>
-                               {% if tipo == 'COMPRAS'%}
-                            {% set dgr = dgr + item.percDgr%}
-                            {% set muni = muni + item.percMuni%}
                             <td class="alignright">{{item.percDgr|number_format(3,'.','')}}</td>
                             <td class="alignright">{{item.percMuni|number_format(3,'.','')}}</td>
-                            {% endif %}
                             <td class="alignright">{{item.total|number_format(3,'.','')}}</td>
                         </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
-            <th colspan="3"></th>
-            <th class="alignright" >{{neto|number_format(3,'.','')}}</th>
-            <th class="alignright" >{{iva|number_format(3,'.','')}}</th>
-            <th class="alignright" >0.00</th>
-            <th class="alignright" >{{nograv|number_format(3,'.','')}} </th>
-            <th class="alignright" >0.00</th>
-            <th class="alignright" >{{imp|number_format(3,'.','')}} </th>
-            <th class="alignright" >{{retiva|number_format(3,'.','')}}</th>
-             {% if tipo == 'COMPRAS'%}
-            <th class="alignright" >{{dgr|number_format(3,'.','')}}</th>
-            <th class="alignright" >{{muni|number_format(3,'.','')}}</th>
-            {% endif %}
-            <th class="alignright" >{{total|number_format(3,'.','')}}</th>
+                <tr>    
+                    <th colspan="3"></th>
+                    <th class="alignright" >{{neto|number_format(3,'.','')}}</th>
+                    <th class="alignright" >{{iva|number_format(3,'.','')}}</th>
+                    <th class="alignright" >0.00</th>
+                    <th class="alignright" >{{nograv|number_format(3,'.','')}} </th>
+                    <th class="alignright" >0.00</th>
+                    <th class="alignright" >{{imp|number_format(3,'.','')}} </th>
+                    <th class="alignright" >{{retiva|number_format(3,'.','')}}</th>
+                     {% if tipo == 'COMPRAS'%}
+                    <th class="alignright" >{{dgr|number_format(3,'.','')}}</th>
+                    <th class="alignright" >{{muni|number_format(3,'.','')}}</th>
+                    {% endif %}
+                    <th class="alignright" >{{total|number_format(3,'.','')}}</th>
+                </tr>
+                <tr>
+                    <th colspan="13" style="border: 1px solid #ddd;" >DETALLES DE ALICUOAS DE IVA </th>
+                </tr>  
+                <tr>
+                    <th colspan="3" style="border: 1px solid #ddd; width:40%;text-align:left;padding-left:15px " > - POR RUBRO -</th>                     
+                    <th style="border: 1px solid #ddd; width:15%;"> 0.00%</th>            
+                    <th style="border: 1px solid #ddd; width:15%;"> 10.50%</th>            
+                    <th style="border: 1px solid #ddd; width:15%;"> 21.00%</th>            
+                    <th style="border: 1px solid #ddd; width:15%;"> 27.00%</th>            
+                    <th colspan="6" style="border: 1px solid #ddd;"></th>            
+                </tr>
+                {% for key, rubro in resumen %}    
+                <tr>
+                    <th colspan="3" style="border: 1px solid #ddd;"> {{ key }} </th> 
+                    {% for alic, imp in rubro %}  
+                          <td style="text-align:right" >{{ imp|number_format(3,'.','') }} </td> 
+                    {% endfor %} 
+                    <th colspan="6" style="border: 1px solid #ddd;"></th>
+                </tr>
+                {% endfor %}
             </tfoot>
+            
         </table>
-
+                  
 </div>
 {% endblock %}
 {% block extra_javascripts %}

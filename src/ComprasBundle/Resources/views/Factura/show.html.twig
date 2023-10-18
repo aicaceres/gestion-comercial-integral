@@ -60,7 +60,7 @@
                        <tr>
                             <td>{{loop.index}}</td>
                             <td>{{det.producto.codigoNombre}}</td>
-                            <td class="alignright">{{det.afipAlicuota}}</td>
+                            <td class="alignright">{{det.afipAlicuota}} {{ det.montoIva }} - {{ det.montoIvaItem }}</td>
                             <td class="alignright">{{det.cantidadTxt}}</td>
                             <td class="alignright">{{det.precio|number_format(3,'.',',')}}</td>
                             <td class="alignright">{{ det.subTotal|number_format(3,'.',',') }}</td>

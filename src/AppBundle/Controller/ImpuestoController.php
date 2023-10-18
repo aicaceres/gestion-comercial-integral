@@ -28,7 +28,12 @@ class ImpuestoController extends Controller {
         $notas = $em->getRepository('ComprasBundle:NotaDebCred')->findByUnidadNegocio($this->get('session')->get('unidneg_id'));
 
         $items = array();
+        $resxrubro = array('SIN RUBRO' => array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0));
         foreach ($facturas as $fact) {
+            $rubroCompras = $fact->getRubroCompras() ? $fact->getRubroCompras()->getNombre() : 'SIN RUBRO';
+            if (!array_key_exists($rubroCompras, $resxrubro)) {
+                $resxrubro[$fact->getRubroCompras()->getNombre()] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
+            }
             if ($fact->getFechaFactura()->format('Y-m-d') >= $desde && $fact->getFechaFactura()->format('Y-m-d') <= $hasta && $fact->getEstado() != 'CANCELADO') {
                 $nro = explode('-', $fact->getNroComprobante());
                 $item = array(
@@ -48,10 +53,24 @@ class ImpuestoController extends Controller {
                     'retIVA' => $fact->getPercepcionIva(),
                     'percDgr' => $fact->getPercepcionDgr(),
                     'percMuni' => $fact->getPercepcionMunicipal(),
+                    'rubro' => $rubroCompras,
                     'total' => $fact->getTotal());
                 array_push($items, $item);
+                if ($fact->getIva() > 0) {
+                    $cantAlicuotas = $em->getRepository('ComprasBundle:Factura')->getCantidadAlicuotas($fact->getId());
+                    foreach ($cantAlicuotas as $alic) {
+                        $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($alic);
+                        foreach ($fact->getDetalles() as $det) {
+                            if ($det->getAfipAlicuota()->getId() == $alicuota->getId()) {
+                                $resxrubro[$rubroCompras][$alicuota->getValor()] += $det->getMontoIvaItem();
+                            }
+                        }
+                    }
+                }
             }
         }
+
+//        $resxrubro['NOTAS DEB/CRED'] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
         foreach ($notas as $nota) {
             if ($nota->getFecha()->format('Y-m-d') >= $desde && $nota->getFecha()->format('Y-m-d') <= $hasta) {
                 $nro = explode('-', $nota->getNroComprobante());
@@ -80,17 +99,38 @@ class ImpuestoController extends Controller {
                     'retIVA' => $nota->getPercepcionIva() * $i,
                     'percDgr' => $nota->getPercepcionDgr() * $i,
                     'percMuni' => $nota->getPercepcionMunicipal() * $i,
+                    'rubro' => $rubroCompras,
                     'total' => $nota->getTotal() * $i);
                 array_push($items, $item);
+                if ($nota->getIva() > 0) {
+                    $cantAlicuotas = $em->getRepository('ComprasBundle:NotaDebCred')->getCantidadAlicuotas($fact->getId());
+                    foreach ($cantAlicuotas as $alic) {
+                        $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($alic);
+                        foreach ($nota->getDetalles() as $det) {
+                            if ($det->getAfipAlicuota()->getId() == $alicuota->getId()) {
+                                $resxrubro['SIN RUBRO'][$alicuota->getValor()] += ($det->getMontoIvaItem() * $i);
+                            }
+                        }
+                    }
+                }
+//                if ($nota->getIva() > 0) {
+//                    $cantAlicuotas = $em->getRepository('ComprasBundle:NotaDebCred')->getCantidadAlicuotas($nota->getId());
+//                    foreach ($cantAlicuotas as $alic) {
+//                        $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($alic);
+//                        foreach ($nota->getDetalles() as $det) {
+//                            if ($det->getAfipAlicuota()->getId() == $alic) {
+//                                $resxrubro['SIN RUBRO'][$alicuota->getValor()] += $nota->getMontoIva();
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
-
         $ord = usort($items, function($a1, $a2) {
             $value1 = strtotime($a1['fecha']->format('Y-m-d'));
             $value2 = strtotime($a2['fecha']->format('Y-m-d'));
             return $value1 - $value2;
         });
-
         // verificar que sea mes completo para mostrar descarga
         $fecha1 = new \DateTime($desde);
         $fecha2 = new \DateTime($hasta);
@@ -100,7 +140,7 @@ class ImpuestoController extends Controller {
         }
 
         return $this->render('AppBundle:Impuesto:libroiva.html.twig', array(
-                'tipo' => 'COMPRAS', 'path' => $this->generateUrl('compras_libroiva'), 'periodo' => $periodo,
+                'tipo' => 'COMPRAS', 'path' => $this->generateUrl('compras_libroiva'), 'periodo' => $periodo, 'resumen' => $resxrubro,
                 'items' => $items, 'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')
         ));
     }
@@ -123,22 +163,24 @@ class ImpuestoController extends Controller {
         foreach ($datos as $fe) {
             $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->filterByCodigo($fe->getDocTipo(), 'tipo-documento');
             $identCliente = $tipoDoc->getNombre() . ' ' . $fe->getDocNro();
+            $i = 1;
+            if ($fe->getNotaDebCred()) {
+                $i = $fe->getNotaDebCred()->getSigno() == '-' ? -1 : 1;
+            }
             $item = array('comprobante' => $fe->getComprobanteTxt(), 'fecha' => $fe->getCbteFchFormatted('d-m-Y'), 'cliente' => $identCliente,
-                'nombre' => $fe->getNombreCliente(), 'neto' => $fe->getImpNeto(), 'iva' => $fe->getImpIva(), 'impRNI' => 0, 'nograv' => $fe->getImpTotConc(),
-                'exento' => $fe->getImpOpEx(), 'impuestos' => $fe->getImpTrib(), 'retIVA' => 0, 'total' => $fe->getTotal()
+                'nombre' => $fe->getNombreCliente(), 'neto' => $fe->getImpNeto() * $i, 'iva' => $fe->getImpIva() * $i, 'impRNI' => 0, 'nograv' => $fe->getImpTotConc() * $i,
+                'exento' => $fe->getImpOpEx() * $i, 'impuestos' => $fe->getImpTrib() * $i, 'retIVA' => 0, 'total' => $fe->getTotal() * $i
             );
-
             $alicuotas = json_decode($fe->getIva());
             if ($alicuotas) {
                 foreach ($alicuotas as $alic) {
                     $codigo = str_pad($alic->Id, 4, "0", STR_PAD_LEFT);
                     $afipComp = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByCodigo($codigo);
-                    $resAlicuotas[$afipComp->getValor()] += $alic->Importe;
+                    $resAlicuotas[$afipComp->getValor()] += $alic->Importe * $i;
                 }
             }
             array_push($items, $item);
         }
-
         return $this->render('VentasBundle:Impuesto:libroiva.html.twig', array(
                 'path' => $this->generateUrl('ventas_libroiva'), 'alicuotas' => $resAlicuotas,
                 'items' => $items, 'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')
@@ -188,6 +230,7 @@ class ImpuestoController extends Controller {
             $operacionesExentas = $cantAlicuotas = 0;
             $error = array();
             $save = false;
+            $signo = 1;
             if ($comprob['tipocomp'] == 'FAC-') {
                 $objComprob = $em->getRepository('ComprasBundle:Factura')->find($comprob['id']);
                 $repo = 'ComprasBundle:Factura';
@@ -196,6 +239,7 @@ class ImpuestoController extends Controller {
             else {
                 $objComprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($comprob['id']);
                 $repo = 'ComprasBundle:NotaDebCred';
+                $signo = $objComprob->getSigno() == '-' ? -1 : 1;
                 $fecha = $objComprob->getFecha()->format('Ymd');
             }
             // completa tipo de comprobante según afip si no posee
@@ -250,7 +294,7 @@ class ImpuestoController extends Controller {
 
             $cantAlicuotas = $em->getRepository($repo)->getCantidadAlicuotas($comprob['id']);
             $totaliva = 0;
-            $totalneto = 0;
+            $totalneto = number_format($objComprob->getSubtotalNeto(), 2, '', '');
             /*
              * ALICUOTAS
              */
@@ -275,6 +319,7 @@ class ImpuestoController extends Controller {
                             'netoGravado' => str_pad($totalneto, 15, "0", STR_PAD_LEFT),
                             'codAlicuota' => $codAlicuota->getCodigo(),
                             'liquidado' => str_pad($totaliva, 15, "0", STR_PAD_LEFT),
+                            'signo' => $signo,
                             'error' => $error,
                             'id' => $objComprob->getId()
                         );
@@ -286,9 +331,9 @@ class ImpuestoController extends Controller {
                             str_pad($objComprob->getAfipNroComprobante(), 20, "0", STR_PAD_LEFT) .
                             '80' .
                             str_pad($cuit, 20, "0", STR_PAD_LEFT) .
-                            str_pad(number_format($objComprob->getSubtotalNeto(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
+                            str_pad($totalneto, 15, "0", STR_PAD_LEFT) .
                             $codAlicuota->getCodigo() .
-                            str_pad(number_format($objComprob->getIva(), 2, '', ''), 15, "0", STR_PAD_LEFT);
+                            str_pad($totaliva, 15, "0", STR_PAD_LEFT);
                         $reginfoAlicuotas = ( $reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
                     }
                 }
@@ -321,6 +366,7 @@ class ImpuestoController extends Controller {
                             'netoGravado' => str_pad($neto, 15, "0", STR_PAD_LEFT),
                             'codAlicuota' => $codAlicuota->getCodigo(),
                             'liquidado' => str_pad($liq, 15, "0", STR_PAD_LEFT),
+                            'signo' => $signo,
                             'error' => $error,
                             'id' => $objComprob->getId()
                         );
@@ -331,15 +377,15 @@ class ImpuestoController extends Controller {
                 // totales
                 $totaliva = $totiva;
                 $totalneto = $totneto;
-                if ($totaliva <> number_format($objComprob->getIva(), 2, '', '') || $totalneto <> number_format($objComprob->getSubtotalNeto(), 2, '', '')) {
-                    $dif1 = $totaliva - number_format($objComprob->getIva(), 2, '', '');
-                    $dif2 = $totalneto - number_format($objComprob->getSubtotalNeto(), 2, '', '');
-
-                    if (abs($dif1) > 1 || abs($dif2) > 1) {
-                        $error[] = 'ALICUOTA';
-                        $toterrores['ALICUOTA'] ++;
-                    }
-                }
+//                if ($totaliva <> number_format($objComprob->getIva(), 2, '', '') || $totalneto <> number_format($objComprob->getSubtotalNeto(), 2, '', '')) {
+//                    $dif1 = $totaliva - number_format($objComprob->getIva(), 2, '', '');
+//                    $dif2 = $totalneto - number_format($objComprob->getSubtotalNeto(), 2, '', '');
+//
+//                    if (abs($dif1) > 1 || abs($dif2) > 1) {
+//                        $error[] = 'ALICUOTA';
+//                        $toterrores['ALICUOTA'] ++;
+//                    }
+//                }
                 foreach ($alic as $i) {
                     if ($format == 'A') {
                         $i['error'] = $error;
@@ -397,7 +443,8 @@ class ImpuestoController extends Controller {
                     'ivaComision' => str_pad("0", 15, "0"),
                     'error' => $error,
                     'proveedorId' => $proveedorId,
-                    'id' => $objComprob->getId()
+                    'id' => $objComprob->getId(),
+                    'signo' => $signo
                 );
                 array_push($reginfoCbtes, $comp);
             }
@@ -410,14 +457,14 @@ class ImpuestoController extends Controller {
                     '80' .
                     str_pad($cuit, 20, "0", STR_PAD_LEFT) .
                     UtilsController::mb_str_pad($proveedor, 30) .
-                    str_pad(number_format($objComprob->getTotalsinBonificacion(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
+                    str_pad($totaloperacion, 15, "0", STR_PAD_LEFT) .
                     str_pad(number_format($objComprob->getTmc(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
                     str_pad($operacionesExentas, 15, "0", STR_PAD_LEFT) .
-                    str_pad(number_format($objComprob->getPercepcionIva(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
+                    str_pad($perciva, 15, "0", STR_PAD_LEFT) .
                     str_pad(number_format('0', 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                    str_pad(number_format($objComprob->getPercepcionDgr(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                    str_pad(number_format($objComprob->getPercepcionMunicipal(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                    str_pad(number_format($objComprob->getImpuestoInterno(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
+                    str_pad($perciibb, 15, "0", STR_PAD_LEFT) .
+                    str_pad($percmuni, 15, "0", STR_PAD_LEFT) .
+                    str_pad($impint, 15, "0", STR_PAD_LEFT) .
                     'PES' .
                     str_pad("0001000000", 10, "0") .
                     count($cantAlicuotas) .
@@ -451,250 +498,253 @@ class ImpuestoController extends Controller {
      * @Method("GET")
      * @Template()
      */
-    public function afipVentasAction(Request $request) {
-        $periodo = $request->get('periodo');
-        $unidneg = $this->get('session')->get('unidneg_id');
-        $em = $this->getDoctrine()->getManager();
-
-        $resultado = $this->getReginfoVentas($em, $unidneg, $periodo, 'A');
-
-        return $this->render('AppBundle:Impuesto:informe-afip.html.twig', array(
-                'tipo' => 'VENTAS', 'path' => $this->generateUrl('ventas_informeafip'),
-                'resultado' => $resultado, 'periodo' => $periodo
-        ));
-    }
+//    public function afipVentasAction(Request $request) {
+//        $periodo = $request->get('periodo');
+//        $unidneg = $this->get('session')->get('unidneg_id');
+//        $em = $this->getDoctrine()->getManager();
+//
+//        $resultado = $this->getReginfoVentas($em, $unidneg, $periodo, 'A');
+//
+//        return $this->render('AppBundle:Impuesto:informe-afip.html.twig', array(
+//                'tipo' => 'VENTAS', 'path' => $this->generateUrl('ventas_informeafip'),
+//                'resultado' => $resultado, 'periodo' => $periodo
+//        ));
+//    }
 
     /*
      * FUNCION PARA OBTENER LOS DATOS DE VENTAS -
      * FORMAT => A (ARRAY) / T (TXT)
      */
 
-    private function getReginfoVentas($em, $unidneg, $mes, $format = 'A') {
-        if ($mes) {
-            $desde = UtilsController::toAnsiDate('01-' . $mes);
-            $ini = new \DateTime($desde);
-            $hasta = $ini->format('Y-m-t');
-        }
-        else {
-            $desde = $hasta = '';
-        }
-        $toterrores = array('CUIT' => 0, 'COMPROBANTE' => 0, 'ALICUOTA' => 0);
-        $valinic = ($format == 'A') ? array() : '';
-        $reginfoCbtes = $reginfoAlicuotas = $valinic;
-        /*
-         * COMPROBANTES
-         */
-        $comprobantes = $em->getRepository('VentasBundle:Factura')->findComprobantesByPeriodoUnidadNegocio($desde, $hasta, $unidneg);
-        foreach ($comprobantes as $comprob) {
-
-            $operacionesExentas = $cantAlicuotas = 0;
-            $error = array();
-            $tipo = explode('-', $comprob['tipocomp']);
-            if ($tipo[0] == 'FAC' || $tipo[0] == 'TICK') {
-                $objComprob = $em->getRepository('VentasBundle:Cobro')->find($comprob['id']);
-                $fecha = $objComprob->getFechaCobro()->format('Ymd');
-                $id = $objComprob->getVenta()->getId();
-                $facturaElectronica = $objComprob->getFacturaElectronica();
-            }
-            else {
-                $objComprob = $em->getRepository('VentasBundle:NotaDebCred')->find($comprob['id']);
-                $fecha = $objComprob->getFecha()->format('Ymd');
-                $id = $objComprob->getId();
-                $facturaElectronica = $objComprob->getNotaElectronica();
-            }
-
-            // Cuit y Proveedor
-            /* if (!UtilsController::validarCuit($objComprob->getCliente()->getCuit())) {
-              $error[] = 'CUIT';
-              $toterrores['CUIT'] ++;
-              } */
-            $cuit = str_replace('-', '', $objComprob->getCliente()->getCuit());
-            $auxstring = substr($objComprob->getCliente()->getNombre(), 0, 30);
-            $cliente = UtilsController::sanear_string($auxstring);
-            $clienteId = $objComprob->getCliente()->getId();
-
-            $cantAlicuotas = $em->getRepository('VentasBundle:FacturaElectronica')->getCantidadAlicuotas($tipo[0], $id);
-            $totaliva = 0;
-            $totalneto = 0;
-            /*
-             * ALICUOTAS
-             */
-            if ($tipo[0] == 'FAC' || $tipo[0] == 'TICK') {
-                // usar ventas para las alicuotas
-                $objComprob = $objComprob->getVenta();
-            }
-            if (count($cantAlicuotas) == 1) {
-                // una sola alicuota, se usa valores generales de la factura
-                $codAlicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByValor(number_format($cantAlicuotas[0]['alicuota'], 2));
-                if ($codAlicuota->getValor() == 0) {
-                    $operacionesExentas = $objComprob->getTotal();
-                    $cantAlicuotas = NULL;
-                }
-                else {
-                    $totaliva = number_format($objComprob->getTotalIva(), 2, '', '');
-                    $totalneto = number_format($objComprob->getMontoTotal() - $objComprob->getTotalIva(), 2, '', '');
-                    if ($format == 'A') {
-                        $alic = array(
-                            'tipoComprobante' => $facturaElectronica->getTipoComprobante()->getCodigo(),
-                            'puntoVenta' => str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT),
-                            'nroComprobante' => str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT),
-                            'netoGravado' => str_pad($totalneto, 15, "0", STR_PAD_LEFT),
-                            'codAlicuota' => $codAlicuota->getCodigo(),
-                            'liquidado' => str_pad($totaliva, 15, "0", STR_PAD_LEFT),
-                            'error' => $error
-                        );
-                        array_push($reginfoAlicuotas, $alic);
-                    }
-                    else {
-                        $txtalic = $facturaElectronica->getTipoComprobante()->getCodigo() .
-                            str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT) .
-                            str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT) .
-                            str_pad($totalneto, 15, "0", STR_PAD_LEFT) .
-                            $codAlicuota->getCodigo() .
-                            str_pad($totaliva, 15, "0", STR_PAD_LEFT);
-                        $reginfoAlicuotas = ( $reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
-                    }
-                }
-            }
-            else {
-                // más de una alicuota, se calculan los valores
-                $totneto = $totiva = 0;
-                $alic = array();
-                foreach ($cantAlicuotas as $item) {
-                    $alicuota = number_format($item['alicuota'], 2);
-                    $neto = $liq = 0;
-                    $codAlicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByValor($alicuota);
-
-                    foreach ($objComprob->getDetalles() as $det) {
-                        $alicdet = number_format($det->getAlicuota(), 2);
-                        if ($alicdet == $codAlicuota->getValor()) {
-                            $neto += $det->getPrecio() * $det->getCantidad();
-                            $liq += $det->getIvaItem();
-                        }
-                    }
-                    $liq = number_format($liq, 2, '', '');
-                    $neto = number_format($neto, 2, '', '');
-                    if ($codAlicuota->getValor() == 0) {
-                        $operacionesExentas = $neto;
-                    }
-                    else {
-                        $alic[] = array(
-                            'tipoComprobante' => $facturaElectronica->getTipoComprobante()->getCodigo(),
-                            'puntoVenta' => str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT),
-                            'nroComprobante' => str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT),
-                            'netoGravado' => str_pad($neto, 15, "0", STR_PAD_LEFT),
-                            'codAlicuota' => $codAlicuota->getCodigo(),
-                            'liquidado' => str_pad($liq, 15, "0", STR_PAD_LEFT),
-                            'error' => $error
-                        );
-                    }
-                    $totneto += $neto;
-                    $totiva += $liq;
-                }
-                // totales
-                $totaliva = $totiva;
-                $totalneto = $totneto;
-                if ($totaliva <> number_format($objComprob->getTotalIva(), 2, '', '') || $totalneto <> number_format($objComprob->getMontoTotal() - $objComprob->getTotalIva(), 2, '', '')) {
-                    $dif1 = $totaliva - number_format($objComprob->getTotalIva(), 2, '', '');
-                    $dif2 = $totalneto - number_format($objComprob->getMontoTotal() - $objComprob->getTotalIva(), 2, '', '');
-
-                    if (abs($dif1) > 1 || abs($dif2) > 1) {
-                        $error[] = 'ALICUOTA';
-                        $toterrores['ALICUOTA'] ++;
-                    }
-                }
-                foreach ($alic as $i) {
-                    if ($format == 'A') {
-                        $i['error'] = $error;
-                        array_push($reginfoAlicuotas, $i);
-                    }
-                    else {
-                        $txtalic = $facturaElectronica->getTipoComprobante()->getCodigo() .
-                            str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT) .
-                            str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT) .
-                            str_pad($i['netoGravado'], 15, "0", STR_PAD_LEFT) .
-                            $codAlicuota->getCodigo() .
-                            str_pad($i['liquidado'], 15, "0", STR_PAD_LEFT);
-                        $reginfoAlicuotas = ($reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
-                    }
-                }
-            }
-
-            /*
-             * COMPROBANTES
-             */
-            $codOperacion = ($objComprob->getTotalIva() == 0 ) ? 'A' : ' ';
-            //$pagovto = UtilsController::toAnsiDate($objComprob->getPagoVto(), false);
-            $pagovto = '';
-            if ($format == 'A') {
-                $comp = array(
-                    'fecha' => $fecha,
-                    'tipoComprobante' => $facturaElectronica->getTipoComprobante()->getCodigo(),
-                    'puntoVenta' => str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT),
-                    'nroComprobante' => str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT),
-                    'nroComprobanteHasta' => str_pad(number_format('0', 2, '', ''), 20, "0", STR_PAD_LEFT),
-                    'cuit' => str_pad($cuit, 11, "0", STR_PAD_LEFT),
-                    'cliente' => $cliente,
-                    'total' => str_pad(number_format($objComprob->getMontoTotal(), 2, '', ''), 15, "0", STR_PAD_LEFT),
-                    'nograv' => str_pad("0", 15, "0"),
-                    'nocateg' => str_pad("0", 15, "0"),
-                    'exe' => str_pad(number_format($operacionesExentas, 2, '', ''), 15, "0", STR_PAD_LEFT),
-                    'percImpNac' => str_pad("0", 15, "0"),
-                    'percIIBB' => str_pad("0", 15, "0"),
-                    'percMuni' => str_pad("0", 15, "0"),
-                    'impInterno' => str_pad("0", 15, "0"),
-                    'moneda' => 'PES',
-                    'tipoCambio' => str_pad("0001000000", 10, "0"),
-                    'cantAlicuotas' => count($cantAlicuotas),
-                    'codOperacion' => $codOperacion,
-                    'otrosTributos' => str_pad("0", 15, "0"),
-                    'pagoVto' => $pagovto,
-                    'error' => $error,
-                    'clienteId' => $clienteId,
-                    'id' => $objComprob->getId()
-                );
-                array_push($reginfoCbtes, $comp);
-            }
-            else {
-
-                $comp = $fecha .
-                    $facturaElectronica->getTipoComprobante()->getCodigo() .
-                    str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT) .
-                    str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT) .
-                    str_pad("0", 20, "0") .
-                    '80' .
-                    str_pad($cuit, 20, "0", STR_PAD_LEFT) .
-                    UtilsController::mb_str_pad($cliente, 30) .
-                    str_pad(number_format($objComprob->getTotal(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                    str_pad("0", 15, "0") .
-                    str_pad("0", 15, "0") .
-                    str_pad(number_format($operacionesExentas, 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                    str_pad("0", 15, "0") .
-                    str_pad("0", 15, "0") .
-                    str_pad("0", 15, "0") .
-                    str_pad("0", 15, "0") .
-                    'PES' .
-                    str_pad("0001000000", 10, "0") .
-                    count($cantAlicuotas) .
-                    $codOperacion .
-                    str_pad("0", 15, "0") .
-                    $pagovto
-                ;
-                $reginfoCbtes = ($reginfoCbtes == '') ? $comp : $reginfoCbtes . "\r\n" . $comp;
-            }
-        }
-
-        /*
-         * MERGE FACTURAS Y NOTAS
-         */
-        if ($format != 'A') {
-            $reginfoCbtes = $reginfoCbtes . "\r\n";
-            $reginfoAlicuotas = $reginfoAlicuotas . "\r\n";
-        }
-        $resultado = array('comprobantes' => $reginfoCbtes, 'alicuotas' => $reginfoAlicuotas, 'errores' => $toterrores);
-
-        return $resultado;
-    }
+//    private function getReginfoVentas($em, $unidneg, $mes, $format = 'A') {
+//        if ($mes) {
+//            $desde = UtilsController::toAnsiDate('01-' . $mes);
+//            $ini = new \DateTime($desde);
+//            $hasta = $ini->format('Y-m-t');
+//        }
+//        else {
+//            $desde = $hasta = '';
+//        }
+//        $toterrores = array('CUIT' => 0, 'COMPROBANTE' => 0, 'ALICUOTA' => 0);
+//        $valinic = ($format == 'A') ? array() : '';
+//        $reginfoCbtes = $reginfoAlicuotas = $valinic;
+//        /*
+//         * COMPROBANTES
+//         */
+//        $comprobantes = $em->getRepository('VentasBundle:Factura')->findComprobantesByPeriodoUnidadNegocio($desde, $hasta, $unidneg);
+//        foreach ($comprobantes as $comprob) {
+//
+//            $operacionesExentas = $cantAlicuotas = 0;
+//            $error = array();
+//            $tipo = explode('-', $comprob['tipocomp']);
+//            $signo = 1;
+//            if ($tipo[0] == 'FAC' || $tipo[0] == 'TICK') {
+//                $objComprob = $em->getRepository('VentasBundle:Cobro')->find($comprob['id']);
+//                $fecha = $objComprob->getFechaCobro()->format('Ymd');
+//                $id = $objComprob->getVenta()->getId();
+//                $facturaElectronica = $objComprob->getFacturaElectronica();
+//            }
+//            else {
+//                $objComprob = $em->getRepository('VentasBundle:NotaDebCred')->find($comprob['id']);
+//                $fecha = $objComprob->getFecha()->format('Ymd');
+//                $signo = $objComprob->getSigno() == '-' ? -1 : 1;
+//                $id = $objComprob->getId();
+//                $facturaElectronica = $objComprob->getNotaElectronica();
+//            }
+//
+//            // Cuit y Proveedor
+//            /* if (!UtilsController::validarCuit($objComprob->getCliente()->getCuit())) {
+//              $error[] = 'CUIT';
+//              $toterrores['CUIT'] ++;
+//              } */
+//            $cuit = str_replace('-', '', $objComprob->getCliente()->getCuit());
+//            $auxstring = substr($objComprob->getCliente()->getNombre(), 0, 30);
+//            $cliente = UtilsController::sanear_string($auxstring);
+//            $clienteId = $objComprob->getCliente()->getId();
+//
+//            $cantAlicuotas = $em->getRepository('VentasBundle:FacturaElectronica')->getCantidadAlicuotas($tipo[0], $id);
+//            $totaliva = 0;
+//            $totalneto = 0;
+//            /*
+//             * ALICUOTAS
+//             */
+//            if ($tipo[0] == 'FAC' || $tipo[0] == 'TICK') {
+//                // usar ventas para las alicuotas
+//                $objComprob = $objComprob->getVenta();
+//            }
+//            if (count($cantAlicuotas) == 1) {
+//                // una sola alicuota, se usa valores generales de la factura
+//                $codAlicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByValor(number_format($cantAlicuotas[0]['alicuota'], 2));
+//                if ($codAlicuota->getValor() == 0) {
+//                    $operacionesExentas = $objComprob->getTotal();
+//                    $cantAlicuotas = NULL;
+//                }
+//                else {
+//                    $totaliva = number_format($objComprob->getTotalIva(), 2, '', '');
+//                    $totalneto = number_format($objComprob->getMontoTotal() - $objComprob->getTotalIva(), 2, '', '');
+//                    if ($format == 'A') {
+//                        $alic = array(
+//                            'tipoComprobante' => $facturaElectronica->getTipoComprobante()->getCodigo(),
+//                            'puntoVenta' => str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT),
+//                            'nroComprobante' => str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT),
+//                            'netoGravado' => str_pad($totalneto, 15, "0", STR_PAD_LEFT),
+//                            'codAlicuota' => $codAlicuota->getCodigo(),
+//                            'liquidado' => str_pad($totaliva, 15, "0", STR_PAD_LEFT),
+//                            'error' => $error
+//                        );
+//                        array_push($reginfoAlicuotas, $alic);
+//                    }
+//                    else {
+//                        $txtalic = $facturaElectronica->getTipoComprobante()->getCodigo() .
+//                            str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT) .
+//                            str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT) .
+//                            str_pad($totalneto, 15, "0", STR_PAD_LEFT) .
+//                            $codAlicuota->getCodigo() .
+//                            str_pad($totaliva, 15, "0", STR_PAD_LEFT);
+//                        $reginfoAlicuotas = ( $reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
+//                    }
+//                }
+//            }
+//            else {
+//                // más de una alicuota, se calculan los valores
+//                $totneto = $totiva = 0;
+//                $alic = array();
+//                foreach ($cantAlicuotas as $item) {
+//                    $alicuota = number_format($item['alicuota'], 2);
+//                    $neto = $liq = 0;
+//                    $codAlicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByValor($alicuota);
+//
+//                    foreach ($objComprob->getDetalles() as $det) {
+//                        $alicdet = number_format($det->getAlicuota(), 2);
+//                        if ($alicdet == $codAlicuota->getValor()) {
+//                            $neto += $det->getPrecio() * $det->getCantidad();
+//                            $liq += $det->getIvaItem();
+//                        }
+//                    }
+//                    $liq = number_format($liq, 2, '', '');
+//                    $neto = number_format($neto, 2, '', '');
+//                    if ($codAlicuota->getValor() == 0) {
+//                        $operacionesExentas = $neto;
+//                    }
+//                    else {
+//                        $alic[] = array(
+//                            'tipoComprobante' => $facturaElectronica->getTipoComprobante()->getCodigo(),
+//                            'puntoVenta' => str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT),
+//                            'nroComprobante' => str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT),
+//                            'netoGravado' => str_pad($neto, 15, "0", STR_PAD_LEFT),
+//                            'codAlicuota' => $codAlicuota->getCodigo(),
+//                            'liquidado' => str_pad($liq, 15, "0", STR_PAD_LEFT),
+//                            'error' => $error
+//                        );
+//                    }
+//                    $totneto += $neto;
+//                    $totiva += $liq;
+//                }
+//                // totales
+//                $totaliva = $totiva;
+//                $totalneto = $totneto;
+//                if ($totaliva <> number_format($objComprob->getTotalIva(), 2, '', '') || $totalneto <> number_format($objComprob->getMontoTotal() - $objComprob->getTotalIva(), 2, '', '')) {
+//                    $dif1 = $totaliva - number_format($objComprob->getTotalIva(), 2, '', '');
+//                    $dif2 = $totalneto - number_format($objComprob->getMontoTotal() - $objComprob->getTotalIva(), 2, '', '');
+//
+//                    if (abs($dif1) > 1 || abs($dif2) > 1) {
+//                        $error[] = 'ALICUOTA';
+//                        $toterrores['ALICUOTA'] ++;
+//                    }
+//                }
+//                foreach ($alic as $i) {
+//                    if ($format == 'A') {
+//                        $i['error'] = $error;
+//                        array_push($reginfoAlicuotas, $i);
+//                    }
+//                    else {
+//                        $txtalic = $facturaElectronica->getTipoComprobante()->getCodigo() .
+//                            str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT) .
+//                            str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT) .
+//                            str_pad($i['netoGravado'], 15, "0", STR_PAD_LEFT) .
+//                            $codAlicuota->getCodigo() .
+//                            str_pad($i['liquidado'], 15, "0", STR_PAD_LEFT);
+//                        $reginfoAlicuotas = ($reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
+//                    }
+//                }
+//            }
+//
+//            /*
+//             * COMPROBANTES
+//             */
+//            $codOperacion = ($objComprob->getTotalIva() == 0 ) ? 'A' : ' ';
+//            //$pagovto = UtilsController::toAnsiDate($objComprob->getPagoVto(), false);
+//            $pagovto = '';
+//            if ($format == 'A') {
+//                $comp = array(
+//                    'fecha' => $fecha,
+//                    'tipoComprobante' => $facturaElectronica->getTipoComprobante()->getCodigo(),
+//                    'puntoVenta' => str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT),
+//                    'nroComprobante' => str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT),
+//                    'nroComprobanteHasta' => str_pad(number_format('0', 2, '', ''), 20, "0", STR_PAD_LEFT),
+//                    'cuit' => str_pad($cuit, 11, "0", STR_PAD_LEFT),
+//                    'cliente' => $cliente,
+//                    'total' => str_pad(number_format($objComprob->getMontoTotal(), 2, '', ''), 15, "0", STR_PAD_LEFT),
+//                    'nograv' => str_pad("0", 15, "0"),
+//                    'nocateg' => str_pad("0", 15, "0"),
+//                    'exe' => str_pad(number_format($operacionesExentas, 2, '', ''), 15, "0", STR_PAD_LEFT),
+//                    'percImpNac' => str_pad("0", 15, "0"),
+//                    'percIIBB' => str_pad("0", 15, "0"),
+//                    'percMuni' => str_pad("0", 15, "0"),
+//                    'impInterno' => str_pad("0", 15, "0"),
+//                    'moneda' => 'PES',
+//                    'tipoCambio' => str_pad("0001000000", 10, "0"),
+//                    'cantAlicuotas' => count($cantAlicuotas),
+//                    'codOperacion' => $codOperacion,
+//                    'otrosTributos' => str_pad("0", 15, "0"),
+//                    'pagoVto' => $pagovto,
+//                    'error' => $error,
+//                    'clienteId' => $clienteId,
+//                    'id' => $objComprob->getId(),
+//                    'signo' => $signo
+//                );
+//                array_push($reginfoCbtes, $comp);
+//            }
+//            else {
+//
+//                $comp = $fecha .
+//                    $facturaElectronica->getTipoComprobante()->getCodigo() .
+//                    str_pad($facturaElectronica->getPuntoVenta(), 5, "0", STR_PAD_LEFT) .
+//                    str_pad($facturaElectronica->getNroComprobante(), 20, "0", STR_PAD_LEFT) .
+//                    str_pad("0", 20, "0") .
+//                    '80' .
+//                    str_pad($cuit, 20, "0", STR_PAD_LEFT) .
+//                    UtilsController::mb_str_pad($cliente, 30) .
+//                    str_pad(number_format($objComprob->getTotal(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
+//                    str_pad("0", 15, "0") .
+//                    str_pad("0", 15, "0") .
+//                    str_pad(number_format($operacionesExentas, 2, '', ''), 15, "0", STR_PAD_LEFT) .
+//                    str_pad("0", 15, "0") .
+//                    str_pad("0", 15, "0") .
+//                    str_pad("0", 15, "0") .
+//                    str_pad("0", 15, "0") .
+//                    'PES' .
+//                    str_pad("0001000000", 10, "0") .
+//                    count($cantAlicuotas) .
+//                    $codOperacion .
+//                    str_pad("0", 15, "0") .
+//                    $pagovto
+//                ;
+//                $reginfoCbtes = ($reginfoCbtes == '') ? $comp : $reginfoCbtes . "\r\n" . $comp;
+//            }
+//        }
+//
+//        /*
+//         * MERGE FACTURAS Y NOTAS
+//         */
+//        if ($format != 'A') {
+//            $reginfoCbtes = $reginfoCbtes . "\r\n";
+//            $reginfoAlicuotas = $reginfoAlicuotas . "\r\n";
+//        }
+//        $resultado = array('comprobantes' => $reginfoCbtes, 'alicuotas' => $reginfoAlicuotas, 'errores' => $toterrores);
+//
+//        return $resultado;
+//    }
 
     /**
      * @Route("/afipExportTxt", name="reginfo_export_txt")

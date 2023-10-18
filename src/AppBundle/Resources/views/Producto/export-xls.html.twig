@@ -32,7 +32,7 @@ table tr td{
         <table cellspacing="0">
             <thead>
                 <tr>
-                    <th>#</th>
+                    <th>ID</th>
                     <th>Código</th>
                     <th>Producto</th>
                     {% if filtro[0]=='Todos'%}
@@ -46,13 +46,13 @@ table tr td{
             <tbody>
                 {% for item in items %}               
                     <tr>
-                        <td class="align-right">{{loop.index}}</td>
+                        <td class="align-right">{{item.id}}</td>
                         <td>{{item.codigo}}</td>
                         <td>{{item.nombre}}</td>
                          {% if filtro[0]=='Todos'%}
-                        <td>{{item.proveedor.nombre}}</td>
+                        <td>{{item.proveedor ? item.proveedor.nombre : ''}}</td>
                         {% endif%}
-                        <td>{{item.rubro.nombre}}</td>
+                        <td>{{item.rubro ? item.rubro.nombre : ''}}</td>
                         <td class="align-right">{{item.costo}}</td>                                    
                         <td>{% if item.activo %} Si {% else %} No{% endif %} </td>                                    
                     </tr>                           

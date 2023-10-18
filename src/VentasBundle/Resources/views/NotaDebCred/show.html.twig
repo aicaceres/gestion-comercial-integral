@@ -83,6 +83,11 @@
           {% endif %}  
             </div>
             <br clear="all" />
+            {% if entity.estado == 'ELIMINADO' %}
+                    <div class="notibar msgalert" style="margin-bottom:10px; background:#ffe9ad !important;height:38px">
+                        <p style="margin:10px 10px 0 55px;text-align:center; font-weight: bold">Eliminado por: {{ entity.updatedBy.username }} - el {{ entity.updated|date('d/m/Y H:i:s') }}</p>
+                    </div>
+            {% endif %}
             <div class="actionbutton">
                 <a class="cancelar" type="button" href="{{ path('ventas_notadebcred') }}" >Volver</a>
             </div>

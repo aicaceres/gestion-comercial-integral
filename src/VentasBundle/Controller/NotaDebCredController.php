@@ -131,7 +131,7 @@ class NotaDebCredController extends Controller {
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_notadebcred');
         // credito - (descuenta la deuda del cliente)
         // debito + (aumenta la deuda del cliente)
-        $response = array('res' => 'OK', 'msg' => '', 'id' => null);
+        $response = array('res' => '', 'msg' => '', 'id' => null);
 
         // Verificar si la caja está abierta CAJA=1
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
@@ -611,7 +611,8 @@ class NotaDebCredController extends Controller {
             }
             $cliente = $entity->getNombreClienteTxt();
             $operacion = $entity->getId();
-            $em->remove($entity);
+            $entity->setEstado('ELIMINADO');
+//            $em->remove($entity);
             $em->flush();
             $this->addFlash('success', 'La nota #' . $operacion . ' de ' . $cliente . ' fue eliminada!');
         }

@@ -415,8 +415,8 @@ class UtilsController extends Controller {
         );
 
         $string = str_replace(
-            array('ñ', 'Ñ', 'ç', 'Ç', 'º', '°', '¥', '#', '§'),
-            array('n', 'N', 'c', 'C', 'o', 'o', 'N', 'N', 'o'),
+            array('ñ', 'Ñ', 'ç', 'Ç', 'º', '°', '¥', '#', '§', '¤'),
+            array('n', 'N', 'c', 'C', 'o', 'o', 'N', 'N', 'o', 'N'),
             $string
         );
         $string = str_replace('"', '', $string);

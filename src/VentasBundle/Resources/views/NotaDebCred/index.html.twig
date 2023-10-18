@@ -71,19 +71,19 @@
             </thead>
             <tbody>
                {% for entity in entities %}
-                <tr>
+                <tr {% if entity.estado=='ELIMINADO' %} class="deleted" {%endif%}>
                     <td><span class="hidden">{{ entity.fecha|date('YmdHmi') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
                     <td>{{ entity.nombreClienteTxt }}</td>
                     <td>
                     {% if entity.notaElectronica %}
                         {{ entity.notaElectronica.comprobanteTxt }}
-                    {% elseif app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred_print') %}
+                    {% elseif app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred_print') and entity.estado != 'ELIMINADO'%}
                         <a href="{{ path('ventas_notadebcred_edit',{ 'id': entity.id }) }}" type="button" class="stdbtn btn_red " title="Facturar">Facturar</a>
                     {% endif %}
                     </td>
                     <td>{{ entity.notaElectronica ? entity.notaElectronica.cae : ''}}</td>
                     <td class="alignright"><span style="float:left">{{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(2,',','.') }}</td>
-                    <td>{{ entity.estado == 'CREADO' ? 'PENDIENTE' : (entity.estado == 'ACREDITADO' ? 'FACTURADO' : '') }}</td>
+                    <td>{{ entity.estado == 'CREADO' ? 'PENDIENTE' : (entity.estado == 'ACREDITADO' ? 'FACTURADO' : entity.estado) }}</td>
                     <td>{{ entity.createdBy.username }}</td>
                     <td class="buttons">
                         {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
@@ -92,7 +92,7 @@
                                 {% if entity.notaElectronica.cae %}
                                 <a href="javascript:void(0)" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'NotaDebCred' })}}" class="editar btn btnaction btn_print" id="nota{{entity.id}}" title="Imprimir Comprobante"></a>
                                 {% endif %}
-                            {% else %}
+                            {% elseif entity.estado != 'ELIMINADO' %}
                                 <a href="{{ path('ventas_notadebcred_delete', { 'id': entity.id }) }}" onclick="confirm('Confirma la eliminación! Esta acción no se puede deshacer')" class="btn btnaction btn_trash btn_yellow" title="Eliminar"></a>
                             {% endif %}
                         {% endif %}

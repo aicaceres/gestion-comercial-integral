@@ -144,7 +144,7 @@ class StockController extends Controller {
                                 throw new \Exception("Error Processing Request");
                             }
                             $detalle->setSigno($signo);
-                            $producto = $em->getRepository('AppBundle:Producto')->findOneByCodigo(trim($data[1]));
+                            $producto = $em->getRepository('AppBundle:Producto')->find(trim($data[1]));
                             $detalle->setProducto($producto);
                             $detalle->setCantidad(floatval($data[2]));
                             $detalle->setMotivo($data[3]);

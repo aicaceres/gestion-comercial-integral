@@ -28,7 +28,7 @@
         <fieldset class="fields" >
             {% include "ComprasBundle:Proveedor:block-proveedor.html.twig" %}
 
-            <div style="display: inline-block; width: 20%">
+            <div style="display: inline-block; width: 12%">
                 {{ form_label(form.fecha) }}
                 {{ form_widget(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
             </div>
@@ -36,6 +36,9 @@
             <div style="display: inline-block; width: 20%">
                 {{ form_label(form.nroComprobante)  }}
                 {{ form_widget(form.nroComprobante, { 'attr': {'class' : 'mediuminput hasInfo','tabindex':'0','maxlength':'20', 'title':'N° de comprobante otorgado por el Proveedor'} })  }}
+            </div>
+            <div style="display: inline-block; width: 20%">
+                {{ form_row(form.rubroCompras, {'attr':{'style':'width:90%'} })  }}
             </div>
 
         </fieldset>

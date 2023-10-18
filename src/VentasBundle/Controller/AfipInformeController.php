@@ -54,6 +54,10 @@ class AfipInformeController extends Controller {
             $operacionesExentas = 0;
             $error = array();
             $comprobante = $fe->getCobro() ? $fe->getCobro() : $fe->getNotaDebCred();
+            $signo = 1;
+            if ($fe->getNotaDebCred()) {
+                $signo = $fe->getNotaDebCred()->getSigno() == '-' ? -1 : 1;
+            }
             //* cliente
             $cliente = $comprobante->getCliente();
             $clienteId = $cliente->getId();
@@ -77,6 +81,7 @@ class AfipInformeController extends Controller {
                         'netoGravado' => str_pad($netoGravado, 15, "0", STR_PAD_LEFT),
                         'codAlicuota' => str_pad($alicuota->Id, 4, "0", STR_PAD_LEFT),
                         'liquidado' => str_pad($liquidado, 15, "0", STR_PAD_LEFT),
+                        'signo' => $signo,
                         'error' => $error
                     );
                     array_push($reginfoAlicuotas, $alic);
@@ -129,7 +134,8 @@ class AfipInformeController extends Controller {
                     'pagoVto' => $pagovto,
                     'error' => $error,
                     'clienteId' => $clienteId,
-                    'id' => $comprobante->getId()
+                    'id' => $comprobante->getId(),
+                    'signo' => $signo
                 );
                 array_push($reginfoCbtes, $comp);
             }
@@ -219,6 +225,142 @@ class AfipInformeController extends Controller {
 
         // Dispatch request
         return $response;
+    }
+
+    /**
+     * @Route("/PercepcionesVentas", name="ventas_percepcionrentas")
+     * @Method("GET")
+     * @Template()
+     */
+    public function PercepcionesRentasAction(Request $request) {
+        $periodo = $request->get('periodo');
+        $em = $this->getDoctrine()->getManager();
+        $resultado = null;
+        if ($periodo) {
+            $resultado = $this->resultadoPercepciones($periodo, $em, 'A');
+        }
+
+        return $this->render('VentasBundle:Impuesto:percepciones-rentas.html.twig', array(
+                'path' => $this->generateUrl('ventas_percepcionrentas'),
+                'resultado' => $resultado, 'periodo' => $periodo
+        ));
+    }
+
+    /**
+     * Devuelve las percepciones de rentas segun periodo
+     */
+    private function resultadoPercepciones($periodo, $em, $format = 'A') {
+        $desde = UtilsController::toAnsiDate('01-' . $periodo);
+        $ini = new \DateTime($desde);
+        $hasta = $ini->format('Ymt');
+
+        $facturas = $em->getRepository('VentasBundle:FacturaElectronica')->findPercepcionesRentas(str_replace('-', '', $desde), $hasta);
+        $precepciones = ($format == 'A') ? array() : '';
+        $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
+        foreach ($facturas as $fact) {
+            $cliente = $fact->getCliente();
+            $cuitempresa = substr(str_pad(str_replace('-', '', $empresa->getCuit()), 11, " ", STR_PAD_LEFT), -11, 11);
+            $tipocomp = intval($fact->getTipoComprobante()->getCodigo());
+            $puntovta = str_pad($fact->getPuntoVenta(), 4, "0", STR_PAD_LEFT);
+            $nrocomp = str_pad($fact->getNroComprobante(), 8, "0", STR_PAD_LEFT);
+            $cuit = substr(str_pad($fact->getDocNro(), 11, " ", STR_PAD_LEFT), -11, 11);
+            $nombre = substr(str_pad(UtilsController::sanear_string($fact->getNombreCliente()), 30, " ", STR_PAD_RIGHT), -30, 30);
+            $fecha = $fact->getCbteFchFormatted('dmY');
+            $categ = str_pad($cliente->getCategoriaRentas()->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
+            $tributos = json_decode($fact->getTributos());
+            $montoret = str_pad(($tributos->Importe * 100), 11, "0", STR_PAD_LEFT);
+            $gravado = str_pad(($tributos->BaseImp * 100), 11, "0", STR_PAD_LEFT);
+            $alicuota = str_pad(($tributos->Alic * 100), 4, "0", STR_PAD_LEFT);
+            $espacios = str_pad(" ", 9, " ");
+            if ($format == 'A') {
+                $precepciones[] = array(
+                    'cuitempresa' => $cuitempresa,
+                    'tipocomprobante' => $tipocomp,
+                    'puntovta' => $puntovta,
+                    'nrocomprobante' => $nrocomp,
+                    'cuit' => $cuit,
+                    'nombrecliente' => $nombre,
+                    'fechacomp' => $fecha,
+                    'montoret' => $montoret,
+                    'categ' => $categ,
+                    'gravado' => $gravado,
+                    'alicuota' => $alicuota
+                );
+            }
+            else {
+                $txtret = $cuitempresa .
+                    $tipocomp .
+                    $puntovta .
+                    $nrocomp .
+                    $cuit .
+                    $espacios .
+                    $nombre .
+                    $fecha .
+                    $montoret .
+                    $categ .
+                    $gravado .
+                    $alicuota;
+                $precepciones = ( $precepciones == '') ? $txtret : $precepciones . "\r\n" . $txtret;
+            }
+        }
+        if ($format == 'T') {
+            $precepciones = $precepciones . "\r\n";
+        }
+        return $precepciones;
+    }
+
+    /**
+     * @Route("/percepcionesExportTxt", name="percepcion_export_txt")
+     * @Method("GET")
+     * @Template()
+     */
+    public function percepcionesExportTxt(Request $request) {
+        $periodo = $request->get('periodo');
+        $hoy = new \DateTime();
+
+        $em = $this->getDoctrine()->getManager();
+        $resultado = $this->resultadoPercepciones($periodo, $em, 'T');
+        $fileContent = $resultado;
+        $filename = $hoy->format('YmdHi') . '.txt';
+
+        // Return a response with a specific content
+        $response = new Response($fileContent);
+
+        // Create the disposition of the file
+        $disposition = $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $filename
+        );
+
+        // Set the content disposition
+        $response->headers->set('Content-Disposition', $disposition);
+
+        // Dispatch request
+        return $response;
+    }
+
+    /**
+     * @Route("/percepcionesRentasPdf.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="ventas_percepcionesrentas_pdf")
+     * @Method("GET")
+     */
+    public function retencionesRentasPdfAction(Request $request) {
+        $periodo = $request->get('periodo');
+        $em = $this->getDoctrine()->getManager();
+        $resultado = null;
+        if ($periodo) {
+            $resultado = $this->resultadoPercepciones($periodo, $em, 'A');
+        }
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('VentasBundle:Impuesto:percepciones-rentas.pdf.twig',
+            array('periodo' => $periodo, 'resultado' => $resultado), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=percepciones_rentas.pdf'));
     }
 
 }

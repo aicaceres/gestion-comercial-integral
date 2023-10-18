@@ -55,7 +55,7 @@ class FacturaRepository extends EntityRepository {
             ->from('VentasBundle:FacturaElectronica', 'fe')
             ->innerJoin('fe.unidadNegocio', 'u')
             ->where('u.id=' . $unidneg)
-            ->andWhere("fe.cae != ''")
+//            ->andWhere("fe.cae != ''")
             ->andWhere("fe.cbteFch >= '" . $desde . "'")
             ->andWhere("fe.cbteFch <= '" . $hasta . "'")
             ->orderBy('fe.cbteFch');
@@ -136,6 +136,21 @@ class FacturaRepository extends EntityRepository {
             ->setMaxResults(1);
 
         return $query->getQuery()->getOneOrNullResult();
+    }
+
+    /**
+     * Encontrar los pagos con retencion de rentas dentro del periodo indicado
+     */
+    public function findPercepcionesRentas($desde, $hasta) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("p")
+            ->from('VentasBundle:FacturaElectronica', 'p')
+            ->andWhere(" p.cbteFch >= '" . $desde . "'")
+            ->andWhere(" p.cbteFch <= '" . $hasta . "'")
+            ->andWhere("p.impTrib > 0")
+            ->orderBy('p.cbteFch');
+
+        return $query->getQuery()->getResult();
     }
 
 }

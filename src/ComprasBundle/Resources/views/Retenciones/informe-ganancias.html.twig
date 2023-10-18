@@ -27,6 +27,7 @@
                 <input name="periodo" required="required" class="datepicker" tabindex="2" type="text" value="{{periodo}}">
             </div>
             <button type="submit" >Buscar</button>
+            <button type="button" id="print-pdf" style="float: right;margin-right: 20px;">Imprimir</button>            
         </form>
     </div>
 
@@ -85,7 +86,9 @@ jQuery(document).ready(function($) {
         }
     });
     $('.togglemenu').click();
-
+    $('#print-pdf').on('click',function(){
+        window.open("{{path('compras_retencionganancias_pdf')}}?"+$('form').serialize());
+    })
 });
 
 </script>

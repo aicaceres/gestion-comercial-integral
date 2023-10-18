@@ -54,6 +54,8 @@ class NotaDebCredController extends Controller {
         $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
         $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
         $entity->setNotaDebCredNro(sprintf("%08d", $equipo->getNroNotaDebCredCompra() + 1));
+        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($this->get('session')->get('unidneg_id'));
+        $entity->setUnidadNegocio($unidneg);
         $form = $this->createCreateForm($entity);
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
                 'entity' => $entity,
@@ -89,7 +91,7 @@ class NotaDebCredController extends Controller {
         //$modificaStock = ($request->get('modificaStock') == 'SI') ? true : false;
         $form->handleRequest($request);
         if ($form->isValid()) {
-//$this->addFlash('success', 'valid!');
+
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
             try {
@@ -195,8 +197,9 @@ class NotaDebCredController extends Controller {
                 }
             }
         }
-//var_dump( $entity->getNroComprobante());
-//var_dump( $errors ); die;
+//        var_dump($entity->getNroComprobante());
+//        var_dump($errors);
+//        die;
         return $this->render('ComprasBundle:NotaDebCred:edit.html.twig', array(
                 'entity' => $entity,
                 'form' => $form->createView(),

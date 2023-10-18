@@ -33,6 +33,31 @@ class RetencionesController extends Controller {
     }
 
     /**
+     * @Route("/retencionesRentasPdf.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="compras_retencionrentas_pdf")
+     * @Method("GET")
+     */
+    public function retencionesRentasPdfAction(Request $request) {
+        $periodo = $request->get('periodo');
+        $unidneg = $this->get('session')->get('unidneg_id');
+        $em = $this->getDoctrine()->getManager();
+        $resultado = null;
+        if ($periodo) {
+            $resultado = $this->resultadoRentas($periodo, $em, 'A');
+        }
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('ComprasBundle:Retenciones:informe-rentas.pdf.twig',
+            array('periodo' => $periodo, 'resultado' => $resultado), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=informe_rentas.pdf'));
+    }
+
+    /**
      * @Route("/retencionesGanancias", name="compras_retencionganancias")
      * @Method("GET")
      * @Template()
@@ -48,6 +73,30 @@ class RetencionesController extends Controller {
                 'tipo' => 'Ganancias', 'path' => $this->generateUrl('compras_retencionganancias'),
                 'periodo' => $periodo, 'resultado' => $resultado
         ));
+    }
+
+    /**
+     * @Route("/retencionesGananciasPdf.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="compras_retencionganancias_pdf")
+     * @Method("GET")
+     */
+    public function retencionesGananciasPdfAction(Request $request) {
+        $periodo = $request->get('periodo');
+        $em = $this->getDoctrine()->getManager();
+        $resultado = array('retenciones' => null, 'sujetos' => null);
+        if ($periodo) {
+            $resultado = $this->resultadoGanancias($periodo, $em, 'A');
+        }
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('ComprasBundle:Retenciones:informe-ganancias.pdf.twig',
+            array('periodo' => $periodo, 'resultado' => $resultado), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=informe_ganancias.pdf'));
     }
 
     /**
@@ -241,8 +290,6 @@ class RetencionesController extends Controller {
                     str_pad($montoret, 11, "0", STR_PAD_LEFT) .
                     $codconcepto .
                     str_pad($imponible, 11, "0", STR_PAD_LEFT) .
-                    '0' .
-                    str_pad(str_replace('.', ',', $pago->getRetencionGanancias()), 17, "0", STR_PAD_LEFT) .
                     str_pad($alicuota, 11, "0", STR_PAD_LEFT);
                 $retenciones = ( $retenciones == '') ? $txtret : $retenciones . "\r\n" . $txtret;
             }

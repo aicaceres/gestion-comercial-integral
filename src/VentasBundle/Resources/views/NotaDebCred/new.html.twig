@@ -325,7 +325,7 @@ function imprimirTicket(notaId){
             driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
         // tributos (iibb)
         if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
-         console.log(data.pagos)
+{#         console.log(data.pagos)#}
         // pagos
         if(data.pagos){
            data.pagos.forEach(function(i){
@@ -343,11 +343,10 @@ function imprimirTicket(notaId){
         driver.ultimoComprobante(data.tipo);
         driver.finalizarTrabajo();
         let nroTicket = driver.response.ultimoNumero
-
-        if(confirm('Se ha registrado la impresión del ticket N° '+nroTicket)){
-            jQuery('#guardar span').html('Guardando Ticket...')
-            procesarTicket(notaId,'NotaDebCred',nroTicket)
-          }
+        
+        jQuery('#guardar span').html('Guardando Ticket...')
+        procesarTicket(notaId,'NotaDebCred',nroTicket)
+        alert(('Se ha registrado la impresión del ticket N° '+nroTicket))  
 
       } catch (e){
         cancelarTicket(driver)
@@ -370,8 +369,7 @@ function imprimirTicket(notaId){
 function procesarTicket(id, entity, nroticket){
     const url = "{{path('ventas_factura_procesarticket')}}"
     jQuery.post(url, {id, entity, nroticket}, function(data){
-    if(data.res === 'OK'){
-        
+    if(data.res === 'OK'){        
       setFacturando(false)
       location.href = jQuery('.cancelar').attr('href')
     }else{

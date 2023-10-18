@@ -13,7 +13,7 @@
     }
 </style>
 <div class="pageheader notab">
-    <h1 class="pagetitle">Retenciones de {{tipo}}</h1>
+    <h1 class="pagetitle">Percepciones de Rentas</h1>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -52,34 +52,34 @@
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable datosrentas rentas" id="rentas">
         <thead>
             <tr style="background-color: gainsboro">
-                <th><span style="width:147px;display: block;">N° CUIT Agente de Retención</span></th>
-                <th><span style="width:125px;display: block;">N° sucursal de Retención</span></th>
-                <th><span style="width:135px;display: block;">N° Comprobante Retención</span></th>
-                <th><span style="width:113px;display: block;">N° CUIT Contribuyente</span></th>
-                <th><span style="width:215px;display: block;">Razón Social Contribuyente</span></th>
-                <th><span style="width:360px;display: block;">Domicilio Contribuyente</span></th>
-                <th><span style="width:100px;display: block;">Fecha de Retención</span></th>
-                <th><span style="width:133px;display: block;">Monto Total de la retención</span></th>
-                <th><span style="width:83px;display: block;">Código concepto</span></th>
-                <th><span style="width:83px;display: block;">Monto Imponible</span></th>
-                <th><span style="width:84px;display: block;">Alícuota aplicada</span></th>
+                <th><span style="width:80px;display: block;">CUIT Empresa</span></th>
+                <th><span style="width:85px;display: block;">Tipo Documento</span></th>
+                <th><span style="width:80px;display: block;">Punto de Venta</span></th>
+                <th><span style="width:90px;display: block;">N° de Documento</span></th>
+                <th><span style="width:70px;display: block;">CUIT Cliente</span></th>
+                <th><span style="width:220px;display: block;">Nombre Cliente</span></th>
+                <th><span style="width:102px;display: block;">Fecha Comprobante</span></th>
+                <th><span style="width:80px;display: block;">Monto Retenido</span></th>
+                <th><span style="width:48px;display: block;">Categoría</span></th>
+                <th><span style="width:80px;display: block;">Monto Gravado</span></th>
+                <th><span style="width:40px;display: block;">Alícuota</span></th>
 
             </tr>
             </thead>
         <tbody>
             {% for item in resultado %}
                 <tr>
-                    <td><span style="width:147px;display: block; ">{{ item.cuitempresa }}</span></td>
-                    <td><span style="width:125px;display: block;"> {{ item.sucursal }} </span></td>
-                    <td><span style="width:135px;display: block;">{{ item.nrocomp }}</span></td>
-                    <td><span style="width:113px;display: block;">{{ item.cuit }} </span></td>
-                    <td><span style="width:215px;display: block;">{{ item.razonsocial }} </span></td>
-                    <td><span style="width:360px;display: block;">{{ item.domicilio }} </span></td>
-                    <td><span style="width:100px;display: block;">{{ item.fecha }} </span></td>
-                    <td><span style="width:133px;display: block;">{{ item.montoret }} </span></td>
-                    <td><span style="width:83px;display: block;"> {{ item.codconcepto }} </span></td>
-                    <td><span style="width:83px;display: block;">{{ item.imponible }} </span></td>
-                    <td><span style="width:84px;display: block;">{{ item.alicuota }} </span></td>
+                    <td><span style="width:80px;display: block; ">{{ item.cuitempresa }}</span></td>
+                    <td><span style="width:85px;display: block;"> {{ item.tipocomprobante }} </span></td>
+                    <td><span style="width:80px;display: block;">{{ item.puntovta }}</span></td>
+                    <td><span style="width:90px;display: block;">{{ item.nrocomprobante }} </span></td>
+                    <td><span style="width:70px;display: block;">{{ item.cuit }} </span></td>
+                    <td><span style="width:220px;display: block;">{{ item.nombrecliente }} </span></td>
+                    <td><span style="width:102px;display: block;">{{ item.fechacomp }} </span></td>
+                    <td><span style="width:80px;display: block;">{{ item.montoret }} </span></td>
+                    <td><span style="width:48px;display: block;"> {{ item.categ }} </span></td>
+                    <td><span style="width:80px;display: block;">{{ item.gravado }} </span></td>
+                    <td><span style="width:40px;display: block;">{{ item.alicuota }} </span></td>
                 </tr>
             {% endfor %}
         </tbody>
@@ -89,7 +89,7 @@
 </div>
 <div>
     <h5 style="text-align:center; margin:10px;"> {{ resultado|length }} retenciones en {{ "now"|date('YmdHi') }}.txt
-        <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('retencion_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}" > <span>Descargar</span> </a></h5>
+        <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('percepcion_export_txt') }}?periodo={{ periodo }}" > <span>Descargar</span> </a></h5>
 </div>
 
 </div>
@@ -131,7 +131,7 @@ jQuery(document).ready(function($) {
     });
     $('.togglemenu').click();
     $('#print-pdf').on('click',function(){
-        window.open("{{path('compras_retencionrentas_pdf')}}?"+$('form').serialize());
+        window.open("{{path('ventas_percepcionesrentas_pdf')}}?"+$('form').serialize());
     })
 });
 

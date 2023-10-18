@@ -15,7 +15,7 @@
     </thead>
     <tbody>
         {% for entity in entities %}
-        <tr>
+        <tr {% if entity.estado=='ELIMINADO' %} class="deleted" {%endif%}>
             <td>{{entity.nroOperacion}}</td>
             <td><span class="hidden">{{ entity.fechaCobro|date('YmdHi') }}</span>{{ entity.fechaCobro|date('d-m-Y H:i') }}</td>
             <td>{{ entity.cliente }}{{ entity.nombreCliente != 'CONSUMIDOR FINAL' ? ('<br>' ~ entity.nombreCliente) |raw : '' }}</td>
@@ -24,7 +24,7 @@
             <td class="estado">
               {% if entity.facturaElectronica %}
                 {{ entity.facturaElectronica.comprobanteTxt }}
-              {% else %}
+              {% elseif entity.estado != 'ELIMINADO' %}
                 <a href="{{ path('ventas_cobro_edit',{ 'id': entity.id }) }}" type="button" class="stdbtn btn_red " title="Facturar">Facturar</a>
               {% endif %}
             </td>
@@ -37,8 +37,8 @@
                     {% if entity.facturaElectronica.cae %}
                     <a href="#" url="{{ path('ventas_factura_print', { 'id': entity.id, 'entity': 'Cobro' })}}" class="editar btn btnaction btn_print" facid="{{entity.id}}"  title="Imprimir Factura"></a>
                     {% endif %}
-                {% else %}
-                  <a href="{{ path('ventas_cobro_delete', { 'id': entity.id }) }}" onclick="confirm('Confirma la eliminación! Esta acción no se puede deshacer')" class="btn btnaction btn_trash btn_yellow" title="Eliminar"></a>
+                {% elseif entity.estado != 'ELIMINADO' %}
+                  <a style="display:none" href="{{ path('ventas_cobro_delete', { 'id': entity.id }) }}" onclick="confirm('Confirma la eliminación! Esta acción no se puede deshacer')" class="btn btnaction btn_trash btn_yellow" title="Eliminar"></a>
                 {% endif %}
 
             </td>

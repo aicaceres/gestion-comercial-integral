@@ -129,6 +129,12 @@ class PagoProveedor {
     protected $saldo = 0;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\RubroCompras")
+     * @ORM\JoinColumn(name="rubro_compras_id", referencedColumnName="id")
+     * */
+    protected $rubroCompras;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pagos")
      * @ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
      */
@@ -729,4 +735,27 @@ class PagoProveedor {
         return $this->montoIva;
     }
 
+
+    /**
+     * Set rubroCompras
+     *
+     * @param \ConfigBundle\Entity\RubroCompras $rubroCompras
+     * @return PagoProveedor
+     */
+    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null)
+    {
+        $this->rubroCompras = $rubroCompras;
+
+        return $this;
+    }
+
+    /**
+     * Get rubroCompras
+     *
+     * @return \ConfigBundle\Entity\RubroCompras 
+     */
+    public function getRubroCompras()
+    {
+        return $this->rubroCompras;
+    }
 }

@@ -36,6 +36,14 @@ class PagoProveedorType extends AbstractType {
             ->add('adicionalRentas', 'hidden')
             ->add('retencionGanancias', 'hidden')
             ->add('cotizacion', 'hidden')
+            ->add('rubroCompras', 'entity', array(
+                'label' => 'Rubro:',
+                'class' => 'ConfigBundle:RubroCompras',
+                'required' => false,
+                'placeholder' => 'Seleccionar...',
+                'choice_label' => 'nombre',
+                'attr' => array('class' => 'mediuminput select2')
+            ))
             ->add('cobroDetalles', 'collection', array(
                 'type' => new CobroDetalleType(),
                 'by_reference' => false,

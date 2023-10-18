@@ -1,0 +1,119 @@
+<pdf>
+    <dynamic-page page-size="A4-landscape" margin-left="50px" margin-right="30px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#F5C98F" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> Retenciones de Ganancias</h2>                   
+        <h4><strong>Período:</strong> {{ periodo }} </h4>
+        <div height="10px"></div>
+        <h4><strong>RETENCIONES</strong></h4>
+        <table font-size="8px">
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.6 cm"><strong>Cód. Comprobante</strong></td>
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.9 cm"><strong>Fecha Emisión</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1.8 cm"><strong>N° Comprobante</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="2 cm"><strong>Importe comprobante</strong></td>
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>Código impuesto</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>Código régimen</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.5 cm"><strong>Cód. operación</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1.5 cm"><strong>Base Cálculo</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.9 cm"><strong>Fecha retención</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>Cód. condición</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1 cm"><strong>Retención sujetos suspendidos</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1.5 cm"><strong>Importe retención</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>Porcentaje exclusión</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.9 cm"><strong>Fecha emisión boletín</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1 cm"><strong>Tipo documento retenido</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1.2 cm"><strong>N° documento del retenido</strong></td>                
+            </tr>        
+            {% for item in resultado.retenciones %}
+                <tr>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.codcomp }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.fechaemision }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.nrocomp }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.importecomp }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.codimpuesto }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.codregimen }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.codoperc }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.basecalculo }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.fecharetencion }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.codcondicion }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.retsujsusp }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.importe }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.porcexclusion }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.fechaboletin }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.tipodoc }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.nrodoc }}</td>
+                </tr>                
+            {% endfor %}  
+        </table>         
+    </dynamic-page>
+        
+    <dynamic-page page-size="A4-landscape" margin-left="50px" margin-right="30px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#F5C98F" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> Retenciones de Ganancias</h2>                   
+        <h4><strong>Período:</strong> {{ periodo }} </h4>
+        <div height="10px"></div>
+        <h4><strong>SUJETOS</strong></h4>
+        <table font-size="8px">
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1.2 cm"><strong>N° documento del retenido</strong></td>
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="2.5 cm"><strong>Razón social</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="2.5 cm"><strong>Domicilio fiscal</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="2 cm"><strong>Localidad</strong></td>
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1 cm"><strong>Provincia</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="0.8 cm"><strong>Codigo postal</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" padding="5px" vertical-align="middle" text-align="center" width="1 cm"><strong>Tipo de documento del retenido</strong></td>               
+            </tr>        
+            {% for item in resultado.sujetos %}
+                <tr>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.nrodoc }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" padding-left="5px">{{ item.razonsocial }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" padding-left="5px">{{ item.domicilio }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" padding-left="5px">{{ item.localidad }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.provincia }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" padding-left="5px">{{ item.cp }}</td>
+                    <td border.type="none" height="15px" vertical-align="middle" text-align="center">{{ item.tipodoc }}</td>
+                </tr>                
+            {% endfor %}  
+        </table>         
+    </dynamic-page>    
+</pdf>

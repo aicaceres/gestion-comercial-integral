@@ -43,7 +43,9 @@
             </tr>
             </thead>
         <tbody>
+            {% set total = 0 %}
             {% for item in resultado.comprobantes %}
+                {% set total = total + (item.total*item.signo)  %}
                 <tr {% if item.error|length>0 %} style="background-color:mistyrose"{% endif %} >
                     <td><span style="width:60px;display: block; ">{{item.fecha}}</span></td>
                     <td><span style="width:60px;display: block;">{{item.tipoComprobante}}</span></td>
@@ -92,6 +94,7 @@
     </table>
 
 </div>
+<h5 style="padding-left:15px">Total Operaciones: ${{ (total/100)|number_format(2,'.',',') }}</h5>                
 <div>
     <h5 style="text-align:center; margin:10px;"> {{ resultado.comprobantes|length }} comprobantes en REGINFO_CV_VENTAS_CBTE.txt
         <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('ventas_reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=CBTE" > <span>Descargar</span> </a></h5>

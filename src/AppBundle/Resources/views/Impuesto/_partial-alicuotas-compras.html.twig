@@ -29,7 +29,9 @@
             </tr>
             </thead>    
         <tbody>    
-            {% for item in resultado.alicuotas %}                    
+            {% set totiva, totneto = 0, 0 %}
+            {% for item in resultado.alicuotas %}   
+                {% set totiva, totneto = (totiva + (item.liquidado*item.signo)), (totneto + (item.netoGravado*item.signo))  %}
                 <tr  {% if 'ALICUOTA' in item.error %} class="js-alicuota-error"  style="background-color:gold; cursor: pointer"{% endif %}  
                     data-url="{{ path('edit_comprobante_compras',{'id':item.id,'tipocomp': item.tipoComprobante}) }}"                                   >                            
                     <td><span style="width:103px;display: block; ">{{item.tipoComprobante}}</span></td>                    
@@ -47,7 +49,8 @@
         
     </table>   
        
-</div>    
+</div>  
+        <h5 style="padding-left:15px">Total Liquidado: ${{ (totiva/100)|number_format(2,'.',',') }}</h5>        
 <div>
     <h5 style="text-align:center; margin:10px;"> {{ resultado.alicuotas|length }} alícuotas en REGINFO_CV_COMPRAS_ALICUOTAS.txt  
         <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=ALIC" > <span>Descargar</span> </a></h5>                
