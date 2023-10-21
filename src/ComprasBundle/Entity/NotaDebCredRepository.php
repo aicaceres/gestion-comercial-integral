@@ -53,6 +53,18 @@ class NotaDebCredRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    public function getNotasParaIva($desde, $hasta, $unidneg) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('n')
+            ->from('ComprasBundle\Entity\NotaDebCred', 'n')
+            ->innerJoin('n.unidadNegocio', 'u')
+            ->where("n.estado!='ANULADO'")
+            ->andWhere('u.id=' . $unidneg)
+            ->andWhere("n.fecha>='" . $desde . " 00:00'")
+            ->andWhere("n.fecha<='" . $hasta . " 23:59'");
+        return $query->getQuery()->getResult();
+    }
+
     public function getCantidadAlicuotas($id) {
         $query = $this->_em->createQueryBuilder();
         $query->select('distinct a.id')

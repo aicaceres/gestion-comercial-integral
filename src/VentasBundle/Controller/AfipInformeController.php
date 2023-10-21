@@ -258,51 +258,58 @@ class AfipInformeController extends Controller {
         $precepciones = ($format == 'A') ? array() : '';
         $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
         foreach ($facturas as $fact) {
-            $cliente = $fact->getCliente();
-            $cuitempresa = substr(str_pad(str_replace('-', '', $empresa->getCuit()), 11, " ", STR_PAD_LEFT), -11, 11);
-            $tipocomp = intval($fact->getTipoComprobante()->getCodigo());
-            $puntovta = str_pad($fact->getPuntoVenta(), 4, "0", STR_PAD_LEFT);
-            $nrocomp = str_pad($fact->getNroComprobante(), 8, "0", STR_PAD_LEFT);
-            $cuit = substr(str_pad($fact->getDocNro(), 11, " ", STR_PAD_LEFT), -11, 11);
-            $nombre = substr(str_pad(UtilsController::sanear_string($fact->getNombreCliente()), 30, " ", STR_PAD_RIGHT), -30, 30);
-            $fecha = $fact->getCbteFchFormatted('dmY');
-            $categ = str_pad($cliente->getCategoriaRentas()->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
             $tributos = json_decode($fact->getTributos());
-            $montoret = str_pad(($tributos->Importe * 100), 11, "0", STR_PAD_LEFT);
-            $gravado = str_pad(($tributos->BaseImp * 100), 11, "0", STR_PAD_LEFT);
-            $alicuota = str_pad(($tributos->Alic * 100), 4, "0", STR_PAD_LEFT);
-            $espacios = str_pad(" ", 9, " ");
-            if ($format == 'A') {
-                $precepciones[] = array(
-                    'cuitempresa' => $cuitempresa,
-                    'tipocomprobante' => $tipocomp,
-                    'puntovta' => $puntovta,
-                    'nrocomprobante' => $nrocomp,
-                    'cuit' => $cuit,
-                    'nombrecliente' => $nombre,
-                    'fechacomp' => $fecha,
-                    'montoret' => $montoret,
-                    'categ' => $categ,
-                    'gravado' => $gravado,
-                    'alicuota' => $alicuota
-                );
-            }
-            else {
-                $txtret = $cuitempresa .
-                    $tipocomp .
-                    $puntovta .
-                    $nrocomp .
-                    $cuit .
-                    $espacios .
-                    $nombre .
-                    $fecha .
-                    $montoret .
-                    $categ .
-                    $gravado .
-                    $alicuota;
-                $precepciones = ( $precepciones == '') ? $txtret : $precepciones . "\r\n" . $txtret;
+            if ($tributos) {
+                $cliente = $fact->getCliente();
+                $cuitempresa = substr(str_pad(str_replace('-', '', $empresa->getCuit()), 11, " ", STR_PAD_LEFT), -11, 11);
+                $tipocomp = intval($fact->getTipoComprobante()->getCodigo());
+                $puntovta = str_pad($fact->getPuntoVenta(), 4, "0", STR_PAD_LEFT);
+                $nrocomp = str_pad($fact->getNroComprobante(), 8, "0", STR_PAD_LEFT);
+                $cuit = substr(str_pad($fact->getDocNro(), 11, " ", STR_PAD_LEFT), -11, 11);
+                $nombre = substr(str_pad(UtilsController::sanear_string($fact->getNombreCliente()), 30, " ", STR_PAD_RIGHT), -30, 30);
+                $fecha = $fact->getCbteFchFormatted('dmY');
+                $categ = str_pad($cliente->getCategoriaRentas()->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
+//                var_dump($cliente->getCategoriaRentas()->getCodigoAtp());
+//                var_dump($tributos);
+//                var_dump($fact->getId());
+//                echo '<br>';
+                $montoret = str_pad(($tributos->Importe * 100), 11, "0", STR_PAD_LEFT);
+                $gravado = str_pad(($tributos->BaseImp * 100), 11, "0", STR_PAD_LEFT);
+                $alicuota = str_pad(($tributos->Alic * 100), 4, "0", STR_PAD_LEFT);
+                $espacios = str_pad(" ", 9, " ");
+                if ($format == 'A') {
+                    $precepciones[] = array(
+                        'cuitempresa' => $cuitempresa,
+                        'tipocomprobante' => $tipocomp,
+                        'puntovta' => $puntovta,
+                        'nrocomprobante' => $nrocomp,
+                        'cuit' => $cuit,
+                        'nombrecliente' => $nombre,
+                        'fechacomp' => $fecha,
+                        'montoret' => $montoret,
+                        'categ' => $categ,
+                        'gravado' => $gravado,
+                        'alicuota' => $alicuota
+                    );
+                }
+                else {
+                    $txtret = $cuitempresa .
+                        $tipocomp .
+                        $puntovta .
+                        $nrocomp .
+                        $cuit .
+                        $espacios .
+                        $nombre .
+                        $fecha .
+                        $montoret .
+                        $categ .
+                        $gravado .
+                        $alicuota;
+                    $precepciones = ( $precepciones == '') ? $txtret : $precepciones . "\r\n" . $txtret;
+                }
             }
         }
+//        die;
         if ($format == 'T') {
             $precepciones = $precepciones . "\r\n";
         }

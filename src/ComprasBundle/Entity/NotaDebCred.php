@@ -235,6 +235,10 @@ class NotaDebCred {
             $this->getImpuestoInterno() + $this->getTmc();
     }
 
+    public function getTotalNeto() {
+        return $this->getSubtotalNeto() - $this->getTotalBonificado();
+    }
+
     // calcula saldo imponible
     public function getSaldoImponible() {
 //        if( !$this->retencionesAplicadas ){

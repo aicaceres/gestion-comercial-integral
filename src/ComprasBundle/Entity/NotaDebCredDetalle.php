@@ -288,9 +288,13 @@ class NotaDebCredDetalle {
 
     public function getMontoIvaItem() {
         $alic = $this->getAfipAlicuota()->getValor();
+        return $this->getMontoNetoItem() * ($alic / 100);
+    }
+
+    public function getMontoNetoItem() {
         $porcBonif = ($this->getNotaDebCred()->getTotalBonificado() * 100 ) / $this->getNotaDebCred()->getSubtotalNeto();
         $neto = $this->getSubTotal() * (1 - ($porcBonif / 100));
-        return $neto * ($alic / 100);
+        return $neto;
     }
 
     public function getTotal() {

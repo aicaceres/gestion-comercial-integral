@@ -24,8 +24,8 @@ class ImpuestoController extends Controller {
         $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
         $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
 
-        $facturas = $em->getRepository('ComprasBundle:Factura')->findByUnidadNegocio($this->get('session')->get('unidneg_id'));
-        $notas = $em->getRepository('ComprasBundle:NotaDebCred')->findByUnidadNegocio($this->get('session')->get('unidneg_id'));
+        $facturas = $em->getRepository('ComprasBundle:Factura')->getFacturasParaIva($desde, $hasta, $this->get('session')->get('unidneg_id'));
+        $notas = $em->getRepository('ComprasBundle:NotaDebCred')->getNotasParaIva($desde, $hasta, $this->get('session')->get('unidneg_id'));
 
         $items = array();
         $resxrubro = array('SIN RUBRO' => array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0));
@@ -34,30 +34,35 @@ class ImpuestoController extends Controller {
             if (!array_key_exists($rubroCompras, $resxrubro)) {
                 $resxrubro[$fact->getRubroCompras()->getNombre()] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
             }
-            if ($fact->getFechaFactura()->format('Y-m-d') >= $desde && $fact->getFechaFactura()->format('Y-m-d') <= $hasta && $fact->getEstado() != 'CANCELADO') {
-                $nro = explode('-', $fact->getNroComprobante());
-                $item = array(
-                    'fecha' => $fact->getFechaFactura(),
-                    'tipoComprobante' => 'FC',
-                    'tipo' => $fact->getTipoFactura(),
-                    'tipofact' => $nro[0],
-                    'nrocomp' => $fact->getNroTipoComprobante(),
-                    'cuit' => $fact->getProveedor()->getCuit(),
-                    'razon' => $fact->getProveedor()->getNombre(),
-                    'iibb' => $fact->getProveedor()->getIibb(),
-                    'neto' => $fact->getSubtotalNeto(),
-                    'iva' => $fact->getIva(),
-                    'nograv' => $fact->getTmc(),
-                    'exento' => '0',
-                    'impuestos' => $fact->getImpuestoInterno(),
-                    'retIVA' => $fact->getPercepcionIva(),
-                    'percDgr' => $fact->getPercepcionDgr(),
-                    'percMuni' => $fact->getPercepcionMunicipal(),
-                    'rubro' => $rubroCompras,
-                    'total' => $fact->getTotal());
-                array_push($items, $item);
-                if ($fact->getIva() > 0) {
-                    $cantAlicuotas = $em->getRepository('ComprasBundle:Factura')->getCantidadAlicuotas($fact->getId());
+            $nro = explode('-', $fact->getNroComprobante());
+            $item = array(
+                'fecha' => $fact->getFechaFactura(),
+                'tipoComprobante' => 'FC',
+                'tipo' => $fact->getTipoFactura(),
+                'tipofact' => $nro[0],
+                'nrocomp' => $fact->getNroTipoComprobante(),
+                'cuit' => $fact->getProveedor()->getCuit(),
+                'razon' => $fact->getProveedor()->getNombre(),
+                'iibb' => $fact->getProveedor()->getIibb(),
+                'neto' => $fact->getTotalNeto(),
+                'iva' => $fact->getIva(),
+                'nograv' => $fact->getTmc(),
+                'exento' => '0',
+                'impuestos' => $fact->getImpuestoInterno(),
+                'retIVA' => $fact->getPercepcionIva(),
+                'percDgr' => $fact->getPercepcionDgr(),
+                'percMuni' => $fact->getPercepcionMunicipal(),
+                'rubro' => $rubroCompras,
+                'total' => $fact->getTotal());
+            array_push($items, $item);
+
+            if (floatval($fact->getIva()) > 0) {
+                $cantAlicuotas = $em->getRepository('ComprasBundle:Factura')->getCantidadAlicuotas($fact->getId());
+                if (count($cantAlicuotas) == 1) {
+                    $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($cantAlicuotas[0]);
+                    $resxrubro[$rubroCompras][$alicuota->getValor()] += $fact->getIva();
+                }
+                else {
                     foreach ($cantAlicuotas as $alic) {
                         $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($alic);
                         foreach ($fact->getDetalles() as $det) {
@@ -70,7 +75,6 @@ class ImpuestoController extends Controller {
             }
         }
 
-//        $resxrubro['NOTAS DEB/CRED'] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
         foreach ($notas as $nota) {
             if ($nota->getFecha()->format('Y-m-d') >= $desde && $nota->getFecha()->format('Y-m-d') <= $hasta) {
                 $nro = explode('-', $nota->getNroComprobante());
@@ -91,7 +95,7 @@ class ImpuestoController extends Controller {
                     'cuit' => $nota->getProveedor()->getCuit(),
                     'razon' => $nota->getProveedor()->getNombre(),
                     'iibb' => $nota->getProveedor()->getIibb(),
-                    'neto' => $nota->getSubtotalNeto() * $i,
+                    'neto' => $nota->getTotalNeto() * $i,
                     'iva' => $nota->getIva() * $i,
                     'nograv' => $nota->getTmc() * $i,
                     'exento' => '0',
@@ -102,8 +106,13 @@ class ImpuestoController extends Controller {
                     'rubro' => $rubroCompras,
                     'total' => $nota->getTotal() * $i);
                 array_push($items, $item);
-                if ($nota->getIva() > 0) {
-                    $cantAlicuotas = $em->getRepository('ComprasBundle:NotaDebCred')->getCantidadAlicuotas($fact->getId());
+
+                $cantAlicuotas = $em->getRepository('ComprasBundle:NotaDebCred')->getCantidadAlicuotas($nota->getId());
+                if (count($cantAlicuotas) == 1) {
+                    $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($cantAlicuotas[0]);
+                    $resxrubro['SIN RUBRO'][$alicuota->getValor()] += ($nota->getIva() * $i);
+                }
+                else {
                     foreach ($cantAlicuotas as $alic) {
                         $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($alic);
                         foreach ($nota->getDetalles() as $det) {
@@ -113,17 +122,6 @@ class ImpuestoController extends Controller {
                         }
                     }
                 }
-//                if ($nota->getIva() > 0) {
-//                    $cantAlicuotas = $em->getRepository('ComprasBundle:NotaDebCred')->getCantidadAlicuotas($nota->getId());
-//                    foreach ($cantAlicuotas as $alic) {
-//                        $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($alic);
-//                        foreach ($nota->getDetalles() as $det) {
-//                            if ($det->getAfipAlicuota()->getId() == $alic) {
-//                                $resxrubro['SIN RUBRO'][$alicuota->getValor()] += $nota->getMontoIva();
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
         $ord = usort($items, function($a1, $a2) {
@@ -293,7 +291,7 @@ class ImpuestoController extends Controller {
             $proveedorId = $objComprob->getProveedor()->getId();
 
             $cantAlicuotas = $em->getRepository($repo)->getCantidadAlicuotas($comprob['id']);
-            $totaliva = 0;
+            $totaliva = $cantidadTotalAlicuotas = 0;
             $totalneto = number_format($objComprob->getSubtotalNeto(), 2, '', '');
             /*
              * ALICUOTAS
@@ -307,9 +305,9 @@ class ImpuestoController extends Controller {
                     $cantAlicuotas = NULL;
                 }
                 else {
-
+                    $cantidadTotalAlicuotas = 1;
                     $totaliva = number_format($objComprob->getIva(), 2, '', '');
-                    $totalneto = number_format($objComprob->getSubtotalNeto(), 2, '', '');
+                    $totalneto = number_format($objComprob->getTotalNeto(), 2, '', '');
                     if ($format == 'A') {
                         $alic = array(
                             'tipoComprobante' => $objComprob->getAfipComprobante()->getCodigo(),
@@ -348,16 +346,18 @@ class ImpuestoController extends Controller {
 
                     foreach ($objComprob->getDetalles() as $det) {
                         if ($det->getAfipAlicuota()->getId() == $codAlicuota->getId()) {
-                            $neto += $det->getPrecio() * $det->getCantidad();
+                            $neto += $det->getMontoNetoItem();
+                            $liq += $det->getMontoIvaItem();
                         }
                     }
-                    $auxliq = $neto * ($codAlicuota->getValor() / 100);
-                    $liq = number_format($auxliq, 2, '', '');
+//                    $auxliq = $neto * ($codAlicuota->getValor() / 100);
+                    $liq = number_format($liq, 2, '', '');
                     $neto = number_format($neto, 2, '', '');
                     if ($codAlicuota->getValor() == 0) {
                         $operacionesExentas = $neto;
                     }
                     else {
+                        $cantidadTotalAlicuotas++;
                         $alic[] = array(
                             'tipoComprobante' => $objComprob->getAfipComprobante()->getCodigo(),
                             'puntoVenta' => str_pad($objComprob->getAfipPuntoVenta(), 5, "0", STR_PAD_LEFT),
@@ -408,12 +408,13 @@ class ImpuestoController extends Controller {
             /*
              * COMPROBANTES
              */
-            $codOperacion = ($objComprob->getIva() == 0 ) ? 'A' : ' ';
+            $codOperacion = ( $operacionesExentas > 0 ) ? 'E' : ' ';
             $perciva = number_format($objComprob->getPercepcionIva(), 2, '', '');
             $perciibb = number_format($objComprob->getPercepcionDgr(), 2, '', '');
             $percmuni = number_format($objComprob->getPercepcionMunicipal(), 2, '', '');
             $impint = number_format($objComprob->getImpuestoInterno(), 2, '', '');
-            $totaloperacion = $totalneto + $totaliva + $perciva + $perciibb + $percmuni + $impint;
+            $totaloperacion = number_format($objComprob->getTotal(), 2, '', '');
+//            $totaloperacion = $totalneto + $totaliva + $perciva + $perciibb + $percmuni + $impint;
             if ($format == 'A') {
                 $comp = array(
                     'fecha' => $fecha,
@@ -433,7 +434,7 @@ class ImpuestoController extends Controller {
                     'impInterno' => str_pad($impint, 15, "0", STR_PAD_LEFT),
                     'moneda' => 'PES',
                     'tipoCambio' => str_pad("0001000000", 10, "0"),
-                    'cantAlicuotas' => count($cantAlicuotas),
+                    'cantAlicuotas' => $cantidadTotalAlicuotas,
                     'codOperacion' => $codOperacion,
                     //'credFiscalComp' => str_pad(number_format($objComprob->getIva(), 2, '', ''), 15, "0", STR_PAD_LEFT),
                     'credFiscalComp' => str_pad($totaliva, 15, "0", STR_PAD_LEFT),
@@ -467,7 +468,7 @@ class ImpuestoController extends Controller {
                     str_pad($impint, 15, "0", STR_PAD_LEFT) .
                     'PES' .
                     str_pad("0001000000", 10, "0") .
-                    count($cantAlicuotas) .
+                    $cantidadTotalAlicuotas .
                     $codOperacion .
                     str_pad($totaliva, 15, "0", STR_PAD_LEFT) .
                     str_pad("0", 15, "0") .

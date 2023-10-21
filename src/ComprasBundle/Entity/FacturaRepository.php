@@ -174,6 +174,18 @@ class FacturaRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    public function getFacturasParaIva($desde, $hasta, $unidneg) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('f')
+            ->from('ComprasBundle\Entity\Factura', 'f')
+            ->innerJoin('f.unidadNegocio', 'u')
+            ->where("f.estado!='CANCELADO'")
+            ->andWhere('u.id=' . $unidneg)
+            ->andWhere("f.fechaFactura>='" . $desde . " 00:00'")
+            ->andWhere("f.fechaFactura<='" . $hasta . " 23:59'");
+        return $query->getQuery()->getResult();
+    }
+
     public function findComprobantesByPeriodoUnidadNegocio($desde, $hasta, $unidneg) {
         $facturas = $this->_em->createQueryBuilder('f')
             ->select(" 'FAC-' tipocomp, f.id, f.fechaFactura fecha, f.tipoFactura tipo  ")

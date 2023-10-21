@@ -296,9 +296,13 @@ class FacturaDetalle {
 
     public function getMontoIvaItem() {
         $alic = $this->getAfipAlicuota()->getValor();
+        return $this->getMontoNetoItem() * ($alic / 100);
+    }
+
+    public function getMontoNetoItem() {
         $porcBonif = ($this->getFactura()->getTotalBonificado() * 100 ) / $this->getFactura()->getSubtotalNeto();
         $neto = $this->getSubTotal() * (1 - ($porcBonif / 100));
-        return $neto * ($alic / 100);
+        return $neto;
     }
 
     public function getTotal() {
