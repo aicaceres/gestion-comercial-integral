@@ -1,0 +1,93 @@
+<pdf>
+<dynamic-page page-size="A4" margin-left="30px" margin-right="30px" margin-top="30px" >
+        <placeholders>
+            <header>
+                <div height="140px" width="100%" >
+                    <table font-size="11px">
+                        <tr>
+                            <td border.type="none">
+                                <div width="100%">
+                                    <img ignore-error="true" src="{{logo}}" width="80%" />
+                                </div>
+                            </td>
+                            <td border.color="#555555" width="40px" vertical-align="middle" text-align="center">
+                                <div font-size="20px" padding-left="5px"><strong>X</strong> </div>
+                            </td>
+                            <td border.type="none" text-align="center" vertical-align="middle">
+                                <div width="100%" font-size="16px" padding-bottom="10px">
+                                    <strong>PEDIDO  N°: {{entity.nroPedido}}</strong>
+                                </div>
+                                <div font-size="11px">
+                                    <strong>Fecha: {{ entity.fechaPedido| date('d-m-Y') }} </strong>                                    
+                                </div>
+                                <div font-size="10px" padding-top="15px">
+                                    <div padding-bottom="10px" text-align="center">Documento No Válido Como Factura</div>                                 
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" border.type="none">
+                                <div padding-left="10px">
+                                    <div padding-bottom="5px">{{ empresa.direccion }} </div>
+                                    <div padding-bottom="5px">Tel/Fax {{ empresa.telefono }} </div>
+                                    <div padding-bottom="5px" href="mailto:{{empresa.email}}">{{ empresa.email }} </div>
+                                </div>
+                            </td>
+                            <td border.type="none">
+                                <div text-align="center">C.U.I.T. {{ empresa.cuit }} </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    Hoja: <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <div border.color="#555555" height="1px" ></div>
+        
+        <div padding-left="50px" margin-top="20px"><strong>PROVEEDOR:</strong> ({{ entity.proveedor.id }}) {{entity.proveedor}}</div>
+        
+        <div padding-top="20px">De nuestra mayor consideración: </div>
+        <div padding="20px 0 7px 50px">Tenemos el agrado de dirigirnos a Ud(s), solicitándoles el siguiente pedido, deberá(n) remitirlo por Transporte EXPRESO</div>
+        <div>LIDER (BS.AS.) con domicilio en AGUSTIN DE VEDIA 3050 N POMPEYA, localidad BUENOS AIRES</div>
+
+        <div height="20px"></div>
+        
+        <table font-size="10px">
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="0.8 cm"><strong>#</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px"><strong>Artículo</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="4 cm"><strong>Cantidad</strong></td>
+            </tr>
+            {% set cantidad = 0 %}
+            {% if entity.detalles|length>0 %}
+                {% for det in entity.detalles if det.producto %}
+                    {% set cantidad = cantidad + det.cantidadTotal %}
+                <tr>
+                    <td border.type="none" height="20px" vertical-align="middle" padding-left="10px">{{loop.index}}</td>
+                    <td border.type="none" height="20px" vertical-align="middle" padding-left="10px">{{det.producto.codigoNombre}} </td>
+                    <td  border.type="none" height="20px" vertical-align="middle" text-align="right" padding-right="15px">{{det.cantidadTotal|number_format(3,'.',',')~' '~ det.producto.unidadMedida}}</td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+        </table>
+        
+        <div height="20px"></div>
+        <div border.color="#999999" height="1px" ></div>
+        <div height="20px"></div>
+        
+        <div>Cantidad de Artículos (Unidades): {{ cantidad }}</div>
+        
+        <div height="20px"></div>
+        
+        <div padding-top="20px">El pago de la presente se instrumentará en un plazo de dto 4% p/pago antici Días</div>
+        
+        <div padding-top="20px"><strong>ATENCIÓN:</strong> En razón del alto costo del SEGURO por transporte, deberán consignar Valor Declarado Neto de Contado y excluir el</div>
+        <div padding-top="7px"> IVA y Costo Financiero. No reconocemos fletes remitidos por otra empresa de transporte que no sea la indicada en el presente.</div>
+
+</dynamic-page>
+</pdf>

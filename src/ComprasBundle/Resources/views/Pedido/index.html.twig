@@ -89,7 +89,7 @@
                 <td><span class="hidden">{{ entity.fechaPedido|date('Ymd') }}</span>{{ entity.fechaPedido|date('d-m-Y') }}</td>
                 <td>{{ entity.nroPedido}}</td>
                 <td>{{ entity.proveedor }}</td>
-                <td>{{ entity.deposito}}</td>
+                <td>{{ entity.deposito}}{{ entity.detalles|length }}</td>
                 <td>{%if entity.fechaEntrega %} <span class="hidden">{{ entity.fechaEntrega|date('Ymd') }}</span>{{ entity.fechaEntrega|date('d-m-Y') }}{% endif %}</td>
                 <td class=" estado">{{ entity.estado }}</td>
                 <td class="buttons">

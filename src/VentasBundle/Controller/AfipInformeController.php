@@ -269,10 +269,6 @@ class AfipInformeController extends Controller {
                 $nombre = substr(str_pad(UtilsController::sanear_string($fact->getNombreCliente()), 30, " ", STR_PAD_RIGHT), -30, 30);
                 $fecha = $fact->getCbteFchFormatted('dmY');
                 $categ = str_pad($cliente->getCategoriaRentas()->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
-//                var_dump($cliente->getCategoriaRentas()->getCodigoAtp());
-//                var_dump($tributos);
-//                var_dump($fact->getId());
-//                echo '<br>';
                 $montoret = str_pad(($tributos->Importe * 100), 11, "0", STR_PAD_LEFT);
                 $gravado = str_pad(($tributos->BaseImp * 100), 11, "0", STR_PAD_LEFT);
                 $alicuota = str_pad(($tributos->Alic * 100), 4, "0", STR_PAD_LEFT);
