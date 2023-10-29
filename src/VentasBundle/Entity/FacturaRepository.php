@@ -153,4 +153,23 @@ class FacturaRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    /**
+     * Pagos de cliente con retenciones de rentas
+     */
+    public function findRetencionesRentas($desde, $hasta) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select("p.prefijoNro, p.pagoNro,d.importe,c.nombre nombreCliente ")
+            ->from('VentasBundle:PagoCliente', 'p')
+            ->innerJoin('p.cliente', 'c')
+            ->innerJoin('p.cobroDetalles', 'd')
+            ->innerJoin('d.chequeRecibido', 'ch')
+            ->innerJoin('ch.banco', 'b')
+            ->where("d.tipoPago = 'CHEQUE' ")
+            ->andWhere("b.nombre = 'RETENCION DGR'")
+            ->andWhere(" p.fecha >= '" . $desde . "'")
+            ->andWhere(" p.fecha <= '" . $hasta . "'")
+            ->orderBy('p.fecha');
+        return $query->getQuery()->getResult();
+    }
+
 }

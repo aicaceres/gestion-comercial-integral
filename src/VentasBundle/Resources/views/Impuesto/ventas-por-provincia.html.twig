@@ -1,0 +1,229 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Ventas Por Provincias</h1>
+    <span class="pagedesc">Impuestos</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    <style>
+        .tipocliente td{
+            border: 1px solid lightgray;
+        }
+        .numbercell{
+            text-align: right;
+            padding-right: 10px;
+            width: 100px;
+        }
+        .headercell th{
+            background-color:skyblue;
+        }
+        .headergrey th{
+            background-color:lightgray;
+        }
+        .titlecell {
+            text-align: left;
+            padding-left: 10px;
+            width: 200px;
+        }
+        .subtitlecell {
+            text-align: left;
+            padding-left: 20px !important;
+        }
+        .ventasxprovincia th{
+            border: 1px solid lightgray;
+        }
+    </style>
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+
+    <div class="" style="margin-bottom: 15px;">
+        <form action="{{ path }}" method="GET">
+            <div style="display: inline-block; margin-right: 30px;">
+                <label><strong>Período:</strong></label>
+                <input name="fecha_desde" required="required" class="datepicker" tabindex="2" type="text" value="{{desde}}">
+                <input name="fecha_hasta" required="required" class="datepicker" tabindex="2" type="text" value="{{hasta}}">
+            </div>
+            <button type="submit" >Buscar</button>
+        </form>
+    </div>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable ventasxprovincia">     
+    {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoRentas, totalPeriodo = 0,0,0,0 %}   
+    {# POR PROVINCIA #}
+    {% for prov,resumen in totalesxProvincia %}
+        {% set totalProvNeto, totalProvIva, totalProvRentas, totalProv = 0,0,0,0 %}
+        <tr style="height: 34px">
+            <th colspan="8" style="border: 1px solid lightgray;background-color:aliceblue">PROVINCIA: {{ prov }}</th>
+        </tr>
+        <tr>
+            <th>Documento</th>
+            <th>Neto sin IVA</th>
+            <th>IVA</th>
+            <th>Sobretasa</th>
+            <th>Imp. Interno</th>
+            <th>Percep. IVA</th>
+            <th>Percep. 1194</th>
+            <th>TOTAL</th>
+        </tr>
+        {# POR TIPO COMPROBANTE #}
+        {% for letra, item in resumen['TCOM']|reverse %}
+            {% set totalProvNeto, totalProvIva, totalProvRentas, totalProv = totalProvNeto+item.neto, totalProvIva+item.iva, totalProvRentas+item.percRentas, totalProv+item.subtotal %}
+            <tr>
+                <td class="subtitlecell">Subtotal {{ letra }}</td>
+                <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.sobretasa|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.impinterno|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.percIva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.percRentas|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
+            </tr>
+        {% endfor %}
+        {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoRentas, totalPeriodo = 
+            totalPeriodoNeto+totalProvNeto, totalPeriodoIva+totalProvIva, totalPeriodoRentas+totalProvRentas, totalPeriodo+totalProv
+        %}
+            <tr>
+                <th class="titlecell"> TOTAL {{ prov }}</th>
+                <th class="numbercell">{{ totalProvNeto|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ totalProvIva|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ totalProvRentas|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ totalProv|number_format(2,'.','') }}</th>
+            </tr>
+         <tr>
+            <td colspan="8" style="border:none">&nbsp;</td>
+        </tr>   
+        {# POR TIPO CLIENTE #}    
+        {% for tipoCliente,item in resumen['TCLI'] %}
+            <tr class="tipocliente">
+                <td class="subtitlecell">{{ tipoCliente }}</td>
+                <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.sobretasa|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.impinterno|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.percIva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.percRentas|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
+            </tr>
+        {% endfor %}  
+        <tr>
+            <td colspan="8" style="border:none">&nbsp;</td>
+        </tr>
+    {% endfor %}     
+    {# TOTAL DEL PERIODO #} 
+        <tr class="headergrey" style="height: 34px;">
+            <th class="titlecell"> TOTAL PERIODO</th>
+            <th class="numbercell">{{ totalPeriodoNeto|number_format(2,'.','') }}</th>
+            <th class="numbercell">{{ totalPeriodoIva|number_format(2,'.','') }}</th>
+            <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+            <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+            <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+            <th class="numbercell">{{ totalPeriodoRentas|number_format(2,'.','') }}</th>
+            <th class="numbercell">{{ totalPeriodo|number_format(2,'.','') }}</th>
+        </tr>
+        <tr>
+            <td colspan="8" style="border:none">&nbsp;</td>
+        </tr>
+        {# TOTALES POR TIPO CLIENTE #} 
+        {% for tipoCliente,item in totalesxTipoCliente %}
+            <tr>
+                <th class="titlecell"> {{ tipoCliente }}</th>
+                <th class="numbercell">{{ item.neto|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ item.iva|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ item.percRentas|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</th>
+            </tr>
+        {% endfor %} 
+        <tr>
+            <td colspan="8" style="border:none">&nbsp;</td>
+        </tr>
+        {# TOTALES POR CATEGORIA DE IVA #} 
+        <tr class="headercell" style="height: 34px">
+            <th colspan="8" style="border: 1px solid lightgray;">TOTALES POR TIPO DE CONTRIBUYENTE</th>
+        </tr>
+        <tr>
+            <th>Tipo de Contribuyente</th>
+            <th>Neto sin IVA</th>
+            <th>IVA</th>
+            <th>Sobretasa</th>
+            <th>Imp. Interno</th>
+            <th>Percep. IVA</th>
+            <th>Percep. 1194</th>
+            <th>TOTAL</th>
+        </tr>
+        {% for categIva,item in totalesxCategoriaIva %}
+            <tr>
+                <td class="titlecell"> {{ categIva }}</td>
+                <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ 0|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ 0|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ 0|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.percRentas|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
+            </tr>
+        {% endfor %} 
+        <tr>
+            <td colspan="8" style="border:none">&nbsp;</td>
+        </tr>
+        {# TOTALES POR ALICUOTA #} 
+        <tr class="headercell" style="height: 34px">
+            <th colspan="5" style="border: 1px solid lightgray;">TOTALES DISCRIMINADOS POR ALICUOTA</th>
+        </tr>
+        <tr>
+            <th colspan="2">Tipo de Contribuyente / Alícuota</th>
+            <th>Base Imponible</th>
+            <th>IVA</th>
+            <th>Total</th>
+        </tr>
+        {% for categIva,alicuotas in totalesxAlicuota %}
+            {% for alicuota,item in alicuotas %}
+                <tr>
+                    <td colspan="2" class="titlecell"> {{ categIva }} <span style="float: right;padding-right:10px;">{{ alicuota }}</span></td>
+                    <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
+                </tr>
+            {% endfor %} 
+        {% endfor %} 
+    </table>
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+    <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('.togglemenu').click();
+    var filename = "VentasxProvincia_{{app.session.get('unidneg_nombre')|slice(0, 10)}}{{'now'|date('mY')}}";
+    
+    tableExporter = $(".ventasxprovincia").tableExport(
+        {headers: true,
+        footers: true,
+        formats: ['xlsx', 'txt'],
+        filename: filename,
+        bootstrap: false,
+        exportButtons: true,
+        position: 'top',
+        ignoreRows: null,
+        ignoreCols: null,
+        trimWhitespace: true}
+                );
+    tableExporter.types.date.assert = function(v){return false;};
+    $('.tableexport-caption').addClass('alignright');
+    $('.ventasxprovincia caption').prepend('<button class="button-default" id="print-pdf" >Imprimir PDF</button>')
+    $('#print-pdf').on('click',function(){
+        window.open("{{path('ventas_xprovincia_print')}}?"+$('form').serialize());
+    })
+});
+</script>
+{% endblock %}

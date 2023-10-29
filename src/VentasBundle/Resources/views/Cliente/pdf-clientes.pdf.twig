@@ -34,6 +34,7 @@
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Dirección</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Localidad</strong></td>                
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Teléfono</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Tipo Cliente</strong></td>                
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Saldo</strong></td>                
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1 cm"><strong>Activo</strong></td>                
             </tr>            
@@ -49,13 +50,14 @@
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[3]}}</td>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[4]}}</td>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[5]}}</td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[6]}}</td>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{item[6]}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item[7]}}</td>
                     </tr>                
                 {% endfor %}  
             {% else %}  
                 <tr>
                     <td colspan="8" height="30px" vertical-align="middle" padding-left="10px">
-                        <strong>No hay proveedores coincidentes con el criterio de búsqueda</strong></td>
+                        <strong>No hay clientes coincidentes con el criterio de búsqueda</strong></td>
                 </tr>
             {% endif %}              
 

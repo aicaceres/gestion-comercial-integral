@@ -1,0 +1,179 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="30px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#F5C98F" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> VENTAS POR PROVINCIA</h2>                   
+        <h4><strong>Período:</strong> {{ desde }} - {{ hasta }}</h4>
+        <div height="10px"></div>
+
+        <table font-size="8px">
+            {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoRentas, totalPeriodo = 0,0,0,0 %} 
+            {# POR PROVINCIA #}
+            {% for prov,resumen in totalesxProvincia %}
+                {% set totalProvNeto, totalProvIva, totalProvRentas, totalProv = 0,0,0,0 %}
+                <tr border.color="black" background.color="aliceblue" vertical-align="middle" text-align="center">
+                    <td colspan="8" height="30px" border.color="black" font-size="9px">PROVINCIA: <strong>{{ prov }}</strong></td>
+                </tr>
+                <tr>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Documento</strong></td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Neto sin IVA</strong></td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>IVA</strong></td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Sobretasa</strong></td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Imp. Interno</strong></td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Percep. IVA</strong></td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Percep. 1194</strong></td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>TOTAL</strong></td>
+                </tr>
+                {# POR TIPO COMPROBANTE #}
+                {% for letra, item in resumen['TCOM']|reverse %}
+                    {% set totalProvNeto, totalProvIva, totalProvRentas, totalProv = totalProvNeto+item.neto, totalProvIva+item.iva, totalProvRentas+item.percRentas, totalProv+item.subtotal %}
+                    <tr>
+                        <td border.color="black" height="16px" vertical-align="middle" padding-left="20px">Subtotal {{ letra }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.neto|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.iva|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.sobretasa|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.impinterno|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.percIva|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.percRentas|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.subtotal|number_format(2,'.','') }}</td>
+                    </tr>
+                {% endfor %}
+                {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoRentas, totalPeriodo = 
+                    totalPeriodoNeto+totalProvNeto, totalPeriodoIva+totalProvIva, totalPeriodoRentas+totalProvRentas, totalPeriodo+totalProv
+                %}
+                <tr>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px"> TOTAL {{ prov }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{ totalProvNeto|number_format(2,'.','') }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{ totalProvIva|number_format(2,'.','') }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{ 0|number_format(2,'.','') }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{ 0|number_format(2,'.','') }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{ 0|number_format(2,'.','') }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{ totalProvRentas|number_format(2,'.','') }}</td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{ totalProv|number_format(2,'.','') }}</td>
+                </tr>
+                <tr>
+                    <td colspan="8" border.type="none" height="10px"></td>
+                </tr>
+                {# POR TIPO CLIENTE #} 
+                {% for tipoCliente,item in resumen['TCLI'] %}
+                    <tr>
+                        <td border.color="black" height="16px" vertical-align="middle" padding-left="20px">{{ tipoCliente }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.neto|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.iva|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.sobretasa|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.impinterno|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.percIva|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.percRentas|number_format(2,'.','') }}</td>
+                        <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.subtotal|number_format(2,'.','') }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="8" border.type="none" height="10px"></td>
+                </tr>                
+            {% endfor %}    
+            {# TOTAL DEL PERIODO #}
+            <tr background.color="lightgray">
+                <td border.color="black" height="30px" vertical-align="middle" padding-left="10px"><strong>TOTAL PERIODO</strong></td>
+                <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ totalPeriodoNeto|number_format(2,'.','') }}</strong></td>
+                <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ totalPeriodoIva|number_format(2,'.','') }}</strong></td>
+                <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ 0|number_format(2,'.','') }}</strong></td>
+                <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ 0|number_format(2,'.','') }}</strong></td>
+                <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ 0|number_format(2,'.','') }}</strong></td>
+                <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ totalPeriodoRentas|number_format(2,'.','') }}</strong></td>
+                <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ totalPeriodo|number_format(2,'.','') }}</strong></td>
+            </tr>
+            <tr>
+                <td colspan="8" border.type="none" height="10px"></td>
+            </tr>
+            {# TOTALES POR TIPO CLIENTE #} 
+            {% for tipoCliente,item in totalesxTipoCliente %}
+                <tr>
+                    <td border.color="black" height="30px" vertical-align="middle" padding-left="10px"><strong>{{ tipoCliente }}</strong></td>
+                    <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ item.neto|number_format(2,'.','') }}</strong></td>
+                    <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ item.iva|number_format(2,'.','') }}</strong></td>
+                    <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ 0|number_format(2,'.','') }}</strong></td>
+                    <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ 0|number_format(2,'.','') }}</strong></td>
+                    <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ 0|number_format(2,'.','') }}</strong></td>
+                    <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ item.percRentas|number_format(2,'.','') }}</strong></td>
+                    <td border.color="black" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ item.subtotal|number_format(2,'.','') }}</strong></td>
+                </tr>
+                
+            {% endfor %}     
+            <tr>
+                <td colspan="8" border.type="none" height="20px"></td>
+            </tr>
+            {# TOTALES POR CATEGORIA DE IVA #} 
+            <tr vertical-align="middle" text-align="center">
+                <td colspan="8" height="30px" border.type="none" font-size="10px">TOTALES POR TIPO DE CONTRIBUYENTE</td>
+            </tr>
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Tipo Contribuyente</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Neto sin IVA</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>IVA</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Sobretasa</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Imp. Interno</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Percep. IVA</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Percep. 1194</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>TOTAL</strong></td>
+            </tr>
+            {% for categIva,item in totalesxCategoriaIva %}
+                <tr>
+                    <td border.color="black" height="16px" vertical-align="middle" padding-left="10px">{{ categIva }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.neto|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.iva|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.sobretasa|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.impinterno|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.percIva|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.percRentas|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.subtotal|number_format(2,'.','') }}</td>
+                </tr>
+            {% endfor %}    
+            <tr>
+                <td colspan="8" border.type="none" height="20px"></td>
+            </tr>
+            {# TOTALES POR ALICUOTA #} 
+            <tr vertical-align="middle" text-align="center">
+                <td colspan="5" height="30px" border.type="none" font-size="10px">TOTALES DISCRIMINADOS POR ALICUOTA</td>
+                <td border.type="none"></td>
+            </tr>
+            <tr>
+                <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Tipo Contribuyente / Alícuota</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Base Imponible</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>IVA</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Total</strong></td>
+                <td colspan="3" border.type="none"><strong></strong></td>
+            </tr>
+            {% for categIva,alicuotas in totalesxAlicuota %}
+                {% for alicuota,item in alicuotas %}
+                <tr>
+                    <td colspan="2" border.color="black" height="16px" vertical-align="middle" padding-left="10px">{{ categIva }} / {{ alicuota }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.neto|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.iva|number_format(2,'.','') }}</td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.subtotal|number_format(2,'.','') }}</td>
+                    <td colspan="3" border.type="none" height="16px"></td>
+                </tr>
+                {% endfor %} 
+            {% endfor %}    
+        </table>
+            
+    </dynamic-page>
+</pdf>

@@ -1,0 +1,110 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Percepciones de Rentas</h1>
+    <span class="pagedesc">Impuestos</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    <style>
+        .numbercell{
+            text-align: right;
+            padding-right: 10px;
+        }
+        .headergrey th{
+            background-color:lightgray;
+        }
+        .percepciones{
+            width: 80%;
+            margin: auto;
+        }
+        .percepciones th{
+            border: 1px solid lightgray;
+        }
+    </style>
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+
+    <div class="" style="margin-bottom: 15px;">
+        <form action="{{ path }}" method="GET">
+            <div style="display: inline-block; margin-right: 30px;">
+                <label><strong>Período:</strong></label>
+                <input name="fecha_desde" required="required" class="datepicker" tabindex="2" type="text" value="{{desde}}">
+                <input name="fecha_hasta" required="required" class="datepicker" tabindex="2" type="text" value="{{hasta}}">
+            </div>
+            <button type="submit" >Buscar</button>
+        </form>
+    </div>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable percepciones">     
+       <tr>
+            <th>Documento</th>
+            <th>D.G.R.</th>
+            <th>Proveedor</th>
+            <th>CUIT</th>
+        </tr>
+        {% set totalPeriodo = 0 %}
+        {% for fecha,row in result %}
+            {% set totaldia = 0 %}
+            <tr>
+                <th colspan="4" style="text-align:left; padding-left: 10px ">FECHA: {{ fecha }}</th>
+            <tr>    
+            {% for item in row %}
+                {% set totaldia = totaldia+item.importe %}
+                {% set totalPeriodo = totalPeriodo + totaldia %}
+            <tr>
+                <td style="padding-left: 20px">{{ item.tipoComp }} {{ item.nroComp }}</td>
+                <td class="numbercell">{{ item.importe|number_format(2,'.','') }}</td>
+                <td>{{ item.proveedor }}</td>
+                <td style="text-align:center">{{ item.cuit }}</td>
+            </tr>    
+            {% endfor %} 
+            <tr>
+                <th style="text-align:left; padding-left: 20px ">Total Diario:</th>
+                <th class="numbercell"> {{ totaldia|number_format(2,'.','') }}</th>
+                <th colspan="2"></th>
+            <tr>
+            <tr>
+                <td colspan="8" style="border:none">&nbsp;</td>
+            </tr>    
+        {% endfor %}    
+        <tr class="headergrey" style="height: 34px;">
+            <th class="titlecell"> TOTAL PERIODO:</th>
+            <th class="numbercell">{{ totalPeriodo|number_format(2,'.','') }}</th>
+            <th colspan="2"></th>
+        </tr>
+    </table>
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+    <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('.togglemenu').click();
+    var filename = "PercepcionRentas_{{'now'|date('mY')}}";
+    
+    tableExporter = $(".percepciones").tableExport(
+        {headers: true,
+        footers: true,
+        formats: ['xlsx', 'txt'],
+        filename: filename,
+        bootstrap: false,
+        exportButtons: true,
+        position: 'top',
+        ignoreRows: null,
+        ignoreCols: null,
+        trimWhitespace: true}
+                );
+    tableExporter.types.date.assert = function(v){return false;};
+    $('.tableexport-caption').addClass('alignright');
+    $('.percepciones caption').prepend('<button class="button-default" id="print-pdf" >Imprimir PDF</button>')
+    $('#print-pdf').on('click',function(){
+        window.open("{{path('compras_percepcionrentas_print')}}?"+$('form').serialize());
+    })
+});
+</script>
+{% endblock %}

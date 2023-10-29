@@ -65,6 +65,21 @@ class NotaDebCredRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    public function getNotasPercepcion($desde, $hasta, $unidneg) {
+        $query = $this->_em->createQueryBuilder();
+        $query->select('n.fecha, a.valor tipoComp, n.nroComprobante, n.percepcionDgr importe, p.nombre, p.cuit')
+            ->from('ComprasBundle\Entity\NotaDebCred', 'n')
+            ->innerJoin('n.unidadNegocio', 'u')
+            ->innerJoin('n.proveedor', 'p')
+            ->innerJoin('n.afipComprobante', 'a')
+            ->where("n.estado!='ANULADO'")
+            ->andWhere("n.percepcionDgr>0")
+            ->andWhere('u.id=' . $unidneg)
+            ->andWhere("n.fecha>='" . $desde . " 00:00'")
+            ->andWhere("n.fecha<='" . $hasta . " 23:59'");
+        return $query->getQuery()->getResult();
+    }
+
     public function getCantidadAlicuotas($id) {
         $query = $this->_em->createQueryBuilder();
         $query->select('distinct a.id')

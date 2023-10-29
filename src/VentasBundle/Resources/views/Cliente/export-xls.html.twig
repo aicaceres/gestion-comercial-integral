@@ -39,6 +39,7 @@ table tr td{
                     <th>Dirección</th>
                     <th>Localidad</th>
                     <th>Teléfono</th>
+                    <th>Tipo Cliente</th>
                     <th>Saldo</th>
                     <th>Activo</th>
                 </tr>
@@ -50,9 +51,10 @@ table tr td{
                         <td>{{item.nombre}}</td>
                         <td>{{item.cuit}}</td>
                         <td>{{item.direccion}}</td>
-                        <td>{{item.localidad.name}}</td>
-                        <td>{{item.saldo}}</td>
+                        <td>{{item.localidad ? item.localidad.name : ''}}</td>
                         <td>{{item.telefono}}</td>
+                        <td>{{item.tipoCliente}}</td>
+                        <td>{{item.saldo}}</td>
                         <td>{% if item.activo %} Si {% else %} No{% endif %} </td>
                     </tr>
                 {% endfor %}

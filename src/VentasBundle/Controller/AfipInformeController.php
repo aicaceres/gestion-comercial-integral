@@ -366,4 +366,197 @@ class AfipInformeController extends Controller {
             'Content-Disposition' => 'filename=percepciones_rentas.pdf'));
     }
 
+    /**
+     * @Route("/RetencionesVentas", name="ventas_retencionrentas")
+     * @Method("GET")
+     * @Template()
+     */
+    public function RetencionesVentasAction(Request $request) {
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
+        $result = $desde ? $this->resultadoRetencionRentas($desde, $hasta) : null;
+
+        return $this->render('VentasBundle:Impuesto:retenciones-rentas.html.twig', array(
+                'path' => $this->generateUrl('ventas_retencionrentas'),
+                'result' => $result, 'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')
+        ));
+    }
+
+    /**
+     * @Route("/RetencionesVentasPdf.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="ventas_retencionrentas_print")
+     * @Method("GET")
+     */
+    public function RetencionesVentasPdfAction(Request $request) {
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
+        $result = $desde ? $this->resultadoRetencionRentas($desde, $hasta) : null;
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('VentasBundle:Impuesto:retenciones-rentas.pdf.twig',
+            array('result' => $result, 'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=retenciones_sufridas.pdf'));
+    }
+
+    private function resultadoRetencionRentas($desde, $hasta) {
+        $em = $this->getDoctrine()->getManager();
+        $pagos = $em->getRepository('VentasBundle:Factura')->findRetencionesRentas($desde, $hasta);
+        return $pagos;
+    }
+
+    /**
+     * @Route("/VentasPorProvincia", name="ventas_ventasxprovincia")
+     * @Method("GET")
+     * @Template()
+     */
+    public function VentasPorProvinciaAction(Request $request) {
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
+        $result = $this->getDatosVentasxProvincia($desde, $hasta);
+
+        return $this->render('VentasBundle:Impuesto:ventas-por-provincia.html.twig', array(
+                'path' => $this->generateUrl('ventas_ventasxprovincia'),
+                'totalesxProvincia' => $result['totalesxProvincia'], 'totalesxTipoCliente' => $result['totalesxTipoCliente'],
+                'totalesxCategoriaIva' => $result['totalesxCategoriaIva'], 'totalesxAlicuota' => $result['totalesxAlicuota'],
+                'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')
+        ));
+    }
+
+    private function getDatosVentasxProvincia($desde, $hasta) {
+        $em = $this->getDoctrine()->getManager();
+        $unidneg = $this->get('session')->get('unidneg_id');
+        $totalesxProvincia = array();
+        $totalesxTipoCliente = array();
+        $totalesxCategoriaIva = array();
+        $totalesxAlicuota = array();
+        $facturas = $em->getRepository('VentasBundle:Factura')->findByFeventasPeriodoUnidadNegocio(str_replace('-', '', $desde), str_replace('-', '', $hasta), $unidneg);
+        foreach ($facturas as $fe) {
+            // PROVINCIA
+            $provincia = $fe->getCliente()->getProvinciaRentas() ? $fe->getCliente()->getProvinciaRentas()->getName() : 'OTRO';
+            $split = split('-', $fe->getTipoComprobante()->getValor());
+            $letra = $split[0] == 'TICK' ? 'TCK' : $split[1];
+            $signo = 1;
+            if ($fe->getNotaDebCred()) {
+                $signo = $fe->getNotaDebCred()->getSigno() == '-' ? -1 : 1;
+            }
+
+            if (isset($totalesxProvincia[$provincia]['TCOM'][$letra]['neto'])) {
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['neto'] += ($fe->getImpNeto() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['percRentas'] += ($fe->getImpTrib() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['subtotal'] += (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            }
+            else {
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['neto'] = ($fe->getImpNeto() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['sobretasa'] = 0;
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['impinterno'] = 0;
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['percIva'] = 0;
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['percRentas'] = ($fe->getImpTrib() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            }
+            // TIPO CLIENTE
+            $tipoCliente = $fe->getCliente()->getTipoCliente() ? $fe->getCliente()->getTipoCliente()->getNombre() : 'OTRO';
+            if (isset($totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'])) {
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'] += ($fe->getImpNeto() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['percRentas'] += ($fe->getImpTrib() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['subtotal'] += (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            }
+            else {
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'] = ($fe->getImpNeto() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['sobretasa'] = 0;
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['impinterno'] = 0;
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['percIva'] = 0;
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['percRentas'] = ($fe->getImpTrib() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            }
+            // TOTALIZADOR TIPO CLIENTE
+            if (isset($totalesxTipoCliente[$tipoCliente]['neto'])) {
+                $totalesxTipoCliente[$tipoCliente]['neto'] += ($fe->getImpNeto() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['percRentas'] += ($fe->getImpTrib() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['subtotal'] += (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            }
+            else {
+                $totalesxTipoCliente[$tipoCliente]['neto'] = ($fe->getImpNeto() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['sobretasa'] = 0;
+                $totalesxTipoCliente[$tipoCliente]['impinterno'] = 0;
+                $totalesxTipoCliente[$tipoCliente]['percIva'] = 0;
+                $totalesxTipoCliente[$tipoCliente]['percRentas'] = ($fe->getImpTrib() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            }
+            // POR CATEGORIA DE IVA
+            $categIva = $fe->getCliente()->getCategoriaIva() ? $fe->getCliente()->getCategoriaIva()->getDescripcion() : 'Otros (no identificados)';
+            $categIvaTotal = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            if (isset($totalesxCategoriaIva[$categIva]['neto'])) {
+                $totalesxCategoriaIva[$categIva]['neto'] += ($fe->getImpNeto() * $signo);
+                $totalesxCategoriaIva[$categIva]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxCategoriaIva[$categIva]['percRentas'] += ($fe->getImpTrib() * $signo);
+                $totalesxCategoriaIva[$categIva]['subtotal'] += $categIvaTotal;
+            }
+            else {
+                $totalesxCategoriaIva[$categIva]['neto'] = ($fe->getImpNeto() * $signo);
+                $totalesxCategoriaIva[$categIva]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxCategoriaIva[$categIva]['sobretasa'] = 0;
+                $totalesxCategoriaIva[$categIva]['impinterno'] = 0;
+                $totalesxCategoriaIva[$categIva]['percIva'] = 0;
+                $totalesxCategoriaIva[$categIva]['percRentas'] = ($fe->getImpTrib() * $signo);
+                $totalesxCategoriaIva[$categIva]['subtotal'] = $categIvaTotal;
+            }
+            // DISCRIMINADO POR ALICUOTA
+            $detalleIva = json_decode($fe->getIva());
+            foreach ($detalleIva as $item) {
+                $codigo = str_pad($item->Id, 4, "0", STR_PAD_LEFT);
+                $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByCodigo($codigo);
+                $ivaTotal = ($item->BaseImp + $item->Importe) * $signo;
+                if (isset($totalesxAlicuota[$categIva][$alicuota->getNombre()]['neto'])) {
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['neto'] += $item->BaseImp * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['iva'] += $item->Importe * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['subtotal'] += $ivaTotal;
+                }
+                else {
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['neto'] = $item->BaseImp * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['iva'] = $item->Importe * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['subtotal'] = $ivaTotal;
+                }
+            }
+        }
+
+        return array('totalesxProvincia' => $totalesxProvincia, 'totalesxTipoCliente' => $totalesxTipoCliente,
+            'totalesxCategoriaIva' => $totalesxCategoriaIva, 'totalesxAlicuota' => $totalesxAlicuota);
+    }
+
+    /**
+     * @Route("/ventasxProvinciaPdf.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="ventas_xprovincia_print")
+     * @Method("GET")
+     */
+    public function ventasxProvinciaPdfAction(Request $request) {
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
+        $result = $this->getDatosVentasxProvincia($desde, $hasta);
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('VentasBundle:Impuesto:ventas-por-provincia.pdf.twig',
+            array('totalesxProvincia' => $result['totalesxProvincia'], 'totalesxTipoCliente' => $result['totalesxTipoCliente'],
+                'totalesxCategoriaIva' => $result['totalesxCategoriaIva'], 'totalesxAlicuota' => $result['totalesxAlicuota'],
+                'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=ventas_x_provincia.pdf'));
+    }
+
 }

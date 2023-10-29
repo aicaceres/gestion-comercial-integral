@@ -120,6 +120,13 @@ class Cliente {
     protected $activo = true;
 
     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\TipoCliente")
+     * @ORM\JoinColumn(name="tipo_cliente_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
+     * */
+    protected $tipoCliente;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="categoria_iva_id", referencedColumnName="id")
      * @Gedmo\Versioned()
@@ -1019,4 +1026,27 @@ class Cliente {
         return $this->vencCertNoRetener;
     }
 
+
+    /**
+     * Set tipoCliente
+     *
+     * @param \ConfigBundle\Entity\TipoCliente $tipoCliente
+     * @return Cliente
+     */
+    public function setTipoCliente(\ConfigBundle\Entity\TipoCliente $tipoCliente = null)
+    {
+        $this->tipoCliente = $tipoCliente;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoCliente
+     *
+     * @return \ConfigBundle\Entity\TipoCliente 
+     */
+    public function getTipoCliente()
+    {
+        return $this->tipoCliente;
+    }
 }

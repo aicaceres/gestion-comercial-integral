@@ -1,0 +1,49 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="30px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>                                        
+                    <div border.color="#F5C98F" height="2px" ></div>   
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
+                </div>                      
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> RETENCIONES SUFRIDAS</h2>                   
+        <h4><strong>Período:</strong> {{ desde }} - {{ hasta }}</h4>
+        <div height="10px"></div>
+
+        <table font-size="8px">
+            <tr font-size="9px">
+                <td border.type="none" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3cm"><strong>Documento</strong></td>
+                <td border.type="none" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Cliente</strong></td>
+                <td border.type="none" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3cm"><strong>Importe</strong></td>
+            </tr>
+            {% set totalPeriodo = 0 %}
+            {% for item in result %}
+            {% set totalPeriodo = totalPeriodo + item.importe %}
+                <tr>
+                    <td border.type="none" height="16px" vertical-align="middle" padding-left="20px">OP 'X' {{ "%'04.10s"|format(item.prefijoNro) }}-{{ "%'08.10s"|format(item.pagoNro) }}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" padding-left="10px">RET DGR {{ item.nombreCliente }}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.importe|number_format(2,'.','') }}</td>
+                </tr>
+        {% endfor %}
+            <tr background.color="#EEEEEE" font-size="9px">
+                <td colspan="2" border.type="none" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>TOTAL PERIODO:</strong></td>
+                <td border.type="none" height="30px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{ totalPeriodo|number_format(2,'.','') }}</strong></td>
+            </tr>
+        </table>    
+    </dynamic-page>
+</pdf>

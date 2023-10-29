@@ -261,8 +261,10 @@ class ClienteRepository extends EntityRepository {
 
         // Create inner joins
         $query->innerJoin('c.localidad', 'l');
+        $query->leftJoin('c.tipoCliente', 'tc');
 
         $countQuery->innerJoin('c.localidad', 'l');
+        $countQuery->leftJoin('c.tipoCliente', 'tc');
 
         if ($deudor) {
             $query->leftJoin('c.cobros', 'co')
@@ -358,6 +360,7 @@ class ClienteRepository extends EntityRepository {
         $query->select("c")
             ->from('VentasBundle\Entity\Cliente', 'c')
             ->leftJoin('c.localidad', 'l')
+            ->leftJoin('c.tipoCliente', 'tc')
             ->orderBy('c.nombre');
         if ($search) {
             $searchItem = trim($search);

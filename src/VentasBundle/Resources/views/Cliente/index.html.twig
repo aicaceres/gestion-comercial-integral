@@ -25,6 +25,7 @@
                 <th>Dirección</th>
                 <th>Localidad</th>
                 <th class="nosort">Teléfono</th>
+                <th class="nosort">Tipo Cliente</th>
                 <th class="nosort">Saldo</th>
                 <th style="width:5%;" class="nosort">Activo</th>
                 <th class="nosort actionbutton addbutton">
@@ -54,17 +55,18 @@ jQuery(document).ready(function($){
                     { "name": "direccion",  "targets": 2 },
                     { "name": "localidad",  "targets": 3 },
                     { "name": "telefono",  "targets": 4 },
-                    { "name": "saldo",  "targets": 5 },
-                    { "name": "activo",  "targets": 6 },
-                    { "name": "actions",  "targets": 7 },
+                    { "name": "tipoCliente",  "targets": 5 },
+                    { "name": "saldo",  "targets": 6 },
+                    { "name": "activo",  "targets": 7 },
+                    { "name": "actions",  "targets": 8 },
                     { "targets"  : 'nosort', "orderable": false }
                 ],
                 "rowCallback": function (row, data) {
                     // registrar seleccion
-                    $(row).find('td:nth-child(6n)').addClass('alignright');
-                    saldo = parseFloat( $(row).find('td:nth-child(6n)').html() );
-                    $(row).find('td:nth-child(6n)').html( saldo.toFixed(3).replace('.',',') );
-                    $(row).find('td:nth-child(7n)').addClass('aligncenter');
+                    $(row).find('td:nth-child(7n)').addClass('alignright');
+                    saldo = parseFloat( $(row).find('td:nth-child(7n)').html() );
+                    $(row).find('td:nth-child(7n)').html( saldo.toFixed(3).replace('.',',') );
+                    $(row).find('td:nth-child(8n)').addClass('aligncenter');
                  },
                 // Server-side parameters
                 "processing": true,

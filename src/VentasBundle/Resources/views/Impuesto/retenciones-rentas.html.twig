@@ -1,0 +1,91 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Retenciones Sufridas</h1>
+    <span class="pagedesc">Impuestos</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<style>
+    .numbercell{
+        text-align: right;
+        padding-right: 10px;
+    }
+    .headergrey th{
+        background-color:lightgray;
+    }
+    .retenciones{
+        width: 80%;
+        margin: auto;
+    }
+    .retenciones th{
+        border: 1px solid lightgray;
+    }
+</style>
+    {% include "AppBundle::notificacion.html.twig" %}
+<div id="contentwrapper" class="contentwrapper">
+
+    <div class="" style="margin-bottom: 15px;">
+        <form action="{{ path }}" method="GET">
+            <div style="display: inline-block; margin-right: 30px;">
+                <label><strong>Período:</strong></label>
+                <input name="fecha_desde" required="required" class="datepicker" tabindex="2" type="text" value="{{desde}}">
+                <input name="fecha_hasta" required="required" class="datepicker" tabindex="2" type="text" value="{{hasta}}">
+            </div>
+            <button type="submit" >Buscar</button>
+        </form>
+    </div>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable retenciones"> 
+        <tr>
+            <th>Documento</th>
+            <th>Cliente</th>
+            <th>Importe</th>
+        </tr>  
+        {% set totalPeriodo = 0 %}
+        {% for item in result %}
+            {% set totalPeriodo = totalPeriodo + item.importe %}
+            <tr>
+                <td style="text-align:center">OP 'X' {{ "%'04.10s"|format(item.prefijoNro) }}-{{ "%'08.10s"|format(item.pagoNro) }}</td>
+                <td>RET DGR {{ item.nombreCliente }}</td>
+                <td class="numbercell">{{ item.importe|number_format(2,'.','') }}</td>
+            </tr>    
+        {% endfor %} 
+        <tr>
+            <th colspan="2" class="numbercell">TOTAL PERIODO:</th>
+            <th class="numbercell">{{ totalPeriodo|number_format(2,'.','') }}</th>
+        </tr> 
+    </table>    
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+    {{ parent() }}
+    <link id="addonstyle" rel="stylesheet" href="{{ asset('assets/js/plugins/tableExport405/tableexport.min.css') }}" type="text/css">
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/js-xlsx-master/dist/xlsx.core.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport/FileSaver.js-master/FileSaver.min.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('assets/js/plugins/tableExport405/tableexport.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    var filename = "RetencionesSufridas_{{'now'|date('mY')}}";
+    
+    tableExporter = $(".retenciones").tableExport(
+        {headers: true,
+        footers: true,
+        formats: ['xlsx', 'txt'],
+        filename: filename,
+        bootstrap: false,
+        exportButtons: true,
+        position: 'top',
+        ignoreRows: null,
+        ignoreCols: null,
+        trimWhitespace: true}
+                );
+    tableExporter.types.date.assert = function(v){return false;};
+    $('.tableexport-caption').addClass('alignright');
+    $('.retenciones caption').prepend('<button class="button-default" id="print-pdf" >Imprimir PDF</button>')
+    $('#print-pdf').on('click',function(){
+        window.open("{{path('ventas_retencionrentas_print')}}?"+$('form').serialize());
+    })
+});
+</script>
+{% endblock %}

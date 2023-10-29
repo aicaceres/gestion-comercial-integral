@@ -113,6 +113,7 @@ class ProveedorController extends Controller {
 
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
+            $entity->setCuit(str_replace('-', '', $entity->getCuit()));
             $em->persist($entity);
             $em->flush();
             $this->addFlash('success', 'El proveedor fue creado con Éxito!');
@@ -176,6 +177,7 @@ class ProveedorController extends Controller {
         $editForm = $this->createEditForm($entity);
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
+            $entity->setCuit(str_replace('-', '', $entity->getCuit()));
             $em->flush();
             $this->addFlash('success', 'Los datos fueron modificados con Éxito!');
             return $this->redirect($this->generateUrl('compras_proveedor'));

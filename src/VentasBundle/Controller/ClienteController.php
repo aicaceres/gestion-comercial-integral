@@ -1313,6 +1313,11 @@ class ClienteController extends Controller {
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $telefono));
                             break;
                         }
+                    case 'tipoCliente': {
+                            $tipoCliente = $cliente->getTipoCliente();
+                            $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $tipoCliente));
+                            break;
+                        }
                     case 'saldo': {
                             $saldo = round($cliente->getSaldo(), 3);
                             $responseTemp = htmlentities(str_replace(array("\r\n", "\r", "\n", "\t"), ' ', $saldo));

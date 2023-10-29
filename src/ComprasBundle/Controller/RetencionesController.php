@@ -300,4 +300,73 @@ class RetencionesController extends Controller {
         return $retenciones;
     }
 
+    /*     * *
+     * PERCEPCIONES RENTAS
+     */
+
+    /**
+     * @Route("/percepcionRentas", name="compras_percepcionrentas")
+     * @Method("GET")
+     * @Template()
+     */
+    public function percepcionRentasAction(Request $request) {
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
+
+        $result = $desde ? $this->resultadoPercepcionRentas($desde, $hasta) : null;
+        return $this->render('ComprasBundle:Retenciones:informe-percepcion-rentas.html.twig', array(
+                'path' => $this->generateUrl('compras_percepcionrentas'),
+                'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')
+                , 'result' => $result
+        ));
+    }
+
+    /**
+     * @Route("/percepcionRentasPdf.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="compras_percepcionrentas_print")
+     * @Method("GET")
+     */
+    public function percepcionRentasPdfAction(Request $request) {
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
+        $result = $this->resultadoPercepcionRentas($desde, $hasta);
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('ComprasBundle:Retenciones:percepcion-rentas.pdf.twig',
+            array('result' => $result,
+                'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=percepciones_rentas.pdf'));
+    }
+
+    private function resultadoPercepcionRentas($desde, $hasta) {
+        $em = $this->getDoctrine()->getManager();
+        $unidneg = $this->get('session')->get('unidneg_id');
+        $facturas = $em->getRepository('ComprasBundle:Factura')->getFacturasPercepcion($desde, $hasta, $unidneg);
+        $notacred = $em->getRepository('ComprasBundle:NotaDebCred')->getNotasPercepcion($desde, $hasta, $unidneg);
+        $datos = array_merge($facturas, $notacred);
+
+        $ord = usort($datos, function($a1, $a2) {
+            $value1 = strtotime($a1['fecha']->format('Y-m-d'));
+            $value2 = strtotime($a2['fecha']->format('Y-m-d'));
+            return $value1 - $value2;
+        });
+
+        $result = array();
+        foreach ($datos as $item) {
+            $idxFecha = $item['fecha']->format('d/m/Y');
+            $nroCompArray = explode('-', $item['nroComprobante']);
+            $nroComp = str_pad($nroCompArray[0], 4, "0", STR_PAD_LEFT) . '-' . str_pad($nroCompArray[1], 8, "0", STR_PAD_LEFT);
+            $cuit = substr($item['cuit'], 0, 2) . '-' . substr($item['cuit'], 2, 8) . '-' . substr($item['cuit'], 10, 1);
+            $row = array('tipoComp' => $item['tipoComp'], 'nroComp' => $nroComp, 'importe' => $item['importe'], 'proveedor' => $item['nombre'], 'cuit' => $cuit);
+            $result[$idxFecha][] = $row;
+        }
+        return $result;
+    }
+
 }
