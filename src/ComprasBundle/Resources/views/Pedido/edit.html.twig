@@ -65,6 +65,13 @@
                 {{ form_row(form.fechaEntrega, { 'attr': {'class' : 'datepicker','tabindex':'2', 'autofocus':true } }) }}
             </div>
             <div class="two_fields">
+                {{ form_row(form.transporte) }}
+                {{ form_row(form.formaPago, { 'attr': {'class' : 'smallinput'} }) }}
+            </div>
+            <div class="two_fields">
+                {{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}
+            </div>
+            <div class="two_fields">
                 <div class="alignright">
                     <button type="button" class="stdbtn print">Imprimir Pedido</button>
                 </div>
@@ -89,6 +96,13 @@
                 {{ form_row(form.deposito) }}
                 {{ form_row(form.fechaEntrega, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
             </div>
+            <div class="two_fields">
+                {{ form_row(form.transporte) }}
+                {{ form_row(form.formaPago, { 'attr': {'class' : 'smallinput'} }) }}
+            </div>
+            <div class="two_fields">
+                {{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}
+            </div> 
             <div class="two_fields">
                 <div style="text-align:center">
                   <button class="stdbtn" type="button" onclick="cargarBajominimo()" >Cargar productos debajo del mínimo</button>
@@ -183,6 +197,7 @@
 jQuery(document).ready(function($) {
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     $('.select2.select2-container').css('width','60%');
+     $('#comprasbundle_pedido_formaPago').after('<strong style="margin-left: 10px"> Días</strong>');
     $(".chzn-select").chosen();
     $(document).keypress(function(e) {
         if (e.which == 43) {

@@ -32,6 +32,7 @@ class ProveedorController extends Controller {
         $desde = $request->get('desde');
         $hasta = $request->get('hasta');
         $rubroId = $request->get('rubroId');
+        $deudor = $request->get('deudor');
         $em = $this->getDoctrine()->getManager();
         $rubros = $em->getRepository('ConfigBundle:RubroCompras')->findBy(array(), array('tipo' => 'ASC'));
         if ($rubroId) {
@@ -64,7 +65,8 @@ class ProveedorController extends Controller {
                 'desde' => $desde,
                 'hasta' => $hasta,
                 'rubroId' => $rubroId,
-                'rubros' => $rubros
+                'rubros' => $rubros,
+                'deudor' => $deudor
         ));
     }
 
@@ -236,6 +238,7 @@ class ProveedorController extends Controller {
         $search = $request->get('searchterm');
         $fdesde = $request->get('fdesde');
         $fhasta = $request->get('fhasta');
+        $deudor = json_decode($request->get('fdeudor'));
         $i = 2;
         if ($search) {
             $sheet->setCellValue('A' . $i, 'Término de Búsqueda: ' . $search);
@@ -243,6 +246,10 @@ class ProveedorController extends Controller {
         }
         if ($fdesde) {
             $sheet->setCellValue('A' . $i, 'Período: ' . $fdesde . ' al ' . $fhasta);
+            $i++;
+        }
+        if ($deudor) {
+            $sheet->setCellValue('A' . $i, 'Con saldo deudor ');
             $i++;
         }
         $i++;

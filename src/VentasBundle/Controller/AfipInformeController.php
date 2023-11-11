@@ -462,7 +462,7 @@ class AfipInformeController extends Controller {
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             // TIPO CLIENTE
-            $tipoCliente = $fe->getCliente()->getTipoCliente() ? $fe->getCliente()->getTipoCliente()->getNombre() : 'OTRO';
+            $tipoCliente = $fe->getCliente()->getTipoCliente() ? $fe->getCliente()->getTipoCliente()->getNombre() : 'Mayorista';
             if (isset($totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'])) {
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'] += ($fe->getImpNeto() * $signo);
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['iva'] += ($fe->getImpIva() * $signo);
@@ -518,15 +518,15 @@ class AfipInformeController extends Controller {
                 $codigo = str_pad($item->Id, 4, "0", STR_PAD_LEFT);
                 $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneByCodigo($codigo);
                 $ivaTotal = ($item->BaseImp + $item->Importe) * $signo;
-                if (isset($totalesxAlicuota[$categIva][$alicuota->getNombre()]['neto'])) {
-                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['neto'] += $item->BaseImp * $signo;
-                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['iva'] += $item->Importe * $signo;
-                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['subtotal'] += $ivaTotal;
+                if (isset($totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['neto'])) {
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['neto'] += $item->BaseImp * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['iva'] += $item->Importe * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['subtotal'] += $ivaTotal;
                 }
                 else {
-                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['neto'] = $item->BaseImp * $signo;
-                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['iva'] = $item->Importe * $signo;
-                    $totalesxAlicuota[$categIva][$alicuota->getNombre()]['subtotal'] = $ivaTotal;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['neto'] = $item->BaseImp * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['iva'] = $item->Importe * $signo;
+                    $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['subtotal'] = $ivaTotal;
                 }
             }
         }

@@ -26,6 +26,11 @@
             </div>  
             <div class="two_fields">
                 {{ form_row(form.deposito) }}
+                {{ form_row(form.transporte) }}
+            </div> 
+            <div class="two_fields">
+                {{ form_row(form.formaPago, { 'attr': {'class' : 'smallinput'} }) }}
+                {{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}
             </div> 
                         
             <br clear="all" /> 
@@ -45,6 +50,7 @@
 jQuery(document).ready(function($) {
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     $('.select2.select2-container').css('width','60%');
+    $('#comprasbundle_pedido_formaPago').after('<strong style="margin-left: 10px"> Días</strong>');
     $('.guardar').click(function() {
         if( !$('#comprasbundle_pedido_proveedor').val() ){
             alert('Debe seleccionar un Proveedor');

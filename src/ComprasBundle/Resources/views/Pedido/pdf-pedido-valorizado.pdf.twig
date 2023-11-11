@@ -34,6 +34,15 @@
             <td border.type="none" height="20px" vertical-align="middle"><strong>Depósito:</strong> {{entity.deposito}} </td>
         </tr>
         <tr>
+            <td border.type="none" height="20px" vertical-align="middle"><strong>Plazo de Pago</strong> {{entity.formaPago}} Días</td>
+            <td border.type="none" height="20px" vertical-align="middle"><strong>Transporte:</strong> {{entity.transporte}} </td>
+        </tr>
+        {% if entity.observaciones %}
+            <tr>
+                <td colspan="2" border.type="none" height="20px" vertical-align="middle"><strong>Observaciones:</strong> {{entity.observaciones}} </td>
+            </tr>
+        {% endif %}    
+        <tr>
             <td border.type="none" height="20px" vertical-align="middle"> <strong>Estado:</strong> {{entity.estado}} </td>
             <td border.type="none" height="20px" vertical-align="middle">{% if recibido %} <strong>Recibido el:</strong> {{entity.fechaEntrega|date('d/m/Y')}} {% endif %}</td>
         </tr>

@@ -63,15 +63,16 @@ class RetencionesController extends Controller {
      * @Template()
      */
     public function retencionesGananciasAction(Request $request) {
-        $periodo = $request->get('periodo');
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
         $em = $this->getDoctrine()->getManager();
         $resultado = array('retenciones' => null, 'sujetos' => null);
-        if ($periodo) {
-            $resultado = $this->resultadoGanancias($periodo, $em, 'A');
+        if ($desde) {
+            $resultado = $this->resultadoGanancias($desde, $hasta, $em, 'A');
         }
         return $this->render('ComprasBundle:Retenciones:informe-ganancias.html.twig', array(
                 'tipo' => 'Ganancias', 'path' => $this->generateUrl('compras_retencionganancias'),
-                'periodo' => $periodo, 'resultado' => $resultado
+                'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta'), 'resultado' => $resultado
         ));
     }
 
@@ -82,16 +83,17 @@ class RetencionesController extends Controller {
      * @Method("GET")
      */
     public function retencionesGananciasPdfAction(Request $request) {
-        $periodo = $request->get('periodo');
+        $desde = UtilsController::toAnsiDate($request->get('fecha_desde'));
+        $hasta = UtilsController::toAnsiDate($request->get('fecha_hasta'));
         $em = $this->getDoctrine()->getManager();
         $resultado = array('retenciones' => null, 'sujetos' => null);
-        if ($periodo) {
-            $resultado = $this->resultadoGanancias($periodo, $em, 'A');
+        if ($desde) {
+            $resultado = $this->resultadoGanancias($desde, $hasta, $em, 'A');
         }
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('ComprasBundle:Retenciones:informe-ganancias.pdf.twig',
-            array('periodo' => $periodo, 'resultado' => $resultado), $response);
+            array('desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta'), 'resultado' => $resultado), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);
@@ -105,22 +107,24 @@ class RetencionesController extends Controller {
      * @Template()
      */
     public function retencionExportTxt(Request $request) {
-        $periodo = $request->get('periodo');
         $file = $request->get('file');
         $tipo = $request->get('tipo');
 
         $em = $this->getDoctrine()->getManager();
 
         if ($tipo == 'Rentas') {
+            $periodo = $request->get('periodo');
             $resultado = $this->resultadoRentas($periodo, $em, 'T');
             $fileContent = $resultado;
             $hoy = new \DateTime();
             $filename = $hoy->format('YmdHi') . '.txt';
         }
         else {
-            $resultado = $this->resultadoGanancias($periodo, $em, 'T');
+            $desde = UtilsController::toAnsiDate($request->get('desde'));
+            $hasta = UtilsController::toAnsiDate($request->get('hasta'));
+            $resultado = $this->resultadoGanancias($desde, $hasta, $em, 'T');
             $fileContent = ( $file == 'RET' ) ? $resultado['retenciones'] : $resultado['sujetos'];
-            $filename = $file . str_replace('-', '', $periodo) . '.txt';
+            $filename = $file . str_replace('-', '', $desde) . '-' . str_replace('-', '', $hasta) . '.txt';
         }
 
         // Return a response with a specific content
@@ -142,10 +146,11 @@ class RetencionesController extends Controller {
     /**
      * Devuelve las retenciones de ganancias segun periodo
      */
-    private function resultadoGanancias($periodo, $em, $format = 'A') {
-        $desde = UtilsController::toAnsiDate('01-' . $periodo);
-        $ini = new \DateTime($desde);
-        $hasta = $ini->format('Y-m-t');
+    private function resultadoGanancias($desde, $hasta, $em, $format = 'A') {
+//        $desde = UtilsController::toAnsiDate('01-' . $periodo);
+//        $ini = new \DateTime($desde);
+//        $hasta = $ini->format('Y-m-t');
+
         $pagos = $em->getRepository('ComprasBundle:PagoProveedor')->findRetencionesGanancias($desde, $hasta);
         $sujetos = ($format == 'A') ? array() : '';
         $proveedores = array();

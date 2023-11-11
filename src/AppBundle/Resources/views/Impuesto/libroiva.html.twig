@@ -97,16 +97,29 @@
                 </tr>
                 <tr>
                     <th colspan="3" style="border: 1px solid #ddd; text-align:left;padding-left:15px " > - POR RUBRO -</th>
-                    <th style="border: 1px solid #ddd;text-align: center"> 0.00%</th>
-                    <th style="border: 1px solid #ddd;text-align: center"> 10.50%</th>
-                    <th style="border: 1px solid #ddd;text-align: center"> 21.00%</th>
-                    <th style="border: 1px solid #ddd;text-align: center"> 27.00%</th>
-                    <th colspan="6" style="border: 1px solid #ddd;"></th>
+                    <th colspan="2" style="border: 1px solid #ddd;text-align: center"> 0.00%</th>
+                    <th colspan="2" style="border: 1px solid #ddd;text-align: center"> 10.50%</th>
+                    <th colspan="2" style="border: 1px solid #ddd;text-align: center"> 21.00%</th>
+                    <th colspan="2" style="border: 1px solid #ddd;text-align: center"> 27.00%</th>
+                    <th colspan="2" style="border: 1px solid #ddd;"></th>
+                </tr>
+                <tr>
+                    <th colspan="3" style="border: 1px solid #ddd; text-align:left;padding-left:15px " ></th>
+                    <th style="border: 1px solid #ddd;text-align: center">Base</th>
+                    <th style="border: 1px solid #ddd;text-align: center">IVA</th>
+                    <th style="border: 1px solid #ddd;text-align: center">Base</th>
+                    <th style="border: 1px solid #ddd;text-align: center">IVA</th>
+                    <th style="border: 1px solid #ddd;text-align: center">Base</th>
+                    <th style="border: 1px solid #ddd;text-align: center">IVA</th>
+                    <th style="border: 1px solid #ddd;text-align: center">Base</th>
+                    <th style="border: 1px solid #ddd;text-align: center">IVA</th>
+                    <th colspan="2" style="border: 1px solid #ddd;"></th>
                 </tr>
                 {% for key, rubro in resumen %}
                 <tr>
                     <th colspan="3" style="border: 1px solid #ddd;"> {{ key }} </th>
                     {% for alic, imp in rubro %}
+                          <td style="text-align:right" >{{ resumenBase[key][alic]|number_format(3,'.','') }} </td>
                           <td style="text-align:right" >{{ imp|number_format(3,'.','') }} </td>
                     {% endfor %}
                     <th colspan="6" style="border: 1px solid #ddd;"></th>

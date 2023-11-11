@@ -1,19 +1,13 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <style>
-    .ui-datepicker{
-        width: 160px;
-    }
-    .ui-datepicker-calendar {
-     display: none;
-    }
     .inputerror{
         background-color: mistyrose !important;
         font-weight: bold;
     }
 </style>
 <div class="pageheader notab">
-    <h1 class="pagetitle">Retenciones de {{tipo}}</h1>
+    <h1 class="pagetitle">Retenciones de Ganancias</h1>
     <span class="pagedesc">Impuestos</span>
 </div><!--pageheader-->
 {% endblock %}
@@ -25,7 +19,8 @@
         <form action="{{ path }}" method="GET">
             <div style="display: inline-block; margin-right: 30px;">
                 <label><strong>Período:</strong></label>
-                <input name="periodo" required="required" class="datepicker" tabindex="2" type="text" value="{{periodo}}">
+                <input name="fecha_desde" required="required" class="datepicker" tabindex="2" type="text" value="{{desde}}">
+                <input name="fecha_hasta" required="required" class="datepicker" tabindex="2" type="text" value="{{hasta}}">
             </div>
             <button type="submit" >Buscar</button>
             <button type="button" id="print-pdf" style="float: right;margin-right: 20px;">Imprimir</button>            
@@ -56,36 +51,7 @@
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     $('.ui-tabs-panel').css('padding','0');
-    $('.datepicker').datepicker({
-        dateFormat: "mm-yy",
-        changeMonth: true,
-        changeYear: true,
-        showButtonPanel: true,
-        closeText: "Seleccionar",
-        onClose: function(dateText, inst) {
-            if($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1) {
-                $(this).datepicker(
-                    'setDate',
-                    new Date(
-                        $("#ui-datepicker-div .ui-datepicker-year :selected").val(),
-                        $("#ui-datepicker-div .ui-datepicker-month :selected").val(),
-                        1
-                    )
-                ).trigger('change');
-                $('.date-picker').focusout();
-            }
-            $("#ui-datepicker-div").removeClass("month_year_datepicker");
-        },
-        beforeShow : function(input, inst) {
-            if((datestr = $(this).val()).length > 0) {
-                year = datestr.substring(datestr.length-4, datestr.length);
-                month = datestr.substring(0, 2);
-                $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
-                $(this).datepicker('setDate', new Date(year, month-1, 1));
-                $("#ui-datepicker-div").addClass("month_year_datepicker");
-            }
-        }
-    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     $('.togglemenu').click();
     $('#print-pdf').on('click',function(){
         window.open("{{path('compras_retencionganancias_pdf')}}?"+$('form').serialize());

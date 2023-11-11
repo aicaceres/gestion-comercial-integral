@@ -1,4 +1,5 @@
 <?php
+
 namespace ComprasBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
@@ -9,8 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="compras_pedido")
  * @ORM\Entity(repositoryClass="ComprasBundle\Entity\PedidoRepository")
  */
-class Pedido
-{
+class Pedido {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -18,11 +18,13 @@ class Pedido
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var integer $prefijoNro
      * @ORM\Column(name="prefijo_nro", type="string", length=3)
      */
     protected $prefijoNro;
+
     /**
      * @var integer $pedidoNro
      * @ORM\Column(name="pedido_nro", type="string", length=8)
@@ -33,7 +35,7 @@ class Pedido
      * @var date $fechaPedido
      * @ORM\Column(name="fecha_pedido", type="date", nullable=false)
      */
-    private $fechaPedido ;
+    private $fechaPedido;
 
     /**
      * @var date $fechaEntrega
@@ -66,9 +68,9 @@ class Pedido
      */
     protected $montoIva;
 
-     /**
-     *@ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pedidos")
-     *@ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
+    /**
+     * @ORM\ManyToOne(targetEntity="ComprasBundle\Entity\Proveedor", inversedBy="pedidos")
+     * @ORM\JoinColumn(name="proveedor_id", referencedColumnName="id")
      * @ORM\OrderBy({"nombre" = "ASC"})
      */
     protected $proveedor;
@@ -79,11 +81,24 @@ class Pedido
      */
     protected $unidadNegocio;
 
-     /**
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Deposito")
      * @ORM\JoinColumn(name="deposito_id", referencedColumnName="id")
      */
     protected $deposito;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Transporte")
+     * @ORM\JoinColumn(name="transporte_id", referencedColumnName="id")
+     * @ORM\OrderBy({"nombre" = "ASC"})
+     */
+    protected $transporte;
+
+    /**
+     * @var string $formaPago
+     * @ORM\Column(name="forma_pago", type="string", nullable=true)
+     */
+    protected $formaPago;
 
     /**
      * @ORM\OneToMany(targetEntity="ComprasBundle\Entity\PedidoDetalle", mappedBy="pedido",cascade={"persist", "remove"})
@@ -93,8 +108,14 @@ class Pedido
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
      * @ORM\JoinColumn(name="calificacion_proveedor_id", referencedColumnName="id")
-     **/
+     * */
     protected $calificacionProveedor;
+
+    /**
+     * @ORM\Column(name="observaciones", type="text", nullable=true)
+     */
+    protected $observaciones;
+
     /**
      * @ORM\Column(name="obs_recepcion", type="text", nullable=true)
      */
@@ -129,11 +150,11 @@ class Pedido
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
     private $updatedBy;
+
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->fechaPedido = new \DateTime();
         $this->estado = 'NUEVO';
@@ -151,18 +172,17 @@ class Pedido
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
+
     /**
      * Set prefijoNro
      *
      * @param string $prefijoNro
      * @return Pedido
      */
-    public function setPrefijoNro($prefijoNro)
-    {
+    public function setPrefijoNro($prefijoNro) {
         $this->prefijoNro = $prefijoNro;
 
         return $this;
@@ -173,8 +193,7 @@ class Pedido
      *
      * @return string
      */
-    public function getPrefijoNro()
-    {
+    public function getPrefijoNro() {
         return $this->prefijoNro;
     }
 
@@ -184,8 +203,7 @@ class Pedido
      * @param string $pedidoNro
      * @return Pedido
      */
-    public function setPedidoNro($pedidoNro)
-    {
+    public function setPedidoNro($pedidoNro) {
         $this->pedidoNro = $pedidoNro;
 
         return $this;
@@ -196,8 +214,7 @@ class Pedido
      *
      * @return string
      */
-    public function getPedidoNro()
-    {
+    public function getPedidoNro() {
         return $this->pedidoNro;
     }
 
@@ -206,9 +223,8 @@ class Pedido
      *
      * @return string
      */
-    public function getNroPedido()
-    {
-        return $this->prefijoNro.'-'.$this->pedidoNro;
+    public function getNroPedido() {
+        return $this->prefijoNro . '-' . $this->pedidoNro;
     }
 
     /**
@@ -217,8 +233,7 @@ class Pedido
      * @param \DateTime $fechaEntrega
      * @return Pedido
      */
-    public function setFechaEntrega($fechaEntrega)
-    {
+    public function setFechaEntrega($fechaEntrega) {
         $this->fechaEntrega = $fechaEntrega;
 
         return $this;
@@ -229,8 +244,7 @@ class Pedido
      *
      * @return \DateTime
      */
-    public function getFechaEntrega()
-    {
+    public function getFechaEntrega() {
         return $this->fechaEntrega;
     }
 
@@ -239,8 +253,7 @@ class Pedido
      * @param \DateTime $fechaPedido
      * @return Pedido
      */
-    public function setFechaPedido($fechaPedido)
-    {
+    public function setFechaPedido($fechaPedido) {
         $this->fechaPedido = $fechaPedido;
 
         return $this;
@@ -251,8 +264,7 @@ class Pedido
      *
      * @return \DateTime
      */
-    public function getFechaPedido()
-    {
+    public function getFechaPedido() {
         return $this->fechaPedido;
     }
 
@@ -262,8 +274,7 @@ class Pedido
      * @param string $estado
      * @return Pedido
      */
-    public function setEstado($estado)
-    {
+    public function setEstado($estado) {
         $this->estado = $estado;
 
         return $this;
@@ -274,8 +285,7 @@ class Pedido
      *
      * @return string
      */
-    public function getEstado()
-    {
+    public function getEstado() {
         return $this->estado;
     }
 
@@ -285,8 +295,7 @@ class Pedido
      * @param string $descuentos
      * @return Pedido
      */
-    public function setDescuentos($descuentos)
-    {
+    public function setDescuentos($descuentos) {
         $this->descuentos = $descuentos;
 
         return $this;
@@ -297,8 +306,7 @@ class Pedido
      *
      * @return string
      */
-    public function getDescuentos()
-    {
+    public function getDescuentos() {
         return $this->descuentos;
     }
 
@@ -344,15 +352,13 @@ class Pedido
         return $this->montoIva;
     }
 
-
     /**
      * Set created
      *
      * @param \DateTime $created
      * @return Pedido
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -363,8 +369,7 @@ class Pedido
      *
      * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -374,8 +379,7 @@ class Pedido
      * @param \DateTime $updated
      * @return Pedido
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -386,8 +390,7 @@ class Pedido
      *
      * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -397,8 +400,7 @@ class Pedido
      * @param \ComprasBundle\Entity\Proveedor $proveedor
      * @return Pedido
      */
-    public function setProveedor(\ComprasBundle\Entity\Proveedor $proveedor = null)
-    {
+    public function setProveedor(\ComprasBundle\Entity\Proveedor $proveedor = null) {
         $this->proveedor = $proveedor;
 
         return $this;
@@ -409,8 +411,7 @@ class Pedido
      *
      * @return \ComprasBundle\Entity\Proveedor
      */
-    public function getProveedor()
-    {
+    public function getProveedor() {
         return $this->proveedor;
     }
 
@@ -420,8 +421,7 @@ class Pedido
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Pedido
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -432,8 +432,7 @@ class Pedido
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -443,8 +442,7 @@ class Pedido
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Pedido
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -455,8 +453,7 @@ class Pedido
      *
      * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 
@@ -466,8 +463,7 @@ class Pedido
      * @param \ComprasBundle\Entity\PedidoDetalle $detalles
      * @return Pedido
      */
-    public function addDetalle(\ComprasBundle\Entity\PedidoDetalle $detalles)
-    {
+    public function addDetalle(\ComprasBundle\Entity\PedidoDetalle $detalles) {
         $detalles->setPedido($this);
         $this->detalles[] = $detalles;
         return $this;
@@ -478,8 +474,7 @@ class Pedido
      *
      * @param \ComprasBundle\Entity\PedidoDetalle $detalles
      */
-    public function removeDetalle(\ComprasBundle\Entity\PedidoDetalle $detalles)
-    {
+    public function removeDetalle(\ComprasBundle\Entity\PedidoDetalle $detalles) {
         $this->detalles->removeElement($detalles);
     }
 
@@ -488,8 +483,7 @@ class Pedido
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getDetalles()
-    {
+    public function getDetalles() {
         return $this->detalles;
     }
 
@@ -499,8 +493,7 @@ class Pedido
      * @param \ConfigBundle\Entity\UnidadNegocio $unidadNegocio
      * @return Pedido
      */
-    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null)
-    {
+    public function setUnidadNegocio(\ConfigBundle\Entity\UnidadNegocio $unidadNegocio = null) {
         $this->unidadNegocio = $unidadNegocio;
 
         return $this;
@@ -511,30 +504,29 @@ class Pedido
      *
      * @return \ConfigBundle\Entity\UnidadNegocio
      */
-    public function getUnidadNegocio()
-    {
+    public function getUnidadNegocio() {
         return $this->unidadNegocio;
     }
 
-/**
- *  Calculos
- */
+    /**
+     *  Calculos
+     */
 
     /**
      * Calcula monto total del pedido
      */
-    public function getCostoTotal(){
+    public function getCostoTotal() {
         $tot = 0;
         //PEDIDO RECIBIDO - calcular en base a recibido - sino calcular en base a cantidad
         foreach ($this->detalles as $detalle) {
-            $cantidad = ($this->estado=='RECIBIDO') ? $detalle->getEntregado() : $detalle->getCantidad();
+            $cantidad = ($this->estado == 'RECIBIDO') ? $detalle->getEntregado() : $detalle->getCantidad();
             $tot += ($detalle->getPrecio() * $cantidad);
         }
         return $tot;
     }
 
     // Costo total del item del pedido original
-    public function getCostoTotalOriginal(){
+    public function getCostoTotalOriginal() {
         $tot = 0;
         foreach ($this->detalles as $detalle) {
             $tot += ($detalle->getPrecio() * $detalle->getCantidad());
@@ -542,29 +534,29 @@ class Pedido
         return $tot;
     }
 
-    public function getDescuentosTxt(){
-      $descuentos = explode(',', $this->getDescuentos());
-      $txt = '';
-      if($descuentos){
-        foreach($descuentos as $desc){
-          $txt = ($txt ? $txt.' + ' : '') . $desc . '%';
+    public function getDescuentosTxt() {
+        $descuentos = explode(',', $this->getDescuentos());
+        $txt = '';
+        if ($descuentos) {
+            foreach ($descuentos as $desc) {
+                $txt = ($txt ? $txt . ' + ' : '') . $desc . '%';
+            }
         }
+        return $txt === '%' ? '0.00%' : $txt;
+    }
+
+    public function getMontoTotal() {
+        return $this->getCostoTotal() - $this->getMontoDescuento() + $this->getMontoIva();
+    }
+
+    /*   public function getPendientes(){
+      $cant = 0;
+      foreach ($this->detalles as $detalle) {
+      $cant = $cant + $detalle->getPendientes();
       }
-      return $txt === '%' ? '0.00%' : $txt;
-    }
-
-    public function getMontoTotal(){
-      return $this->getCostoTotal() - $this->getMontoDescuento() + $this->getMontoIva();
-    }
-
- /*   public function getPendientes(){
-        $cant = 0;
-        foreach ($this->detalles as $detalle) {
-            $cant = $cant + $detalle->getPendientes();
-        }
-        return $cant;
-    }
-*/
+      return $cant;
+      }
+     */
 
     /**
      * Set deposito
@@ -572,8 +564,7 @@ class Pedido
      * @param \AppBundle\Entity\Deposito $deposito
      * @return Pedido
      */
-    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null)
-    {
+    public function setDeposito(\AppBundle\Entity\Deposito $deposito = null) {
         $this->deposito = $deposito;
 
         return $this;
@@ -584,8 +575,7 @@ class Pedido
      *
      * @return \AppBundle\Entity\Deposito
      */
-    public function getDeposito()
-    {
+    public function getDeposito() {
         return $this->deposito;
     }
 
@@ -595,20 +585,18 @@ class Pedido
      * @param string $obsRecepcion
      * @return Pedido
      */
-    public function setObsRecepcion($obsRecepcion)
-    {
+    public function setObsRecepcion($obsRecepcion) {
         $this->obsRecepcion = $obsRecepcion;
 
         return $this;
-}
+    }
 
     /**
      * Get obsRecepcion
      *
      * @return string
      */
-    public function getObsRecepcion()
-    {
+    public function getObsRecepcion() {
         return $this->obsRecepcion;
     }
 
@@ -618,8 +606,7 @@ class Pedido
      * @param \ConfigBundle\Entity\Parametro $calificacionProveedor
      * @return Pedido
      */
-    public function setCalificacionProveedor(\ConfigBundle\Entity\Parametro $calificacionProveedor = null)
-    {
+    public function setCalificacionProveedor(\ConfigBundle\Entity\Parametro $calificacionProveedor = null) {
         $this->calificacionProveedor = $calificacionProveedor;
 
         return $this;
@@ -630,8 +617,71 @@ class Pedido
      *
      * @return \ConfigBundle\Entity\Parametro
      */
-    public function getCalificacionProveedor()
-    {
+    public function getCalificacionProveedor() {
         return $this->calificacionProveedor;
     }
+
+    /**
+     * Set formaPago
+     *
+     * @param string $formaPago
+     * @return Pedido
+     */
+    public function setFormaPago($formaPago) {
+        $this->formaPago = $formaPago;
+
+        return $this;
+    }
+
+    /**
+     * Get formaPago
+     *
+     * @return string
+     */
+    public function getFormaPago() {
+        return $this->formaPago;
+    }
+
+    /**
+     * Set observaciones
+     *
+     * @param string $observaciones
+     * @return Pedido
+     */
+    public function setObservaciones($observaciones) {
+        $this->observaciones = $observaciones;
+
+        return $this;
+    }
+
+    /**
+     * Get observaciones
+     *
+     * @return string
+     */
+    public function getObservaciones() {
+        return $this->observaciones;
+    }
+
+    /**
+     * Set transporte
+     *
+     * @param \ConfigBundle\Entity\Transporte $transporte
+     * @return Pedido
+     */
+    public function setTransporte(\ConfigBundle\Entity\Transporte $transporte = null) {
+        $this->transporte = $transporte;
+
+        return $this;
+    }
+
+    /**
+     * Get transporte
+     *
+     * @return \ConfigBundle\Entity\Transporte
+     */
+    public function getTransporte() {
+        return $this->transporte;
+    }
+
 }

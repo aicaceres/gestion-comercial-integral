@@ -29,10 +29,12 @@ class ImpuestoController extends Controller {
 
         $items = array();
         $resxrubro = array('SIN RUBRO' => array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0));
+        $resxrubroBase = array('SIN RUBRO' => array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0));
         foreach ($facturas as $fact) {
             $rubroCompras = $fact->getRubroCompras() ? $fact->getRubroCompras()->getNombre() : 'SIN RUBRO';
             if (!array_key_exists($rubroCompras, $resxrubro)) {
                 $resxrubro[$fact->getRubroCompras()->getNombre()] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
+                $resxrubroBase[$fact->getRubroCompras()->getNombre()] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
             }
             $nro = explode('-', $fact->getNroComprobante());
             $item = array(
@@ -61,6 +63,7 @@ class ImpuestoController extends Controller {
                 if (count($cantAlicuotas) == 1) {
                     $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($cantAlicuotas[0]);
                     $resxrubro[$rubroCompras][$alicuota->getValor()] += $fact->getIva();
+                    $resxrubroBase[$rubroCompras][$alicuota->getValor()] += $fact->getSubtotalNeto();
                 }
                 else {
                     foreach ($cantAlicuotas as $alic) {
@@ -68,6 +71,7 @@ class ImpuestoController extends Controller {
                         foreach ($fact->getDetalles() as $det) {
                             if ($det->getAfipAlicuota()->getId() == $alicuota->getId()) {
                                 $resxrubro[$rubroCompras][$alicuota->getValor()] += $det->getMontoIvaItem();
+                                $resxrubroBase[$rubroCompras][$alicuota->getValor()] += $det->getMontoNetoItem();
                             }
                         }
                     }
@@ -111,6 +115,7 @@ class ImpuestoController extends Controller {
                 if (count($cantAlicuotas) == 1) {
                     $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($cantAlicuotas[0]);
                     $resxrubro['SIN RUBRO'][$alicuota->getValor()] += ($nota->getIva() * $i);
+                    $resxrubroBase['SIN RUBRO'][$alicuota->getValor()] += ($nota->getSubtotalNeto() * $i);
                 }
                 else {
                     foreach ($cantAlicuotas as $alic) {
@@ -118,6 +123,7 @@ class ImpuestoController extends Controller {
                         foreach ($nota->getDetalles() as $det) {
                             if ($det->getAfipAlicuota()->getId() == $alicuota->getId()) {
                                 $resxrubro['SIN RUBRO'][$alicuota->getValor()] += ($det->getMontoIvaItem() * $i);
+                                $resxrubroBase['SIN RUBRO'][$alicuota->getValor()] += ($det->getMontoNetoItem() * $i);
                             }
                         }
                     }
@@ -139,7 +145,7 @@ class ImpuestoController extends Controller {
 
         return $this->render('AppBundle:Impuesto:libroiva.html.twig', array(
                 'tipo' => 'COMPRAS', 'path' => $this->generateUrl('compras_libroiva'), 'periodo' => $periodo, 'resumen' => $resxrubro,
-                'items' => $items, 'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')
+                'resumenBase' => $resxrubroBase, 'items' => $items, 'desde' => $request->get('fecha_desde'), 'hasta' => $request->get('fecha_hasta')
         ));
     }
 

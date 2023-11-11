@@ -27,6 +27,19 @@
                     <input type="text" value="{{entity.deposito}}" disabled="disabled" class="mediuminput">
                 </div>
             </div>
+             <div class="two_fields">
+                <div><label for="nroPedido">Transporte:</label>
+                    <input type="text" value="{{entity.transporte}}" disabled="disabled" class="smallinput">
+                </div>
+                <div><label for="nroPedido" style="width: 100px;">Plazo de pago:</label>
+                    <input type="text" value="{{entity.formaPago}}  Días" disabled="disabled" class="width100">
+                </div>
+            </div>
+            {% if entity.observaciones %}
+            <div style="vertical-align:top; "><label for="nroPedido">Observaciones:</label>
+                <input type="text" value="{{entity.observaciones}}" disabled="disabled" class="smallinput">
+            </div>    
+            {% endif %}      
             <hr style="border:1px solid #eee;">
             <fieldset >
                 <div  class="two_fields">

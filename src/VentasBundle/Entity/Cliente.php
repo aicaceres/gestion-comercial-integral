@@ -217,6 +217,11 @@ class Cliente {
     protected $notasDebCredVenta;
 
     /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="cliente")
+     */
+    protected $facturasElectronicas;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -295,21 +300,6 @@ class Cliente {
         foreach ($pagos as $pag) {
             $saldo -= $pag->getTotal();
         }
-
-        // foreach( $this->getCobros() as $cobro){
-        //     $saldo += $cobro->getFacturaElectronica() ? $cobro->getFacturaElectronica()->getSaldo() : 0;
-        // }
-        // foreach( $this->getNotasDebCredVenta() as $debcred){
-        //     $tipo = explode('-', $debcred->getNotaElectronica()->getTipoComprobante()->getValor()) ;
-        //     if($tipo[0]==='CRE' && $debcred->getFormaPago()->getCuentaCorriente()){
-        //       $saldo -= $debcred->getNotaElectronica()->getTotal();
-        //     }else{
-        //       $saldo += $debcred->getNotaElectronica()->getSaldo();
-        //     }
-        // }
-
-
-
         return $saldo;
     }
 
@@ -1026,15 +1016,13 @@ class Cliente {
         return $this->vencCertNoRetener;
     }
 
-
     /**
      * Set tipoCliente
      *
      * @param \ConfigBundle\Entity\TipoCliente $tipoCliente
      * @return Cliente
      */
-    public function setTipoCliente(\ConfigBundle\Entity\TipoCliente $tipoCliente = null)
-    {
+    public function setTipoCliente(\ConfigBundle\Entity\TipoCliente $tipoCliente = null) {
         $this->tipoCliente = $tipoCliente;
 
         return $this;
@@ -1043,10 +1031,19 @@ class Cliente {
     /**
      * Get tipoCliente
      *
-     * @return \ConfigBundle\Entity\TipoCliente 
+     * @return \ConfigBundle\Entity\TipoCliente
      */
-    public function getTipoCliente()
-    {
+    public function getTipoCliente() {
         return $this->tipoCliente;
     }
+
+    /**
+     * Get facturasElectronicas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getFacturasElectronicas() {
+        return $this->facturasElectronicas;
+    }
+
 }

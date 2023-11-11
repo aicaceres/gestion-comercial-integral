@@ -33,7 +33,7 @@ class FacturaElectronica {
     protected $unidadNegocio;
 
     /**
-     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente")
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="facturasElectronicas")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */

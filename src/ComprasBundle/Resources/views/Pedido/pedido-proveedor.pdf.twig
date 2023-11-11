@@ -52,10 +52,16 @@
         <div padding-left="50px" margin-top="20px"><strong>PROVEEDOR:</strong> ({{ entity.proveedor.id }}) {{entity.proveedor}}</div>
         
         <div padding-top="20px">De nuestra mayor consideración: </div>
-        <div padding="20px 0 7px 50px">Tenemos el agrado de dirigirnos a Ud(s), solicitándoles el siguiente pedido, deberá(n) remitirlo por Transporte EXPRESO</div>
-        <div>LIDER (BS.AS.) con domicilio en AGUSTIN DE VEDIA 3050 N POMPEYA, localidad BUENOS AIRES</div>
+        <div padding="20px 0 7px 40px">Tenemos el agrado de dirigirnos a Ud(s), solicitándoles el siguiente pedido, deberá(n) remitirlo por el siguiente transporte: </div>
+        {% if entity.transporte %}
+        <div padding="5px 0 7px 50px"> {{ entity.transporte.nombre }} con domicilio en {{ entity.transporte.domicilioCompleto }} </div>
+        {% endif %}
 
-        <div height="20px"></div>
+        <div height="10px"></div>
+        {% if entity.observaciones %}
+        <div font-size="9px">Observaciones: {{ entity.observaciones }}</div>
+        {% endif %}
+        <div height="10px"></div>
         
         <table font-size="10px">
             <tr>
@@ -84,7 +90,7 @@
         
         <div height="20px"></div>
         
-        <div padding-top="20px">El pago de la presente se instrumentará en un plazo de dto 4% p/pago antici Días</div>
+        <div padding-top="20px">El pago de la presente se instrumentará en un plazo de {{ entity.formaPago }} Días</div>
         
         <div padding-top="20px"><strong>ATENCIÓN:</strong> En razón del alto costo del SEGURO por transporte, deberán consignar Valor Declarado Neto de Contado y excluir el</div>
         <div padding-top="7px"> IVA y Costo Financiero. No reconocemos fletes remitidos por otra empresa de transporte que no sea la indicada en el presente.</div>

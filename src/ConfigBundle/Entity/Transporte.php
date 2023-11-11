@@ -1,8 +1,10 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Transporte
  * @ORM\Table(name="transporte")
@@ -13,8 +15,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
  *     message="Ya existe un registro con este nombre."
  * )
  */
-class Transporte
-{
+class Transporte {
     /**
      * @var integer $id
      * @ORM\Column(name="id", type="integer")
@@ -22,32 +23,37 @@ class Transporte
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false, unique=true)
-     */    
+     */
     protected $nombre;
+
     /**
      * @var string $cuit
      * @ORM\Column(name="cuit", type="string", length=13, nullable=true)
      */
-    protected $cuit;    
+    protected $cuit;
+
     /**
      * @var string $direccion
      * @ORM\Column(name="direccion", type="string", nullable=true)
      */
     protected $direccion;
+
     /**
      * @var string $telefono
      * @ORM\Column(name="telefono", type="string", nullable=true)
      */
-    protected $telefono;      
+    protected $telefono;
+
     /**
-    * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
-    * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
-    */
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
+     * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
+     */
     protected $localidad;
- 
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -61,7 +67,7 @@ class Transporte
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -76,19 +82,22 @@ class Transporte
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;     
+    private $updatedBy;
 
     public function __toString() {
         return $this->nombre;
-    }    
-    
+    }
+
+    public function domicilioCompleto() {
+        return $this->direccion . ', ' . $this->getLocalidad() . ', ' . $this->getLocalidad()->getProvincia();
+    }
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -98,8 +107,7 @@ class Transporte
      * @param string $nombre
      * @return Transporte
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -108,10 +116,9 @@ class Transporte
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -121,8 +128,7 @@ class Transporte
      * @param string $cuit
      * @return Transporte
      */
-    public function setCuit($cuit)
-    {
+    public function setCuit($cuit) {
         $this->cuit = $cuit;
 
         return $this;
@@ -131,10 +137,9 @@ class Transporte
     /**
      * Get cuit
      *
-     * @return string 
+     * @return string
      */
-    public function getCuit()
-    {
+    public function getCuit() {
         return $this->cuit;
     }
 
@@ -144,8 +149,7 @@ class Transporte
      * @param string $direccion
      * @return Transporte
      */
-    public function setDireccion($direccion)
-    {
+    public function setDireccion($direccion) {
         $this->direccion = $direccion;
 
         return $this;
@@ -154,10 +158,9 @@ class Transporte
     /**
      * Get direccion
      *
-     * @return string 
+     * @return string
      */
-    public function getDireccion()
-    {
+    public function getDireccion() {
         return $this->direccion;
     }
 
@@ -167,8 +170,7 @@ class Transporte
      * @param string $telefono
      * @return Transporte
      */
-    public function setTelefono($telefono)
-    {
+    public function setTelefono($telefono) {
         $this->telefono = $telefono;
 
         return $this;
@@ -177,10 +179,9 @@ class Transporte
     /**
      * Get telefono
      *
-     * @return string 
+     * @return string
      */
-    public function getTelefono()
-    {
+    public function getTelefono() {
         return $this->telefono;
     }
 
@@ -190,8 +191,7 @@ class Transporte
      * @param \DateTime $created
      * @return Transporte
      */
-    public function setCreated($created)
-    {
+    public function setCreated($created) {
         $this->created = $created;
 
         return $this;
@@ -200,10 +200,9 @@ class Transporte
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getCreated()
-    {
+    public function getCreated() {
         return $this->created;
     }
 
@@ -213,8 +212,7 @@ class Transporte
      * @param \DateTime $updated
      * @return Transporte
      */
-    public function setUpdated($updated)
-    {
+    public function setUpdated($updated) {
         $this->updated = $updated;
 
         return $this;
@@ -223,10 +221,9 @@ class Transporte
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
-    public function getUpdated()
-    {
+    public function getUpdated() {
         return $this->updated;
     }
 
@@ -236,8 +233,7 @@ class Transporte
      * @param \ConfigBundle\Entity\Localidad $localidad
      * @return Transporte
      */
-    public function setLocalidad(\ConfigBundle\Entity\Localidad $localidad = null)
-    {
+    public function setLocalidad(\ConfigBundle\Entity\Localidad $localidad = null) {
         $this->localidad = $localidad;
 
         return $this;
@@ -246,10 +242,9 @@ class Transporte
     /**
      * Get localidad
      *
-     * @return \ConfigBundle\Entity\Localidad 
+     * @return \ConfigBundle\Entity\Localidad
      */
-    public function getLocalidad()
-    {
+    public function getLocalidad() {
         return $this->localidad;
     }
 
@@ -259,8 +254,7 @@ class Transporte
      * @param \ConfigBundle\Entity\Usuario $createdBy
      * @return Transporte
      */
-    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
-    {
+    public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null) {
         $this->createdBy = $createdBy;
 
         return $this;
@@ -269,10 +263,9 @@ class Transporte
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getCreatedBy()
-    {
+    public function getCreatedBy() {
         return $this->createdBy;
     }
 
@@ -282,8 +275,7 @@ class Transporte
      * @param \ConfigBundle\Entity\Usuario $updatedBy
      * @return Transporte
      */
-    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null)
-    {
+    public function setUpdatedBy(\ConfigBundle\Entity\Usuario $updatedBy = null) {
         $this->updatedBy = $updatedBy;
 
         return $this;
@@ -292,10 +284,9 @@ class Transporte
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
-    public function getUpdatedBy()
-    {
+    public function getUpdatedBy() {
         return $this->updatedBy;
     }
 

@@ -240,10 +240,23 @@ class ClienteRepository extends EntityRepository {
     /**
      * para administracion de clientes
      */
-    public function indexCount($provId = null) {
+    public function indexCount($deudor) {
         $query = $this->_em->createQueryBuilder();
         $query->select("count(c.id)")
             ->from('VentasBundle\Entity\Cliente', 'c');
+        $query->innerJoin('c.localidad', 'l');
+        $query->leftJoin('c.tipoCliente', 'tc');
+        if ($deudor) {
+            $qb2 = $this->_em->createQueryBuilder();
+            $qb2->select('c2.id')
+                ->from('VentasBundle\Entity\Cliente', 'c2')
+                ->innerJoin('c2.facturasElectronicas', 'fe')
+                ->leftJoin('fe.tipoComprobante', 'ac')
+                ->andWhere("ac.valor not like '%DEB%'")
+                ->andWhere('fe.saldo>0');
+            $ins = $qb2->getDQL();
+            $query->andWhere($qb2->expr()->In('c.id', $ins));
+        }
         return $query->getQuery()->getSingleScalarResult();
     }
 
@@ -267,19 +280,16 @@ class ClienteRepository extends EntityRepository {
         $countQuery->leftJoin('c.tipoCliente', 'tc');
 
         if ($deudor) {
-            $query->leftJoin('c.cobros', 'co')
-                ->leftJoin('co.facturaElectronica', 'f')
-                ->leftJoin('c.notasDebCredVenta', 'nc')
-                ->leftJoin('nc.notaElectronica', 'ne')
-                ->andWhere('f.saldo>0')
-                ->orWhere('ne.saldo>0');
-
-            $countQuery->leftJoin('c.cobros', 'co')
-                ->leftJoin('co.facturaElectronica', 'f')
-                ->leftJoin('c.notasDebCredVenta', 'nc')
-                ->leftJoin('nc.notaElectronica', 'ne')
-                ->andWhere('f.saldo>0')
-                ->orWhere('ne.saldo>0');
+            $qb2 = $this->_em->createQueryBuilder();
+            $qb2->select('c2.id')
+                ->from('VentasBundle\Entity\Cliente', 'c2')
+                ->innerJoin('c2.facturasElectronicas', 'fe')
+                ->leftJoin('fe.tipoComprobante', 'ac')
+                ->andWhere("ac.valor not like '%DEB%'")
+                ->andWhere('fe.saldo>0');
+            $ins = $qb2->getDQL();
+            $query->andWhere($qb2->expr()->In('c.id', $ins));
+            $countQuery->andWhere($qb2->expr()->In('c.id', $ins));
         }
 
         // Other conditions than the ones sent by the Ajax call ?
@@ -369,12 +379,15 @@ class ClienteRepository extends EntityRepository {
             $query->andWhere($searchQuery);
         }
         if ($deudor) {
-            $query->leftJoin('c.cobros', 'co')
-                ->leftJoin('co.facturaElectronica', 'f')
-                ->leftJoin('c.notasDebCredVenta', 'nc')
-                ->leftJoin('nc.notaElectronica', 'ne')
-                ->andWhere('f.saldo>0')
-                ->orWhere('ne.saldo>0');
+            $qb2 = $this->_em->createQueryBuilder();
+            $qb2->select('c2.id')
+                ->from('VentasBundle\Entity\Cliente', 'c2')
+                ->innerJoin('c2.facturasElectronicas', 'fe')
+                ->leftJoin('fe.tipoComprobante', 'ac')
+                ->andWhere("ac.valor not like '%DEB%'")
+                ->andWhere('fe.saldo>0');
+            $ins = $qb2->getDQL();
+            $query->andWhere($qb2->expr()->In('c.id', $ins));
         }
 
         return $query->getQuery()->getResult();

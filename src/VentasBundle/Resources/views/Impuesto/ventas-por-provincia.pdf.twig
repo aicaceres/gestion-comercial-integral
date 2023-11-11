@@ -152,24 +152,44 @@
             </tr>
             {# TOTALES POR ALICUOTA #} 
             <tr vertical-align="middle" text-align="center">
-                <td colspan="5" height="30px" border.type="none" font-size="10px">TOTALES DISCRIMINADOS POR ALICUOTA</td>
-                <td border.type="none"></td>
+                <td colspan="8" height="30px" border.type="none" font-size="10px">TOTALES DISCRIMINADOS POR ALICUOTA</td>
+            </tr>
+            <tr vertical-align="middle" text-align="center">
+                <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"></td>
+                <td colspan="3" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Minorista</strong></td>
+                <td colspan="3" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Mayorista</strong></td>
             </tr>
             <tr>
                 <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Tipo Contribuyente / Alícuota</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Base Imponible</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>IVA</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Total</strong></td>
-                <td colspan="3" border.type="none"><strong></strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Base Imponible</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>IVA</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Total</strong></td>
             </tr>
             {% for categIva,alicuotas in totalesxAlicuota %}
                 {% for alicuota,item in alicuotas %}
                 <tr>
                     <td colspan="2" border.color="black" height="16px" vertical-align="middle" padding-left="10px">{{ categIva }} / {{ alicuota }}</td>
-                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.neto|number_format(2,'.','') }}</td>
-                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.iva|number_format(2,'.','') }}</td>
-                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{ item.subtotal|number_format(2,'.','') }}</td>
-                    <td colspan="3" border.type="none" height="16px"></td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">
+                        {{ (item['Minorista'] is defined ? item['Minorista'].neto : 0)|number_format(2,'.','') }}
+                    </td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">
+                        {{ (item['Minorista'] is defined ? item['Minorista'].iva : 0)|number_format(2,'.','') }}
+                    </td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">
+                        {{ (item['Minorista'] is defined ? item['Minorista'].subtotal : 0)|number_format(2,'.','') }}
+                    </td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">
+                        {{ (item['Mayorista'] is defined ? item['Mayorista'].neto : 0)|number_format(2,'.','') }}
+                    </td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">
+                        {{ (item['Mayorista'] is defined ? item['Mayorista'].iva : 0)|number_format(2,'.','') }}
+                    </td>
+                    <td border.color="black" height="16px" vertical-align="middle" text-align="right" padding-right="10px">
+                        {{ (item['Mayorista'] is defined ? item['Mayorista'].subtotal : 0)|number_format(2,'.','') }}
+                    </td>
                 </tr>
                 {% endfor %} 
             {% endfor %}    

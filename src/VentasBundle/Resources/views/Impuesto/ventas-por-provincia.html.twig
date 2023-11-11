@@ -173,10 +173,18 @@
         </tr>
         {# TOTALES POR ALICUOTA #} 
         <tr class="headercell" style="height: 34px">
-            <th colspan="5" style="border: 1px solid lightgray;">TOTALES DISCRIMINADOS POR ALICUOTA</th>
+            <th colspan="8" style="border: 1px solid lightgray;">TOTALES DISCRIMINADOS POR ALICUOTA</th>
+        </tr>
+        <tr>
+           <th colspan="2"></th>
+           <th colspan="3">Minorista</th>
+           <th colspan="3">Mayorista</th>
         </tr>
         <tr>
             <th colspan="2">Tipo de Contribuyente / Alícuota</th>
+            <th>Base Imponible</th>
+            <th>IVA</th>
+            <th>Total</th>
             <th>Base Imponible</th>
             <th>IVA</th>
             <th>Total</th>
@@ -185,9 +193,12 @@
             {% for alicuota,item in alicuotas %}
                 <tr>
                     <td colspan="2" class="titlecell"> {{ categIva }} <span style="float: right;padding-right:10px;">{{ alicuota }}</span></td>
-                    <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
-                    <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
-                    <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ (item['Minorista'] is defined ? item['Minorista'].neto : 0)|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ (item['Minorista'] is defined ? item['Minorista'].iva : 0)|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ (item['Minorista'] is defined ? item['Minorista'].subtotal : 0)|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ (item['Mayorista'] is defined ? item['Mayorista'].neto : 0)|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ (item['Mayorista'] is defined ? item['Mayorista'].iva : 0)|number_format(2,'.','') }}</td>
+                    <td class="numbercell">{{ (item['Mayorista'] is defined ? item['Mayorista'].subtotal : 0)|number_format(2,'.','') }}</td>
                 </tr>
             {% endfor %} 
         {% endfor %} 

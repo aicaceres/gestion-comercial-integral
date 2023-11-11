@@ -33,10 +33,10 @@ class ClienteController extends Controller {
      */
     public function indexAction() {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente');
-        $em = $this->getDoctrine()->getManager();
-        $entities = $em->getRepository('VentasBundle:Cliente')->findAll();
+//        $em = $this->getDoctrine()->getManager();
+//        $entities = $em->getRepository('VentasBundle:Cliente')->findAll();
         return $this->render('VentasBundle:Cliente:index.html.twig', array(
-                'entities' => $entities,
+                'entities' => null,
         ));
     }
 
@@ -1264,7 +1264,7 @@ class ClienteController extends Controller {
         // Returned objects are of type Town
         $objects = $results["results"];
         // Get total number of objects
-        $total_objects_count = $repo->indexCount();
+        $total_objects_count = $repo->indexCount($deudor);
         // Get total number of results
         $selected_objects_count = count($objects);
         // Get total number of filtered data
@@ -1372,7 +1372,6 @@ class ClienteController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $search = $request->get('searchterm');
         $deudor = $request->get('deudor');
-
         $items = $em->getRepository('VentasBundle:Cliente')->getClientesForExportXls($search, $deudor);
 
         $partial = $this->renderView(
