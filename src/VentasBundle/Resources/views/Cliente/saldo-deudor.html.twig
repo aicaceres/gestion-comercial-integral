@@ -1,0 +1,68 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Clientes con Saldo Deudor</h1>
+<span class="pagedesc">Administración de Clientes</span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+    <form id="printform" name="printform" target="_blank" action="{{ path("export_ventas_cliente_saldodeudor") }}" method="post" style="height:40px; ">
+        <a class="stdbtn" href="{{ path("ventas_cliente") }}">Todos los Clientes</a>
+        <input type="hidden" id="searchterm" name="searchterm"/>
+        <input type="hidden" id="datalist" name="datalist"/>
+        <button class="stdbtn floatright" type="submit" >Exportar</button>
+    </form>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Nombre y Apellido</th>
+                <th>CUIT</th>
+                <th>Dirección</th>
+                <th>Localidad</th>
+                <th class="nosort">Teléfono</th>
+                <th>Tipo Cliente</th>
+                <th>Saldo</th>
+                <th class="nosort actionbutton addbutton">&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% for item in entities if item.saldo>0 %}
+          <tr>
+            <td>{{ item.nombre }}</td>
+            <td>{{ item.cuit }}</td>
+            <td>{{ item.direccion }}</td>
+            <td>{{ item.localidad }}</td>
+            <td>{{ item.telefono }}</td>
+            <td>{{ item.tipoCliente }}</td>
+            <td class="alignright">{{ item.saldo|number_format(3,'.','') }}</td>
+            <td>
+              <a href="{{ path('ventas_cliente_edit', { 'id': item.id }) }}" class="editar btn btnaction btn_pencil" target="_blank" title="Editar"></a>
+              <a href="{{ path('ventas_cliente_ctacte', { 'cliId': item.id }) }}" class="editar btn btnaction btn_list" target="_blank" title="Cta. Cte."></a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+jQuery(document).ready(function($){
+   $('#printform').on('submit',function(){
+        $('#searchterm').val( $('#dyntable2_filter input').val() );
+        var datos = [];
+        var oTable = $('#dyntable2').dataTable();
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
+            value.splice(7);
+            datos[index] = value;
+        });
+        $('#datalist').val(JSON.stringify(datos));
+    });
+});
+</script>
+{% endblock %}

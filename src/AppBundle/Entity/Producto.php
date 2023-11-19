@@ -53,7 +53,7 @@ class Producto {
 
     /**
      * @var string $costo
-     * @ORM\Column(name="costo", type="decimal", scale=3,  nullable=false)
+     * @ORM\Column(name="costo", type="decimal", precision=15, scale=3,  nullable=false)
      * @Gedmo\Versioned()
      */
     protected $costo;

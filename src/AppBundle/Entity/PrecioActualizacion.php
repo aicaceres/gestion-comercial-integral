@@ -18,57 +18,57 @@ class PrecioActualizacion
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
-    
+
     /**
      * @var string $tipoActualizacion
      * @ORM\Column(name="tipo_actualizacion", type="string")
      */
     protected $tipoActualizacion;
-    
+
     /**
      * @var string $valor
-     * @ORM\Column(name="valor", type="decimal", scale=2)
+     * @ORM\Column(name="valor", type="decimal", precision=15, scale=2)
      */
     protected $valor;
-    
+
     /**
      * @var string $criteria
      * @ORM\Column(name="criteria", type="string", nullable=true)
      */
     protected $criteria;
-    
+
     /**
      * @var string $valores
      * @ORM\Column(name="valores", type="string", nullable=true)
      */
     protected $valores;
-    
+
     /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\PrecioLista", inversedBy="actualizaciones")
      * @ORM\JoinColumn(name="precio_lista_id", referencedColumnName="id")
      */
-    protected $precioLista;    
-    
+    protected $precioLista;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
      */
     private $created;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="created_by", referencedColumnName="id")
      */
-    private $createdBy;     
-    
+    private $createdBy;
+
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -84,14 +84,14 @@ class PrecioActualizacion
     public function setTipoActualizacion($tipoActualizacion)
     {
         $this->tipoActualizacion = $tipoActualizacion;
-    
+
         return $this;
     }
 
     /**
      * Get tipoActualizacion
      *
-     * @return string 
+     * @return string
      */
     public function getTipoActualizacion()
     {
@@ -107,14 +107,14 @@ class PrecioActualizacion
     public function setValor($valor)
     {
         $this->valor = $valor;
-    
+
         return $this;
     }
 
     /**
      * Get valor
      *
-     * @return string 
+     * @return string
      */
     public function getValor()
     {
@@ -130,14 +130,14 @@ class PrecioActualizacion
     public function setCriteria($criteria)
     {
         $this->criteria = $criteria;
-    
+
         return $this;
     }
 
     /**
      * Get criteria
      *
-     * @return string 
+     * @return string
      */
     public function getCriteria()
     {
@@ -153,14 +153,14 @@ class PrecioActualizacion
     public function setCreated($created)
     {
         $this->created = $created;
-    
+
         return $this;
     }
 
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -175,14 +175,14 @@ class PrecioActualizacion
      */
     public function setPrecioLista(\AppBundle\Entity\PrecioLista $precioLista = null)
     {
-        $this->precioLista = $precioLista;    
+        $this->precioLista = $precioLista;
         return $this;
     }
 
     /**
      * Get precioLista
      *
-     * @return \AppBundle\Entity\PrecioLista 
+     * @return \AppBundle\Entity\PrecioLista
      */
     public function getPrecioLista()
     {
@@ -197,14 +197,14 @@ class PrecioActualizacion
      */
     public function setCreatedBy(\ConfigBundle\Entity\Usuario $createdBy = null)
     {
-        $this->createdBy = $createdBy;    
+        $this->createdBy = $createdBy;
         return $this;
     }
 
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -220,14 +220,14 @@ class PrecioActualizacion
     public function setValores($valores)
     {
         $this->valores = $valores;
-    
+
         return $this;
     }
 
     /**
      * Get valores
      *
-     * @return string 
+     * @return string
      */
     public function getValores()
     {

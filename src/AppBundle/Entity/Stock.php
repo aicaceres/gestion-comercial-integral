@@ -53,7 +53,7 @@ class Stock {
 
     /**
      * @var integer $costo
-     * @ORM\Column(name="costo", type="decimal", scale=3, nullable=true )
+     * @ORM\Column(name="costo", type="decimal", precision=15, scale=3, nullable=true )
      */
     protected $costo;
 

@@ -140,7 +140,6 @@ class NotaDebCredController extends Controller {
             $response['msg'] = 'La caja está cerrada. Debe realizar la apertura para iniciar';
             return new JsonResponse($response);
         }
-//        $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
 
         if ($notadebcredId) {
             $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($notadebcredId);
@@ -151,9 +150,6 @@ class NotaDebCredController extends Controller {
             $entity->setUnidadNegocio($unidneg);
         }
         $form = $this->createCreateForm($entity, $datos['tipoComprobante']);
-
-//        $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->find($datos['tipoComprobante']);
-//        $form->get('tipoComprobante')->setData(null);
 
         $form->handleRequest($request);
 
@@ -168,25 +164,6 @@ class NotaDebCredController extends Controller {
                 $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
                 $entity->setFormaPago($formapago);
                 $entity->setCotizacion($entity->getMoneda()->getCotizacion());
-
-//                $tipoDocReq = $request->get('ventasbundle_tipoDocumentoCliente');
-//                if ($tipoDocReq) {
-//                    $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($tipoDocReq);
-//                    $docNro = $request->get('ventasbundle_nroDocumentoCliente') ? $request->get('ventasbundle_nroDocumentoCliente') : 1;
-//                    $entity->setTipoDocumentoCliente($tipoDoc);
-//                    $entity->setNroDocumentoCliente($docNro);
-//                }
-//                else if ($cliente->getCuit()) {
-//                    $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->filterByCodigo(80, 'tipo-documento');
-//                    $entity->setTipoDocumentoCliente($tipoDoc);
-//                    $entity->setNroDocumentoCliente($cliente->getCuit());
-//                }
-//                else {
-//                    $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->filterByCodigo(96, 'tipo-documento');
-//                    $entity->setTipoDocumentoCliente($tipoDoc);
-//                    $entity->setNroDocumentoCliente(1);
-//                    $entity->setNombreCliente($request->get('ventasbundle_nombreCliente') ? $request->get('ventasbundle_nombreCliente') : 'CONSUMIDOR FINAL');
-//                }
                 $tipoDocReq = $request->get('ventasbundle_tipoDocumentoCliente');
                 if ($tipoDocReq) {
                     $tipoDoc = $em->getRepository('ConfigBundle:Parametro')->find($tipoDocReq);
@@ -221,7 +198,6 @@ class NotaDebCredController extends Controller {
                 }
 
                 $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
-//                 $iva = $tributos = array();
                 if ($entity->getDetalles()) {
                     $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
                     $productos = $request->get('ventasbundle_producto');
@@ -287,7 +263,6 @@ class NotaDebCredController extends Controller {
                 $entity->setPercIibb($impTrib);
                 $entity->setTotal($impTotal);
                 // signo
-//                $entity->setSigno($tipo->getSigno());
                 $entity->setEstado('CREADO');
                 $em->persist($entity);
                 $em->flush();

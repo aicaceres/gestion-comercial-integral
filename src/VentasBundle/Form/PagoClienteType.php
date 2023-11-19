@@ -47,10 +47,18 @@ class PagoClienteType extends AbstractType
                       $qb = $repository->createQueryBuilder('f')
                               ->leftJoin('f.cobro', 'c')
                               ->leftJoin('f.notaDebCred', 'n')
-                              ->where('c.cliente = :cli')
-                              ->orWhere('n.cliente = :cli')
+                              ->where('f.cliente = :cli')
                               ->andWhere('f.saldo>0')
+                              ->orWhere("n.signo ='-' AND n.comprobanteAsociado is null and n.cliente = :cli")
                               ->setParameter('cli', $cliente);
+                      // $qb = $repository->createQueryBuilder('f')
+                      //         ->leftJoin('f.cobro', 'c')
+                      //         ->leftJoin('f.notaDebCred', 'n')
+                      //         ->where('c.cliente = :cli')
+                      //         ->orWhere('n.cliente = :cli')
+                      //         ->andWhere('f.saldo>0')
+                      //         ->setParameter('cli', $cliente);
+                      // var_dump($qb->getQuery()->getSql());die;
                       return $qb;
                   },))
         ;

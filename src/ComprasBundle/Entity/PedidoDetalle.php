@@ -61,7 +61,7 @@ class PedidoDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", scale=3, nullable=true )
+     * @ORM\Column(name="precio", type="decimal", precision=15, scale=3, nullable=true )
      */
     protected $precio;
 

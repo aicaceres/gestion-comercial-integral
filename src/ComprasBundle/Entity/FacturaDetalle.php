@@ -49,7 +49,7 @@ class FacturaDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="precio", type="decimal", precision=15, precision=15, scale=3 )
      */
     protected $precio;
 

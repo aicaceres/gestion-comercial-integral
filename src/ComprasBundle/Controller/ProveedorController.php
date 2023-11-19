@@ -4,6 +4,7 @@ namespace ComprasBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -631,7 +632,6 @@ class ProveedorController extends Controller {
                     $totalPago += $detalle->getImporte();
                 }
 
-//                $montoImputar = round($totalPago + $formData['montoRentas'] + $formData['montoGanancias'], 3);
                 $montoPago = round($formData['montoPago'], 3);
                 $entity->setMontoRetRentas($formData['montoRentas']);
                 $entity->setMontoRetGanancias($formData['montoGanancias']);
@@ -641,8 +641,53 @@ class ProveedorController extends Controller {
                 $entity->setImporte($totalPago);
                 $entity->setMontoIva($formData['montoIva']);
                 $entity->setMontoPago($formData['montoPago']);
+
                 // recorrer comprobantes, imputar el pago
                 if ($request->get('txtconcepto')) {
+                    $ncs = new ArrayCollection();
+                    $fcs = new ArrayCollection();
+                    foreach ($conceptos as $item) {
+                      $doc = explode('-', $item);
+                      if ($doc[0] == 'FAC') {
+                          $comprob = $em->getRepository('ComprasBundle:Factura')->find($doc[1]);
+                          $fcs->add($comprob);
+                      }
+                      else {
+                          $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
+                          if($comprob->getSigno() == '-'){
+                             $ncs->add($comprob);
+                          }else{
+                            $fcs->add($comprob);
+                          }
+                      }
+                    }
+                    if($ncs){
+                      // hay NC para imputar a las FC
+                      $saldoNc = 0;
+                      foreach ($ncs as $nc) {
+                        $saldoNc = $saldoNc + $nc->getSaldo();
+                        foreach ($fcs as $fc) {
+                          if($saldoNc == 0) break;
+                          $tipofc = substr( $fc->getAfipComprobante()->getValor(), 0, 3 );
+                          if( $tipofc === "FAC"){
+                            $nc->addFactura($fc);
+                          }
+                          $estadofc = '';
+                          if($saldoNc > $fc->getSaldo()){
+                            $saldoNc -= $fc->getSaldo();
+                            $fc->setSaldo(0);
+                            $estadofc = $tipofc == 'FAC' ? 'PAGADO' : 'ACREDITADO';
+                          }else{
+                            $fc->setSaldo( $fc->getSaldo() - $saldoNc );
+                            $saldoNc = 0;
+                            $estadofc = $tipofc == 'FAC' ? 'PAGO PARCIAL' : 'PENDIENTE';
+                          }
+                          $fc->setEstado($estadofc);
+                        }
+                        $nc->setSaldo($saldoNc);
+                        $nc->setEstado(($saldoNc > 0) ? 'PENDIENTE' : 'ACREDITADO' );
+                      }
+                    }
                     foreach ($conceptos as $item) {
                         $doc = explode('-', $item);
                         if ($doc[0] == 'FAC') {
@@ -652,20 +697,23 @@ class ProveedorController extends Controller {
                             $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
                         }
                         $montocomp = $saldoComprob = round($comprob->getSaldo(), 3);
+                        $estadoComp = '';
                         if ($montoPago >= $saldoComprob) {
                             //alcanza para cubrir el saldo
                             $montoPago = round(($montoPago - $saldoComprob), 3);
                             $comprob->setSaldo(0);
-                            $comprob->setEstado('PAGADO');
+                            $estadoComp = $doc[0] === 'FAC' ? 'PAGADO' : 'ACREDITADO';
+                            // $comprob->setEstado('PAGADO');
                         }
                         else {
                             //no alcanza, impacta el total
                             $montocomp = $montoPago;
                             $comprob->setSaldo(round(($saldoComprob - $montoPago), 3));
                             $montoPago = 0;
-                            $comprob->setEstado('PAGO PARCIAL');
+                            $estadoComp = $doc[0] === 'FAC' ? 'PAGO PARCIAL' : 'PENDIENTE';
+                            // $comprob->setEstado('PAGO PARCIAL');
                         }
-//                    $comprob->setRetencionesAplicadas(1);
+                        $comprob->setEstado($estadoComp);
                         $comptxt = array('clave' => $item, 'monto' => $montocomp);
                         array_push($txtConcepto, $comptxt);
                         $em->persist($comprob);
@@ -680,7 +728,6 @@ class ProveedorController extends Controller {
                 $equipo->setNroPagoCompra($equipo->getNroPagoCompra() + 1);
                 $baseImponibleGanancias = $formData['baseImponibleRentas'];
                 // si hay retencion ganancias guardar el acumulado
-//                if ($entity->getRetencionGanancias() > 0) {
                 // buscar periodo
                 $hoy = new \DateTime();
                 $retencionGanancia = $em->getRepository('ComprasBundle:RetencionGanancia')->findOneBy(
@@ -695,7 +742,6 @@ class ProveedorController extends Controller {
                 $retencionGanancia->setAcumuladoRetencion($retencionGanancia->getAcumuladoRetencion() + $formData['montoGanancias']);
 
                 $em->persist($retencionGanancia);
-//                }
 
                 $em->persist($entity);
                 $em->persist($equipo);
@@ -882,6 +928,13 @@ class ProveedorController extends Controller {
         $id = $request->get('prov');
         $em = $this->getDoctrine()->getManager();
         $facturas = $em->getRepository('ComprasBundle:Proveedor')->getFacturasImpagas($id);
+        foreach ($facturas as &$item) {
+          if($item['tipo']==='CRE'){
+            $item['total'] *= -1;
+            $item['iva'] *= -1;
+            $item['saldo'] *= -1;
+          }
+        }
         // genera select de comprobantes adeudados
         $partial = $this->renderView('ComprasBundle:Proveedor:factura-proveedor-row.html.twig',
             array('facturas' => $facturas));
@@ -959,15 +1012,20 @@ class ProveedorController extends Controller {
         if (is_array($selected)) {
             foreach ($selected as $sel) {
                 $comp = explode("-", $sel);
+                $signo = 1;
                 if ($comp[0] == 'FAC') {
                     $obj = $em->getRepository('ComprasBundle:Factura')->find($comp[1]);
                 }
                 else {
                     $obj = $em->getRepository('ComprasBundle:NotaDebCred')->find($comp[1]);
+                    if($obj->getSigno()==='-'){
+                      $signo = -1;
+                    }
+
                 }
-                $montoTotal += $obj->getSaldo();
-                $netoImp += $obj->getSaldoImponible();
-                $ivaImp += $obj->getSaldo() - $obj->getSaldoImponible();
+                $montoTotal += ($obj->getSaldo() * $signo);
+                $netoImp += ($obj->getSaldoImponible() * $signo);
+                $ivaImp += ($obj->getSaldo() * $signo) - ($obj->getSaldoImponible() * $signo);
                 $porcImp += $obj->getPorcImponible();
             }
             $porcImp = $porcImp / count($selected);

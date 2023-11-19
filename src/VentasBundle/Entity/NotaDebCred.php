@@ -64,28 +64,28 @@ class NotaDebCred {
 
     /**
      * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", scale=2,nullable=true )
+     * @ORM\Column(name="iva", type="decimal", precision=15, scale=2,nullable=true )
      * @Gedmo\Versioned()
      */
     protected $iva;
 
     /**
      * @var integer $percIibb
-     * @ORM\Column(name="perc_iibb", type="decimal", scale=2,nullable=true )
+     * @ORM\Column(name="perc_iibb", type="decimal", precision=15, scale=2,nullable=true )
      * @Gedmo\Versioned()
      */
     protected $percIibb = 0;
 
     /**
      * @var integer $total
-     * @ORM\Column(name="total", type="decimal", scale=3 )
+     * @ORM\Column(name="total", type="decimal", precision=15, scale=3 )
      * @Gedmo\Versioned()
      */
     protected $total;
 
     /**
      * @var integer $saldo
-     * @ORM\Column(name="saldo", type="decimal", scale=3,nullable=true )
+     * @ORM\Column(name="saldo", type="decimal", precision=15, scale=3,nullable=true )
      * @Gedmo\Versioned()
      */
     protected $saldo = 0;
@@ -154,7 +154,7 @@ class NotaDebCred {
 
     /**
      * @var string $percepcionRentas
-     * @ORM\Column(name="percepcion_rentas", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="percepcion_rentas", type="decimal", precision=15, scale=2, nullable=true)
      */
     protected $percepcionRentas;
 

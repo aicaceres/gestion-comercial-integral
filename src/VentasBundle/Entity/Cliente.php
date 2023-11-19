@@ -84,14 +84,14 @@ class Cliente {
 
     /**
      * @var integer $saldoInicial
-     * @ORM\Column(name="saldo_inicial", type="decimal", scale=2, nullable=true )
+     * @ORM\Column(name="saldo_inicial", type="decimal", precision=15, scale=2, nullable=true )
      * @Gedmo\Versioned()
      */
     protected $saldoInicial;
 
     /**
      * @var integer $limiteCredito
-     * @ORM\Column(name="limite_credito", type="decimal", scale=2, nullable=true )
+     * @ORM\Column(name="limite_credito", type="decimal", precision=15, scale=2, nullable=true )
      */
     protected $limiteCredito;
 
@@ -300,7 +300,7 @@ class Cliente {
         foreach ($pagos as $pag) {
             $saldo -= $pag->getTotal();
         }
-        return $saldo;
+        return round($saldo,3);
     }
 
     public function getFechaUltimaCompra() {

@@ -133,13 +133,14 @@ class ProveedorRepository extends EntityRepository {
             ->setParameter('agr', $prov)
             ->orderBy('f.fechaFactura');
         $notacred = $this->_em->createQueryBuilder('c')
-            ->select("c.id,'DEB' tipo,c.tipoNota letra, c.fecha, c.total, c.iva, c.saldo, c.nroComprobante")
+            ->select("c.id, CASE WHEN c.signo='+' then 'DEB' ELSE 'CRE' END tipo,c.tipoNota letra, c.fecha, c.total, c.iva, c.saldo, c.nroComprobante")
             ->from('ComprasBundle\Entity\NotaDebCred', 'c')
             ->innerJoin('c.proveedor', 'p')
+            ->leftJoin('c.facturas','f')
             ->where('p.id=:agr')
             ->andWhere('c.saldo>0')
-            ->andWhere("c.signo='+'")
             ->andWhere("c.estado!='CANCELADO'")
+            ->andWhere('f.id is null')
             ->setParameter('agr', $prov)
             ->orderBy('c.fecha');
         $datos = array_merge($facturas->getQuery()->getArrayResult(), $notacred->getQuery()->getArrayResult());

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="application/vnd.ms-excel; charset=UTF-8" />
+   </head>
+   <body  >
+<style>
+table{ font-family:'Arial';font-size: 12px; }
+table tr th{
+    border-top: 1px solid gray;
+    border-left: 1px solid gray;
+    background: #CCCCCC;
+    font-size: 13px;
+    }
+table tr td{
+    border: 1px solid black;
+    height: 20px;
+    vertical-align: middle;
+    padding: 5px;
+}
+.align-right{
+    text-align: right;
+    padding-right: 10px !important;
+}
+</style>
+      <h2 text-align="center"> Listado de Clientes con Saldo Deudor</h2>
+        {% if search %}
+            <h4> Término de Búsqueda: "{{search}}" </h4>
+        {%endif%}
+        <table cellspacing="0">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre y Apellido</th>
+                    <th>CUIT</th>
+                    <th>Dirección</th>
+                    <th>Localidad</th>
+                    <th>Teléfono</th>
+                    <th>Tipo Cliente</th>
+                    <th>Saldo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td class="align-right">{{loop.index}}</td>
+                        <td>{{item[0]}}</td>
+                        <td>{{item[1]}}</td>
+                        <td>{{item[2]}}</td>
+                        <td>{{item[3]}}</td>
+                        <td>{{item[4]}}</td>
+                        <td>{{item[5]}}</td>
+                        <td>{{item[6]|number_format(3,'.','')}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+   </body>
+</html>

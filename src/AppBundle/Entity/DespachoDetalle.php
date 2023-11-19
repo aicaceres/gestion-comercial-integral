@@ -17,7 +17,7 @@ class DespachoDetalle
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
-    
+
     /**
      * @var integer $orden
      * @ORM\Column(name="orden", type="integer",nullable=true)
@@ -26,33 +26,33 @@ class DespachoDetalle
 
      /**
      *@ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto")
-     *@ORM\JoinColumn(name="producto_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
     protected $producto;
-    
+
      /**
      * @var integer $cantidad
      * @ORM\Column(name="cantidad", type="decimal", scale=3 )
      */
-    protected $cantidad;    
-    
+    protected $cantidad;
+
     /**
      * @ORM\Column(name="bulto", type="boolean", nullable=true)
      */
-    protected $bulto = false;   
-   
+    protected $bulto = false;
+
      /**
      * @var integer $cantidadxBulto
      * @ORM\Column(name="cantidad_x_bulto", type="integer", nullable=true )
      */
-    protected $cantidadxBulto;    
+    protected $cantidadxBulto;
 
      /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", scale=3, nullable=true )
+     * @ORM\Column(name="precio", type="decimal", precision=15, scale=3, nullable=true )
      */
     protected $precio;
-    
+
     /**
      * @var integer $entregado
      * @ORM\Column(name="entregado", type="decimal", scale=3, nullable=true)
@@ -63,8 +63,8 @@ class DespachoDetalle
     * @ORM\OneToOne(targetEntity="AppBundle\Entity\PedidoDetalle", inversedBy="despachoDetalle")
     * @ORM\JoinColumn(name="stock_pedido_detalle_id", referencedColumnName="id")
     */
-    protected $pedidoDetalle;      
-    
+    protected $pedidoDetalle;
+
      /**
      * @ORM\ManyToMany(targetEntity="ComprasBundle\Entity\LoteProducto", inversedBy="despachoDetalles")
      * @ORM\JoinTable(name="lotes_x_despachodetalle",
@@ -72,14 +72,14 @@ class DespachoDetalle
      *      inverseJoinColumns={@ORM\JoinColumn(name="compras_lote_producto_id", referencedColumnName="id")}
      * )
      */
-    private $lotes;    
-    
+    private $lotes;
+
      /**
      *@ORM\ManyToOne(targetEntity="AppBundle\Entity\Despacho", inversedBy="detalles")
-     *@ORM\JoinColumn(name="stock_despacho_id", referencedColumnName="id") 
+     *@ORM\JoinColumn(name="stock_despacho_id", referencedColumnName="id")
      */
-    protected $despacho;    
-    
+    protected $despacho;
+
     /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
@@ -93,7 +93,7 @@ class DespachoDetalle
      * @ORM\Column(type="datetime")
      */
     private $updated;
-    
+
     /**
      * @var User $createdBy
      * @Gedmo\Blameable(on="create")
@@ -108,8 +108,8 @@ class DespachoDetalle
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Usuario")
      * @ORM\JoinColumn(name="updated_by", referencedColumnName="id")
      */
-    private $updatedBy;       
-    
+    private $updatedBy;
+
 
     // variable stock para mostrar en despacho
     protected $stock = 0;
@@ -118,15 +118,15 @@ class DespachoDetalle
     }
     public function setStock($stock)
     {
-        $this->stock = $stock;    
+        $this->stock = $stock;
         return $this;
     }
-    
-    
+
+
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -142,14 +142,14 @@ class DespachoDetalle
     public function setOrden($orden)
     {
         $this->orden = $orden;
-    
+
         return $this;
     }
 
     /**
      * Get orden
      *
-     * @return integer 
+     * @return integer
      */
     public function getOrden()
     {
@@ -165,14 +165,14 @@ class DespachoDetalle
     public function setCantidad($cantidad)
     {
         $this->cantidad = $cantidad;
-    
+
         return $this;
     }
 
     /**
      * Get cantidad
      *
-     * @return integer 
+     * @return integer
      */
     public function getCantidad()
     {
@@ -188,14 +188,14 @@ class DespachoDetalle
     public function setEntregado($entregado)
     {
         $this->entregado = $entregado;
-    
+
         return $this;
     }
 
     /**
      * Get entregado
      *
-     * @return integer 
+     * @return integer
      */
     public function getEntregado()
     {
@@ -211,14 +211,14 @@ class DespachoDetalle
     public function setProducto(\AppBundle\Entity\Producto $producto = null)
     {
         $this->producto = $producto;
-    
+
         return $this;
     }
 
     /**
      * Get producto
      *
-     * @return \AppBundle\Entity\Producto 
+     * @return \AppBundle\Entity\Producto
      */
     public function getProducto()
     {
@@ -234,14 +234,14 @@ class DespachoDetalle
     public function setDespacho(\AppBundle\Entity\Despacho $despacho = null)
     {
         $this->despacho = $despacho;
-    
+
         return $this;
     }
 
     /**
      * Get despacho
      *
-     * @return \AppBundle\Entity\Despacho 
+     * @return \AppBundle\Entity\Despacho
      */
     public function getDespacho()
     {
@@ -264,7 +264,7 @@ class DespachoDetalle
     /**
      * Get bulto
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getBulto()
     {
@@ -287,7 +287,7 @@ class DespachoDetalle
     /**
      * Get cantidadxBulto
      *
-     * @return integer 
+     * @return integer
      */
     public function getCantidadxBulto()
     {
@@ -310,7 +310,7 @@ class DespachoDetalle
     /**
      * Get pedidoDetalle
      *
-     * @return \AppBundle\Entity\PedidoDetalle 
+     * @return \AppBundle\Entity\PedidoDetalle
      */
     public function getPedidoDetalle()
     {
@@ -349,24 +349,24 @@ class DespachoDetalle
     /**
      * Get lotes
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getLotes()
     {
         return $this->lotes;
     }
-    
+
     public function getLotesTxt(){
         $txt = '';
         foreach ($this->lotes as $value) {
-           $txt = $txt. '<br> '. $value->__toString(); 
+           $txt = $txt. '<br> '. $value->__toString();
         }
         return $txt;
-    }       
-     
-    
-    
-    
+    }
+
+
+
+
     public function getCantidadTxt()
     {
         if( $this->bulto ){
@@ -376,7 +376,7 @@ class DespachoDetalle
         }
         return $txt;
     }
-    
+
     public function getCantidadTotal(){
         if( $this->bulto )  return $this->cantidad * $this->cantidadxBulto;
         else                return $this->cantidad;
@@ -403,19 +403,19 @@ class DespachoDetalle
     public function getSolicitadoTxt()
     {
         if( is_null( $this->getPedidoDetalle() ) )
-            return NULL;        
+            return NULL;
         return $this->getPedidoDetalle()->getCantidadTxt();
     }
-    
+
     public function hayInconsistencia(){
         if( $this->getDespacho()->getEstado()=='ENTREGADO' && $this->getCantidadTotal() <> $this->getEntregado() )
             return true;
         else
-            return false;   
+            return false;
     }
-    
-        
-// Para detalle del despacho    
+
+
+// Para detalle del despacho
     public function getCantidadItemTxt()
     {
         if( $this->bulto ){
@@ -428,25 +428,25 @@ class DespachoDetalle
     public function getCantidadItemTotal(){
         if( $this->bulto )  return number_format((float) ($this->getCantidad()*$this->cantidadxBulto), 3, '.', '');
         else                return number_format((float)$this->getCantidad(), 3, '.', '');
-    }    
+    }
     public function getLotesItemTxt(){
         $txt = '';
         $div = '<br>';
-        foreach ($this->lotes as $value) {           
-           $txt = $txt. $div. $value->__toString(); 
+        foreach ($this->lotes as $value) {
+           $txt = $txt. $div. $value->__toString();
            $div = ' / ';
         }
         return $txt;
-    }       
+    }
     public function getLotesInputTxt(){
         $txt = '';
         $div = '';
-        foreach ($this->lotes as $value) {           
-           $txt = $txt. $div. $value->__toString(); 
+        foreach ($this->lotes as $value) {
+           $txt = $txt. $div. $value->__toString();
            $div = ' / ';
         }
         return $txt;
-    }       
+    }
 
 
     /**
@@ -465,7 +465,7 @@ class DespachoDetalle
     /**
      * Get created
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreated()
     {
@@ -488,7 +488,7 @@ class DespachoDetalle
     /**
      * Get updated
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdated()
     {
@@ -511,7 +511,7 @@ class DespachoDetalle
     /**
      * Get createdBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getCreatedBy()
     {
@@ -534,7 +534,7 @@ class DespachoDetalle
     /**
      * Get updatedBy
      *
-     * @return \ConfigBundle\Entity\Usuario 
+     * @return \ConfigBundle\Entity\Usuario
      */
     public function getUpdatedBy()
     {
@@ -557,7 +557,7 @@ class DespachoDetalle
     /**
      * Get precio
      *
-     * @return string 
+     * @return string
      */
     public function getPrecio()
     {

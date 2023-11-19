@@ -29,13 +29,13 @@ class Precio {
 
     /**
      * @var string $costo
-     * @ORM\Column(name="costo", type="decimal", scale=3,  nullable=true)
+     * @ORM\Column(name="costo", type="decimal", precision=15, scale=3,  nullable=true)
      */
     protected $costo;
 
     /**
      * @var string $precio
-     * @ORM\Column(name="precio", type="decimal", scale=3,  nullable=false)
+     * @ORM\Column(name="precio", type="decimal", precision=15, scale=3,  nullable=false)
      * @Gedmo\Versioned()
      */
     protected $precio;

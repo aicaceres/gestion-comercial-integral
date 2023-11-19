@@ -130,7 +130,7 @@ class Proveedor {
 
     /**
      * @var integer $saldoInicial
-     * @ORM\Column(name="saldo_inicial", type="decimal", scale=3, nullable=true )
+     * @ORM\Column(name="saldo_inicial", type="decimal", precision=15, scale=3, nullable=true )
      */
     protected $saldoInicial = 0;
 

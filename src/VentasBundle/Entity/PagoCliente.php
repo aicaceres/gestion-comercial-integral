@@ -50,7 +50,7 @@ class PagoCliente {
 
     /**
      * @var integer $total
-     * @ORM\Column(name="total", type="decimal", scale=2 )
+     * @ORM\Column(name="total", type="decimal", precision=15, scale=2 )
      */
     protected $total = 0;
 

@@ -165,7 +165,7 @@ class UtilsController extends Controller {
             }
             else {
                 $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
-                $tipo = ' [DEB ';
+                $tipo = ' ['.$doc[0].' ';
             }
             $text = $text . $tipo . $comprob->getNroComprobante() . ' $' . $item->monto . '] ';
         }
@@ -185,7 +185,7 @@ class UtilsController extends Controller {
             }
             else {
                 $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
-                $tipo = ' DEB N°';
+                $tipo = ' '.$doc[0].' N°';
             }
             //$factura = $em->getRepository('ComprasBundle:Factura')->find($item->id);
             //$text = $tipo . $comprob->getNroComprobante() . ' $' . $item->monto . ' ';

@@ -4,6 +4,7 @@ namespace VentasBundle\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Doctrine\Common\Collections\ArrayCollection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -33,10 +34,22 @@ class ClienteController extends Controller {
      */
     public function indexAction() {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente');
-//        $em = $this->getDoctrine()->getManager();
-//        $entities = $em->getRepository('VentasBundle:Cliente')->findAll();
         return $this->render('VentasBundle:Cliente:index.html.twig', array(
                 'entities' => null,
+        ));
+    }
+
+    /**
+     * @Route("/saldoDeudor", name="ventas_cliente_saldodeudor")
+     * @Method("GET")
+     * @Template()
+     */
+    public function saldoDeudorAction() {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente');
+        $em = $this->getDoctrine()->getManager();
+        $entities = $em->getRepository('VentasBundle:Cliente')->findAll();
+        return $this->render('VentasBundle:Cliente:saldo-deudor.html.twig', array(
+                'entities' => $entities,
         ));
     }
 
@@ -613,6 +626,42 @@ class ClienteController extends Controller {
                     $totalPago += $detalle->getImporte();
                 }
                 $comprobantes = $entity->getComprobantes();
+                // recorrer para imputar NC si corresponde
+                $ncs = new ArrayCollection();
+                $fcs = new ArrayCollection();
+                foreach ($comprobantes as $comp) {
+                  if($comp->getNotaDebCred()){
+                    if($comp->getNotaDebCred()->getSigno() === '-'){
+                      // guardar nc para imputar a las fc
+                      $ncs->add($comp);
+                    }
+                  }else{
+                      $fcs->add($comp);
+                    }
+                }
+                if($ncs){
+                  // hay NC para imputar a las FC
+                  $saldoNc = 0;
+                  foreach ($ncs as $nc) {
+                    $saldoNc += $nc->getTotal();
+                    foreach ($fcs as $fc) {
+                      if($saldoNc == 0) break;
+                      if( !$nc->getNotaDebCred()->getComprobanteAsociado() ){
+                        $nc->getNotaDebCred()->setComprobanteAsociado($fc);
+                      }else{
+                        $msg = $nc->getNotaDebCred()->getConcepto() . ' - Saldo imputado a '.$fc->getComprobanteTxt();
+                        $nc->getNotaDebCred()->setConcepto($msg);
+                      }
+                      if($saldoNc > $fc->getSaldo()){
+                        $saldoNc -= $fc->getSaldo();
+                        $fc->setSaldo(0);
+                      }else{
+                        $fc->setSaldo( $fc->getSaldo() - $saldoNc );
+                        $saldoNc = 0;
+                      }
+                    }
+                  }
+                }
                 $montoNotaCredito = 0;
                 if ($entity->getGeneraNotaCredito()) {
                     // marcar como cancelados los comprobantes
@@ -994,7 +1043,20 @@ class ClienteController extends Controller {
         // facturas y notas de débito
         $ids = $request->get('ids');
         $em = $this->getDoctrine()->getManager();
-        $saldo = $em->getRepository('VentasBundle:FacturaElectronica')->findSaldoComprobantes($ids);
+        $saldo = 0;
+        foreach ($ids as $id) {
+          $fact = $em->getRepository('VentasBundle:FacturaElectronica')->find($id);
+          if($fact->getNotaDebCred()){
+            if($fact->getNotaDebCred()->getSigno()=='-'){
+              $saldo -= $fact->getTotal();
+            }else{
+              $saldo += $fact->getSaldo();
+            }
+          }else{
+            $saldo += $fact->getSaldo();
+          }
+        }
+        // $saldo = $em->getRepository('VentasBundle:FacturaElectronica')->findSaldoComprobantes($ids);
         return new Response(round($saldo, 2));
     }
 
@@ -1189,6 +1251,28 @@ class ClienteController extends Controller {
 
         // Send all this stuff back to DataTables
         return new Response($response);
+    }
+
+    /**
+     * @Route("/exportClientesSaldoDeudor", name="export_ventas_cliente_saldodeudor")
+     * @Method("POST")
+     */
+    public function exportClientesSaldoDeudorAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $search = $request->get('searchterm');
+        $items = json_decode($request->get('datalist'));
+        $partial = $this->renderView(
+            'VentasBundle:Cliente:export-saldodeudor-xls.html.twig',
+            array('items' => $items, 'search' => $search)
+        );
+        $hoy = new \DateTime();
+        $fileName = 'Clientes_saldoDeudor_' . $hoy->format('dmY_Hi');
+        $response = new Response();
+        $response->setStatusCode(200);
+        $response->headers->set('Content-Type', 'application/vnd.ms-excel; charset=UTF-8');
+        $response->headers->set('Content-Disposition', 'filename="' . $fileName . '.xls"');
+        $response->setContent($partial);
+        return $response;
     }
 
     /**

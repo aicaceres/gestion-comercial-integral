@@ -65,7 +65,7 @@ class Cheque {
     protected $fecha;
     /**
      * @var string $valor
-     * @ORM\Column(name="valor", type="decimal", scale=3, nullable=false)
+     * @ORM\Column(name="valor", type="decimal", precision=15, scale=3, nullable=false)
      */
     protected $valor;
 

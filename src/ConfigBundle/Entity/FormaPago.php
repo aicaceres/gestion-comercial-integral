@@ -86,7 +86,7 @@ class FormaPago {
 
     /**
      * @var integer $mora
-     * @ORM\Column(name="mora", type="decimal",scale=2,nullable=true)
+     * @ORM\Column(name="mora", type="decimal", precision=15,scale=2,nullable=true)
      */
     protected $mora;
 

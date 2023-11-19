@@ -11,12 +11,12 @@
 <div id="contentwrapper" class="contentwrapper">
     <form id="printform" name="printform" target="_blank" action="{{ path("export_ventas_cliente") }}" method="post" style="height:40px; ">
             &nbsp;&nbsp;&nbsp;
-            <label><strong>Clientes con Saldo Deudor: </strong></label>
-            <input type="checkbox" name="deudor" id="deudor" />
+            <a class="stdbtn" href="{{ path("ventas_cliente_saldodeudor") }}">Clientes con saldo deudor</a>
 
         <input type="hidden" id="searchterm" name="searchterm"/>
         <button class="stdbtn floatright" type="submit" >Exportar</button>
     </form>
+
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="clientes_table">
         <thead>
             <tr>

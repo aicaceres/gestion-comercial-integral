@@ -6,14 +6,19 @@ use ConfigBundle\Controller\UtilsController;
 
 class FacturaRepository extends EntityRepository {
 
-    public function findSaldoComprobantes($ids) {
-        $query = $this->_em->createQueryBuilder();
-        $query->select('SUM(f.saldo)')
-            ->from('VentasBundle\Entity\FacturaElectronica', 'f')
-            ->andWhere('f.id IN (:ids)')
-            ->setParameter('ids', $ids);
-        return $query->getQuery()->getSingleScalarResult();
-    }
+    // public function findSaldoComprobantes($ids) {
+    //     $query = $this->_em->createQueryBuilder();
+    //     $query->select('f')
+    //         ->from('VentasBundle\Entity\FacturaElectronica', 'f')
+    //         ->andWhere('f.id IN (:ids)')
+    //         ->setParameter('ids', $ids);
+    //     $result = $query->getQuery()->getArrayResult();
+    //     foreach ($result as $value) {
+    //       var_dump($value);
+    //     }
+    //     die;
+    //     return $saldo;
+    // }
 
     /**   -----  */
     public function findFacturasByPeriodo($desde, $hasta) {

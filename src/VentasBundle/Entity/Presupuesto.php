@@ -73,7 +73,7 @@ class Presupuesto {
 
     /**
      * @var string $percepcionRentas
-     * @ORM\Column(name="percepcion_rentas", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="percepcion_rentas", type="decimal", precision=15, scale=2, nullable=true)
      */
     protected $percepcionRentas;
 

@@ -359,6 +359,7 @@ class FacturaElectronicaController extends Controller {
      * @Template()
      */
     public function processImportacionAction(Request $request) {
+        die;
         $unidneg_id = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_importacion');
         $em = $this->getDoctrine()->getManager();
