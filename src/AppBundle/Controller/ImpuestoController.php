@@ -63,7 +63,7 @@ class ImpuestoController extends Controller {
                 if (count($cantAlicuotas) == 1) {
                     $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($cantAlicuotas[0]);
                     $resxrubro[$rubroCompras][$alicuota->getValor()] += $fact->getIva();
-                    $resxrubroBase[$rubroCompras][$alicuota->getValor()] += $fact->getSubtotalNeto();
+                    $resxrubroBase[$rubroCompras][$alicuota->getValor()] += $fact->getTotalNeto();
                 }
                 else {
                     foreach ($cantAlicuotas as $alic) {
@@ -78,7 +78,6 @@ class ImpuestoController extends Controller {
                 }
             }
         }
-
         foreach ($notas as $nota) {
             if ($nota->getFecha()->format('Y-m-d') >= $desde && $nota->getFecha()->format('Y-m-d') <= $hasta) {
                 $nro = explode('-', $nota->getNroComprobante());
