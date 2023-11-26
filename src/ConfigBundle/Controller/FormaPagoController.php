@@ -25,7 +25,7 @@ class FormaPagoController extends Controller
    */
   public function indexAction()
   {
-    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_formapago');
+    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_formapago');
     $em = $this->getDoctrine()->getManager();
     $entities = $em->getRepository('ConfigBundle:FormaPago')->findAll();
     return $this->render('ConfigBundle:FormaPago:index.html.twig', array(
@@ -40,7 +40,7 @@ class FormaPagoController extends Controller
    */
   public function createAction(Request $request)
   {
-    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_formapago_new');
+    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_formapago');
     $entity = new FormaPago();
     $form = $this->createCreateForm($entity);
     $form->handleRequest($request);
@@ -79,7 +79,7 @@ class FormaPagoController extends Controller
    */
   public function newAction()
   {
-    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_formapago_new');
+    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_formapago');
     $entity = new FormaPago();
     $form   = $this->createCreateForm($entity);
     return $this->render('ConfigBundle:FormaPago:edit.html.twig', array(
@@ -95,7 +95,7 @@ class FormaPagoController extends Controller
    */
   public function editAction($id)
   {
-    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_formapago_edit');
+    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_formapago');
     $em = $this->getDoctrine()->getManager();
     $entity = $em->getRepository('ConfigBundle:FormaPago')->find($id);
     if (!$entity) {
@@ -132,7 +132,7 @@ class FormaPagoController extends Controller
    */
   public function updateAction(Request $request, $id)
   {
-    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_formapago_edit');
+    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_formapago');
     $em = $this->getDoctrine()->getManager();
     $entity = $em->getRepository('ConfigBundle:FormaPago')->find($id);
     if (!$entity) {
@@ -160,7 +160,7 @@ class FormaPagoController extends Controller
    */
   public function deleteAction($id)
   {
-    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_formapago_delete');
+    UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_formapago');
     $em = $this->getDoctrine()->getManager();
     $entity = $em->getRepository('ConfigBundle:FormaPago')->find($id);
     try {

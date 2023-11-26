@@ -13,7 +13,7 @@ use ConfigBundle\Entity\Escalas;
 use ConfigBundle\Form\EscalasType;
 
 /**
- * @Route("/escalas") 
+ * @Route("/escalas")
  */
 class EscalasController extends Controller
 {
@@ -25,16 +25,16 @@ class EscalasController extends Controller
      */
     public function indexAction(Request $request)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_escalas');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
-        $tipo = ($request->get('tipoId')) ? $request->get('tipoId') : 'R'; 
+        $tipo = ($request->get('tipoId')) ? $request->get('tipoId') : 'R';
         $entities = $em->getRepository('ConfigBundle:Escalas')->filterEscalasByTipo($tipo);
         return $this->render('ConfigBundle:Escalas:index.html.twig', array(
             'entities' => $entities,
             'tipoId' => $tipo
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_escalas_create")
      * @Method("POST")
@@ -42,7 +42,7 @@ class EscalasController extends Controller
      */
     public function createAction(Request $request)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_escalas_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $entity = new Escalas();
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
@@ -74,7 +74,7 @@ class EscalasController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{tipo}/new", name="sistema_escalas_new")
      * @Method("GET")
@@ -82,18 +82,18 @@ class EscalasController extends Controller
      */
     public function newAction($tipo)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_escalas_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $entity = new Escalas();
         $entity->setTipo($tipo);
         if($tipo == 'G') $entity->setNombre( 'HONORARIOS DIRECTORES Y ADMINI');
-        $form   = $this->createCreateForm($entity);        
+        $form   = $this->createCreateForm($entity);
         return $this->render('ConfigBundle:Escalas:edit.html.twig', array(
             'entity' => $entity,
             'tipos' => $this->tipos,
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_escalas_edit")
      * @Method("GET")
@@ -101,7 +101,7 @@ class EscalasController extends Controller
      */
     public function editAction($id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_escalas_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Escalas')->find($id);
         if (!$entity) {
@@ -130,7 +130,7 @@ class EscalasController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_escalas_update")
      * @Method("PUT")
@@ -138,7 +138,7 @@ class EscalasController extends Controller
      */
     public function updateAction(Request $request, $id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_escalas_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Escalas')->find($id);
         if (!$entity) {
@@ -160,18 +160,18 @@ class EscalasController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_escalas_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_escalas_delete');
+    {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Escalas')->find($id);
         try{
-            $em->remove($entity); 
+            $em->remove($entity);
             $em->flush();
             $msg ='OK';
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }

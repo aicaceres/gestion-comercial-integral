@@ -25,7 +25,7 @@ class MonedaController extends Controller
      */
     public function indexAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_moneda');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_moneda');
         $em = $this->getDoctrine()->getManager();
         $entities = $em->getRepository('ConfigBundle:Moneda')->findAll();
         return $this->render('ConfigBundle:Moneda:index.html.twig', array(
@@ -40,7 +40,7 @@ class MonedaController extends Controller
      */
     public function createAction(Request $request)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_moneda_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_moneda');
         $entity = new Moneda();
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
@@ -79,7 +79,7 @@ class MonedaController extends Controller
      */
     public function newAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_moneda_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_moneda');
         $entity = new Moneda();
         $form   = $this->createCreateForm($entity);
         return $this->render('ConfigBundle:Moneda:edit.html.twig', array(
@@ -95,7 +95,7 @@ class MonedaController extends Controller
      */
     public function editAction($id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_moneda_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_moneda');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Moneda')->find($id);
         if (!$entity) {
@@ -132,7 +132,7 @@ class MonedaController extends Controller
      */
     public function updateAction(Request $request, $id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_moneda_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_moneda');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Moneda')->find($id);
         if (!$entity) {
@@ -160,7 +160,7 @@ class MonedaController extends Controller
      */
     public function deleteAction($id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_moneda_delete');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_moneda');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Moneda')->find($id);
         try{

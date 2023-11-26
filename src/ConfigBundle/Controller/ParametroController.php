@@ -28,7 +28,7 @@ class ParametroController extends Controller {
      * @Template()
      */
     public function afipAction($slug = 'alicuota') {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_afip');
         $em = $this->getDoctrine()->getManager();
         switch ($slug) {
             case 'alicuota':
@@ -105,7 +105,7 @@ class ParametroController extends Controller {
      * @Method("GET")
      */
     public function newRubroAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
         $rub = $request->get('rub');
         $em = $this->getDoctrine()->getManager();
         $agrupador = $em->getRepository('ConfigBundle:Parametro')->findOneByNombre('rubro');
@@ -129,6 +129,7 @@ class ParametroController extends Controller {
      * @Template()
      */
     public function indexAction($slug = 'rubro') {
+        $this->checkPermiso($slug);
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro');
         $em = $this->getDoctrine()->getManager();
         if ($slug == 'rubro') {
@@ -446,6 +447,13 @@ class ParametroController extends Controller {
         $agrupador = $em->getRepository('ConfigBundle:Parametro')->findOneByNombre($slug);
         $results = $em->getRepository('ConfigBundle:Parametro')->filterByTerm($term, $agrupador->getId());
         return new JsonResponse($results);
+    }
+
+    private function checkPermiso($slug){
+      if($slug === 'rubro' || $slug === 'sit-impositiva'){
+        $tag = $slug === 'rubro' ? 'sistema_parametro_rubro' : 'sistema_parametro_impositivo';
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), $tag);
+      }
     }
 
 }

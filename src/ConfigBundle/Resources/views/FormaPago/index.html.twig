@@ -12,22 +12,20 @@
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
-                <th>Nombre</th>                
-                <th>Cta Cte</th>                
-                <th>Tarjeta</th>                
-                <th>Cuotas</th>                
-                <th>Vto</th>                
-                <th>Plazo</th>                
-                <th>Tipo Recargo</th>                
-                <th>Recargo</th>                
-                <th>Dto Pago Ant.</th>                
-                <th>Mora</th>                
-                <th>Días Mora</th>                 
-                <th># Copias</th>                 
+                <th>Nombre</th>
+                <th>Cta Cte</th>
+                <th>Tarjeta</th>
+                <th>Cuotas</th>
+                <th>Vto</th>
+                <th>Plazo</th>
+                <th>Tipo Recargo</th>
+                <th>Recargo</th>
+                <th>Dto Pago Ant.</th>
+                <th>Mora</th>
+                <th>Días Mora</th>
+                <th># Copias</th>
                 <th class="nosort actionbutton addbutton">
-                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_formapago_new') %}
                     <a class="editar create" href="{{ path('sistema_formapago_new') }}">Agregar</a>
-                    {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
         </thead>
@@ -35,29 +33,25 @@
         {% for entity in entities %}
             <tr>
                 <td>{{ entity.nombre|upper }}</td>
-                <td><input type="checkbox" disabled="disabled" {% if entity.cuentaCorriente %}checked="checked"{% endif %} /></td>                                         
-                <td><input type="checkbox" disabled="disabled" {% if entity.tarjeta %}checked="checked"{% endif %} /></td>               
-                <td>{{ entity.cuotas }}</td>                
-                <td>{{ entity.vencimiento }}</td>                
-                <td>{{ entity.plazo }}</td>                
-                <td>{{ entity.tipoRecargo }}</td>                
-                <td>{{ entity.porcentajeRecargo }}</td>                
-                <td>{{ entity.descuentoPagoAnticipado }}</td>                
-                <td>{{ entity.mora }}</td>                
-                <td>{{ entity.diasMora }}</td>                
-                <td>{{ entity.copiasComprobante }}</td>                
+                <td><input type="checkbox" disabled="disabled" {% if entity.cuentaCorriente %}checked="checked"{% endif %} /></td>
+                <td><input type="checkbox" disabled="disabled" {% if entity.tarjeta %}checked="checked"{% endif %} /></td>
+                <td>{{ entity.cuotas }}</td>
+                <td>{{ entity.vencimiento }}</td>
+                <td>{{ entity.plazo }}</td>
+                <td>{{ entity.tipoRecargo }}</td>
+                <td>{{ entity.porcentajeRecargo }}</td>
+                <td>{{ entity.descuentoPagoAnticipado }}</td>
+                <td>{{ entity.mora }}</td>
+                <td>{{ entity.diasMora }}</td>
+                <td>{{ entity.copiasComprobante }}</td>
                 <td>
-                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_formapago_edit') %}
                     <a href="{{ path('sistema_formapago_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
-                    {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_formapago_delete') %}
-                        <a href url="{{ path('sistema_formapago_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>                                                               
-                    {% endif %}
+                    <a href url="{{ path('sistema_formapago_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
                 </td>
             </tr>
-           {% endfor %}           
+           {% endfor %}
         </tbody>
-    </table> 
+    </table>
 </div>
 {% endblock %}
 {% block extra_javascripts %}

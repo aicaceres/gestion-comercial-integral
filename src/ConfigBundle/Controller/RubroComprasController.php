@@ -24,14 +24,14 @@ class RubroComprasController extends Controller
      */
     public function indexAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_rubrocompras');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
         $em = $this->getDoctrine()->getManager();
         $entities = $em->getRepository('ConfigBundle:RubroCompras')->findAll();
         return $this->render('ConfigBundle:RubroCompras:index.html.twig', array(
             'entities' => $entities,
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_rubrocompras_create")
      * @Method("POST")
@@ -39,7 +39,7 @@ class RubroComprasController extends Controller
      */
     public function createAction(Request $request)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_rubrocompras_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
         $entity = new RubroCompras();
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
@@ -70,7 +70,7 @@ class RubroComprasController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/new", name="sistema_rubrocompras_new")
      * @Method("GET")
@@ -78,7 +78,7 @@ class RubroComprasController extends Controller
      */
     public function newAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_rubrocompras_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
         $entity = new RubroCompras();
         $form   = $this->createCreateForm($entity);
         return $this->render('ConfigBundle:RubroCompras:edit.html.twig', array(
@@ -86,7 +86,7 @@ class RubroComprasController extends Controller
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_rubrocompras_edit")
      * @Method("GET")
@@ -94,7 +94,7 @@ class RubroComprasController extends Controller
      */
     public function editAction($id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_rubrocompras_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:RubroCompras')->find($id);
         if (!$entity) {
@@ -123,7 +123,7 @@ class RubroComprasController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_rubrocompras_update")
      * @Method("PUT")
@@ -131,7 +131,7 @@ class RubroComprasController extends Controller
      */
     public function updateAction(Request $request, $id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_rubrocompras_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:RubroCompras')->find($id);
         if (!$entity) {
@@ -152,18 +152,18 @@ class RubroComprasController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_rubrocompras_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_rubrocompras_delete');
+    {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:RubroCompras')->find($id);
         try{
-            $em->remove($entity); 
+            $em->remove($entity);
             $em->flush();
             $msg ='OK';
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }

@@ -13,7 +13,7 @@ use ConfigBundle\Entity\ActividadComercial;
 use ConfigBundle\Form\ActividadComercialType;
 
 /**
- * @Route("/actividadcomercial") 
+ * @Route("/actividadcomercial")
  */
 class ActividadComercialController extends Controller
 {
@@ -24,14 +24,14 @@ class ActividadComercialController extends Controller
      */
     public function indexAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_actividadcomercial');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
         $entities = $em->getRepository('ConfigBundle:ActividadComercial')->findAll();
         return $this->render('ConfigBundle:ActividadComercial:index.html.twig', array(
             'entities' => $entities,
         ));
     }
-    
+
     /**
      * @Route("/", name="sistema_actividadcomercial_create")
      * @Method("POST")
@@ -39,7 +39,7 @@ class ActividadComercialController extends Controller
      */
     public function createAction(Request $request)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_actividadcomercial_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $entity = new ActividadComercial();
         $form = $this->createCreateForm($entity);
         $form->handleRequest($request);
@@ -70,7 +70,7 @@ class ActividadComercialController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/new", name="sistema_actividadcomercial_new")
      * @Method("GET")
@@ -78,7 +78,7 @@ class ActividadComercialController extends Controller
      */
     public function newAction()
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_actividadcomercial_new');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $entity = new ActividadComercial();
         $form   = $this->createCreateForm($entity);
         return $this->render('ConfigBundle:ActividadComercial:edit.html.twig', array(
@@ -86,7 +86,7 @@ class ActividadComercialController extends Controller
             'form'   => $form->createView(),
         ));
     }
-    
+
     /**
      * @Route("/{id}/edit", name="sistema_actividadcomercial_edit")
      * @Method("GET")
@@ -94,7 +94,7 @@ class ActividadComercialController extends Controller
      */
     public function editAction($id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_actividadcomercial_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:ActividadComercial')->find($id);
         if (!$entity) {
@@ -123,7 +123,7 @@ class ActividadComercialController extends Controller
         ));
         return $form;
     }
-    
+
     /**
      * @Route("/{id}", name="sistema_actividadcomercial_update")
      * @Method("PUT")
@@ -131,7 +131,7 @@ class ActividadComercialController extends Controller
      */
     public function updateAction(Request $request, $id)
     {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_actividadcomercial_edit');
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:ActividadComercial')->find($id);
         if (!$entity) {
@@ -152,18 +152,18 @@ class ActividadComercialController extends Controller
             //'delete_form' => $deleteForm->createView(),
         ));
     }
-    
+
     /**
      * @Route("/delete/{id}", name="sistema_actividadcomercial_delete")
      * @Method("POST")
      */
     public function deleteAction($id)
-    {   
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_actividadcomercial_delete');
+    {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_impositivo');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:ActividadComercial')->find($id);
         try{
-            $em->remove($entity); 
+            $em->remove($entity);
             $em->flush();
             $msg ='OK';
         } catch (\Exception $ex) {  $msg= $ex->getTraceAsString();     }

@@ -39,9 +39,7 @@
                 <th>Código ATP</th>
                 {% endif %}
                 <th class="nosort actionbutton addbutton">
-                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_escalas_new') %}
                     <a class="editar create" href="{{ path('sistema_escalas_new', { 'tipo': tipoId }) }}">Agregar Escala</a>
-                    {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
         </thead>
@@ -54,12 +52,8 @@
                 <td>{{ entity.minimo }}</td>
                 <td>{% if tipoId=='G' %}{{ entity.codigoAtp|number_format(2,'.',',') }}{% else %}{{ entity.codigoAtp }}{% endif %}</td>
                 <td>
-                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_escalas_edit') %}
                     <a href="{{ path('sistema_escalas_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
-                    {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_escalas_delete') %}
-                        <a href url="{{ path('sistema_escalas_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
-                    {% endif %}
+                    <a href url="{{ path('sistema_escalas_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
                 </td>
             </tr>
            {% endfor %}

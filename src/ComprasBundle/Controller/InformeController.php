@@ -167,15 +167,6 @@ class InformeController extends Controller {
         ));
     }
 
-    /**
-     * @Route("/", name="compras_informe_financiero")
-     * @Method("GET")
-     * @Template()
-     */
-    public function financieroAction(Request $request) {
-
-    }
-
     private function mesesPeriodo($periodo) {
         $meses = [];
         $f1 = new \DateTime($periodo['desde']);
@@ -193,9 +184,4 @@ class InformeController extends Controller {
 
         return $meses;
     }
-
-
-
-
-
 }
