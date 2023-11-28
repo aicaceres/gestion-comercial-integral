@@ -48,6 +48,7 @@ class Stock {
     /**
      * @var string $stock_minimo
      * @ORM\Column(name="stock_minimo", type="decimal", scale=3,  nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $stockMinimo;
 

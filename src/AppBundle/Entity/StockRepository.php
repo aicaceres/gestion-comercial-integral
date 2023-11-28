@@ -25,9 +25,9 @@ class StockRepository extends EntityRepository
                 ->andWhere('d.id=:depId')
                 ->setParameter('prodId', $id)
                 ->setParameter('depId', $dep);
-        return $query->getQuery()->getSingleScalarResult();  
+        return $query->getQuery()->getSingleScalarResult();
     }
-    
+
     /**
      * Encontrar en stock por producto y deposito
      */
@@ -40,8 +40,8 @@ class StockRepository extends EntityRepository
                 ->where('p.id=:prodId')
                 ->andWhere('d.id=:depId')
                 ->setParameter('prodId', $prodId)
-                ->setParameter('depId', $depId);                
-        return $query->getQuery()->getOneOrNullResult();         
+                ->setParameter('depId', $depId);
+        return $query->getQuery()->getOneOrNullResult();
     }
 
     /*
@@ -53,7 +53,7 @@ class StockRepository extends EntityRepository
                 ->from('AppBundle\Entity\StockMovimiento','m')
                 ->innerJoin('m.deposito', 'd')
                 ->groupBy('m.fecha, d.nombre, m.tipo, m.movimiento');
-        return $query->getQuery()->getArrayResult(); 
+        return $query->getQuery()->getArrayResult();
     }
     /*
      * Detalle de un Movimiento
@@ -82,17 +82,17 @@ class StockRepository extends EntityRepository
                 ->orderBy('s.created')
                 ->setParameter('prodId', $prodId)
                 ->setParameter('depId', $depId);
-        return $query->getQuery()->getResult();        
-    }*/    
-    
+        return $query->getQuery()->getResult();
+    }*/
+
     public function findByCriteria($unidneg, $prodId=NULL, $desde=NULL, $hasta=NULL){
         $query = $this->_em->createQueryBuilder();
         $query->select('m')
               ->from('AppBundle\Entity\StockMovimiento', 'm')
               ->innerJoin('m.deposito', 'd')
               ->innerJoin('d.unidadNegocio','u')
-              ->where("u.id=".$unidneg) ;  
-        
+              ->where("u.id=".$unidneg) ;
+
         if($prodId){
             $query->innerJoin('m.producto', 'pr')
                     ->andWhere('pr.id='.$prodId);
@@ -105,19 +105,25 @@ class StockRepository extends EntityRepository
             $cadena = " m.fecha <= '". UtilsController::toAnsiDate($hasta)."'";
             $query->andWhere($cadena);
         }
-        
+
         return $query->getQuery()->getResult();
     }
-    
+
     public function getAjustesByCriteria($depId,$periodo){
         $query = $this->_em->createQueryBuilder();
         $query->select('a')
               ->from('AppBundle\Entity\StockAjuste', 'a')
               ->innerJoin('a.deposito', 'd')
-              ->where('d.id='.$depId )  
+              ->where('d.id='.$depId )
               ->andWhere("a.fecha>='".UtilsController::toAnsiDate($periodo['desde'])." 00:00'")
-              ->andWhere("a.fecha<='".UtilsController::toAnsiDate($periodo['hasta'])." 23:59'");  
+              ->andWhere("a.fecha<='".UtilsController::toAnsiDate($periodo['hasta'])." 23:59'");
         return $query->getQuery()->getResult();
-    }    
-    
+    }
+
+    public function adminReset(){
+      $qb = $this->_em->createQueryBuilder('s')
+              ->update('AppBundle\Entity\Stock','s')
+              ->set('s.cantidad', 0);
+      return $qb->getQuery()->execute();
+    }
 }

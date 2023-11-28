@@ -8,36 +8,40 @@
 {% block contentwrapper %}
     {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-<div>  
-    <form id="printform" name="printform" target="_blank"  action="{{ path("print_inventario_enstock") }}" method="post">
-        <input type="hidden" id="depositoid" name="depositoid" value=""/>
-        <input type="hidden" id="proveedorid" name="proveedorid" value=""/>
-        <input type="hidden" id="searchterm" name="searchterm" value=""/>
-        <input type="hidden" id="datalist" name="datalist" value=""/>
-        <button class="stdbtn floatright" data-url="{{ path('export_inventario_enstock') }}" type="button" >Exportar</button>        
-        <button class="stdbtn floatright" data-url="{{ path('print_inventario_enstock') }}" type="button" >Imprimir</button>
-    </form>   
-    <form id="searchform" action="{{ path('stock_inventario_enstock') }}" method="post">
-        <div style="display: inline-block; margin-bottom: 10px;">
-            &nbsp;&nbsp;&nbsp;
-            <label><strong>Depósito:</strong></label>
-            <select class="uniformselect" id="selectDeposito" name="depId">
-                <option value="0">Todos</option>
-            {% for dep in depositos %}
-                <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
-            {% endfor %}
-            </select>  
-            &nbsp;&nbsp;&nbsp;
-            <label><strong>Proveedor:</strong></label>
-            <select class="chzn-select" id="selectProveedor" name="provId">
-                <option value="0">Todos</option>
-            {% for prov in proveedores %}
-                <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
-            {% endfor %}
-            </select>  
-        </div>
-    </form>
-</div><!-- button -->      
+    <div>
+        <form id="printform" name="printform" target="_blank"  action="{{ path("print_inventario_enstock") }}" method="post">
+            <input type="hidden" id="depositoid" name="depositoid" value=""/>
+            <input type="hidden" id="proveedorid" name="proveedorid" value=""/>
+            <input type="hidden" id="searchterm" name="searchterm" value=""/>
+            <input type="hidden" id="datalist" name="datalist" value=""/>
+            <button class="stdbtn floatright" data-url="{{ path('export_inventario_enstock') }}" type="button" >Exportar</button>
+            <button class="stdbtn floatright" data-url="{{ path('print_inventario_enstock') }}" type="button" >Imprimir</button>
+        </form>
+
+        <form id="searchform" action="{{ path('stock_inventario_enstock') }}" method="post">
+            <div style="display: inline-block; margin-bottom: 10px;">
+                &nbsp;&nbsp;&nbsp;
+                <label><strong>Depósito:</strong></label>
+                <select class="uniformselect" id="selectDeposito" name="depId">
+                    <option value="0">Todos</option>
+                {% for dep in depositos %}
+                    <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
+                {% endfor %}
+                </select>
+                &nbsp;&nbsp;&nbsp;
+                <label><strong>Proveedor:</strong></label>
+                <select class="chzn-select" id="selectProveedor" name="provId">
+                    <option value="0">Todos</option>
+                {% for prov in proveedores %}
+                    <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
+                {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div><!-- button -->
+    {% if app.user.access(app.session.get('unidneg_id'),'stock_admin_reset') %}
+    <div style="text-align:right"><button id="reset-stock" class="stdbtn btn_red">REINICIAR STOCK A CERO</button></div>
+    {% endif %}
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -46,7 +50,7 @@
                 <th>Código</th>
                 <th>Producto</th>
                 <th>Proveedor</th>
-                <th style="width: 90px;display: inline-block;" class="nosort">Stock Actual</th>
+                <th class="nosort">Stock Actual</th>
             </tr>
         </thead>
         <tbody>
@@ -62,22 +66,22 @@
             </tr>
            {% endfor %}
         </tbody>
-    </table>    
+    </table>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
-{% include "AppBundle::block-list-js.html.twig" %}    
+{% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     $(".chzn-select").chosen();
     $('#selectProveedor_chzn').css('vertical-align', 'bottom');
-    $('#selectProveedor,#selectDeposito').change(function(){ 
+    $('#selectProveedor,#selectDeposito').change(function(){
         form = $('#searchform').serialize();
         window.location.href= "{{ path('stock_inventario_enstock') }}?"+form ;
-    });    
+    });
 
     var oTable = $('#dyntable2').dataTable();
-    oTable.fnSort( [ [0,'asc'],[1,'asc'],[2,'asc'] ] );   
+    oTable.fnSort( [ [0,'asc'],[1,'asc'],[2,'asc'] ] );
     $('#printform button').on('click',function(){
         let form = $('#printform');
         let url = $(this).data('url');
@@ -88,10 +92,17 @@ jQuery(document).ready(function($) {
         var datos = [];
         oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             datos[index] = value;
-        }); 
+        });
         $('#datalist').val(JSON.stringify(datos));
         form.submit();
     });
+
+    $('#reset-stock').on('click', function(){
+      const txt = 'ESTA POR RESETEAR A CERO TODOS LOS PRODUCTOS DEL STOCK!\n\n Esta acción no podrá revertirse!!\n\n CONFIRMA EL RESETEO?'
+      if(confirm(txt)){
+        window.location.href = '{{ path("stock_admin_reset") }}'
+      }
+    })
     /*$('#printform').on('submit',function(){
         console.log( $(this).attr('action'));
         return false;
@@ -101,10 +112,10 @@ jQuery(document).ready(function($) {
         var datos = [];
         oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             datos[index] = value;
-        }); 
+        });
         $('#datalist').val(JSON.stringify(datos));
     });     */
-       
-});    
-</script>   
+
+});
+</script>
 {% endblock %}

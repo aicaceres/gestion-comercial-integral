@@ -226,15 +226,6 @@ class ProductoController extends Controller {
             return $this->redirect($this->generateUrl('stock'));
         }
 
-        //$entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg,$provId,$depId);
-        /*        if($provId||$depId){
-          //$entities = $em->getRepository('AppBundle:Producto')->findByProveedor($provId);
-          $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor(array("proveedor" => $provId, "deposito"=> $depId ));
-
-          }else{
-          $entities = $em->getRepository('AppBundle:Producto')->findAll();
-          }
-         */
         return $this->render('AppBundle:Producto:listado.html.twig', array(
                 'entities' => $entities,
                 'proveedores' => $proveedores,

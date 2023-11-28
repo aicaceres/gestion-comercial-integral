@@ -1,6 +1,8 @@
 <?php
 
 namespace AppBundle\Controller;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -661,5 +663,34 @@ class StockController extends Controller {
         return new Response($content, 200, array('content-type' => 'application/pdf',
             'Content-Disposition' => 'filename=informe_productos_despachados_' . $hoy->format('dmY_Hi') . '.pdf'));
     }
+
+    /**
+     * @Route("/stockAdminReset", name="stock_admin_reset")
+     * @Method("GET")
+     * @Template()
+     */
+     public function stockAdminResetAction(){
+        $unidneg = $this->get('session')->get('unidneg_id');
+        if($this->getUser()->getAccess($unidneg, 'stock_admin_reset')){
+          $em = $this->getDoctrine()->getManager();
+          $logger = new Logger('stock_admin_reset');
+          $logger->pushHandler(new StreamHandler($this->get('kernel')->getRootDir() . '/logs/stockAdminReset.log', Logger::INFO));
+
+          $result = $em->getRepository('AppBundle:Stock')->adminReset();
+          $data = array(
+            'user' => $this->getUser()->getUsername(),
+            'cantidad' => $result
+          );
+          $logger->addInfo('Stock reseteado', $data);
+          if($result){
+            $this->addFlash('success', 'Se ha reseteado el stock a cero de '.$result.' productos!');
+          }else {
+            $this->addFlash('info', 'No se han realizado modificaciones en el stock');
+          }
+        }else{
+          $this->addFlash('error', 'No posee permiso para realizar esta acción!');
+        }
+        return $this->redirectToRoute('stock_inventario_enstock');
+     }
 
 }
