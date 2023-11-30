@@ -164,7 +164,7 @@ class RetencionesController extends Controller {
             $codregimen = str_pad($proveedor->getActividadComercial()->getCodigoRegimen(), 3, "0", STR_PAD_LEFT);
             $importecomp = str_replace(',', '', str_pad(number_format($pago->getImporte(), 2, '.', ''), 16, "0", STR_PAD_LEFT));
             $basecalculo = str_replace(',', '', str_pad(number_format($pago->getBaseImponibleRentas(), 2, '.', ''), 14, "0", STR_PAD_LEFT));
-            $importeret = str_replace(',', '', str_pad(number_format($pago->getMontoGanancias(), 2, '.', ''), 14, "0", STR_PAD_LEFT));
+            $importeret = str_replace(',', '', str_pad(number_format($pago->getMontoRetGanancias(), 2, '.', ''), 14, "0", STR_PAD_LEFT));
             $docret = substr(str_pad($proveedor->getCuit(), 20, " ", STR_PAD_RIGHT), 0, 20);
             // sujetos
             $cuit = substr(str_pad($proveedor->getCuit(), 11, " ", STR_PAD_LEFT), -11, 11);

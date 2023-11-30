@@ -894,7 +894,7 @@ class ProveedorController extends Controller {
             if ($retencionGanancia) {
                 $saldoAcTotal = $retencionGanancia->getAcumuladoTotal() - $entity->getBaseImponibleRentas();
                 $retencionGanancia->setAcumuladoTotal($saldoAcTotal > 0 ? $saldoAcTotal : 0);
-                $saldoAcRet = $retencionGanancia->getAcumuladoRetencion() - $entity->getMontoGanancias();
+                $saldoAcRet = $retencionGanancia->getAcumuladoRetencion() - $entity->getMontoRetGanancias();
                 $retencionGanancia->setAcumuladoRetencion($saldoAcRet > 0 ? $saldoAcRet : 0);
                 $em->persist($retencionGanancia);
             }

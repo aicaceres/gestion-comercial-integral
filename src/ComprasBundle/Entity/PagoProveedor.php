@@ -204,9 +204,9 @@ class PagoProveedor {
         return $this->getRetencionGanancias() . '%';
     }
 
-    public function getMontoGanancias() {
-        return $this->getBaseImponibleRentas() * ( $this->getRetencionGanancias() / 100 );
-    }
+    // public function getMontoGanancias() {
+    //     return $this->getBaseImponibleRentas() * ( $this->getRetencionGanancias() / 100 );
+    // }
 
     public function getTextoPagosParaOrdenPago() {
         $txt = '';
