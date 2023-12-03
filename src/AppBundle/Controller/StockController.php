@@ -150,7 +150,7 @@ class StockController extends Controller {
                             $detalle->setProducto($producto);
                             $detalle->setCantidad(floatval($data[2]));
                             $detalle->setMotivo($data[3]);
-                            if ($data[4]) {
+                            if (isset($data[4])) {
                                 $lote = $em->getRepository('ComprasBundle:LoteProducto')->findOneByNroLote($data[4]);
                                 if (!$lote && isset($data[5])) {
                                     $vto = new \DateTime($data[5]);

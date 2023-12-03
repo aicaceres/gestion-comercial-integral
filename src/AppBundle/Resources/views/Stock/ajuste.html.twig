@@ -2,7 +2,7 @@
 {% block pageheader %}
 <div class="pageheader notab">
     <h1 class="pagetitle">Ajustes de Stock</h1>
-    <span class="pagedesc">Ajuste de inventario por Rubro o Proveedor</span>    
+    <span class="pagedesc">Ajuste de inventario por Rubro o Proveedor</span>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -16,16 +16,16 @@
             {% for dep in depositos %}
                 <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.empresaUnidadDeposito}}</option>
             {% endfor %}
-            </select>  
-        </div>    
-        <div style="display: inline-block; margin:10px;">     
+            </select>
+        </div>
+        <div style="display: inline-block; margin:10px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Período: </strong></label>
-            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{periodo.desde}}" name="desde" id="desde" /> 
-            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{periodo.hasta}}" name="hasta" id="hasta" /> 
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{periodo.desde}}" name="desde" id="desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{periodo.hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
-        </div>        
-    </form>            
+        </div>
+    </form>
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -35,7 +35,7 @@
                  <th class="nosort actionbutton addbutton">
                     {% if app.user.access(app.session.get('unidneg_id'),'stock_ajuste_new') %}
                     <a class="editar create" href="{{ path('stock_ajuste_new') }}?depId={{depId}}">Nuevo Ajuste</a>
-                    {% else %} &nbsp; {% endif %}                     
+                    {% else %} &nbsp; {% endif %}
                 </th>
             </tr>
         </thead>
@@ -50,22 +50,22 @@
                     <a href="{{ path('stock_ajuste_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Ajuste"></a>
                         {% if not entity.procesado %}
                         <a href="{{ path('stock_ajuste_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar Ajuste"></a>
-                        {% endif %}  
-                    {% endif %}  
+                        {% endif %}
+                    {% endif %}
                     {% if app.user.access(app.session.get('unidneg_id'),'stock_ajuste') %}
                     <a href="javascript:void(0)" url="{{ path('print_ajuste_stock', { 'id': entity.id }) }}" class="editar btn btnaction btn_print" title="Imprimir Ajuste"></a>
-                    {% endif %}  
-                </td>    
+                    {% endif %}
+                </td>
             </tr>
            {% endfor %}
         </tbody>
-    </table> 
+    </table>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
-jQuery(document).ready(function($){ 
+jQuery(document).ready(function($){
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     $('#stock_ajuste_new').on('click',
             function(){
@@ -74,10 +74,11 @@ jQuery(document).ready(function($){
 
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [0,'desc'] ] );
-
-    $('#selectDeposito').change(function(){ 
+    oTable._fnLengthChange( 100 )
+    oTable.fnDraw()
+    $('#selectDeposito').change(function(){
         $('#searchform').submit();
-    }); 
+    });
 });
-</script> 
+</script>
 {% endblock %}
