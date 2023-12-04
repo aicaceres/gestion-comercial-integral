@@ -219,7 +219,7 @@ class ProductoController extends Controller {
 
         if (count($depositos) > 0) {
             //$proveedores = $em->getRepository('ComprasBundle:Proveedor')->findByActivo(1);
-            $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId);
+            $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId, false);
         }
         else {
             $this->addFlash('error', 'No posee depósitos asignados!!');
@@ -438,7 +438,7 @@ class ProductoController extends Controller {
         $depositos = $this->getUser()->getDepositos($unidneg);
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         if (count($depositos) > 0) {
-            $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId);
+            $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId, true);
         }
         else {
             $this->addFlash('error', 'No posee depósitos asignados!!');

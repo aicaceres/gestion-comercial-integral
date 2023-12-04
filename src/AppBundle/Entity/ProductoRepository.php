@@ -50,7 +50,7 @@ class ProductoRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
-    public function findProductosPorDepositoyProveedor($unidneg, $prov, $dep) {
+    public function findProductosPorDepositoyProveedor($unidneg, $prov, $dep, $conStock=false) {
         $query = $this->_em->createQueryBuilder('s')
             ->select('s')
             ->from('AppBundle\Entity\Stock', 's')
@@ -65,6 +65,9 @@ class ProductoRepository extends EntityRepository {
         }
         if ($dep) {
             $query->andWhere('d.id=' . $dep);
+        }
+        if($conStock){
+          $query->andWhere('s.cantidad>0');
         }
         return $query->getQuery()->getResult();
     }
