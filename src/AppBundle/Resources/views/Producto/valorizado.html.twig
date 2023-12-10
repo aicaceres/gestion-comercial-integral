@@ -8,16 +8,17 @@
 {% block contentwrapper %}
     {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-<div>  
+<div>
     <form id="printform" name="printform" target="_blank"  action="{{ path("print_inventario_valorizado") }}" method="post">
         <input type="hidden" id="depositoid" name="depositoid" value=""/>
         <input type="hidden" id="proveedorid" name="proveedorid" value=""/>
+        <input type="hidden" id="formapagoid" name="formapagoid" value=""/>
         <input type="hidden" id="searchterm" name="searchterm" value=""/>
         <input type="hidden" id="datalist" name="datalist" value=""/>
         <input type="hidden" id="option" name="option" value="I"/>
         <button class="stdbtn print floatright" type="submit" >Imprimir</button>
         <button class="stdbtn export floatright" type="submit" >Exportar</button>
-    </form>       
+    </form>
     <form id="searchform" action="{{ path('stock_inventario_valorizado') }}" method="post">
         <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
@@ -27,7 +28,7 @@
             {% for dep in depositos %}
                 <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.nombre}}</option>
             {% endfor %}
-            </select>  
+            </select>
             &nbsp;&nbsp;&nbsp;
             <label><strong>Proveedor:</strong></label>
             <select class="uniformselect" id="selectProveedor" name="provId">
@@ -35,11 +36,18 @@
             {% for prov in proveedores %}
                 <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
             {% endfor %}
-            </select>  
+            </select>
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Forma de Pago:</strong></label>
+            <select class="uniformselect" id="selectFormaPago" name="formapagoId">
+            {% for pago in formasPago %}
+                <option value="{{pago.id}}" {% if pago.id==formapagoId %} selected="selected" {% endif %}> {{pago.textSelect}}</option>
+            {% endfor %}
+            </select>
         </div>
     </form>
-</div><!-- button -->        
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="stockvalorizado">        
+</div><!-- button -->
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="stockvalorizado">
         <thead>
             <tr>
                 <th>Depósito</th>
@@ -49,7 +57,8 @@
                 <th>Proveedor</th>
                 <th class="nosort">Mínimo</th>
                 <th class="nosort">Actual</th>
-                <th class="nosort">Valorizado</th>
+                <th class="nosort">Valorizado por Costo</th>
+                <th class="nosort">Valorizado por Precio</th>
                 <th class="nosort">Activo</th>
             </tr>
         </thead>
@@ -66,14 +75,20 @@
                 <td class="alignright" style="width:5%;">{{ entity.producto.stockminimo|number_format(0) }}</td>
                 <td class="alignright" style="width:10%;">{{ entity.cantidad ~ ' ' ~ entity.producto.unidadmedida }}</td>
                 <td class="alignright" style="width:10%;">{%if entity.cantidad<0%}0.00 {%else%} {{entity.getValorizado| number_format(3,'.','')}} {%endif%}</td>
+                <td class="alignright" style="width:10%;">{%if entity.cantidad<0%}0.00 {%else%} {{entity.getByFormaPago(dtorec, entity.producto.getPrecioByListaPpal())| number_format(3,'.','')}} {%endif%}</td>
                 <td style="width:5%;"><input type="checkbox" disabled="disabled" {% if entity.producto.activo %}checked="checked"{% endif %} />                </td>
             </tr>
            {% endfor %}
         </tbody>
         <tfoot>
-             <th class="aligncenter" colspan="9" style="font-size:14px" >VALORIZADO TOTAL: $ <span id="totalsum"></span>.-</th>
+            <th class="aligncenter" colspan="5" style="font-size:14px" >
+                <span>VALORIZADO POR COSTO: $ <span id="totalsumxcosto"></span>.-</span>
+            </th>
+            <th class="aligncenter" colspan="5" style="font-size:14px" >
+                <span>VALORIZADO POR PRECIO: $ <span id="totalsumxprecio"></span>.-</span>
+            </th>
         </tfoot>
-    </table> 
+    </table>
 </div>
 
 {% endblock %}
@@ -81,8 +96,8 @@
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    
-      $('#selectProveedor,#selectDeposito').change(function(){ 
+
+      $('#selectProveedor,#selectDeposito,#selectFormaPago').change(function(){
         form = $('#searchform').serialize();
         window.location.href= "{{ path('stock_inventario_valorizado') }}?"+form ;
     });
@@ -106,29 +121,33 @@ jQuery(document).ready(function($) {
         },
         "drawCallback": function () {
             var api = this.api();
-            total = api.column( 7, {search:'applied'} ).data().sum();
-            $('#totalsum').html( Number(total.toFixed(3)).toLocaleString('en')  );
+            totalxcosto = api.column( 7, {search:'applied'} ).data().sum();
+            totalxprecio = api.column( 8, {search:'applied'} ).data().sum();
+            $('#totalsumxcosto').html( Number(totalxcosto.toFixed(3)).toLocaleString('en')  );
+            $('#totalsumxprecio').html( Number(totalxprecio.toFixed(3)).toLocaleString('en')  );
 
           }
     });
-    totalsum = valorizado.api().column( 7 ).data().sum();
-    $('#totalsum').html(Number(totalsum.toFixed(3)).toLocaleString('en') );
-    
+    totalsumxcosto = valorizado.api().column( 7 ).data().sum();
+    $('#totalsumxcosto').html(Number(totalsumxcosto.toFixed(3)).toLocaleString('en') );
+    totalxprecio = valorizado.api().column( 8 ).data().sum();
+    $('#totalxprecio').html(Number(totalxprecio.toFixed(3)).toLocaleString('en') );
+
      //var oTable = $('#dyntable2').dataTable();
     $('#printform').on('submit',function(e){
-        if( e.originalEvent.submitter.textContent ==='Exportar' ){
-            $('#option').val('E');
-        }
+        const opt = e.originalEvent.submitter.textContent ==='Exportar' ? 'E' : 'I'
+        $('#option').val(opt);
         $('#depositoid').val($('#selectDeposito').val());
         $('#proveedorid').val($('#selectProveedor').val());
+        $('#formapagoid').val($('#selectFormaPago').val());
         $('#searchterm').val( $('#stockvalorizado_filter input').val() );
         var datos = [];
         valorizado.api().rows( { search:'applied' } ).data().each(function(value, index) {
             datos[index] = value;
-        }); 
+        });
         $('#datalist').val(JSON.stringify(datos));
-    });   
-});    
-</script>    
+    });
+});
+</script>
 
 {% endblock %}

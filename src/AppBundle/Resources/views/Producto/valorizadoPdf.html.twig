@@ -63,13 +63,17 @@
         {% endif%}
         <th>Mínimo</th>
         <th>Actual</th>
-        <th>Valorizado</th>
+        <th>Valorizado por Costo</th>
+        <th>Valorizado por Precio</th>
     </tr>
     </thead>
     <tbody>
-        {% set total =0 %}
-        {% for item in listado %}        
-            {% set total = total + item.getValorizadoActual %}
+        {% set totalCosto =0 %}
+        {% set totalPrecio =0 %}
+        {% for item in listado %}
+            {% set totalCosto = totalCosto + item.getValorizadoActual %}
+            {% set precio = (entity.cantidad<0) ? '0.00' : entity.getByFormaPago(dtorec, entity.producto.getPrecioByListaPpal()) %}
+            {% set totalPrecio = totalPrecio + precio %}
         <tr>
             <td>{{item.codigo |upper}}</td>
             <td>{{item.nombre}}</td>
@@ -79,6 +83,7 @@
             <td class=" align-right" >{{item.stockminimo| number_format(2,'.',',')}}</td>
             <td class="align-right " >{{item.stockactual| number_format(3,'.',',') }}</td>
             <td class="align-right" >{{item.getValorizadoActual| number_format(3,'.',',')}}</td>
+            <td class="align-right" >{{precio| number_format(3,'.','')}}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -87,8 +92,8 @@
             <th class="align-right">{{total| number_format(2,'.',',')}}</th>
         </tfoot>
 </table>
-<script type="text/javascript">    
-        window.print(); 
-      // window.close(); 
+<script type="text/javascript">
+        window.print();
+      // window.close();
       //window.setTimeout('window.close()', 1000);
-</script>   
+</script>

@@ -231,4 +231,9 @@ class Stock {
         return $this->getProducto()->getCosto() * $this->cantidad;
     }
 
+    public function getByFormaPago($dtorec, $precio){
+      $valor = $precio * ( 1 + floatval($dtorec) / 100 );
+      return round($valor * $this->cantidad, 3);
+    }
+
 }

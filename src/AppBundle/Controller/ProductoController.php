@@ -436,6 +436,9 @@ class ProductoController extends Controller {
         // control de depositos
         $unidneg = $this->get('session')->get('unidneg_id');
         $depositos = $this->getUser()->getDepositos($unidneg);
+        $formasPago = $em->getRepository('ConfigBundle:FormaPago')->findAll();
+        $formaPagoId = $request->get('formapagoId') ? $request->get('formapagoId') : $formasPago[0]->getId();
+        $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find($formaPagoId);
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         if (count($depositos) > 0) {
             $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId, true);
@@ -444,13 +447,15 @@ class ProductoController extends Controller {
             $this->addFlash('error', 'No posee depósitos asignados!!');
             return $this->redirect($this->generateUrl('stock'));
         }
-
         return $this->render('AppBundle:Producto:valorizado.html.twig', array(
                 'entities' => $entities,
                 'proveedores' => $proveedores,
                 'depositos' => $depositos,
+                'formasPago' => $formasPago,
                 'provId' => $provId,
-                'depId' => $depId
+                'depId' => $depId,
+                'formapagoId' => $formaPagoId,
+                'dtorec' => $formaPago->getPorcentajeRecargo()
         ));
     }
 
@@ -464,12 +469,17 @@ class ProductoController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $depositoId = $request->get('depositoid');
         $proveedorId = $request->get('proveedorid');
+        $formapagoId = $request->get('formapagoid');
         $search = $request->get('searchterm');
         $deposito = $em->getRepository('AppBundle:Deposito')->find($depositoId);
         $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($proveedorId);
+        $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find($formapagoId);
 
-        $textoFiltro = array(($deposito ? $deposito->getNombre() : 'Todos'), ($proveedor ? $proveedor->getNombre() : 'Todos'));
-
+        $textoFiltro = array(
+          ($deposito ? $deposito->getNombre() : 'Todos'),
+          ($proveedor ? $proveedor->getNombre() : 'Todos'),
+          ($formaPago ? $formaPago->getNombre() : 'Todos'),
+        );
         if ($request->get('option') == 'E') {
             $items = json_decode($request->get('datalist'));
             $hoy = new \DateTime();
@@ -500,6 +510,10 @@ class ProductoController extends Controller {
                 $sheet->setCellValue('A' . $i, 'Proveedor: ' . $proveedor->getNombre());
                 $i++;
             }
+            if ($formaPago) {
+                $sheet->setCellValue('A' . $i, 'Forma de Pago: ' . $formaPago->getNombre());
+                $i++;
+            }
             $i++;
             // Escribir encabezado
             $sheet->setCellValue('A' . $i, 'DEPOSITO')
@@ -509,15 +523,17 @@ class ProductoController extends Controller {
                 ->setCellValue('E' . $i, 'PROVEEDOR')
                 ->setCellValue('F' . $i, 'MINIMO')
                 ->setCellValue('G' . $i, 'ACTUAL')
-                ->setCellValue('H' . $i, 'VALORIZADO');
+                ->setCellValue('H' . $i, 'VALORIZADO COSTO')
+                ->setCellValue('I' . $i, 'VALORIZADO PRECIO');
 
             // Escribir contenido
             $i++;
-            $total = 0;
+            $totalCosto = $totalPrecio = 0;
             foreach ($items as $item) {
                 $sheet->getStyle('H' . $i)->getNumberFormat()->setFormatCode('0.000');
 
-                $valoriz = str_replace(',', '', $item['7']);
+                $valorizCosto = str_replace(',', '', $item['7']);
+                $valorizPrecio = str_replace(',', '', $item['8']);
 
                 $sheet->setCellValue('A' . $i, $item['0'])
                     ->setCellValue('B' . $i, $item['1'])
@@ -526,12 +542,16 @@ class ProductoController extends Controller {
                     ->setCellValue('E' . $i, $item['4'])
                     ->setCellValue('F' . $i, $item['5'])
                     ->setCellValue('G' . $i, $item['6'])
-                    ->setCellValue('H' . $i, $valoriz);
+                    ->setCellValue('H' . $i, $valorizCosto)
+                    ->setCellValue('I' . $i, $valorizPrecio);
                 $i++;
-                $total = $total + $valoriz;
+                $totalCosto = $totalCosto + $valorizCosto;
+                $totalPrecio = $totalPrecio + $valorizPrecio;
             }
             $i++;
-            $sheet->setCellValue('A' . $i, 'VALORIZADO TOTAL: $' . number_format($total, 3) . '.-');
+            $sheet->setCellValue('A' . $i, 'VALORIZADO COSTO: $' . number_format($totalCosto, 3) . '.-');
+            $i++;
+            $sheet->setCellValue('A' . $i, 'VALORIZADO PRECIO: $' . number_format($totalPrecio, 3) . '.-');
 
             $phpExcelObject->getActiveSheet()->setTitle('Inventario Valorizado');
             // Set active sheet index to the first sheet, so Excel opens this as the first sheet

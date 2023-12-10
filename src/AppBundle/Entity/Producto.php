@@ -760,6 +760,16 @@ class Producto {
         return round($precio * ( 1 + floatval($dtoContado) / 100 ), 3);
     }
 
+    public function getPrecioByListaPpal() {
+        $precio = 0;
+        foreach ($this->getPrecios() as $item) {
+            if ($item->getPrecioLista()->getPrincipal()) {
+                $precio = $item->getPrecio();
+            }
+        }
+        return $precio;
+    }
+
     /**
      * Set iva
      *
