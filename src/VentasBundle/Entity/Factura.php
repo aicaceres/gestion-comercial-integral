@@ -49,19 +49,19 @@ class Factura {
 
     /**
      * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", scale=2 )
+     * @ORM\Column(name="iva", type="decimal", precision=20, scale=2 )
      */
     protected $iva;
 
     /**
      * @var integer $total
-     * @ORM\Column(name="total", type="decimal", scale=3 )
+     * @ORM\Column(name="total", type="decimal", precision=20, scale=3 )
      */
     protected $total;
 
     /**
      * @var integer $saldo
-     * @ORM\Column(name="saldo", type="decimal", scale=3 )
+     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=3 )
      */
     protected $saldo;
 

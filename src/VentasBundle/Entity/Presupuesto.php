@@ -46,7 +46,7 @@ class Presupuesto {
 
     /**
      * @var integer $descuentoRecargo
-     * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
+     * @ORM\Column(name="descuentoRecargo", type="decimal", precision=20, scale=2,nullable=true )
      * @Gedmo\Versioned()
      */
     protected $descuentoRecargo;
@@ -73,7 +73,7 @@ class Presupuesto {
 
     /**
      * @var string $percepcionRentas
-     * @ORM\Column(name="percepcion_rentas", type="decimal", precision=15, scale=2, nullable=true)
+     * @ORM\Column(name="percepcion_rentas", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $percepcionRentas;
 

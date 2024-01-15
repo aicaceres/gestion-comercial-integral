@@ -74,7 +74,7 @@ class FormaPago {
 
     /**
      * @var integer $porcentajeRecargo
-     * @ORM\Column(name="porcentaje_recargo", type="decimal",scale=2, nullable=true)
+     * @ORM\Column(name="porcentaje_recargo", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $porcentajeRecargo;
 
@@ -86,7 +86,7 @@ class FormaPago {
 
     /**
      * @var integer $mora
-     * @ORM\Column(name="mora", type="decimal", precision=15,scale=2,nullable=true)
+     * @ORM\Column(name="mora", type="decimal", precision=20, scale=2,nullable=true)
      */
     protected $mora;
 

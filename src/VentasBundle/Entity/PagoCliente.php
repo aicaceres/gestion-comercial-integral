@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * VentasBundle\Entity\PagoCliente
  * @ORM\Table(name="ventas_pago_cliente")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="VentasBundle\Entity\ClienteRepository")
  */
 class PagoCliente {
     /**
@@ -25,13 +25,11 @@ class PagoCliente {
     private $fecha;
 
     /**
-     * @var integer $prefijoNro
      * @ORM\Column(name="prefijo_nro", type="string", length=3)
      */
     protected $prefijoNro = '011';
 
     /**
-     * @var integer $pagoNro
      * @ORM\Column(name="pago_nro", type="string", length=6)
      */
     protected $pagoNro;
@@ -43,21 +41,29 @@ class PagoCliente {
     protected $moneda;
 
     /**
-     * @var string $cotizacion
-     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="cotizacion", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $cotizacion = 1;
 
     /**
-     * @var integer $total
-     * @ORM\Column(name="total", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="total", type="decimal", precision=20, scale=2 )
      */
     protected $total = 0;
+
+    /**
+     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=2 )
+     */
+    protected $saldo = 0;
 
     /**
      * @ORM\Column(name="genera_nota_credito", type="boolean",nullable=true)
      */
     protected $generaNotaCredito = false;
+
+    /**
+     * @ORM\Column(name="destino_saldo", type="string", nullable=false)
+     */
+    protected $destinoSaldo = 'CTACTE';
 
     /**
      * @ORM\OneToOne(targetEntity="VentasBundle\Entity\NotaDebCred")
@@ -67,13 +73,13 @@ class PagoCliente {
     protected $notaDebCred;
 
     /**
-     * @ORM\ManyToMany(targetEntity="VentasBundle\Entity\FacturaElectronica", inversedBy="pagos")
-     * @ORM\JoinTable(name="comprobantes_x_pagocliente",
-     *      joinColumns={@ORM\JoinColumn(name="ventas_factura_electronica_id", referencedColumnName="id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="ventas_pago_cliente_id", referencedColumnName="id")}
-     * )
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PagoClienteComprobante", mappedBy="pago",cascade={"persist", "remove"})
      */
     private $comprobantes;
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PagoClienteRecibo", mappedBy="pago",cascade={"persist", "remove"})
+     */
+    private $recibos;
 
     /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="pagoCliente",cascade={"persist", "remove"})
@@ -111,12 +117,18 @@ class PagoCliente {
      * Constructor
      */
     public function __construct() {
-        $this->comprobantes = new \Doctrine\Common\Collections\ArrayCollection();
         $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     public function __toString() {
         return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' . str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
+    }
+
+    public function getReciboACuentaTxt(){
+      $fecha = $this->getFecha()->format('d/m/Y');
+      $simbolo = $this->getMoneda()->getSimbolo();
+      $importe = $this->getSaldo();
+      return $this->__toString() . ' | ' . $fecha . ' | ' . $simbolo . $importe;
     }
 
     public function getComprobanteNro() {
@@ -127,7 +139,15 @@ class PagoCliente {
         $txt = '';
         foreach ($this->getComprobantes() as $comp) {
             $aux = ($txt) ? ' | ' : '';
-            $txt = $txt . $aux . $comp->getComprobanteTxt();
+            $txt = $txt . $aux . $comp->getComprobanteTxt() ;
+        }
+        return $txt;
+    }
+    public function getRecibosTxt() {
+        $txt = '';
+        foreach ($this->getRecibos() as $comp) {
+            $aux = ($txt) ? ' | ' : '';
+            $txt = $txt . $aux . $comp->getComprobanteTxt() ;
         }
         return $txt;
     }
@@ -296,36 +316,6 @@ class PagoCliente {
     }
 
     /**
-     * Add comprobantes
-     *
-     * @param \VentasBundle\Entity\FacturaElectronica $comprobantes
-     * @return PagoCliente
-     */
-    public function addComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes) {
-        $this->comprobantes[] = $comprobantes;
-
-        return $this;
-    }
-
-    /**
-     * Remove comprobantes
-     *
-     * @param \VentasBundle\Entity\FacturaElectronica $comprobantes
-     */
-    public function removeComprobante(\VentasBundle\Entity\FacturaElectronica $comprobantes) {
-        $this->comprobantes->removeElement($comprobantes);
-    }
-
-    /**
-     * Get comprobantes
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getComprobantes() {
-        return $this->comprobantes;
-    }
-
-    /**
      * Add cobroDetalles
      *
      * @param \VentasBundle\Entity\CobroDetalle $cobroDetalles
@@ -482,4 +472,117 @@ class PagoCliente {
         return $this->notaDebCred;
     }
 
+
+    /**
+     * Set saldo
+     *
+     * @param string $saldo
+     * @return PagoCliente
+     */
+    public function setSaldo($saldo)
+    {
+        $this->saldo = $saldo;
+
+        return $this;
+    }
+
+    /**
+     * Get saldo
+     *
+     * @return string
+     */
+    public function getSaldo()
+    {
+        return $this->saldo;
+    }
+
+    /**
+     * Set destinoSaldo
+     *
+     * @param string $destinoSaldo
+     * @return PagoCliente
+     */
+    public function setDestinoSaldo($destinoSaldo)
+    {
+        $this->destinoSaldo = $destinoSaldo;
+
+        return $this;
+    }
+
+    /**
+     * Get destinoSaldo
+     *
+     * @return string
+     */
+    public function getDestinoSaldo()
+    {
+        return $this->destinoSaldo;
+    }
+
+    /**
+     * Add recibos
+     *
+     * @param \VentasBundle\Entity\PagoClienteRecibo $recibos
+     * @return PagoCliente
+     */
+    public function addRecibo(\VentasBundle\Entity\PagoClienteRecibo $recibos)
+    {
+        $recibos->setPago($this);
+        $this->recibos[] = $recibos;
+        return $this;
+    }
+
+    /**
+     * Remove recibos
+     *
+     * @param \VentasBundle\Entity\PagoClienteRecibo $recibos
+     */
+    public function removeRecibo(\VentasBundle\Entity\PagoClienteRecibo $recibos)
+    {
+        $this->recibos->removeElement($recibos);
+    }
+
+    /**
+     * Get recibos
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRecibos()
+    {
+        return $this->recibos;
+    }
+
+    /**
+     * Add comprobantes
+     *
+     * @param \VentasBundle\Entity\PagoClienteComprobante $comprobantes
+     * @return PagoCliente
+     */
+    public function addComprobante(\VentasBundle\Entity\PagoClienteComprobante $comprobantes)
+    {
+        $comprobantes->setPago($this);
+        $this->comprobantes[] = $comprobantes;
+
+        return $this;
+    }
+
+    /**
+     * Remove comprobantes
+     *
+     * @param \VentasBundle\Entity\PagoClienteComprobante $comprobantes
+     */
+    public function removeComprobante(\VentasBundle\Entity\PagoClienteComprobante $comprobantes)
+    {
+        $this->comprobantes->removeElement($comprobantes);
+    }
+
+    /**
+     * Get comprobantes
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getComprobantes()
+    {
+        return $this->comprobantes;
+    }
 }

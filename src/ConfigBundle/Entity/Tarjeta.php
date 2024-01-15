@@ -38,7 +38,7 @@ class Tarjeta {
 
     /**
      * @var float $limiteSinAutorizacion
-     * @ORM\Column(name="limite_sin_autorizacion", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="limite_sin_autorizacion", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $limiteSinAutorizacion;
 

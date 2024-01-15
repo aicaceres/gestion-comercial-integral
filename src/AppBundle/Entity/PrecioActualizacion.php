@@ -27,7 +27,7 @@ class PrecioActualizacion
 
     /**
      * @var string $valor
-     * @ORM\Column(name="valor", type="decimal", precision=15, scale=2)
+     * @ORM\Column(name="valor", type="decimal", precision=20, scale=2)
      */
     protected $valor;
 

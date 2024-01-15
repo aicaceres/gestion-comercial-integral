@@ -44,7 +44,7 @@ class PagoProveedor {
 
     /**
      * @var string $cotizacion
-     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="cotizacion", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $cotizacion = 1;
 
@@ -68,55 +68,55 @@ class PagoProveedor {
 
     /**
      * @var integer $importe
-     * @ORM\Column(name="importe", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="importe", type="decimal", precision=20, scale=3 )
      */
     protected $importe;
 
     /**
      * @var integer $montoPago
-     * @ORM\Column(name="monto_pago", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="monto_pago", type="decimal", precision=20, scale=3 )
      */
     protected $montoPago;
 
     /**
      * @var integer $montoIva
-     * @ORM\Column(name="monto_iva", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="monto_iva", type="decimal", precision=20, scale=3 )
      */
     protected $montoIva;
 
     /**
      * @var integer $baseImponibleRentas
-     * @ORM\Column(name="base_imponible_rentas", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="base_imponible_rentas", type="decimal", precision=20, scale=2 )
      */
     protected $baseImponibleRentas = 0;
 
     /**
      * @var integer $retencionRentas
-     * @ORM\Column(name="retencion_rentas", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="retencion_rentas", type="decimal", precision=20, scale=2 )
      */
     protected $retencionRentas = 0;
 
     /**
      * @var integer $adicionalRentas
-     * @ORM\Column(name="adicional_rentas", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="adicional_rentas", type="decimal", precision=20, scale=2 )
      */
     protected $adicionalRentas = 0;
 
     /**
      * @var integer $retencionGanancias
-     * @ORM\Column(name="retencion_ganancias", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="retencion_ganancias", type="decimal", precision=20, scale=2 )
      */
     protected $retencionGanancias = 0;
 
     /**
      * @var integer $montoRetRentas
-     * @ORM\Column(name="monto_ret_rentas", type="decimal", precision=15, scale=3, nullable=true )
+     * @ORM\Column(name="monto_ret_rentas", type="decimal", precision=20, scale=3, nullable=true )
      */
     protected $montoRetRentas;
 
     /**
      * @var integer $montoRetGanancias
-     * @ORM\Column(name="monto_ret_ganancias", type="decimal", precision=15, scale=3, nullable=true )
+     * @ORM\Column(name="monto_ret_ganancias", type="decimal", precision=20, scale=3, nullable=true )
      */
     protected $montoRetGanancias;
 
@@ -124,7 +124,7 @@ class PagoProveedor {
      * * Diferencia entre el pago total y los importes abonados.
      * * Refleja los saldos pendientes de las facturas imputadas
      * @var integer $saldo
-     * @ORM\Column(name="saldo", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=3 )
      */
     protected $saldo = 0;
 

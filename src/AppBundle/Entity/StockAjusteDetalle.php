@@ -26,7 +26,7 @@ class StockAjusteDetalle
 
      /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", scale=3)
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3)
      */
     protected $cantidad;
 

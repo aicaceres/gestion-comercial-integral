@@ -28,12 +28,12 @@ class RetencionGanancia {
 
     /**
      * @var integer $acumuladoTotal
-     * @ORM\Column(name="acumulado_total", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="acumulado_total", type="decimal", precision=20, scale=3 )
      */
     protected $acumuladoTotal;
     /**
      * @var integer $acumuladoRetencion
-     * @ORM\Column(name="acumulado_retencion", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="acumulado_retencion", type="decimal", precision=20, scale=3 )
      */
     protected $acumuladoRetencion;
 

@@ -38,9 +38,14 @@ class Banco {
     protected $cheques;
 
     /**
-     * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\CuentaBancaria", mappedBy="banco")
+     * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\CuentaBancaria", mappedBy="banco", cascade={"persist","remove"}, orphanRemoval=true)
      */
     protected $cuentas;
+
+    /**
+     * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\BancoMovimiento", mappedBy="banco")
+     */
+    protected $movimientos;
 
     /**
      * Constructor
@@ -48,7 +53,7 @@ class Banco {
     public function __construct()
     {
         $this->cheques = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->cuentas = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->movimientos = new \Doctrine\Common\Collections\ArrayCollection();
     }
     public function __toString() {
         return $this->nombre;
@@ -120,36 +125,36 @@ class Banco {
     }
 
     /**
-     * Add cuentas
+     * Add movimientos
      *
-     * @param \ConfigBundle\Entity\CuentaBancaria $cuentas
+     * @param \ConfigBundle\Entity\BancoMovimiento $movimientos
      * @return Banco
      */
-    public function addCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas)
+    public function addMovimiento(\ConfigBundle\Entity\BancoMovimiento $movimientos)
     {
-        $this->cuentas[] = $cuentas;
+        $this->movimientos[] = $movimientos;
 
         return $this;
     }
 
     /**
-     * Remove cuentas
+     * Remove movimientos
      *
-     * @param \ConfigBundle\Entity\CuentaBancaria $cuentas
+     * @param \ConfigBundle\Entity\BancoMovimiento $movimientos
      */
-    public function removeCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas)
+    public function removeMovimiento(\ConfigBundle\Entity\BancoMovimiento $movimientos)
     {
-        $this->cuentas->removeElement($cuentas);
+        $this->movimientos->removeElement($movimientos);
     }
 
     /**
-     * Get cuentas
+     * Get movimientos
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getCuentas()
+    public function getMovimientos()
     {
-        return $this->cuentas;
+        return $this->movimientos;
     }
 
     /**
@@ -173,5 +178,38 @@ class Banco {
     public function getActivo()
     {
         return $this->activo;
+    }
+
+    /**
+     * Add cuentas
+     *
+     * @param \ConfigBundle\Entity\CuentaBancaria $cuentas
+     * @return Banco
+     */
+    public function addCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas)
+    {
+        $cuentas->setBanco($this);
+        $this->cuentas[] = $cuentas;
+        return $this;
+    }
+
+    /**
+     * Remove cuentas
+     *
+     * @param \ConfigBundle\Entity\CuentaBancaria $cuentas
+     */
+    public function removeCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas)
+    {
+        $this->cuentas->removeElement($cuentas);
+    }
+
+    /**
+     * Get cuentas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCuentas()
+    {
+        return $this->cuentas;
     }
 }

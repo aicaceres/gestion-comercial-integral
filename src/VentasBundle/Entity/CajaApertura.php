@@ -35,7 +35,7 @@ class CajaApertura {
 
     /**
      * @var integer $montoApertura
-     * @ORM\Column(name="monto_apertura", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="monto_apertura", type="decimal", precision=20, scale=2 )
      */
     protected $montoApertura = 0;
 
@@ -48,14 +48,14 @@ class CajaApertura {
 
     /**
      * @var integer $montoCierre
-     * @ORM\Column(name="monto_cierre", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="monto_cierre", type="decimal", precision=20, scale=2, nullable=true )
      * @Gedmo\Versioned()
      */
     protected $montoCierre = 0;
 
     /**
      * @var integer $cambios
-     * @ORM\Column(name="cambios", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="cambios", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $cambios;
 

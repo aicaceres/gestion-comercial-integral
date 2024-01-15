@@ -1,0 +1,90 @@
+<pdf>
+    <dynamic-page page-size="A4-landscape" margin-left="70px" margin-right="40px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="60px" width="100%" >
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+        <h2 text-align="center"> Movimientos Bancarios </h2>
+        <h4><strong>Banco:</strong> {{ filtro[0] }}  - <strong>Cuenta N°:</strong> {{ filtro[1] }} </h4>
+        <div height="10px"></div>
+        <h4><strong>Fecha desde:</strong> {{ filtro[2] }} <strong> hasta:</strong> {{ filtro[3] }} </h4>
+        {% if filtro[4] %}<h4><strong>Incluye movimientos conciliados</strong></h4>{% endif %}
+        <div height="10px"></div>
+        {% set contador = 0%}
+        <table font-size="9px">
+            <tr>
+                <td colspan="5" border.type="none"></td>
+                <td colspan="2" height="20px" vertical-align="middle" text-align="center">
+                  <strong> SALDO INICIAL: {{ saldos.saldoInicial|number_format(2,'.','') }} </strong>
+                </td>
+                <td border.type="none"></td>
+            </tr>
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm"><strong>#</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm" ><strong>Fecha Carga</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>Tipo Movimiento</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Nro Movimiento</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Acreditación</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm"><strong>DEBE</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm"><strong>HABER</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" ><strong>Observaciones</strong></td>
+            </tr>
+            {% if items|length>0   %}
+                {% for item in items %}
+                  {% set debe = item.tipoMovimiento.signo == '+' ? item.importe : 0 %}
+                  {% set haber = item.tipoMovimiento.signo == '-' ? item.importe : 0 %}
+                    <tr>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px" width="1 cm">{{loop.index}}</td>
+                        <td height="20px" vertical-align="middle" text-align="center">{{item.fechaCarga|date('d-m-Y')}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.tipoMovimiento.nombre}} </td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.nroMovimiento}}</td>
+                        <td height="20px" vertical-align="middle" text-align="center"> {{item.fechaAcreditacion|date('d-m-Y')}}</td>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{debe|number_format(2,'.','')}}</td>
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{haber|number_format(2,'.','')}}</td>
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{item.observaciones}}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="8" height="30px" vertical-align="middle" padding-left="10px">
+                        <strong>No hay movimientos</strong></td>
+                </tr>
+            {% endif %}
+
+
+            <tr>
+                <td colspan="3" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right"></td>
+                <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">Saldo Movimientos</td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="5px" text-align="right">{{saldos.saldoTotal.debe|number_format(2,'.','')}}</td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="5px" text-align="right">{{saldos.saldoTotal.haber|number_format(2,'.','')}}</td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">{{ (saldos.saldoInicial + saldos.saldoTotal.debe + saldos.saldoTotal.haber)|number_format(2,'.','') }}</td>
+            </tr>
+            <tr>
+                <td colspan="3" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
+                    <strong>Total de Movimientos: {{ items|length }}</strong>
+                </td>
+                <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">Saldo Conciliados</td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="5px" text-align="right">{{saldos.saldoConciliado.debe|number_format(2,'.','')}}</td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="5px" text-align="right">{{saldos.saldoConciliado.haber|number_format(2,'.','')}}</td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">{{ (saldos.saldoInicial + saldos.saldoConciliado.debe + saldos.saldoConciliado.haber)|number_format(2,'.','') }}</td>
+            </tr>
+        </table>
+    </dynamic-page>
+</pdf>

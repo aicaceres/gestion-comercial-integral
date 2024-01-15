@@ -26,7 +26,7 @@ class PresupuestoDetalle {
     protected $orden;
 
     /**
-     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto")
+     * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="presupuestos")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
@@ -41,7 +41,7 @@ class PresupuestoDetalle {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", scale=3)
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3)
      * @Gedmo\Versioned()
      */
     protected $cantidad = 1;
@@ -61,14 +61,14 @@ class PresupuestoDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="precio", type="decimal", precision=20, scale=3 )
      * @Gedmo\Versioned()
      */
     protected $precio;
 
     /**
      * @var integer $alicuota
-     * @ORM\Column(name="alicuota", type="decimal", scale=3 )
+     * @ORM\Column(name="alicuota", type="decimal", precision=20, scale=3 )
      * @Gedmo\Versioned()
      */
     protected $alicuota = 0;
@@ -76,7 +76,7 @@ class PresupuestoDetalle {
     /**
      * @var integer $dtoRec
      * monto descuento o recargo
-     * @ORM\Column(name="dtoRec", type="decimal", scale=3 )
+     * @ORM\Column(name="dtoRec", type="decimal", precision=20, scale=3 )
      * @Gedmo\Versioned()
      */
     protected $dtoRec = 0;

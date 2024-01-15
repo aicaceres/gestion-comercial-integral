@@ -406,4 +406,15 @@ class ClienteRepository extends EntityRepository {
         return $query->getQuery()->getArrayResult();
     }
 
+  public function findRecibosACuenta($cliente){
+    $query = $this->_em->createQueryBuilder();
+        $query->select('p')
+            ->from('VentasBundle:PagoCliente', 'p')
+            ->innerJoin('p.cliente','c')
+            ->leftJoin('p.comprobantes', 'm')
+            ->where('c.id = :id')
+            ->andWhere('m.id IS NULL')
+            ->setParameter('id', $cliente->getId());
+        return $query->getQuery()->getArrayResult();
+  }
 }

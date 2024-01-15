@@ -38,19 +38,19 @@ class Escalas {
 
     /**
      * @var string $retencion
-     * @ORM\Column(name="retencion", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="retencion", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $retencion = 0;
 
     /**
      * @var string $adicional
-     * @ORM\Column(name="adicional", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="adicional", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $adicional = 0;
 
     /**
      * @var string $minimo
-     * @ORM\Column(name="minimo", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="minimo", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $minimo = 0;
 

@@ -33,7 +33,7 @@ class CentroCostoDetalle {
 
     /**
      * @var integer $costo
-     * @ORM\Column(name="costo", type="decimal", precision=15, scale=3 )
+     * @ORM\Column(name="costo", type="decimal", precision=20, scale=3 )
      */
     protected $costo;
 

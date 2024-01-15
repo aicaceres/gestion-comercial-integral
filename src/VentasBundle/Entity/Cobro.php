@@ -100,7 +100,7 @@ class Cobro {
 
     /**
      * @var string $cotizacion
-     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="cotizacion", type="decimal", precision=20, scale=2, nullable=true)
      * @Gedmo\Versioned()
      */
     protected $cotizacion = 0;

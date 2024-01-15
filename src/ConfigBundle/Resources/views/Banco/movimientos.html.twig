@@ -1,0 +1,172 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Movimientos Bancarios</h1>
+    <span class="pagedesc">Administración de Bancos </span>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+    {% include "AppBundle::notificacion.html.twig" %}
+
+<div id="contentwrapper" class="contentwrapper">
+<div>
+    <form id="searchform" action="{{ path('sistema_banco_movimiento') }}" method="get">
+        <div style="display: inline-block; margin-bottom: 10px;">
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Banco:</strong></label>
+            <select class="uniformselect" id="selectBanco" name="bancoId">
+            {% for bco in bancos %}
+                <option value="{{bco.id}}" {% if bco.id==bancoId %} selected="selected" {% endif %}> {{bco.nombre}}</option>
+            {% endfor %}
+            </select>
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Cuentas:</strong></label>
+            <select class="uniformselect" id="selectCuenta" name="cuentaId">
+            {% for cta in cuentas %}
+                <option value="{{cta.id}}" {% if cta.id==cuentaId %} selected="selected" {% endif %}> {{cta.nroCuenta}}</option>
+            {% endfor %}
+            </select>
+            <a href="javascript:void(0)" class="editar btn btnaction btn_add" title="Agregar Cuenta"></a>
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Incluir conciliados:</strong></label>
+            <input type="checkbox" id="conciliado" name="conciliado" {% if conciliado %} checked="checked" {% endif %}/>
+
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Fecha: </strong></label>
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
+            <input type="hidden" id="option" name="option" value="B"/>
+            <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="formSubmit()" title="Buscar"></a>
+
+        </div>
+            <button class="stdbtn print floatright" id="imprimir" type="button" >Imprimir</button>
+    </form>
+</div>
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
+        <thead>
+            <tr>
+                <th>Fecha Carga</th>
+                <th>Tipo Movimiento</th>
+                <th>N° de Movimiento</th>
+                <th>Fecha Acreditación</th>
+                <th>DEBE</th>
+                <th>HABER</th>
+                <th>Observaciones</th>
+                <th class="nosort" ></th>
+                <th class="nosort actionbutton addbutton">
+                    {% if app.user.access(app.session.get('unidneg_id'),'sistema_banco') and cuentaId %}
+                    <a class="editar create" href="{{ path('sistema_banco_movimiento_new', { 'bancoId': bancoId, 'cuentaId': cuentaId }) }}">Agregar Movimiento</a>
+                    {% else %} &nbsp; {% endif %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            {% set debe = entity.tipoMovimiento.signo == '+' ? entity.importe : 0 %}
+            {% set haber = entity.tipoMovimiento.signo == '-' ? entity.importe : 0 %}
+            <tr>
+                <td><span class="hidden">{{ entity.fechaCarga|date('Ymd') }}</span>{{ entity.fechaCarga|date('d-m-Y') }}</td>
+                <td>{{ entity.tipoMovimiento }}</td>
+                <td>{{ entity.nroMovimiento}}</td>
+                <td>{% if entity.fechaAcreditacion %}<span class="hidden">{{ entity.fechaAcreditacion|date('Ymd') }}</span>{{ entity.fechaAcreditacion|date('d-m-Y') }}{% endif %}</td>
+                <td class="alignright">{{ debe|number_format(2,'.','') }}</td>
+                <td class="alignright">{{ haber|number_format(2,'.','') }}</td>
+                <td>{{ entity.observaciones }}</td>
+                <td style="text-align:center">
+                  <input type="checkbox" class="js-conciliado" title="Conciliado"
+                    {% if entity.conciliado %} checked="checked" disabled="disabled"
+                    {% else %} onclick="updateIds(this)" data-id="{{entity.id}}"{% endif %}/>
+                </td>
+                <td>
+                  <a href="{{ path('sistema_banco_movimiento_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar Movimiento"></a>
+                  <a href url="{{ path('sistema_banco_movimiento_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
+                </td>
+            </tr>
+           {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th colspan="4" class="alignright">Saldos Movimientos</th>
+            <th class="alignright" style="font-size:14px">{{saldoTotal.debe|number_format(2,'.','')}}</th>
+            <th class="alignright" style="font-size:14px" >{{saldoTotal.haber|number_format(2,'.','')}}</th>
+            <th id="saldototal">
+              <h5 style="width:100px;text-align:right">{{ (saldoInicial + saldoTotal.debe + saldoTotal.haber)|number_format(2,'.','') }} </h5>
+            </th>
+            <th colspan="2">
+              <a class="stdbtn" onclick="conciliar()" href="javascript:void(0)">Conciliar</a>
+            </th>
+          </tr>
+          <tr>
+            <th colspan="4" class="alignright">Saldos Conciliados</th>
+            <th class="alignright" style="font-size:14px">{{saldoConciliado.debe|number_format(2,'.','')}}</th>
+            <th class="alignright" style="font-size:14px" >{{saldoConciliado.haber|number_format(2,'.','')}}</th>
+            <th id="saldototal">
+              <h5 style="width:100px;text-align:right">{{ (saldoInicial + saldoConciliado.debe + saldoConciliado.haber)|number_format(2,'.','') }} </h5>
+            </th>
+            <th colspan="2" ></th>
+          </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+{% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript">
+const saldoInicial = "{{saldoInicial|number_format(2,'.','') }}"
+let concIds = []
+jQuery(document).ready(function($) {
+  if ( $('#contentwrapper').width() < 1000) {
+    $('.togglemenu').click();
+  }
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+    $('#selectBanco').change(function(e){
+      $('#selectCuenta').append(new Option("", "")).val("").trigger('change')
+    })
+    $('#selectCuenta, #conciliado').change( formSubmit )
+
+    $('#dyntable2_length').prepend('<h5 style="text-align:center;"><span style="padding:11px; border:1px solid grey">SALDO INICIAL: '+ saldoInicial +'</span></h5>')
+
+    $('#imprimir').on('click', function(){
+      $('#option').val('I')
+      $('#searchform').attr('target','_blank')
+      $('#searchform').submit()
+      $('#option').val('B')
+      $('#searchform').attr('target','_self')
+    })
+
+    $('.btn_add').on('click', function(e){
+      url = "{{ path('sistema_banco_add_cuenta') }}"
+      e.preventDefault()
+      var cuenta = prompt('Ingresar N° de Cuenta');
+      var jqxhr = jQuery.get(url,{ cuenta, bancoId:{{bancoId}} }, function(data){
+          if(data.msg=='OK'){
+            $('#selectCuenta').append(new Option(cuenta,data.id)).val(data.id).trigger('change')
+          }
+      },'JSON').fail(function(error) {
+          alert( error.msg );
+      })
+    })
+});
+function formSubmit(){
+  form = jQuery('#searchform').serialize()
+  window.location.href= "{{ path('sistema_banco_movimiento') }}?"+form
+}
+function updateIds(chk){
+  if(jQuery(chk).is(':checked')){
+    concIds.push(jQuery(chk).data('id'))
+  }else{
+    concIds = concIds.filter(i => i != jQuery(chk).data('id'))
+  }
+}
+function conciliar(){
+  if(concIds.length){
+    if(confirm('Confirma la conciliación de los movimientos seleccionados?')){
+      form = jQuery('#searchform').serialize()
+      window.location.href= '{{ path("sistema_banco_conciliar") }}?'+form+"&ids="+concIds
+    }
+  }else{
+    alert('No hay movimientos para conciliar')
+  }
+}
+</script>
+{% endblock %}

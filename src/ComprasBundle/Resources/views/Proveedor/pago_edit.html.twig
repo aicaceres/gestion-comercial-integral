@@ -57,7 +57,7 @@
                 {{ form_label(form.montoPago,'PAGO:') }}
                 <strong class="simbolo">$</strong>
                 {{ form_widget(form.montoPago,{'attr':{'class':'number mediuminput', 'title':'Monto del pago a realizar'}}) }}
-            </div>            
+            </div>
             <div style="display: inline-block; width: 10%">
                 <label for="comprasbundle_pagoproveedor_montoGanancias" class="required">DGI: <span id="lblGanancia"></label>
                 <strong class="simbolo">$</strong>
@@ -93,7 +93,7 @@
                         <a class="close"></a>
                         <p style="margin:10px 10px 0 55px">Al modificar el PAGO controle que el IVA se corresponda con el monto ingresado. Para recalcular elimine el valor de IVA!.</p>
                     </div>
-            </fieldset>    
+            </fieldset>
         <fieldset class="detalle_pago" >
             <div style="display:inline-block; width:95%; margin:10px 0;" >
                 <h5>DETALLE DEL PAGO:</h5>
@@ -175,14 +175,14 @@ jQuery(function ($) {
     }, 1000);
 
     $('#calcular-valores').on("click", function(){changeComprobantes()})
-    
+
     $('#comprasbundle_pagoproveedor_montoPago').on('change',function(){
         if( $('#comprasbundle_pagoproveedor_montoIva').val()>0 ){
-            $('#mensaje-control-iva').show(); 
+            $('#mensaje-control-iva').show();
         }
     })
-    
-    
+
+
     $('#comprasbundle_pagoproveedor_proveedor').on('change',function(){
         let provId = $(this).val();
         $.ajax({
@@ -202,7 +202,7 @@ jQuery(function ($) {
             }
        });
     }).trigger('change');
-    
+
     $(document).on('click','.js_get_cheques', function() {
         cargarCheques( $(this).closest('.chequeTd') );
     });
@@ -223,7 +223,7 @@ jQuery(function ($) {
         }
         else{
 {#            importeTotal = parseFloat($('#comprasbundle_pagoproveedor_importe').val())#}
-            
+
             // controlar que el pago cubra los impuestos
             impuestos = parseFloat($('#comprasbundle_pagoproveedor_montoGanancias').val())  + parseFloat($('#comprasbundle_pagoproveedor_montoRentas').val());
             if( pago < impuestos ){
@@ -430,7 +430,7 @@ function cargarCheques(objTd){
         $removeFormA.on('blur', function(e) {
             $('#linkAddPago').focus();
         });
-        
+
     }
 
     function changeComprobantes(){
@@ -475,16 +475,16 @@ function cargarCheques(objTd){
             pagos += importe
         });
         $('.pago').html( pagos.toFixed(2) );
-        
+
         vuelto = pagos - checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
         $('.vuelto').html(vuelto.toFixed(2))
     }
-    
+
     function getMontoTotal(){
         total = checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
         montoRentas = checknumero( $('#comprasbundle_pagoproveedor_montoRentas'),2)
         montoGanan = checknumero($('#comprasbundle_pagoproveedor_montoGanancias'),2)
-        console.log(total + montoRentas + montoGanan)
+        {# console.log(total + montoRentas + montoGanan) #}
         return total + montoRentas + montoGanan
     }
 });

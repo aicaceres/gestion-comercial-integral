@@ -53,21 +53,21 @@ class Producto {
 
     /**
      * @var string $costo
-     * @ORM\Column(name="costo", type="decimal", precision=15, scale=3,  nullable=false)
+     * @ORM\Column(name="costo", type="decimal", precision=20, scale=3,  nullable=false)
      * @Gedmo\Versioned()
      */
     protected $costo;
 
     /**
      * @var string $iva
-     * @ORM\Column(name="iva", type="decimal", scale=2,  nullable=false)
+     * @ORM\Column(name="iva", type="decimal", precision=20, scale=2,  nullable=false)
      * @Gedmo\Versioned()
      */
     protected $iva = 21;
 
     /**
      * @var string $stock_minimo
-     * @ORM\Column(name="stock_minimo", type="decimal", scale=3,  nullable=true)
+     * @ORM\Column(name="stock_minimo", type="decimal", precision=20, scale=3,  nullable=true)
      * @Gedmo\Versioned()
      */
     protected $stockMinimo;

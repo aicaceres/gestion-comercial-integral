@@ -33,22 +33,22 @@ class ActividadComercial {
     protected $codigo;
     /**
      * @var string $exento
-     * @ORM\Column(name="exento", type="decimal", scale=2,nullable=true)
+     * @ORM\Column(name="exento", type="decimal", precision=20, scale=2,nullable=true)
      */
     protected $exento = 0;
     /**
      * @var string $inscripto
-     * @ORM\Column(name="inscripto", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="inscripto", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $inscripto = 0;
     /**
      * @var string $noInscripto
-     * @ORM\Column(name="no_inscripto", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="no_inscripto", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $noInscripto = 0;
     /**
      * @var string $minimo
-     * @ORM\Column(name="minimo", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="minimo", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $minimo = 0;
 

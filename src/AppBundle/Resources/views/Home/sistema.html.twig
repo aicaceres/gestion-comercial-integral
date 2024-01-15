@@ -7,37 +7,17 @@
 {% block contentwrapper %}
 {% include "AppBundle::notificacion.html.twig" %}
 <div id="contentwrapper" class="contentwrapper">
-    <div class="two_third dashboard_left">              
-        <ul class="shortcuts">         
+    <div class="two_third dashboard_left">
+        <ul class="shortcuts">
             <li>
-                <a href="javascript:void(0)" class="settings" title="Check WS status">
-                    <span class="loader">WsAfip Status</span>
-                    <span class="loader" style="display:none"><img src={{ asset('assets/images/loaders/loader4.gif') }}></span>
+              {% if app.user.access(app.session.get('unidneg_id'),'sistema_banco_movimiento') %}
+                <a href="{{ path('sistema_banco_movimiento') }}" class="banco" title="Ir a Movimientos de Banco">
+                    <span class="loader">Mov. Bancarios</span>
                 </a>
+              {% endif %}
             </li>
         </ul>
         <br clear="all" />
     </div><!--two_third dashboard_left -->
 </div>
-{% endblock %}
-{% block extra_javascripts %}
-    {{ parent() }}
-<script type="text/javascript">
-jQuery(document).ready(function($) {
-    $('.settings').on('click',function(e){
-        url = "{{ path('ws_get_comprobantes_validos') }}" 
-        e.preventDefault()
-        var modo = prompt('Ingresar Modo');
-        jQuery('.loader').toggle()
-        var jqxhr = jQuery.get(url,{ modo }, function(data){
-            alert(JSON.stringify(data))
-        },'JSON').fail(function(error) {
-            alert( error.msg );
-        }).always(function() {
-           jQuery('.loader').toggle()
-        })   
-        
-    });
-});
-</script>
 {% endblock %}

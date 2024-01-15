@@ -40,21 +40,21 @@ class Stock {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", scale=3 )
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3 )
      * @Gedmo\Versioned()
      */
     protected $cantidad = 0;
 
     /**
      * @var string $stock_minimo
-     * @ORM\Column(name="stock_minimo", type="decimal", scale=3,  nullable=true)
+     * @ORM\Column(name="stock_minimo", type="decimal", precision=20, scale=3,  nullable=true)
      * @Gedmo\Versioned()
      */
     protected $stockMinimo;
 
     /**
      * @var integer $costo
-     * @ORM\Column(name="costo", type="decimal", precision=15, scale=3, nullable=true )
+     * @ORM\Column(name="costo", type="decimal", precision=20, scale=3, nullable=true )
      */
     protected $costo;
 

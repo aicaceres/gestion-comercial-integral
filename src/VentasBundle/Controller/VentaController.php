@@ -35,8 +35,7 @@ class VentaController extends Controller {
         UtilsController::haveAccess($user, $unidneg, 'ventas_venta');
         $em = $this->getDoctrine()->getManager();
 
-        $desde = $request->get('desde');
-        $hasta = $request->get('hasta');
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
 
         if ($user->getAccess($unidneg, 'ventas_venta_own') && !$user->isAdmin($unidneg)) {
             $id = $user->getId();
@@ -46,15 +45,15 @@ class VentaController extends Controller {
             $id = $request->get('userId');
             $owns = false;
         }
-        $entities = $em->getRepository('VentasBundle:Venta')->findByCriteria($unidneg, $desde, $hasta, $id);
+        $entities = $em->getRepository('VentasBundle:Venta')->findByCriteria($unidneg, $periodo['ini'], $periodo['fin'], $id);
         $users = $em->getRepository('VentasBundle:Venta')->getUsers();
         return $this->render('VentasBundle:Venta:index.html.twig', array(
                 'entities' => $entities,
                 'id' => $id,
                 'owns' => $owns,
                 'users' => $users,
-                'desde' => $desde,
-                'hasta' => $hasta
+                'desde' => $periodo['ini'],
+                'hasta' => $periodo['fin']
         ));
     }
 

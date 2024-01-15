@@ -1,0 +1,23 @@
+<fieldset >
+    <div class="two_fields">
+    {{ form_row(form.nroCheque, { 'attr': {'class' : 'smallinput' } }) }}
+    {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
+    </div>
+    <div class="two_fields">
+    {{ form_row(form.banco, { 'attr': {'class' : 'select2 selectBancoPropio'} }) }}
+    {{ form_row(form.cuenta, { 'attr': {'class' : 'selectCuentaPropio', 'required':'required' } }) }}
+    </div>
+    <div class="two_fields">
+    {{ form_row(form.valor, { 'attr': {'class' : 'mininput'} }) }}
+    </div>
+    <div class="two_fields">
+    {{ form_row(form.devuelto) }}
+    {{ form_row(form.usado) }}
+    </div>
+    <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>
+    <br clear="all" />
+    <div class="actionbutton">
+        <button class="guardar" type="submit" >Guardar</button>
+        <a class="cancelar" type="button" href="{{ path('sistema_cheque')}}">Cancelar</a>
+    </div>
+</fieldset>

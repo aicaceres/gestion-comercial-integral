@@ -627,6 +627,7 @@ sup{vertical-align:super;}
 	text-transform: uppercase;
 }
 .shortcuts li a.settings { background-image: url(../images/icons/64/settings.png); }
+.shortcuts li a.banco { background-image: url(../images/icons/64/banco.png); }
 .shortcuts li a.users { background-image: url(../images/icons/64/users.png); }
 .shortcuts li a.gallery { background-image: url(../images/icons/64/images.png); }
 .shortcuts li a.events { background-image: url(../images/icons/64/events.png); }
@@ -1045,6 +1046,7 @@ form button:active {
 form input.mininput, form textarea.mininput { width: 20%; }
 form select.mininput { min-width: 20% }
 form input[type=number], form input.number { width: 50px; }
+form input.monto { text-align: right !important;}
 form input.smallinput, form textarea.smallinput, form select.smallinput { width: 40%; }
 form input.mediuminput, form textarea.mediuminput, form select.mediuminput { width: 60%; }
 form select.medium50 { width: 55%; }
@@ -1546,8 +1548,8 @@ a.btn_table { background-position: -82px -480px; }
 	font-weight: bold; padding: 7px 10px; border: 1px solid #ccc; background: #eee url(../images/buttons.png) repeat-x top left; color: #333;
 	-moz-border-radius: 2px; -webkit-border-radius: 2px; border-radius: 2px; cursor: pointer; opacity: 0.8;
 }
-.stdbtn:hover { text-decoration: none; opacity: 1; color: white !important}
-.stdbtn:focus { text-decoration: none; opacity: 1; color: white !important}
+/* .stdbtn:hover { text-decoration: none; opacity: 1; color: white !important}
+.stdbtn:focus { text-decoration: none; opacity: 1; color: white !important} */
 
 .btn_yellow { background-position: 0 -38px; border-color: #ebb205; color: #ae510d; }
 .btn_blue { background-position: 0 -76px; border-color: #0282ce; color: #fff; }
@@ -2216,6 +2218,7 @@ input.hasInfo {
 .green{ color: darkgreen !important; box-shadow: 0 0 2px #006400 inset !important;}
 .hide-button {display:none;}
 span.minus{ background: url('../images/icons/minus.png'); width: 12px; height: 12px; display: inline-block; }
+span.plus{ background: url('../images/icons/add.png'); width: 12px; height: 12px; display: inline-block; }
 a.desactivado{ cursor: not-allowed !important ; opacity: 0.5;}
 /***/
 .capitalize {text-transform:capitalize;}
@@ -2237,8 +2240,9 @@ a.desactivado{ cursor: not-allowed !important ; opacity: 0.5;}
 	border: 1px solid #E50000; cursor: pointer; font-weight: bold; color: #fff; display:inline-block;
 }
 .actionbutton a.editar:hover,.actionbutton button.guardar:hover{ background: blue; border: 1px solid #3f526f;; }
+.actionbutton button.guardar:focus{ background: blue; border: 1px solid #3f526f;; }
 .actionbutton a.cancelar { background: #eee; color: #666; border: 1px solid #ddd; }
-.actionbutton a.cancelar:hover { background: #ddd; border: 1px solid #ccc; }
+.actionbutton a.cancelar:hover, .actionbutton a.cancelar:focus { background: #ddd; border: 1px solid #ccc; }
 /*.actionbutton .loading { margin: 0 10px; font-style: italic; color: #999; font-size: 11px; display: none; }
 .actionbutton .loading img { vertical-align: middle; margin-right: 5px; }*/
 .actionbutton.addbutton a,.actionbutton.addbutton button{

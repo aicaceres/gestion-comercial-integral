@@ -8,45 +8,18 @@
 
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos ' : 'Alta de Nuevo Cheque' }}</h1>
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos ' : 'Nuevo Cheque ' ~ ( entity.tipo == 'P' ? 'Propio' : 'de Terceros' ) }}</h1>
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
 {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
-        <fieldset >
-            <div class="two_fields">
-            {{ form_row(form.nroCheque, { 'attr': {'class' : 'smallinput' } }) }}
-            {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
-            </div>
-            <div class="two_fields">
-            {{ form_row(form.banco, { 'attr': {'class' : 'select2 selectBanco',
-                    'data-url': path("sistema_banco_add") } }) }}
-            {{ form_row(form.sucursal, { 'attr': {'class' : 'smallinput'} }) }}
-            </div>
-            <div class="locate">
-            {{ form_row(form.pais, { 'attr': {'class' : 'uniformselect'  } }) }}
-            {{ form_row(form.provincia, { 'attr': {'class' : 'uniformselect'  } }) }}
-            {{ form_row(form.localidad, { 'attr': {'class' : 'uniformselect'  } }) }}
-            </div>
-            <p>{{ form_row(form.titularCheque, { 'attr': {'class' : 'chzn-select'  } }) }}</p>
-            <div class="two_fields">
-            {{ form_row(form.dador, { 'attr': {'style' : 'width:50%'} }) }}
-            {{ form_row(form.telefono, { 'attr': {'class' : 'smallinput'} }) }}
-            </div>
-            <div class="two_fields">
-            {{ form_row(form.tomado, { 'attr': {'class' : 'datepicker'} }) }}
-            {{ form_row(form.valor, { 'attr': {'class' : 'mininput'} }) }}
-            </div>
-            <div class="two_fields">
-            {{ form_row(form.devuelto) }}
-            {{ form_row(form.usado) }}
-            </div>
-            <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>
-            <br clear="all" />
-            <div class="actionbutton">
-                <button class="guardar" type="submit" >Guardar</button>
-                <a class="cancelar" type="button" href="{{ path('sistema_cheque')}}">Cancelar</a>
-            </div>
-        </fieldset>
+    {% if entity.tipo == 'T' %}
+        {% include "ConfigBundle:Cheque:_partial-tercero.html.twig" %}
+    {% else %}
+        {% include "ConfigBundle:Cheque:_partial-propio.html.twig" %}
+    {% endif %}
+<div style="display:none">
+{{ form_rest(form) }}
+</div>
 {{ form_end(form) }}
 </div>
 </div>
@@ -57,7 +30,22 @@
 jQuery(document).ready(function($) {
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
 
+    $('.selectBancoPropio').on('change', function(e){
+      e.preventDefault()
+      url = "{{ path('sistema_banco_get_cuentas') }}"
+      bancoId = $(this).val()
+      cuentaId = $('.selectCuentaPropio').val()
+      $('.selectCuentaPropio').html('')
+      $.get(url,{ bancoId }, function(data){
+        if(!data.length) alert('El banco no tiene cuentas asociadas! No se podrá crear el cheque')
+        data.forEach(c =>
+          $('.selectCuentaPropio').append('<option value="'+c.id+'" >'+c.nroCuenta+'</option>')
+        )
+        $('.selectCuentaPropio').val(cuentaId)
+      },'JSON').fail(function(error) {
+          alert( error );
+      })
+    }).change()
 });
-
 </script>
 {% endblock %}

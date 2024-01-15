@@ -66,6 +66,21 @@
                 {% endif %}
             </div>
         </fieldset>
+        <fieldset class="fields recibos ">
+        <div style="display: inline-block; width: 55%">
+          <label >RECIBOS IMPUTADOS:</label>
+            <select class="select2" style="width:90%">
+                <option> {{ entity.recibosTxt }} </option>
+            </select>
+        </div>
+          <div style="display: inline-block;">
+          <label>PAGOS A CUENTA:</label>
+          <select class="select2" style="width:90%">
+                <option> {{ entity.destinoSaldo }} </option>
+            </select>
+          </div>
+
+    </fieldset>
         <fieldset class="fields">
             <div>
                 <label>OBSERVACIONES:</label>
@@ -162,7 +177,7 @@
                                 <span class="pago" style="font-size:16px" >{{importe|number_format(3,',','.')}}</span>.-
                             </th>
                             <th width="150px" class="vueltoTh">
-                                CAMBIO: &nbsp;
+                                {{ entity.destinoSaldo }}: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
                                 <span class="vuelto" style="font-size:16px">{{ (importe - entity.total)|number_format(2,',','.')}}  </span>
                             </th>

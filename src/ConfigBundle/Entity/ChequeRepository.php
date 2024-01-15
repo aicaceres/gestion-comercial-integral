@@ -19,8 +19,24 @@ class ChequeRepository extends EntityRepository {
         $query = $this->_em->createQueryBuilder();
         $query->select('c')
                 ->from('ConfigBundle\Entity\Cheque', 'c')
+                ->innerJoin('c.banco', 'b')
                 ->where('c.usado=0')
+                ->andWhere("b.nombre NOT LIKE '%RETENCION%' ")
                 ->andWhere('c.devuelto=0');
-        return $query->getQuery()->getResult();        
+        return $query->getQuery()->getResult();
+    }
+
+    public function findNoRetenciones($tipo = ''){
+      $query = $this->_em->createQueryBuilder();
+      $query->select('c')
+              ->from('ConfigBundle\Entity\Cheque', 'c')
+              ->innerJoin('c.banco', 'b')
+              ->where("b.nombre NOT LIKE '%RETENCION%' ")
+              ->orderBy('c.fecha','DESC');
+      if($tipo){
+        $query->andWhere('c.tipo = :tipo')
+              ->setParameter('tipo', $tipo);
+      }
+      return $query->getQuery()->getResult();
     }
 }

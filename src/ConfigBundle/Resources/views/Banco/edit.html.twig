@@ -13,24 +13,58 @@
 <div class="divEdicion">
  {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >
-            <p>             
-                {{ form_label(form.nombre) }}
-                {{ form_widget(form.nombre, { 'attr': {'class' : 'smallinput', 'style':'text-transform:uppercase','autofocus':'autofocus' } }) }}
-                {{ form_errors(form.nombre) }}                
-            </p>
-            <p>
-            {{ form_label(form.activo) }}
-            {{ form_widget(form.activo) }}
-            {{ form_errors(form.activo) }}
-             </p>
-                   
-            <br clear="all" /> 
+          <div class="two_fields">
+              {{ form_row(form.nombre, { 'attr': {'class' : 'mediuminput','autofocus':'autofocus' } }) }}
+              {{ form_row(form.activo) }}
+            </div>
+
+            <div class="widgetbox" id="divcuentas" style="width:50%;margin-left: 150px;background: beige;padding: 15px;display:block;">
+            <div class="title" style="margin:0;"><h5>Cuentas Bancarias
+                <a href="javascript:void(0)" id="addCuenta" onclick="addNewCuenta()" title="Agregar cuenta">[ + ]</a></h5>
+            </div>
+            <div class="widgetcontent">
+                {{ form_errors(form.cuentas) }}
+                <table class="stdtable cuentaxbanco" cellspacing="0" cellpadding="0" border="0" style="background:white;margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th>Nro Cuenta</th>
+                            <th style="width:10%">Activo</th>
+                            <th style="width:10%"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-index="{{form.cuentas | length }}" data-prototype="{% filter escape %}{% include 'ConfigBundle:Banco:item-cuenta.html.twig' with {'item':form.cuentas.vars.prototype} %}{% endfilter %}">
+                        {% for cuenta in form.cuentas %}
+                          {% include 'ConfigBundle:Banco:item-cuenta.html.twig' with {'item': cuenta} %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('sistema_banco')}}">Cancelar</a>
             </div>
         </fieldset>
 {{ form_end(form) }}
-</div>    
 </div>
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+function addNewCuenta(){
+  $holder = jQuery('table.cuentaxbanco tbody')
+  var prototype = $holder.data('prototype')
+  var index = $holder.data('index')
+  var newForm = prototype.replace(/items2/g, index)
+  $holder.append(newForm);
+  $holder.data('index', index + 1);
+}
+function delCuenta(obj){
+  tr = jQuery(obj).closest("tr")
+  return confirm('Desea eliminar esta cuenta?') ? tr.remove() : false
+}
+</script>
 {% endblock %}

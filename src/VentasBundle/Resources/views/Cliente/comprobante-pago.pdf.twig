@@ -115,12 +115,25 @@
                     1
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" padding-left="10px">
+                  {% if pago.comprobantes|length %}
                     Pago imputado a: {{pago.comprobantesTxt}}
+                  {% else %}
+                    Pago sin comprobantes imputados
+                  {% endif %}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
                     {{totalpago|number_format(2,',','.')}}
                 </td>
             </tr>
+            {% if pago.recibos %}
+            <tr>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px"></td>
+                <td border.type="none" height="15px" vertical-align="middle" padding-left="10px">
+                    Pago a cuenta imputado: {{pago.recibosTxt}}
+                </td>
+                <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px"></td>
+            </tr>
+            {% endif %}
             {% if pago.generaNotaCredito %}
             <tr>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
@@ -139,8 +152,8 @@
                 <td border.type="none" colspan="3" height="15px" vertical-align="middle" padding-left="10px" padding-top="20px">
                     Obs. {{ pago.observaciones }}
                 </td>
-            </tr>    
-            {% endif %}    
+            </tr>
+            {% endif %}
         </table>
 
 </dynamic-page>

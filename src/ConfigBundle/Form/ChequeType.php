@@ -6,6 +6,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use ConfigBundle\Form\EventListener\AddLocalidadFieldSubscriber;
 use ConfigBundle\Form\EventListener\AddProvinciaFieldSubscriber;
 use ConfigBundle\Form\EventListener\AddPaisFieldSubscriber;
+use Doctrine\ORM\EntityRepository;
 
 class ChequeType extends AbstractType
 {
@@ -20,29 +21,44 @@ class ChequeType extends AbstractType
         $builder
             ->addEventSubscriber(new AddLocalidadFieldSubscriber($propertyPathToLocalidad))
             ->addEventSubscriber(new AddProvinciaFieldSubscriber($propertyPathToLocalidad))
-            ->addEventSubscriber(new AddPaisFieldSubscriber($propertyPathToLocalidad));           
-        $builder  
-            ->add('id','hidden')    
-            ->add('tipo','hidden') 
+            ->addEventSubscriber(new AddPaisFieldSubscriber($propertyPathToLocalidad));
+        $builder
+            ->add('id','hidden')
+            ->add('tipo','hidden')
             ->add('nroCheque',null,array('label' => 'Nº Cheque:','required'=>true))
-           // ->add('nroInterno',null,array('label' => 'Nº Interno:','required'=>false,'mapped'=>false))
-            ->add('dador','text',array('label' => 'Dador:','required'=>true))
+            ->add('dador','text',array('label' => 'Dador:','required'=>false))
             ->add('telefono','text',array('label' => 'Telefono:','required'=>false))
-            ->add('fecha','date',array('widget' => 'single_text','label' => 'Fecha:', 
+            ->add('fecha','date',array('widget' => 'single_text','label' => 'Fecha:',
                 'format' => 'dd-MM-yyyy', 'required' => true))
             ->add('titularCheque','entity',array('class' => 'ConfigBundle:TitularCheque',
                 'placeholder'=>'Seleccionar..' ,'label' => 'Titular:','required' =>false))
-            ->add('banco','entity',array('class' => 'ConfigBundle:Banco',
-                'label' => 'Banco:','required' =>true))
+
             ->add('sucursal',null,array('label' => 'Sucursal:','required' => false))
             ->add('tomado','date',array('widget' => 'single_text', 'label' => 'Tomado el:',
                 'format' => 'dd-MM-yyyy', 'required' => false))
             ->add('devuelto',null,array('label' => 'Devuelto/Rechazado:','required' => false))
-            ->add('observaciones',null,array('label' => 'Observaciones:','required' => false))    
+            ->add('observaciones',null,array('label' => 'Observaciones:','required' => false))
             ->add('usado',null,array('label' => 'Utilizado:','required' => false))
-            ->add('valor',null,array('label' => 'Valor:'));
+            ->add('valor',null,array('label' => 'Valor:','required' => true))
+            ->add('banco', 'entity', array(
+                    'class' => 'ConfigBundle:Banco',
+                    'label' => 'Banco:',
+                    'required' => true,
+                    'query_builder' => function(EntityRepository $repository) {
+                        return $qb = $repository->createQueryBuilder('c')
+                                ->where("c.nombre NOT LIKE '%RETENCION%'")
+                                ->andWhere("c.activo=1")
+                                ->orderBy("c.nombre", "ASC");
+                    }
+                ))
+            ->add('cuenta', 'entity', array(
+                    'class' => 'ConfigBundle:CuentaBancaria',
+                    'choice_label' => 'nroCuenta',
+                    'label' => 'Cuenta:',
+                    'required' => false
+                ));
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */

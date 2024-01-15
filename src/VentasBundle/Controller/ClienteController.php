@@ -19,6 +19,8 @@ use VentasBundle\Entity\NotaDebCred;
 use VentasBundle\Entity\NotaDebCredDetalle;
 use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Entity\CobroDetalle;
+use VentasBundle\Entity\PagoClienteComprobante;
+use VentasBundle\Entity\PagoClienteRecibo;
 use VentasBundle\Afip\src\Afip;
 use Endroid\QrCode\QrCode;
 
@@ -503,7 +505,6 @@ class ClienteController extends Controller {
             return $this->redirectToRoute('ventas_cliente_pagos');
         }
         $entity = new PagoCliente();
-
         $cliente = $em->getRepository('VentasBundle:Cliente')->find($id);
         $entity->setCliente($cliente);
         $valido = UtilsController::validarCuit($cliente->getCuit());
@@ -521,7 +522,7 @@ class ClienteController extends Controller {
         return $this->render('VentasBundle:Cliente:pago_edit.html.twig', array(
                 'entity' => $entity,
                 'form' => $form->createView(),
-                'cuitvalido' => $valido,
+                'cuitvalido' => $valido
         ));
     }
 
@@ -582,6 +583,8 @@ class ClienteController extends Controller {
      * @Method("POST")
      */
     public function pagosCreateAction(Request $request) {
+      $datos = $request->get('ventasbundle_pagocliente');
+
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
@@ -625,48 +628,88 @@ class ClienteController extends Controller {
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
                 }
-                $comprobantes = $entity->getComprobantes();
+
                 // recorrer para imputar NC si corresponde
                 $ncs = new ArrayCollection();
                 $fcs = new ArrayCollection();
-                foreach ($comprobantes as $comp) {
-                  if($comp->getNotaDebCred()){
-                    if($comp->getNotaDebCred()->getSigno() === '-'){
-                      // guardar nc para imputar a las fc
-                      $ncs->add($comp);
-                    }
-                  }else{
-                      $fcs->add($comp);
-                    }
-                }
-                if($ncs){
-                  // hay NC para imputar a las FC
-                  $saldoNc = 0;
-                  foreach ($ncs as $nc) {
-                    $saldoNc += $nc->getTotal();
-                    foreach ($fcs as $fc) {
-                      if($saldoNc == 0) break;
-                      if( !$nc->getNotaDebCred()->getComprobanteAsociado() ){
-                        $nc->getNotaDebCred()->setComprobanteAsociado($fc);
-                      }else{
-                        $msg = $nc->getNotaDebCred()->getConcepto() . ' - Saldo imputado a '.$fc->getComprobanteTxt();
-                        $nc->getNotaDebCred()->setConcepto($msg);
+                if( isset($datos['comprobantes'])) {
+                  foreach($datos['comprobantes'] as $feId){
+                    $comp = new PagoClienteComprobante();
+                    $fe = $em->getRepository('VentasBundle:FacturaElectronica')->find($feId);
+                    $comp->setComprobante($fe);
+                    $comp->setMonto($fe->getSaldo());
+                    $entity->addComprobante($comp);
+                    if($fe->getNotaDebCred()){
+                      if($fe->getNotaDebCred()->getSigno() === '-'){
+                        // guardar nc para imputar a las fc
+                        $ncs->add($fe);
                       }
-                      if($saldoNc > $fc->getSaldo()){
-                        $saldoNc -= $fc->getSaldo();
-                        $fc->setSaldo(0);
-                      }else{
-                        $fc->setSaldo( $fc->getSaldo() - $saldoNc );
-                        $saldoNc = 0;
+                    }else{
+                      $fcs->add($fe);
+                    }
+                  }
+                  if($ncs){
+                    // hay NC para imputar a las FC
+                    $saldoNc = 0;
+                    foreach ($ncs as $nc) {
+                      $saldoNc += $nc->getTotal();
+                      foreach ($fcs as $fc) {
+                        if($saldoNc == 0) break;
+                        if( !$nc->getNotaDebCred()->getComprobanteAsociado() ){
+                          $nc->getNotaDebCred()->setComprobanteAsociado($fc);
+                        }else{
+                          $msg = $nc->getNotaDebCred()->getConcepto() . ' - Saldo imputado a '.$fc->getComprobanteTxt();
+                          $nc->getNotaDebCred()->setConcepto($msg);
+                        }
+                        if($saldoNc > $fc->getSaldo()){
+                          $saldoNc -= $fc->getSaldo();
+                          $fc->setSaldo(0);
+                        }else{
+                          $fc->setSaldo( $fc->getSaldo() - $saldoNc );
+                          $saldoNc = 0;
+                        }
                       }
                     }
                   }
+                }else{
+                    $entity->setTotal($totalPago);
+                    $entity->setSaldo($totalPago);
+                  }
+                $saldoRecibo = 0;
+                if( isset($datos['recibos'])) {
+                  foreach ( $datos['recibos'] as $recId){
+                    $recibo = new PagoClienteRecibo();
+                    $pagoAnt = $em->getRepository('VentasBundle:PagoCliente')->find($recId);
+                    $recibo->setRecibo($pagoAnt);
+                    $recibo->setMonto($pagoAnt->getSaldo());
+                    $entity->addRecibo($recibo);
+                    // recorro las facturas para ajustar el saldo y asocio la factura q ajusta al recibo, descuento el saldo del recibo
+                    $saldoRecibo += $pagoAnt->getSaldo();
+                    foreach ($fcs as $fc) {
+                      if($saldoRecibo == 0) break;
+                      $comp = new PagoClienteComprobante();
+                      $comp->setComprobante($fc);
+                      if($saldoRecibo > $fc->getSaldo()){
+                          $saldoRecibo -= $fc->getSaldo();
+                          $comp->setMonto($fc->getSaldo());
+                          $fc->setSaldo(0);
+                          $pagoAnt->setSaldo($saldoRecibo);
+                        }else{
+                          $fc->setSaldo( $fc->getSaldo() - $saldoRecibo );
+                          $comp->setMonto($saldoRecibo);
+                          $saldoRecibo = 0;
+                          $pagoAnt->setSaldo(0);
+                        }
+                      $pagoAnt->addComprobante($comp);
+                    }
+                  }
                 }
+
                 $montoNotaCredito = 0;
                 if ($entity->getGeneraNotaCredito()) {
                     // marcar como cancelados los comprobantes
-                    foreach ($comprobantes as $comp) {
-                        $comp->setSaldo(0);
+                    foreach ($entity->getComprobantes() as $comp) {
+                        $comp->getComprobante()->setSaldo(0);
                         // asociar los comprobantes a la nc - generar array para ws
                     }
                     $montoNotaCredito = round(($entity->getTotal() - $totalPago), 2);
@@ -711,9 +754,9 @@ class ClienteController extends Controller {
                     if ($entity->getComprobantes()) {
                         foreach ($entity->getComprobantes() as $comp) {
                             $cbtesAsoc[] = array(
-                                'Tipo' => $comp->getCodigoComprobante(),
-                                'PtoVta' => $comp->getPuntoVenta(),
-                                'Nro' => $comp->getNroComprobante()
+                                'Tipo' => $comp->getComprobante()->getCodigoComprobante(),
+                                'PtoVta' => $comp->getComprobante()->getPuntoVenta(),
+                                'Nro' => $comp->getComprobante()->getNroComprobante()
                             );
                         }
                     }
@@ -833,19 +876,37 @@ class ClienteController extends Controller {
                     // cancelar saldos de los comprobantes
                     $total = ($totalPago > $entity->getTotal()) ? $entity->getTotal() : $totalPago;
                     $entity->setTotal($total);
-                    foreach ($comprobantes as $comprob) {
-                        if ($total >= $comprob->getSaldo()) {
-                            //alcanza para cubrir el saldo
-                            $total -= $comprob->getSaldo();
-                            $comprob->setSaldo(0);
-                        }
-                        else {
-                            //no alcanza, impacta el total
-                            $comprob->setSaldo($comprob->getSaldo() - $total);
-                            $total = 0;
-                        }
+                    if($entity->getComprobantes()){
+                      foreach ($entity->getComprobantes() as $comprob) {
+                        $fe = $comprob->getComprobante();
+                          if ($total >= $fe->getSaldo()) {
+                              //alcanza para cubrir el saldo
+                              $total -= $fe->getSaldo();
+                              $fe->setSaldo(0);
+                          }
+                          else {
+                              //no alcanza, impacta el total
+                              $fe->setSaldo($fe->getSaldo() - $total);
+                              $total = 0;
+                          }
+                      }
                     }
+                    $entity->setSaldo($total);
                 }
+                // var_dump($totalPago - $entity->getTotal());
+// var_dump($entity->getTotal());
+// var_dump($entity->getSaldo());
+// echo '---';
+                if($entity->getDestinoSaldo() == 'CAMBIO'){
+                  $entity->setTotal( $entity->getTotal() + $saldoRecibo );
+                  $entity->setSaldo(0);
+                }else{
+                  $entity->setTotal( $totalPago );
+                  $entity->setSaldo( $totalPago );
+                }
+// var_dump($entity->getTotal());
+// var_dump($entity->getSaldo());
+                // die;
 
                 // set nro de pago
                 $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
@@ -1041,23 +1102,39 @@ class ClienteController extends Controller {
      */
     public function getSaldoComprobanteAction(Request $request) {
         // facturas y notas de débito
-        $ids = $request->get('ids');
+        $ids = $request->get('compids');
+        $recids = $request->get('recids');
+
         $em = $this->getDoctrine()->getManager();
-        $saldo = 0;
-        foreach ($ids as $id) {
-          $fact = $em->getRepository('VentasBundle:FacturaElectronica')->find($id);
-          if($fact->getNotaDebCred()){
-            if($fact->getNotaDebCred()->getSigno()=='-'){
-              $saldo -= $fact->getTotal();
+        $aPagar = $total = $saldoPago = 0;
+        if($ids != 'null'){
+          foreach ($ids as $id) {
+            $fact = $em->getRepository('VentasBundle:FacturaElectronica')->find($id);
+            if($fact->getNotaDebCred()){
+              if($fact->getNotaDebCred()->getSigno()=='-'){
+                $total -= $fact->getTotal();
+              }else{
+                $total += $fact->getSaldo();
+              }
             }else{
-              $saldo += $fact->getSaldo();
+              $total += $fact->getSaldo();
             }
-          }else{
-            $saldo += $fact->getSaldo();
           }
         }
+        $aPagar = $total;
+        if($recids != 'null'){
+          foreach ($recids as $rec) {
+            $pago = $em->getRepository('VentasBundle:PagoCliente')->find($rec);
+            $saldoPago += $pago->getSaldo();
+            $total -= $pago->getSaldo();
+          }
+          $total = $total <= 0 ? 0 : $total;
+          $saldoPago -= $aPagar;
+          $saldoPago = $saldoPago <= 0 ? 0 : $saldoPago;
+        }
         // $saldo = $em->getRepository('VentasBundle:FacturaElectronica')->findSaldoComprobantes($ids);
-        return new Response(round($saldo, 2));
+        // return new Response(round($saldo, 2));
+        return new JsonResponse( array('total'=> round($total,2), 'saldo'=> round($saldoPago,2)));
     }
 
     /**

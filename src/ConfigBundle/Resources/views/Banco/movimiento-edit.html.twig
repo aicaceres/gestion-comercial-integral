@@ -1,0 +1,56 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Movimientos - {{entity.banco.nombre}}</h1>
+    <span class="pagedesc">Administración de Bancos</span>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >{{ (entity.id) ? 'Editar Movimiento' : 'Nuevo Movimiento' }}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+ {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+        <fieldset >
+            <div class="two_fields">
+              {{ form_row(form.cuenta) }}
+              {{ form_row(form.fechaCarga, { 'attr': {'class' : 'datepicker'} }) }}
+            </div>
+            <div class="two_fields">
+            {{ form_row(form.tipoMovimiento, { 'attr': {'class' : 'smallinput'} }) }}
+            {{ form_row(form.nroMovimiento, { 'attr': {'class' : 'smallinput'} }) }}
+            </div>
+            <div class="two_fields">
+            {{ form_row(form.importe, { 'attr': {'class' : 'monto mininput'} }) }}
+            {{ form_row(form.fechaAcreditacion, { 'attr': {'class' : 'datepicker'} }) }}
+            </div>
+            <div class="two_fields">
+            {{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}
+            <div>{{ form_row(form.conciliado) }}</div>
+            </div>
+
+
+            <br clear="all" />
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" type="button" href="{{ path('sistema_banco_movimiento', { 'bancoId': entity.banco.id, 'cuentaId': entity.cuenta.id })}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" style="display:none">{{ form_rest(form) }}</div>
+{{ form_end(form) }}
+</div>
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+
+    $('#configbundle_bancomovimiento_observaciones').on('blur', function(){
+      $('button.guardar').focus()
+    })
+});
+</script>
+{% endblock %}

@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use ConfigBundle\Controller\UtilsController;
 use ConfigBundle\Entity\Cheque;
+use ConfigBundle\Entity\BancoMovimiento;
 use ConfigBundle\Form\ChequeType;
 
 /**
@@ -21,12 +22,14 @@ class ChequeController extends Controller {
      * @Method("GET")
      * @Template()
      */
-    public function indexAction() {
+    public function indexAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $em = $this->getDoctrine()->getManager();
-        $entities = $em->getRepository('ConfigBundle:Cheque')->findAll();
+        $tipo = $request->get('tipo');
+        $entities = $em->getRepository('ConfigBundle:Cheque')->findNoRetenciones($tipo);
         return $this->render('ConfigBundle:Cheque:index.html.twig', array(
                 'entities' => $entities,
+                'tipo' => $tipo
         ));
     }
 
@@ -43,14 +46,28 @@ class ChequeController extends Controller {
 
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
+            // $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
 
-            $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
-            $nro = $equipo->getNroInternoCheque() + 1;
-            $entity->setChequeNro(sprintf("%06d", $nro));
-            $equipo->setNroInternoCheque($nro);
+            // $entity->setPrefijoNro(sprintf("%03d", $equipo->getPrefijo()));
+            // $nro = $equipo->getNroInternoCheque() + 1;
+            // $entity->setChequeNro(sprintf("%06d", $nro));
+            // $equipo->setNroInternoCheque($nro);
+            // $em->persist($equipo);
+            if($entity->getTipo()=='P'){
+              // generar movimiento bancario
+              $movim = new BancoMovimiento();
+              $movim->setFechaCarga(new \DateTime());
+              $movim->setImporte($entity->getValor());
+              $movim->setObservaciones($entity->getObservaciones());
+              $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CHEQUE');
+              $movim->setTipoMovimiento($tipoMov);
+              $movim->setNroMovimiento($entity->getNroCheque());
+              $movim->setBanco($entity->getBanco());
+              $movim->setCuenta($entity->getCuenta());
+              $movim->setCheque($entity);
+              $em->persist($movim);
+            }
             $em->persist($entity);
-            $em->persist($equipo);
             $em->flush();
 
             return $this->redirect($this->generateUrl('sistema_cheque'));
@@ -79,9 +96,12 @@ class ChequeController extends Controller {
      * @Method("GET")
      * @Template("ConfigBundle:Cheque:edit.html.twig")
      */
-    public function newAction() {
+    public function newAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $entity = new Cheque();
+        $tipo = $request->get('tipo');
+        $entity->setTipo($tipo);
+        if($tipo === 'P') $entity->setDador('PROPIO');
         $form = $this->createCreateForm($entity);
         return $this->render('ConfigBundle:Cheque:edit.html.twig', array(
                 'entity' => $entity,

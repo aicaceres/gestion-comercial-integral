@@ -32,7 +32,7 @@ class PedidoDetalle {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", scale=3 )
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3 )
      */
     protected $cantidad;
 
@@ -49,7 +49,7 @@ class PedidoDetalle {
 
     /**
      * @var string $cantidadStock
-     * @ORM\Column(name="cantidad_stock", type="decimal", scale=3,  nullable=true)
+     * @ORM\Column(name="cantidad_stock", type="decimal", precision=20, scale=3,  nullable=true)
      */
     protected $cantidadStock;
 

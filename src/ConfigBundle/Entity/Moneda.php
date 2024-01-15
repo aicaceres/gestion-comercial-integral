@@ -33,12 +33,12 @@ class Moneda {
     protected $simbolo = '$';
     /**
      * @var string $cotizacion
-     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="cotizacion", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $cotizacion = 0;
     /**
      * @var string $tope
-     * @ORM\Column(name="tope", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="tope", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $tope = 0;
     /**

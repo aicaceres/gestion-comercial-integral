@@ -78,14 +78,14 @@ class FacturaElectronica {
 
     /**
      * @var decimal $total
-     * @ORM\Column(name="total", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="total", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $total;
 
     /**
      * @var decimal $saldo
-     * @ORM\Column(name="saldo", type="decimal", precision=15, scale=2 )
+     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $saldo;
@@ -125,33 +125,33 @@ class FacturaElectronica {
 
     /**
      * Importe neto no gravado
-     * @ORM\Column(name="imp_tot_conc", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="imp_tot_conc", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $impTotConc;
 
     /**
      * Importe neto gravado
-     * @ORM\Column(name="imp_neto", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="imp_neto", type="decimal", precision=20, scale=2, nullable=true )
      * @Gedmo\Versioned()
      */
     protected $impNeto;
 
     /**
      * Importe exento de IVA
-     * @ORM\Column(name="imp_op_ex", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="imp_op_ex", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $impOpEx;
 
     /**
      * Importe total de IVA
-     * @ORM\Column(name="imp_iva", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="imp_iva", type="decimal", precision=20, scale=2, nullable=true )
      * @Gedmo\Versioned()
      */
     protected $impIva;
 
     /**
      * Importe total de tributos
-     * @ORM\Column(name="imp_trib", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="imp_trib", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $impTrib;
 

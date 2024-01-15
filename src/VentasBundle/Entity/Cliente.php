@@ -84,14 +84,14 @@ class Cliente {
 
     /**
      * @var integer $saldoInicial
-     * @ORM\Column(name="saldo_inicial", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="saldo_inicial", type="decimal", precision=20, scale=2, nullable=true )
      * @Gedmo\Versioned()
      */
     protected $saldoInicial;
 
     /**
      * @var integer $limiteCredito
-     * @ORM\Column(name="limite_credito", type="decimal", precision=15, scale=2, nullable=true )
+     * @ORM\Column(name="limite_credito", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $limiteCredito;
 
@@ -220,6 +220,11 @@ class Cliente {
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\FacturaElectronica", mappedBy="cliente")
      */
     protected $facturasElectronicas;
+
+    /**
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\Venta", mappedBy="cliente")
+     */
+    protected $ventas;
 
     /**
      * @var datetime $created

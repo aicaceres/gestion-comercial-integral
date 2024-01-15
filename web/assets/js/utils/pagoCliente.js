@@ -193,41 +193,74 @@ function actualizarPagos() {
 		pagos += importe
 	})
 	// si se genera nc calcular y sumar importe
-	
-        if (generanc) {
-                // calcular valor de nc
-                nc = total - pagos
-        }
-        jQuery("#nota_credito").val(nc.toFixed(2))
-        jQuery(".nota-credito span").html(nc.toFixed(2))
-        jQuery(".nota-credito").toggle(generanc)
-        jQuery(".nota-credito").toggleClass("red", nc < 0)
-        
+  if (generanc) {
+          // calcular valor de nc
+          nc = total - pagos
+  }
+  if (generanc && nc == 0) {
+    alert('No se puede generar NC de importe cero!')
+    jQuery("#ventasbundle_pagocliente_generaNotaCredito").attr('checked',false)
+    jQuery.uniform.update()
+    generanc = false
+  }
+  jQuery("#nota_credito").val(nc.toFixed(2))
+  jQuery(".nota-credito span").html(nc.toFixed(2))
+  jQuery(".nota-credito").toggle(generanc)
+  jQuery(".nota-credito").toggleClass("red", nc < 0)
+
 	jQuery(".pago").html(pagos.toFixed(2))
-	vuelto = pagos - total + nc
+  vuelto = pagos - total + nc
+
+  if (jQuery("#ventasbundle_pagocliente_destinoSaldo").val() == 'CAMBIO') {
+    vuelto = vuelto + parseFloat(jQuery("#saldo-pago").html())
+    jQuery(".destinoSaldoTxt").html('CAMBIO:')
+  } else {
+    jQuery(".destinoSaldoTxt").html('A CTACTE:')
+  }
 	jQuery(".vuelto").html(vuelto.toFixed(2))
 }
 
 function calcularTotal() {
-	obj = jQuery("#ventasbundle_pagocliente_comprobantes")
-	data = obj.val()
-	if (data) {
+	comp = jQuery('#ventasbundle_pagocliente_comprobantes');
+  compdata = comp.val();
+  rec = jQuery('#ventasbundle_pagocliente_recibos');
+  recdata = rec.val();
+	if (compdata || recdata) {
             jQuery('#ventasbundle_pagocliente_total').attr('readonly',true)
-		url = obj.attr("url")
+		url = comp.attr("url")
 		jQuery.ajax({
 			url: url,
-			async: false,
-			data: { ids: data },
-			success: function (data) {
-				total = parseFloat(data)
+      async: false,
+      dataType: "json",
+			data: {compids:compdata, recids:recdata},
+      success: function (data) {
+        total = parseFloat(data.total)
+        saldo = parseFloat(data.saldo)
 				jQuery("#ventasbundle_pagocliente_total").val(total.toFixed(2))
+        jQuery("#saldo-pago").html(saldo.toFixed(2))
+        if (saldo > 0) {
+          jQuery('.saldos').show()
+        } else {
+          jQuery('.saldos').hide()
+          jQuery('#ventasbundle_pagocliente_destinoSaldo').val('CTACTE')
+        }
 				actualizarPagos()
 			}
 		})
 	} else {
             jQuery('#ventasbundle_pagocliente_total').attr('readonly',false)
-		total = 0
-		jQuery("#ventasbundle_pagocliente_total").val(total.toFixed(2))
+		total = saldo = 0
+    jQuery("#ventasbundle_pagocliente_total").val(total.toFixed(2))
+    jQuery("#saldo-pago").html(saldo.toFixed(2))
+    jQuery(".saldos").hide()
 		actualizarPagos()
-	}
+  }
+}
+
+function setDestinoSaldo() {
+  if (jQuery("#ventasbundle_pagocliente_destinoSaldo").val() == 'CAMBIO') {
+    jQuery('.vuelto').html( jQuery("#saldo-pago").html() )
+  } else {
+    jQuery('.vuelto').html(0)
+  }
 }

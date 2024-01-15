@@ -14,33 +14,33 @@ class Parametro
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
- 
+
     /**
      * @ORM\Column(name="agrupador_id", type="integer", nullable=true)
      */
     protected $agrupador_id;
-    
+
     /**
      * @ORM\Column(name="padre_id", type="integer", nullable=true)
      */
     protected $padre_id;
-    
+
     /**
      * @ORM\Column(name="nombre", type="string", length=200)
      */
     protected $nombre;
-    
+
     /**
      * @ORM\Column(name="descripcion", type="string", length=200, nullable=true)
      */
     protected $descripcion;
 
     /**
-     * @ORM\Column(name="numerico", type="decimal",scale=2, nullable=true)
+     * @ORM\Column(name="numerico", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $numerico;
     /**
-     * @ORM\Column(name="numerico2", type="decimal",scale=2, nullable=true)
+     * @ORM\Column(name="numerico2", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $numerico2;
 
@@ -68,7 +68,7 @@ class Parametro
      * @ORM\JoinColumn(name="padre_id", referencedColumnName="id", onDelete="cascade")
      */
     protected $padre;
-    
+
     /**
      * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\Parametro", mappedBy="agrupador")
      */
@@ -79,7 +79,7 @@ class Parametro
      * @ORM\JoinColumn(name="agrupador_id", referencedColumnName="id", onDelete="cascade")
      */
     protected $agrupador;
-    
+
     public function __toString() {
         return $this->nombre;
     }
@@ -99,7 +99,7 @@ class Parametro
     }
     /**
      * Get id
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -117,7 +117,7 @@ class Parametro
 
     /**
      * Get agrupador_id
-     * @return integer 
+     * @return integer
      */
     public function getAgrupadorId()
     {
@@ -135,7 +135,7 @@ class Parametro
 
     /**
      * Get padre_id
-     * @return integer 
+     * @return integer
      */
     public function getPadreId()
     {
@@ -153,7 +153,7 @@ class Parametro
 
     /**
      * Get nombre
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -171,7 +171,7 @@ class Parametro
 
     /**
      * Get descripcion
-     * @return string 
+     * @return string
      */
     public function getDescripcion()
     {
@@ -189,7 +189,7 @@ class Parametro
 
     /**
      * Get numerico
-     * @return decimal 
+     * @return decimal
      */
     public function getNumerico()
     {
@@ -207,7 +207,7 @@ class Parametro
 
     /**
      * Get boleano
-     * @return boolean 
+     * @return boolean
      */
     public function getBoleano()
     {
@@ -225,7 +225,7 @@ class Parametro
 
     /**
      * Get activo
-     * @return boolean 
+     * @return boolean
      */
     public function getActivo()
     {
@@ -243,7 +243,7 @@ class Parametro
 
     /**
      * Get hijos
-     * @return Doctrine\Common\Collections\Collection 
+     * @return Doctrine\Common\Collections\Collection
      */
     public function getHijos()
     {
@@ -261,7 +261,7 @@ class Parametro
 
     /**
      * Get padre
-     * @return ConfigBundle\Entity\Parametro 
+     * @return ConfigBundle\Entity\Parametro
      */
     public function getPadre()
     {
@@ -270,7 +270,7 @@ class Parametro
 
     /**
      * Get agrupados
-     * @return Doctrine\Common\Collections\Collection 
+     * @return Doctrine\Common\Collections\Collection
      */
     public function getAgrupados()
     {
@@ -288,13 +288,13 @@ class Parametro
 
     /**
      * Get agrupador
-     * @return ConfigBundle\Entity\Parametro 
+     * @return ConfigBundle\Entity\Parametro
      */
     public function getAgrupador()
     {
         return $this->agrupador;
     }
-    
+
 
     /**
      * Set numerico2
@@ -304,13 +304,13 @@ class Parametro
     public function setNumerico2($numerico2)
     {
         $this->numerico2 = $numerico2;
-    
+
         return $this;
     }
 
     /**
      * Get numerico2
-     * @return string 
+     * @return string
      */
     public function getNumerico2()
     {
@@ -325,7 +325,7 @@ class Parametro
     public function addHijo(\ConfigBundle\Entity\Parametro $hijos)
     {
         $this->hijos[] = $hijos;
-    
+
         return $this;
     }
 
@@ -346,7 +346,7 @@ class Parametro
     public function addAgrupado(\ConfigBundle\Entity\Parametro $agrupados)
     {
         $this->agrupados[] = $agrupados;
-    
+
         return $this;
     }
 
@@ -375,7 +375,7 @@ class Parametro
     /**
      * Get codigo
      *
-     * @return string 
+     * @return string
      */
     public function getCodigo()
     {

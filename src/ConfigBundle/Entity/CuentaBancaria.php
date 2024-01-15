@@ -5,7 +5,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * ConfigBundle\Entity\CuentaBancaria
  * @ORM\Table(name="cuenta_bancaria")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="ConfigBundle\Entity\BancoRepository")
  */
 class CuentaBancaria {
     /**
@@ -16,46 +16,21 @@ class CuentaBancaria {
      */
     protected $id;
     /**
-     * @var string $tipo
-     * @ORM\Column(name="tipo", type="string", nullable=false)
-     */
-    // CC:ctacte o CA:caja ahorro
-    protected $tipo;
-    /**
      * @var string $nroCuenta
      * @ORM\Column(name="nro_cuenta", type="string", nullable=false)
      */
     protected $nroCuenta;
     /**
-     * @var string $cbu
-     * @ORM\Column(name="cbu", type="string", nullable=false)
-     */
-    protected $cbu;
-    /**
-     * @var string $titular
-     * @ORM\Column(name="titular", type="string", nullable=false)
-     */
-    protected $titular;
-    /**
-     * @var string $sucursal
-     * @ORM\Column(name="sucursal", type="string", nullable=false)
-     */
-    protected $sucursal;
-    /**
      * @var string $activo
      * @ORM\Column(name="activo", type="boolean", nullable=true)
      */
-    protected $activo = true;
-    /**
-    * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Localidad")
-    * @ORM\JoinColumn(name="localidad_id", referencedColumnName="id")
-    */
-    protected $localidad;
+     protected $activo;
     /**
      *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Banco", inversedBy="cuentas")
      *@ORM\JoinColumn(name="banco_id", referencedColumnName="id")
      */
     protected $banco;
+
 
     /**
      * Get id
@@ -65,29 +40,6 @@ class CuentaBancaria {
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set tipo
-     *
-     * @param string $tipo
-     * @return CuentaBancaria
-     */
-    public function setTipo($tipo)
-    {
-        $this->tipo = $tipo;
-
-        return $this;
-    }
-
-    /**
-     * Get tipo
-     *
-     * @return string
-     */
-    public function getTipo()
-    {
-        return $this->tipo;
     }
 
     /**
@@ -114,95 +66,26 @@ class CuentaBancaria {
     }
 
     /**
-     * Set cbu
+     * Set activo
      *
-     * @param string $cbu
+     * @param boolean $activo
      * @return CuentaBancaria
      */
-    public function setCbu($cbu)
+    public function setActivo($activo)
     {
-        $this->cbu = $cbu;
+        $this->activo = $activo;
 
         return $this;
     }
 
     /**
-     * Get cbu
+     * Get activo
      *
-     * @return string
+     * @return boolean
      */
-    public function getCbu()
+    public function getActivo()
     {
-        return $this->cbu;
-    }
-
-    /**
-     * Set titular
-     *
-     * @param string $titular
-     * @return CuentaBancaria
-     */
-    public function setTitular($titular)
-    {
-        $this->titular = $titular;
-
-        return $this;
-    }
-
-    /**
-     * Get titular
-     *
-     * @return string
-     */
-    public function getTitular()
-    {
-        return $this->titular;
-    }
-
-    /**
-     * Set sucursal
-     *
-     * @param string $sucursal
-     * @return CuentaBancaria
-     */
-    public function setSucursal($sucursal)
-    {
-        $this->sucursal = $sucursal;
-
-        return $this;
-    }
-
-    /**
-     * Get sucursal
-     *
-     * @return string
-     */
-    public function getSucursal()
-    {
-        return $this->sucursal;
-    }
-
-    /**
-     * Set localidad
-     *
-     * @param \ConfigBundle\Entity\Localidad $localidad
-     * @return CuentaBancaria
-     */
-    public function setLocalidad(\ConfigBundle\Entity\Localidad $localidad = null)
-    {
-        $this->localidad = $localidad;
-
-        return $this;
-    }
-
-    /**
-     * Get localidad
-     *
-     * @return \ConfigBundle\Entity\Localidad
-     */
-    public function getLocalidad()
-    {
-        return $this->localidad;
+        return $this->activo;
     }
 
     /**
@@ -226,28 +109,5 @@ class CuentaBancaria {
     public function getBanco()
     {
         return $this->banco;
-    }
-
-    /**
-     * Set activo
-     *
-     * @param boolean $activo
-     * @return CuentaBancaria
-     */
-    public function setActivo($activo)
-    {
-        $this->activo = $activo;
-
-        return $this;
-    }
-
-    /**
-     * Get activo
-     *
-     * @return boolean
-     */
-    public function getActivo()
-    {
-        return $this->activo;
     }
 }

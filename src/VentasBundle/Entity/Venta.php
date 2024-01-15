@@ -56,7 +56,7 @@ class Venta {
     protected $unidadNegocio;
 
     /**
-     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="Ventas")
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\Cliente", inversedBy="ventas")
      * @ORM\JoinColumn(name="cliente_id", referencedColumnName="id")
      * @Gedmo\Versioned()
      */
@@ -77,7 +77,7 @@ class Venta {
 
     /**
      * @var string $percepcionRentas
-     * @ORM\Column(name="percepcion_rentas", type="decimal", precision=15, scale=2, nullable=true)
+     * @ORM\Column(name="percepcion_rentas", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $percepcionRentas;
 
@@ -104,14 +104,14 @@ class Venta {
 
     /**
      * @var string $cotizacion
-     * @ORM\Column(name="cotizacion", type="decimal", scale=2, nullable=true)
+     * @ORM\Column(name="cotizacion", type="decimal", precision=20, scale=2, nullable=true)
      * @Gedmo\Versioned()
      */
     protected $cotizacion = 0;
 
     /**
      * @var integer $descuentoRecargo
-     * @ORM\Column(name="descuentoRecargo", type="decimal", scale=2,nullable=true )
+     * @ORM\Column(name="descuentoRecargo", type="decimal", precision=20, scale=2,nullable=true )
      * @Gedmo\Versioned()
      */
     protected $descuentoRecargo;

@@ -41,9 +41,7 @@ class CobroController extends Controller {
         $user = $this->getUser();
         UtilsController::haveAccess($user, $unidneg, 'ventas_factura');
         $em = $this->getDoctrine()->getManager();
-        $desde = $request->get('desde');
-        $hasta = $request->get('hasta');
-
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
         if ($user->getAccess($unidneg, 'ventas_factura_own') && !$user->isAdmin($unidneg)) {
             $id = $user->getId();
             $owns = true;
@@ -52,10 +50,11 @@ class CobroController extends Controller {
             $id = $request->get('userId');
             $owns = false;
         }
-        $entities = $em->getRepository('VentasBundle:Cobro')->findByCriteria($unidneg, $desde, $hasta, $id);
+
+        $entities = $em->getRepository('VentasBundle:Cobro')->findByCriteria($unidneg, $periodo['ini'], $periodo['fin'], $id);
         $users = $em->getRepository('VentasBundle:Cobro')->getUsers();
 
-        $ventas = $em->getRepository('VentasBundle:Venta')->findPorCobrarByCriteria($unidneg, $desde, $hasta, $id);
+        $ventas = $em->getRepository('VentasBundle:Venta')->findPorCobrarByCriteria($unidneg, $periodo['ini'], $periodo['fin'], $id);
 
         return $this->render('VentasBundle:Cobro:index.html.twig', array(
                 'entities' => $entities,
@@ -63,8 +62,8 @@ class CobroController extends Controller {
                 'id' => $id,
                 'owns' => $owns,
                 'users' => $users,
-                'desde' => $desde,
-                'hasta' => $hasta,
+                'desde' => $periodo['ini'],
+                'hasta' => $periodo['fin'],
                 'selectedtab' => $request->get('selectedtab'),
                 'printpdf' => $request->get('printpdf')
         ));

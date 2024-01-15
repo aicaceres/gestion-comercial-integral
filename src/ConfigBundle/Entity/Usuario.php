@@ -18,7 +18,7 @@ class Usuario implements UserInterface
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
-    
+
     /**
      * @var string $username
      * @ORM\Column(name="username", type="string",unique=true)
@@ -61,25 +61,25 @@ class Usuario implements UserInterface
     /**
      * @ORM\Column(name="fecha_alta", type="datetime")
      */
-    protected $fechaAlta;   
-    
+    protected $fechaAlta;
+
     /**
      * @ORM\OneToMany(targetEntity="ConfigBundle\Entity\RolUnidadNegocio", mappedBy="usuario", cascade={"persist","remove"})
      */
-    protected $rolesUnidadNegocio;        
-    
-    protected $roles;     
+    protected $rolesUnidadNegocio;
+
+    protected $roles;
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
         return $this->id;
     }
-    
+
     public function __toString() {
         return $this->nombre;
     }
@@ -87,7 +87,7 @@ class Usuario implements UserInterface
     public function getTitle(){
         return '" '.$this->username.' - '.$this->nombre.' "';
     }
-    
+
     public function getRol($unidneg){
         if( $this->id ){
             foreach ($this->getRolesUnidadNegocio() as $rolUN) {
@@ -96,7 +96,7 @@ class Usuario implements UserInterface
                  }
              }
          }
-        return false; 
+        return false;
     }
     public function isAdmin($unidneg){
         if( $this->id ){
@@ -106,12 +106,12 @@ class Usuario implements UserInterface
                  }
              }
          }
-        return false; 
+        return false;
     }
 
     /**
      * Get depositos del usuario según unidad de negocio
-     */    
+     */
     public function getDepositos($unidneg){
         if( $this->id ){
             foreach ($this->getRolesUnidadNegocio() as $rolUN) {
@@ -120,31 +120,31 @@ class Usuario implements UserInterface
                  }
              }
          }
-        return false; 
+        return false;
     }
-    
+
     public function getCantPedidosSolicitados($unidneg){
         if( $this->id ){
             $cant = 0;
             foreach ($this->getDepositos($unidneg) as $dep) {
                 foreach($dep->getPedidosSolicitados() as $ps){
                     if( $ps->getEstado()=='PENDIENTE' ){
-                        $cant = $cant + 1;                        
+                        $cant = $cant + 1;
                     }
-                }                
+                }
              }
          }
-        return $cant; 
+        return $cant;
     }
     public function getPedidosSolicitados($unidneg){
         if( $this->id ){
-            $datos = new \Doctrine\Common\Collections\ArrayCollection(); 
+            $datos = new \Doctrine\Common\Collections\ArrayCollection();
             foreach ($this->getDepositos($unidneg) as $dep) {
                 foreach($dep->getPedidosSolicitados() as $ps){
                     if( $ps->getEstado()=='PENDIENTE' ){
-                        $datos->add($ps);                        
-                    }                    
-                }                
+                        $datos->add($ps);
+                    }
+                }
              }
          }
           $iterator = $datos->getIterator();
@@ -160,22 +160,22 @@ class Usuario implements UserInterface
             foreach ($this->getDepositos($unidneg) as $dep) {
                 foreach($dep->getPedidosDemandados() as $ps){
                     if( $ps->getEstado()=='PENDIENTE' ){
-                        $cant = $cant + 1;                        
+                        $cant = $cant + 1;
                     }
-                }                
+                }
              }
          }
-        return $cant; 
+        return $cant;
     }
     public function getPedidosDemandados($unidneg){
         if( $this->id ){
-            $datos = new \Doctrine\Common\Collections\ArrayCollection(); 
+            $datos = new \Doctrine\Common\Collections\ArrayCollection();
             foreach ($this->getDepositos($unidneg) as $dep) {
                 foreach($dep->getPedidosDemandados() as $ps){
                     if( $ps->getEstado()=='PENDIENTE' ){
-                        $datos->add($ps);                         
+                        $datos->add($ps);
                     }
-                }                
+                }
              }
          }
          $iterator = $datos->getIterator();
@@ -183,7 +183,7 @@ class Usuario implements UserInterface
             return ($a->getFechaPedido()->format('Y-m-d') > $b->getFechaPedido()->format('Y-m-d')) ? -1 : 1;
         });
         $datosSorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
-        return $datosSorted; 
+        return $datosSorted;
     }
 
     public function getAccess($unidneg,$slug) {
@@ -194,8 +194,8 @@ class Usuario implements UserInterface
         }
         return false;
     }
-    
-  /*  
+
+  /*
     public function getInitRoute(){
         return $this->getRol()->getInitRoute();
     }
@@ -203,11 +203,11 @@ class Usuario implements UserInterface
     public function getAccess($slug) {
         return $this->rol->getAccess($slug);
     }
-   * 
+   *
    */
     public function __construct()
     {
-        $this->fechaAlta = new \DateTime();        
+        $this->fechaAlta = new \DateTime();
     }
 
     /**
@@ -219,7 +219,7 @@ class Usuario implements UserInterface
     {
         $this->username = strtoupper($username);
     }
-    
+
     /**
      * Get username
      * @return string
@@ -352,9 +352,9 @@ class Usuario implements UserInterface
         return $this->fechaAlta;
     }
 
-    
-    
-    
+
+
+
 // IMPLEMENTACION DE USERINTERFACE
     public function getRoles()
     {
@@ -399,7 +399,7 @@ class Usuario implements UserInterface
     /**
      * Get rolesUnidadNegocio
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getRolesUnidadNegocio()
     {

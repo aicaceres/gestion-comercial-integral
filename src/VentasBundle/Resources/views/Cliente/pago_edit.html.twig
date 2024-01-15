@@ -69,6 +69,28 @@
             <input id="nota_credito" class="number smallinput" value="0" type="hidden"/>
         </div>
     </fieldset>
+    <fieldset class="fields recibos ">
+        <div style="display: inline-block; width: 55%">
+            {{ form_label(form.recibos) }}
+            {{ form_widget(form.recibos,
+                    {'attr':
+                        {'style':'width:90%',
+                          'onchange': 'calcularTotal()',
+                        }
+                    })
+                }}
+            {{ form_errors(form.recibos) }}
+        </div>
+          <div style="display: inline-block;" class="">
+              {{ form_label(form.destinoSaldo) }}
+              {{ form_widget(form.destinoSaldo,
+                      {'attr': {'onchange': 'actualizarPagos()'}
+                      }) }}
+          </div>
+          <div style="display: inline-block;" class="saldos">
+              <label>SALDO A FAVOR: $<span id="saldo-pago">0</span>.-</label>
+          </div>
+    </fieldset>
     <fieldset class="fields">
         <div>
             {{ form_label(form.observaciones,'OBSERVACIONES:') }}
@@ -77,42 +99,6 @@
     </fieldset>
 
     {% include "VentasBundle:CobroVenta:_partial-detalle-pago.html.twig" with { 'cobroDetalles': form.cobroDetalles } %}
-
-    {# <fieldset class="detalle_pago" >
-        <div style="display:inline-block; width:85%; margin:10px 0 10px 5%;" >
-            <h5>DETALLE DEL PAGO:</h5>
-            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="tabla-pagos stdtable noaction" >
-                {% set prototype = form.cobroDetalles.vars.prototype %}
-                <tbody data-index="{{form.cobroDetalles | length }}"
-                    data-prototype="{% filter escape %}{% include 'VentasBundle:Cobro:prototype.html.twig' with {'item':prototype} %}{% endfilter %}"
-                >
-                {% for det in form.cobroDetalles %}
-                    <tr>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-            <table style="width:100%" cellpadding="0" cellspacing="0" border="0" class="resumen-pagos stdtable noaction">
-                <thead>
-                    <tr>
-                        <th style="text-align:right">
-                            IMPORTE: &nbsp;
-                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                            <span class="pago" style="font-size:16px" >0</span>.-
-                        </th>
-                        <th width="150px" class="vueltoTh">
-                            CAMBIO: &nbsp;
-                            <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                            <span class="vuelto" style="font-size:16px"></span>
-                        </th>
-                        <th width="30px" style="text-align:center;"><a href="javascript:void(0)" id="linkAddPago" tabindex="0" title="Agregar"><span class="add-item-button">+</span></th>
-                    </tr>
-                </thead>
-            </table>
-
-        </div>
-    </fieldset> #}
 
         <fieldset>
             <div class="actionbutton">
@@ -133,23 +119,20 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
+      $('.saldos').hide()
+      $('.destinoSaldoTxt').html('A CTACTE:')
+      if($('#ventasbundle_pagocliente_recibos option').length >0){
+        $('.recibos').removeClass('hidden')
+      }
         $('#ventasbundle_pagocliente_total').on('change',function(){
             actualizarPagos();
         })
 
-        {# calcularTotal(); #}
-        {# actualizarPagos(); #}
-
         $('#guardar').on('click', function(){
-            {#if( !$('#ventasbundle_pagocliente_comprobantes').val() ){
-                jAlert('Debe indicar los comprobantes a abonar!');
-                $('#ventasbundle_pagocliente_comprobantes').select2('focus');
-                return false;
-            }#}
             pago = parseFloat($('.pago').html());
             nc = jQuery("#nota_credito").val();
 
-            if( $(':invalid').length>0 || (pago<=0 && nc<=0) ){
+            if( $(':invalid').length>0  ){
                 jAlert( 'Completar todos los datos para registrar el pago!');
                 return false;
             }
@@ -185,60 +168,6 @@ jQuery(function ($) {
         $('#ventasbundle_pagocliente_comprobantes').select2('focus');
 
     });
-
-
-
-    {#function actualizarPagos() {
-    alert('pag')
-        total = checknumero( $('#ventasbundle_pagocliente_total'),2 );
-        pagos = nc = 0;
-        items = $(".tabla-pagos tbody tr.item");
-        items.each(function(){
-            importe = checknumero( $(this).find('[id*="_importe"]'),2 );
-            pagos += importe
-        });
-        // si se genera nc calcular y sumar importe
-        generanc = $('#ventasbundle_pagocliente_generaNotaCredito').is(':checked');
-        console.log('nc',generanc)
-        if($('#ventasbundle_pagocliente_comprobantes').val()){
-            if( generanc ){
-                // calcular valor de nc
-                nc = total - pagos;
-            }
-            $('#nota_credito').val(nc.toFixed(2));
-            $('.nota-credito span').html(nc.toFixed(2));
-            $('.nota-credito').toggle( generanc );
-            $('.nota-credito').toggleClass('red', nc<0 );
-        }else{
-            if(generanc) alert('No se puede generar nc sin asociar comprobante')
-        }
-
-        $('.pago').html( pagos.toFixed(2) );
-        vuelto = pagos - total + nc;
-        $('.vuelto').html(vuelto.toFixed(2))
-    }#}
-
-    function calcularTotal(){
-        obj = $('#ventasbundle_pagocliente_comprobantes');
-        data = obj.val();
-        if( data ){
-            url = obj.attr('url');
-                    $.ajax({
-                        url: url,
-                        async: false,
-                        data: {ids:data},
-                        success: function(data){
-                            total = parseFloat(data);
-                            $('#ventasbundle_pagocliente_total').val( total.toFixed(2) );
-                            actualizarPagos();
-                        }
-                    });
-        }else{
-          total = 0
-          $('#ventasbundle_pagocliente_total').val( total.toFixed(2) );
-          actualizarPagos();
-        }
-    }
 });
 
 

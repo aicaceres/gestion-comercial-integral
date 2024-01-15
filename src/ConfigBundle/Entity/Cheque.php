@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
  * ConfigBundle\Entity\Cheque
  * @ORM\Table(name="cheque")
  * @ORM\Entity(repositoryClass="ConfigBundle\Entity\ChequeRepository")
+ * @Gedmo\Loggable()
  */
 class Cheque {
     /**
@@ -30,6 +31,7 @@ class Cheque {
     /**
      * @var string $nroCheque
      * @ORM\Column(name="nro_cheque", type="string", nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $nroCheque;
     /**
@@ -45,12 +47,14 @@ class Cheque {
     /**
      * @var date $tomado
      * @ORM\Column(name="tomado", type="date", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $tomado;
 
     /**
      * @var string $dador
      * @ORM\Column(name="dador", type="string", nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $dador;
     /**
@@ -61,11 +65,13 @@ class Cheque {
     /**
      * @var date $fecha
      * @ORM\Column(name="fecha", type="date", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $fecha;
     /**
      * @var string $valor
-     * @ORM\Column(name="valor", type="decimal", precision=15, scale=3, nullable=false)
+     * @ORM\Column(name="valor", type="decimal", precision=20, scale=3, nullable=false)
+     * @Gedmo\Versioned()
      */
     protected $valor;
 
@@ -75,6 +81,7 @@ class Cheque {
     protected $devuelto = false;
     /**
      * @ORM\Column(name="observaciones", type="text", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $observaciones;
 
@@ -92,8 +99,15 @@ class Cheque {
     /**
      *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Banco", inversedBy="cheques")
      *@ORM\JoinColumn(name="banco_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
      */
     protected $banco;
+    /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\CuentaBancaria")
+     * @ORM\JoinColumn(name="cuenta_bancaria_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
+     */
+    protected $cuenta;
 
     /**
      * @var string $sucursal
@@ -654,4 +668,27 @@ class Cheque {
         return $this->pagoCliente;
     }
 
+
+    /**
+     * Set cuenta
+     *
+     * @param \ConfigBundle\Entity\CuentaBancaria $cuenta
+     * @return Cheque
+     */
+    public function setCuenta(\ConfigBundle\Entity\CuentaBancaria $cuenta = null)
+    {
+        $this->cuenta = $cuenta;
+
+        return $this;
+    }
+
+    /**
+     * Get cuenta
+     *
+     * @return \ConfigBundle\Entity\CuentaBancaria
+     */
+    public function getCuenta()
+    {
+        return $this->cuenta;
+    }
 }

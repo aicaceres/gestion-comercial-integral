@@ -40,6 +40,7 @@ class PagoClienteType extends AbstractType
             ->add('cliente')
             ->add('comprobantes', 'entity', array(
                   'required' => false, 'label' => 'COMPROBANTES PENDIENTES:', 'multiple' => true,
+                  'mapped'=> false,
                   'placeholder' => 'Seleccionar...', 'attr' => array('class' => 'select2'),
                   'choice_label' => 'comprobanteCtaCtePendienteTxt',
                   'class' => 'VentasBundle:FacturaElectronica',
@@ -51,14 +52,23 @@ class PagoClienteType extends AbstractType
                               ->andWhere('f.saldo>0')
                               ->orWhere("n.signo ='-' AND n.comprobanteAsociado is null and n.cliente = :cli")
                               ->setParameter('cli', $cliente);
-                      // $qb = $repository->createQueryBuilder('f')
-                      //         ->leftJoin('f.cobro', 'c')
-                      //         ->leftJoin('f.notaDebCred', 'n')
-                      //         ->where('c.cliente = :cli')
-                      //         ->orWhere('n.cliente = :cli')
-                      //         ->andWhere('f.saldo>0')
-                      //         ->setParameter('cli', $cliente);
-                      // var_dump($qb->getQuery()->getSql());die;
+                      return $qb;
+                  },))
+
+            ->add('destinoSaldo', 'choice', array('choices' => array('CTACTE' => 'Cuenta Corriente', 'CAMBIO' => 'Cambio'), 'label' => 'Asentar saldo en:'))
+            ->add('recibos', 'entity', array(
+                  'required' => false, 'label' => 'PAGOS A CUENTA:', 'multiple' => true,
+                  'mapped'=> false,
+                  'placeholder' => 'Seleccionar...', 'attr' => array('class' => 'select2'),
+                  'choice_label' => 'reciboACuentaTxt',
+                  'class' => 'VentasBundle:PagoCliente',
+                  'query_builder' => function(EntityRepository $repository) use ($cliente) {
+
+                      $qb = $repository->createQueryBuilder('p')
+                              ->innerJoin('p.cliente','c')
+                              ->where('p.cliente = :cli')
+                              ->andWhere('p.saldo > 0')
+                              ->setParameter('cli', $cliente);
                       return $qb;
                   },))
         ;
