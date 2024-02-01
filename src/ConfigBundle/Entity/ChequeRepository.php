@@ -26,7 +26,7 @@ class ChequeRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
-    public function findNoRetenciones($tipo = ''){
+    public function findNoRetenciones($tipo = '', $tipoCheque='', $estado = ''){
       $query = $this->_em->createQueryBuilder();
       $query->select('c')
               ->from('ConfigBundle\Entity\Cheque', 'c')
@@ -36,6 +36,29 @@ class ChequeRepository extends EntityRepository {
       if($tipo){
         $query->andWhere('c.tipo = :tipo')
               ->setParameter('tipo', $tipo);
+      }
+      if($tipoCheque){
+        $query->andWhere('c.tipoCheque = :tipocheque')
+              ->setParameter('tipocheque', $tipoCheque);
+      }
+      if($estado){
+        $hoy = new \DateTime();
+        switch ($estado) {
+          case 'RECHAZADO':
+            $query->andWhere('c.devuelto = 1');
+            break;
+          case 'USADO':
+            $query->andWhere('c.usado = 1');
+            break;
+          case 'FUTURO':
+            $query->andWhere("c.fecha > '" . $hoy->format('Y-m-d') ."'")
+              ->andWhere("c.devuelto = 0 and c.usado=0");
+            break;
+          case 'ENFECHA':
+            $query->andWhere("c.fecha <= '" . $hoy->format('Y-m-d') ."'")
+              ->andWhere("c.devuelto = 0 and c.usado=0");
+            break;
+        }
       }
       return $query->getQuery()->getResult();
     }

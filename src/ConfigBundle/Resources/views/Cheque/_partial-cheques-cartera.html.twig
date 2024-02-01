@@ -6,6 +6,7 @@
 </style>
 <div>
   <h4 style="text-align:center">Monto Seleccionado: $ <span id="montoTotal"></span></h4>
+  <input type="hidden" name="ids" id="chequeIds" />
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -22,11 +23,11 @@
     {% for cheque in cheques %}
         <tr {% if cheque.fecha > date() %} class="cheque-futuro" {% else %} class="cheque-enfecha" {% endif %}>
             <td>{{cheque.nroCheque}}</td>
-            <td>{{cheque.tomado|date('d-m-Y')}}</td>
+            <td><span class="hidden">{{ cheque.tomado|date('Ymd') }}</span>{{cheque.tomado|date('d-m-Y')}}</td>
             <td>{{cheque.dador}}</td>
             <td>{{cheque.banco}}</td>
-            <td>{{cheque.fecha|date('d-m-Y')}}</td>
-            <td class="alignright">{{cheque.valor|number_format(2,',','.')}}</td>
+            <td><span class="hidden">{{ cheque.fecha|date('Ymd') }}</span>{{cheque.fecha|date('d-m-Y')}}</td>
+            <td class="alignright">{{cheque.valor}}</td>
             <td><input data-valor="{{ cheque.valor }}" type="checkbox" onclick="selectCheque(this)" id="{{cheque.id}}" style="width: 20px;"/></td>
         </tr>
     {% endfor %}
@@ -36,6 +37,7 @@
 <script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.dataTables.min.js') }}"></script>
 <script type="text/javascript" src="{{ asset('assets/js/custom/tables.js') }}"></script>
 <script type="text/javascript">
+let chequeIds = []
 jQuery(document).ready(function($) {
     $('#montoTotal').html(0)
     var oTable = $('#dyntable2').dataTable();
@@ -44,12 +46,8 @@ jQuery(document).ready(function($) {
       let monto = parseFloat($('#montoTotal').html())
       let cheque = parseFloat($(this).data('valor'))
       monto = $(this).is(':checked') ? monto + cheque : monto - cheque
-      {# if($(this).is(':checked')){
-        monto = monto + cheque
-      }else{
-        monto = monto - cheque
-      } #}
       $('#montoTotal').html(monto.toFixed(2))
+
     })
 });
 function selectCheque(obj){
@@ -58,5 +56,11 @@ function selectCheque(obj){
   let cheque = parseFloat(selected.data('valor'))
   monto = selected.is(':checked') ? monto + cheque : monto - cheque
   jQuery('#montoTotal').html(monto.toFixed(2))
+  if(selected.is(':checked')){
+    chequeIds.push(jQuery(obj).attr('id') )
+  }else{
+    chequeIds = chequeIds.filter(e => e != jQuery(obj).attr('id'))
+  }
+  jQuery('#chequeIds').val( chequeIds )
 }
 </script>

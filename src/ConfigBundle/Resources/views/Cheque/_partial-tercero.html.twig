@@ -13,10 +13,13 @@
     {{ form_row(form.provincia, { 'attr': {'class' : 'uniformselect'  } }) }}
     {{ form_row(form.localidad, { 'attr': {'class' : 'uniformselect'  } }) }}
     </div>
-    <p>{{ form_row(form.titularCheque, { 'attr': {'class' : 'chzn-select'  } }) }}</p>
+    <div class="two_fields">
+    {{ form_row(form.titularCheque, { 'attr': {'class' : 'chzn-select'  } }) }}
+    {{ form_row(form.tipoCheque, { 'attr': {'class' : 'chzn-select'  } }) }}
+    </div>
     <div class="two_fields">
     {{ form_row(form.dador, { 'attr': {'style' : 'width:50%', 'required':'required'} }) }}
-    {{ form_row(form.telefono, { 'attr': {'class' : 'smallinput'} }) }}
+    {{ form_row(form.fechaPago, { 'attr': {'class' : 'datepicker'} }) }}
     </div>
     <div class="two_fields">
     {{ form_row(form.tomado, { 'attr': {'class' : 'datepicker'} }) }}

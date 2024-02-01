@@ -22,6 +22,7 @@ class ChequeType extends AbstractType
             ->add('banco','entity',array('class' => 'ConfigBundle:Banco',
                 'label' => 'Banco:','required' =>false))
             ->add('sucursal',null,array('label' => 'Sucursal:','required' => false))
+            ->add('tomado','date',array('widget' => 'single_text','format' => 'dd-MM-yyyy', 'required' => false))
             ;
     }
 

@@ -26,10 +26,26 @@ class ChequeController extends Controller {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
         $em = $this->getDoctrine()->getManager();
         $tipo = $request->get('tipo');
-        $entities = $em->getRepository('ConfigBundle:Cheque')->findNoRetenciones($tipo);
+        $tipoCheque = $request->get('tipocheque');
+        $estado = $request->get('estado');
+        $entities = $em->getRepository('ConfigBundle:Cheque')->findNoRetenciones($tipo, $tipoCheque, $estado);
+
+        $option = $request->get('option');
+        if($option){
+          $dataCheque = array(
+                'tipo' => $tipo,
+                'tipocheque'=> $tipoCheque,
+                'estado' => $estado,
+                'result' => $entities
+              );
+          $this->get('session')->set('dataCheque', $dataCheque);
+          return $this->redirectToRoute('print_cheque');
+        }
         return $this->render('ConfigBundle:Cheque:index.html.twig', array(
                 'entities' => $entities,
-                'tipo' => $tipo
+                'tipo' => $tipo,
+                'tipocheque' => $tipoCheque,
+                'estado'=> $estado
         ));
     }
 
@@ -189,6 +205,35 @@ class ChequeController extends Controller {
             $msg = $ex->getTraceAsString();
         }
         return new Response(json_encode($msg));
+    }
+
+       /**
+     * @Route("/printCheque.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="print_cheque")
+     * @Method("get")
+     */
+    public function printChequeAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+
+        $data = $this->get('session')->get('dataCheque');
+        $tipo = $data['tipo'];
+        $tipoCheque = $data['tipocheque'];
+        $estado = $data['estado'];
+        $items =$data['result'];
+
+        $textoFiltro = array($tipo, $tipoCheque, $estado);
+
+            $facade = $this->get('ps_pdf.facade');
+            $response = new Response();
+            $this->render('ConfigBundle:Cheque:print.pdf.twig',
+                array('items' => $items, 'filtro' => $textoFiltro), $response);
+
+            $xml = $response->getContent();
+            $content = $facade->render($xml);
+            $hoy = new \DateTime();
+            return new Response($content, 200, array('content-type' => 'application/pdf',
+                'Content-Disposition' => 'filename=lista_cheques' . $hoy->format('dmY_Hi') . '.pdf'));
     }
 
 }

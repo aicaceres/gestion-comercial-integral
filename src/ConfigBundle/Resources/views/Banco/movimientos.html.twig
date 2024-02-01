@@ -79,7 +79,7 @@
                 </td>
                 <td>
                   <a href="{{ path('sistema_banco_movimiento_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar Movimiento"></a>
-                  <a href url="{{ path('sistema_banco_movimiento_delete', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
+                  <a href="javascript:void(0)" data-url="{{ path('sistema_banco_movimiento_delete', { 'id': entity.id }) }}" class="deletebco btn btnaction btn_trash" title="Borrar"></a>
                 </td>
             </tr>
            {% endfor %}
@@ -138,14 +138,26 @@ jQuery(document).ready(function($) {
       url = "{{ path('sistema_banco_add_cuenta') }}"
       e.preventDefault()
       var cuenta = prompt('Ingresar N° de Cuenta');
-      var jqxhr = jQuery.get(url,{ cuenta, bancoId:{{bancoId}} }, function(data){
-          if(data.msg=='OK'){
-            $('#selectCuenta').append(new Option(cuenta,data.id)).val(data.id).trigger('change')
-          }
-      },'JSON').fail(function(error) {
-          alert( error.msg );
-      })
+      if(cuenta){
+        var jqxhr = jQuery.get(url,{ cuenta, bancoId:{{bancoId}} }, function(data){
+            if(data.msg=='OK'){
+              $('#selectCuenta').append(new Option(cuenta,data.id)).val(data.id).trigger('change')
+            }
+        },'JSON').fail(function(error) {
+            alert( error.msg );
+        })
+      }
     })
+
+    jQuery('.deletebco').on('click',function(){
+      const url = jQuery(this).data('url')
+        jConfirm('Está seguro de eliminar este registro?', 'Borrar registro', function(r) {
+            if (r) {
+              window.location.href= url
+            }
+            return false;
+        });
+    });
 });
 function formSubmit(){
   form = jQuery('#searchform').serialize()

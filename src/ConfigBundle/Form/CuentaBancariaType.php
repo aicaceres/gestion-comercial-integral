@@ -15,6 +15,10 @@ class CuentaBancariaType extends AbstractType
     {
         $builder
             ->add('nroCuenta',null,array('required' => true))
+            ->add('tipoCuenta','choice', array( 'expanded'=>false,
+                'choices'   => array( 'CTACTE' => 'Cuenta Corriente','CAJA_AHORRO' => 'Caja de Ahorro')
+              ))
+            ->add('moneda',null,array('required'=>true))
             ->add('activo',null,array('required'=>false))
         ;
     }

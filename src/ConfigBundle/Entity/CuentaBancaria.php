@@ -21,6 +21,15 @@ class CuentaBancaria {
      */
     protected $nroCuenta;
     /**
+     * @ORM\Column(name="tipo_cuenta", type="string", nullable=false)
+     */
+    protected $tipoCuenta = 'CTACTE';
+    /**
+     *@ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Moneda")
+     *@ORM\JoinColumn(name="moneda_id", referencedColumnName="id")
+     */
+    protected $moneda;
+    /**
      * @var string $activo
      * @ORM\Column(name="activo", type="boolean", nullable=true)
      */
@@ -109,5 +118,51 @@ class CuentaBancaria {
     public function getBanco()
     {
         return $this->banco;
+    }
+
+    /**
+     * Set tipoCuenta
+     *
+     * @param string $tipoCuenta
+     * @return CuentaBancaria
+     */
+    public function setTipoCuenta($tipoCuenta)
+    {
+        $this->tipoCuenta = $tipoCuenta;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoCuenta
+     *
+     * @return string 
+     */
+    public function getTipoCuenta()
+    {
+        return $this->tipoCuenta;
+    }
+
+    /**
+     * Set moneda
+     *
+     * @param \ConfigBundle\Entity\Moneda $moneda
+     * @return CuentaBancaria
+     */
+    public function setMoneda(\ConfigBundle\Entity\Moneda $moneda = null)
+    {
+        $this->moneda = $moneda;
+
+        return $this;
+    }
+
+    /**
+     * Get moneda
+     *
+     * @return \ConfigBundle\Entity\Moneda 
+     */
+    public function getMoneda()
+    {
+        return $this->moneda;
     }
 }

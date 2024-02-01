@@ -27,12 +27,15 @@ class ChequeType extends AbstractType
             ->add('tipo','hidden')
             ->add('nroCheque',null,array('label' => 'Nº Cheque:','required'=>true))
             ->add('dador','text',array('label' => 'Dador:','required'=>false))
-            ->add('telefono','text',array('label' => 'Telefono:','required'=>false))
+            ->add('fechaPago','date',array('widget' => 'single_text','label' => 'Fecha de Pago:',
+                'format' => 'dd-MM-yyyy', 'required' => false))
             ->add('fecha','date',array('widget' => 'single_text','label' => 'Fecha:',
                 'format' => 'dd-MM-yyyy', 'required' => true))
             ->add('titularCheque','entity',array('class' => 'ConfigBundle:TitularCheque',
                 'placeholder'=>'Seleccionar..' ,'label' => 'Titular:','required' =>false))
-
+            ->add('tipoCheque','choice', array( 'expanded'=>false,
+                'choices' => array( 'NORMAL' => 'Normal','DIFERIDO' => 'Diferido','ELECTRONICO' => 'Electrónico')
+              ))
             ->add('sucursal',null,array('label' => 'Sucursal:','required' => false))
             ->add('tomado','date',array('widget' => 'single_text', 'label' => 'Tomado el:',
                 'format' => 'dd-MM-yyyy', 'required' => false))

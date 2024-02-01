@@ -292,10 +292,10 @@ function cargarCheques(objTd){
                     modal: true, autoOpen: true, title: 'Cheques en Cartera', width: '70%', minHeight: 400,
                     buttons: [{text: "Agregar", class: 'closePopup',
                             click: function() {
-                                cheques = $(this).find('input[type="checkbox"]:checked');
+                                cheques = $(this).find('#chequeIds').val().split(',');
                                 addNewTr = false;
-                                cheques.each(function(i) {
-                                    $.get(getDatosCheque,{id: $(this).attr('id') },
+                                cheques.forEach(function(i) {
+                                    $.get(getDatosCheque,{id: i },
                                         function(data){
                                             if(addNewTr){
                                                 addNewPago('CHEQUE')

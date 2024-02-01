@@ -25,6 +25,7 @@ class Cheque {
     /**
      * @var string $estado
      * @ORM\Column(name="estado", type="string", nullable=false)
+     * @Gedmo\Versioned()
      */
     // C:cartera - U:usado - D:devuelto
     protected $estado = 'C';
@@ -39,6 +40,11 @@ class Cheque {
      * @ORM\Column(name="prefijo_nro", type="string", length=3, nullable=true)
      */
     protected $prefijoNro;
+    /**
+     * @ORM\Column(name="tipo_cheque", type="string", nullable=false)
+     * @Gedmo\Versioned()
+     */
+    protected $tipoCheque = 'NORMAL';
     /**
      * @var integer $chequeNro
      * @ORM\Column(name="cheque_nro", type="string", length=6, nullable=true)
@@ -69,6 +75,12 @@ class Cheque {
      */
     protected $fecha;
     /**
+     * @var date $fechaPago
+     * @ORM\Column(name="fecha_pago", type="date", nullable=true)
+     * @Gedmo\Versioned()
+     */
+    protected $fechaPago;
+    /**
      * @var string $valor
      * @ORM\Column(name="valor", type="decimal", precision=20, scale=3, nullable=false)
      * @Gedmo\Versioned()
@@ -77,6 +89,7 @@ class Cheque {
 
     /**
      * @ORM\Column(name="devuelto", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $devuelto = false;
     /**
@@ -87,6 +100,7 @@ class Cheque {
 
     /**
      * @ORM\Column(name="usado", type="boolean", nullable=true)
+     * @Gedmo\Versioned()
      */
     protected $usado = false;
 
@@ -690,5 +704,51 @@ class Cheque {
     public function getCuenta()
     {
         return $this->cuenta;
+    }
+
+    /**
+     * Set tipoCheque
+     *
+     * @param string $tipoCheque
+     * @return Cheque
+     */
+    public function setTipoCheque($tipoCheque)
+    {
+        $this->tipoCheque = $tipoCheque;
+
+        return $this;
+    }
+
+    /**
+     * Get tipoCheque
+     *
+     * @return string
+     */
+    public function getTipoCheque()
+    {
+        return $this->tipoCheque;
+    }
+
+    /**
+     * Set fechaPago
+     *
+     * @param \DateTime $fechaPago
+     * @return Cheque
+     */
+    public function setFechaPago($fechaPago)
+    {
+        $this->fechaPago = $fechaPago;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaPago
+     *
+     * @return \DateTime 
+     */
+    public function getFechaPago()
+    {
+        return $this->fechaPago;
     }
 }

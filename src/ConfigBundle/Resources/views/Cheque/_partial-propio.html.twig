@@ -9,6 +9,10 @@
     </div>
     <div class="two_fields">
     {{ form_row(form.valor, { 'attr': {'class' : 'mininput'} }) }}
+    {{ form_row(form.tipoCheque, { 'attr': {'class' : 'mininput'} }) }}
+    </div>
+    <div class="two_fields">
+    {{ form_row(form.fechaPago, { 'attr': {'class' : 'datepicker'} }) }}
     </div>
     <div class="two_fields">
     {{ form_row(form.devuelto) }}

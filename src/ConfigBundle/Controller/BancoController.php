@@ -200,7 +200,7 @@ class BancoController extends Controller
     {
         $unidneg = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg, 'sistema_banco_movimiento');
-        $option = $request->get('option') ? $request->get('option') : 'B';
+        $option = $request->get('option');
         $em = $this->getDoctrine()->getManager();
         $conciliado = $this->getUser()->isAdmin($unidneg) ? $request->get('conciliado') : 0;
         $bancoId = $request->get('bancoId');
@@ -210,8 +210,8 @@ class BancoController extends Controller
 
         $cuentas = $em->getRepository('ConfigBundle:CuentaBancaria')->findBy(array('banco' => $banco->getId(),'activo' => 1), array('nroCuenta' => 'ASC'));
         $cuenta = $cuentaId ? $em->getRepository('ConfigBundle:CuentaBancaria')->find($cuentaId) : ($cuentas ? $cuentas[0] : null);
-
         $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+        $periodo['fin'] = date("d-m-Y", strtotime($periodo['fin'] . "+ 30 days"));
         $result = $em->getRepository('ConfigBundle:BancoMovimiento')->findByCriteria($banco->getId(),$cuenta ? $cuenta->getId() : 0, $periodo, $conciliado);
 
         if($option === 'I'){
@@ -255,7 +255,7 @@ class BancoController extends Controller
         $entity->setBanco($banco);
         $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($cuentaId);
         $entity->setCuenta($cuenta);
-        $entity->setConciliado(true);
+        $entity->setConciliado(false);
         $form = $this->movimientoCreateForm($entity);
         return $this->render('ConfigBundle:Banco:movimiento-edit.html.twig', array(
             'entity' => $entity,
@@ -386,7 +386,7 @@ class BancoController extends Controller
 
         /**
      * @Route("/movimiento/delete/{id}", name="sistema_banco_movimiento_delete")
-     * @Method("POST")
+     * @Method("GET")
      */
     public function movimientoDeleteAction($id)
     {
@@ -398,12 +398,9 @@ class BancoController extends Controller
             $em->flush();
             $msg ='OK';
         }  catch (\Doctrine\DBAL\DBALException $e) {
-            /*if ($this->getUser()->getRol()->getAdmin())
-                $this->addFlash('danger', $e->getMessage());
-              else*/
                 $this->addFlash('danger', 'Este dato no puede ser eliminado porque está siendo utilizado en el sistema.');
         }
-        return $this->redirectToRoute('sistema_banco_movimiento',array('bancoId'=>$entity->getBanco()->getId()));
+        return $this->redirectToRoute('sistema_banco_movimiento',array('bancoId' => $entity->getBanco()->getId(), 'cuentaId'=> $entity->getCuenta()->getId()));
     }
 
     /**
@@ -494,7 +491,7 @@ class BancoController extends Controller
 
         $textoFiltro = array($banco, $cuenta, $desde, $hasta, $conciliado);
 
-        if ($request->get('option') == 'I') {
+
             $items = $data['result']['movimientos'];
             $facade = $this->get('ps_pdf.facade');
             $response = new Response();
@@ -506,102 +503,6 @@ class BancoController extends Controller
             $hoy = new \DateTime();
             return new Response($content, 200, array('content-type' => 'application/pdf',
                 'Content-Disposition' => 'filename=banco_movimientos' . $hoy->format('dmY_Hi') . '.pdf'));
-        }
-        else {
-            $items = json_decode($request->get('datalist'));
-            $hoy = new \DateTime();
-            $filename = 'InventarioValorizado_' . $hoy->format('dmY_Hi') . '.xls';
-            $search = $request->get('searchterm');
-            $phpExcelObject = $this->get('phpexcel')->createPHPExcelObject();
-            $sheet = $phpExcelObject->setActiveSheetIndex(0);
 
-            $user = $this->getUser()->getUsername();
-            $phpExcelObject->getProperties()->setCreator($user)
-                ->setLastModifiedBy($user)
-                ->setTitle($filename)
-                ->setDescription("Listado de Proveedores");
-
-            // Escribir títulos
-            $sheet->setCellValue('A1', 'INVENTARIO VALORIZADO');
-
-            $i = 2;
-            if ($search) {
-                $sheet->setCellValue('A' . $i, 'Término de Búsqueda: ' . $search);
-                $i++;
-            }
-            if ($deposito) {
-                $sheet->setCellValue('A' . $i, 'Depósito: ' . $deposito->getNombre());
-                $i++;
-            }
-            if ($proveedor) {
-                $sheet->setCellValue('A' . $i, 'Proveedor: ' . $proveedor->getNombre());
-                $i++;
-            }
-            if ($formaPago) {
-                $sheet->setCellValue('A' . $i, 'Forma de Pago: ' . $formaPago->getNombre());
-                $i++;
-            }
-            $i++;
-            // Escribir encabezado
-            $sheet->setCellValue('A' . $i, 'DEPOSITO')
-                ->setCellValue('B' . $i, 'RUBRO')
-                ->setCellValue('C' . $i, 'CODIGO')
-                ->setCellValue('D' . $i, 'PRODUCTO')
-                ->setCellValue('E' . $i, 'PROVEEDOR')
-                ->setCellValue('F' . $i, 'MINIMO')
-                ->setCellValue('G' . $i, 'ACTUAL')
-                ->setCellValue('H' . $i, 'VALORIZADO COSTO')
-                ->setCellValue('I' . $i, 'VALORIZADO PRECIO');
-
-            // Escribir contenido
-            $i++;
-            $totalCosto = $totalPrecio = 0;
-            foreach ($items as $item) {
-                $sheet->getStyle('H' . $i)->getNumberFormat()->setFormatCode('0.000');
-
-                $valorizCosto = str_replace(',', '', $item['7']);
-                $valorizPrecio = str_replace(',', '', $item['8']);
-
-                $sheet->setCellValue('A' . $i, $item['0'])
-                    ->setCellValue('B' . $i, $item['1'])
-                    ->setCellValue('C' . $i, $item['2'])
-                    ->setCellValue('D' . $i, $item['3'])
-                    ->setCellValue('E' . $i, $item['4'])
-                    ->setCellValue('F' . $i, $item['5'])
-                    ->setCellValue('G' . $i, $item['6'])
-                    ->setCellValue('H' . $i, $valorizCosto)
-                    ->setCellValue('I' . $i, $valorizPrecio);
-                $i++;
-                $totalCosto = $totalCosto + $valorizCosto;
-                $totalPrecio = $totalPrecio + $valorizPrecio;
-            }
-            $i++;
-            $sheet->setCellValue('A' . $i, 'VALORIZADO COSTO: $' . number_format($totalCosto, 3) . '.-');
-            $i++;
-            $sheet->setCellValue('A' . $i, 'VALORIZADO PRECIO: $' . number_format($totalPrecio, 3) . '.-');
-
-            $phpExcelObject->getActiveSheet()->setTitle('Inventario Valorizado');
-            // Set active sheet index to the first sheet, so Excel opens this as the first sheet
-            $phpExcelObject->setActiveSheetIndex(0);
-
-            // create the writer
-            $writer = $this->get('phpexcel')->createWriter($phpExcelObject, 'Excel5');
-            // create the response
-            $response = $this->get('phpexcel')->createStreamedResponse($writer);
-            // adding headers
-
-
-            $dispositionHeader = $response->headers->makeDisposition(
-                ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                $filename
-            );
-            $response->headers->set('Content-Type', 'text/vnd.ms-excel; charset=utf-8');
-            $response->headers->set('Pragma', 'public');
-            $response->headers->set('Cache-Control', 'maxage=1');
-            $response->headers->set('Content-Disposition', $dispositionHeader);
-
-            return $response;
-
-        }
     }
 }

@@ -42,9 +42,11 @@ jQuery(document).ready(function($) {
           $('.selectCuentaPropio').append('<option value="'+c.id+'" >'+c.nroCuenta+'</option>')
         )
         $('.selectCuentaPropio').val(cuentaId)
-      },'JSON').fail(function(error) {
+      },'JSON')
+      {# .fail(function(error) {
+          console.log( error );
           alert( error );
-      })
+      }) #}
     }).change()
 });
 </script>

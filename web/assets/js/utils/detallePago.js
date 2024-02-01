@@ -9,7 +9,7 @@ jQuery(document).ready(function ($) {
     $("#dialog-tipopago").dialog("close")
     addNewPago(tipo)
   })
-  
+
   const pagosTr = pagosHolder.find("tr")
   pagosTr.each(function (i, tr) {
       addPagoDeleteLink(jQuery(tr).find('.delTd'))
@@ -24,7 +24,7 @@ function checkStatusDetallePago() {
     jQuery(".detalle_pago").css('display','none')
     pagosHolder.find("tr").remove()
   } else {
-    quitarElementosSegunTipo(pagosHolder.find('tr'))  
+    quitarElementosSegunTipo(pagosHolder.find('tr'))
     jQuery(".detalle_pago").css('display','block')
 //    if (pagosHolder.find('tr').length === 0 ) {
 //      addNewPago(tipopago)
@@ -99,7 +99,7 @@ function quitarElementosSegunTipo(pagosTr) {
       }
       //cheque
       if (tipo === "CHEQUE") {
-        itemTr
+        chequeTr = itemTr
           .find('[id*="_chequeRecibido_fecha"]')
           .datepicker({ dateFormat: "dd-mm-yy" })
         // tarjetaTd required false
@@ -163,7 +163,8 @@ function handleChangeImporte(target) {
   if (obj.siblings('[id*="_tipoPago"]').val() === 'CHEQUE') {
     // cargar valor al cheque
     let chequeTd = obj.parent().parent().find("td.chequeTd")
-    chequeTd.find('[id*="_valor"]').val( obj.val() )
+    chequeTd.find('[id*="_valor"]').val(obj.val())
+    chequeTd.find('[id*="_tomado"]').val(chequeTd.find('[id*="_fecha"]').val())
   }
   actualizarSumaPagos()
 }

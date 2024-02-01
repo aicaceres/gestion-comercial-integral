@@ -31,6 +31,7 @@
         {{ form_widget(cheque.fecha, { 'attr': {'class' : 'datepicker'} }) }}
         {{ form_label(cheque.dador) }}
         {{ form_widget(cheque.dador, { 'attr': {'style':'width:30%'} }) }}
+        <div style="display:none">{{ form_widget(cheque.tomado) }}</div>
         </div>
         <div style="margin:5px 0">
         {{ form_label(cheque.banco) }}
