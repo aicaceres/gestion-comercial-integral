@@ -43,6 +43,7 @@ class ProveedorController extends Controller {
             $entities = $em->getRepository('ComprasBundle:Proveedor')->findAll();
         }
         foreach ($entities as $prov) {
+
             $saldo = $prov->getSaldoInicial();
             // Facturas
             $facturas = $em->getRepository('ComprasBundle:Proveedor')->getFacturasCompraxFecha($prov->getId(), $desde, $hasta, $rubroId);
@@ -56,7 +57,7 @@ class ProveedorController extends Controller {
             // Pagos
             $pagos = $em->getRepository('ComprasBundle:Proveedor')->getPagosxFecha($prov->getId(), $desde, $hasta, $rubroId);
             foreach ($pagos as $pago) {
-                $saldo -= $pago->getImporte();
+                $saldo -= $pago->getMontoPago();
             }
 
             $prov->setSaldoxFechas($saldo);
@@ -619,6 +620,9 @@ class ProveedorController extends Controller {
                             $obj = $em->getRepository('ConfigBundle:Cheque')->find($cheque->getId());
                             $detalle->setChequeRecibido($obj);
                             $detalle->getChequeRecibido()->setUsado(true);
+                            if($detalle->getChequeRecibido()->getTipo() === 'P' && floatval($detalle->getChequeRecibido()->getValor()) === floatval(0)){
+                              $detalle->getChequeRecibido()->setValor($detalle->getImporte());
+                            }
                         }
                         else {
                             $cheque->setTomado(new \DateTime);
@@ -631,7 +635,6 @@ class ProveedorController extends Controller {
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
                 }
-
                 $montoPago = round($formData['montoPago'], 3);
                 $entity->setMontoRetRentas($formData['montoRentas']);
                 $entity->setMontoRetGanancias($formData['montoGanancias']);

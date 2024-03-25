@@ -16,6 +16,7 @@
 <div id="contentwrapper" class="contentwrapper">
 <h1 id="popup_title" >Nota {{ entity.notaElectronica ? entity.notaElectronica.comprobanteTxt : ''}}</h1>
 <div class="divEdicion">
+    {% include "AppBundle::notificacion.html.twig" %}
     <form action="#" method="post" class="stdform">
         <fieldset >
             <div class="two_fields">
@@ -40,6 +41,9 @@
             {% if entity.comprobanteAsociado %}
                 <div><label>Comprob. Asociado:</label>
                     <input type="text" value="{{entity.comprobanteAsociado.comprobanteTxt}}" disabled="disabled" class="mediuminput">
+                    {% if app.user.isAdmin(app.session.get('unidneg_id')) %}
+                    <a href="{{ path('ventas_notadebcred_release', { 'id': entity.id }) }}" class="editar btn btnaction btn_refresh" title="Liberar Comprobante Asociado" onclick="if(confirm('Confirma desasociar el comprobante?')){ return true }else{return false}" style="display:none"></a>
+                    {% endif %}
                 </div>
              {% elseif entity.periodoAsocDesde and entity.periodoAsocHasta %}
                 <div class="two_fields">
@@ -80,7 +84,7 @@
           </div>
           {% if entity.notaElectronica %}
             {% include "VentasBundle:FacturaElectronica:info-banner.html.twig" with {'fe':entity.notaElectronica, 'id':entity.id, 'entity': 'NotaDebCred'} %}
-          {% endif %}  
+          {% endif %}
             </div>
             <br clear="all" />
             {% if entity.estado == 'ELIMINADO' %}

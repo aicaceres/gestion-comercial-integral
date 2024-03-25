@@ -382,6 +382,7 @@ class FacturaElectronicaController extends Controller {
                     $this->addFlash('success', 'Facturas preparadas para importacion : ' . count($entity));
                     break;
                 case 'PROCESAR':
+                    die;
                     $precioLista = $em->getRepository('AppBundle:PrecioLista')->findOneByPrincipal(1);
                     $comodin = $em->getRepository('AppBundle:Producto')->findOneByComodin(1);
                     $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);

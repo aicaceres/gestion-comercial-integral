@@ -131,6 +131,7 @@ class FacturaController extends Controller {
                         $entity->removeDetalle($detalle);
                     }
                 }
+                $entity->setAfipNroComprobante(sprintf("%08d",  $entity->getAfipNroComprobante()));
                 $em->persist($entity);
                 $em->persist($equipo);
                 $em->flush();

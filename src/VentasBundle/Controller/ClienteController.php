@@ -728,9 +728,8 @@ class ClienteController extends Controller {
                     $notacredito->setTipoComprobante($tipoComp);
                     $notacredito->setCategoriaIva($catIva);
                     $notacredito->setPercepcionRentas($entity->getCliente()->getPercepcionRentas());
-                    $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find(21);
+                    $formaPago = $em->getRepository('ConfigBundle:FormaPago')->findOneByCuentaCorriente(1);
                     $notacredito->setFormaPago($formaPago);
-
                     $notaElectronica = new FacturaElectronica();
                     $notaElectronica->setUnidadNegocio($unidneg);
                     $notaElectronica->setCliente($entity->getCliente());
@@ -875,38 +874,34 @@ class ClienteController extends Controller {
                 else {
                     // cancelar saldos de los comprobantes
                     $total = ($totalPago > $entity->getTotal()) ? $entity->getTotal() : $totalPago;
+                    $saldoFinalPago = $totalPago;
                     $entity->setTotal($total);
                     if($entity->getComprobantes()){
                       foreach ($entity->getComprobantes() as $comprob) {
                         $fe = $comprob->getComprobante();
-                          if ($total >= $fe->getSaldo()) {
-                              //alcanza para cubrir el saldo
-                              $total -= $fe->getSaldo();
-                              $fe->setSaldo(0);
-                          }
-                          else {
-                              //no alcanza, impacta el total
-                              $fe->setSaldo($fe->getSaldo() - $total);
-                              $total = 0;
-                          }
+                        // calcula saldo del pago
+                        $saldoFinalPago = $saldoFinalPago - $fe->getSaldo();
+                        if ($total >= $fe->getSaldo()) {
+                            //alcanza para cubrir el saldo
+                            $total -= $fe->getSaldo();
+                            $fe->setSaldo(0);
+                        }
+                        else {
+                            //no alcanza, impacta el total
+                            $fe->setSaldo($fe->getSaldo() - $total);
+                            $total = 0;
+                        }
                       }
                     }
-                    $entity->setSaldo($total);
+                    // se guarda si queda saldo a favor
+                    $entity->setSaldo(($saldoFinalPago > 0) ? $saldoFinalPago : 0);
                 }
-                // var_dump($totalPago - $entity->getTotal());
-// var_dump($entity->getTotal());
-// var_dump($entity->getSaldo());
-// echo '---';
                 if($entity->getDestinoSaldo() == 'CAMBIO'){
                   $entity->setTotal( $entity->getTotal() + $saldoRecibo );
                   $entity->setSaldo(0);
                 }else{
                   $entity->setTotal( $totalPago );
-                  $entity->setSaldo( $totalPago );
                 }
-// var_dump($entity->getTotal());
-// var_dump($entity->getSaldo());
-                // die;
 
                 // set nro de pago
                 $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
@@ -916,6 +911,7 @@ class ClienteController extends Controller {
                     $param->setUltimoNroPagoCliente($entity->getPagoNro());
                     $em->persist($param);
                 }
+                die;
                 $em->persist($entity);
                 $em->flush();
                 $res = array(

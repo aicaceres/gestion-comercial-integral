@@ -101,7 +101,7 @@
                                 <label>NOTA DE CRÉDITO {{ entity.notaDebCred }}: </label>
                             </td>
                             <td class="importeTd alignright" width="160px">
-                                <span style="font-size:16px;font-weight:bold">{{ entity.moneda.simbolo }} {{ entity.montoNc|number_format(3,',','.') }}</span>
+                                <span style="font-size:16px;font-weight:bold">{{ entity.moneda.simbolo }} {{ entity.notaDebCred.total|number_format(3,',','.') }}</span>
                             </td>
                         </tr>
                     {% endif %}

@@ -189,8 +189,13 @@ class NotaDebCredController extends Controller {
                 }
 
                 if ($request->get('ventasbundle_notadebcred_comprobanteAsociado')) {
+
                     $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
-                    $entity->setComprobanteAsociado($compAsoc);
+                    if($compAsoc->getSaldo() === $compAsoc->getTotal()){
+                      $entity->setComprobanteAsociado($compAsoc);
+                    }else{
+                      $entity->setConcepto($compAsoc->getComprobanteTxt());
+                    }
                 }
 
                 if (is_null($entity->getDescuentoRecargo())) {
@@ -595,6 +600,41 @@ class NotaDebCredController extends Controller {
             $this->addFlash('error', 'Error de eliminación. ' . $ex->getMessage());
         }
         return $this->redirectToRoute('ventas_notadebcred');
+    }
+
+    /**
+     * @Route("/release/{id}", name="ventas_notadebcred_release")
+     * @Method("GET")
+     */
+    public function releaseAction($id) {
+       if($this->getUser()->isAdmin($this->get('session')->get('unidneg_id'))){
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
+        $entity->setComprobanteAsociado(null);
+        $entity->setSaldo($entity->getTotal());
+        $em->persist($entity);
+        $em->flush();
+        $this->addFlash('success', 'Se liberó el comprobante asociado');
+        return $this->redirectToRoute('ventas_notadebcred_show', array('id' => $id));
+       }
+//         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_notadebcred');
+//         $em = $this->getDoctrine()->getManager();
+//         $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
+//         try {
+//             if ($entity->getNotaElectronica()) {
+//                 throw $this->createNotFoundException('No se puede eliminar una nota emitida fiscalmente.');
+//             }
+//             $cliente = $entity->getNombreClienteTxt();
+//             $operacion = $entity->getId();
+//             $entity->setEstado('ELIMINADO');
+// //            $em->remove($entity);
+//             $em->flush();
+//             $this->addFlash('success', 'La nota #' . $operacion . ' de ' . $cliente . ' fue eliminada!');
+//         }
+//         catch (\Exception $ex) {
+//             $this->addFlash('error', 'Error de eliminación. ' . $ex->getMessage());
+//         }
+//         return $this->redirectToRoute('ventas_notadebcred');
     }
 
 }
