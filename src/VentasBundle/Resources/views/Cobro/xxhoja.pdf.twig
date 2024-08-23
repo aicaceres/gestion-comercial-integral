@@ -76,7 +76,7 @@
                         </tr>
                         <tr>
                             <td border.type="none" font-size="8px">Op: {{app.user|upper}} - Ref. #{{venta.nroOperacion}} - {{'now'|date('d-m-Y H:i')}} </td>
-                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{venta.descuentoRecargo}}%]: {{cbte.moneda.simbolo}} {{venta.totalDescuentoRecargo|number_format(3,',','.')}}</td>
+                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{venta.descuentoRecargo}}%]: {{cbte.moneda.simbolo}} {{venta.totalDescuentoRecargo|number_format(2,',','.')}}</td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
                                 <span>{{cbte.moneda.simbolo}} {{ (venta.subTotal + venta.totalDescuentoRecargo)|number_format(2,',','.') }}</span>
@@ -193,7 +193,7 @@
                     {{item.nombreProducto}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{item.precioUnitarioItem|number_format(3,',','.')}}
+                    {{item.precioUnitarioItem|number_format(2,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
                     {{item.alicuota|number_format(2,',','.')}}%
@@ -207,7 +207,7 @@
             {% if cbte.venta.concepto %}
             <tr>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{ 1|number_format(3,',','.')}}
+                    {{ 1|number_format(2,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="center" padding-top="5px">
                     999999
@@ -216,7 +216,7 @@
                     {{cbte.venta.concepto|nl2br}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{0|number_format(3,',','.')}}
+                    {{0|number_format(2,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
                     {{21|number_format(2,',','.')}}%

@@ -9,11 +9,11 @@
                                 <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
                             </td>
                         </tr>
-                    </table>                                        
-                    <div border.color="#F5C98F" height="2px" ></div>   
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
                     <div height="5px"></div>
-                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
-                </div>                      
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
             </header>
             <footer>
                 <div height="30px" width="100%" text-align="right">
@@ -21,7 +21,7 @@
                 </div>
             </footer>
         </placeholders>
-        <h2 text-align="center"> Informe de Productos Comprados</h2>                   
+        <h2 text-align="center"> Informe de Productos Comprados</h2>
         <h4 padding-bottom="10px"><strong>Producto:</strong> {{ filtro[3] }}  </h4>
         <h4 padding-bottom="10px"><strong>Proveedor:</strong> {{ filtro[0] }}  </h4>
         {% if filtro[1] or filtro[2] %}
@@ -34,15 +34,15 @@
         {%endif%}
         <table font-size="9px">
             <tr>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm"><strong>#</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Producto</strong></td>  
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm"><strong>#</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Producto</strong></td>
                 {% if filtro[0]=='TODOS' %}
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Proveedor</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Proveedor</strong></td>
                 {% endif %}
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>Precio Unit. Promedio</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Cantidad</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm"><strong>Total</strong></td>               
-            </tr>        
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Cantidad</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm"><strong>Total</strong></td>
+            </tr>
             {% set total = 0%}
             {% if items|length>0   %}
                 {% for item in items %}
@@ -52,31 +52,31 @@
                     {% else %}
                         {% set proveedor, precio, cantidad, subtotal = '', item[2], item[3], item[4] %}
                     {% endif %}
-                    
+
                     {% set total = total+subtotal|replace({',': ''})%}
                     <tr>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="9px">{{loop.index}}</td>
-                        <td height="20px" vertical-align="middle" padding-left="5px">{{producto}}</td>   
+                        <td height="20px" vertical-align="middle" padding-left="5px">{{producto}}</td>
                         {% if item[5] is defined %}
                              <td height="20px" vertical-align="middle" padding-left="5px">{{proveedor}}</td>
-                        {% endif %}     
+                        {% endif %}
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{precio}}</td>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{cantidad}}</td>
-                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{subtotal}}</td>                         
-                    </tr>                
-                {% endfor %}  
-            {% else %}  
+                        <td height="20px" vertical-align="middle" text-align="right" padding-right="10px">{{subtotal}}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
                 <tr>
                     <td colspan="5" height="30px" vertical-align="middle" padding-left="10px">
                         <strong>No hay productos coincidentes con el criterio de búsqueda</strong></td>
                 </tr>
-            {% endif %}              
+            {% endif %}
             <tr>
                 <td colspan="{% if filtro[0]=='TODOS' %} 5 {% else %} 4 {% endif %}" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
                     <strong>Cantidad de Items: {{items|length}}</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
-                    <strong>$ {{total|number_format(3,'.','')}}</strong></td>               
+                    <strong>$ {{total|number_format(2,'.','')}}</strong></td>
             </tr>
-        </table>         
+        </table>
     </dynamic-page>
 </pdf>

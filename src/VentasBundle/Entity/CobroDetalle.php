@@ -29,7 +29,7 @@ class CobroDetalle {
 
     /**
      * @var integer $importe
-     * @ORM\Column(name="importe", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="importe", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $importe = 0;

@@ -17,7 +17,7 @@ class NotaDebCredType extends AbstractType {
     public function buildForm(FormBuilderInterface $builder, array $options) {
         $tipoComp = $options['attr']['tipoComp'];
         $data = $options['data'];
-        $tipoNota = $data->getSigno() == '+' ? 'DEB' : 'CRE';
+        $tipoNota = $data->getSigno() == '+' ? ['DEB','NDE'] : ['CRE','NCE'];
         $builder
             ->add('signo', 'hidden')
             ->add('precioLista', 'entity', array('label' => 'Lista de Precios:',
@@ -61,6 +61,8 @@ class NotaDebCredType extends AbstractType {
                 'attr' => array(
                     'class' => 'row citem'
             )))
+            ->add('rechazado','choice', array('mapped' => false,
+              'label' => 'Rechazado:','expanded' => false, 'choices' => array('N' => 'No','S'=> 'Si') ))
             ->add('tipoComprobante', 'entity', array('label' => 'Tipo Comprobante:',
                 'class' => 'ConfigBundle:AfipComprobante', 'required' => true,
                 'query_builder' => function(EntityRepository $repository) use ($tipoNota, $tipoComp) {
@@ -73,7 +75,9 @@ class NotaDebCredType extends AbstractType {
                         return $qb = $repository->createQueryBuilder('c')
                             ->where('c.activo=1')
                             ->andWhere('c.valor like :param1')
-                            ->setParameter('param1', '%' . $tipoNota . '%');
+                            ->orWhere('c.valor like :param2')
+                            ->setParameter('param1', '%' . $tipoNota[0] . '%')
+                            ->setParameter('param2', '%' . $tipoNota[1] . '%');
                     }
                 }
             ))

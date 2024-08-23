@@ -40,7 +40,7 @@
                 <label for="estado" >Descripción:</label>
                 <input type="text" value="{{entity.descripcion}}" disabled="disabled" class="smallinput">
 
-                <strong style="padding-left:10px" > Saldo: {{ entity.saldo|number_format(3,'.',',') }} </strong>
+                <strong style="padding-left:10px" > Saldo: {{ entity.saldo|number_format(2,'.',',') }} </strong>
 
             </div>
             <div style="padding-top: 20px; margin-left: 50px; width: 80%;" >
@@ -56,14 +56,16 @@
                         </tr>
                     </thead>
                     <tbody>
+                    {% set aux = 0 %}
                     {% for det in entity.detalles %}
+                    {% set aux = aux + det.subTotal%}
                        <tr>
                             <td>{{loop.index}}</td>
                             <td>{{det.producto.codigoNombre}}</td>
                             <td class="alignright">{{det.afipAlicuota}}</td>
                             <td class="alignright">{{det.cantidadTxt}}</td>
-                            <td class="alignright">{{det.precio|number_format(3,'.',',')}}</td>
-                            <td class="alignright">{{ det.subTotal|number_format(3,'.',',') }}</td>
+                            <td class="alignright">{{det.precio|number_format(2,'.',',')}}</td>
+                            <td class="alignright">{{ det.subTotal|number_format(2,'.',',') }}</td>
                             <td><a href="javascript:void(0)" class="linkcc {% if det.centroCostoDetalle|length==0  %}empty{% endif %}" title="Centro Costo" style='float:right'><h5 style="display:inline;">CC</h5></a></td>
                         </tr>
                         {% if det.centroCostoDetalle|length>0  %}
@@ -94,7 +96,7 @@
                     <tfoot>
                         <tr>
                             <th class="head1" colspan="5" style="text-align:right"></th>
-                            <th colspan='2' class="head1" style="text-align:right;padding-right: 10px;">{{entity.subTotal|number_format(3,'.',',')}}</th>
+                            <th colspan='2' class="head1" style="text-align:right;padding-right: 10px;">{{entity.subTotal|number_format(2,'.',',')}}</th>
                         </tr>
                     </tfoot>
                 </table>
@@ -114,15 +116,15 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{ entity.subtotalNeto|number_format(3,'.',',') }}</td>
-                            <td>{{ entity.totalBonificado|number_format(3,'.',',') }}</td>
-                            <td>{{ entity.iva|number_format(3,'.',',') }}</td>
-                            <td>{{ entity.percepcionIva|number_format(3,'.',',') }}</td>
-                            <td>{{ entity.percepcionDgr|number_format(3,'.',',') }}</td>
-                            <td>{{ entity.percepcionMunicipal|number_format(3,'.',',') }}</td>
-                            <td>{{ entity.impuestoInterno|number_format(3,'.',',') }}</td>
-                            <td>{{ entity.tmc|number_format(3,'.',',') }}</td>
-                            <td class="red">{{ entity.total|number_format(3,'.',',') }}</td>
+                            <td>{{ entity.subtotalNeto|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.totalBonificado|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.iva|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.percepcionIva|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.percepcionDgr|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.percepcionMunicipal|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.impuestoInterno|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.tmc|number_format(2,'.',',') }}</td>
+                            <td class="red">{{ entity.total|number_format(2,'.',',') }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -154,14 +156,14 @@
                                 <a target='_blank' href="{{path('compras_notadebcred_show', { 'id': pago.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                                 {% endif %}
                                 </td>
-                                <td>{{pago.monto|number_format(3,'.',',')}} </td>
+                                <td>{{pago.monto|number_format(2,'.',',')}} </td>
                             </tr>
                         {% endfor %}
                         </tbody>
                         <tfoot>
                             <tr>
                                 <th colspan="3" > Total</th>
-                                <th> {{ total|number_format(3,'.',',') }} {% if (entity.total-total)>0 %} <span style="color:red;float:right"> [{{ (entity.total-total)|number_format(3,'.',',') }} ] </span> {% endif %}</th>
+                                <th> {{ total|number_format(2,'.',',') }} {% if (entity.total-total)>0 %} <span style="color:red;float:right"> [{{ (entity.total-total)|number_format(2,'.',',') }} ] </span> {% endif %}</th>
                             </tr>
                         </tfoot>
                     </table>

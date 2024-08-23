@@ -214,7 +214,6 @@ class UtilsController extends Controller {
 
         if (strpos($value, '-') === false)
             return $value;
-
         $date = UtilsController::toArray($value);
 
         if ($guiones) {

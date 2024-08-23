@@ -2,10 +2,17 @@
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Cheque
- * @ORM\Table(name="cheque")
+  * @ORM\Table(name="cheque",uniqueConstraints={@ORM\UniqueConstraint(name="chequexbco_idx", columns={"banco_id","cuenta_bancaria_id","nro_cheque"})})
  * @ORM\Entity(repositoryClass="ConfigBundle\Entity\ChequeRepository")
+  * @UniqueEntity(
+ *     fields={"banco","cuenta","nroCheque"},
+ *     errorPath="nroCheque",
+ *     message="El N° de Cheque ya existe para este Banco y esta Cuenta."
+ * )
  * @Gedmo\Loggable()
  */
 class Cheque {
@@ -82,7 +89,7 @@ class Cheque {
     protected $fechaPago;
     /**
      * @var string $valor
-     * @ORM\Column(name="valor", type="decimal", precision=20, scale=3, nullable=false)
+     * @ORM\Column(name="valor", type="decimal", precision=20, scale=2, nullable=false)
      * @Gedmo\Versioned()
      */
     protected $valor;
@@ -745,7 +752,7 @@ class Cheque {
     /**
      * Get fechaPago
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaPago()
     {

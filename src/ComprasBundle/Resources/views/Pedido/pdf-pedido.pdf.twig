@@ -70,7 +70,7 @@
                             {% endif %}
                 </td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if 'x' in det.cantidadTxt %} {{det.cantidadTxt}} {%endif%}</td>
-                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.cantidadTotal|number_format(3,'.',',')~' '~ det.producto.unidadMedida}}</td>
+                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.cantidadTotal|number_format(2,'.',',')~' '~ det.producto.unidadMedida}}</td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if entity.estado=='RECIBIDO' and ('x' in det.entregadoItemTxt) and det.entregado>0%} {{det.entregadoItemTxt}}{%endif%}</td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if entity.estado=='RECIBIDO' %} {{ det.entregadoItemTotalTxt }}{%endif%}</td>
             </tr>

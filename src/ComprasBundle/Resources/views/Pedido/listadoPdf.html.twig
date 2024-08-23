@@ -48,7 +48,7 @@
 <div class="align-center" style="height:32px;">
     <span style="display: block;padding-top: 10px;">PEDIDOS A PROVEEDOR</span>
 </div>
-<h5> 
+<h5>
     <small style="display: block;margin-bottom: 5px;">Fecha: {{date('now')|date('d / m / Y H:i')}}</small>
     <small>Usuario: {{app.user.nombre}} </small>
 </h5>
@@ -72,14 +72,14 @@
             <td>{{item.proveedor}}</td>
             <td>{{item.fechaPedido|date('d-m-Y')}}</td>
             <td>{%if item.fechaEntrega %}{{ item.fechaEntrega|date('d-m-Y') }}{% endif %}</td>
-            <td class="alignright">{{ item.costoTotal|number_format(3,'.',',') }}</td>
+            <td class="alignright">{{ item.costoTotal|number_format(2,'.',',') }}</td>
             <td>{{ item.estado }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
-<script type="text/javascript">    
-        window.print(); 
-      // window.close(); 
+<script type="text/javascript">
+        window.print();
+      // window.close();
       window.setTimeout('window.close()', 1000);
-</script>   
+</script>

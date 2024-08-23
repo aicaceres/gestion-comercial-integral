@@ -32,7 +32,7 @@ class PedidoDetalle {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=2 )
      */
     protected $cantidad;
 
@@ -61,19 +61,19 @@ class PedidoDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=20, scale=3, nullable=true )
+     * @ORM\Column(name="precio", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $precio;
 
     /**
      * @var integer $entregado
-     * @ORM\Column(name="entregado", type="decimal", precision=20, scale=3, nullable=true)
+     * @ORM\Column(name="entregado", type="decimal", precision=20, scale=2, nullable=true)
      */
     protected $entregado;
 
     /**
      * @var string $cantidadStock
-     * @ORM\Column(name="cantidad_stock", type="decimal", precision=20, scale=3,  nullable=true)
+     * @ORM\Column(name="cantidad_stock", type="decimal", precision=20, scale=2,  nullable=true)
      */
     protected $cantidadStock;
 

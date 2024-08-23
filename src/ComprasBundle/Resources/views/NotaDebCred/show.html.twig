@@ -17,7 +17,7 @@
                 <div><label for="nroNotaCredito">Comprobante:</label>
                     <input type="text" value="{{entity.tipoNota}} {{entity.nuevoNroComprobante}}" disabled="disabled" class="smallinput">
                 </div>
-            </div> 
+            </div>
             <div class="two_fields">
                 <div><label for="fecha">Fecha:</label>
                     <input type="text" value="{{entity.fecha|date('d/m/Y')}}" disabled="disabled" class="width100">
@@ -25,7 +25,7 @@
                 <div><label for="nroComprobante">Estado:</label>
                     <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
                 </div>
-            </div> 
+            </div>
             <div class="two_fields">
                 <div><label for="proveedor">Proveedor:</label>
                     <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="mediuminput">
@@ -40,20 +40,20 @@
                     <input type="text" value="{%if entity.modificaStock%}Si{%else%}No{%endif%}" disabled="disabled" class="width50">
                 </div>
                 {% endif %}
-            </div> 
+            </div>
             {% if entity.facturas and entity.signo=='-' %}
                     {% set facturas = '' %}
                     {% for factura in entity.facturas %}
-                        {% if loop.first %} 
+                        {% if loop.first %}
                             {% set facturas = factura.selectFactura  %}
-                        {% else %}    
+                        {% else %}
                             {% set facturas = facturas ~' - '~ factura.selectFactura  %}
-                        {% endif %}                            
-                    {% endfor %}    
+                        {% endif %}
+                    {% endfor %}
                 <div><label>Facturas asociadas:</label>
-                    <input type="text" value="{{facturas}}" disabled="disabled" class="mediuminput"> 
+                    <input type="text" value="{{facturas}}" disabled="disabled" class="mediuminput">
                 </div>
-            {% endif %}    
+            {% endif %}
             <div style="padding-top: 20px; margin-left: 50px; width: 80%;" >
                 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
@@ -62,7 +62,7 @@
                             <th >Producto</th>
                             <th class="head1" style="width:15%;">Cantidad</th>
                             <th class="head1" style="width:15%;">Precio Unit.</th>
-                            <th class="head1" style="width:10%;">SubTotal</th>                            
+                            <th class="head1" style="width:10%;">SubTotal</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -71,53 +71,53 @@
                             <td>{{loop.index}}</td>
                             <td>{{det.producto.codigoNombre}}</td>
                             <td class="alignright">{{det.cantidadTxt}}</td>
-                            <td class="alignright">{{(det.precio)|number_format(3,'.',',') }}</td>
-                            <td class="alignright">{{ det.subTotal|number_format(3,'.',',') }}</td>
+                            <td class="alignright">{{(det.precio)|number_format(2,'.',',') }}</td>
+                            <td class="alignright">{{ det.subTotal|number_format(2,'.',',') }}</td>
                         </tr>
-                    {% endfor %}           
-                    </tbody>                    
+                    {% endfor %}
+                    </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="4" style="text-align:right"></th>
-                            <th style="text-align:right;padding-right: 10px;">{{entity.subTotal|number_format(3,'.',',')}}</th>
+                            <th style="text-align:right;padding-right: 10px;">{{entity.subTotal|number_format(2,'.',',')}}</th>
                         </tr>
                     </tfoot>
-                </table>   
-                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">   
+                </table>
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
                         <tr>
-                            <th>Subtotal Neto </th>                                                       
-                            <th>Total Bonif. </th>                                                       
-                            <th>IVA </th>                                                       
-                            <th>Percep. IVA </th>                                                       
-                            <th>Percep. DGR </th>                                                       
-                            <th>Percep. Muni </th>                                                       
-                            <th>Imp. Interno </th>                                                       
-                            <th>No Grav.</th> 
-                            <th>TOTAL</th> 
+                            <th>Subtotal Neto </th>
+                            <th>Total Bonif. </th>
+                            <th>IVA </th>
+                            <th>Percep. IVA </th>
+                            <th>Percep. DGR </th>
+                            <th>Percep. Muni </th>
+                            <th>Imp. Interno </th>
+                            <th>No Grav.</th>
+                            <th>TOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{{ entity.subtotalNeto|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.totalBonificado|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.iva|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.percepcionIva|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.percepcionDgr|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.percepcionMunicipal|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.impuestoInterno|number_format(3,'.',',') }}</td>   
-                            <td>{{ entity.tmc|number_format(3,'.',',') }}</td>   
-                            <td class="red">{{ entity.total|number_format(3,'.',',') }}</td>   
-                        </tr> 
+                            <td>{{ entity.subtotalNeto|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.totalBonificado|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.iva|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.percepcionIva|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.percepcionDgr|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.percepcionMunicipal|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.impuestoInterno|number_format(2,'.',',') }}</td>
+                            <td>{{ entity.tmc|number_format(2,'.',',') }}</td>
+                            <td class="red">{{ entity.total|number_format(2,'.',',') }}</td>
+                        </tr>
                     </tbody>
-                </table>              
-            </div>                  
-            <br clear="all" /> 
+                </table>
+            </div>
+            <br clear="all" />
             <div class="actionbutton">
                 <a class="cancelar" type="button" href="#" onclick="history.back();">Volver</a>
             </div>
         </fieldset>
     </form>
-</div>    
+</div>
 </div>
 {% endblock %}

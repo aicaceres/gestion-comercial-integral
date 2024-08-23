@@ -74,8 +74,8 @@
                 <td>{{ entity.producto.proveedor }}</td>
                 <td class="alignright" style="width:5%;">{{ entity.producto.stockminimo|number_format(0) }}</td>
                 <td class="alignright" style="width:10%;">{{ entity.cantidad ~ ' ' ~ entity.producto.unidadmedida }}</td>
-                <td class="alignright" style="width:10%;">{%if entity.cantidad<0%}0.00 {%else%} {{entity.getValorizado| number_format(3,'.','')}} {%endif%}</td>
-                <td class="alignright" style="width:10%;">{%if entity.cantidad<0%}0.00 {%else%} {{entity.getByFormaPago(dtorec, entity.producto.getPrecioByListaPpal())| number_format(3,'.','')}} {%endif%}</td>
+                <td class="alignright" style="width:10%;">{%if entity.cantidad<0%}0.00 {%else%} {{entity.getValorizado| number_format(2,'.','')}} {%endif%}</td>
+                <td class="alignright" style="width:10%;">{%if entity.cantidad<0%}0.00 {%else%} {{entity.getByFormaPago(dtorec, entity.producto.getPrecioByListaPpal())| number_format(2,'.','')}} {%endif%}</td>
                 <td style="width:5%;"><input type="checkbox" disabled="disabled" {% if entity.producto.activo %}checked="checked"{% endif %} />                </td>
             </tr>
            {% endfor %}
@@ -123,15 +123,15 @@ jQuery(document).ready(function($) {
             var api = this.api();
             totalxcosto = api.column( 7, {search:'applied'} ).data().sum();
             totalxprecio = api.column( 8, {search:'applied'} ).data().sum();
-            $('#totalsumxcosto').html( Number(totalxcosto.toFixed(3)).toLocaleString('en')  );
-            $('#totalsumxprecio').html( Number(totalxprecio.toFixed(3)).toLocaleString('en')  );
+            $('#totalsumxcosto').html( Number(totalxcosto.toFixed(2)).toLocaleString('en')  );
+            $('#totalsumxprecio').html( Number(totalxprecio.toFixed(2)).toLocaleString('en')  );
 
           }
     });
     totalsumxcosto = valorizado.api().column( 7 ).data().sum();
-    $('#totalsumxcosto').html(Number(totalsumxcosto.toFixed(3)).toLocaleString('en') );
+    $('#totalsumxcosto').html(Number(totalsumxcosto.toFixed(2)).toLocaleString('en') );
     totalxprecio = valorizado.api().column( 8 ).data().sum();
-    $('#totalxprecio').html(Number(totalxprecio.toFixed(3)).toLocaleString('en') );
+    $('#totalxprecio').html(Number(totalxprecio.toFixed(2)).toLocaleString('en') );
 
      //var oTable = $('#dyntable2').dataTable();
     $('#printform').on('submit',function(e){

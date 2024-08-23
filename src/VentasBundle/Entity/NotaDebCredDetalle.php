@@ -41,7 +41,7 @@ class NotaDebCredDetalle {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3)
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=2)
      * @Gedmo\Versioned()
      */
     protected $cantidad = 1;
@@ -61,21 +61,21 @@ class NotaDebCredDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="precio", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $precio = 0;
 
     /**
      * @var integer $alicuota
-     * @ORM\Column(name="alicuota", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="alicuota", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $alicuota = 0;
 
     /**
      * @var integer $descuento
-     * @ORM\Column(name="descuento", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="descuento", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $descuento = 0;
@@ -99,7 +99,7 @@ class NotaDebCredDetalle {
             // precio con iva incluido convertido a la cotizacion
             $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $cotizacion;
         }
-        return round($precio, 4);
+        return round($precio, 2);
     }
 
     // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
@@ -126,7 +126,7 @@ class NotaDebCredDetalle {
 
     // total del item
     public function getTotalItem() {
-        return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 3);
+        return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 2);
     }
 
     /** FIN VALORES ITEM */
@@ -136,7 +136,7 @@ class NotaDebCredDetalle {
 
     public function getBaseImponibleItem() {
         $precio = ($this->getPrecio() / $this->getNotaDebCred()->getCotizacion()) * $this->getCantidad();
-        return round($precio, 3);
+        return round($precio, 2);
     }
 
     /** Calculos * */

@@ -149,13 +149,13 @@ class NotaDebCredController extends Controller {
 
                                 if ($saldoNC >= $fact->getSaldo()) {
                                     //alcanza para cubrir el saldo
-                                    $saldoNC = round($saldoNC - $fact->getSaldo(), 3);
+                                    $saldoNC = round($saldoNC - $fact->getSaldo(), 2);
                                     $fact->setSaldo(0);
                                     $fact->setEstado('PAGADO');
                                 }
                                 else {
                                     //no alcanza, impacta el total
-                                    $fact->setSaldo(round(($fact->getSaldo() - $saldoNC), 3));
+                                    $fact->setSaldo(round(($fact->getSaldo() - $saldoNC), 2));
                                     $saldoNC = 0;
                                     $saldoFc = ( $fact->getSaldo() > 0 ) ? 'PAGO PARCIAL' : 'PAGADO';
                                     $fact->setEstado($saldoFc);

@@ -187,7 +187,7 @@ function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
     jQuery('#popup').dialog('open');
 }
 
-function checknumero(obj, dec=3){
+function checknumero(obj, dec=2){
     num = obj.val().replace(',','.');
     num = ( isNaN(num) || num==='' )  ? 0 : parseFloat(num).toFixed(dec);
     obj.val( num );

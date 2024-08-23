@@ -38,7 +38,7 @@ class BancoMovimiento {
     private $fechaAcreditacion;
     /**
      * @var string $importe
-     * @ORM\Column(name="importe", type="decimal", precision=20, scale=3,  nullable=false)
+     * @ORM\Column(name="importe", type="decimal", precision=20, scale=2,  nullable=false)
      * @Gedmo\Versioned()
      */
     protected $importe;

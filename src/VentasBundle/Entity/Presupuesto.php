@@ -186,14 +186,14 @@ class Presupuesto {
       }
       public function getTotalDescuentoRecargo() {
       $total = $this->getSubTotal() * ( $this->getDescuentoRecargo()/100 );
-      return round( ($total ) ,3);
+      return round( ($total ) ,2);
       }
       public function getTotalIva(){
       $total = 0;
       foreach ($this->detalles as $item) {
       $total = $total + $item->getIvaItem();
       }
-      return round( $total ,3);
+      return round( $total ,2);
       }
       public function getTotalIibb(){
       $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
@@ -228,7 +228,7 @@ class Presupuesto {
             // descuento sobre el subtotal
             $total = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
         }
-        return round(($total), 3);
+        return round(($total), 2);
     }
 
     public function getTotalIva() {
@@ -236,7 +236,7 @@ class Presupuesto {
         foreach ($this->detalles as $item) {
             $total = $total + $item->getTotalIvaItem();
         }
-        return round(($total), 3);
+        return round(($total), 2);
     }
 
     public function getTotalIibb() {

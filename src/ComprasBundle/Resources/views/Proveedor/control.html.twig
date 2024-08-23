@@ -7,8 +7,8 @@
 {% block contentwrapper %}
     {% include "AppBundle::notificacion.html.twig" %}
 
-<div id="contentwrapper" class="contentwrapper">  
-<div class="deposito_selector" style="margin-bottom: 15px;">            
+<div id="contentwrapper" class="contentwrapper">
+<div class="deposito_selector" style="margin-bottom: 15px;">
     <form id="searchform" action="{{ path('compras_informe_controlpago') }}" method="GET">
         <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
@@ -17,41 +17,41 @@
             {% for prov in proveedores if prov.activo %}
                 <option value="{{prov.id}}" {% if prov.id==provId %} selected="selected" {% endif %}> {{prov.nombre}}</option>
             {% endfor %}
-            </select>  
-        </div> 
+            </select>
+        </div>
     </form>
 </div>
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
-            <tr>                
+            <tr>
                 <th>Fecha</th>
                 <th>Factura</th>
-                <th class="nosort">Total</th>                
+                <th class="nosort">Total</th>
                 <th>Monto Pagos</th>
                 <th>Monto Notas Crédito</th>
-                <th>Diferencia</th>                
+                <th>Diferencia</th>
             </tr>
         </thead>
-        <tbody>        
+        <tbody>
            {% set totaldif = 0 %}
            {% for res in resultado %}
-               {% set dif = res.total - res.pago - res.nota %}              
-               {% if dif|number_format(3,'.',',') >0 %}
+               {% set dif = res.total - res.pago - res.nota %}
+               {% if dif|number_format(2,'.',',') >0 %}
                    {% set totaldif = totaldif + dif %}
-                    <tr>                        
+                    <tr>
                         <td><span class="hidden">{{ res.fecha|date('Ymd') }}</span>{{ res.fecha|date('d-m-Y') }}</td>
                         <td>{{ res.nroFactura }} <a target='_blank' href="{{ path('compras_factura_show', { 'id': res.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a></td>
-                        <td class="alignright">{{ res.total }}</td>                        
+                        <td class="alignright">{{ res.total }}</td>
                         <td class="alignright">{{ res.pago }}</td>
                         <td class="alignright">{{ res.nota }}</td>
-                        <td class="alignright">{{ dif|number_format(3,'.',',') }}</td>                
+                        <td class="alignright">{{ dif|number_format(2,'.',',') }}</td>
                     </tr>
                {% endif %}
            {% endfor %}
         </tbody>
-    </table> 
-     
-    <div class="deposito_selector aligncenter" style="padding:10px 10px 10px 0"><label>Diferencias: $&nbsp;<span id="span_saldo_ctacte">{{ totaldif|number_format(3,'.',',') }}</span></label></div>                                  
+    </table>
+
+    <div class="deposito_selector aligncenter" style="padding:10px 10px 10px 0"><label>Diferencias: $&nbsp;<span id="span_saldo_ctacte">{{ totaldif|number_format(2,'.',',') }}</span></label></div>
 </div>
 
 {% endblock %}
@@ -61,9 +61,9 @@
 <script type="text/javascript">
 jQuery(document).ready(function($){
     var oTable = $('#dyntable2').dataTable();
-   $('#selectProveedor').change(function(){ 
+   $('#selectProveedor').change(function(){
         $('#searchform').submit();
-    });      
+    });
 });
-</script>      
+</script>
 {% endblock %}

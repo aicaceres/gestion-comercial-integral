@@ -44,7 +44,7 @@
                 <td class="alignright">{% if entity.tipo=='R' %}<small style="float:left; font-size:8px;">REMITO</small>  {% endif %} {{entity.nroPresupuesto}} </td>
                 <td><span class="hidden">{{ entity.fechaPresupuesto|date('Ymd') }}</span>{{ entity.fechaPresupuesto|date('d-m-Y') }}</td>
                 <td>{{ entity.cliente }}{{ entity.nombreCliente != 'CONSUMIDOR FINAL' ? ('<br><small>' ~ entity.nombreCliente) |raw : '</small>' }}</td>
-                <td class="alignright">{{ entity.montoTotal|number_format(3,',','.') }}</td>
+                <td class="alignright">{{ entity.montoTotal|number_format(2,',','.') }}</td>
                 <td>{{entity.createdBy.username|upper }}</td>
                 <td class="buttons">
                     {% if entity.estado == 'ANULADO' %}
@@ -103,11 +103,6 @@ jQuery(document).ready(function($){
         });
         $('#datalist').val(JSON.stringify(datos));
     });
-
-    {# const printpdf = '{{printpdf}}';
-    if( printpdf ){
-        //$('[presid="'+printpdf+'"]').click()
-    } #}
 
   $('body').on('click','.btn_print', function(e){
     $(this).parent().find('.btn_pencil').remove()

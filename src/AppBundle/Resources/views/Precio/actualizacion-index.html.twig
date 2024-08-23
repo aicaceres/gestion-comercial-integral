@@ -8,7 +8,7 @@
 {% include "AppBundle::notificacion.html.twig" %}
     <div class="actionbutton addbutton">
         <button class="guardar" id="actualizacion_new" >Nueva Actualización</button>
-    </div><!-- button --> 
+    </div><!-- button -->
 <div id="contentwrapper" class="contentwrapper">
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
@@ -27,19 +27,19 @@
                 <td style="text-align: center">{{ entity.id}}</td>
                 <td style="text-align: center">{{ entity.precioLista.nombre }}</td>
                 <td>{{entity.valores|raw}}</td>
-                <td style="text-align: center">{%if entity.tipoActualizacion=='M'%}$ {{entity.valor|number_format(3,'.',',')}}{% else %}{{entity.valor|number_format(0)}}%{% endif %}</td>
+                <td style="text-align: center">{%if entity.tipoActualizacion=='M'%}$ {{entity.valor|number_format(2,'.',',')}}{% else %}{{entity.valor|number_format(0)}}%{% endif %}</td>
                 <td><span class="hidden">{{ entity.created|date('Ymd') }}</span> {{ entity.created|date('d-m-Y H:i:s') }}</td>
                 <td>{{ entity.createdBy }}</td>
             </tr>
            {% endfor %}
         </tbody>
-    </table> 
+    </table>
 </div>
  {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
-    jQuery(document).ready(function($){ 
+    jQuery(document).ready(function($){
         $('#actualizacion_new').on('click',
                 function(){
                     window.location.href= "{{ path('stock_precio_actualizacion_new') }}" ;
@@ -47,5 +47,5 @@
         var oTable = $('#dyntable2').dataTable();
         oTable.fnSort( [ [0,'desc'] ] );
     });
-</script>    
+</script>
 {% endblock %}

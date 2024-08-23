@@ -68,6 +68,35 @@ class Parametrizacion {
     protected $validezPresupuesto = 7;
 
     /**
+     * Parametros para Factura MiPymes
+     */
+
+    /**
+     * @var string $formPagoFE
+     * @ORM\Column(name="form_pago_fe", type="string", length=3)}
+     * Valores SCA - ADC
+     */
+    protected $formPagoFE = 'SCA';
+
+    /**
+     * @var string $cbuEmisor
+     * @ORM\Column(name="cbu_emisor", type="string", length=22)}
+     */
+    protected $cbuEmisor;
+
+    /**
+     * @var string $aliasEmisor
+     * @ORM\Column(name="alias_emisor", type="string", length=256, nullable=true)}
+     */
+    protected $aliasEmisor;
+
+    /**
+     * @var string $referenciaComercial
+     * @ORM\Column(name="referencia_comercial", type="string", length=256, nullable=true)}
+     */
+    protected $referenciaComercial;
+
+    /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
@@ -271,4 +300,90 @@ class Parametrizacion {
         return $this->ultimoNroPagoCliente;
     }
 
+    /**
+     * Set formPagoFE
+     *
+     * @param string $formPagoFE
+     * @return Parametrizacion
+     */
+    public function setFormPagoFE($formPagoFE) {
+        $this->formPagoFE = $formPagoFE;
+
+        return $this;
+    }
+
+    /**
+     * Get formPagoFE
+     *
+     * @return string
+     */
+    public function getFormPagoFE() {
+        return $this->formPagoFE;
+    }
+
+    /**
+     * Set cbuEmisor
+     *
+     * @param string $cbuEmisor
+     * @return Parametrizacion
+     */
+    public function setCbuEmisor($cbuEmisor) {
+        $this->cbuEmisor = $cbuEmisor;
+
+        return $this;
+    }
+
+    /**
+     * Get cbuEmisor
+     *
+     * @return string
+     */
+    public function getCbuEmisor() {
+        return $this->cbuEmisor;
+    }
+
+    /**
+     * Set aliasEmisor
+     *
+     * @param string $aliasEmisor
+     * @return Parametrizacion
+     */
+    public function setAliasEmisor($aliasEmisor) {
+        $this->aliasEmisor = $aliasEmisor;
+
+        return $this;
+    }
+
+    /**
+     * Get aliasEmisor
+     *
+     * @return string
+     */
+    public function getAliasEmisor() {
+        return $this->aliasEmisor;
+    }
+
+
+    /**
+     * Set referenciaComercial
+     *
+     * @param string $referenciaComercial
+     * @return Parametrizacion
+     */
+    public function setReferenciaComercial($referenciaComercial)
+    {
+        $this->referenciaComercial = $referenciaComercial;
+
+        return $this;
+    }
+
+    /**
+     * Get referenciaComercial
+     *
+     * @return string
+     */
+    public function getReferenciaComercial()
+    {
+        return $this->referenciaComercial;
+    }
 }

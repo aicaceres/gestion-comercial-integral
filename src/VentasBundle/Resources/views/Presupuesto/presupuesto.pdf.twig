@@ -132,7 +132,7 @@
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
                     {% if (presupuesto.tipo=='P') %}
                         {% set precio = ( item.precioUnitarioItem+(item.precioUnitarioItem*(presupuesto.descuentoRecargo/100)) )  %}
-                        {{ precio|number_format(1,',','.')}} 
+                        {{ precio|number_format(2,',','.')}}
                     {% endif %}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
@@ -144,7 +144,7 @@
             </tr>
             {% endfor %}
         </table>
-                            
+
 
         {% set cativa = (presupuesto.cliente.categoriaIva) ? presupuesto.cliente.categoriaIva.nombre : 'C' %}
         {% set retrentas = presupuesto.cliente.categoriaRentas ? presupuesto.cliente.categoriaRentas.retencion : 0 %}
@@ -157,18 +157,18 @@
                 </td>
                 {% if showiva %}
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    IVA: $ {{presupuesto.totalIva|number_format(3,',','.')}}
+                    IVA: $ {{presupuesto.totalIva|number_format(2,',','.')}}
                 </td>
                 {% endif %}
                 {% if presupuesto.cliente.percepcionRentas > 0 %}
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    Perc.IIBB [{{presupuesto.cliente.percepcionRentas|number_format(2,'.',',')}}%]: $ {{presupuesto.totalIibb|number_format(3,',','.')}}
+                    Perc.IIBB [{{presupuesto.cliente.percepcionRentas|number_format(2,'.',',')}}%]: $ {{presupuesto.totalIibb|number_format(2,',','.')}}
                 </td>
                 {% endif %}
-                
-                
+
+
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" width="20%" vertical-align="middle" text-align="center">
-                    TOTAL: $ {{presupuesto.montoTotal|number_format(3,',','.')}}
+                    TOTAL: $ {{presupuesto.montoTotal|number_format(2,',','.')}}
                 </td>
             </tr>
         </table>

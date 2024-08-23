@@ -676,8 +676,8 @@ jQuery(function ($) {
 			precTot = precUnit * cant
 			// subtotal para vista
 			subtotalTh += precTot
-			item.find(".precTd span").html(precUnit.toFixed(3))
-			item.find(".itmSubtotalTd").text(precTot.toFixed(3))
+			item.find(".precTd span").html(precUnit.tofixed(2))
+			item.find(".itmSubtotalTd").text(precTot.tofixed(2))
 			// totalizar
 			subTotal += precio * cant
 			totalIVA += iva * cant
@@ -686,19 +686,19 @@ jQuery(function ($) {
 		subTotalResumen = subTotal / cotizacion
 		totalIvaResumen = totalIVA / cotizacion
 		totalIibbResumen = totalIIBB / cotizacion
-		$("#subtotalTh").html(subtotalTh.toFixed(3))
-		$("#importeSubtotal").html(subTotalResumen.toFixed(3).replace(".", ","))
+		$("#subtotalTh").html(subtotalTh.tofixed(2))
+		$("#importeSubtotal").html(subTotalResumen.tofixed(2).replace(".", ","))
 
 		if (categoriaIva != "I" && categoriaIva != "M") {
 			descrec = subTotalResumen * (porcentaje / 100)
 		}
 		const totalgral =
 			subTotalResumen + descrec + totalIvaResumen + totalIibbResumen
-		$("#importeRecargo").text(descrec.toFixed(3).replace(".", ","))
-		$("#importeTotal").text(totalgral.toFixed(3).replace(".", ","))
+		$("#importeRecargo").text(descrec.tofixed(2).replace(".", ","))
+		$("#importeTotal").text(totalgral.tofixed(2).replace(".", ","))
 		// iva e iibb
-		$("#importeIVA").text(totalIvaResumen.toFixed(3).replace(".", ","))
-		$("#importeIIBB").text(totalIibbResumen.toFixed(3).replace(".", ","))
+		$("#importeIVA").text(totalIvaResumen.tofixed(2).replace(".", ","))
+		$("#importeIIBB").text(totalIibbResumen.tofixed(2).replace(".", ","))
 
 		$collectionHolder.find(".ordTd").each(function (index) {
 			$(this).html(index + 1)

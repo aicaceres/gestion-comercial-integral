@@ -305,7 +305,7 @@ class Cliente {
         foreach ($pagos as $pag) {
             $saldo -= $pag->getTotal();
         }
-        return round($saldo,3);
+        return round($saldo,2);
     }
 
     public function getFechaUltimaCompra() {

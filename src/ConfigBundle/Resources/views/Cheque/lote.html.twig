@@ -1,0 +1,59 @@
+{% extends "AppBundle::layout.html.twig" %}
+
+{% block pageheader %}
+<div class="pageheader notab">
+    <h1 class="pagetitle">Administración de Cheques</h1>
+</div><!--pageheader-->
+{% endblock %}
+
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Carga de cheques por lote</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+{{ form_start(form, {'attr': {'class': 'stdform'}}) }}
+  <fieldset >
+      <div class="two_fields">
+      {{ form_row(form.banco, { 'attr': {'class' : 'select2 selectBancoPropio'} }) }}
+      {{ form_row(form.cuenta, { 'attr': {'class' : 'selectCuentaPropio', 'required':'required' } }) }}
+      </div>
+      <div class="two_fields">
+      {{ form_row(form.tipoCheque, { 'attr': {'class' : 'mininput'} }) }}
+      {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
+      </div>
+      <div class="two_fields">
+      {{ form_row(form.nroCheque, { 'attr': {'class' : 'smallinput' } }) }}
+      {{ form_row(form.cantidad, { 'attr': {'class' : 'mininput' } }) }}
+      </div>
+      <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>
+      <br clear="all" />
+      <div class="actionbutton">
+          <button class="guardar" type="submit" >Guardar</button>
+          <a class="cancelar" type="button" href="{{ path('sistema_cheque')}}">Cancelar</a>
+      </div>
+  </fieldset>
+{{ form_end(form) }}
+</div>
+{% endblock %}
+
+{% block extra_javascripts %}
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+  $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+  $('.selectBancoPropio').on('change', function(e){
+      e.preventDefault()
+      url = "{{ path('sistema_banco_get_cuentas') }}"
+      bancoId = $(this).val()
+      cuentaId = $('.selectCuentaPropio').val()
+      $('.selectCuentaPropio').html('')
+      $.get(url,{ bancoId }, function(data){
+        //if(!data.length) alert('El banco no tiene cuentas asociadas! No se podrá crear el cheque')
+        data.forEach(c =>
+          $('.selectCuentaPropio').append('<option value="'+c.id+'" >'+c.nroCuenta+'</option>')
+        )
+        $('.selectCuentaPropio').val(cuentaId)
+      },'JSON')
+    }).change()
+});
+</script>
+{% endblock %}

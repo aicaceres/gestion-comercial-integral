@@ -37,7 +37,7 @@
             <td>{{ item.localidad }}</td>
             <td>{{ item.telefono }}</td>
             <td>{{ item.tipoCliente }}</td>
-            <td class="alignright">{{ item.saldo|number_format(3,'.','') }}</td>
+            <td class="alignright">{{ item.saldo|number_format(2,'.','') }}</td>
             <td>
               <a href="{{ path('ventas_cliente_edit', { 'id': item.id }) }}" class="editar btn btnaction btn_pencil" target="_blank" title="Editar"></a>
               <a href="{{ path('ventas_cliente_ctacte', { 'cliId': item.id }) }}" class="editar btn btnaction btn_list" target="_blank" title="Cta. Cte."></a>

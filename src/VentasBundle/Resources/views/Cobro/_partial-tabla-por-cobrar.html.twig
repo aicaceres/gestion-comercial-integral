@@ -8,10 +8,10 @@
             <th class="nosort">Total</th>
             <th>Usuario</th>
             <th>
-                <a href="javascript:void(0)" title="Recargar" id="recargar" class="btn btnaction btn_refresh" 
+                <a href="javascript:void(0)" title="Recargar" id="recargar" class="btn btnaction btn_refresh"
                    onclick="recargarVentasPorCobrar()"></a>
                     <img class="loader_refresh hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
-                    
+
             </th>
         </tr>
     </thead>
@@ -25,7 +25,7 @@
             <td>{{ entity.cliente }}{{ entity.nombreCliente != 'CONSUMIDOR FINAL' ? ('<br>' ~ entity.nombreCliente) |raw : '' }}</td>
             <td>{{ entity.formaPago }}</td>
             <td class="alignright">
-                <span style="float:left"> {{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(3,',','.') }}</td>
+                <span style="float:left"> {{entity.moneda.simbolo}}</span>{{ entity.montoTotal|number_format(2,',','.') }}</td>
             <td>{{entity.updatedBy.nombre|upper }}</td>
             <td class="operacion">
               <a href="{{ path('ventas_cobro_facturar', { 'id': entity.id }) }}" title="Cobrar esta venta" class="btn btnaction btn_dollartag"></a>
@@ -36,4 +36,3 @@
         {% endfor %}
     </tbody>
 </table>
-                

@@ -58,13 +58,13 @@ class Pedido {
 
     /**
      * @var integer $montoDescuento
-     * @ORM\Column(name="monto_descuento", type="decimal", precision=20, scale=3, nullable=true )
+     * @ORM\Column(name="monto_descuento", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $montoDescuento;
 
     /**
      * @var integer $montoIva
-     * @ORM\Column(name="monto_iva", type="decimal", precision=20, scale=3, nullable=true )
+     * @ORM\Column(name="monto_iva", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $montoIva;
 

@@ -8,7 +8,6 @@ use Doctrine\ORM\EntityRepository;
 use ConfigBundle\Entity\ParametroRepository;
 use ConfigBundle\Form\ParametroType;
 
-
 class CobroType extends AbstractType {
 
     /**
@@ -17,7 +16,6 @@ class CobroType extends AbstractType {
      */
     public function buildForm(FormBuilderInterface $builder, array $options) {
         // $type = $options['attr']['type'];
-
         // $optionsDoc = array(
         //     'class'         => 'ConfigBundle:Parametro',
         //     'placeholder'   => 'Seleccionar...',
@@ -31,38 +29,41 @@ class CobroType extends AbstractType {
         //     });
 
         $builder
-                ->add('detalles', 'collection', array(
-                    'label_attr' => array('style'=>'display:none'),
-                    'type' => new CobroDetalleType(),
-                    'by_reference' => false,
-                    'allow_delete' => true,
-                    'allow_add' => true,
-                    'prototype_name' => 'citems',
-                    'attr' => array(
-                        'class' => 'row citem'
-                )))
-                //->add('nroOperacion', 'hidden')
-               // ->add('moneda','hidden')
-                //->add('cotizacion','hidden')
-                // ->add('venta','hidden')
-                // ->add('nombreCliente',null, array('label' => 'Nombre:'))
-                // ->add('tipoDocumentoCliente', null, $optionsDoc )
-                // ->add('nroDocumentoCliente',null, array('label'=>'N° Documento:'))
-
-                //->add('fechaCobro','datetime')
-                //->add('direccionCliente',null, array('label'=>'Dirección:'))
-
-                // ->add('moneda', 'entity', array(
-                //     'class' => 'ConfigBundle:Moneda',
-                //     'required' => true, 'label' => 'MONEDA: '
-                // ))
-                // ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
-                //     'required' => true, 'label' => 'FORMA DE PAGO: '))
-                // ->add('venta', 'entity', array('class' => 'VentasBundle:Venta'))
-                //->add('facturaElectronica', new FacturaElectronicaType())
-
-                    // para ticket
-                // ->add('nroTicket','hidden',array('mapped'=>false))
+            ->add('periodoAsocDesde', 'date', array('widget' => 'single_text', 'label' => 'Período Desde:',
+                'format' => 'dd-MM-yyyy', 'required' => false))
+            ->add('periodoAsocHasta', 'date', array('widget' => 'single_text', 'label' => 'Hasta:',
+                'format' => 'dd-MM-yyyy', 'required' => false))
+            ->add('fechaVtoPago', 'date', array('widget' => 'single_text', 'label' => 'Fecha Vto Pago:',
+                'format' => 'dd-MM-yyyy', 'required' => false))
+            ->add('detalles', 'collection', array(
+                'label_attr' => array('style' => 'display:none'),
+                'type' => new CobroDetalleType(),
+                'by_reference' => false,
+                'allow_delete' => true,
+                'allow_add' => true,
+                'prototype_name' => 'citems',
+                'attr' => array(
+                    'class' => 'row citem'
+            )))
+        //->add('nroOperacion', 'hidden')
+        // ->add('moneda','hidden')
+        //->add('cotizacion','hidden')
+        // ->add('venta','hidden')
+        // ->add('nombreCliente',null, array('label' => 'Nombre:'))
+        // ->add('tipoDocumentoCliente', null, $optionsDoc )
+        // ->add('nroDocumentoCliente',null, array('label'=>'N° Documento:'))
+        //->add('fechaCobro','datetime')
+        //->add('direccionCliente',null, array('label'=>'Dirección:'))
+        // ->add('moneda', 'entity', array(
+        //     'class' => 'ConfigBundle:Moneda',
+        //     'required' => true, 'label' => 'MONEDA: '
+        // ))
+        // ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
+        //     'required' => true, 'label' => 'FORMA DE PAGO: '))
+        // ->add('venta', 'entity', array('class' => 'VentasBundle:Venta'))
+        //->add('facturaElectronica', new FacturaElectronicaType())
+        // para ticket
+        // ->add('nroTicket','hidden',array('mapped'=>false))
         ;
         // if ($type == 'new') {
         //     // en render de nueva venta solo traer cliente por defecto
@@ -82,8 +83,6 @@ class CobroType extends AbstractType {
         //         'required' => true
         //     ));
         // }
-
-
     }
 
     /**

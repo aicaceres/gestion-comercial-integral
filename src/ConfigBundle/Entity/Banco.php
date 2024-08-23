@@ -1,12 +1,14 @@
 <?php
+
 namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Banco
  * @ORM\Table(name="banco")
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="ConfigBundle\Entity\BancoRepository")
  * @UniqueEntity(
  *     fields={"nombre"},
  *     errorPath="nombre",
@@ -21,11 +23,13 @@ class Banco {
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
     /**
      * @var string $nombre
      * @ORM\Column(name="nombre", type="string", nullable=false, unique=true)
      */
     protected $nombre;
+
     /**
      * @var string $activo
      * @ORM\Column(name="activo", type="boolean", nullable=true)
@@ -50,21 +54,21 @@ class Banco {
     /**
      * Constructor
      */
-    public function __construct()
-    {
+    public function __construct() {
         $this->cheques = new \Doctrine\Common\Collections\ArrayCollection();
         $this->movimientos = new \Doctrine\Common\Collections\ArrayCollection();
     }
+
     public function __toString() {
         return $this->nombre;
     }
+
     /**
      * Get id
      *
      * @return integer
      */
-    public function getId()
-    {
+    public function getId() {
         return $this->id;
     }
 
@@ -74,8 +78,7 @@ class Banco {
      * @param string $nombre
      * @return Banco
      */
-    public function setNombre($nombre)
-    {
+    public function setNombre($nombre) {
         $this->nombre = $nombre;
 
         return $this;
@@ -86,8 +89,7 @@ class Banco {
      *
      * @return string
      */
-    public function getNombre()
-    {
+    public function getNombre() {
         return $this->nombre;
     }
 
@@ -97,8 +99,7 @@ class Banco {
      * @param \ConfigBundle\Entity\Cheque $cheques
      * @return Banco
      */
-    public function addCheque(\ConfigBundle\Entity\Cheque $cheques)
-    {
+    public function addCheque(\ConfigBundle\Entity\Cheque $cheques) {
         $this->cheques[] = $cheques;
 
         return $this;
@@ -109,8 +110,7 @@ class Banco {
      *
      * @param \ConfigBundle\Entity\Cheque $cheques
      */
-    public function removeCheque(\ConfigBundle\Entity\Cheque $cheques)
-    {
+    public function removeCheque(\ConfigBundle\Entity\Cheque $cheques) {
         $this->cheques->removeElement($cheques);
     }
 
@@ -119,8 +119,7 @@ class Banco {
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getCheques()
-    {
+    public function getCheques() {
         return $this->cheques;
     }
 
@@ -130,8 +129,7 @@ class Banco {
      * @param \ConfigBundle\Entity\BancoMovimiento $movimientos
      * @return Banco
      */
-    public function addMovimiento(\ConfigBundle\Entity\BancoMovimiento $movimientos)
-    {
+    public function addMovimiento(\ConfigBundle\Entity\BancoMovimiento $movimientos) {
         $this->movimientos[] = $movimientos;
 
         return $this;
@@ -142,8 +140,7 @@ class Banco {
      *
      * @param \ConfigBundle\Entity\BancoMovimiento $movimientos
      */
-    public function removeMovimiento(\ConfigBundle\Entity\BancoMovimiento $movimientos)
-    {
+    public function removeMovimiento(\ConfigBundle\Entity\BancoMovimiento $movimientos) {
         $this->movimientos->removeElement($movimientos);
     }
 
@@ -152,8 +149,7 @@ class Banco {
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getMovimientos()
-    {
+    public function getMovimientos() {
         return $this->movimientos;
     }
 
@@ -163,8 +159,7 @@ class Banco {
      * @param boolean $activo
      * @return Banco
      */
-    public function setActivo($activo)
-    {
+    public function setActivo($activo) {
         $this->activo = $activo;
 
         return $this;
@@ -175,8 +170,7 @@ class Banco {
      *
      * @return boolean
      */
-    public function getActivo()
-    {
+    public function getActivo() {
         return $this->activo;
     }
 
@@ -186,8 +180,7 @@ class Banco {
      * @param \ConfigBundle\Entity\CuentaBancaria $cuentas
      * @return Banco
      */
-    public function addCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas)
-    {
+    public function addCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas) {
         $cuentas->setBanco($this);
         $this->cuentas[] = $cuentas;
         return $this;
@@ -198,8 +191,7 @@ class Banco {
      *
      * @param \ConfigBundle\Entity\CuentaBancaria $cuentas
      */
-    public function removeCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas)
-    {
+    public function removeCuenta(\ConfigBundle\Entity\CuentaBancaria $cuentas) {
         $this->cuentas->removeElement($cuentas);
     }
 
@@ -208,8 +200,8 @@ class Banco {
      *
      * @return \Doctrine\Common\Collections\Collection
      */
-    public function getCuentas()
-    {
+    public function getCuentas() {
         return $this->cuentas;
     }
+
 }

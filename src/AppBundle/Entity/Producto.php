@@ -53,7 +53,7 @@ class Producto {
 
     /**
      * @var string $costo
-     * @ORM\Column(name="costo", type="decimal", precision=20, scale=3,  nullable=false)
+     * @ORM\Column(name="costo", type="decimal", precision=20, scale=2,  nullable=false)
      * @Gedmo\Versioned()
      */
     protected $costo;
@@ -67,7 +67,7 @@ class Producto {
 
     /**
      * @var string $stock_minimo
-     * @ORM\Column(name="stock_minimo", type="decimal", precision=20, scale=3,  nullable=true)
+     * @ORM\Column(name="stock_minimo", type="decimal", precision=20, scale=2,  nullable=true)
      * @Gedmo\Versioned()
      */
     protected $stockMinimo;
@@ -757,7 +757,7 @@ class Producto {
     public function getPrecioContadoByLista($lista, $dtoContado, $iva) {
 
         $precio = $iva ? $this->getPrecioConIvaByLista($lista) : $this->getPrecioByLista($lista);
-        return round($precio * ( 1 + floatval($dtoContado) / 100 ), 3);
+        return round($precio * ( 1 + floatval($dtoContado) / 100 ), 2);
     }
 
     public function getPrecioByListaPpal() {

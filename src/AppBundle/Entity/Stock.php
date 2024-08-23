@@ -40,21 +40,21 @@ class Stock {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $cantidad = 0;
 
     /**
      * @var string $stock_minimo
-     * @ORM\Column(name="stock_minimo", type="decimal", precision=20, scale=3,  nullable=true)
+     * @ORM\Column(name="stock_minimo", type="decimal", precision=20, scale=2,  nullable=true)
      * @Gedmo\Versioned()
      */
     protected $stockMinimo;
 
     /**
      * @var integer $costo
-     * @ORM\Column(name="costo", type="decimal", precision=20, scale=3, nullable=true )
+     * @ORM\Column(name="costo", type="decimal", precision=20, scale=2, nullable=true )
      */
     protected $costo;
 
@@ -233,7 +233,7 @@ class Stock {
 
     public function getByFormaPago($dtorec, $precio){
       $valor = $precio * ( 1 + floatval($dtorec) / 100 );
-      return round($valor * $this->cantidad, 3);
+      return round($valor * $this->cantidad, 2);
     }
 
 }

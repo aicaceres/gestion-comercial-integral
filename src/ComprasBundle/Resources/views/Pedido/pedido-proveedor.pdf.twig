@@ -18,10 +18,10 @@
                                     <strong>PEDIDO  N°: {{entity.nroPedido}}</strong>
                                 </div>
                                 <div font-size="11px">
-                                    <strong>Fecha: {{ entity.fechaPedido| date('d-m-Y') }} </strong>                                    
+                                    <strong>Fecha: {{ entity.fechaPedido| date('d-m-Y') }} </strong>
                                 </div>
                                 <div font-size="10px" padding-top="15px">
-                                    <div padding-bottom="10px" text-align="center">Documento No Válido Como Factura</div>                                 
+                                    <div padding-bottom="10px" text-align="center">Documento No Válido Como Factura</div>
                                 </div>
                             </td>
                         </tr>
@@ -48,9 +48,9 @@
             </footer>
         </placeholders>
         <div border.color="#555555" height="1px" ></div>
-        
+
         <div padding-left="50px" margin-top="20px"><strong>PROVEEDOR:</strong> ({{ entity.proveedor.id }}) {{entity.proveedor}}</div>
-        
+
         <div padding-top="20px">De nuestra mayor consideración: </div>
         <div padding="20px 0 7px 40px">Tenemos el agrado de dirigirnos a Ud(s), solicitándoles el siguiente pedido, deberá(n) remitirlo por el siguiente transporte: </div>
         {% if entity.transporte %}
@@ -62,7 +62,7 @@
         <div font-size="9px">Observaciones: {{ entity.observaciones }}</div>
         {% endif %}
         <div height="10px"></div>
-        
+
         <table font-size="10px">
             <tr>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-left="10px" width="0.8 cm"><strong>#</strong></td>
@@ -76,22 +76,22 @@
                 <tr>
                     <td border.type="none" height="20px" vertical-align="middle" padding-left="10px">{{loop.index}}</td>
                     <td border.type="none" height="20px" vertical-align="middle" padding-left="10px">{{det.producto.codigoNombre}} </td>
-                    <td  border.type="none" height="20px" vertical-align="middle" text-align="right" padding-right="15px">{{det.cantidadTotal|number_format(3,'.',',')~' '~ det.producto.unidadMedida}}</td>
+                    <td  border.type="none" height="20px" vertical-align="middle" text-align="right" padding-right="15px">{{det.cantidadTotal|number_format(2,'.',',')~' '~ det.producto.unidadMedida}}</td>
                 </tr>
                 {% endfor %}
             {% endif %}
         </table>
-        
+
         <div height="20px"></div>
         <div border.color="#999999" height="1px" ></div>
         <div height="20px"></div>
-        
+
         <div>Cantidad de Artículos (Unidades): {{ cantidad }}</div>
-        
+
         <div height="20px"></div>
-        
+
         <div padding-top="20px">El pago de la presente se instrumentará en un plazo de {{ entity.formaPago }} Días</div>
-        
+
         <div padding-top="20px"><strong>ATENCIÓN:</strong> En razón del alto costo del SEGURO por transporte, deberán consignar Valor Declarado Neto de Contado y excluir el</div>
         <div padding-top="7px"> IVA y Costo Financiero. No reconocemos fletes remitidos por otra empresa de transporte que no sea la indicada en el presente.</div>
 

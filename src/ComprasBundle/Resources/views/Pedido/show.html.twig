@@ -45,8 +45,8 @@
             {% if entity.observaciones %}
             <div style="vertical-align:top; "><label for="nroPedido">Observaciones:</label>
                 <input type="text" value="{{entity.observaciones}}" disabled="disabled" class="smallinput">
-            </div>    
-            {% endif %}    
+            </div>
+            {% endif %}
             <div class="two_fields">
                 <div style="vertical-align:top; "><label for="nroPedido">Clasificación:</label>
                     <input type="text" value="{{entity.calificacionProveedor}}" disabled="disabled" class="smallinput">
@@ -75,7 +75,7 @@
                                  {{det.lotesTxt|raw}}
                             </td>
                             <td class="alignright">{%if 'x' in det.cantidadTxt %} {{det.cantidadTxt}} {%endif%}</td>
-                            <td class="alignright">{{det.cantidadTotal|number_format(3,'.',',')~' '~ det.producto.unidadMedida}}</td>
+                            <td class="alignright">{{det.cantidadTotal|number_format(2,'.',',')~' '~ det.producto.unidadMedida}}</td>
                             <td class="alignright">{%if entity.estado=='RECIBIDO' and ('x' in det.entregadoItemTxt) and det.entregado>0 %} {{det.entregadoItemTxt}}{%endif%}</td>
                             <td class="alignright" {% if det.hayDiferencia %} style="color:red" {% endif %} >{%if entity.estado=='RECIBIDO' %} {{ det.entregadoItemTotalTxt }}{%endif%}</td>
                         </tr>

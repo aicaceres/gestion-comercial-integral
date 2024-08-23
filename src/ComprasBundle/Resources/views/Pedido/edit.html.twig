@@ -102,7 +102,7 @@
             </div>
             <div class="two_fields">
                 {{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}
-            </div> 
+            </div>
             <div class="two_fields">
                 <div style="text-align:center">
                   <button class="stdbtn" type="button" onclick="cargarBajominimo()" >Cargar productos debajo del mínimo</button>
@@ -142,7 +142,7 @@
                     <tfoot>
                         <tr>
                             <th colspan="6"> <span style="float:right;"> Subtotal: $</span> </th>
-                            <th class="subtotal alignright" >{{entity.costoTotal|number_format(3,'.','')}}</th>
+                            <th class="subtotal alignright" >{{entity.costoTotal|number_format(2,'.','')}}</th>
                         </tr>
 <tr>
   <th colspan="5" rowspan="3">
@@ -166,7 +166,7 @@
 </tr>
 <tr>
   <th><span style="float:right;"> TOTAL: $</span></th>
-  <th class="total alignright" style="font-size:12px;">{{entity.montoTotal|number_format(3,'.','')}}</th>
+  <th class="total alignright" style="font-size:12px;">{{entity.montoTotal|number_format(2,'.','')}}</th>
 
 </tr>
                     </tfoot>
@@ -480,8 +480,8 @@ function cargarBajominimo(){
     ivaTotal += ivaItem
     subtotal = subtotal + parseFloat( item.find('.montototalTd').text() );
   })
-  jQuery('.subtotal').html( subtotal.toFixed(3) );
-  jQuery('#comprasbundle_pedido_montoIva').val( ivaTotal.toFixed(3) );
+  jQuery('.subtotal').html( subtotal.toFixed(2) );
+  jQuery('#comprasbundle_pedido_montoIva').val( ivaTotal.toFixed(2) );
   calcularTotales()
 }#}
 
@@ -495,10 +495,10 @@ function cargarBajominimo(){
     subtotal = subtotal - calc
     monto = monto + calc
   })
-  jQuery('#comprasbundle_pedido_montoDescuento').val( monto.toFixed(3) )
+  jQuery('#comprasbundle_pedido_montoDescuento').val( monto.toFixed(2) )
   iva = jQuery('#comprasbundle_pedido_montoIva').val()
   let total = subtotal + parseFloat(iva)
-  jQuery('.total').html( total.toFixed(3) );
+  jQuery('.total').html( total.toFixed(2) );
 }#}
 
 function recalcularTotales(){
@@ -515,7 +515,7 @@ function recalcularTotales(){
     const cantidad = parseFloat(cantTd.data('cantidad'))
     const alicuota = montoTd.data('alicuota')
     const precio = parseFloat(montoTd.text())
-    let subtotalItem = cantidad * precio 
+    let subtotalItem = cantidad * precio
     let subTotalFinal = subtotalItem
     /// aplicar dto
     let montoDto = 0
@@ -525,16 +525,16 @@ function recalcularTotales(){
       montoDto += calc
     })
     const ivaItem = subtotalItem * (alicuota/100)
-    montoTd.data('montoiva',ivaItem) 
+    montoTd.data('montoiva',ivaItem)
     subtotal += subTotalFinal
     ivaTotal += ivaItem
     dtoTotal += montoDto
   })
-  jQuery('.subtotal').html( subtotal.toFixed(3) );
-  jQuery('#comprasbundle_pedido_montoDescuento').val( dtoTotal.toFixed(3) )
-  jQuery('#comprasbundle_pedido_montoIva').val( ivaTotal.toFixed(3) )
+  jQuery('.subtotal').html( subtotal.toFixed(2) );
+  jQuery('#comprasbundle_pedido_montoDescuento').val( dtoTotal.toFixed(2) )
+  jQuery('#comprasbundle_pedido_montoIva').val( ivaTotal.toFixed(2) )
   let total = subtotal - dtoTotal + ivaTotal
-  jQuery('.total').html( total.toFixed(3) );  
+  jQuery('.total').html( total.toFixed(2) );
 }
 
 

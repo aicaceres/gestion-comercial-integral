@@ -32,7 +32,7 @@ class FacturaDetalle {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3)
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=2)
      */
     protected $cantidad;
 
@@ -49,7 +49,7 @@ class FacturaDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="precio", type="decimal", precision=20, scale=2 )
      */
     protected $precio;
 
@@ -61,7 +61,7 @@ class FacturaDetalle {
 
     /**
      * @var integer $descuento
-     * @ORM\Column(name="descuento", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="descuento", type="decimal", precision=20, scale=2 )
      */
     protected $descuento = 0;
 

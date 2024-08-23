@@ -237,6 +237,9 @@ class CobroController extends Controller {
                         if ($tipoPago !== 'CHEQUE') {
                             $detalle->setChequeRecibido(null);
                         }
+                        else {
+                            $detalle->getChequeRecibido()->setTomado(new \DateTime());
+                        }
                         if ($tipoPago !== 'TARJETA') {
                             $detalle->setDatosTarjeta(null);
                         }
@@ -421,6 +424,14 @@ class CobroController extends Controller {
         if ($comprobante) {
             $valor = explode('-', $comprobante->getTipoComprobante()->getValor());
             $tipos = $em->getRepository('ConfigBundle:AfipComprobante')->findByValor(array('CRE-' . $valor[1]));
+            foreach ($tipos as $tipo) {
+                $items[] = $tipo->getId();
+            }
+            $tipos = $em->getRepository('ConfigBundle:AfipComprobante')->findByValor(array('NCE-' . $valor[1]));
+            foreach ($tipos as $tipo) {
+                $items[] = $tipo->getId();
+            }
+            $tipos = $em->getRepository('ConfigBundle:AfipComprobante')->findByValor(array('NDE-' . $valor[1]));
             foreach ($tipos as $tipo) {
                 $items[] = $tipo->getId();
             }

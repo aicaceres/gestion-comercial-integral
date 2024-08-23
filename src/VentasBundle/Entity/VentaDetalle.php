@@ -40,7 +40,7 @@ class VentaDetalle {
 
     /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3)
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=2)
      * @Gedmo\Versioned()
      */
     protected $cantidad = 1;
@@ -58,14 +58,14 @@ class VentaDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="precio", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $precio = 0;
 
     /**
      * @var integer $alicuota
-     * @ORM\Column(name="alicuota", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="alicuota", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $alicuota = 0;
@@ -73,7 +73,7 @@ class VentaDetalle {
     /**
      * @var integer $dtoRec
      * monto descuento o recargo
-     * @ORM\Column(name="dtoRec", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="dtoRec", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $dtoRec = 0;
@@ -88,15 +88,17 @@ class VentaDetalle {
     // valor del precio unitario segun categoria de iva
     public function getPrecioUnitarioItem() {
         $categIva = $this->getVenta()->getCliente()->getCategoriaIva()->getNombre();
-        if ($categIva == 'I' || $categIva == 'M') {
+        if ($categIva == 'I' || $categIva == 'M' ) {
             // precio sin iva convertido a la cotizacion
             $precio = $this->getPrecio() / $this->getVenta()->getCotizacion();
+        }else if($categIva == 'E'){
+          $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $this->getVenta()->getCotizacion();
         }
         else {
             // precio con iva incluido convertido a la cotizacion
             $precio = ( $this->getPrecio() * ( 1 + ($this->getAlicuota() / 100)) ) / $this->getVenta()->getCotizacion();
         }
-        return round($precio, 3);
+        return $precio;
     }
 
     // monto del descuento del item para calcular iva y sumariar total si categoriaIva I o M
@@ -123,12 +125,12 @@ class VentaDetalle {
 
     // total del item
     public function getTotalItem() {
-        return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 3);
+        return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 2);
     }
 
     public function getBaseImponibleItem() {
         $precio = ($this->getPrecio() / $this->getVenta()->getCotizacion()) * $this->getCantidad();
-        return round($precio, 3);
+        return round($precio, 2);
     }
 
     /** FIN VALORES ITEM */

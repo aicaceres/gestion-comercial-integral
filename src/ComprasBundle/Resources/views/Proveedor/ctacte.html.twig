@@ -8,14 +8,14 @@
     {% include "AppBundle::notificacion.html.twig" %}
 
     <div id="contentwrapper" class="contentwrapper">
-        <div class="deposito_selector">  
+        <div class="deposito_selector">
             <form id="printform" name="printform" target="_blank"  action="{{ path("print_proveedor_ctacte") }}" method="post" style="height:40px;display: inline; ">
                 <input type="hidden" id="proveedorid" name="proveedorid"/>
                 <input type="hidden" id="fdesde" name="fdesde"/>
-                <input type="hidden" id="fhasta" name="fhasta"/>        
+                <input type="hidden" id="fhasta" name="fhasta"/>
                 <input type="hidden" id="datalist" name="datalist"/>
                 <button class="stdbtn floatright" type="submit" >Imprimir</button>
-            </form>    
+            </form>
             <form id="searchform" action="{{ path('compras_proveedor_ctacte') }}" method="GET">
                 <div style="display: inline-block; margin-right: 30px;">
                     <label><strong>Proveedor:</strong></label>
@@ -24,18 +24,18 @@
                             <option value="{{prov.id}}" {% if prov.id== proveedor.id%} selected="selected" {% endif %}
                                     >{{prov.nombre}}</option>
                         {% endfor %}
-                    </select>   
-                </div>    
-                <div style="display: inline-block; margin-right: 30px;">    
+                    </select>
+                </div>
+                <div style="display: inline-block; margin-right: 30px;">
                     &nbsp;&nbsp;&nbsp;
                     <label><strong>Período: </strong></label>
-                    <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
-                    <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
-                    <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>            
-                </div>                    
-            </form>                  
+                    <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+                    <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
+                    <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
+                </div>
+            </form>
         </div>
-        <div class="deposito_selector" style="float:right; padding:0 10px 10px 0"><label>Saldo: $&nbsp;<span id="span_saldo_ctacte"></span></label></div>                      
+        <div class="deposito_selector" style="float:right; padding:0 10px 10px 0"><label>Saldo: $&nbsp;<span id="span_saldo_ctacte"></span></label></div>
         <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="ctactetable">
             <thead>
                 <tr>
@@ -59,14 +59,14 @@
                             <td></td>
                             <td></td>
                             <td class="alignright">{{entity.concepto}}</td>
-                            <td class="alignright debe">{{entity.importe|number_format(3,'.',',')}}</td>
+                            <td class="alignright debe">{{entity.importe|number_format(2,'.',',')}}</td>
                             <td class="alignright haber"></td>
-                            <td class="alignright">{{saldo|number_format(3,'.',',')}}</td>
+                            <td class="alignright">{{saldo|number_format(2,'.',',')}}</td>
                         </tr>
                     {%else%}
                         <tr id="{{loop.index}}">
-                            <td class="con0"> 
-                                {% if entity.tipo in ['0','1','4'] %} 
+                            <td class="con0">
+                                {% if entity.tipo in ['0','1','4'] %}
                                     {% set saldo= saldo+entity.importe%}
                                     {% set debe= debe+entity.importe%}
                                     <img src="{{ asset('assets/images/icons/in.png') }}" style="margin-top: 5px"/>
@@ -78,40 +78,40 @@
                             </td>
                             <td class="con0">{{ entity.fecha|date('d-m-Y') }}</td>
                             <td class="con0">{{entity.comprobante }}
-                                {% if entity.tipo=='1' %} 
+                                {% if entity.tipo=='1' %}
                                     <a href="{{path('compras_factura_show', { 'id': entity.id }) }}" style="float:right" ><img src="{{asset('assets/images/icons/folder.png')}}"></a>
-                                    {% elseif entity.tipo in ['2','4'] %} 
+                                    {% elseif entity.tipo in ['2','4'] %}
                                     <a href="{{ path('compras_notadebcred_show', { 'id': entity.id }) }}" style="float:right"><img src="{{asset('assets/images/icons/folder.png')}}"></a>
-                                    {% else %} 
+                                    {% else %}
                                     <a href="{{ path('compras_proveedor_pagos_show', { 'id': entity.id }) }}" style="float:right"><img src="{{asset('assets/images/icons/folder.png')}}"></a>
                                     {% endif %}
                             </td>
                             <td>{{entity.concepto|raw }}</td>
-                            <td class="alignright debe">{% if entity.tipo in ['0','1','4'] %}{{entity.importe|number_format(3,'.',',')}}{% endif %}</td>
-                            <td class="alignright haber">{% if entity.tipo in ['3','2'] %}{{entity.importe|number_format(3,'.',',')}}{% endif %}</td>
-                            <td class="alignright">{{saldo|number_format(3,'.',',')}}</td>
+                            <td class="alignright debe">{% if entity.tipo in ['0','1','4'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
+                            <td class="alignright haber">{% if entity.tipo in ['3','2'] %}{{entity.importe|number_format(2,'.',',')}}{% endif %}</td>
+                            <td class="alignright">{{saldo|number_format(2,'.',',')}}</td>
                         </tr>
                     {%endif%}
                 {% endfor %}
             </tbody>
             <tfoot>
             <th colspan="4"></th>
-            <th class="alignright" >{{debe|number_format(3,'.',',')}}</th>
-            <th class="alignright" >{{haber|number_format(3,'.',',')}}</th>
-            <th class="alignright saldo_ctacte" >{{saldo|number_format(3,'.',',')}}</th>
+            <th class="alignright" >{{debe|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{haber|number_format(2,'.',',')}}</th>
+            <th class="alignright saldo_ctacte" >{{saldo|number_format(2,'.',',')}}</th>
             </tfoot>
-        </table> 
+        </table>
     </div>
 
 {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
-jQuery(document).ready(function($) {    
+jQuery(document).ready(function($) {
     $('#span_saldo_ctacte').html( $('.saldo_ctacte').html() );
-    $('#selectProveedorCtacte').change(function(){ 
+    $('#selectProveedorCtacte').change(function(){
         $('#searchform').submit();
-    }); 
+    });
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
    //  var debe=0, haber=0;
     //$('#selectProveedorCtacte').change(function(){ $('#searchform').submit(); });
@@ -127,24 +127,24 @@ jQuery(document).ready(function($) {
         $('#fhasta').val($('#hasta').val());
         //$('#searchterm').val( $('#dyntable2_filter input').val() );
         var datos = [];
-        ctacte.api().rows( { search:'applied' } ).data().each(function(value, index) {  
+        ctacte.api().rows( { search:'applied' } ).data().each(function(value, index) {
             // signo
             if( value[0]!=='' ){
-                if( value[0].indexOf('out.png')>-1 ) value[0]='-';                
+                if( value[0].indexOf('out.png')>-1 ) value[0]='-';
                 if( value[0].indexOf('in.png')>-1 )  value[0]='+';
             }
             // nro comp
             var i = value[2].indexOf('\n');
             if(i > -1){
                 var nro = value[2].substr(0,i);
-                value[2]=nro;                
+                value[2]=nro;
             }
             datos[index] = value;
-        });         
+        });
         $('#datalist').val(JSON.stringify(datos));
-    });    
-        
-        
+    });
+
+
     var ctacte2 = $('#xxxctactetable').dataTable({
         "bSort":false,
         "sPaginationType": "full_numbers",
@@ -161,14 +161,14 @@ jQuery(document).ready(function($) {
 			"sInfoEmpty": "Sin coincidencias",
 			"sInfoFiltered": "(filtrado de _MAX_ registros)",
                         "sSearch": "Buscar:"
-		},   
+		},
         "fnFooterCallback": function(row, data, start, end, display) {
             var intVal = function ( i ) {
                 return typeof i === 'string' ?
                     i.replace(/[\$,]/g, '')*1 :
                     typeof i === 'number' ?
                         i : 0;
-            };            
+            };
          /* Calculate the market share for browsers on this page */
          if(start==0)
          { debe=0; haber=0;}
@@ -181,15 +181,15 @@ jQuery(document).ready(function($) {
         /* Modify the footer row to match what we want */
         var nCells = row.getElementsByTagName('th');
         debe = parseInt(debe * 100)/100;
-        nCells[1].innerHTML =  debe.toFixed(3);
+        nCells[1].innerHTML =  debe.toFixed(2);
         haber = parseInt( haber * 100)/100;
-        nCells[2].innerHTML = haber.toFixed(3) ;
+        nCells[2].innerHTML = haber.toFixed(2) ;
         saldo =  parseInt(  intVal( data[ display[end-1] ][6] ) * 100)/100;
-        nCells[3].innerHTML =  saldo.toFixed(3)  ;
-            
+        nCells[3].innerHTML =  saldo.toFixed(2)  ;
+
         }
     });
     //ctacte.fnPageChange('last');
-});    
-</script>    
+});
+</script>
 {% endblock %}

@@ -9,22 +9,22 @@
                                 <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
                             </td>
                         </tr>
-                    </table>                                        
-                    <div border.color="#F5C98F" height="2px" ></div>   
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
                     <div height="5px"></div>
-                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
-                </div>                      
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
             </header>
             <footer>
                 <div height="30px" width="100%" text-align="right">
                     <page-number />
                 </div>
-            </footer>    
+            </footer>
         </placeholders>
-        <h2 text-align="center"> Libro de IVA Compras </h2>                   
+        <h2 text-align="center"> Libro de IVA Compras </h2>
         <h4 padding-bottom="10px"><strong>Período:</strong> {{ desde }} - {{ hasta }} </h4>
         <div height="10px"></div>
-        
+
         <table font-size="9px">
             <tr>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" >Alícuota</td>
@@ -34,27 +34,27 @@
             </tr>
             <tr>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">TOTAL</td>
-                {% for alic in alicuotas %}  
-                <td height="20px" vertical-align="middle" text-align="center">$ {{ alic }} </td> 
-                {% endfor %} 
+                {% for alic in alicuotas %}
+                <td height="20px" vertical-align="middle" text-align="center">$ {{ alic }} </td>
+                {% endfor %}
             </tr>
         </table>
         <div height="10px"></div>
-        
+
         <table font-size="8px">
             <tr>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Comprobante</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.8 cm"><strong>Fecha</strong></td>  
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Identificación Cliente</strong></td>                
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Comprobante</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.8 cm"><strong>Fecha</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Identificación Cliente</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm" ><strong>Neto</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>IVA</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Imp. RNI</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>No Grab.</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Exentos</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Impuestos</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Ret. IVA</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>TOTAL</strong></td>               
-            </tr> 
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>IVA</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Imp. RNI</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>No Grab.</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Exentos</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Impuestos</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Ret. IVA</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>TOTAL</strong></td>
+            </tr>
             {% set neto,iva,impRNI,nograv,exento,imp,retiva,total = 0,0,0,0,0,0,0,0 %}
             {% for item in items %}
                 {% set neto = neto + item.neto%}
@@ -69,29 +69,29 @@
                     <td border.type="none" height="16px" vertical-align="middle" padding-left="10px">{{item.comprobante}}</td>
                     <td border.type="none" height="16px" vertical-align="middle" padding-left="10px">{{item.fecha}}</td>
                     <td border.type="none" height="16px" vertical-align="middle" padding-left="5px">{{item.cliente|upper}} - {{item.nombre|upper}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.neto|number_format(3,'.','')}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.iva|number_format(3,'.','')}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.impRNI|number_format(3,'.','')}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.nograv|number_format(3,'.','')}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.exento|number_format(3,'.','')}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.impuestos|number_format(3,'.','')}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.retIVA|number_format(3,'.','')}}</td>
-                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.total|number_format(3,'.','')}}</td>
-                </tr>                
-            {% endfor %}  
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.neto|number_format(2,'.','')}}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.iva|number_format(2,'.','')}}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.impRNI|number_format(2,'.','')}}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.nograv|number_format(2,'.','')}}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.exento|number_format(2,'.','')}}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.impuestos|number_format(2,'.','')}}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.retIVA|number_format(2,'.','')}}</td>
+                    <td border.type="none" height="16px" vertical-align="middle" text-align="right" padding-right="10px">{{item.total|number_format(2,'.','')}}</td>
+                </tr>
+            {% endfor %}
             <tr>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px" colspan="3">TOTALIZADOS </td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{neto|number_format(3,'.',',')}}</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{iva|number_format(3,'.',',')}}</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{impRNI|number_format(3,'.',',')}}</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{nograv|number_format(3,'.',',')}}</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{exento|number_format(3,'.',',')}}</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{imp|number_format(3,'.',',')}} </strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{retiva|number_format(3,'.',',')}}</strong></td>               
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{total|number_format(3,'.',',')}}</strong></td>               
-            </tr> 
-        </table>  
-        
-        
-    </dynamic-page>    
-</pdf>    
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px" colspan="3">TOTALIZADOS </td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{neto|number_format(2,'.',',')}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{iva|number_format(2,'.',',')}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{impRNI|number_format(2,'.',',')}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{nograv|number_format(2,'.',',')}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{exento|number_format(2,'.',',')}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{imp|number_format(2,'.',',')}} </strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{retiva|number_format(2,'.',',')}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{total|number_format(2,'.',',')}}</strong></td>
+            </tr>
+        </table>
+
+
+    </dynamic-page>
+</pdf>

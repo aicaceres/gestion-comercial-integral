@@ -1,6 +1,6 @@
 <tr>
     <td border.type="none" height="15px" vertical-align="middle" width="2.5 cm" padding-left="3px">
-        {{ item.nroComprobante }} 
+        {{ item.nroComprobante }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="center" width="1.2 cm">
         {{ item.fecha }}
@@ -12,21 +12,21 @@
         {{ item.moneda }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="1.2 cm">
-        {{ item.cotiz|number_format(3,',','.') }}
+        {{ item.cotiz|number_format(2,',','.') }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
-        {{ item.EFECTIVO|number_format(3,',','.') }}
+        {{ item.EFECTIVO|number_format(2,',','.') }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
-        {{ item.CHEQUE|number_format(3,',','.') }}
+        {{ item.CHEQUE|number_format(2,',','.') }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
-        {{ item.TARJETA|number_format(3,',','.') }}
+        {{ item.TARJETA|number_format(2,',','.') }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
-        {{ item.TRANSFERENCIA|number_format(3,',','.') }}
+        {{ item.TRANSFERENCIA|number_format(2,',','.') }}
     </td>
     <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="2 cm">
-        {{ item.CTACTE|number_format(3,',','.') }} 
+        {{ item.CTACTE|number_format(2,',','.') }}
     </td>
 </tr>

@@ -1,15 +1,15 @@
 <tr class="item" data-id="{{item.id}}" style="height:30px;">
     <td class="ordTd"></td>
     <td class="prodTd">{{item.producto.codigoNombre}}  {{item.lotesItemTxt|raw}}   </td>
-    <td class="stockTd alignright">{{ item.producto.getStockActualxDeposito(item.pedido.deposito.id)|number_format(3,'.','') }} {{ item.producto.unidadmedida.nombre }} </td>
+    <td class="stockTd alignright">{{ item.producto.getStockActualxDeposito(item.pedido.deposito.id)|number_format(2,'.','') }} {{ item.producto.unidadmedida.nombre }} </td>
     <td class="solTd alignright">{{item.cantidadTxt}} </td>
     <td class="recTd alignright">{{ item.entregadoItemTxt }}</td>
     <td class="recTd alignright" {% if item.hayDiferencia %} style="color:red" {% endif %}>
     {{item.entregadoItemTotalTxt }}</td>
     <td style="text-align:center;width:20px;">
-        <a class="editTd" href="javascript:void(0)" title="Editar" tabIndex="-1" 
+        <a class="editTd" href="javascript:void(0)" title="Editar" tabIndex="-1"
            data-url="{{path('compras_render_edit_item_recepcion',{'id':item.id})}}" data-actionurl="{{path('compras_item_recepcion_update',{'id':item.id})}}">
             <img src="{{asset('assets/images/icons/editor.png')}}" /></a>
-    </td>    
+    </td>
     <td style="text-align:center;"><a class="delTd" href="javascript:void(0)" data-id="{{item.id}}"  title="Marcar como no recibido" tabIndex="-1"><span class="minus"></span></a></td>
 </tr>

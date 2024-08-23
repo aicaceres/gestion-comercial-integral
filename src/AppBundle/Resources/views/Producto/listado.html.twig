@@ -61,7 +61,7 @@
                 <td style="width:8%;">{{ entity.producto.codigo |upper }}</td>
                 <td>{{ entity.producto.nombre }}</td>
                 <td>{{ entity.producto.proveedor }}</td>
-                <td class="alignright" style="font-weight:bold; width:10%;{% if entity.cantidad<0 %} color:red;{%endif%}">{{ entity.cantidad| number_format(3,'.',',') }}
+                <td class="alignright" style="font-weight:bold; width:10%;{% if entity.cantidad<0 %} color:red;{%endif%}">{{ entity.cantidad| number_format(2,'.',',') }}
                     {{ entity.producto.unidadMedida }}</td>
             </tr>
            {% endfor %}

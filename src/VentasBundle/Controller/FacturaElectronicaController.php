@@ -41,18 +41,25 @@ class FacturaElectronicaController extends Controller {
     public function emitirAction(Request $request) {
         $id = $request->get('id');
         $entity = $request->get('entity');
+        $esMiPyme = filter_var($request->get('mipyme'), FILTER_VALIDATE_BOOLEAN);
 
         $serviceFacturar = $this->get('factura_electronica_webservice');
-        $result = $serviceFacturar->procesarComprobante($id, $entity, 'WS');
-
+        if($esMiPyme){
+          $rechazado = $request->get('rechazado');
+          $result = $serviceFacturar->procesarComprobanteMipymes($id, $entity, $rechazado);
+        }else{
+          $result = $serviceFacturar->procesarComprobante($id, $entity, 'WS');
+        }
         if ($entity == 'NotaDebCred' && $result['res'] == 'OK') {
             $result = $this->notaCreditoProcesarStock($id);
         }
 
-        if ($result['res'] == 'OK') {
-            $result['urlprint'] = $this->generateUrl('ventas_factura_print', ['id' => $id, 'entity' => $entity]);
+        if (strpos($result['msg'], '10192')) {
+          $result = $serviceFacturar->procesarComprobanteMipymes($id, $entity);
         }
-
+        if ($result['res'] == 'OK') {
+          $result['urlprint'] = $this->generateUrl('ventas_factura_print', ['id' => $id, 'entity' => $entity]);
+        }
         return new JsonResponse($result);
     }
 
@@ -273,6 +280,7 @@ class FacturaElectronicaController extends Controller {
             $comprobante = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
             $tipo = $comprobante->getTipoComprobante();
             if ($tipo->getClase() == 'CRE') {
+                $result['nce'] = true;
                 $cbteAsoc = $comprobante->getComprobanteAsociado();
                 $deposito = $em->getRepository('AppBundle:Deposito')->findOneByPordefecto(1);
                 if ($cbteAsoc) {
@@ -315,6 +323,7 @@ class FacturaElectronicaController extends Controller {
 
             $em->getConnection()->commit();
             $result['res'] = 'OK';
+            $result['msg'] = '';
 
             return $result;
         }

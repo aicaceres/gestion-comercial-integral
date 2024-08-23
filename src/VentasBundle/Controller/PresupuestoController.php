@@ -31,15 +31,16 @@ class PresupuestoController extends Controller {
         $unidneg = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_venta');
         $em = $this->getDoctrine()->getManager();
-        $desde = $request->get('desde');
-        $hasta = $request->get('hasta');
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+        // $desde = $request->get('desde');
+        // $hasta = $request->get('hasta');
         $printpdf = null;
         $cliId = $request->get('cliId');
         $cliente = null;
         if ($cliId) {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
-        $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $desde, $hasta);
+        $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $periodo['ini'], $periodo['fin']);
         if ($this->getUser()->getAccess($unidneg, 'ventas_presupuesto_print')) {
             $printpdf = $request->get('printpdf');
         }
@@ -47,8 +48,8 @@ class PresupuestoController extends Controller {
                 'entities' => $entities,
                 'cliId' => $cliId,
                 'cliente' => $cliente,
-                'desde' => $desde,
-                'hasta' => $hasta,
+                'desde' => $periodo['ini'],
+                'hasta' => $periodo['fin'],
                 'printpdf' => $printpdf
         ));
     }

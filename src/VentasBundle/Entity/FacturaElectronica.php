@@ -194,6 +194,19 @@ class FacturaElectronica {
      */
     protected $iva;
 
+    /**
+     * Detalle de opcionales
+     * @ORM\Column(name="opcionales", type="text", nullable=true )
+     * @Gedmo\Versioned()
+     */
+    protected $opcionales;
+
+    /**
+     * Fecha de vto (yyyymmdd)
+     * @ORM\Column(name="fch_vto_pago", type="integer", nullable=true)
+     */
+    protected $fchVtoPago;
+
     //***/
 
     /**
@@ -284,7 +297,7 @@ class FacturaElectronica {
         else {
             $fecha = $this->getNotaDebCred()->getFecha()->format('d/m/Y');
             $simbolo = $this->getNotaDebCred()->getMoneda()->getSimbolo();
-            $saldo = ($this->getNotaDebCred()->getSigno() == '-') ? $this->getTotal()*-1 : $this->getSaldo();
+            $saldo = ($this->getNotaDebCred()->getSigno() == '-') ? $this->getTotal() * -1 : $this->getSaldo();
         }
         return $this->getTipoComprobante()->getValor() . ' ' . $this->getNroComprobanteTxt() .
             ' | ' . $fecha . ' | ' . $simbolo . $saldo;
@@ -313,6 +326,12 @@ class FacturaElectronica {
                 return 'NOTA DE DEBITO';
             case 'CRE':
                 return 'NOTA DE CREDITO';
+            case 'FCE':
+                return 'FACTURA DE CREDITO MiPyME';
+            case 'NDE':
+                return 'NOTA DE DEBITO MiPyME';
+            case 'NCE':
+                return 'NOTA DE CREDITO MiPyME';
         }
         return false;
     }
@@ -320,6 +339,40 @@ class FacturaElectronica {
     public function getCbteFchFormatted($format = 'Y-m-d') {
         $cbteFch = new \DateTime($this->getCbteFch());
         return $cbteFch->format($format);
+    }
+
+    public function getFchVtoPagoFormatted($format = 'Y-m-d') {
+        $fecha = new \DateTime($this->getFchVtoPago());
+        return $fecha->format($format);
+    }
+
+    public function getOpcionalesById($id) {
+        $opcionales = json_decode($this->getOpcionales());
+        if ($opcionales) {
+            foreach ($opcionales as $op) {
+                if ($op->Id == $id) {
+                    return $op->Valor;
+                }
+            }
+        }
+        return null;
+    }
+    /**
+     * Returns the transferencia option name based on the value in the opciones field
+     *
+     * @return string
+     */
+    public function getOpcionTransferencia() {
+        $opTransferencia = $this->getOpcionalesById(27);
+        $transferenciaOptionName = $opTransferencia === 'SCA'
+            ? 'Sistema de Circulacion Abierta'
+            : 'Agente de Depósito Colectivo';
+        return $transferenciaOptionName;
+    }
+
+    public function getPeriodoFacturado() {
+        $cbteFch = new \DateTime($this->getCbteFch());
+        return array('desde' => $cbteFch->format('Y-m-01'), 'hasta' => $cbteFch->format('Y-m-t'));
     }
 
     /**
@@ -975,6 +1028,48 @@ class FacturaElectronica {
      */
     public function getCliente() {
         return $this->cliente;
+    }
+
+    /**
+     * Set opcionales
+     *
+     * @param string $opcionales
+     * @return FacturaElectronica
+     */
+    public function setOpcionales($opcionales) {
+        $this->opcionales = $opcionales;
+
+        return $this;
+    }
+
+    /**
+     * Get opcionales
+     *
+     * @return string
+     */
+    public function getOpcionales() {
+        return $this->opcionales;
+    }
+
+    /**
+     * Set fchVtoPago
+     *
+     * @param integer $fchVtoPago
+     * @return FacturaElectronica
+     */
+    public function setFchVtoPago($fchVtoPago) {
+        $this->fchVtoPago = $fchVtoPago;
+
+        return $this;
+    }
+
+    /**
+     * Get fchVtoPago
+     *
+     * @return integer
+     */
+    public function getFchVtoPago() {
+        return $this->fchVtoPago;
     }
 
 }

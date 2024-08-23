@@ -1,11 +1,11 @@
 <tr class="item" data-id="{{item.id}}" style="height:30px;">
     <td class="ordTd" style="text-align:center;">{{ idx is defined ? idx : '' }}</td>
     <td class="prodTd">{{ item.producto.codigoNombre }}</td>
-    <td class="stockTd alignright">{{ item.producto.getStockActualxDeposito(item.pedido.deposito.id)|number_format(3,'.','') }} {{ item.producto.unidadmedida.nombre }} </td>
+    <td class="stockTd alignright">{{ item.producto.getStockActualxDeposito(item.pedido.deposito.id)|number_format(2,'.','') }} {{ item.producto.unidadmedida.nombre }} </td>
     <td class="cantTd alignright" data-cantidad="{{ item.cantidadTotal }}">{{ item.cantidadItemTxt }} </td>
-    <td class="totalTd alignright">{{item.cantidadTotal|number_format(3,'.','')~' '~item.producto.unidadmedida.nombre}}</td>
-    <td class="montoTd alignright" data-alicuota="{{ item.producto.iva }}" data-montoiva="">{{item.precio|number_format(3,'.','')}}</td>
-    <td class="montototalTd alignright">{{item.costoTotal|number_format(3,'.','')}}</td>
+    <td class="totalTd alignright">{{item.cantidadTotal|number_format(2,'.','')~' '~item.producto.unidadmedida.nombre}}</td>
+    <td class="montoTd alignright" data-alicuota="{{ item.producto.iva }}" data-montoiva="">{{item.precio|number_format(2,'.','')}}</td>
+    <td class="montototalTd alignright">{{item.costoTotal|number_format(2,'.','')}}</td>
     <td style="text-align:center;width:20px;">
         {% if item.pedido.estado == 'NUEVO' %}
         <a class="editTd" href="javascript:void(0)" title="Editar" tabIndex="-1"

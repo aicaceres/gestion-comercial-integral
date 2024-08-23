@@ -61,11 +61,11 @@
                     </div>
                 </div>
             {% endif %}
-            <div class="two_fields" style='margin-top: 10px;'>
+            <div class="two_fields" style="margin-top: 10px;">
                 <div>
                     <label style="width:180px">Centro de Costo por defecto:</label>
                     <select id="centrocosto-default" class="select2">
-                        <option value=''>Seleccionar</option>
+                        <option value="">Seleccionar</option>
                         {% for centro in centros  %}
                         <option value="{{ centro.id }}" >{{ centro.nombre|upper }}</option>
                         {% endfor %}
@@ -102,12 +102,12 @@
                                     data-urlselect = "{{ path('get_autocomplete_productos_compras') }} "
                                  >
                                 {% if det.vars.data.producto.id is defined %}
-                                  <option value="{{det.vars.data.producto.id}}" selected="selected" data-alicuota="{{ det.vars.data.afipAlicuota }}" data-bulto="{{ det.vars.data.bulto }}" 
+                                  <option value="{{det.vars.data.producto.id}}" selected="selected" data-alicuota="{{ det.vars.data.afipAlicuota }}" data-bulto="{{ det.vars.data.bulto }}"
                                     data-cantxBulto="{{ det.vars.data.cantidadxBulto }}" data-unidmed="{{ det.vars.data.producto.unidadmedida.nombre }}"  data-comodin="{{ det.vars.data.producto.comodin ?? 0 }}" >
                                       {{det.vars.data.producto}}
                                   </option>
                                 {% endif %}
-                                </select>    
+                                </select>
                             </td>
                             <td class="afipAlicuota">{{ form_widget(det.afipAlicuota) }}</td>
                             <td class="cantTd">{{ form_widget(det.cantidad, { 'attr': {'class' : 'number floatleft','min':'10','style':'text-align:right;'} }) }}
@@ -118,7 +118,7 @@
                             <td class="precTd  alignright">
                                 <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
                             </td>
-                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(3,'.','') }}</td>
+                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(2,'.','') }}</td>
                             <td class="delTd" style="text-align:center;"></td>
                         </tr>
 
@@ -161,7 +161,7 @@
                             <th colspan="7" style="text-align:right"> SubTotal</th>
                             <th class="cktotal red" id="Total">{{ form_widget(form.subtotal, { 'attr': {'style':'text-align:right;'} }) }}</th>
                             <th style="text-align:center;">
-                                <a href="javascript:void(0)" id="linkAdd" tabindex="0"  title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}" /></a>
+                                <a href="javascript:void(0)" id="linkAdd" tabindex="0"  title="Agregar"><img src="{{asset('assets/images/icons/add.png')}}"/></a>
                             </th>
                         </tr>
                     </tfoot>
@@ -195,6 +195,43 @@
                     </tbody>
                 </table>
             </div>
+            <div class="widgetbox" id="tableAlicuotas" style="width: 530px;margin:auto;background: aliceblue;padding: 15px;display:block;">
+              <div class="title" style="margin:0;"><h5>Detalle de alícuotas <a href="#" id="addAlicuota" title="Agregar otra alícuota" style="display:none">[ + ]</a></h5></div>
+              <div class="widgetcontent">
+                {{ form_errors(form.alicuotas) }}
+                <table class="stdtable alicuotas" cellspacing="0" cellpadding="0" border="0" style="background:white;margin-top: 10px;">
+                  <thead>
+                      <tr>
+                          <th style="width:100px;">Alícuota</th>
+                          <th style="width:200px">Importe neto gravado</th>
+                          <th style="width:200px;">Impuesto liquidado</th>
+                          <th style="width:30px;"></th>
+                      </tr>
+                  </thead>
+                  <tbody data-index="{{form.alicuotas | length }}" data-prototype="{% filter escape %}{% include 'ComprasBundle:Factura:_alicuotas_prototype.html.twig' with {'item':form.alicuotas.vars.prototype} %}{% endfilter %}">
+                      {% for alic in form.alicuotas %}
+                          <tr class="alicitem" style="height:30px" divdata="item_{{loop.index-1}}">
+                              <td class="alicTd"><span></span> {{ form_widget(alic.afipAlicuota, { 'attr': {'style':'display:none'} }) }}</td>
+                              <td class="netoTd">{{ form_widget(alic.netoGravado, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                              <td class="alicIvaTd">{{ form_widget(alic.liquidado, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                              <td class="delAlicTd" style="display:none">
+                                <a href="javascript:void(0)" title="Eliminar" class="btn btnaction btn_trash" onclick="delAlicuota(this)"></a>
+                              </td>
+                          </tr>
+                      {% endfor %}
+                  </tbody>
+                  <thead>
+                      <tr>
+                          <th></th>
+                          <th id="netoTh" class="alignright" style="padding-right: 20px;">0</th>
+                          <th id="ivaTh" class="alignright" style="padding-right: 20px;">0</th>
+                          <th></th>
+                      </tr>
+                  </thead>
+                </table>
+              </div><!--widgetcontent-->
+            </div>
+
             <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="button" >Guardar</button>
@@ -276,11 +313,11 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         addNewItem();
         e.stopPropagation();
-        const lastProduct = $collectionHolder.find('.widgetProducto').last() 
+        const lastProduct = $collectionHolder.find('.widgetProducto').last()
         setProductSelect2(lastProduct)
         lastProduct.select2("open")
     });
-{#   $(".prodTd .chzn-select").change(function(){ changeProducto( $(this) ) });#}
+ {#   $(".prodTd .chzn-select").change(function(){ changeProducto( $(this) ) });#}
    $('.cantTd input, .precTd input[type=text]').change(function(){
        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
    $('.cktotal input').change(function(){
@@ -291,6 +328,12 @@ jQuery(document).ready(function($) {
     $(document).on('change','.ivaTd select',function(){
         actualizaTotales();
     })
+
+    $('#addAlicuota').on('click',function(e){
+        e.preventDefault();
+        addNewAlicuota();
+        e.stopPropagation();
+    });
 
     $('.guardar').click(function() {
         if( $(document).find('.ccred').length >0 ){
@@ -351,8 +394,8 @@ jQuery(document).ready(function($) {
         {#var old = $(this).data('old');
         var now = $(this).val();
         var subtot = $('#comprasbundle_factura_subtotal').val() - (now-old);
-        $('#comprasbundle_factura_subtotal').val( subtot.toFixed(3) );
-        $('#comprasbundle_factura_subtotalNeto').val( subtot.toFixed(3) );#}
+        $('#comprasbundle_factura_subtotal').val( subtot.toFixed(2) );
+        $('#comprasbundle_factura_subtotalNeto').val( subtot.toFixed(2) );#}
         actualizaTotales()
     });
 
@@ -363,10 +406,12 @@ jQuery(document).ready(function($) {
             ptovta.val( ptovta.val().padStart( 5 , '0')) ;
             nro = $('#comprasbundle_factura_afipPuntoVenta').val() + '-' + $('#comprasbundle_factura_afipNroComprobante').val();
             $('#comprasbundle_factura_nroComprobante').val(nro);
+            if($('#comprasbundle_factura_afipNroComprobante').val())
+              $('#comprasbundle_factura_afipNroComprobante').val( $('#comprasbundle_factura_afipNroComprobante').val().padStart( 8 , '0'))
         });
 
     $('.formrows input[type="text"]').css('height','20px');
-    
+
     selProducto = $(".widgetProducto")
     setProductSelect2(selProducto)
     actualizaTotales();
@@ -405,7 +450,7 @@ jQuery(document).ready(function($) {
                     var last = $(this).find('tr').last();
                     last.find('[name*="centroCosto"]').val( jQuery('#centrocosto-default').val() )
                     var precio = parseFloat( $(this).closest('.ccTr').prev('.item').find('.totalTd').html() );
-                    last.find('[name*="costo"]').val( precio.toFixed(3) )
+                    last.find('[name*="costo"]').val( precio.toFixed(2) )
                     checkCosto( $(this) );
                 }
             });
@@ -420,6 +465,10 @@ $('input[type=radio]').on('focus',function(){
 })
 
     $("#comprasbundle_factura_afipComprobante").select2('focus');
+
+    $('body').on('change','.alicIvaTd input, .netoTd input',function() {
+      updateAlicuotaTotal();
+    });
 
 });
  // funciones personalizas para el formulario
@@ -449,7 +498,7 @@ $('input[type=radio]').on('focus',function(){
                 var last = hold.find('tr').last();
                 last.find('[name*="centroCosto"]').val( jQuery('#centrocosto-default').val() )
                 var precio = parseFloat( jQuery(this).closest('.precTd').siblings('.totalTd').html());
-                last.find('[name*="costo"]').val( precio.toFixed(3) )
+                last.find('[name*="costo"]').val( precio.toFixed(2) )
                 checkCosto( hold );
             }
         }
@@ -527,7 +576,7 @@ function checkCosto(holder){
         }
         var val = checknumero(item)
         if( val > 0 ){
-            item.val( val.toFixed(3) )
+            item.val( val.toFixed(2) )
             suma = suma + val ;
         }else{
             suma = 0;
@@ -585,33 +634,7 @@ function addItemFormCentroCostoLink($itemFormTd) {
         }
     });
 }
-{#function changeProducto(producto){
-    if(producto.val()){
-        jQuery.ajax({
-                url: "{{ path("get_data_producto") }}",
-                //async:false,
-                dataType:"json",
-                data: 'prod='+ producto.val(),
-                success: function(data) {
-                    trIndex = producto.parent().parent();
-                    trIndex.find('.ivaTd [name*="afipAlicuota"] option:contains('+ data.iva +')').prop('selected', true);
-                    trIndex.find('.cantTd input').val(1);
-                    trIndex.find('span.unidmed').html(data.unidmed);
-                    if(data.bulto){
-                        trIndex.find('span.unidmed').hide();
-                        trIndex.find('.cantxBulto input').val(data.cantxBulto);
-                    }else{
-                        trIndex.find('span.unidmed').show();
-                        trIndex.find('.cantxBulto input').val('');
-                    }
-                    trIndex.find('.bulto input').prop('checked', data.bulto);
-                    jQuery.uniform.update();
-                    actualizaTotales();
-                    trIndex.find('.cantTd input').select();
-                }
-            });
-    }
-}#}
+
 function changeBulto(item){
     var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed');
         var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
@@ -628,7 +651,7 @@ function changeBulto(item){
 }
 function actualizaTotales(){
         let IvaTotal=0;
-        var tipoC = jQuery('#comprasbundle_factura_afipComprobante option:selected').text().slice(-2) == ' C'        
+        var tipoC = jQuery('#comprasbundle_factura_afipComprobante option:selected').text().slice(-2) == ' C'
         // calcular subtotal
         let Total = 0
         jQuery("tr.item").each(function(){
@@ -636,36 +659,48 @@ function actualizaTotales(){
             const cant =  checknumero( item.find('.cantTd input') ) ;
             const prec =  checknumero( item.find('.precTd input[type=text]') )
             const sbtotItm = prec*cant
-            item.find('.totalTd').text( sbtotItm.toFixed(3))
+            item.find('.totalTd').text( sbtotItm.toFixed(2))
             Total += sbtotItm
         })
-        jQuery("#comprasbundle_factura_subtotal").val(Total.toFixed(3))
+        jQuery("#comprasbundle_factura_subtotal").val(Total.toFixed(2))
         // calcular iva teniendo en cuenta el dto
         const totbon = checknumero( jQuery('#comprasbundle_factura_totalBonificado') );
-        const porcDto = ((totbon * 100) / Total)
+        const porcDto = (totbon === 0 && Total === 0) ? 0 : (totbon * 100) / Total;
+
+        const arrayAlic = {}
         jQuery("tr.item").each(function(){
             var item = jQuery(this);
             var cant =  checknumero( item.find('.cantTd input') ) ;
             var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
             const precTotal = cant*prec
             const precDto = precTotal - (precTotal * (porcDto/100))
+            let ivaTxt = item.find('.ivaTd [name*="afipAlicuota"] option:selected').text();
             let iva = item.find('.ivaTd [name*="afipAlicuota"] option:selected').text();
             iva = parseFloat(iva.replace('%', '') /100);
+            ivaItem = 0
+
             if( !tipoC){
                 IvaTotal += (precDto * iva);
+                ivaItem = (precDto * iva);
+            }
+            if (arrayAlic[ivaTxt]) {
+              arrayAlic[ivaTxt].iva += ivaItem;
+              arrayAlic[ivaTxt].neto += precDto;
+            } else {
+              arrayAlic[ivaTxt] = { iva: ivaItem, neto: precDto };
             }
         });
-
-        jQuery('#comprasbundle_factura_iva').val(  IvaTotal.toFixed(3)  );
+        setTablaAlicuotas(arrayAlic)
+        jQuery('#comprasbundle_factura_iva').val(  IvaTotal.toFixed(2)  );
         totales(1);
         $collectionHolder.find('.ordTd').each(function(index) {
             jQuery(this).html(index+1);
         });
     }
-    
+
 function totales(suma){
     var neto = checknumero(jQuery('#comprasbundle_factura_subtotal'));
-    jQuery('#comprasbundle_factura_subtotalNeto').val(  neto.toFixed(3)  );
+    jQuery('#comprasbundle_factura_subtotalNeto').val(  neto.toFixed(2)  );
     var impuesto = checknumero( jQuery('#comprasbundle_factura_impuestoInterno') );
     var iva = checknumero( jQuery('#comprasbundle_factura_iva') );
     var perciva = checknumero( jQuery('#comprasbundle_factura_percepcionIva') );
@@ -676,10 +711,11 @@ function totales(suma){
     if(suma){
         var subtot = neto - totbon;
         var totales = subtot  +  impuesto + iva + perciva + percdgr + percmun +  tmc ;
-         jQuery('#comprasbundle_factura_total').val( totales.toFixed(3) );
+         jQuery('#comprasbundle_factura_total').val( totales.toFixed(2) );
      }else{
          checknumero( jQuery('#comprasbundle_factura_total') );
      }
+  checkDiferencias()
 }
 
 function setProductSelect2(selProducto) {
@@ -706,7 +742,7 @@ function setProductSelect2(selProducto) {
                         }
                     })
                     return { results }
-		},                                
+		},
             },
             templateResult: (data) => {
                 return data.text
@@ -742,5 +778,84 @@ function setProductSelect2(selProducto) {
             actualizaTotales();
             tr.find('.cantTd input').select();
         })
+}
+/// Alicuotas
+function setTablaAlicuotas(arr){
+  alicTr = jQuery('table.alicuotas tbody').find('tr')
+  ivaTotal = netoTotal = 0
+  for( iva in arr){
+    let existe = false
+    alicTr.each(function() {
+        var select = jQuery(this).find('td.alicTd select');
+        if (select.find('option:selected').text().trim() === iva) {
+            existe = true;
+            updateAlicuotaData(jQuery(this), arr[iva])
+            return false;  // Terminar el bucle cuando se encuentra el valor
+        }
+    });
+    if(!existe){
+      newTr = addNewAlicuota(iva)
+      updateAlicuotaData(newTr, arr[iva])
+    }
+    ivaTotal += arr[iva].iva
+    netoTotal += arr[iva].neto
+  }
+  jQuery('#ivaTh').html(ivaTotal.toFixed(2))
+  jQuery('#netoTh').html(netoTotal.toFixed(2))
+}
+function updateAlicuotaData(tr, arr){
+  var alicIvaInput = tr.find('td.alicIvaTd input');
+  alicIvaInput.val( parseFloat(arr.iva).toFixed(2))
+  var netoInput = tr.find('td.netoTd input');
+  netoInput.val( parseFloat(arr.neto).toFixed(2))
+}
+function addNewAlicuota(iva){
+    $holder = jQuery('table.alicuotas tbody');
+    var prototype = $holder.data('prototype');
+    var index = $holder.data('index');
+    var newForm = prototype.replace(/items/g, index);
+    $holder.append(newForm);
+    $holder.data('index', index + 1);
+    alicuota = $holder.find('.alicTd select').last();
+    span = $holder.find('.alicTd span').last();
+    alicuota.children('option').each(function() {
+        if (jQuery(this).text().trim() === iva) {
+            span.text(iva)
+            jQuery(this).prop('selected', true);
+        }
+    });
+    $holder.find('td.alicIvaTd input').last().val(0)
+    $holder.find('td.netoTd input').last().val(0)
+    return $holder.find('tr').last()
+}
+function delAlicuota(obj){
+  tr = jQuery(obj).closest("tr")
+  if( confirm('Desea eliminar este item?')  ){
+    tr.remove()
+    // jQuery('.stkmin').change()
+  }else return false
+}
+function checkDiferencias(){
+  ivaTh = jQuery('#ivaTh')
+  netoTh = jQuery('#netoTh')
+  ivaTh.attr('style','background:#f7f7f7')
+  netoTh.attr('style','background:#f7f7f7')
+  if(ivaTh.text() != jQuery('#comprasbundle_factura_iva').val()){
+    ivaTh.attr('style','background:coral')
+  }
+  if(netoTh.text() != jQuery('#comprasbundle_factura_subtotal').val()){
+    netoTh.attr('style','background:coral')
+  }
+}
+function updateAlicuotaTotal(){
+  alicTr = jQuery('table.alicuotas tbody').find('tr')
+  iva = neto = 0
+  alicTr.each(function() {
+    iva += parseFloat(jQuery(this).find('.alicIvaTd input').val())
+    neto += parseFloat(jQuery(this).find('.netoTd input').val())
+  });
+  jQuery('#ivaTh').html(iva.toFixed(2))
+  jQuery('#netoTh').html(neto.toFixed(2))
+  checkDiferencias()
 }
 </script>{% endblock %}

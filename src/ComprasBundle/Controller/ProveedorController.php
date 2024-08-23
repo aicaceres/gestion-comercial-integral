@@ -622,6 +622,11 @@ class ProveedorController extends Controller {
                             $detalle->getChequeRecibido()->setUsado(true);
                             if($detalle->getChequeRecibido()->getTipo() === 'P' && floatval($detalle->getChequeRecibido()->getValor()) === floatval(0)){
                               $detalle->getChequeRecibido()->setValor($detalle->getImporte());
+                              $mov = $em->getRepository('ConfigBundle:BancoMovimiento')->findMovimientoCheque($detalle->getChequeRecibido()->getId());
+                              if($mov){
+                                $mov->setImporte($detalle->getImporte());
+                                $em->persist($mov);
+                              }
                             }
                         }
                         else {
@@ -635,7 +640,7 @@ class ProveedorController extends Controller {
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
                 }
-                $montoPago = round($formData['montoPago'], 3);
+                $montoPago = round($formData['montoPago'], 2);
                 $entity->setMontoRetRentas($formData['montoRentas']);
                 $entity->setMontoRetGanancias($formData['montoGanancias']);
                 $saldo = ($formData['importe'] + $formData['montoRentas'] + $formData['montoGanancias']) - $totalPago;
@@ -699,11 +704,11 @@ class ProveedorController extends Controller {
                         else {
                             $comprob = $em->getRepository('ComprasBundle:NotaDebCred')->find($doc[1]);
                         }
-                        $montocomp = $saldoComprob = round($comprob->getSaldo(), 3);
+                        $montocomp = $saldoComprob = round($comprob->getSaldo(), 2);
                         $estadoComp = '';
                         if ($montoPago >= $saldoComprob) {
                             //alcanza para cubrir el saldo
-                            $montoPago = round(($montoPago - $saldoComprob), 3);
+                            $montoPago = round(($montoPago - $saldoComprob), 2);
                             $comprob->setSaldo(0);
                             $estadoComp = $doc[0] === 'FAC' ? 'PAGADO' : 'ACREDITADO';
                             // $comprob->setEstado('PAGADO');
@@ -711,7 +716,7 @@ class ProveedorController extends Controller {
                         else {
                             //no alcanza, impacta el total
                             $montocomp = $montoPago;
-                            $comprob->setSaldo(round(($saldoComprob - $montoPago), 3));
+                            $comprob->setSaldo(round(($saldoComprob - $montoPago), 2));
                             $montoPago = 0;
                             $estadoComp = $doc[0] === 'FAC' ? 'PAGO PARCIAL' : 'PENDIENTE';
                             // $comprob->setEstado('PAGO PARCIAL');
@@ -1063,7 +1068,7 @@ class ProveedorController extends Controller {
             $montoIva = $ivaImp;
         }
 
-        $datos['baseImponible'] = round($netoImp, 3);
+        $datos['baseImponible'] = round($netoImp, 2);
         // calcular retencion rentas
         $montoRetRentas = $rentas = $adicional = 0;
         $retrentas = $porcRentas['porcRetRentas'];
@@ -1089,8 +1094,8 @@ class ProveedorController extends Controller {
         $datos['lblrentas'] = $datos['porcRentas'] . '%' . $aux;
 
 
-        $datos['pago'] = round($montoPago, 3);
-        $datos['iva'] = round($montoIva, 3);
+        $datos['pago'] = round($montoPago, 2);
+        $datos['iva'] = round($montoIva, 2);
 
         // calcular retencion Ganancias
         $hoy = new \DateTime();

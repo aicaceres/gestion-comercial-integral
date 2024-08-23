@@ -6,7 +6,7 @@
     <tr class="resumen">
       <th style="width:18%">
         Subtotal: <span class="simbolo">{{simbolo}}</span>&nbsp;
-            <span id="importeSubtotal" >{{ (entity.subTotal)|number_format(3,',','.')}}</span>.-
+            <span id="importeSubtotal" >{{ (entity.subTotal)|number_format(2,',','.')}}</span>.-
       </th>
       <th >
         Descuento/Recargo [
@@ -18,19 +18,19 @@
             {% endif %}
         %]:
         <span class="simbolo">{{simbolo}}</span>&nbsp;
-        <span id="importeRecargo">{{ entity.totalDescuentoRecargo|number_format(3,',','.') }}</span>.-
+        <span id="importeRecargo">{{ entity.totalDescuentoRecargo|number_format(2,',','.') }}</span>.-
       </th>
       <th id="ivaTd" style=" {% if not showiva %} display:none; {% endif %} width:16%">
         IVA: <span class="simbolo">{{simbolo}}</span>&nbsp;
-        <span id="importeIVA">{{ entity.totalIva|number_format(3,',','.') }}</span>.-
+        <span id="importeIVA">{{ entity.totalIva|number_format(2,',','.') }}</span>.-
       </th>
       <th id="iibbTd" style="{% if entity.cliente.percepcionRentas == 0 %} display:none; {% endif %}width:20%">
           Perc.IIBB [<span id="percrentas">{{entity.cliente.percepcionRentas|number_format(2,'.',',')}}</span>%]: <span class="simbolo">{{simbolo}}</span>&nbsp;
-        <span id="importeIIBB">{{ entity.totalIibb|number_format(3,',','.') }}</span>.-
+        <span id="importeIIBB">{{ entity.totalIibb|number_format(2,',','.') }}</span>.-
       </th>
       <th style="width:18%" class="gralTotalTd red">
         TOTAL: <span class="simbolo">{{simbolo}}</span>&nbsp;<span id="importeTotal">
-          {{ entity.montoTotal|number_format(3,',','.')}}
+          {{ entity.montoTotal|number_format(2,',','.')}}
         </span>.-
       </th>
     </tr>

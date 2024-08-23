@@ -15,16 +15,16 @@
                  {{ form_row(form.depositoOrigen) }}
             </div>
             <div class="two_fields">
-                {{ form_row(form.unidadNegocio) }}   
-                {{ form_row(form.depositoDestino) }}   
-            </div>  
-                
+                {{ form_row(form.unidadNegocio) }}
+                {{ form_row(form.depositoDestino) }}
+            </div>
+
             <div class="two_fields">
                 <div><label for="nroPedido">Nº pedido:</label>
                     <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
                 </div>
                 {{ form_row(form.fechaPedido, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
-            </div> 
+            </div>
             <div  class="two_fields">
                 <div>
                     {{ form_label(form.estado) }}
@@ -33,7 +33,7 @@
                 {{ form_widget(form.estado) }}
                 {% if entity.estado=='NUEVO' %}{{ form_row(form.cerrado,{'label': 'Enviar Pedido ','label_attr':{'title':'Hasta que no se marque el pedido no será visible por el Depósito Destino','class':'infoicon' ,'style':'width:130px'},'attr': {'title':'Hasta que no se marque el pedido no será visible por el Depósito Destino'}  }) }}
                 {% else%}<div class="aligncenter"><button type="button" class="stdbtn print">Imprimir Pedido</button></div>{%endif%}
-            </div> 
+            </div>
             <div style="padding-top: 20px; margin-left: 50px; " id="divItems">
                 {{ form_errors(form.detalles) }}
                 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
@@ -48,18 +48,18 @@
                         </tr>
                     </thead>
                     <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'AppBundle:Pedido:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
-                    {% for item in form.detalles %}                                   
+                    {% for item in form.detalles %}
                         <tr class="item" divdata="item_{{loop.index-1}}">
                             <td class="ordTd"></td>
                             <td class="prodTd">{{ form_widget(item.producto) }}</td>
-                            <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft'} }) }} 
+                            <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft'} }) }}
                                 <span class="unidmed floatleft" style="padding-left: 5px; {% if item.vars.data.bulto %} display:none; {% endif %} ">{{ item.vars.data.producto.unidadmedida.nombre}}</span> </td>
                             <td class="bulto">{{ form_widget(item.bulto) }}</td>
                             <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }}</td>
-                            <td class="totalTd alignright">{{item.vars.data.cantidadTotal|number_format(3,'.','')}}</td>
+                            <td class="totalTd alignright">{{item.vars.data.cantidadTotal|number_format(2,'.','')}}</td>
                             <td class="delTd" style="text-align:center;"></td>
                         </tr>
-                    {% endfor %}           
+                    {% endfor %}
                     </tbody>
                     <tfoot>
                         <tr>
@@ -69,10 +69,10 @@
                             </th>
                         </tr>
                     </tfoot>
-                </table>    
+                </table>
 
-            </div>                
-            <br clear="all" /> 
+            </div>
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('stock_pedido')}}">Cancelar</a>
@@ -80,11 +80,11 @@
         </fieldset>
         <div name="rest" style="display:none">{{ form_rest(form) }}</div>
     {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
-{% include "AppBundle::block-deposito-js.html.twig" %} 
+{% include "AppBundle::block-deposito-js.html.twig" %}
 
 <script type="text/javascript">
 jQuery(document).ready(function($) {
@@ -103,18 +103,18 @@ jQuery(document).ready(function($) {
     });
     $collectionHolder.find('.ordTd').each(function(i) {
         $(this).html(i + 1);
-    });    
+    });
     $('#linkAdd').on('click', function(e) {
         e.preventDefault();
         addNewItem();
         e.stopPropagation();
         $collectionHolder.find('.chzn-container').last().trigger('mousedown');
-    });    
-   $(".chzn-select").change(function(){ changeProducto( $(this) ); }); 
-   $('.cantTd input, .cantxBulto input').change(function(){ 
+    });
+   $(".chzn-select").change(function(){ changeProducto( $(this) ); });
+   $('.cantTd input, .cantxBulto input').change(function(){
        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
    $(document).keypress(function(e) {
-        if (e.which == 43) { 
+        if (e.which == 43) {
             e.preventDefault();
             $('#linkAdd').click();
         }
@@ -122,15 +122,15 @@ jQuery(document).ready(function($) {
     $('.guardar').click(function() {
         if( !$('#appbundle_pedido_depositoOrigen').val() ){
             alert('Debe seleccionar un Depósito de origen para el pedido');
-            return false;  
+            return false;
         };
         if( !$('#appbundle_pedido_depositoDestino').val() ){
             alert('Debe seleccionar un Depósito destino para el pedido');
-            return false;  
+            return false;
         };
         if( $('#appbundle_pedido_depositoOrigen').val() == $('#appbundle_pedido_depositoDestino').val() ){
             alert('El depósito de origen no puede ser el mismo que el de destino');
-            return false;  
+            return false;
         };
         if( $('tbody tr.item').length > 0 ){
             if (!confirm('Confirma la registración?')) {
@@ -145,13 +145,13 @@ jQuery(document).ready(function($) {
         myWindow.focus();
     });
     {%endif%}
-    
+
     $(".bulto input").change(function(){ changeBulto( $(this) );  });
     $(".bulto input").each(function() {
         changeBulto( $(this) );
     });
     actualizaTotales();
-});    
+});
 function addNewItem() {
     var prototype = $collectionHolder.data('prototype');
     var index = $collectionHolder.data('index');
@@ -162,10 +162,10 @@ function addNewItem() {
     $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
     jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
     jQuery('input').on('focus',function(){ jQuery(this).select(); });
-    jQuery(".chzn-select").change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery(".chzn-select").change(function(){ changeProducto( jQuery(this) ); });
     jQuery(".bulto input").last().uniform();
     jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
-    jQuery('.cantTd input, .cantxBulto input  ').change(function(){ 
+    jQuery('.cantTd input, .cantxBulto input  ').change(function(){
         if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
 }
 function addItemFormDeleteLink($itemFormTd) {
@@ -182,30 +182,30 @@ function addItemFormDeleteLink($itemFormTd) {
         }
     });
 }
-function changeBulto(item){    
-    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+function changeBulto(item){
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed');
     var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
     if( item.is(':checked') ){
         unidmed.hide();
-        cantxbulto.prop('readonly',false);     
+        cantxbulto.prop('readonly',false);
         cantxbulto.css('color','#666');
         if( cantxbulto.val()=='' )
             cantxbulto.val(1);
         cantxbulto.focus();
     }else{
-       unidmed.show(); 
+       unidmed.show();
        cantxbulto.prop('readonly',true);
-       cantxbulto.css('color','#fff');           
+       cantxbulto.css('color','#fff');
     }
-    actualizaTotales();    
+    actualizaTotales();
 }
 function changeProducto(producto){
     jQuery.ajax({
                url: "{{ path("get_data_producto") }}",
                async:false,
                dataType:"json",
-               data: 'prod='+ producto.val()+'&dep='+jQuery('#appbundle_pedido_depositoOrigen').val(),   
-               success: function(data) { 
+               data: 'prod='+ producto.val()+'&dep='+jQuery('#appbundle_pedido_depositoOrigen').val(),
+               success: function(data) {
                    if(data.prodPedPendiente){
                        alert('Total en pedidos pendientes: '+data.prodPedPendiente+' '+data.unidmed);
                    }
@@ -219,12 +219,12 @@ function changeProducto(producto){
                        trIndex.find('span.unidmed').show();
                        trIndex.find('.cantxBulto input').val('');
                    }
-                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   trIndex.find('.bulto input').prop('checked', data.bulto);
                    jQuery.uniform.update();
                    trIndex.find('.cantTd input').focus();
                }
            });
-    actualizaTotales();       
+    actualizaTotales();
 }
 
     function actualizaTotales(){
@@ -233,11 +233,11 @@ function changeProducto(producto){
             var item = jQuery(this);
             cant = parseFloat(item.find('.cantTd input').val());
             if( item.find('.bulto input').prop('checked') )
-                cant = cant *  parseFloat(item.find('.cantxBulto input').val());            
+                cant = cant *  parseFloat(item.find('.cantxBulto input').val());
             //actualizar total
-            item.find('.totalTd').text( cant.toFixed(3) +' '+ item.find('span.unidmed').html() );
+            item.find('.totalTd').text( cant.tofixed(2) +' '+ item.find('span.unidmed').html() );
         });
-        
+
          $collectionHolder.find('.ordTd').each(function(index) {
             jQuery(this).html(index+1);
         });

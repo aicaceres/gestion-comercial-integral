@@ -71,16 +71,16 @@
                 <td> {{ entity.codigo}}</td>
                 <td>{{ entity.producto}}</td>
                 {% if provId==0 %} <td>{{ entity.proveedor}}</td> {% endif %}
-                <td style="text-align: right">{{ entity.preciounit|number_format(3,'.','')}}</td>
-                <td style="text-align: right">{{ entity.cant|number_format(3,'.','') }} {{entity.unidadMedida}}</td>
-                <td style="text-align: right">{{ entity.total|number_format(3,'.','') }} </td>
+                <td style="text-align: right">{{ entity.preciounit|number_format(2,'.','')}}</td>
+                <td style="text-align: right">{{ entity.cant|number_format(2,'.','') }} {{entity.unidadMedida}}</td>
+                <td style="text-align: right">{{ entity.total|number_format(2,'.','') }} </td>
         </tr>
            {% endfor %}
         </tbody>
         <tfoot>
             <tr>
                 <th colspan="{% if provId==0 %} 5 {% else %} 4 {% endif %}" style="text-align: right">Monto Total</th>
-                <th style="text-align: right">$ {{total|number_format(3,'.','')}}</th>
+                <th style="text-align: right">$ {{total|number_format(2,'.','')}}</th>
             </tr>
         </tfoot>
     </table>

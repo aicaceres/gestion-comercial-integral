@@ -6,53 +6,52 @@
         table.alicuotas tbody {
             overflow-y: scroll;
             height: 240px;
-        }            
+        }
         table.alicuotas thead tr th {
             font-weight: normal;
             background-color: gainsboro;
             color: #666;
             border-right: 1px solid #eee;
             padding: 0px 10px;
-        }            
+        }
     </style>
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable datosafip alicuotas" id="afip-comprobante">                    
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable datosafip alicuotas" id="afip-comprobante">
         <thead>
             <tr style="background-color: gainsboro">
-                <th><span style="width:103px;display: block;">Tipo de Comprobante</span></th>                
+                <th><span style="width:103px;display: block;">Tipo de Comprobante</span></th>
                 <th><span style="width:60px;display: block;">Punto Venta</span></th>
-                <th><span style="width:130px;display: block;">N° de Comprobante</span></th>                
+                <th><span style="width:130px;display: block;">N° de Comprobante</span></th>
                 <th><span style="width:140px;display: block;">Código Documento Vendedor</span></th>
                 <th><span style="width:130px;display: block;">Identificación del Vendedor</span></th>
                 <th><span style="width:110px;display: block;">Importe neto gravado</span></th>
                 <th><span style="width:74px;display: block;">Alícuota de IVA</span></th>
                 <th><span style="width:90px;display: block;">Impuesto liquidado</span></th>
             </tr>
-            </thead>    
-        <tbody>    
+            </thead>
+        <tbody>
             {% set totiva, totneto = 0, 0 %}
-            {% for item in resultado.alicuotas %}   
+            {% for item in resultado.alicuotas %}
                 {% set totiva, totneto = (totiva + (item.liquidado*item.signo)), (totneto + (item.netoGravado*item.signo))  %}
-                <tr  {% if 'ALICUOTA' in item.error %} class="js-alicuota-error"  style="background-color:gold; cursor: pointer"{% endif %}  
-                    data-url="{{ path('edit_comprobante_compras',{'id':item.id,'tipocomp': item.tipoComprobante}) }}"                                   >                            
-                    <td><span style="width:103px;display: block; ">{{item.tipoComprobante}}</span></td>                    
+                <tr  {% if 'ALICUOTA' in item.error %} class="js-alicuota-error"  style="background-color:gold; cursor: pointer"{% endif %}
+                    data-url="{{ path('edit_comprobante_compras',{'id':item.id,'tipocomp': item.tipoComprobante}) }}"                                   >
+                    <td><span style="width:103px;display: block; ">{{item.tipoComprobante}}</span></td>
                     <td><span style="width:60px;display: block;">{{item.puntoVenta}}</span></td>
-                    <td><span style="width:130px;display: block;">{{ item.nroComprobante }}</span></td>                   
-                    <td><span style="width:140px;display: block;">80</span></td>                    
+                    <td><span style="width:130px;display: block;">{{ item.nroComprobante }}</span></td>
+                    <td><span style="width:140px;display: block;">80</span></td>
                     <td><span style="width:130px;display: block;">{{ item.cuit }}</span></td>
                     <td {% if 'ALICUOTA' in item.error %} style="font-weight:bold"{% endif %}>
-                        <span style="width:90px;display: block;">{{ item.netoGravado }}</span></td>   
+                        <span style="width:90px;display: block;">{{ item.netoGravado }}</span></td>
                     <td><span style="width:74px;display: block;">{{item.codAlicuota}}</span></td>
-                    <td><span style="width:110px;display: block; {% if 'ALICUOTA' in item.error %}font-weight:bold;{% endif %}   ">{{ item.liquidado }}</span> </td>                                                                                           
+                    <td><span style="width:110px;display: block; {% if 'ALICUOTA' in item.error %}font-weight:bold;{% endif %}   ">{{ item.liquidado }}</span> </td>
                 </tr>
             {% endfor %}
-        </tbody> 
-        
-    </table>   
-       
-</div>  
-        <h5 style="padding-left:15px">Total Liquidado: ${{ (totiva/100)|number_format(2,'.',',') }}</h5>        
+        </tbody>
+
+    </table>
+
+</div>
+        <h5 style="padding-left:15px">Total Liquidado: ${{ (totiva/100)|number_format(2,'.',',') }}</h5>
 <div>
-    <h5 style="text-align:center; margin:10px;"> {{ resultado.alicuotas|length }} alícuotas en REGINFO_CV_COMPRAS_ALICUOTAS.txt  
-        <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=ALIC" > <span>Descargar</span> </a></h5>                
-</div>        
-           
+    <h5 style="text-align:center; margin:10px;"> {{ resultado.alicuotas|length }} alícuotas en REGINFO_CV_COMPRAS_ALICUOTAS.txt
+        <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=ALIC" > <span>Descargar</span> </a></h5>
+</div>

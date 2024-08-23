@@ -15,7 +15,7 @@
         <input type="hidden" id="searchterm" name="searchterm"/>
         <input type="hidden" id="datalist" name="datalist"/>
         <button class="stdbtn floatright" type="submit" >Imprimir</button>
-    </form>   
+    </form>
     <form class="deposito_selector" id="searchform" action="{{ path('stock_informe_despachado') }}" method="get">
         <div style="display: inline-block; margin:10px;">
             &nbsp;&nbsp;&nbsp;
@@ -24,17 +24,17 @@
                 {% for dep in depositos %}
                     <option value="{{dep.id}}" {% if dep.id==depId %} selected="selected" {% endif %}> {{dep.empresaUnidadDeposito}}</option>
                 {% endfor %}
-            </select>  
-        </div>    
-        <div style="display: inline-block; margin:10px;">     
+            </select>
+        </div>
+        <div style="display: inline-block; margin:10px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Período: </strong></label>
-            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" /> 
-            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" /> 
+            <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
+            <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
-        </div>        
-    </form>     
-          
+        </div>
+    </form>
+
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -47,43 +47,43 @@
         </thead>
         <tbody>
              {% set total = 0%}
-        {% for entity in entities %} 
+        {% for entity in entities %}
             <tr>
-                {% set subtotal = entity.precultcompra|number_format(3,'.','') * entity.entregado|number_format(3,'.','') %}             
+                {% set subtotal = entity.precultcompra|number_format(2,'.','') * entity.entregado|number_format(2,'.','') %}
                 <td> {{ entity.codigo}}</td>
                 <td>{{ entity.producto}}</td>
-                <td style="text-align: right">{{ entity.precultcompra|number_format(3,'.','')}}</td>
-                <td style="text-align: right">{{ entity.entregado|number_format(3,'.','') }} {{entity.unidadMedida}}</td> 
-                <td style="text-align: right">{{ subtotal|number_format(3,'.','')}}</td></tr>
+                <td style="text-align: right">{{ entity.precultcompra|number_format(2,'.','')}}</td>
+                <td style="text-align: right">{{ entity.entregado|number_format(2,'.','') }} {{entity.unidadMedida}}</td>
+                <td style="text-align: right">{{ subtotal|number_format(2,'.','')}}</td></tr>
              {% set total = total + subtotal %}
            {% endfor %}
         </tbody>
          <tfoot>
             <tr>
                 <th colspan="4" style="text-align: right">Monto Total</th>
-                <th style="text-align: right">$ {{total|number_format(3,'.','')}}</th>
+                <th style="text-align: right">$ {{total|number_format(2,'.','')}}</th>
             </tr>
         </tfoot>
-    </table>     
+    </table>
 </div>
  {% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
 <script type="text/javascript">
-jQuery(document).ready(function($){    
+jQuery(document).ready(function($){
     var oTable = $('#dyntable2').dataTable();
-     oTable.fnSort( [ [1,'asc'] ] );     
-    $('#selectDeposito').change(function(){ 
+     oTable.fnSort( [ [1,'asc'] ] );
+    $('#selectDeposito').change(function(){
         $('#searchform').submit();
-    }); 
-    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});   
+    });
+    $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
  $('#printform').on('submit',function(){
         $('#depositoid').val($('#selectDeposito').val());
         $('#fdesde').val($('#desde').val());
         $('#fhasta').val($('#hasta').val());
         $('#searchterm').val( $('#dyntable2_filter input').val() );
         var datos = [];
-        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {  
+        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
             /*var i = value[1].indexOf('</span>');
             if( i >-1 ){
                 var fecha = value[1].substr(i+7);
@@ -91,9 +91,9 @@ jQuery(document).ready(function($){
             }
             value.splice(5);*/
             datos[index] = value;
-        }); 
+        });
         $('#datalist').val(JSON.stringify(datos));
-    });     
+    });
 });
-</script>   
+</script>
 {% endblock %}

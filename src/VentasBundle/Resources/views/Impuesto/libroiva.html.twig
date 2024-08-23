@@ -21,16 +21,16 @@
     </div>
     <table style="width:400px"  cellpadding="0" cellspacing="0" border="0" class="stdtable">
             <tr>
-                <th style="border: 1px solid #ddd; width:25%;" > Alícuota</th>            
-                <th style="border: 1px solid #ddd; width:25%;"> 0.00%</th>            
-                <th style="border: 1px solid #ddd; width:25%;"> 10.50%</th>            
-                <th style="border: 1px solid #ddd; width:25%;"> 21.00%</th>            
-            </tr>  
+                <th style="border: 1px solid #ddd; width:25%;" > Alícuota</th>
+                <th style="border: 1px solid #ddd; width:25%;"> 0.00%</th>
+                <th style="border: 1px solid #ddd; width:25%;"> 10.50%</th>
+                <th style="border: 1px solid #ddd; width:25%;"> 21.00%</th>
+            </tr>
             <tr>
-                <th style="border: 1px solid #ddd;"> TOTAL </th> 
-    {% for alic in alicuotas %}  
-                <td style="text-align:center" >$ {{ alic }} </td> 
-    {% endfor %}    
+                <th style="border: 1px solid #ddd;"> TOTAL </th>
+    {% for alic in alicuotas %}
+                <td style="text-align:center" >$ {{ alic }} </td>
+    {% endfor %}
             </tr>
     </table>
     {% set neto,iva,impRNI,nograv,exento,imp,retiva,total = 0,0,0,0,0,0,0,0 %}
@@ -65,27 +65,27 @@
                             <td>{{item.fecha}}</td>
                             <td>{{item.cliente|upper}}</td>
                             <td>{{item.nombre|upper}}</td>
-                            <td class="alignright">{{item.neto|number_format(3,'.','')}}</td>
-                            <td class="alignright">{{item.iva|number_format(3,'.','')}}</td>
-                            <td class="alignright">{{item.impRNI|number_format(3,'.','')}}</td>
-                            <td class="alignright">{{item.nograv|number_format(3,'.','')}}</td>
-                            <td class="alignright">{{item.exento|number_format(3,'.','')}}</td>
-                            <td class="alignright">{{item.impuestos|number_format(3,'.','')}}</td>
-                            <td class="alignright">{{item.retIVA|number_format(3,'.','')}}</td>
-                            <td class="alignright">{{item.total|number_format(3,'.','')}}</td>
+                            <td class="alignright">{{item.neto|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.iva|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.impRNI|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.nograv|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.exento|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.impuestos|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.retIVA|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.total|number_format(2,'.','')}}</td>
                         </tr>
                 {% endfor %}
             </tbody>
             <tfoot>
             <th colspan="4"></th>
-            <th class="alignright" >{{neto|number_format(3,'.',',')}}</th>
-            <th class="alignright" >{{iva|number_format(3,'.',',')}}</th>
-            <th class="alignright" >{{impRNI|number_format(3,'.',',')}}</th>
-            <th class="alignright" >{{nograv|number_format(3,'.',',')}} </th>
-            <th class="alignright" >{{exento|number_format(3,'.',',')}}</th>
-            <th class="alignright" >{{imp|number_format(3,'.',',')}} </th>
-            <th class="alignright" >{{retiva|number_format(3,'.',',')}}</th>
-            <th class="alignright" >{{total|number_format(3,'.',',')}}</th>
+            <th class="alignright" >{{neto|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{iva|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{impRNI|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{nograv|number_format(2,'.',',')}} </th>
+            <th class="alignright" >{{exento|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{imp|number_format(2,'.',',')}} </th>
+            <th class="alignright" >{{retiva|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{total|number_format(2,'.',',')}}</th>
             </tfoot>
         </table>
 
@@ -102,7 +102,7 @@ jQuery(document).ready(function($) {
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     $('.togglemenu').click();
     var filename = "IvaVentas{{app.session.get('unidneg_nombre')|slice(0, 10)}}{{'now'|date('mY')}}";
-    
+
     tableExporter = $("#libroivaventas").tableExport(
         {headers: true,
         footers: true,

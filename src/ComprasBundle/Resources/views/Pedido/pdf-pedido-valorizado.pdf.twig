@@ -41,7 +41,7 @@
             <tr>
                 <td colspan="2" border.type="none" height="20px" vertical-align="middle"><strong>Observaciones:</strong> {{entity.observaciones}} </td>
             </tr>
-        {% endif %}    
+        {% endif %}
         <tr>
             <td border.type="none" height="20px" vertical-align="middle"> <strong>Estado:</strong> {{entity.estado}} </td>
             <td border.type="none" height="20px" vertical-align="middle">{% if recibido %} <strong>Recibido el:</strong> {{entity.fechaEntrega|date('d/m/Y')}} {% endif %}</td>
@@ -79,28 +79,28 @@
                             {% endif %}
                 </td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if 'x' in det.cantidadTxt %} {{det.cantidadTxt}} {%endif%}</td>
-                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.cantidadTotal|number_format(3,'.',',')~' '~ det.producto.unidadMedida}}</td>
+                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.cantidadTotal|number_format(2,'.',',')~' '~ det.producto.unidadMedida}}</td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if entity.estado=='RECIBIDO' and ('x' in det.entregadoItemTxt) and det.entregado>0%} {{det.entregadoItemTxt}}{%endif%}</td>
                 <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{%if entity.estado=='RECIBIDO' %} {{ det.entregadoItemTotalTxt }}{%endif%}</td>
-                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.costoTotal|number_format(3,'.',',')}}</td>
+                <td border.color="black" height="20px" vertical-align="middle" text-align="right" padding-right="5px">{{det.costoTotal|number_format(2,'.',',')}}</td>
             </tr>
             {% endfor %}
         {% endif %}
           <tr>
             <td colspan="6" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> Subtotal: $</td>
-            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.costoTotal|number_format(3,'.',',') }}</td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.costoTotal|number_format(2,'.',',') }}</td>
           </tr>
           <tr>
             <td colspan="6" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> Descuentos: {{ entity.descuentosTxt }} $</td>
-            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.montoDescuento|number_format(3,'.',',') }}</td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.montoDescuento|number_format(2,'.',',') }}</td>
           </tr>
           <tr>
             <td colspan="6" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> I.V.A.: $ </td>
-            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.montoIva|number_format(3,'.',',') }}</td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.montoIva|number_format(2,'.',',') }}</td>
           </tr>
           <tr font-size="11px">
             <td colspan="6" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> TOTAL: $ </td>
-            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.montoTotal|number_format(3,'.',',') }}</td>
+            <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="5px"> {{ entity.montoTotal|number_format(2,'.',',') }}</td>
           </tr>
     </table>
 

@@ -414,7 +414,7 @@ function cargarCheques(objTd){
         const imp = jQuery(".vuelto").html()
 		? jQuery(".vuelto").html().replace(",", ".")
 		: 0
-	importe.val(Math.abs(parseFloat(imp)).toFixed(3)).change()
+	importe.val(Math.abs(parseFloat(imp)).toFixed(2)).change()
     }
 
     function addPagoDeleteLink($itemFormTd) {
@@ -443,17 +443,16 @@ function cargarCheques(objTd){
             url: "{{ path("compras_proveedor_pagos_getMontoAPagar") }}",
             data: data ,
             success: function(data) {
-                console.log(data)
                 $('#comprasbundle_pagoproveedor_baseImponibleRentas').val(data.baseImponible);
                 $('#comprasbundle_pagoproveedor_retencionRentas').val(data.porcRentas);
                 $('#comprasbundle_pagoproveedor_adicionalRentas').val(data.porcAdicional);
                 // actualizar label con porcentajes dgr
                 $('#lblrentas').html( data.lblrentas );
 
-                $('#comprasbundle_pagoproveedor_montoRentas').val( (data.rentas + data.adicional).toFixed(3));
-                $('#comprasbundle_pagoproveedor_montoGanancias').val(data.ganancias.toFixed(3));
-                $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.porcGanancia.toFixed(3));
-                $('#comprasbundle_pagoproveedor_importe').val(data.total.toFixed(3));
+                $('#comprasbundle_pagoproveedor_montoRentas').val( (data.rentas + data.adicional).toFixed(2));
+                $('#comprasbundle_pagoproveedor_montoGanancias').val(data.ganancias.toFixed(2));
+                $('#comprasbundle_pagoproveedor_retencionGanancias').val(data.porcGanancia.toFixed(2));
+                $('#comprasbundle_pagoproveedor_importe').val(data.total.toFixed(2));
                 {#const montoPago = data.total + data.ganancias + data.rentas + data.adicional #}
                 $('#comprasbundle_pagoproveedor_montoPago').val(data.pago);
                 $('#comprasbundle_pagoproveedor_montoIva').val(data.iva);
@@ -475,7 +474,6 @@ function cargarCheques(objTd){
             pagos += importe
         });
         $('.pago').html( pagos.toFixed(2) );
-
         vuelto = pagos - checknumero( $('#comprasbundle_pagoproveedor_importe'),2 );
         $('.vuelto').html(vuelto.toFixed(2))
     }

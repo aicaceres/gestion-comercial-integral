@@ -94,6 +94,15 @@ class FacturaType extends AbstractType {
             ))
             ->add('afipPuntoVenta', null, array('label' => 'N° Comprobante', 'required' => true))
             ->add('afipNroComprobante', null, array('required' => true))
+            ->add('alicuotas', 'collection', array(
+                'type' => new FacturaAlicuotaType(),
+                'by_reference' => false,
+                'allow_delete' => true,
+                'allow_add' => true,
+                'prototype_name' => 'items',
+                'attr' => array(
+                    'class' => 'row item'
+            )))
         ;
     }
 

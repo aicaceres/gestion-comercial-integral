@@ -11,6 +11,7 @@ use ConfigBundle\Controller\UtilsController;
 use ConfigBundle\Entity\Cheque;
 use ConfigBundle\Entity\BancoMovimiento;
 use ConfigBundle\Form\ChequeType;
+use ConfigBundle\Form\ChequeLoteType;
 
 /**
  * @Route("/cheque")
@@ -235,5 +236,93 @@ class ChequeController extends Controller {
             return new Response($content, 200, array('content-type' => 'application/pdf',
                 'Content-Disposition' => 'filename=lista_cheques' . $hoy->format('dmY_Hi') . '.pdf'));
     }
+
+    // crear lote de cheques
+        /**
+     * @Route("/lote", name="sistema_cheque_lote")
+     * @Method("GET")
+     * @Template()
+     */
+    public function loteAction() {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
+        $em = $this->getDoctrine()->getManager();
+        $entity = new Cheque();
+        $entity->setTipo('P');
+        $entity->setDador('PROPIO');
+        $entity->setEstado('C');
+        $entity->setValor(0);
+        $form = $this->createForm(new ChequeLoteType(), $entity, array(
+            'action' => $this->generateUrl('sistema_cheque_lote_create'),
+            'method' => 'POST',
+        ));
+        return $this->render('ConfigBundle:Cheque:lote.html.twig', array(
+                'entity' => $entity,
+                'form' => $form->createView(),
+        ));
+    }
+
+        /**
+     * @Route("/lote", name="sistema_cheque_lote_create")
+     * @Method("POST")
+     * @Template("ConfigBundle:Cheque:lote.html.twig")
+     */
+    public function createLoteAction(Request $request) {
+UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_banco');
+        $cheque = new Cheque();
+        $form = $this->createForm(new ChequeLoteType(), $cheque, array(
+            'action' => $this->generateUrl('sistema_cheque_lote_create'),
+            'method' => 'POST',
+        ));
+        $form->handleRequest($request);
+
+        $em = $this->getDoctrine()->getManager();
+        $em->getConnection()->beginTransaction();
+        $data = $request->get('configbundle_chequelote');
+        $nroInicial = $data['nroCheque'];
+
+        try {
+          for ($i = 0; $i < $data['cantidad']; $i++) {
+            $entity = new Cheque();
+            $entity->setTipo('P');
+            $entity->setDador('PROPIO');
+            $entity->setEstado('C');
+            $entity->setValor(0);
+            $entity->setNroCheque($nroInicial++);
+            $entity->setFecha(new \DateTime($data['fecha']));
+            $banco = $em->getRepository('ConfigBundle:Banco')->find($data['banco']);
+            $entity->setBanco($banco);
+            $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($data['cuenta']);
+            $entity->setCuenta($cuenta);
+            $entity->setTipoCheque($data['tipoCheque']);
+            $entity->setObservaciones($data['observaciones']);
+            $em->persist($entity);
+            // movimiento
+            $movim = new BancoMovimiento();
+            $movim->setFechaCarga(new \DateTime());
+            $movim->setImporte($entity->getValor());
+            $movim->setObservaciones($entity->getObservaciones());
+            $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CHEQUE');
+            $movim->setTipoMovimiento($tipoMov);
+            $movim->setNroMovimiento($entity->getNroCheque());
+            $movim->setBanco($entity->getBanco());
+            $movim->setCuenta($entity->getCuenta());
+            $movim->setCheque($entity);
+            $em->persist($movim);
+          }
+          $em->flush();
+          $em->getConnection()->commit();
+          return $this->redirect($this->generateUrl('sistema_cheque'));
+        }catch (\Exception $ex) {
+          // $this->get('session')->getFlashBag()->add('error', $ex->getMessage());
+          $em->getConnection()->rollback();
+        }
+
+        return $this->render('ConfigBundle:Cheque:lote.html.twig', array(
+          'entity' => $cheque,
+          'form' => $form->createView(),
+        ));
+
+    }
+
 
 }

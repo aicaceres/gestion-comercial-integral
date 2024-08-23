@@ -876,16 +876,16 @@ class ProductoController extends Controller {
                 if ($rowPrecio !== null) {
                     $precioUnit = floatval($producto->getPrecioByLista($listaprecio));
                     if (in_array($categoriaIva, ['I', 'M'])) {
-                        $precio = round($precioUnit, 3);
+                        $precio = round($precioUnit, 2);
                     }
                     else {
                         $montoIva = ($precioUnit * ( $alicuota / 100 ));
-                        $precio = round(($precioUnit + $montoIva), 3);
+                        $precio = round(($precioUnit + $montoIva), 2);
                     }
                     $pagoContado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
                     $precioContado = $precio;
                     if ($pagoContado) {
-                        $precioContado = round($precio * ( 1 + $pagoContado->getPorcentajeRecargo() / 100 ), 3);
+                        $precioContado = round($precio * ( 1 + $pagoContado->getPorcentajeRecargo() / 100 ), 2);
                     }
                     $bajominimo = false;
                     $stock = 0;
@@ -904,7 +904,7 @@ class ProductoController extends Controller {
                     $bajominimo = $bajominimo ? 1 : 0;
                     $precioTemp = $precioUnit;
                     if ($descuento < 0) {
-                        $precioTemp = round($precio * ( 1 + $descuento / 100), 3);
+                        $precioTemp = round($precio * ( 1 + $descuento / 100), 2);
                     }
 
                     //
@@ -1129,16 +1129,16 @@ class ProductoController extends Controller {
             $iva = $producto->getIva();
             $precioUnit = floatval($producto->getPrecioByLista($lista));
             if (in_array($categoriaIva, ['I', 'M'])) {
-                $precio = round($precioUnit, 3);
+                $precio = round($precioUnit, 2);
             }
             else {
                 $montoIva = ($precioUnit * ( $iva / 100 ));
-                $precio = round(($precioUnit + $montoIva), 3);
+                $precio = round(($precioUnit + $montoIva), 2);
             }
 
             $pagoContado = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(true);
             if ($pagoContado) {
-                $precio = round($precio * ( 1 + $pagoContado->getPorcentajeRecargo() / 100 ), 3);
+                $precio = round($precio * ( 1 + $pagoContado->getPorcentajeRecargo() / 100 ), 2);
             }
             $bajominimo = false;
             $stock = 0;

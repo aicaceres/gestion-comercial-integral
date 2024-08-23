@@ -66,7 +66,7 @@
           {% include "VentasBundle:Partial:_partial-datos-formapago.html.twig" with {'item':entity.formaPago}  %}
 
       </fieldset>
-      {% if entity.venta.concepto %}    
+      {% if entity.venta.concepto %}
       <fieldset>
         <div style="padding-top: 10px; width: 60%;">
             <label>Concepto adicional: </label>
@@ -87,14 +87,25 @@
       {% include "VentasBundle:CobroVenta:_partial-detalle-pago.html.twig" with { 'cobroDetalles': form.detalles } %}
 
       <fieldset>
+            <div style="text-align: center;" id="divFechaFCE">
+                <div style="display:inline-block; width: 10%;">
+                    {{ form_row(form.periodoAsocDesde, { 'attr': {'class' : 'datepicker'} }) }}
+                </div>
+                <div style="display:inline-block; width: 10%;">
+                    {{ form_row(form.periodoAsocHasta, { 'attr': {'class' : 'datepicker'} }) }}
+                </div>
+                <div style="display:inline-block; width: 10%; margin-left: 40px">
+                    {{ form_row(form.fechaVtoPago, { 'attr': {'class' : 'datepicker'} }) }}
+                </div>
+            </div>
             <br clear="all" />
             <div style="text-align: center;" id="divEmitirTicket">
               <label> EMITIR TICKET</label>
               <input type="checkbox" name="emitirTicket" id="emitirTicket"/>
             </div>
             <div class="actionbutton">
-                <button class="guardar" id="guardar" type="button" 
-                        data-urlemitir="{{ path('ventas_factura_emitir') }}" 
+                <button class="guardar" id="guardar" type="button"
+                        data-urlemitir="{{ path('ventas_factura_emitir') }}"
                         data-urlticket="{{ path('ventas_factura_getticket')}}">
                   <span>Guardar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
                 </button>
@@ -125,6 +136,35 @@
 <script type="text/javascript" src="{{ asset('assets/js/utils/widgetFormapago.js') }}"></script>
 <script type="text/javascript">
 jQuery(function ($) {
+
+    $('.datepicker').datepicker({
+        dateFormat: 'dd-mm-yy',
+        onClose: function( selectedDate )
+          {
+            let desde = $('#ventasbundle_cobro_periodoAsocDesde').datepicker( "getDate" )
+            let hasta = $('#ventasbundle_cobro_periodoAsocHasta').datepicker( "getDate" )
+            if( desde && hasta && desde > hasta){
+              alert('Controlar el rango de fechas, la fecha desde debe ser menor a la fecha hasta!')
+              $('#ventasbundle_cobro_periodoAsocHasta').val('')
+            }
+          }
+      });
+    let hoy = new Date()
+    // primer y ultimo dia
+    const year = hoy.getFullYear()
+    const month = hoy.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    let periodoIni = firstDay.toLocaleString("en-GB").slice(0,10).split('-').reverse().join('-').replaceAll('/','-')
+    let periodoFin = lastDay.toLocaleString("en-GB").slice(0,10).split('-').reverse().join('-').replaceAll('/','-')
+    // Obtener la fecha de hoy más 30 días
+    let fecha30 = new Date(hoy.getTime())
+    fecha30.setDate(fecha30.getDate() + 30)
+    vto = fecha30.toLocaleString("en-GB").slice(0,10).split('-').reverse().join('-').replaceAll('/','-')
+
+    jQuery('#ventasbundle_cobro_periodoAsocDesde').val( periodoIni )
+    jQuery('#ventasbundle_cobro_periodoAsocHasta').val( periodoFin )
+    jQuery('#ventasbundle_cobro_fechaVtoPago').val( vto )
 
     // datos del cliente cuando es consumidor final
     {% if entity.cliente.consumidorFinal %}
@@ -305,12 +345,12 @@ function imprimirTicket(cobroId){
   const driver = getDriver()
   jQuery.get(url, {id:cobroId, entity: 'Cobro'}, function(data){
     if(data.res === 'OK' && driver){
-      try {    
+      try {
         driver.iniciarTrabajo();
 
-        driver.especificarPie('1'," ") 
-        driver.especificarPie('2',data.pie[0]) 
-        driver.especificarPie('3',data.pie[1]) 
+        driver.especificarPie('1'," ")
+        driver.especificarPie('2',data.pie[0])
+        driver.especificarPie('3',data.pie[1])
 
         driver.cancelarComprobante();
         let params = data.cliente
@@ -320,7 +360,7 @@ function imprimirTicket(cobroId){
         // items
         data.items.forEach(function(item,i){
             data.adicItem[i].forEach(function(linea){
-                driver.imprimirTextoFiscal(linea)  
+                driver.imprimirTextoFiscal(linea)
             })
           driver.imprimirItem2g(...item)
         })
@@ -335,11 +375,11 @@ function imprimirTicket(cobroId){
                if(i.length>0){
                     driver.imprimirPago2g(...i)
                }
-          }) 
+          })
         }
         driver.cerrarComprobante();
         driver.finalizarTrabajo();
-        
+
         //  nro comprobante emitido
         driver.iniciarTrabajo();
         driver.ultimoComprobante(data.tipo);
@@ -392,9 +432,8 @@ function procesarTicket(id, entity, nroticket){
 }
 
 function registrarMovimientoIfu(comando, error=null){
-   url = "{{ path('ifu_registrar_movimiento') }}" 
-   data = {caja:"1", comando, error } 
-   console.log(data)
+   url = "{{ path('ifu_registrar_movimiento') }}"
+   data = {caja:"1", comando, error }
    jQuery.post(url, data, function(data){
     if(data.res !== 'OK'){
         alert(data.msg)

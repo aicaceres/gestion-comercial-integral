@@ -81,9 +81,9 @@
             <td class=" align-right" >{{item.proveedor }}</td>
             {% endif%}
             <td class=" align-right" >{{item.stockminimo| number_format(2,'.',',')}}</td>
-            <td class="align-right " >{{item.stockactual| number_format(3,'.',',') }}</td>
-            <td class="align-right" >{{item.getValorizadoActual| number_format(3,'.',',')}}</td>
-            <td class="align-right" >{{precio| number_format(3,'.','')}}</td>
+            <td class="align-right " >{{item.stockactual| number_format(2,'.',',') }}</td>
+            <td class="align-right" >{{item.getValorizadoActual| number_format(2,'.',',')}}</td>
+            <td class="align-right" >{{precio| number_format(2,'.','')}}</td>
         </tr>
         {% endfor %}
     </tbody>

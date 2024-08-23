@@ -1,175 +1,167 @@
-{% extends "AppBundle::layout.html.twig" %}
+{% extends 'AppBundle::layout.html.twig' %}
 {% block pageheader %}
-<div class="pageheader notab">
-    <h1 class="pagetitle">Régimen de Información de {{tipo}}</h1>
+  <div class="pageheader notab">
+    <h1 class="pagetitle">Régimen de Información de {{ tipo }}</h1>
     <span class="pagedesc">Impuestos</span>
-</div><!--pageheader-->
+  </div>
+  <!-- pageheader -->
 {% endblock %}
 {% block contentwrapper %}
-    {% include "AppBundle::notificacion.html.twig" %}
-<div id="contentwrapper" class="contentwrapper">
-    
-    <div class="" style="margin-bottom: 15px;">  
-        <form action="{{ path }}" method="GET">
-            <div style="display: inline-block; margin-right: 30px;">
-                <label><strong>Período:</strong></label>
-                <input name="periodo" required="required" class="datepicker" tabindex="2" type="text" value="{{periodo}}">                 
-            </div>
-            <button type="submit" >Buscar</button>                        
-        </form>
-    </div>                 
-            
-        <div class="hidden">
-            PENDIENTES: Actualizar alicuotas en tablas de detalles para facturas y notas (con el dato del producto actualizar detalle y asociar con tabla alicuotas)
-            <br>
-            consultar codigo de operacion en operaciones no gravadas
+  {% include 'AppBundle::notificacion.html.twig' %}
+  <div id="contentwrapper" class="contentwrapper">
+    <div class="" style="margin-bottom: 15px;">
+      <form action="{{ path }}" method="GET">
+        <div style="display: inline-block; margin-right: 30px;">
+          <label><strong>Período:</strong></label>
+          <input name="periodo" required="required" class="datepicker" tabindex="2" type="text" value="{{ periodo }}" />
         </div>
-        {% if resultado.errores['COMPROBANTE'] or resultado.errores['CUIT'] or resultado.errores['ALICUOTA'] %}
-        <div class="notibar announcement">
-            <a class="close"></a>
-            <h3>Inconsistencias detectadas</h3>
-            <h5>Numeración de comprobantes: <span>{{ resultado.errores['COMPROBANTE'] }}</span> &nbsp;&nbsp;-&nbsp;&nbsp; CUIT: <span>{{ resultado.errores['CUIT'] }}</span> &nbsp;&nbsp;-&nbsp;&nbsp; Diferencias en alícuotas: <span>{{ resultado.errores['ALICUOTA'] }} Comprobantes</span></h5>
-        </div>
-        {% endif %}
-           
-    <div id="tabs" class="">
-        <ul>
-            <li><a href="#tabs-1">COMPROBANTES</a></li>
-            <li><a href="#tabs-2">ALÍCUOTAS</a></li>                                   
-        </ul>
-        <div id="tabs-1">
-            {% set tempcomp = 'AppBundle:Impuesto:_partial-comprobantes-'~tipo|lower~'.html.twig' %}
-            {% include tempcomp %}                                                      
-            
-        </div>
-        <div id="tabs-2">
-           {% set tempalic = 'AppBundle:Impuesto:_partial-alicuotas-'~tipo|lower~'.html.twig' %}
-            {% include tempalic %}                                           
-            
-        </div>              
-    </div><!--#tabs-->                       
-          
-    
-</div>
-<style>
-    .ui-datepicker{
-        width: 160px;
-    }   
- .ui-datepicker-calendar {
-     display: none;     
- }
- .inputerror{
-    background-color: mistyrose !important;
-    font-weight: bold;
- }
+        <button type="submit">Buscar</button>
+      </form>
+    </div>
 
-</style>        
+    <div class="hidden">
+      PENDIENTES: Actualizar alicuotas en tablas de detalles para facturas y notas (con el dato del producto actualizar detalle y asociar con tabla alicuotas)
+      <br />
+      consultar codigo de operacion en operaciones no gravadas
+    </div>
+    {% if resultado.errores['COMPROBANTE'] or resultado.errores['CUIT'] or resultado.errores['ALICUOTA'] %}
+      <div class="notibar announcement">
+        <a class="close"></a>
+        <h3>Inconsistencias detectadas</h3>
+        <h5>Numeración de comprobantes: <span>{{ resultado.errores['COMPROBANTE'] }}</span> &nbsp;&nbsp;-&nbsp;&nbsp; CUIT: <span>{{ resultado.errores['CUIT'] }}</span> &nbsp;&nbsp;-&nbsp;&nbsp; Diferencias en alícuotas: <span>{{ resultado.errores['ALICUOTA'] }} Comprobantes</span></h5>
+      </div>
+    {% endif %}
+
+    <div id="tabs" class="">
+      <ul>
+        <li>
+          <a href="#tabs-1">COMPROBANTES</a>
+        </li>
+        <li>
+          <a href="#tabs-2">ALÍCUOTAS</a>
+        </li>
+      </ul>
+      <div id="tabs-1">
+        {% set tempcomp = 'AppBundle:Impuesto:_partial-comprobantes-' ~ (tipo|lower) ~ '.html.twig' %}
+        {% include tempcomp %}
+      </div>
+      <div id="tabs-2">
+        {% set tempalic = 'AppBundle:Impuesto:_partial-alicuotas-' ~ (tipo|lower) ~ '.html.twig' %}
+        {% include tempalic %}
+      </div>
+    </div>
+    <!-- #tabs -->
+  </div>
+  <style>
+    .ui-datepicker {
+      width: 160px;
+    }
+    .ui-datepicker-calendar {
+      display: none;
+    }
+    .inputerror {
+      background-color: mistyrose !important;
+      font-weight: bold;
+    }
+  </style>
 {% endblock %}
 {% block extra_javascripts %}
-    {{ parent() }}  
-<script type="text/javascript">
-jQuery(document).ready(function($) {    
-    $('.datepicker').datepicker({
-        dateFormat: "mm-yy",
+  {{ parent() }}
+  <script type="text/javascript">
+    jQuery(document).ready(function ($) {
+      $('.datepicker').datepicker({
+        dateFormat: 'mm-yy',
         changeMonth: true,
         changeYear: true,
         showButtonPanel: true,
-        closeText: "Seleccionar",
-        onClose: function(dateText, inst) {
-            if($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1) {
-                $(this).datepicker(
-                    'setDate',
-                    new Date(
-                        $("#ui-datepicker-div .ui-datepicker-year :selected").val(),
-                        $("#ui-datepicker-div .ui-datepicker-month :selected").val(),
-                        1
-                    )
-                ).trigger('change');
-                $('.date-picker').focusout();
-            }
-            $("#ui-datepicker-div").removeClass("month_year_datepicker");
+        closeText: 'Seleccionar',
+        onClose: function (dateText, inst) {
+          if ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1) {
+            $(this)
+              .datepicker('setDate', new Date($('#ui-datepicker-div .ui-datepicker-year :selected').val(), $('#ui-datepicker-div .ui-datepicker-month :selected').val(), 1))
+              .trigger('change')
+            $('.date-picker').focusout()
+          }
+          $('#ui-datepicker-div').removeClass('month_year_datepicker')
         },
-        beforeShow : function(input, inst) {
-            if((datestr = $(this).val()).length > 0) {
-                year = datestr.substring(datestr.length-4, datestr.length);
-                month = datestr.substring(0, 2);
-                $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
-                $(this).datepicker('setDate', new Date(year, month-1, 1));
-                $("#ui-datepicker-div").addClass("month_year_datepicker");
-            }
+        beforeShow: function (input, inst) {
+          if ((datestr = $(this).val()).length > 0) {
+            year = datestr.substring(datestr.length - 4, datestr.length)
+            month = datestr.substring(0, 2)
+            $(this).datepicker('option', 'defaultDate', new Date(year, month - 1, 1))
+            $(this).datepicker('setDate', new Date(year, month - 1, 1))
+            $('#ui-datepicker-div').addClass('month_year_datepicker')
+          }
         }
-    });
-    $('.togglemenu').click();    
-    $('.ui-tabs-panel').css('padding','0');   
-    
-    $("input.cuit, input.ptovta, input.nrocomp").on('keyup', function (e) {        
-        if (e.key === 'Enter' || e.keyCode === 13) {
-            $(this).blur();
-        }        
-    });
-    $('input.cuit').on('blur',function(){
-        var obj = $(this);        
-        var cuit = $(this).val();
-        if( $.isNumeric(cuit) && cuit.length == 11 ){  
-            var url = $(this).data('url');
-            $.getJSON( url,{ 'txt': cuit }, function( data ) {                       
-                if(data==='ERROR'){
-                    obj.addClass('inputerror');   
-                    obj.val('').focus();
-                    alert('El cuit ingresado no es válido');                    
-                }else if(data==='EXISTE'){
-                    obj.addClass('inputerror');   
-                    obj.val('').focus(); 
-                    alert('El cuit ingresado está duplicado');                    
-                }else{
-                    $('input.cuit').each( function(){
-                        if( $(this).data('prov') == obj.data('prov') ){
-                            $(this).val(cuit);
-                            $(this).removeClass('inputerror'); 
-                        }
-                    });                      
-                }
-            });
-                       
-        }else{
-            if( cuit ) {
-                obj.addClass('inputerror');   
-                obj.val('').focus();                   
-                alert('El formato válido de CUIT son 11 dígitos numéricos.');
-            }
-        }
-    });
-    $('input.nrocomp').on('blur',function(e){
-        e.stopPropagation();
-        e.preventDefault();
-        var obj = $(this);        
-        var valor = $(this).val();        
-        var url = $(this).data('url');
-        var aux = valor.split('-');
-        var pto = parseInt(aux[0]);
-        var comp = parseInt(aux[1]);
-        
-        if ( aux.length != 2 || !$.isNumeric(pto) || !$.isNumeric(comp) || pto==0 || comp==0 )
-        {
-          obj.addClass('inputerror');          
-          alert("El formato debe ser punto de venta - número de comprobante: 1-1");
-          return false;
-        }
-        $.getJSON( url,{ 'valor': valor }, function( data ) {                       
-            if(data==='ERROR'){
-                obj.addClass('inputerror');             
-                alert('No se pudo actualizar, intente nuevamente');                    
-            }else{                    
-                obj.val(data);    
-                obj.removeClass('inputerror');
-            }
-        });                               
-    });
-    $('.js-alicuota-error').on('click',function(e){        
-        var url = $(this).data('url');
-        window.open(url);
-    }); 
-}); 
+      })
+      $('.togglemenu').click()
+      $('.ui-tabs-panel').css('padding', '0')
 
-</script>  
+      $('input.cuit, input.ptovta, input.nrocomp').on('keyup', function (e) {
+        if (e.key === 'Enter' || e.keyCode === 13) {
+          $(this).blur()
+        }
+      })
+      $('input.cuit').on('blur', function () {
+        var obj = $(this)
+        var cuit = $(this).val()
+        if ($.isNumeric(cuit) && cuit.length == 11) {
+          var url = $(this).data('url')
+          $.getJSON(url, { txt: cuit }, function (data) {
+            if (data === 'ERROR') {
+              obj.addClass('inputerror')
+              obj.val('').focus()
+              alert('El cuit ingresado no es válido')
+            } else if (data === 'EXISTE') {
+              obj.addClass('inputerror')
+              obj.val('').focus()
+              alert('El cuit ingresado está duplicado')
+            } else {
+              $('input.cuit').each(function () {
+                if ($(this).data('prov') == obj.data('prov')) {
+                  $(this).val(cuit)
+                  $(this).removeClass('inputerror')
+                }
+              })
+            }
+          })
+        } else {
+          if (cuit) {
+            obj.addClass('inputerror')
+            obj.val('').focus()
+            alert('El formato válido de CUIT son 11 dígitos numéricos.')
+          }
+        }
+      })
+      $('input.nrocomp').on('blur', function (e) {
+        e.stopPropagation()
+        e.preventDefault()
+        var obj = $(this)
+        var valor = $(this).val()
+        var url = $(this).data('url')
+        var aux = valor.split('-')
+        var pto = parseInt(aux[0])
+        var comp = parseInt(aux[1])
+
+        if (aux.length != 2 || !$.isNumeric(pto) || !$.isNumeric(comp) || pto == 0 || comp == 0) {
+          obj.addClass('inputerror')
+          alert('El formato debe ser punto de venta - número de comprobante: 1-1')
+          return false
+        }
+        $.getJSON(url, { valor: valor }, function (data) {
+          if (data === 'ERROR') {
+            obj.addClass('inputerror')
+            alert('No se pudo actualizar, intente nuevamente')
+          } else {
+            obj.val(data)
+            obj.removeClass('inputerror')
+          }
+        })
+      })
+      $('.js-alicuota-error').on('click', function (e) {
+        var url = $(this).data('url')
+        window.open(url)
+      })
+    })
+  </script>
 {% endblock %}

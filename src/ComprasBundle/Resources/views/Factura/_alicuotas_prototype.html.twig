@@ -1,0 +1,8 @@
+<tr class="alicitem" divdata="item_items" style="height:30px">
+  <td class="alicTd"><span></span>{{ form_widget(item.afipAlicuota, { 'attr': {'style':'display:none'} }) }}</td>
+  <td class="netoTd">{{ form_widget(item.netoGravado, { 'attr': {'style':'text-align:right;'} }) }}</td>
+  <td class="alicIvaTd">{{ form_widget(item.liquidado, { 'attr': {'style':'text-align:right;'} }) }}</td>
+  <td class="delAlicTd">
+    <a href="javascript:void(0)" title="Eliminar" class="btn btnaction btn_trash" onclick="delAlicuota(this)"></a>
+  </td>
+</tr>

@@ -208,7 +208,7 @@ function checkStock(item){
             var val = ( isNaN(stkmin) || (stkmin==='') )  ? 0 : parseFloat(stkmin);
             tot = tot + val ;
         });
-        jQuery('#appbundle_producto_stock_minimo').val( parseFloat(tot).toFixed(3) );
+        jQuery('#appbundle_producto_stock_minimo').val( parseFloat(tot).toFixed(2) );
     }else{
         alert('Seleccione un depósito para indicar el stock!');
         jQuery('#appbundle_producto_stock_minimo').val( 0 );

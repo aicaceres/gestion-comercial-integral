@@ -52,7 +52,7 @@ function addNewPago(tipo) {
   actualizarSumaPagos()
 
   const imp = jQuery(".vuelto").html() ? jQuery(".vuelto").html().replace(",", ".") : 0
-  importe.val(Math.abs(parseFloat(imp)).toFixed(3)).change()
+  importe.val(Math.abs(parseFloat(imp)).toFixed(2)).change()
 }
 
 function quitarElementosSegunTipo(pagosTr) {
@@ -180,11 +180,11 @@ function actualizarSumaPagos() {
       let importe = checknumero(jQuery(item).find('[id*="_importe"]'))
       pagos += importe
     })
-		jQuery(".pago").html(pagos.toFixed(3))
-    vuelto = pagos.toFixed(3) - total.toFixed(3)
-    //vuelto = ( Math.abs(vuelto.toFixed(3)) < 0.100) ? 0 : vuelto
-		jQuery(".vuelto").html(vuelto.toFixed(3).replace(".", ","))
+		jQuery(".pago").html(pagos.toFixed(2))
+    vuelto = pagos.toFixed(2) - total.toFixed(2)
+    //vuelto = ( Math.abs(vuelto.toFixed(2)) < 0.100) ? 0 : vuelto
+		jQuery(".vuelto").html(vuelto.toFixed(2).replace(".", ","))
 //		jQuery("#linkAddPago").toggle(vuelto < 0)
 	}
-	jQuery(".vuelto").html(vuelto.toFixed(3).replace(".", ","))
+	jQuery(".vuelto").html(vuelto.toFixed(2).replace(".", ","))
 }

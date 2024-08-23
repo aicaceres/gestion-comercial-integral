@@ -3,7 +3,7 @@
     <td class="ordTd"></td>
     <td class="prodTd">{{item.producto.codigoNombre}}  {{item.lotesItemTxt|raw}}  </td>
     <td class="signoTd">{{item.signo}}</td>
-    <td class="cantTd">{{item.cantidadTotal|number_format(3,'.','')~' '~item.producto.unidadmedida.nombre}} </td>
+    <td class="cantTd">{{item.cantidadTotal|number_format(2,'.','')~' '~item.producto.unidadmedida.nombre}} </td>
     <td class="motTd">{{ item.motivo }}</td>
     <td style="text-align:center;width:20px;">
         <a class="editTd" href="javascript:void(0)" title="Editar" tabIndex="-1"

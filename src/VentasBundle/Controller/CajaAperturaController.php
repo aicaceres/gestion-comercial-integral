@@ -227,6 +227,8 @@ class CajaAperturaController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($id);
         $movimientos = $em->getRepository('VentasBundle:CajaApertura')->getMovimientosById($id);
+        $bancosRetencion = $em->getRepository('ConfigBundle:Banco')->findBancosRetencion();
+
         $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante_bn.png';
 //        return $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
 //                array('apertura' => $apertura, 'movimientos' => $movimientos, 'logo' => $logo));
@@ -306,7 +308,8 @@ class CajaAperturaController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
         $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
-            array('apertura' => $apertura, 'arqueo' => $resumen, 'movimientos' => $movimientos, 'logo' => $logo), $response);
+            array('apertura' => $apertura, 'arqueo' => $resumen, 'movimientos' => $movimientos,
+                'bancosRetencion' => array_column($bancosRetencion, 'nombre'), 'logo' => $logo), $response);
 
         $xml = $response->getContent();
         $content = $facade->render($xml);

@@ -54,7 +54,7 @@ table tr td{
                         <td>{{item.localidad ? item.localidad.name : ''}}</td>
                         <td>{{item.telefono}}</td>
                         <td>{{item.tipoCliente}}</td>
-                        <td>{{item.saldo|number_format(3,'.','')}}</td>
+                        <td>{{item.saldo|number_format(2,'.','')}}</td>
                         <td>{% if item.activo %} Si {% else %} No{% endif %} </td>
                     </tr>
                 {% endfor %}

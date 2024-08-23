@@ -45,7 +45,7 @@ jQuery(document).ready(function ($) {
 						}
 					})
 					return { results }
-				},  
+				},
 			},
 			placeholder: "Seleccionar...",
 			allowClear: true,
@@ -57,7 +57,7 @@ jQuery(document).ready(function ($) {
                 .on("select2:selecting", function (e) {
                   let id = e.params.args.data.id
 //                  if(e.params.args.data.cargaritems){
-                    if (confirm("Desea cargar los items del comprobante asociado?")) {
+                  if (confirm("Desea cargar los items del comprobante asociado?")) {
                           eliminarItemsCargados()
                           cargarItems(id)
                       }
@@ -82,7 +82,7 @@ jQuery(document).ready(function ($) {
       function (data) {
         const itemsCount = data.items.length - 1;
         jQuery("#ventasbundle_notadebcred_descuentoRecargo").val(data.dtorec)
-        
+
         jQuery.each(data.items, function (i, item) {
           addNewItem()
           const newOption = new Option(item.text, item.id, true, true)
@@ -120,16 +120,18 @@ jQuery(document).ready(function ($) {
     )
   }
 
-function eliminarItemsCargados(){
+  function eliminarItemsCargados() {
     tbody = jQuery('table.detalle tbody')
+    const index = tbody.data("index")
     tbody.find('tr.item').remove()
+    tbody.data("index", 0)
 }
 
 function filtrarTipoComprobante(id) {
     jQuery.getJSON(
             selectComprobante.data("urltiposvalidos"),
             {id},
-            function (data) {
+      function (data) {
                 objTiposComprobante = jQuery('[id*="_tipoComprobante"]')
                 objTiposComprobante.find("option").each(function (e) {
 
@@ -152,5 +154,5 @@ function handleChangePrecio(el) {
 }
 function handleBlurPrecio(el) {
   let value = parseFloat(jQuery(el).val())
-  jQuery(el).val( value.toFixed(3))
+  jQuery(el).val( value.toFixed(2))
 }

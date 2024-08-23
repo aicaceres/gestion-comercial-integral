@@ -41,7 +41,7 @@ jQuery(document).ready(function ($) {
 
 	$('[id*="_descuentoRecargo"]').on("change", function (e) {
 		const value = parseFloat(e.target.value)
-		jQuery(this).val(value.toFixed(3))
+		jQuery(this).val(value.toFixed(2))
                 actualizarImportes()
   })
 
@@ -83,7 +83,7 @@ function actualizarImportes(ndc=0) {
   const categoriaIva = jQuery(".selectorCliente").data("categiva")
   const percrentas = jQuery(".selectorCliente").data("percrentas")
   const porcentaje = checknumero(jQuery('[id*="_descuentoRecargo"]'))
-  jQuery('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(3))
+  jQuery('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(2))
   jQuery('span.descuentoRecargo').html(porcentaje.toFixed(2))
 
   $collectionHolder.find("tr.item").each(function (i, tr) {
@@ -107,39 +107,40 @@ function actualizarImportes(ndc=0) {
 			// precio + iva
 			precio = precio * (1 + alicuota / 100)
 		}
-		//}
+    //}
 		// calcular la cotización si es distinta a 1
 		precUnit = precio / cotizacion
                 // calcular precio con descuento para la vista
                 if(!ndc){
-                    precUnit = precUnit * (1 + porcentaje / 100)
-                }    
+                  precUnit = precUnit * (1 + porcentaje / 100)
+    }
+
 		precTot = precUnit * cant
 		// subtotal para vista
 		subtotalTh += precTot
-		item.find(".precTd span").html(precUnit.toFixed(3))
-		item.find(".itmSubtotalTd").text(precTot.toFixed(3))
+		item.find(".precTd span").html(precUnit.toFixed(2))
+		item.find(".itmSubtotalTd").text(precTot.toFixed(2))
 		// totalizar
-		subTotal += precio * cant
+    subTotal += precio * cant
 		totalIVA += iva * cant
 		totalIIBB += iibb * cant
 	})
 	subTotalResumen = subTotal / cotizacion
 	totalIvaResumen = totalIVA / cotizacion
 	totalIibbResumen = totalIIBB / cotizacion
-	jQuery("#subtotalTh").html(subtotalTh.toFixed(3))
-	jQuery("#importeSubtotal").html(subTotalResumen.toFixed(3).replace(".", ","))
+	jQuery("#subtotalTh").html(subtotalTh.toFixed(2))
+	jQuery("#importeSubtotal").html(subTotalResumen.toFixed(2).replace(".", ","))
 
 	if (categoriaIva !== "I" && categoriaIva !== "M") {
 		descrec = subTotalResumen * (porcentaje / 100)
 	}
 	const totalgral =
     subTotalResumen + descrec + totalIvaResumen + totalIibbResumen
-  jQuery("#importeRecargo").text(descrec.toFixed(3).replace(".", ","))
-	jQuery("#importeTotal").text(totalgral.toFixed(3).replace(".", ","))
+  jQuery("#importeRecargo").text(descrec.toFixed(2).replace(".", ","))
+	jQuery("#importeTotal").text(totalgral.toFixed(2).replace(".", ","))
 	// iva e iibb
-	jQuery("#importeIVA").text(totalIvaResumen.toFixed(3).replace(".", ","))
-	jQuery("#importeIIBB").text(totalIibbResumen.toFixed(3).replace(".", ","))
+	jQuery("#importeIVA").text(totalIvaResumen.toFixed(2).replace(".", ","))
+	jQuery("#importeIIBB").text(totalIibbResumen.toFixed(2).replace(".", ","))
 
   if (typeof actualizarSumaPagos !== 'undefined' && jQuery.isFunction(actualizarSumaPagos)) {
     actualizarSumaPagos()
@@ -204,7 +205,7 @@ function loadModalProductos(prod) {
                                           newOption.setAttribute('data-precio', item.data('precio'))
                                           newOption.setAttribute('data-alicuota', item.data('alicuota'))
                                           newOption.setAttribute('data-comodin', item.data('comodin'))
-                                          newOption.setAttribute('data-bajominimo', item.data('bajominimo'))	
+                                          newOption.setAttribute('data-bajominimo', item.data('bajominimo'))
 					prod.append(newOption).trigger("select2:select")
           jQuery("#popup").dialog("destroy")
           prod.change()
@@ -298,7 +299,7 @@ function setSelect2ToProduct(selProducto) {
 						}
 					})
 					return { results }
-				},                                
+				},
 			},
                         templateResult: (data) => {
                             return data.text
@@ -338,7 +339,7 @@ function setSelect2ToProduct(selProducto) {
                         precio = data.precio
                         alicuota = data.alicuota
                         comodin = data.comodin == 0 ? false : true
-                        bajominimo = data.bajominimo == 0 ? false : true 
+                        bajominimo = data.bajominimo == 0 ? false : true
                     }
 
                     //precios
@@ -348,8 +349,8 @@ function setSelect2ToProduct(selProducto) {
                      jQuery(obj).siblings(".bajominimo").toggle(bajominimo)
                      //comodin
                      textoComodin.toggle(comodin)
-                     textoComodin.attr("required", comodin)   
-                        
+                     textoComodin.attr("required", comodin)
+
                     actualizarImportes()
 
                     setTimeout(function () {

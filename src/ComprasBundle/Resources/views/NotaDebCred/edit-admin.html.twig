@@ -11,7 +11,7 @@
 <div class="divEdicion">
     {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >
-            <div class="formrows">                              
+            <div class="formrows">
                 <div class="two_fields">
                 <div><label for="nroNotaCredito">Tipo:</label>
                     <input type="text" value="{{entity.signoNota}}" disabled="disabled" class="width100">
@@ -19,7 +19,7 @@
                 <div><label for="nroNotaCredito">Comprobante:</label>
                     <input type="text" value="{{entity.tipoNota}} {{entity.nroComprobante}}" disabled="disabled" class="width100">
                 </div>
-            </div> 
+            </div>
             <div class="two_fields">
                 <div><label for="fecha">Fecha:</label>
                     <input type="text" value="{{entity.fecha|date('d/m/Y')}}" disabled="disabled" class="width100">
@@ -27,7 +27,7 @@
                 <div><label for="nroComprobante">Estado:</label>
                     <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
                 </div>
-            </div> 
+            </div>
             <div class="two_fields">
                 <div><label for="proveedor">Proveedor:</label>
                     <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="mediuminput">
@@ -42,20 +42,20 @@
                     <input type="text" value="{%if entity.modificaStock%}Si{%else%}No{%endif%}" disabled="disabled" class="width50">
                 </div>
                 {% endif %}
-            </div> 
+            </div>
             {% if entity.facturas and entity.signo=='-' %}
                     {% set facturas = '' %}
                     {% for factura in entity.facturas %}
-                        {% if loop.first %} 
+                        {% if loop.first %}
                             {% set facturas = factura.selectFactura  %}
-                        {% else %}    
+                        {% else %}
                             {% set facturas = facturas ~' - '~ factura.selectFactura  %}
-                        {% endif %}                            
-                    {% endfor %}    
+                        {% endif %}
+                    {% endfor %}
                 <div><label>Facturas asociadas:</label>
-                    <input type="text" value="{{facturas}}" disabled="disabled" class="mediuminput"> 
+                    <input type="text" value="{{facturas}}" disabled="disabled" class="mediuminput">
                 </div>
-            {% endif %} 
+            {% endif %}
             </div>
             <div style="padding-top: 20px; margin:auto; width: 100%;" id="divItems">
                 {{ form_errors(form.detalles) }}
@@ -64,11 +64,11 @@
                         <tr>
                             <th style="width:3%;">#</th>
                             <th>Producto</th>
-                            <th style="width:8%;">Alícuota</th>                            
+                            <th style="width:8%;">Alícuota</th>
                             <th style="width:12%;">Cant.</th>
                             <th style="width:10%;" colspan="2">Bulto</th>
                             <th style="width:10%;">Precio Unit.</th>
-                            <th style="width:10%;">SubTotal</th>                                                        
+                            <th style="width:10%;">SubTotal</th>
                         </tr>
                     </thead>
                     <tbody data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'ComprasBundle:NotaDebCred:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
@@ -85,48 +85,48 @@
                             <td class="precTd  alignright">
                                 <span tabIndex="-1">{{ form_widget(det.precio, { 'attr': {'class' : 'width50','style':'text-align:right;'} }) }} </span>
                             </td>
-                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(3,'.','') }}</td>                            
+                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(2,'.','') }}</td>
                         </tr>
-                    {% endfor %}           
+                    {% endfor %}
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="7" style="text-align:right"> SubTotal</th>                            
-                            <th class="cktotal red" id="Total">{{ form_widget(form.subtotal, { 'attr': {'style':'text-align:right;'} }) }}</th>                          
-                        </tr>                        
+                            <th colspan="7" style="text-align:right"> SubTotal</th>
+                            <th class="cktotal red" id="Total">{{ form_widget(form.subtotal, { 'attr': {'style':'text-align:right;'} }) }}</th>
+                        </tr>
                     </tfoot>
-                </table> 
-                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">   
+                </table>
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
                         <tr>
-                            <th>Subtotal Neto </th>                                                       
-                            <th>Impuesto Interno </th>                                                       
-                            <th>IVA </th>                                                       
-                            <th>Percep. IVA </th>                                                       
-                            <th>Percep. DGR </th>                                                       
-                            <th>Percep. Muni </th>                                                       
-                            <th>Total Bonif. </th>                                                       
-                            <th>No Grav.</th> 
-                            <th>TOTAL</th> 
+                            <th>Subtotal Neto </th>
+                            <th>Impuesto Interno </th>
+                            <th>IVA </th>
+                            <th>Percep. IVA </th>
+                            <th>Percep. DGR </th>
+                            <th>Percep. Muni </th>
+                            <th>Total Bonif. </th>
+                            <th>No Grav.</th>
+                            <th>TOTAL</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'readonly':'readonly', 'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                            <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>   
-                        </tr> 
+                            <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'readonly':'readonly', 'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                        </tr>
                     </tbody>
-                </table>              
-            </div>             
-             
-            <br clear="all" /> 
+                </table>
+            </div>
+
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('compras_notadebcred')}}">Cancelar</a>
@@ -134,75 +134,75 @@
         </fieldset>
         <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
  {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
 <script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
 <script type="text/javascript">
-jQuery(document).ready(function($) {   
+jQuery(document).ready(function($) {
     $(document).on('keypress',function(e){
         var keycode = (e.keyCode ? e.keyCode : e.which);
         if(keycode == '13'){ e.preventDefault(); }
-    });        
-        
-    $collectionHolder = $('table.factura tbody');    
+    });
+
+    $collectionHolder = $('table.factura tbody');
     $collectionHolder.find('.ordTd').each(function(i) {
         $(this).html(i + 1);
-    });    
-   $('.cantTd input, .precTd input[type=text]').change(function(){ 
+    });
+   $('.cantTd input, .precTd input[type=text]').change(function(){
        if(isNaN( parseFloat(jQuery(this).val()) )) jQuery(this).val(0);  actualizaTotales(); });
-    /*$('.cktotal input').change(function(){ 
-        if(isNaN( parseFloat(jQuery(this).val()) )) 
-            jQuery(this).val(0);  
-        totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 ); 
+    /*$('.cktotal input').change(function(){
+        if(isNaN( parseFloat(jQuery(this).val()) ))
+            jQuery(this).val(0);
+        totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 );
     });*/
-    $('.cktotal input').change(function(){ 
-        if(isNaN( parseFloat(jQuery(this).val()) )) 
-            jQuery(this).val(0);  
-        totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 ); 
-    });       
+    $('.cktotal input').change(function(){
+        if(isNaN( parseFloat(jQuery(this).val()) ))
+            jQuery(this).val(0);
+        totales( ( jQuery(this).attr('id')==='comprasbundle_notadebcred_total' ) ? 0 : 1 );
+    });
     $('#comprasbundle_notadebcred_totalBonificado').on('focus',function(){
         $(this).data('old', $(this).val());
     });
     $('#comprasbundle_notadebcred_totalBonificado').on('change',function(){
-        var old = $(this).data('old'); 
-        var now = $(this).val(); 
+        var old = $(this).data('old');
+        var now = $(this).val();
         var subtot = $('#comprasbundle_notadebcred_subtotal').val() - (now-old);
-        $('#comprasbundle_notadebcred_subtotal').val( subtot.toFixed(3) );
-        $('#comprasbundle_notadebcred_subtotalNeto').val( subtot.toFixed(3) );
+        $('#comprasbundle_notadebcred_subtotal').val( subtot.toFixed(2) );
+        $('#comprasbundle_notadebcred_subtotalNeto').val( subtot.toFixed(2) );
     });
     $('.guardar').click(function() {
         if (!confirm('Confirma la registración?')) {
                return false;
-            }      
-    }); 
-    
+            }
+    });
+
     $(".bulto input").change(function(){ changeBulto( $(this) );  });
     $(".bulto input").each(function() {
         changeBulto( $(this) );
     });
-    
+
        $('.nrofactura > div:first-of-type').css('width','22%');
-        $('.nrofactura > div:first-of-type > div').css('width','22%');        
-        
+        $('.nrofactura > div:first-of-type > div').css('width','22%');
+
     $('.formrows input[type="text"]').css('height','20px');
-  
-});    
- 
-function changeBulto(item){ 
-    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+
+});
+
+function changeBulto(item){
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed');
         var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
         if( item.is(':checked') ){
             unidmed.hide();
-            cantxbulto.prop('readonly',false);     
+            cantxbulto.prop('readonly',false);
             cantxbulto.css('color','#666');
             cantxbulto.focus();
         }else{
-           unidmed.show(); 
+           unidmed.show();
            cantxbulto.prop('readonly',true);
-           cantxbulto.css('color','#fff');           
-        }   
+           cantxbulto.css('color','#fff');
+        }
 }
 
 function actualizaTotales(){
@@ -213,13 +213,13 @@ function actualizaTotales(){
             var item = jQuery(this);
             var cant =  checknumero( item.find('.cantTd input') ) ;
             var prec =  checknumero( item.find('.precTd input[type=text]') ) ;
-            var arr = ['A','M'];            
+            var arr = ['A','M'];
             if(  jQuery.inArray(jQuery('#comprasbundle_notadebcred_tipoNota').val(),arr )!== -1 ){
                 var porciva = item.find('.prodTd').data('iva');
                 var iva =  parseFloat( porciva )/100 ;
                 item.find('.ivaTd [name*="afipAlicuota"] option:contains('+ porciva +')').prop('selected', true);
-            }else{ 
-                iva = porciva = 0; 
+            }else{
+                iva = porciva = 0;
                 item.find('.ivaTd [name*="afipAlicuota"] option:contains(0.00)').prop('selected', true);
             }
             // sumatoria de ivas discriminado por alicuota
@@ -228,20 +228,20 @@ function actualizaTotales(){
             sbtotItm = prec * cant;
             Total += sbtotItm;
             IvaTotal += (sbtotItm * iva);
-            item.find('.totalTd').text( sbtotItm.toFixed(3));                
+            item.find('.totalTd').text( sbtotItm.toFixed(2));
         });
-        jQuery('#Total input[type=text]').val(Total.toFixed(3));
+        jQuery('#Total input[type=text]').val(Total.toFixed(2));
         //var iva = Total * 0.21;
-        jQuery('#comprasbundle_notadebcred_iva').val(  IvaTotal.toFixed(3)  ); 
-        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));      
+        jQuery('#comprasbundle_notadebcred_iva').val(  IvaTotal.toFixed(2)  );
+        //jQuery('#subtotalneto input[type=text]').val(Total.toFixed(2));
         totales(1);
         $collectionHolder.find('.ordTd').each(function(index) {
             jQuery(this).html(index+1);
-        });         
+        });
     }
 function totales(suma){
-    var neto = checknumero(jQuery('#comprasbundle_notadebcred_subtotal'));    
-    jQuery('#comprasbundle_notadebcred_subtotalNeto').val(  neto.toFixed(3)  ); 
+    var neto = checknumero(jQuery('#comprasbundle_notadebcred_subtotal'));
+    jQuery('#comprasbundle_notadebcred_subtotalNeto').val(  neto.toFixed(2)  );
   //  var subtotalneto = checknumero( jQuery('#comprasbundle_factura_subtotalNeto') );
     var impuesto = checknumero( jQuery('#comprasbundle_notadebcred_impuestoInterno') );
     var iva = checknumero( jQuery('#comprasbundle_notadebcred_iva') );
@@ -249,13 +249,13 @@ function totales(suma){
     var percdgr = checknumero( jQuery('#comprasbundle_notadebcred_percepcionDgr') );
     var percmun = checknumero( jQuery('#comprasbundle_notadebcred_percepcionMunicipal') );
     var totbon = checknumero( jQuery('#comprasbundle_notadebcred_totalBonificado') );
-    var tmc = checknumero( jQuery('#comprasbundle_notadebcred_tmc') ); 
-    if(suma){    
+    var tmc = checknumero( jQuery('#comprasbundle_notadebcred_tmc') );
+    if(suma){
         var subtot = neto - totbon;
-        var totales = subtot  +  impuesto + iva + perciva + percdgr + percmun +  tmc ;  
-         jQuery('#comprasbundle_notadebcred_total').val( totales.toFixed(3) );   
+        var totales = subtot  +  impuesto + iva + perciva + percdgr + percmun +  tmc ;
+         jQuery('#comprasbundle_notadebcred_total').val( totales.toFixed(2) );
      }else{
-         checknumero( jQuery('#comprasbundle_notadebcred_total') ); 
+         checknumero( jQuery('#comprasbundle_notadebcred_total') );
      }
 }
 </script>{% endblock %}

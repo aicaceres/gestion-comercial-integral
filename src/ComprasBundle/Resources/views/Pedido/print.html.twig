@@ -33,7 +33,7 @@
                 font-size: 1.3em;
                 vertical-align: top;
                 width: 20%;
-            } 
+            }
             .nropedido label {
                 display: block;
                 font-size: 0.6em;
@@ -76,7 +76,7 @@
         <div class="align-center" style="height:32px;">
             <span style="display: block;padding-top: 10px;">PEDIDO DE COMPRAS</span>
         </div>
-        <h5> 
+        <h5>
             <small style="display: block;margin-bottom: 5px;">Fecha: {{date('now')|date('d / m / Y H:i')}}</small>
             <small>Usuario: {{app.user.nombre}} </small>
         </h5>
@@ -114,7 +114,7 @@
                         <td>{{item.producto.nombre}}</td>
                         <td class="alignright">{% if recibido %}{{item.entregadoTxt}}{%else%}{{item.cantidadTxt}}{%endif%}</td>
                         <td class="alignright">{{item.precio}}</td>
-                        <td class="alignright">{{item.costoTotal|number_format(3,'.',',')}}</td>
+                        <td class="alignright">{{item.costoTotal|number_format(2,'.',',')}}</td>
                     </tr>
                 {% endfor %}
                     {% for i in range(1, 10 - entity.detalles|length)%}
@@ -127,14 +127,14 @@
                     <tr>
                         <th colspan="3" class="alignleft"></th>
                         <th class="alignright">TOTAL</th>
-                        <th class="alignright">{{entity.getCostoTotal|number_format(3,'.',',')}}</th>
+                        <th class="alignright">{{entity.getCostoTotal|number_format(2,'.',',')}}</th>
                     </tr>
                 </tfoot>
             </table>
         </div>
-<script type="text/javascript">    
-        window.print(); 
+<script type="text/javascript">
+        window.print();
         window.setTimeout('window.close()', 1000);
-</script>          
+</script>
     </body>
 </html>

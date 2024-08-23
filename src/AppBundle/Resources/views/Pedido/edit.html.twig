@@ -15,16 +15,16 @@
                  {{ form_row(form.depositoOrigen) }}
             </div>
             <div class="two_fields">
-                {{ form_row(form.unidadNegocio) }}   
-                {{ form_row(form.depositoDestino) }}   
-            </div>  
-                
+                {{ form_row(form.unidadNegocio) }}
+                {{ form_row(form.depositoDestino) }}
+            </div>
+
             <div class="two_fields">
                 <div><label for="nroPedido">Nº pedido:</label>
                     <input type="text" value="{{entity.nroPedido}}" disabled="disabled" class="width100">
                 </div>
                 {{ form_row(form.fechaPedido, { 'attr': {'class' : 'datepicker','tabindex':'2'} }) }}
-            </div> 
+            </div>
             <div  class="two_fields">
                 <div>
                     {{ form_label(form.estado) }}
@@ -33,9 +33,9 @@
                 {{ form_widget(form.estado) }}
                 {% if entity.estado=='NUEVO' %}{{ form_row(form.cerrado,{'label': 'Enviar Pedido ','label_attr':{'title':'Hasta que no se marque el pedido no será visible por el Depósito Destino','class':'infoicon' ,'style':'width:130px'},'attr': {'title':'Hasta que no se marque el pedido no será visible por el Depósito Destino'}  }) }}
                 {% else%}<div class="aligncenter"><button type="button" class="stdbtn print">Imprimir Pedido</button></div>{%endif%}
-            </div> 
-            
-<div style="padding-top: 20px;" id="divItems">                
+            </div>
+
+<div style="padding-top: 20px;" id="divItems">
                 <table style="width:80%;margin: 0 auto;" cellpadding="0" cellspacing="0" border="0" class="stdtable noaction" id="detalle">
                     <thead>
                         <tr>
@@ -47,16 +47,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                    {% for item in entity.detalles %}   
-                         {% include "AppBundle:Pedido:tr_item_pedido.html.twig" %} 
-                        <!--<tr class="item" style="height:30px;">                            
+                    {% for item in entity.detalles %}
+                         {% include "AppBundle:Pedido:tr_item_pedido.html.twig" %}
+                        <!--<tr class="item" style="height:30px;">
                             <td class="ordTd">{{loop.index}}</td>
                             <td class="prodTd">{{ item.producto.codigoNombre }}</td>
                             <td class="cantTd alignright">{{ item.cantidadItemTxt }} </td>
-                            <td class="totalTd alignright">{{item.cantidadTotal|number_format(3,'.','')~' '~item.producto.unidadmedida.nombre}}</td>
+                            <td class="totalTd alignright">{{item.cantidadTotal|number_format(2,'.','')~' '~item.producto.unidadmedida.nombre}}</td>
                             <td style="text-align:center;"><a class="delTd" href="javascript:void(0)" data-id="{{item.id}}"  title="Quitar" tabIndex="-1"><span class="minus"></span></a></td>
                         </tr>-->
-                    {% endfor %}           
+                    {% endfor %}
                     </tbody>
                     <tfoot>
                         <tr>
@@ -66,12 +66,12 @@
                             </th>
                         </tr>
                     </tfoot>
-                </table>    
+                </table>
 
-            </div>                
-            <br clear="all" />             
-            
-            
+            </div>
+            <br clear="all" />
+
+
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('stock_pedido')}}">Cancelar</a>
@@ -79,11 +79,11 @@
         </fieldset>
         <div name="rest" style="display:none">{{ form_rest(form) }}</div>
     {{ form_end(form) }}
-</div>    
+</div>
 </div>
 {% endblock %}
 {% block extra_javascripts %}
-{% include "AppBundle::block-deposito-js.html.twig" %} 
+{% include "AppBundle::block-deposito-js.html.twig" %}
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     depositos = "[{{ app.session.get('depositos')|join(', ') }}]";
@@ -97,7 +97,7 @@ jQuery(document).ready(function($) {
         $(this).html(index+1);
     });
     $(document).keypress(function(e) {
-        if (e.which == 43) { 
+        if (e.which == 43) {
             e.preventDefault();
             $('#linkAdd').click();
         }
@@ -108,15 +108,15 @@ jQuery(document).ready(function($) {
     $('.guardar').click(function() {
         if( !$('#appbundle_pedido_depositoOrigen').val() ){
             alert('Debe seleccionar un Depósito de origen para el pedido');
-            return false;  
+            return false;
         };
         if( !$('#appbundle_pedido_depositoDestino').val() ){
             alert('Debe seleccionar un Depósito destino para el pedido');
-            return false;  
+            return false;
         };
         if( $('#appbundle_pedido_depositoOrigen').val() == $('#appbundle_pedido_depositoDestino').val() ){
             alert('El depósito de origen no puede ser el mismo que el de destino');
-            return false;  
+            return false;
         };
         if( $('#appbundle_pedido_cerrado').is(':checked')){
             if( $('tbody tr.item').length > 0 ){
@@ -157,11 +157,11 @@ jQuery(document).ready(function($) {
          });
         }
     });
-    
+
     // EDITAR ITEM
     $(document).on('click','.editTd',function(){
-        var partialurl =  $(this).data('url'); 
-        var actionurl = $(this).data('actionurl'); 
+        var partialurl =  $(this).data('url');
+        var actionurl = $(this).data('actionurl');
         var tr = $(this).parent().parent();
         $('#popup').dialog('open');
         $('#popup')
@@ -169,7 +169,7 @@ jQuery(document).ready(function($) {
             .load(partialurl, function() {
                 var form = $("[name='appbundle_pedidodetalle']");
                 form.find('#pedidoid').val('{{entity.id}}');
-                var prod = form.find("#appbundle_pedidodetalle_producto");              
+                var prod = form.find("#appbundle_pedidodetalle_producto");
                 prod.chosen({no_results_text: "Sin resultados", search_contains: true});
                 prod.prop('disabled', true).trigger("liszt:updated");
                 form.find("#appbundle_pedidodetalle_bulto").uniform();
@@ -181,8 +181,8 @@ jQuery(document).ready(function($) {
             .dialog({
             modal: true, autoOpen: true, title: 'Editar item del pedido',width: '50%', minHeight: 200,
             buttons: [{text: "Modificar", class: 'closePopup additem',
-                    click: function() { 
-                        var form = $("[name='appbundle_pedidodetalle']");  
+                    click: function() {
+                        var form = $("[name='appbundle_pedidodetalle']");
                         if(!form.find("#appbundle_pedidodetalle_cantidad").val()){
                             alert('Debe ingresar una cantidad!');
                             form.find("#appbundle_pedidodetalle_cantidad").focus();
@@ -195,7 +195,7 @@ jQuery(document).ready(function($) {
                         }
                         // quitar disable antes de enviar
                         form.find("#appbundle_pedidodetalle_producto").prop('disabled', false).trigger("liszt:updated");
-                        // guardar item en detalle 
+                        // guardar item en detalle
                          $.post( actionurl , form.serialize(),function(data){
                              if(data.msg==='OK'){
                                  // reemplazar en la tabla
@@ -214,11 +214,11 @@ jQuery(document).ready(function($) {
                             $(this).dialog("destroy");
                         }}]
             });
-        });     
-    
-    
+        });
+
+
     $('#linkAdd').on('click',function(){
-        var partialurl =  $(this).data('url');    
+        var partialurl =  $(this).data('url');
         $('#popup').dialog('open');
         // width: '70%', minHeight: 400,
         $('#popup')
@@ -226,7 +226,7 @@ jQuery(document).ready(function($) {
             .load(partialurl, function() {
                 var form = $("[name='appbundle_pedidodetalle']");
                 form.find('#pedidoid').val('{{entity.id}}');
-                var prod = form.find("#appbundle_pedidodetalle_producto");              
+                var prod = form.find("#appbundle_pedidodetalle_producto");
                 prod.chosen({no_results_text: "Sin resultados", search_contains: true});
                 prod.change(function () {
                    changeProducto($(this));
@@ -240,8 +240,8 @@ jQuery(document).ready(function($) {
             .dialog({
             modal: true, autoOpen: true, title: 'Agregar items al pedido',width: '50%', minHeight: 200,
             buttons: [{text: "Agregar", class: 'closePopup additem',
-                    click: function() { 
-                        var form = $("[name='appbundle_pedidodetalle']");  
+                    click: function() {
+                        var form = $("[name='appbundle_pedidodetalle']");
                         if(!form.find("#appbundle_pedidodetalle_producto").val()){
                             alert('Debe ingresar un producto!');
                             form.find('.chzn-container').last().trigger('mousedown');
@@ -257,11 +257,11 @@ jQuery(document).ready(function($) {
                             form.find("#appbundle_pedidodetalle_cantidadxBulto").focus();
                             return false;
                         }
-                        // guardar item en detalle 
+                        // guardar item en detalle
                          $.post( "{{path('stock_item_pedido_create')}}" , form.serialize(),function(data){
                              if(data.msg==='OK'){
                                  // insertar en la tabla
-                                 $('#detalle tbody').append(data.tr); 
+                                 $('#detalle tbody').append(data.tr);
                                 //reordenar nros
                                 $('#detalle').find('.ordTd').each(function(index) {
                                   $(this).html(index+1);
@@ -269,7 +269,7 @@ jQuery(document).ready(function($) {
                                  /*ord = $('.stdtable tbody tr').length + 1;
                                 $('.stdtable tbody').append('<tr class="item" style="height:30px;"><td class="ordTd">'+
                                         ord+'</td><td>'+ data.prod +'</td><td class="alignright">'+data.cant+'</td>'+
-                                        '<td class="alignright">'+data.total+'</td><td><a class="delTd" href="javascript:void(0)" title="Quitar" data-id="'+data.id+'" tabIndex="-1"><span class="minus"></span></a></td> </tr>'); 
+                                        '<td class="alignright">'+data.total+'</td><td><a class="delTd" href="javascript:void(0)" title="Quitar" data-id="'+data.id+'" tabIndex="-1"><span class="minus"></span></a></td> </tr>');
                                 */
                                 } else {
                                     alert('error ' + data.msg);
@@ -284,7 +284,7 @@ jQuery(document).ready(function($) {
             });
         });
     });
-    
+
     function changeProducto(producto) {
         var form = jQuery("[name='appbundle_pedidodetalle']");
         form.find('.loaders').show();
@@ -299,7 +299,7 @@ jQuery(document).ready(function($) {
             //async:false,
             dataType: "json",
             data: 'prod=' + producto.val() + '&dep=' + jQuery('#appbundle_pedido_depositoOrigen').val(),
-            success: function (data) {                
+            success: function (data) {
                 form.find('#appbundle_pedidodetalle_cantidad').val(1);
                 form.find('.unidmed').text(data.unidmed);
                 if (data.bulto) {

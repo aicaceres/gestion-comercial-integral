@@ -29,7 +29,7 @@
             {% for mov in movimientos if mov.tipoComprobante in ['DEB','CRE'] %}
                 {% include "VentasBundle:CajaApertura:seccion.html.twig" %}
             {% endfor %}
-            {% for mov in movimientos if mov.tipoComprobante == 'FAC' %}
+            {% for mov in movimientos if mov.tipoComprobante in ['FAC','FCE'] %}
                 {% include "VentasBundle:CajaApertura:seccion.html.twig" %}
             {% endfor %}
             {% for mov in movimientos if mov.tipoComprobante == 'TIC' %}
@@ -48,7 +48,7 @@
                     <td>{{ mov.datosTarjeta.tarjeta }}</td>
                     <td>{{ mov.datosTarjeta.numero }}</td>
                     <td class="alignright">
-                            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,',','.') }}
+                            {{ (mov.importe*mov.moneda.cotizacion)|number_format(2,',','.') }}
                     </td>
                 </tr>
             {% endfor %}

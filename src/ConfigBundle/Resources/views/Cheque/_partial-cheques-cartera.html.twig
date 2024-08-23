@@ -5,7 +5,31 @@
     .closeNotif{ margin: 10px; float: right;}
 </style>
 <div>
-  <h4 style="text-align:center">Monto Seleccionado: $ <span id="montoTotal"></span></h4>
+  <div style="display:flex; justify-content: space-between;margin-bottom:10px">
+    <div style="width:60%">
+    <label><strong>Tipo de cheque: </strong></label>
+    <select name="tipo" id="selectTipo" onChange="jQuery('#searchform').submit();" style="min-width: 25%;">
+      <option value=""> Todos </option>
+      <option value="P"> Propios </option>
+      <option value="T"> De Tercero </option>
+    </select>
+
+    <select name="tipocheque" id="selectTipoCheque" onChange="jQuery('#searchform').submit();" style="min-width: 25%;">
+      <option value=""> Todos </option>
+      <option value="NORMAL"> Normal </option>
+      <option value="DIFERIDO"> Diferido </option>
+      <option value="ELECTRONICO"> Electrónico </option>
+    </select>
+
+    <select name="estado" id="selectEstado" onChange="jQuery('#searchform').submit();" style="min-width: 25%;">
+      <option value=""> Todos </option>
+      <option value="FUTURO"> Futuro </option>
+      <option value="ENFECHA"> En fecha </option>
+    </select>
+    </div>
+    <h4 style="text-align:center">Monto Seleccionado: $ <span id="montoTotal"></span></h4>
+  </div>
+
   <input type="hidden" name="ids" id="chequeIds" />
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
@@ -28,7 +52,7 @@
             <td>{{cheque.banco}}</td>
             <td><span class="hidden">{{ cheque.fecha|date('Ymd') }}</span>{{cheque.fecha|date('d-m-Y')}}</td>
             <td class="alignright">{{cheque.valor}}</td>
-            <td><input data-valor="{{ cheque.valor }}" type="checkbox" onclick="selectCheque(this)" id="{{cheque.id}}" style="width: 20px;"/></td>
+            <td><input data-valor="{{ cheque.valor }}" data-tipo="{{cheque.tipo}}" data-tipocheque="{{cheque.tipoCheque}}" type="checkbox" onclick="selectCheque(this)" id="{{cheque.id}}" style="width: 20px;"/></td>
         </tr>
     {% endfor %}
         </tbody>
@@ -49,6 +73,37 @@ jQuery(document).ready(function($) {
       $('#montoTotal').html(monto.toFixed(2))
 
     })
+
+    $('#selectTipo, #selectTipoCheque, #selectEstado').on('change', function(){
+      oTable.fnDraw()
+    })
+
+$.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
+  var tipo = $('#selectTipo').val()
+  var tipoCheque =  $('#selectTipoCheque').val()
+  var estado =  $('#selectEstado').val()
+  var pass = true
+  if(tipo){
+    dataTipo = jQuery(aData[6]).data('tipo')
+    if(dataTipo != tipo) pass=false
+  }
+  if(tipoCheque){
+    dataTipoCheque = jQuery(aData[6]).data('tipocheque')
+    if(dataTipoCheque != tipoCheque) pass=false
+  }
+  if(estado){
+    //check por fecha segun estado
+    var hoy = new Date()
+    hoy.setHours(0, 0, 0, 0)
+    var fechaTexto = aData[4].slice(-10).split('-')
+    let fechaCheque = new Date(parseInt(fechaTexto[2]), parseInt(fechaTexto[1]-1), parseInt(fechaTexto[0]));
+    if(estado == 'FUTURO' && fechaCheque < hoy) pass= false
+    if(estado == 'ENFECHA' && fechaCheque >= hoy) pass= false
+  }
+    return pass;
+});
+
+
 });
 function selectCheque(obj){
   let selected = jQuery(obj)

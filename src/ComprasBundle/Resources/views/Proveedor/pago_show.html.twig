@@ -96,7 +96,7 @@
                                     <label>EFECTIVO: </label>
                                 </td>
                                 <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(2,'.',',') }}</span>
                                 </td>
                             </tr>
                         {% endif %}
@@ -117,7 +117,7 @@
                                     </div>
                                 </td>
                                 <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(2,'.',',') }}</span>
                                 </td>
                             </tr>
                         {% endif %}
@@ -144,7 +144,7 @@
                                     {% endif %}
                                 </td>
                                 <td class="importeTd alignright" width="160px">
-                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(3,'.',',') }}</span>
+                                    <span style="font-size:16px;font-weight:bold">{{ det.moneda.simbolo }} {{ det.importe|number_format(2,'.',',') }}</span>
                                 </td>
                             </tr>
                         {% endif %}
@@ -157,7 +157,7 @@
                             <th style="text-align:right">
                                 IMPORTE: &nbsp;
                                 <span class="simbolo" style="font-size:16px">{{ entity.moneda.simbolo }} </span>
-                                <span class="pago" style="font-size:16px" >{{importe|number_format(3,'.',',')}}</span>.-
+                                <span class="pago" style="font-size:16px" >{{importe|number_format(2,'.',',')}}</span>.-
                             </th>
                             <th width="150px" class="vueltoTh">
                                 SALDO: &nbsp;

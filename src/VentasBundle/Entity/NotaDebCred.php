@@ -78,14 +78,14 @@ class NotaDebCred {
 
     /**
      * @var integer $total
-     * @ORM\Column(name="total", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="total", type="decimal", precision=20, scale=2 )
      * @Gedmo\Versioned()
      */
     protected $total;
 
     /**
      * @var integer $saldo
-     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=2,nullable=true )
      * @Gedmo\Versioned()
      */
     protected $saldo = 0;
@@ -310,7 +310,7 @@ class NotaDebCred {
             // descuento sobre el subtotal
             $total = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
         }
-        return round(($total), 3);
+        return round(($total), 2);
     }
 
     public function getTotalIva() {
@@ -318,7 +318,7 @@ class NotaDebCred {
         foreach ($this->detalles as $item) {
             $total = $total + $item->getTotalIvaItem();
         }
-        return round(($total / $this->getCotizacion()), 3);
+        return round(($total / $this->getCotizacion()), 2);
     }
 
     public function getTotalIibb() {

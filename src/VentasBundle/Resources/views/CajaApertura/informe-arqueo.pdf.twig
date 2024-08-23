@@ -37,10 +37,10 @@
                     <table font-size="14px" padding-bottom="15px">
                         <tr>
                             <td border.type="none" vertical-align="bottom" text-align="center" height="30px">
-                                Apertura: $ {{ apertura.montoApertura|number_format(3,',','.') }}.-
+                                Apertura: $ {{ apertura.montoApertura|number_format(2,',','.') }}.-
                             </td>
                             <td border.type="none" vertical-align="bottom" text-align="center" height="30px">
-                                Cierre: {{ (apertura.fechaCierre) ? '$ ' ~ apertura.montoCierre|number_format(3,',','.') : '-' }}.-
+                                Cierre: {{ (apertura.fechaCierre) ? '$ ' ~ apertura.montoCierre|number_format(2,',','.') : '-' }}.-
                             </td>
                         </tr>
                     </table>
@@ -85,19 +85,19 @@
     {% set tot_efectivo, tot_cheque, tot_tarjeta, tot_ctacte, tot_transferencia, tot_retencion, tot_vuelto = 0,0,0,0,0,0,0 %}
     {% set tiposFacturacion = [ {'tag': 'CRE', 'title': 'CRÉDITOS'},
                                 {'tag': 'DEB', 'title': 'DÉBITOS'},
-                                {'tag': 'FAC', 'title': 'FACTURAS'},
+                                {'tag': 'FAC, FCE', 'title': 'FACTURAS'},
                                 {'tag': 'TIC', 'title': 'TICKETS'}] %}
 
     <table font-size="8px">
-        
+
         {% for tipoComp in tiposFacturacion %}
             {% set cnt, efectivo, cheque, tarjeta, ctacte, transferencia, retencion, vuelto = 0,0,0,0,0,0,0,0 %}
-            {% for item in arqueo if item.tipoComprobante == tipoComp['tag'] %}
+            {% for item in arqueo if item.tipoComprobante in tipoComp['tag'] %}
                 {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'item':item} %}
                 {% set cnt, efectivo, cheque, tarjeta, ctacte, transferencia, vuelto =
                        cnt+1 , efectivo + item.EFECTIVO, cheque + item.CHEQUE, tarjeta + item.TARJETA, ctacte + item.CTACTE, transferencia + item.TRANSFERENCIA, vuelto + item.vuelto %}
             {% endfor %}
-             
+
             {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
             {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
             {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
@@ -110,30 +110,30 @@
         <tr font-style="italic" margin-top="3px" margin-bottom="10px" font-size="9px">
             <td border.type="none" height="15px"  vertical-align="middle" colspan="5">Subtotal de Facturacion</td>
             <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
-                {{ tot_efectivo|number_format(3,',','.') }}
+                {{ tot_efectivo|number_format(2,',','.') }}
             </td>
             <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
-                {{ tot_cheque|number_format(3,',','.') }}
+                {{ tot_cheque|number_format(2,',','.') }}
             </td>
             <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
-                {{ tot_tarjeta|number_format(3,',','.') }}
+                {{ tot_tarjeta|number_format(2,',','.') }}
             </td>
             <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
-                {{ tot_transferencia|number_format(3,',','.') }}
+                {{ tot_transferencia|number_format(2,',','.') }}
             </td>
             <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px">
-                {{ tot_ctacte|number_format(3,',','.') }}
+                {{ tot_ctacte|number_format(2,',','.') }}
             </td>
         </tr>
 <!-- total de facturacion -->
         <tr font-size="9px">
             <td border.color="#999999" colspan="5" padding="10px"><b>TOTAL DE FACTURACION EN CAJA</b></td>
             <td border.color="#999999" colspan="3" padding="10px" text-align="center">
-                {{ (tot_efectivo + tot_tarjeta + tot_cheque + tot_transferencia )|number_format(3,',','.') }}
+                {{ (tot_efectivo + tot_tarjeta + tot_cheque + tot_transferencia )|number_format(2,',','.') }}
             </td>
             <td border.color="#999999" padding="10px" text-align="center"><b>CTA. CTE.</b></td>
             <td border.color="#999999" padding="10px" text-align="center" font-size="8px">
-                {{ tot_ctacte|number_format(3,',','.') }}
+                {{ tot_ctacte|number_format(2,',','.') }}
             </td>
         </tr>
         <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
@@ -155,40 +155,40 @@
         {% set tot_transferencia, tot_vuelto = (tot_transferencia + transferencia),  tot_vuelto + vuelto %}
 
     {% endfor %}
-                     
+
 <!-- TOTALES -->
         <tr font-size="9px">
             <td border.color="#999999" colspan="5" padding="10px"><b>TOTALES DE LA CAJA</b></td>
             <td border.color="#999999" padding="10px" text-align="right" padding-right="5px">
-                {{ tot_efectivo|number_format(3,',','.') }}
+                {{ tot_efectivo|number_format(2,',','.') }}
             </td>
             <td border.color="#999999" colspan="3" padding="10px" text-align="center"><b>TOTAL CTA. CTE.</b></td>
             <td border.color="#999999" padding="10px" text-align="right" padding-right="5px">
-                {{ tot_ctacte|number_format(3,',','.') }}
+                {{ tot_ctacte|number_format(2,',','.') }}
             </td>
         </tr>
         <tr>
             <td colspan="5" text-align="right" border.type="none" height="20px" vertical-align="middle" padding-right="5px"> Cambio del día </td>
-            <td text-align="right" border.type="none" height="20px" vertical-align="middle" padding-right="5px"> {{ tot_vuelto|number_format(3,',','.') }} </td>
+            <td text-align="right" border.type="none" height="20px" vertical-align="middle" padding-right="5px"> {{ tot_vuelto|number_format(2,',','.') }} </td>
         </tr>
 
         <tr font-size="9px">
             <td border.color="#555555" height="20px" colspan="5" padding="10px" vertical-align="middle"><b>TOTAL CAJA CONTADO</b></td>
             <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
                 <!-- total efectivo - cambio del dia -->
-                {{ (tot_efectivo + tot_vuelto + apertura.montoApertura)|number_format(3,',','.') }}
+                {{ (tot_efectivo + tot_vuelto + apertura.montoApertura)|number_format(2,',','.') }}
             </td>
             <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
-                {{ tot_cheque|number_format(3,',','.') }}
+                {{ tot_cheque|number_format(2,',','.') }}
             </td>
             <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
-                {{ tot_tarjeta|number_format(3,',','.') }}
+                {{ tot_tarjeta|number_format(2,',','.') }}
             </td>
             <td height="20px" border.color="#555555" padding="10px" text-align="center" vertical-align="middle">
-                {{ tot_transferencia|number_format(3,',','.') }}
+                {{ tot_transferencia|number_format(2,',','.') }}
             </td>
             <td height="20px" border.color="#555555" padding="10px" text-align="center" vertical-align="middle">
-                <b>{{ (tot_efectivo + tot_cheque + tot_tarjeta + tot_transferencia)|number_format(3,',','.') }}</b>
+                <b>{{ (tot_efectivo + tot_cheque + tot_tarjeta + tot_transferencia)|number_format(2,',','.') }}</b>
             </td>
         </tr>
 

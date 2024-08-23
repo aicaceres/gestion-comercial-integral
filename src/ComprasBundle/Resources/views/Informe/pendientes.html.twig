@@ -69,7 +69,7 @@
                 <td> {{ entity.codigo}}</td>
                 <td>{{ entity.producto}}</td>
                 {% if provId==0 %} <td>{{ entity.proveedor}}</td> {% endif %}
-                <td style="text-align: right">{{ entity.cant|number_format(3,'.','') }} {{entity.unidadMedida}}</td>
+                <td style="text-align: right">{{ entity.cant|number_format(2,'.','') }} {{entity.unidadMedida}}</td>
                 <td style="text-align: right">{{ entity.fechaEntrega|date('d-m-Y') }}</td>
         </tr>
            {% endfor %}

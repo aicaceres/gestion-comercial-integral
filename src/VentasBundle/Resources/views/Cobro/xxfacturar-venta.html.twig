@@ -779,7 +779,7 @@ function detectarControles(e) {
     const cotizacion = parseFloat($('#ventasbundle_cobro_cotizacion').val()) ;
     $('.valor').each(function(){
         valor = $(this).data('valor')/cotizacion;
-        $(this).html(valor.toFixed(3));
+        $(this).html(valor.toFixed(2));
     });
 }*/
 });

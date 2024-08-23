@@ -45,7 +45,7 @@ class StockMovimiento
 
      /**
      * @var integer $cantidad
-     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="cantidad", type="decimal", precision=20, scale=2 )
      */
     protected $cantidad;
 

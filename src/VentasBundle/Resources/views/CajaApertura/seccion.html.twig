@@ -3,21 +3,21 @@
     <td>{{ mov.fecha|date('d/m/Y') }}</td>
     <td>{{ mov.cliente }}</td>
     <td>{{ mov.moneda.simbolo }}</td>
-    <td>{{ mov.moneda.cotizacion|number_format(3,',','.') }}</td>
+    <td>{{ mov.moneda.cotizacion|number_format(2,',','.') }}</td>
     <td class="alignright">{% if mov.tipoPago=='EFECTIVO' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,',','.') }}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(2,',','.') }}
         {% else %} 0,00 {% endif %}
     </td>
     <td class="alignright">{% if mov.tipoPago=='CHEQUE' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,',','.') }}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(2,',','.') }}
         {% else %} 0,00 {% endif %}
     </td>
     <td class="alignright">{% if mov.tipoPago=='TARJETA' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,',','.') }}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(2,',','.') }}
         {% else %} 0,00 {% endif %}
     </td>
     <td class="alignright">{% if mov.tipoPago=='CTACTE' %}
-            {{ (mov.importe*mov.moneda.cotizacion)|number_format(3,',','.') }}
+            {{ (mov.importe*mov.moneda.cotizacion)|number_format(2,',','.') }}
         {% else %} 0,00 {% endif %}
     </td>
     <td class="alignright">0,00</td>

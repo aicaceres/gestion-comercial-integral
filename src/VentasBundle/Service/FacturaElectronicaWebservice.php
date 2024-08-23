@@ -42,6 +42,7 @@ class FacturaElectronicaWebservice {
 
     public function procesarComprobante($id, $entity, $modo, $nroTicket = null) {
         $response['res'] = 'ERROR';
+        $response['msg'] = '';
         $em = $this->em;
         try {
             $em->getConnection()->beginTransaction();
@@ -60,6 +61,105 @@ class FacturaElectronicaWebservice {
             elseif ($modo == 'TF') {
                 $dataFe['nroComprobante'] = $nroTicket;
             }
+
+            // guardar FE
+            $this->guardarFacturaElectronica($dataFe);
+
+            //* Marcar como finalizado
+            if ($tipo == 'FAC') {
+                $comprobante->setEstado('FINALIZADO');
+                $comprobante->getVenta()->setEstado('FACTURADO');
+            }
+            else {
+                $comprobante->setEstado('ACREDITADO');
+            }
+            $em->persist($comprobante);
+            $em->flush();
+
+            $em->getConnection()->commit();
+            $response['res'] = 'OK';
+            $response['msg'] = 'Comprobante emitido correctamente!';
+        }
+        catch (\Exception $ex) {
+            $em->getConnection()->rollback();
+            $msg = array_key_exists($ex->getCode(), $this->webserviceError) ?
+                $this->webserviceError[$ex->getCode()] :
+                $ex->getMessage();
+
+            $response['res'] = 'ERROR';
+            $response['msg'] = $ex->getMessage();
+        }
+
+        return $response;
+    }
+
+    public function procesarComprobanteMipymes($id, $entity, $rechazado = 'NO') {
+        $response['res'] = 'ERROR';
+        $em = $this->em;
+        $opcionales = [];
+        try {
+            $em->getConnection()->beginTransaction();
+            $comprobante = $em->getRepository('VentasBundle:' . $entity)->find($id);
+            $tipo = $entity === 'Cobro' ? 'FAC' : 'NDC';
+
+            // preparar los datos de FE
+            $dataFe = $this->setDataFacturaElectronica($tipo, $comprobante, 'WS');
+
+            // cambiar tipo de comprobante a MiPymes
+            $cbteTipo = $em->getRepository('ConfigBundle:AfipComprobante')->find($dataFe['afipComprobante']);
+            $split = split('-', $cbteTipo->getValor());
+
+            $cbte = $split[0] == 'FAC' ? 'FCE' : $split[0];
+            $cbteTipoNuevo = $em->getRepository('ConfigBundle:AfipComprobante')->findOneBy(array('valor' => $cbte . '-' . $split[1]));
+            $dataFe['afipComprobante'] = $cbteTipoNuevo->getId();
+            $hoy = new \DateTime();
+
+            if ($tipo === 'NDC') {
+              $dataFe['periodoAsoc'] = [];
+                $opcionales[] = array(
+                    'Id' => 22,
+                    'Valor' => $rechazado
+                );
+                if($cbte === 'NCE' || $cbte === 'NDE') {
+                  $dataFe['cbtesAsoc'][0]['Cuit'] = $this->cuitAfip == '27208373124' ? $this->afipOptionsTest['CUIT'] : $this->afipOptionsProd['CUIT'];
+                  $dataFe['cbtesAsoc'][0]['CbteFch'] = $comprobante->getComprobanteAsociado()->getCbteFch();
+                }
+            }
+            else {
+               $dataFe['fchVtoPago'] = intval($comprobante->getFechaVtoPago()->format('Ymd'));
+                $parametrizacion = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $this->session->get('unidneg_id')));
+                if ($parametrizacion->getCbuEmisor()) {
+                    $opcionales[] = array(
+                        'Id' => 2101,
+                        'Valor' => $parametrizacion->getCbuEmisor()
+                    );
+                }
+                if ($parametrizacion->getAliasEmisor()) {
+                    $opcionales[] = array(
+                        'Id' => 2102,
+                        'Valor' => $parametrizacion->getAliasEmisor()
+                    );
+                }
+                if ($parametrizacion->getReferenciaComercial()) {
+                    $opcionales[] = array(
+                        'Id' => 23,
+                        'Valor' => $parametrizacion->getReferenciaComercial()
+                    );
+                }
+                if ($parametrizacion->getformPagoFE()) {
+                    $opcionales[] = array(
+                        'Id' => 27,
+                        'Valor' => $parametrizacion->getformPagoFE()
+                    );
+                }
+            }
+            $dataFe['opcionales'] = $opcionales;
+
+            $result = $this->enviarWs($dataFe);
+            // al recibir respuesta actualizar datos de cae
+            $dataFe['cae'] = $result['cae'];
+            $dataFe['caeVto'] = $result['caeVto'];
+            $dataFe['nroComprobante'] = $result['nroComprobante'];
 
             // guardar FE
             $this->guardarFacturaElectronica($dataFe);
@@ -117,7 +217,10 @@ class FacturaElectronicaWebservice {
             'CbtesAsoc' => $fe['cbtesAsoc'],
             'PeriodoAsoc' => $fe['periodoAsoc'],
             'Iva' => $fe['iva'],
+            'Opcionales' => $fe['opcionales'],
+            'FchVtoPago' => $fe['fchVtoPago']
         );
+
         // si no hay tributos
         if (empty($fe['tributos'])) {
             unset($data['Tributos']);
@@ -132,7 +235,13 @@ class FacturaElectronicaWebservice {
         if (empty($fe['periodoAsoc'])) {
             unset($data['PeriodoAsoc']);
         }
-
+        // MiPymes
+        if (empty($fe['opcionales'])) {
+            unset($data['Opcionales']);
+        }
+        if (empty($fe['fchVtoPago'])) {
+            unset($data['FchVtoPago']);
+        }
         // create voucher
         $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
 
@@ -253,6 +362,7 @@ class FacturaElectronicaWebservice {
             $impTrib = $iibb;
             $tributos = array(
                 'Id' => 7,
+                'Desc' => 'Ingresos Brutos',
                 'BaseImp' => $neto,
                 'Alic' => $percRentas,
                 'Importe' => $iibb
@@ -292,9 +402,10 @@ class FacturaElectronicaWebservice {
             'cbtesAsoc' => $cbtesAsoc,
             'periodoAsoc' => $periodoAsoc,
             'tributos' => $tributos,
-            'iva' => $iva
+            'iva' => $iva,
+            'opcionales' => [],
+            'fchVtoPago' => ''
         );
-
         return $dataFe;
     }
 
@@ -311,7 +422,6 @@ class FacturaElectronicaWebservice {
             $nota = $em->getRepository('VentasBundle:NotaDebCred')->find($dataFe['notaId']);
             $cliente = $nota->getCliente();
         }
-
         $fe = new FacturaElectronica();
         $fe->setUnidadNegocio($unidneg);
         $fe->setTipoComprobante($tipoComprobante);
@@ -340,6 +450,8 @@ class FacturaElectronicaWebservice {
         $fe->setCbtesAsoc(json_encode($dataFe['cbtesAsoc']));
         $fe->setPeriodoAsoc(json_encode($dataFe['periodoAsoc']));
         $fe->setIva(json_encode($dataFe['iva']));
+        $fe->setOpcionales(json_encode($dataFe['opcionales']));
+        $fe->setFchVtoPago($dataFe['fchVtoPago']);
 
         $em->persist($fe);
         $em->flush();
@@ -384,7 +496,7 @@ class FacturaElectronicaWebservice {
         $config = $modo == 'PRODUCCION' ? $afipOptionsProd : $afipOptionsTest;
         try {
             $afip = new Afip($config);
-            $wsResult = $afip->ElectronicBilling->GetAliquotTypes();
+            $wsResult = $afip->ElectronicBilling->GetOptionsTypes();
 
             return array('MODO' => $modo, 'STATUS' => $wsResult);
         }

@@ -45,12 +45,12 @@
     </fieldset>
 
     <fieldset class="fields" >
-        {% if entity.signo == '-' %}
+        {# {% if entity.signo == '-' %} #}
         <div style="display:inline-block; width: 40%">
             {% include "VentasBundle:NotaDebCred:block-select-comprobanteasociado.html.twig" %}
         </div>
-        {% endif %}
-        <div style="display:inline-block; width: 25%;">
+        {# {% endif %} #}
+        <div style="display:inline-block; width: 28%;">
             {{ form_row(form.tipoComprobante) }}
         </div>
         <div style="display:inline-block; width: 10%;">
@@ -64,8 +64,11 @@
         </div>
     </fieldset>
     <fieldset class="fields" style="margin-top:10px">
-        <div style="display:inline-block; width:65%;">
+        <div style="display:inline-block; width:50%;">
             {{ form_row(form.concepto) }}
+        </div>
+        <div style="display:inline-block; width:18%;">
+{{ form_row(form.rechazado) }}
         </div>
         <div style="display:inline-block; width:30%;">
             {{ form_row(form.precioLista, { 'attr': {'style' : 'width:70%'} }) }}
@@ -95,8 +98,8 @@
         </div>
         {% endif %}
         <div class="actionbutton">
-            <button class="guardar" id="guardar" type="button" 
-                    data-urlemitir="{{ path('ventas_factura_emitir') }}" 
+            <button class="guardar" id="guardar" type="button"
+                    data-urlemitir="{{ path('ventas_factura_emitir') }}"
                     data-urlticket="{{ path('ventas_factura_getticket')}}">
               <span>Guardar</span> <img class="loader_facturar hidden" src={{ asset('assets/images/loaders/loader8.gif') }} >
             </button>
@@ -189,11 +192,11 @@ jQuery(document).ready(function($){
                 if(  $(':invalid').length>0 || parseFloat(vuelto) <0 ){
                     alert( 'Completar todos los datos para facturar!' );
                     if(vuelto<0) jQuery('#linkAddPago').click()
-                    
+
                     return false;
                 }
             }
-                        
+
             const trs = $('table.detalle tbody tr.item')
             if( trs.length > 0 ){
                 let hayVacios = false
@@ -218,10 +221,10 @@ jQuery(document).ready(function($){
                 }
             }else{  alert('Debe ingresar items a la Nota'); return false;}
         })
-        
+
         // setear tipo comprobante segun cliente
         setTipoComprobante()
-        
+
 });
 
 function setTipoComprobante(){
@@ -275,7 +278,14 @@ function enviarEmision(id){
 function emitirComprobanteWs(notaId){
   jQuery('#guardar span').html('Emitiendo Comprobante...')
   const url = jQuery('#guardar').data('urlemitir')
-  jQuery.post(url, {id:notaId, entity: 'NotaDebCred'}, function(data){
+  const esMiPyme = jQuery('#ventasbundle_notadebcred_tipoComprobante option:selected').text().includes('MiPyME')
+  jQuery.post(url, {
+      id:notaId,
+      entity: 'NotaDebCred',
+      mipyme: esMiPyme,
+      rechazado: jQuery('#ventasbundle_notadebcred_rechazado').val()
+      },
+  function(data){
     if(data.res === 'OK'){
       jQuery("#divEmitirTicket").remove()
       setFacturando(false)
@@ -300,13 +310,13 @@ function imprimirTicket(notaId){
   const driver = getDriver()
   jQuery.get(url, {id:notaId, entity: 'NotaDebCred'}, function(data){
     if(data.res === 'OK' && driver){
-      try {       
+      try {
         driver.iniciarTrabajo();
-        
-        driver.especificarPie('1'," ") 
-        driver.especificarPie('2',data.pie[0]) 
-        driver.especificarPie('3',data.pie[1]) 
-        
+
+        driver.especificarPie('1'," ")
+        driver.especificarPie('2',data.pie[0])
+        driver.especificarPie('3',data.pie[1])
+
         driver.cancelarComprobante();
         let params = data.cliente
         driver.datosCliente(...params);
@@ -315,7 +325,7 @@ function imprimirTicket(notaId){
         // items
         data.items.forEach(function(item,i){
             data.adicItem[i].forEach(function(linea){
-                driver.imprimirTextoFiscal(linea)  
+                driver.imprimirTextoFiscal(linea)
             })
           driver.imprimirItem2g(...item)
         })
@@ -325,14 +335,13 @@ function imprimirTicket(notaId){
             driver.imprimirDescuentoGeneral(data.porcdto, data.montodto);
         // tributos (iibb)
         if(data.iibb) driver.ImprimirOtrosTributos(...data.iibb)
-{#         console.log(data.pagos)#}
         // pagos
         if(data.pagos){
            data.pagos.forEach(function(i){
                 if(i.length){
                     driver.imprimirPago2g(...i)
                }
-          }) 
+          })
         }
 
         driver.cerrarComprobante();
@@ -343,10 +352,10 @@ function imprimirTicket(notaId){
         driver.ultimoComprobante(data.tipo);
         driver.finalizarTrabajo();
         let nroTicket = driver.response.ultimoNumero
-        
+
         jQuery('#guardar span').html('Guardando Ticket...')
         procesarTicket(notaId,'NotaDebCred',nroTicket)
-        alert(('Se ha registrado la impresión del ticket N° '+nroTicket))  
+        alert(('Se ha registrado la impresión del ticket N° '+nroTicket))
 
       } catch (e){
         cancelarTicket(driver)
@@ -369,7 +378,7 @@ function imprimirTicket(notaId){
 function procesarTicket(id, entity, nroticket){
     const url = "{{path('ventas_factura_procesarticket')}}"
     jQuery.post(url, {id, entity, nroticket}, function(data){
-    if(data.res === 'OK'){        
+    if(data.res === 'OK'){
       setFacturando(false)
       location.href = jQuery('.cancelar').attr('href')
     }else{
@@ -424,8 +433,8 @@ function setFacturando(on){
   }
 }
 function registrarMovimientoIfu(comando, error=null){
-   url = "{{ path('ifu_registrar_movimiento') }}" 
-   data = {caja:"1", comando, error } 
+   url = "{{ path('ifu_registrar_movimiento') }}"
+   data = {caja:"1", comando, error }
    jQuery.post(url, data, function(data){
     if(data.res !== 'OK'){
         alert(data.msg)

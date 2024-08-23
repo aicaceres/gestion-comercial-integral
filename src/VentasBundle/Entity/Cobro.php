@@ -106,6 +106,27 @@ class Cobro {
     protected $cotizacion = 0;
 
     /**
+     * @var datetime $periodoAsocDesde
+     * @ORM\Column(name="periodo_asoc_desde", type="datetime", nullable=true)
+     * @Gedmo\Versioned()
+     */
+    private $periodoAsocDesde;
+
+    /**
+     * @var datetime $periodoAsocHasta
+     * @ORM\Column(name="periodo_asoc_hasta", type="datetime", nullable=true)
+     * @Gedmo\Versioned()
+     */
+    private $periodoAsocHasta;
+
+    /**
+     * @var datetime $fechaVtoPago
+     * @ORM\Column(name="fecha_vto_pago", type="datetime", nullable=true)
+     * @Gedmo\Versioned()
+     */
+    private $fechaVtoPago;
+
+    /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="cobro",cascade={"persist", "remove"}, orphanRemoval=true)
      */
     protected $detalles;
@@ -641,4 +662,73 @@ class Cobro {
         return $this->tipoDocumentoCliente;
     }
 
+
+    /**
+     * Set periodoAsocDesde
+     *
+     * @param \DateTime $periodoAsocDesde
+     * @return Cobro
+     */
+    public function setPeriodoAsocDesde($periodoAsocDesde)
+    {
+        $this->periodoAsocDesde = $periodoAsocDesde;
+
+        return $this;
+    }
+
+    /**
+     * Get periodoAsocDesde
+     *
+     * @return \DateTime 
+     */
+    public function getPeriodoAsocDesde()
+    {
+        return $this->periodoAsocDesde;
+    }
+
+    /**
+     * Set periodoAsocHasta
+     *
+     * @param \DateTime $periodoAsocHasta
+     * @return Cobro
+     */
+    public function setPeriodoAsocHasta($periodoAsocHasta)
+    {
+        $this->periodoAsocHasta = $periodoAsocHasta;
+
+        return $this;
+    }
+
+    /**
+     * Get periodoAsocHasta
+     *
+     * @return \DateTime 
+     */
+    public function getPeriodoAsocHasta()
+    {
+        return $this->periodoAsocHasta;
+    }
+
+    /**
+     * Set fechaVtoPago
+     *
+     * @param \DateTime $fechaVtoPago
+     * @return Cobro
+     */
+    public function setFechaVtoPago($fechaVtoPago)
+    {
+        $this->fechaVtoPago = $fechaVtoPago;
+
+        return $this;
+    }
+
+    /**
+     * Get fechaVtoPago
+     *
+     * @return \DateTime 
+     */
+    public function getFechaVtoPago()
+    {
+        return $this->fechaVtoPago;
+    }
 }

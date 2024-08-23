@@ -45,18 +45,18 @@
                 <th>IVA</th>
                 <th>IIBB</th>
                 <th>Total</th>
-                
+
                 <th>Base21</th>
                 <th>Iva21</th>
                 <th>Base105</th>
                 <th>Iva105</th>
-                
+
                 <th>Cta Cte</th>
             </tr>
         </thead>
         <tbody>
             {% for item in entity %}
-      
+
             <tr>
                 <td>{{item.fecha}}</td>
                 <td>{{item.tipoComprobante}}</td>
@@ -68,29 +68,29 @@
                 <td>{{item.nombreCliente}}</td>
                 <td>{{item.tipoCambio}}</td>
                 <td>{{item.moneda}}</td>
-                
+
                 <td class="alignright">{{item.impNeto|number_format(2,'.','')}}</td>
-                <td class="alignright">{{item.impTotConc|number_format(3,'.','')}}</td>
-                <td class="alignright">{{item.impOpEx|number_format(3,'.','')}}</td>
+                <td class="alignright">{{item.impTotConc|number_format(2,'.','')}}</td>
+                <td class="alignright">{{item.impOpEx|number_format(2,'.','')}}</td>
                 <td class="alignright">{{item.impIva|number_format(2,'.','')}}</td>
                 <td class="alignright">{{item.impTrib|number_format(2,'.','')}} - {{ ((item.impTrib*100)/item.impNeto)|number_format(2,'.','') }}</td>
                 <td class="alignright"><b>{{item.total|number_format(2,'.','')}}</b></td>
-                
+
                 <td class="alignright">{{item.base21|number_format(2,'.','')}}</td>
                 <td class="alignright">{{item.iva21|number_format(2,'.','')}} </td>
                 <td class="alignright">{{item.base105|number_format(2,'.','')}}</td>
                 <td class="alignright">{{item.iva105|number_format(2,'.','')}}</td>
-                
+
                 <td>{{item.enCtacte}}</td>
             </tr>
             {% else %}
             <tr>
                 <td colspan="20"> SIN DATOS </td>
-            </tr>    
+            </tr>
             {% endfor %}
         </tbody>
         <tfoot>
-        <th colspan="20"> Facturas por procesar: {{ entity|length }}</th>            
+        <th colspan="20"> Facturas por procesar: {{ entity|length }}</th>
         </tfoot>
     </table>
 </div>

@@ -58,10 +58,15 @@
                 {% set simbolo = cbte.moneda.simbolo %}
                 {% set cliente = cbte.cliente %}
                 {% set operador = cbte.venta is defined ? cbte.venta.createdBy.nombre : cbte.createdBy.nombre %}
-                <div height="220px" width="100%">
+                <div {% if 'FCE' in fe.tipoComprobante.valor %} height="280px" {% else %} height="220px" {% endif %} width="100%">
                     {% if cliente.categoriaIva.nombre == 'M' %}
                     <div font-size="8px" padding="10px">
                     Crédito fiscal discriminado en el presente comprobante sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes Ley 27618
+                    </div>
+                    {% endif %}
+                    {% if 'FCE' in fe.tipoComprobante.valor %}
+                    <div font-size="8px" padding="10px" color="brown">
+                    Luego de su aceptación tácita o expresa, esta Factura de Crédito Electrónica MiPyMEs será transmitida a El <strong>Sistema de Circulación Abierta para Facturas de Crédito Electrónicas MiPyMEs</strong>, para su circulación y negociación, incluso en los Mercados de Valores, en este caso, a través de un Agente de Depósito Colectivo o agentes que cumplan similares funciones.
                     </div>
                     {% endif %}
                     <div border.color="#555555" height="1px" ></div>
@@ -79,7 +84,7 @@
                         </tr>
                         <tr>
                             <td border.type="none" font-size="8px">Op: {{operador|upper}} - {{ cbte.refVenta is defined ? cbte.refVenta ~' - ' : ''}} {{'now'|date('d-m-Y H:i')}} </td>
-                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{cbte.descuentoRecargo}}%]: {{simbolo}} {{cbte.totalDescuentoRecargo|number_format(3,',','.')}}</td>
+                            <td border.type="none" text-align="right" vertical-align="middle" padding-top="5px">Desc [{{cbte.descuentoRecargo}}%]: {{simbolo}} {{cbte.totalDescuentoRecargo|number_format(2,',','.')}}</td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Subtotal:</span></td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
                                 <span>{{simbolo}} {{ (cbte.subTotal + cbte.totalDescuentoRecargo)|number_format(2,',','.') }}</span>
@@ -131,6 +136,28 @@
             </footer>
         </placeholders>
         <div border.color="#555555" height="1px" ></div>
+        {% if fe.getOpcionalesById(2101) %}
+        <table font-size="11px" padding-bottom="10px">
+            <tr>
+                <td border.type="none" padding-top="10px">
+                    <strong>Fecha de Vencimiento para el pago:</strong> {{fe.getFchVtoPagoFormatted('d-m-Y')}}
+                </td>
+                <td border.type="none" padding-top="10px">
+                    <strong>Período facturado Desde:</strong> {{fe.periodoFacturado.desde|date('d-m-Y')}} <strong>Hasta:</strong> {{fe.periodoFacturado.hasta|date('d-m-Y')}}
+                </td>
+            </tr>
+            <tr>
+                <td border.type="none" padding-top="10px">
+                    <strong>CBU del Emisor:</strong> {{fe.getOpcionalesById(2101)}}
+                </td>
+                <td border.type="none" padding-top="10px">
+                    <strong>Alias del Emisor:</strong> {{fe.getOpcionalesById(2102)}}
+                </td>
+            </tr>
+        </table>
+        <div border.color="#555555" height="1px" ></div>
+        {% endif %}
+
         <table font-size="11px" padding-bottom="10px">
             <tr>
                 <td border.type="none" padding-top="10px">
@@ -157,6 +184,13 @@
                     <strong>Condición de Venta:</strong> {{cbte.formaPago}}
                 </td>
             </tr>
+            {% if fe.getOpcionalesById(27) %}
+            <tr>
+                <td colspan="2" border.type="none" padding-top="10px">
+                    <strong>Opción de Transferencia:</strong> {{fe.getOpcionTransferencia}}
+                </td>
+            </tr>
+            {% endif %}
         </table>
 
         <table font-size="9px" padding-top="10px">
@@ -193,7 +227,7 @@
                     {{item.nombreProducto}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{item.precioUnitarioItem|number_format(3,',','.')}}
+                    {{item.precioUnitarioItem|number_format(2,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
                     {{item.alicuota|number_format(2,',','.')}}%
@@ -207,7 +241,7 @@
             {% if cbte.concepto %}
             <tr>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{ 1|number_format(3,',','.')}}
+                    {{ 1|number_format(2,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="center" padding-top="5px">
                     999999
@@ -216,7 +250,7 @@
                     {{cbte.concepto|nl2br}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
-                    {{0|number_format(3,',','.')}}
+                    {{0|number_format(2,',','.')}}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px" padding-top="5px">
                     {{21|number_format(2,',','.')}}%

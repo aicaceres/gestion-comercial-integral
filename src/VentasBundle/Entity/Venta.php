@@ -208,7 +208,7 @@ class Venta {
             // descuento sobre el subtotal
             $total = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
         }
-        return round(($total), 3);
+        return round(($total), 2);
     }
 
     public function getTotalIva() {
@@ -221,7 +221,7 @@ class Venta {
             foreach ($this->detalles as $item) {
                 $total = $total + $item->getTotalIvaItem();
             }
-            return round(($total / $this->getCotizacion()), 3);
+            return round(($total / $this->getCotizacion()), 2);
         }
     }
 
@@ -244,7 +244,7 @@ class Venta {
             $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
             $total = $this->getSubTotal() + $descRec;
         }
-        return round($total, 3);
+        return round($total, 2);
     }
 
     /**

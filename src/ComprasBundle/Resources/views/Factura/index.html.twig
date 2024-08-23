@@ -61,8 +61,8 @@
                 <td>{{entity.afipComprobante.nombre~' '~entity.nuevoNroComprobante}}</td>
                 <td><span class="hidden">{{ entity.fechaFactura|date('Ymd') }}</span>{{ entity.fechaFactura|date('d-m-Y') }}</td>
                 <td>{{ entity.proveedor }}</td>
-                <td class="alignright">{{ entity.getTotal|number_format(3,'.',',') }}</td>
-                <td class="alignright">{{ entity.saldo|number_format(3,'.',',') }}</td>
+                <td class="alignright">{{ entity.getTotal|number_format(2,'.',',') }}</td>
+                <td class="alignright">{{ entity.saldo|number_format(2,'.',',') }}</td>
                 <td class="estado">{{ entity.estado }}</td>
                 <td>{{ entity.createdBy.username }}</td>
                 <td class="buttons">

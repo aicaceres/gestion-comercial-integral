@@ -154,6 +154,7 @@ class NotaDebCredController extends Controller {
         $form->handleRequest($request);
 
         if ($form->isValid()) {
+
             $em->getConnection()->beginTransaction();
             try {
 
@@ -187,14 +188,14 @@ class NotaDebCredController extends Controller {
                 else {
                     $entity->setNombreCliente($cliente->getNombre());
                 }
-
                 if ($request->get('ventasbundle_notadebcred_comprobanteAsociado')) {
 
                     $compAsoc = $em->getRepository('VentasBundle:FacturaElectronica')->find($request->get('ventasbundle_notadebcred_comprobanteAsociado'));
-                    if($compAsoc->getSaldo() === $compAsoc->getTotal()){
-                      $entity->setComprobanteAsociado($compAsoc);
-                    }else{
-                      $entity->setConcepto($compAsoc->getComprobanteTxt());
+                    if ($compAsoc->getSaldo() === $compAsoc->getTotal()) {
+                        $entity->setComprobanteAsociado($compAsoc);
+                    }
+                    else {
+                        $entity->setConcepto($compAsoc->getComprobanteTxt());
                     }
                 }
 
@@ -207,6 +208,7 @@ class NotaDebCredController extends Controller {
                     $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
                     $productos = $request->get('ventasbundle_producto');
                     foreach ($entity->getDetalles() as $key => $item) {
+// ver como borrar los items antes de volver a cargar cuando se modifica el comprobante asociado en el detalle. en la pantalla
                         $producto = $em->getRepository('AppBundle:Producto')->find($productos[$key]);
                         if ($producto) {
                             $item->setProducto($producto);
@@ -232,6 +234,7 @@ class NotaDebCredController extends Controller {
                     }
                     $impTotal += $impTrib;
                 }
+
                 // completar datos de detalles
                 $saldo = 0;
                 if (count($entity->getCobroDetalles()) == 0) {
@@ -256,12 +259,14 @@ class NotaDebCredController extends Controller {
                         if ($tipoPago != 'CHEQUE') {
                             $detalle->setChequeRecibido(null);
                         }
+                        else {
+                            $detalle->getChequeRecibido()->setTomado(new \DateTime());
+                        }
                         if ($tipoPago != 'TARJETA') {
                             $detalle->setDatosTarjeta(null);
                         }
                     }
                 }
-
                 // seteo ultimos valores
                 $tipo = $entity->getTipoComprobante();
                 $entity->setIva($impIVA);
@@ -607,16 +612,16 @@ class NotaDebCredController extends Controller {
      * @Method("GET")
      */
     public function releaseAction($id) {
-       if($this->getUser()->isAdmin($this->get('session')->get('unidneg_id'))){
-        $em = $this->getDoctrine()->getManager();
-        $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
-        $entity->setComprobanteAsociado(null);
-        $entity->setSaldo($entity->getTotal());
-        $em->persist($entity);
-        $em->flush();
-        $this->addFlash('success', 'Se liberó el comprobante asociado');
-        return $this->redirectToRoute('ventas_notadebcred_show', array('id' => $id));
-       }
+        if ($this->getUser()->isAdmin($this->get('session')->get('unidneg_id'))) {
+            $em = $this->getDoctrine()->getManager();
+            $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($id);
+            $entity->setComprobanteAsociado(null);
+            $entity->setSaldo($entity->getTotal());
+            $em->persist($entity);
+            $em->flush();
+            $this->addFlash('success', 'Se liberó el comprobante asociado');
+            return $this->redirectToRoute('ventas_notadebcred_show', array('id' => $id));
+        }
 //         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_notadebcred');
 //         $em = $this->getDoctrine()->getManager();
 //         $entity = $em->getRepository('VentasBundle:NotaDebCred')->find($id);

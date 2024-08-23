@@ -60,7 +60,7 @@ function addNewPago(tipo) {
 	const imp = jQuery(".vuelto").html()
 		? jQuery(".vuelto").html().replace(",", ".")
 		: 0
-	importe.val(Math.abs(parseFloat(imp)).toFixed(3)).change()
+	importe.val(Math.abs(parseFloat(imp)).toFixed(2)).change()
 }
 
 function quitarElementosSegunTipo(pagosTr) {

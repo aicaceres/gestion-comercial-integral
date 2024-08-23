@@ -72,61 +72,61 @@ class NotaDebCred {
 
     /**
      * @var integer $subtotal
-     * @ORM\Column(name="subtotal", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="subtotal", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $subtotal;
 
     /**
      * @var integer $subtotalNeto
-     * @ORM\Column(name="subtotal_neto", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="subtotal_neto", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $subtotalNeto;
 
     /**
      * @var integer $impuestoInterno
-     * @ORM\Column(name="impuesto_interno", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="impuesto_interno", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $impuestoInterno;
 
     /**
      * @var integer $iva
-     * @ORM\Column(name="iva", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="iva", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $iva;
 
     /**
      * @var integer $percepcionIva
-     * @ORM\Column(name="percepcion_iva", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="percepcion_iva", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $percepcionIva;
 
     /**
      * @var integer $percepcionDgr
-     * @ORM\Column(name="percepcion_dgr", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="percepcion_dgr", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $percepcionDgr;
 
     /**
      * @var integer $percepcionMunicipal
-     * @ORM\Column(name="percepcion_municipal", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="percepcion_municipal", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $percepcionMunicipal;
 
     /**
      * @var integer $totalBonificado
-     * @ORM\Column(name="total_bonificado", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="total_bonificado", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $totalBonificado;
 
     /**
      * @var integer $tmc
-     * @ORM\Column(name="tmc", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="tmc", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $tmc;
 
     /**
      * @var integer $total
-     * @ORM\Column(name="total", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="total", type="decimal", precision=20, scale=2 )
      */
     protected $total;
 
@@ -142,7 +142,7 @@ class NotaDebCred {
 
     /**
      * @var integer $saldo
-     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=3,nullable=true )
+     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=2,nullable=true )
      */
     protected $saldo;
 
@@ -198,6 +198,11 @@ class NotaDebCred {
      * @ORM\Column(name="afip_nro_comprobante", type="string", length=20)
      */
     protected $afipNroComprobante;
+
+        /**
+     * @ORM\OneToMany(targetEntity="ComprasBundle\Entity\NotaDebCredAlicuota", mappedBy="notaDebCred",cascade={"persist", "remove"})
+     */
+    protected $alicuotas;
 
     /**
      * @var datetime $created
@@ -1003,4 +1008,38 @@ class NotaDebCred {
         return $this->retencionesAplicadas;
     }
 
+
+    /**
+     * Add alicuotas
+     *
+     * @param \ComprasBundle\Entity\NotaDebCredAlicuota $alicuotas
+     * @return NotaDebCred
+     */
+    public function addAlicuota(\ComprasBundle\Entity\NotaDebCredAlicuota $alicuotas)
+    {
+        $alicuotas->setNotaDebCred($this);
+        $this->alicuotas[] = $alicuotas;
+
+        return $this;
+    }
+
+    /**
+     * Remove alicuotas
+     *
+     * @param \ComprasBundle\Entity\NotaDebCredAlicuota $alicuotas
+     */
+    public function removeAlicuota(\ComprasBundle\Entity\NotaDebCredAlicuota $alicuotas)
+    {
+        $this->alicuotas->removeElement($alicuotas);
+    }
+
+    /**
+     * Get alicuotas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAlicuotas()
+    {
+        return $this->alicuotas;
+    }
 }

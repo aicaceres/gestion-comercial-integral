@@ -55,13 +55,13 @@ class Factura {
 
     /**
      * @var integer $total
-     * @ORM\Column(name="total", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="total", type="decimal", precision=20, scale=2 )
      */
     protected $total;
 
     /**
      * @var integer $saldo
-     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=3 )
+     * @ORM\Column(name="saldo", type="decimal", precision=20, scale=2 )
      */
     protected $saldo;
 
