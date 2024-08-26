@@ -100,7 +100,7 @@
 
         <table width="80%" margin-left="20%" margin-top="5px">
             {% set total_cheques = 0 %}
-            {% for mov in apertura.movimientos if mov.cobro %}
+            {% for mov in apertura.movimientos if mov.pagoProveedor is null %}
             {% if mov.tipoPago == 'CHEQUE' %}
                 {% set banco = mov.chequeRecibido.banco ? mov.chequeRecibido.banco.nombre : '///' %}
                 {% if not ( banco in bancosRetencion) %}
@@ -151,7 +151,7 @@
 
         <table width="80%" margin-left="20%" margin-top="5px">
             {% set total_cheques = 0 %}
-            {% for mov in apertura.movimientos if mov.pagoCliente %}
+            {% for mov in apertura.movimientos if mov.pagoProveedor %}
             {% if mov.tipoPago == 'CHEQUE' %}
                 {% set banco = mov.chequeRecibido.banco ? mov.chequeRecibido.banco.nombre : '///' %}
                 {% if not ( banco in bancosRetencion) %}
