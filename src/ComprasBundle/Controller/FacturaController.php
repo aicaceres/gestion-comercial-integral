@@ -13,6 +13,7 @@ use ConfigBundle\Controller\UtilsController;
 use ComprasBundle\Entity\Factura;
 use ComprasBundle\Entity\FacturaDetalle;
 use ComprasBundle\Form\FacturaType;
+use ComprasBundle\Form\FacturaEditarType;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
 use ComprasBundle\Entity\PagoProveedor;
@@ -131,7 +132,7 @@ class FacturaController extends Controller {
                         $entity->removeDetalle($detalle);
                     }
                 }
-                $entity->setAfipNroComprobante(sprintf("%08d",  $entity->getAfipNroComprobante()));
+                $entity->setAfipNroComprobante(sprintf("%08d", $entity->getAfipNroComprobante()));
                 $em->persist($entity);
                 $em->persist($equipo);
                 $em->flush();
@@ -782,6 +783,65 @@ class FacturaController extends Controller {
         catch (\Exception $ex) {
             return $ex->getMessage();
         }
+    }
+
+    /**
+     * Editar las facturas antes de informar a afip
+     */
+
+    /**
+     * @Route("/editar/{id}", name="compras_factura_editar_admin")
+     * @Method("GET")
+     * @Template()
+     */
+    public function editarAdminAction($id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_factura_editar_admin');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('ComprasBundle:Factura')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Factura entity.');
+        }
+
+        $editForm = $this->createEditarAdminForm($entity);
+        return $this->render('ComprasBundle:Factura:editar-admin.html.twig', array(
+                'entity' => $entity,
+                'form' => $editForm->createView()
+        ));
+    }
+
+    private function createEditarAdminForm(Factura $entity) {
+        $form = $this->createForm(new FacturaEditarType(), $entity, array(
+            'action' => $this->generateUrl('compras_factura_update_editar', array('id' => $entity->getId())),
+            'method' => 'PUT',
+        ));
+        return $form;
+    }
+
+    /**
+     * @Route("/editar/{id}", name="compras_factura_update_editar")
+     * @Method("PUT")
+     * @Template("AppBundle:Factura:editar-admin.html.twig")
+     */
+    public function updateEditarAction(Request $request, $id) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_factura_edit');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('ComprasBundle:Factura')->find($id);
+        $editForm = $this->createEditarAdminForm($entity);
+        $editForm->handleRequest($request);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Factura entity.');
+        }
+        if ($editForm->isValid()) {
+            $em->persist($entity);
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('compras_factura'));
+        }
+        return $this->render('ComprasBundle:Factura:edit.html.twig', array(
+                'entity' => $entity,
+                'form' => $editForm->createView()
+        ));
     }
 
 }

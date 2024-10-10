@@ -1,0 +1,176 @@
+{% extends "AppBundle::layout.html.twig" %}
+{% block pageheader %}
+<style>
+.divEdicion select:focus, .divEdicion input:focus, .divEdicion button:focus, .divEdicion a:focus, .divEdicion .select2-container *:focus{
+        color:blue ;
+        font-weight:bold ;
+        background-color: gainsboro;
+    }
+.focus{
+    font-weight:bold ;
+}
+</style>
+<div class="pageheader notab">
+    <h1 class="pagetitle">Facturas de Compras</h1>
+</div><!--pageheader-->
+{% endblock %}
+{% block contentwrapper %}
+<div id="contentwrapper" class="contentwrapper">
+<h1 id="popup_title" >Corregir Factura Nº: {{ entity.tipoFactura~' '~entity.nuevoNroComprobante}}</h1>
+{% include "AppBundle::notificacion.html.twig" %}
+<div class="divEdicion">
+{{ form_start(form, {'attr': {'class': 'stdform','id':'comprasbundle_factura'}}) }}
+        <fieldset >
+            <div class="two_fields">
+                <div><label for="nroFactura">{{ entity.afipComprobante.nombre}}:</label>
+
+                    <input type="text" value="{{entity.nuevoNroComprobante}}" disabled="disabled" class="smallinput">
+                </div>
+                <div><label for="nroPedido">Fecha:</label>
+                    <input type="text" value="{{entity.fechaFactura|date('d/m/Y')}}" disabled="disabled" class="width100">
+                </div>
+            </div>
+            <div class="two_fields">
+                <div><label for="nroPedido">Proveedor:</label>
+                    <input type="text" value="{{entity.proveedor}}" disabled="disabled" class="smallinput">
+                </div>
+                <div>
+                    <label for="estado" >Estado:</label>
+                    <input type="text" value="{{entity.estado}}" disabled="disabled" class="width100">
+                </div>
+                <div style="display:none"><label for="nroFactura">Nº Comprobante:</label>
+                    <input type="text" value="{{entity.nroComprobante}}" disabled="disabled" class="width100">
+                </div>
+            </div>
+            <div class="two_fields">
+                <div><label for="nroPedido">Rubro Compras:</label>
+                    <input type="text" value="{{entity.rubroCompras}}" disabled="disabled" class="mediuminput">
+                </div>
+            </div>
+            <div>
+                <label for="estado" >Descripción:</label>
+                <input type="text" value="{{entity.descripcion}}" disabled="disabled" class="smallinput">
+
+                <strong style="padding-left:10px" > Saldo: {{ entity.saldo|number_format(2,'.',',') }} </strong>
+
+            </div>
+            <div class="formrows">            
+            <div style="padding-top: 20px; margin:auto; width: 100%;" id="divItems">
+                {{ form_errors(form.detalles) }}
+                <table cellpadding="0" cellspacing="0" border="0" class="factura stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th style="width:3%;">Nº</th>
+                            <th>Producto</th>
+                            <th style="width:8%;">Alícuota</th>
+                            <th style="width:12%;">Cant.</th>
+                            <th style="width:10%;">Costo Unit.</th>
+                            <th style="width:10%;">SubTotal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="main" data-index="{{form.detalles | length }}" data-prototype="{% filter escape %}{% include 'ComprasBundle:Factura:prototype.html.twig' with {'item':form.detalles.vars.prototype} %}{% endfilter %}">
+                    {% for det in form.detalles %}
+                        <tr class="item" divdata="item_{{loop.index-1}}">
+                            <td class="ordTd" data-id="{{ det.vars.data.id }}"></td>
+                            <td class="prodTd" data-iva="{{det.vars.data.producto.iva}}">{{det.vars.data.producto}}</td>
+                            <td class="afipAlicuota">{{det.vars.data.afipAlicuota}}</td>
+                            <td class="cantTd">{{det.vars.data.cantidadTxt}}</td>
+                            <td class="precTd  alignright">
+                                <span tabIndex="-1">{{det.vars.data.precio}} </span>
+                            </td>
+                            <td class="totalTd alignright">{{ det.vars.data.getTotal|number_format(2,'.','') }}</td>
+                        </tr>
+
+                    {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="5" style="text-align:right"> SubTotal</th>
+                            <th class="cktotal red" id="Total">{{ form_widget(form.subtotal, { 'attr': {'style':'text-align:right;'} }) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
+                    <thead>
+                        <tr>
+                            <th>Subtotal Neto </th>
+                            <th>Total Bonif. </th>
+                            <th>IVA </th>
+                            <th>Percep. IVA </th>
+                            <th>Percep. DGR </th>
+                            <th>Percep. Muni </th>
+                            <th>Impuesto Interno </th>
+                            <th>No Grav.</th>
+                            <th>TOTAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="cktotal">{{ form_widget(form.subtotalNeto, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.totalBonificado, { 'attr': {'style':'text-align:right;','data-old':'0'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.iva, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionIva, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionDgr, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.percepcionMunicipal, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.impuestoInterno, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.tmc, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                            <td class="cktotal">{{ form_widget(form.total, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="widgetbox" id="tableAlicuotas" style="width: 530px;margin:auto;background: aliceblue;padding: 15px;display:block;">
+              <div class="title" style="margin:0;"><h5>Detalle de alícuotas <a href="#" id="addAlicuota" title="Agregar otra alícuota" style="display:none">[ + ]</a></h5></div>
+              <div class="widgetcontent">
+                {{ form_errors(form.alicuotas) }}
+                <table class="stdtable alicuotas" cellspacing="0" cellpadding="0" border="0" style="background:white;margin-top: 10px;">
+                  <thead>
+                      <tr>
+                          <th style="width:100px;">Alícuota</th>
+                          <th style="width:200px">Importe neto gravado</th>
+                          <th style="width:200px;">Impuesto liquidado</th>
+                      </tr>
+                  </thead>
+                  <tbody data-index="{{form.alicuotas | length }}" data-prototype="{% filter escape %}{% include 'ComprasBundle:Factura:_alicuotas_prototype.html.twig' with {'item':form.alicuotas.vars.prototype} %}{% endfilter %}">
+                      {% for alic in form.alicuotas %}
+                          {% set neto, liq = 0,0 %}
+                          <tr class="alicitem" style="height:30px" divdata="item_{{loop.index-1}}">
+                              <td class="alicTd"><span>{{ alic.vars.data.afipAlicuota.nombre }}</span> {{ form_widget(alic.afipAlicuota, { 'attr': {'style':'display:none'} }) }}</td>
+                              <td class="netoTd">{{ form_widget(alic.netoGravado, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                              <td class="alicIvaTd">{{ form_widget(alic.liquidado, { 'attr': {'style':'text-align:right;'} }) }}</td>
+                          </tr>
+                      {% endfor %}
+                  </tbody>
+                  <thead>
+                      <tr>
+                          <th></th>
+                          <th id="netoTh" class="alignright" style="padding-right: 20px;">0</th>
+                          <th id="ivaTh" class="alignright" style="padding-right: 20px;">0</th>
+                      </tr>
+                  </thead>
+                </table>
+              </div><!--widgetcontent-->
+            </div>
+
+            <br clear="all" />
+            <div class="actionbutton">
+                <button class="guardar" type="submit" >Guardar</button>
+                <a class="cancelar" id="cancelar" type="button" href="{{ path('compras_factura')}}">Cancelar</a>
+            </div>
+        </fieldset>
+        <div name="rest" class="hiddenformrest">{{ form_rest(form) }}</div>
+  {{ form_end(form) }}
+</div>
+</div>
+{% endblock %}
+{% block extra_javascripts %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/chosen.jquery.min.js') }}"></script>
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    $('.togglemenu').click();
+    
+    $('#comprasbundle_factura').on('submit', function(){
+        if(!confirm('Confirma la registración?')) return false;
+    })
+});
+</script>{% endblock %}

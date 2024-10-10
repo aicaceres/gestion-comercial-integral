@@ -242,6 +242,9 @@ class FacturaElectronicaWebservice {
         if (empty($fe['fchVtoPago'])) {
             unset($data['FchVtoPago']);
         }
+        if ($fe['impIVA'] == 0){
+             unset($data['Iva']);
+        }
         // create voucher
         $wsResult = $afip->ElectronicBilling->CreateNextVoucher($data);
 
@@ -337,13 +340,16 @@ class FacturaElectronicaWebservice {
                             'BaseImp' => round($iva[$key]['BaseImp'] + $baseImp, 2),
                             'Importe' => round($iva[$key]['Importe'] + $importe, 2)
                         );
-                    }
-                    // TOTALES
-                    $impDtoRec += $dtoRec;
+                    }                  
                     $impNeto += $baseImp;
-                    $impIVA += $importe;
-                    $impTotal += ($baseImp + $importe);
+                }else{
+                    $impOpEx += $baseImp;
                 }
+                // TOTALES
+                $impDtoRec += $dtoRec;
+                
+                $impIVA += $importe;
+                $impTotal += ($baseImp + $importe);
             }
         }
 

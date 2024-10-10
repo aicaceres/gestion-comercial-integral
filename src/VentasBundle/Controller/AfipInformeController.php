@@ -51,7 +51,7 @@ class AfipInformeController extends Controller {
          */
         $facturas = $em->getRepository('VentasBundle:Factura')->findByFeventasPeriodoUnidadNegocio($desde, $hasta, $unidneg);
         foreach ($facturas as $fe) {
-            $operacionesExentas = 0;
+            $operacionesExentas = $fe->getImpOpEx();
             $error = array();
             $comprobante = $fe->getCobro() ? $fe->getCobro() : $fe->getNotaDebCred();
             $signo = 1;

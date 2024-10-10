@@ -58,8 +58,8 @@
                             <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.6 cm">
                                 Mon
                             </td>
-                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1.2 cm">
-                                Cotización
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.8 cm">
+                                Cotiz.
                             </td>
                             <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
                                 EFECTIVO
@@ -70,10 +70,10 @@
                             <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
                                 TARJETA
                             </td>
-                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.2 cm">
                                 TRANSFERENCIA
                             </td>
-                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm">
+                            <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.2 cm">
                                 CTA.CTE.
                             </td>
                         </tr>
@@ -142,15 +142,21 @@
                           {'tag': 'REC', 'title': 'RECIBOS'}] %}
 
     {% for tipoComp in tiposPagos %}
-        {% set cnt, efectivo, cheque, tarjeta, ctacte, transferencia, retencion, vuelto = 0,0,0,0,0,0,0,0 %}
+        {% set cnt, efectivo, cheque, chequerec, tarjeta, ctacte, transferencia, retencion, vuelto = 0,0,0,0,0,0,0,0,0 %}
         {% for item in arqueo if item.tipoComprobante == tipoComp['tag'] %}
             {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'item':item} %}
-            {% set cnt, efectivo, cheque, tarjeta, ctacte, transferencia, vuelto =
-                   cnt+1 , efectivo + item.EFECTIVO, cheque + item.CHEQUE, tarjeta + item.TARJETA, ctacte + item.CTACTE, transferencia + item.TRANSFERENCIA, vuelto + item.vuelto %}
+            {% set cnt, efectivo, tarjeta, ctacte, transferencia, vuelto =
+                   cnt+1 , efectivo + item.EFECTIVO, tarjeta + item.TARJETA, ctacte + item.CTACTE, transferencia + item.TRANSFERENCIA, vuelto + item.vuelto %}
+         
+            {% if tipoComp['tag'] == 'REC' %}
+                {% set chequerec = chequerec + item.CHEQUE %}                  
+            {% endif %}    
+            {% set cheque = cheque + item.CHEQUE %}
         {% endfor %}
 
         {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
-        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
+        
+        {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + chequerec) %}
         {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
         {% set tot_transferencia, tot_vuelto = (tot_transferencia + transferencia),  tot_vuelto + vuelto %}
 
@@ -184,11 +190,29 @@
             <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
                 {{ tot_tarjeta|number_format(2,',','.') }}
             </td>
-            <td height="20px" border.color="#555555" padding="10px" text-align="center" vertical-align="middle">
+            <td height="20px" border.color="#555555" padding="10px" text-align="right" vertical-align="middle">
                 {{ tot_transferencia|number_format(2,',','.') }}
             </td>
-            <td height="20px" border.color="#555555" padding="10px" text-align="center" vertical-align="middle">
+            <td height="20px" border.color="#555555" padding="10px" text-align="right" vertical-align="middle">
                 <b>{{ (tot_efectivo + tot_cheque + tot_tarjeta + tot_transferencia)|number_format(2,',','.') }}</b>
+            </td>
+        </tr>
+        <tr font-size="6px">
+            <td border.type="none" height="3px" colspan="5" padding="3px" vertical-align="middle"></td>
+            <td border.color="#555555" height="3px" padding="3px" text-align="center" padding-right="5px" vertical-align="middle">
+                EFECTIVO
+            </td>
+            <td border.color="#555555" height="3px" padding="3px" text-align="center" padding-right="5px" vertical-align="middle">
+                CHEQUE
+            </td>
+            <td border.color="#555555" height="3px" padding="3px" text-align="center" padding-right="5px" vertical-align="middle">
+                TARJETA
+            </td>
+            <td height="3px" border.color="#555555" padding="3px" text-align="center" vertical-align="middle">
+                TRANSFERENCIA
+            </td>
+            <td height="3px" border.color="#555555" padding="3px" text-align="center" vertical-align="middle">
+                <b>TOTAL</b>
             </td>
         </tr>
 

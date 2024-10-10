@@ -228,23 +228,8 @@ class CajaAperturaController extends Controller {
         $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($id);
         $movimientos = $em->getRepository('VentasBundle:CajaApertura')->getMovimientosById($id);
         $bancosRetencion = $em->getRepository('ConfigBundle:Banco')->findBancosRetencion();
-
         $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante_bn.png';
-//        return $this->render('VentasBundle:CajaApertura:informe-arqueo.pdf.twig',
-//                array('apertura' => $apertura, 'movimientos' => $movimientos, 'logo' => $logo));
-//        $resumen = array(
-//            'nroComprobante' => '',
-//            'fecha' => '',
-//            'cliente' => '',
-//            'moneda' => '',
-//            'cotiz' => '',
-//            'montoComp' => 0,
-//            'efectivo' => 0,
-//            'cheque' => 0,
-//            'tarjeta' => 0,
-//            'ctacte' => 0,
-//            'total' => 0,
-//            'tipoComprobante' => '');
+
         $resumen = $resumenMov = array();
         foreach ($movimientos as $mov) {
             if (!$mov->getIncluirEnArqueo()) {
@@ -253,10 +238,11 @@ class CajaAperturaController extends Controller {
             $tipoPago = $mov->getTipoPago();
             if ($tipoPago == 'CHEQUE') {
                 $banco = $mov->getChequeRecibido()->getBanco() ? $mov->getChequeRecibido()->getBanco()->getNombre() : '///';
-                if (strpos($banco, 'RETENCION') != false) {
+                if (strpos($banco, 'RETENCION') !== false) {
                     $tipoPago = 'RETENCION';
                 }
             }
+
             if ($tipoPago == 'TARJETA') {
                 $tarjeta = $mov->getDatosTarjeta()->getTarjeta()->getNombre();
                 if ($tarjeta == 'TRANSFERENCIA') {
@@ -265,6 +251,7 @@ class CajaAperturaController extends Controller {
             }
             $monto = $mov->getImporte() * $mov->getMoneda()->getCotizacion() * $mov->getSignoCaja();
             $key = array_search($mov->getComprobanteTxt(), array_column($resumen, 'nroComprobante'));
+
             if ($key) {
                 // cargar en el mismo item
                 $resumen[$key][$tipoPago] += $monto;
@@ -275,7 +262,6 @@ class CajaAperturaController extends Controller {
                 }
             }
             else {
-
                 $resumenMov['id'] = $mov->getId();
                 $resumenMov['tipoComprobante'] = $mov->getTipoComprobante();
                 $resumenMov['nroComprobante'] = $mov->getComprobanteTxt();
@@ -300,8 +286,6 @@ class CajaAperturaController extends Controller {
                 }
                 array_push($resumen, $resumenMov);
             }
-//            var_dump($mov->getTipoComprobante());
-//            var_dump($mov->getTipoPago());
             $monto = 0;
         }
 
