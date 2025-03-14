@@ -12,6 +12,7 @@ use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\Cobro;
 use VentasBundle\Form\CobroType;
 use VentasBundle\Entity\CobroDetalle;
+use ConfigBundle\Entity\BancoMovimiento;
 use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Afip\src\Afip;
 use Endroid\QrCode\QrCode;
@@ -37,7 +38,8 @@ class CobroController extends Controller {
      * @Template()
      */
     public function indexAction(Request $request) {
-        $unidneg = $this->get('session')->get('unidneg_id');
+        $session = $this->get('session');
+        $unidneg = $session->get('unidneg_id');
         $user = $this->getUser();
         UtilsController::haveAccess($user, $unidneg, 'ventas_factura');
         $em = $this->getDoctrine()->getManager();
@@ -55,6 +57,9 @@ class CobroController extends Controller {
         $users = $em->getRepository('VentasBundle:Cobro')->getUsers();
 
         $ventas = $em->getRepository('VentasBundle:Venta')->findPorCobrarByCriteria($unidneg, $periodo['ini'], $periodo['fin'], $id);
+        if(!$session->get('caja')){
+            $this->addFlash('error', 'Este equipo ' . $session->get('hostname') . ' no está definido como caja!');
+        }
 
         return $this->render('VentasBundle:Cobro:index.html.twig', array(
                 'entities' => $entities,
@@ -81,7 +86,7 @@ class CobroController extends Controller {
         $em = $this->getDoctrine()->getManager();
 
         $referer = $request->headers->get('referer');
-        if ($this->checkCajaAbierta($em)) {
+        if ($this->checkCajaAbierta($em,$session)) {
             return $this->redirect($referer);
         }
 
@@ -151,8 +156,8 @@ class CobroController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $response = array('res' => 'OK', 'msg' => '', 'id' => null);
 
-        // Verificar si la caja está abierta CAJA=1
-        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+        // Verificar si la caja está abierta
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($session->get('caja')['apertura']);
         if (!$apertura) {
             $response['res'] = 'ERROR';
             $response['msg'] = 'La caja está cerrada. Debe realizar la apertura para iniciar cobros';
@@ -214,6 +219,7 @@ class CobroController extends Controller {
 
                 // completar datos de detalles
                 $efectivo = true;
+                $transferencias = array();
                 if (count($entity->getDetalles()) == 0) {
                     if ($formapago->getTipoPago() === 'CTACTE') {
                         // insertar un detalle para ctacte
@@ -228,7 +234,8 @@ class CobroController extends Controller {
                     }
                 }
                 else {
-                    foreach ($entity->getDetalles() as $detalle) {
+                    $detalles = array_values($datos['detalles']);
+                    foreach ($entity->getDetalles() as $key => $detalle) {
                         $detalle->setCajaApertura($apertura);
                         if (!$detalle->getMoneda()) {
                             $detalle->setMoneda($entity->getMoneda());
@@ -245,6 +252,24 @@ class CobroController extends Controller {
                         }
                         if ($tipoPago !== 'EFECTIVO') {
                             $efectivo = false;
+                        }
+                        if ($tipoPago === 'TRANSFERENCIA') {
+                            // cargar movimiento de credito bancario
+                            $movBanco = new BancoMovimiento();
+                            $banco = $em->getRepository('ConfigBundle:Banco')->find($detalles[$key]['bancoTransferencia']);
+                            $movBanco->setBanco($banco);
+                            $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($detalles[$key]['cuentaTransferencia']);
+                            $movBanco->setCuenta($cuenta);
+                            $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
+                            $movBanco->setConciliado(false);
+                            $movBanco->setImporte($detalles[$key]['importe']);
+                            $movBanco->setFechaAcreditacion(new \DateTime());
+                            $movBanco->setFechaCarga(new \DateTime());
+                            $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CREDITO');
+                            $movBanco->setTipoMovimiento($tipoMov);
+                            $movBanco->setCobroDetalle($detalle);
+                            $movBanco->setObservaciones('Transferencia por cobro de ventas - Op. #'.$entity->getNroOperacion());
+                            $em->persist($movBanco);
                         }
                     }
                 }
@@ -439,8 +464,8 @@ class CobroController extends Controller {
         return new JsonResponse($items);
     }
 
-    private function checkCajaAbierta($em) {
-        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+    private function checkCajaAbierta($em,$session) {
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($session->get('caja')['apertura']);
         if (!$apertura) {
             $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
             return true;

@@ -110,13 +110,12 @@ function partialVentasPorCobrar(url) {
 }
 
 // lanza popup para apertura de caja
-// CAJA=1
-function aperturaCajaVentas(url, cobro=false, caja=1 ) {
+// CAJA=hostname
+function aperturaCajaVentas(url, cobro=false ) {
     let horaRefresh = null;
-    data = { 'id': caja };
-    jQuery('#popup').html('');
+    jQuery('#popup').html('<div style="text-align:center">Cargando datos...</div>');
     jQuery('#popup')
-        .load(url, data, function () {
+        .load(url, function () {
             // refresca la hora en un campo fecha-hora
             horaRefresh = setInterval(function () {
                 jQuery('.js-hora').html( new Date().toLocaleString().slice(9) );
@@ -130,20 +129,19 @@ function aperturaCajaVentas(url, cobro=false, caja=1 ) {
         close: function (event, ui) {
             event.preventDefault();
             clearInterval(horaRefresh);
-            if( reload )
-                window.location.href = referer;
+//            if( reload )
+//                window.location.href = referer;
         }
     });
     jQuery('#popup').dialog('open');
 }
 // lanza popup para cierre de caja
-// CAJA=1
-function cierreCajaVentas(url, reload=false, referer = "#",caja=1) {
+// CAJA= hostname
+function cierreCajaVentas(url, reload=false, referer = "#") {
   let horaRefresh = null;
-    data = { 'id': caja };
-    jQuery('#popup').html('');
+    jQuery('#popup').html('<div style="text-align:center">Cargando datos...</div>');
     jQuery('#popup')
-        .load(url, data, function () {
+        .load(url, function () {
             // confirm para el cierre
             jQuery('#ventasbundle_cierre').on('submit', function () {
                 if (!confirm('CONFIRMA EL CIERRE DE CAJA!\n\n Este movimiento no puede ser modificado!'))

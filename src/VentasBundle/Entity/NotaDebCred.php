@@ -260,6 +260,9 @@ class NotaDebCred {
                 case 'TARJETA':
                     $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
                     break;
+                case 'TRANSFERENCIA':
+                    $txt = $txt . $aux . 'TRANSFERENCIA: ' . $monto;
+                    break;
             }
         }
         return $txt;

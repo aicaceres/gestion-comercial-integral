@@ -17,6 +17,7 @@ use VentasBundle\Entity\PagoCliente;
 use VentasBundle\Form\PagoClienteType;
 use VentasBundle\Entity\NotaDebCred;
 use VentasBundle\Entity\NotaDebCredDetalle;
+use ConfigBundle\Entity\BancoMovimiento;
 use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Entity\CobroDetalle;
 use VentasBundle\Entity\PagoClienteComprobante;
@@ -417,13 +418,13 @@ class ClienteController extends Controller {
     /**
      * @Route("/selectFacturasCliente", name="select_facturas_cliente")
      * @Method("GET")
-
-      public function facturasAction(Request $request) {
+    */
+    public function facturasAction(Request $request) {
       $id = $request->get('id');
       $em = $this->getDoctrine()->getManager();
       $facturas = $em->getRepository('VentasBundle:Factura')->findByClienteId($id);
       return new JsonResponse($facturas);
-      } */
+    }
 
     /**
      * @Route("/updateCuit", name="update_cuit_cliente")
@@ -474,8 +475,9 @@ class ClienteController extends Controller {
     public function pagosIndexAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente_pagos');
         $cliId = $request->get('cliId');
-        $desde = $request->get('desde');
-        $hasta = $request->get('hasta');
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+        $desde = $periodo['ini'];
+        $hasta = $periodo['fin'];
         $em = $this->getDoctrine()->getManager();
         $cliente = null;
         if ($cliId) {
@@ -499,9 +501,10 @@ class ClienteController extends Controller {
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
         $em = $this->getDoctrine()->getManager();
-        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar(1);
         if (!$apertura) {
-            $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+            $this->addFlash('error', 'La caja 1 está cerrada. Debe realizar la apertura para iniciar cobros');
             return $this->redirectToRoute('ventas_cliente_pagos');
         }
         $entity = new PagoCliente();
@@ -514,7 +517,7 @@ class ClienteController extends Controller {
             // ultimo nro de operacion de cobro
             $entity->setPagoNro($param->getUltimoNroPagoCliente() + 1);
         }
-        $moneda = MonedaController::getMonedaByDefault();
+        $moneda = MonedaController::getMonedaByDefault($em);
         $entity->setMoneda($moneda);
         $entity->setFecha(new \DateTime());
         $form = $this->pagosCreateCreateForm($entity);
@@ -601,15 +604,16 @@ class ClienteController extends Controller {
             try {
                 $em->getConnection()->beginTransaction();
                 // checkear apertura de caja
-                $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+                $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar(1);
                 if (!$apertura) {
-                    $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+                    $this->addFlash('error', 'La caja 1 está cerrada. Debe realizar la apertura para iniciar cobros');
                     return $this->redirect($request->headers->get('referer'));
                 }
 
                 $totalPago = 0;
                 // limpiar cheque y tarjeta si no corresponde
-                foreach ($entity->getCobroDetalles() as $detalle) {
+                $detalles = array_values($datos['cobroDetalles']);
+                foreach ($entity->getCobroDetalles() as $key => $detalle) {
                     $detalle->setCajaApertura($apertura);
                     if (!$detalle->getMoneda()) {
                         $detalle->setMoneda($entity->getMoneda());
@@ -623,6 +627,24 @@ class ClienteController extends Controller {
                     }
                     if ($tipoPago != 'TARJETA') {
                         $detalle->setDatosTarjeta(null);
+                    }
+                    if ($tipoPago === 'TRANSFERENCIA') {
+                        // cargar movimiento de credito bancario
+                        $movBanco = new BancoMovimiento();
+                        $banco = $em->getRepository('ConfigBundle:Banco')->find($detalles[$key]['bancoTransferencia']);
+                        $movBanco->setBanco($banco);
+                        $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($detalles[$key]['cuentaTransferencia']);
+                        $movBanco->setCuenta($cuenta);
+                        $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
+                        $movBanco->setConciliado(false);
+                        $movBanco->setImporte($detalles[$key]['importe']);
+                        $movBanco->setFechaAcreditacion(new \DateTime());
+                        $movBanco->setFechaCarga(new \DateTime());
+                        $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CREDITO');
+                        $movBanco->setTipoMovimiento($tipoMov);
+                        $movBanco->setCobroDetalle($detalle);
+                        $movBanco->setObservaciones('Transferencia por pago de Cliente - '.$entity->getCliente());
+                        $em->persist($movBanco);
                     }
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
@@ -724,6 +746,7 @@ class ClienteController extends Controller {
                     $letra = ($catIva == 'I' || $catIva == 'M') ? 'A' : 'B';
                     $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->getIdByTipo('CRE-' . $letra);
 
+
                     $notacredito = new NotaDebCred();
                     $notacredito->setFecha(new \DateTime());
                     $notacredito->setCliente($entity->getCliente());
@@ -739,7 +762,7 @@ class ClienteController extends Controller {
                     $notaElectronica = new FacturaElectronica();
                     $notaElectronica->setUnidadNegocio($unidneg);
                     $notaElectronica->setCliente($entity->getCliente());
-                    $notaElectronica->setPuntoVenta($this->getParameter('ptovta_ws_factura'));
+                    $notaElectronica->setPuntoVenta($caja->getPtoVtaWs());
                     $notaElectronica->setConcepto(1); // Productos
                     $notaElectronica->setCbteFch(intval($notacredito->getFecha()->format('Ymd')));
                     $notaElectronica->setNombreCliente($notacredito->getNombreClienteTxt());

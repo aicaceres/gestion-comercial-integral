@@ -843,7 +843,8 @@ function checkDiferencias(){
   if(ivaTh.text() != jQuery('#comprasbundle_factura_iva').val()){
     ivaTh.attr('style','background:coral')
   }
-  if(netoTh.text() != jQuery('#comprasbundle_factura_subtotal').val()){
+  const subtotal = parseFloat(jQuery('#comprasbundle_factura_subtotal').val()) - parseFloat(jQuery('#comprasbundle_factura_totalBonificado').val())
+  if(netoTh.text() != subtotal){
     netoTh.attr('style','background:coral')
   }
 }

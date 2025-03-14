@@ -45,7 +45,7 @@
         <tbody>    
             {% for item in resultado.comprobantes %}                    
                 <tr {% if item.error|length>0 %} style="background-color:mistyrose"{% endif %} >                            
-                    <td><span style="width:60px;display: block; ">{{item.fecha}}</span></td>
+                    <td><span style="width:60px;display: block; ">{{item.fecha}} </span></td>
                     <td><span style="width:60px;display: block;">{{item.tipoComprobante}}</span></td>
                     {% if 'COMPROBANTE' in item.error %} 
                     <td colspan="2">                        

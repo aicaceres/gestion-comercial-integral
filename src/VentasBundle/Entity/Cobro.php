@@ -192,6 +192,9 @@ class Cobro {
                 case 'TARJETA':
                     $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
                     break;
+                case 'TRANSFERENCIA':
+                    $txt = $txt . $aux . 'TRANSFERENCIA: ' . $monto;
+                    break;
             }
         }
         return $txt;
@@ -679,7 +682,7 @@ class Cobro {
     /**
      * Get periodoAsocDesde
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getPeriodoAsocDesde()
     {
@@ -702,7 +705,7 @@ class Cobro {
     /**
      * Get periodoAsocHasta
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getPeriodoAsocHasta()
     {
@@ -725,7 +728,7 @@ class Cobro {
     /**
      * Get fechaVtoPago
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getFechaVtoPago()
     {

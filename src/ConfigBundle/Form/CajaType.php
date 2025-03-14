@@ -14,8 +14,11 @@ class CajaType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('nombre',null,array('label' => 'Nombre:'))
+            ->add('nombre',null,array('label' => 'Nombre Corto:'))
             ->add('descripcion',null,array('label' => 'Descripción:'))
+            ->add('hostname',null,array('label' => 'Nombre Equipo:'))
+            ->add('ptoVtaWs',null,array('label' => 'Webservice:'))
+            ->add('ptoVtaIfu',null,array('label' => 'Tickeadora:'))
             ->add('activo',null,array('label' => 'Activo:','required'=>false))
         ;
     }

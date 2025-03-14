@@ -1,5 +1,9 @@
 <div class="vernav2 iconmenu">
     <ul>
+        {% if app.user.access(app.session.get('unidneg_id'),'sistema_caja') %}
+        <li id="caja"><a href="{{path('sistema_caja')}}" class="elements">Cajas</a></li>
+        {% endif %}
+
         {% if app.user.access(app.session.get('unidneg_id'),'sistema_banco') %}
         <li id="banco"><a href="{{path('sistema_banco')}}" class="elements">Bancos</a></li>
         <li id="cheque"><a href="{{path('sistema_cheque')}}" class="elements">Cheques</a></li>

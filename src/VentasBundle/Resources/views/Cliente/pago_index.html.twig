@@ -61,7 +61,9 @@
                 <td class="buttons">
                    <a href="{{ path('ventas_cliente_pagos_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver"></a> &nbsp;
                     <a href="#" url="{{ path('print_comprobante_pago_ventas', { 'id': entity.id })}}" class="editar btn btnaction btn_print"  title="Imprimir Comprobante"></a>
-                   <a href url="{{ path('ventas_cliente_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" style="display: none" title="Eliminar"></a>
+                    {% if not entity.canDelete and false %}                      
+                   <a href url="{{ path('ventas_cliente_pagos_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a>
+                   {% endif %}
                 </td>
             </tr>
            {% endfor %}

@@ -306,6 +306,15 @@ class FacturaElectronica {
     public function getCodigoComprobante() {
         return intval($this->getTipoComprobante()->getCodigo());
     }
+    
+    public function getPercepcionRentas(){
+        if($this->getCobro()){
+            return $this->getCobro()->getVenta()->getPercepcionRentas();
+        }elseif($this->getNotaDebCred()){
+            return $this->getNotaDebCred()->getPercepcionRentas();
+        }
+        return null;
+    }
 
     public function getLetra() {
         return substr($this->getTipoComprobante()->getValor(), 4, 1);

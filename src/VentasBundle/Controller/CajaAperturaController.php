@@ -23,20 +23,39 @@ class CajaAperturaController extends Controller {
      * @Template()
      */
     public function indexAction(Request $request) {
-        $unidneg = $this->get('session')->get('unidneg_id');
+        $session = $this->get('session');
+        $unidneg = $session->get('unidneg_id');
         $user = $this->getUser();
         UtilsController::haveAccess($user, $unidneg, 'ventas_caja_apertura');
         $em = $this->getDoctrine()->getManager();
-
-        $desde = $request->get('desde');
-        $hasta = $request->get('hasta');
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+        $desde = $periodo['ini'];
+        $hasta = $periodo['fin'];
         $cajaId = $request->get('cajaId');
 
-        $cajas = $em->getRepository('ConfigBundle:Caja')->findAll();
+        $caja = null;
+
+        // Intentar obtener la caja desde la solicitud
         if ($cajaId) {
             $caja = $em->getRepository('ConfigBundle:Caja')->find($cajaId);
         }
-        else {
+
+        // Si no hay caja en la solicitud, buscar en la sesión
+        if (!$caja && $session->get('caja')['id']) {
+            $caja = $em->getRepository('ConfigBundle:Caja')->find($session->get('caja')['id']);
+            $cajaId = $session->get('caja')['id'];
+        }
+
+        // Mostrar error solo si no hay una caja definida en la sesión
+        if (!$session->get('caja')['id']) {
+            $this->addFlash('error', 'Este equipo ' . $session->get('hostname') . ' no está definido como caja!');
+        }
+
+        // Obtener todas las cajas para el selector
+        $cajas = $em->getRepository('ConfigBundle:Caja')->findAll();
+
+        // Si no se encontró caja válida, usar la primera disponible (si existe)
+        if (!$caja && !empty($cajas)) {
             $caja = $cajas[0];
         }
 
@@ -53,18 +72,17 @@ class CajaAperturaController extends Controller {
 
     /**
      * @Route("/newApertura", name="ventas_apertura_new")
-     * @Method("POST")
+     * @Method("GET")
      * @Template()
      */
     public function newAperturaAction(Request $request) {
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_apertura');
 
-        $id = $request->get('id');
         $em = $this->getDoctrine()->getManager();
-        $caja = $em->getRepository('ConfigBundle:Caja')->find($id);
-        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($caja->getId());
-        if ($caja->getAbierta() || $apertura) {
+        $caja = $em->getRepository('ConfigBundle:Caja')->find($session->get('caja')['id']);
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($session->get('caja')['apertura']);
+        if ($apertura) {
             $this->addFlash('error', 'Esta caja ya se encuentra abierta.<br> Debe realizar el cierre primero!');
             $partial = $this->renderView('AppBundle::notificacion.html.twig');
             return new Response($partial);
@@ -111,7 +129,6 @@ class CajaAperturaController extends Controller {
                 $em->persist($entity);
                 $em->flush();
                 $em->getConnection()->commit();
-                $session->set('caja_abierta', true);
                 $ruta = $this->redirect($referer);
             }
             catch (\Exception $ex) {
@@ -137,16 +154,15 @@ class CajaAperturaController extends Controller {
 
     /**
      * @Route("/newCierre", name="ventas_cierre_new")
-     * @Method("POST")
+     * @Method("GET")
      * @Template()
      */
-    public function newCierreAction(Request $request) {
+    public function newCierreAction() {
         $session = $this->get('session');
         UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_cierre');
 
-        $cajaId = $request->get('id');
         $em = $this->getDoctrine()->getManager();
-        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar($cajaId);
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($session->get('caja')['apertura']);
         if (!$apertura) {
             $this->addFlash('error', 'No se encuentra una apertura de caja para realizar el cierre.');
             $partial = $this->renderView('AppBundle::notificacion.html.twig');
@@ -300,6 +316,138 @@ class CajaAperturaController extends Controller {
 
         return new Response($content, 200, array('content-type' => 'application/pdf',
             'Content-Disposition' => 'filename=arqueo_' . $apertura->getId() . '.pdf'));
+    }
+
+    /**
+     * @Route("/informes", name="ventas_apertura_unificado")
+     * @Method("GET")
+     * @Template()
+     */
+    public function indexUnificadoAction(Request $request) {
+        $session = $this->get('session');
+        $unidneg = $session->get('unidneg_id');
+        $user = $this->getUser();
+        UtilsController::haveAccess($user, $unidneg, 'ventas_caja_unificado');
+        $em = $this->getDoctrine()->getManager();
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+        $desde = $periodo['ini'];
+        $hasta = $periodo['fin'];
+
+        $cajas = $em->getRepository('ConfigBundle:Caja')->findAll();
+        $entities = $em->getRepository('VentasBundle:CajaApertura')->findByCriteria($unidneg, $desde, $hasta);
+        $dias = [];
+        foreach ($entities as $apertura) {
+            $fecha = $apertura->getFechaApertura()->format('d-m-Y');
+            array_push($dias, $fecha);
+        }
+        $fechas = array_unique($dias);
+        rsort($fechas);
+        return $this->render('VentasBundle:CajaApertura:unificado.html.twig', array(
+                'entities' => $entities,
+                'cajas' => $cajas,
+                'desde' => $desde,
+                'hasta' => $hasta,
+                'dias'  => $fechas
+        ));
+    }
+
+    /**
+     * @Route("/{fecha}/arqueoCajaUnificado.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="ventas_arqueo_unificado")
+     * @Method("GET")
+     */
+    public function arqueoCajaUnificadoAction($fecha) {
+        $session = $this->get('session');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'ventas_caja_unificado');
+        $em = $this->getDoctrine()->getManager();
+        $movimientos = $em->getRepository('VentasBundle:CajaApertura')->getMovimientosByFecha($fecha);
+        $bancosRetencion = $em->getRepository('ConfigBundle:Banco')->findBancosRetencion();
+        $logo = __DIR__ . '/../../../web/assets/images/logo_comprobante_bn.png';
+        $resumen = $resumenMov = array();
+        $cajas = [];
+
+        foreach ($movimientos as $mov) {
+            if (!$mov->getIncluirEnArqueo()) {
+                continue;
+            }
+            $tipoPago = $mov->getTipoPago();
+            if ($tipoPago == 'CHEQUE') {
+                $banco = $mov->getChequeRecibido()->getBanco() ? $mov->getChequeRecibido()->getBanco()->getNombre() : '///';
+                if (strpos($banco, 'RETENCION') !== false) {
+                    $tipoPago = 'RETENCION';
+                }
+            }
+
+            if ($tipoPago == 'TARJETA') {
+                $tarjeta = $mov->getDatosTarjeta()->getTarjeta()->getNombre();
+                if ($tarjeta == 'TRANSFERENCIA') {
+                    $tipoPago = 'TRANSFERENCIA';
+                }
+            }
+            $monto = $mov->getImporte() * $mov->getMoneda()->getCotizacion() * $mov->getSignoCaja();
+            $key = array_search($mov->getComprobanteTxt(), array_column($resumen, 'nroComprobante'));
+
+            if ($key) {
+                // cargar en el mismo item
+                $resumen[$key][$tipoPago] += $monto;
+                // actualizar el vuelto si corresponde
+                if ($tipoPago !== 'CTACTE') {
+                    // si tiene importe el movimiento
+                    $resumen[$key]['vuelto'] -= $mov->getImporte();
+                }
+            }
+            else {
+                $resumenMov['id'] = $mov->getId();
+                $resumenMov['caja'] = $mov->getCajaApertura()->getCaja()->getNombre();
+                $resumenMov['tipoComprobante'] = $mov->getTipoComprobante();
+                $resumenMov['nroComprobante'] = $mov->getComprobanteTxt();
+                $resumenMov['fecha'] = $mov->getFecha()->format('d/m/Y');
+                $resumenMov['cliente'] = $mov->getCliente();
+                $resumenMov['moneda'] = $mov->getMoneda()->getSimbolo();
+                $resumenMov['cotiz'] = $mov->getMoneda()->getCotizacion();
+                $resumenMov['montoComp'] = $mov->getMontoComprobante();
+                // armar los tipos para el array
+                $resumenMov['EFECTIVO'] = 0;
+                $resumenMov['CHEQUE'] = 0;
+                $resumenMov['TARJETA'] = 0;
+                $resumenMov['TRANSFERENCIA'] = 0;
+                $resumenMov['CTACTE'] = 0;
+                $resumenMov['RETENCION'] = 0;
+                $resumenMov['vuelto'] = 0;
+                // asignar el monto en el que corresponda
+                $resumenMov[$tipoPago] = $monto;
+                if ($tipoPago !== 'CTACTE') {
+                    // si tiene importe el movimiento
+                    $resumenMov['vuelto'] = $mov->getMontoComprobante() - $mov->getImporte();
+                }
+                array_push($resumen, $resumenMov);
+                $cajas[] = $mov->getCajaApertura()->getCaja()->getNombre();
+            }
+            $monto = 0;
+        }
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+        $this->render('VentasBundle:CajaApertura:informe-arqueo-unificado.pdf.twig',
+            array('fechaApertura' => $fecha, 'arqueo' => $resumen, 'movimientos' => $movimientos, 'cajas' => array_unique($cajas),
+                'bancosRetencion' => array_column($bancosRetencion, 'nombre'), 'logo' => $logo), $response);
+
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        $hoy = new \DateTime();
+        return new Response($content, 200, array('content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=arqueo_' . $hoy->format('dmY_Hi') . '.pdf'));
+    }
+
+    private function getDaysFromPeriod($desde,$hasta){
+        $ini = new \DateTime($desde);
+        $fin = new \DateTime($hasta);
+        $dias = [];
+        while ($ini <= $fin) {
+            $dias[] = $ini->format('d-m-Y');
+            $ini->modify('+1 day');
+        }
+        return array_reverse($dias);
     }
 
 }

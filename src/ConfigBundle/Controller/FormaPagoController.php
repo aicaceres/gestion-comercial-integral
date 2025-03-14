@@ -230,8 +230,7 @@ class FormaPagoController extends Controller
     return new Response($partial);
   }
 
-    public function getDescuentoContado(){
-      $em = $this->getDoctrine()->getManager();
+    public function getDescuentoContado($em){
       $formapago = $em->getRepository('ConfigBundle:FormaPago')->findOneByContado(1);
       return $formapago->getPorcentajeRecargo();
     }

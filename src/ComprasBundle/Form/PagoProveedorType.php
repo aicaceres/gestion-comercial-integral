@@ -44,6 +44,17 @@ class PagoProveedorType extends AbstractType {
                 'choice_label' => 'nombre',
                 'attr' => array('class' => 'mediuminput select2')
             ))
+            ->add('nroMovTransferencia', null, array('mapped'=> false))
+            ->add('bancoTransferencia', 'entity', array('class' => 'ConfigBundle:Banco',
+                'mapped' =>false, 'label' => 'Banco:', 
+                'query_builder' => function(EntityRepository $repository) {
+                    return $qb = $repository->createQueryBuilder('b')
+                            ->innerJoin('b.cuentas', 'c')
+                            ->where('b.activo=1');
+                }
+            ))
+            ->add('cuentaTransferencia','entity',array('class' => 'ConfigBundle:CuentaBancaria',
+                'label' => 'Cuenta:','mapped' =>false))
             ->add('cobroDetalles', 'collection', array(
                 'type' => new CobroDetalleType(),
                 'by_reference' => false,

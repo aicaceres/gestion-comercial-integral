@@ -1,0 +1,283 @@
+<!-- Analitico -->
+    <dynamic-page page-size="A4" margin-left="20px" margin-right="20px" margin-top="20px" >
+        <placeholders>
+            <header>
+                <div height="90px" width="100%" >
+                    <table font-size="10px" >
+                        <tr>
+                            <td border.type="none">
+                                <div width="100%">
+                                    <img ignore-error="true" src="{{logo}}" width="180px" />
+                                </div>
+                            </td>
+                            <td border.type="none" vertical-align="middle" text-align="center" font-size="15px">
+                                Analítico de Caja Unificado
+                            </td>
+                            <td border.type="none" vertical-align="middle" text-align="right">
+                                PÁGINA <page-number />
+                            </td>
+                        </tr>
+                    </table>
+                    <table font-size="14px" >
+                        <tr>
+                            <td border.type="none" vertical-align="bottom" text-align="right" padding-right="10px" width="370px">
+                                Fecha: {{ fechaApertura|date('d/m/Y') }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </header>
+        </placeholders>
+
+<!-- EFECTIVO -->
+        <table width="80%" margin-left="20%">
+            <tr font-size="9px">
+                <td border.color="#999999" padding="10px"><b>TOTAL EFECTIVO</b></td>
+                <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ tot_efectivo|number_format(2,',','.') }} </b>
+                </td>
+            </tr>
+        </table>
+
+<!-- TARJETA -->
+        <table padding-top="20px" width="80%" margin-left="20%" border.type="bottom">
+            <tr font-size="9px">
+                <td border.type="none" padding="8px" width="100px">Moneda: PESOS</td>
+                <td border.type="none" padding="8px" text-align="center">
+                    TARJETAS CRÉDITOS
+                </td>
+            </tr>
+        </table>
+        <table width="80%" margin-left="20%" margin-top="5px">
+          {% for caja in cajas %}
+            {% set cntCaja = 0 %}
+            <tr><td colspan="4" border.type="bottom" border.style="dotted" padding="5px" font-size="9px">{{ caja }}</td></tr>
+
+            {% for mov in movimientos if mov.cajaApertura.caja.nombre == caja %}
+              {% if mov.tipoPago == 'TARJETA' and mov.datosTarjeta.tarjeta.nombre != 'TRANSFERENCIA' %}
+                  <tr font-size="8px">
+                      <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
+                          {{ mov.comprobanteTxt }}
+                      </td>
+                      <td border.type="none"  vertical-align="middle" width="3 cm">
+                          {{ mov.datosTarjeta.tarjeta.nombre }}
+                      </td>
+                      <td border.type="none"  vertical-align="middle">
+                          {{ mov.datosTarjeta.numero ?? '0000 0000 0000 0000' }}
+                      </td>
+                      <td border.type="none"  vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                          {{ (mov.importe * mov.moneda.cotizacion)|number_format(2,',','.') }}
+                      </td>
+                  </tr>
+                  {% set cntCaja = cntCaja+1 %}
+              {% else %}
+                  <tr border.type="none">
+                      <td border.type="none"></td>
+                      <td border.type="none"></td>
+                      <td border.type="none"></td>
+                      <td border.type="none"></td>
+                  </tr>
+              {% endif %}
+            {% endfor %}
+            {% if cntCaja == 0 %}
+              <tr><td colspan="4" border.type="none" font-size="8px" padding="5px">Sin Movimientos</td></tr>
+            {% endif %}
+          {% endfor %}
+            <tr font-size="9px" margin-top="10px">
+                <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL TARJETAS CRÉDITOS</b></td>
+                <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ tot_tarjeta|number_format(2,',','.') }} </b>
+                </td>
+            </tr>
+        </table>
+
+<!-- CHEQUE -->
+        <table padding-top="20px" width="80%" margin-left="20%" border.type="bottom">
+            <tr font-size="9px">
+                <td border.type="none" padding="8px" text-align="center">
+                    CHEQUES - COBRANZAS
+                </td>
+            </tr>
+        </table>
+        <table width="80%" margin-left="20%" margin-top="5px">
+          {% set total_cheques = 0 %}
+          {% for caja in cajas %}
+            {% set cntCaja = 0 %}
+            <tr><td colspan="4" border.type="bottom" border.style="dotted" padding="5px" font-size="9px">{{ caja }}</td></tr>
+
+            {% for mov in movimientos if mov.cajaApertura.caja.nombre == caja and mov.pagoProveedor is null %}
+              {% if mov.tipoPago == 'CHEQUE' %}
+                {% set banco = mov.chequeRecibido.banco ? mov.chequeRecibido.banco.nombre : '///' %}
+                {% if not ( banco in bancosRetencion) %}
+                {% set op = mov.pagoProveedor is not null ? -1 : 1 %}
+                {% set impcheque = (mov.importe * mov.moneda.cotizacion) * op %}
+
+                {% set total_cheques = total_cheques + impcheque %}
+                <tr font-size="8px">
+                    <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
+                        {{ mov.comprobanteTxt }}
+                    </td>
+                    <td border.type="none" vertical-align="middle" width="3 cm">
+                        {{ mov.chequeRecibido.banco }}
+                    </td>
+                    <td border.type="none" vertical-align="middle">
+                        {{ mov.chequeRecibido.nroCheque }}
+                    </td>
+                    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                        {{ impcheque|number_format(2,',','.') }}
+                    </td>
+                </tr>
+                {% set cntCaja = cntCaja+1 %}
+                {% endif %}
+              {% else %}
+                <tr border.type="none">
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+            {% if cntCaja == 0 %}
+              <tr><td colspan="4" border.type="none" font-size="8px" padding="5px">Sin Movimientos</td></tr>
+            {% endif %}
+          {% endfor %}
+            <tr font-size="9px" margin-top="10px">
+                <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL CHEQUES  - COBRANZAS</b></td>
+                <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ total_cheques|number_format(2,',','.') }} </b>
+                </td>
+            </tr>
+        </table>
+
+        <table width="80%" margin-left="20%" margin-top="5px" border.type="none">
+            <tr font-size="8px" margin-top="10px">
+                <td border.type="none" padding-right="5px" text-align="right">Cambio del día</td>
+                <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                   <b> {{ tot_vuelto|number_format(2,',','.') }} </b>
+                </td>
+            </tr>
+            <tr font-size="10px" margin-top="10px" font-type="DejaVuSansMono">
+                <td background.color="#EEEEEE" border.color="#999999" padding="10px"><b>TOTAL CAJA ANALÍTICA</b></td>
+                <td background.color="#EEEEEE" border.color="#999999" vertical-align="middle" text-align="right"  width="3 cm">
+                   <b> {{ (tot_efectivo + tot_vuelto + tot_tarjeta + tot_cheque)|number_format(2,',','.') }} </b>
+                </td>
+            </tr>
+        </table>
+
+        <table padding-top="20px" width="80%" margin-left="20%" border.type="bottom">
+            <tr font-size="9px">
+                <td border.type="none" padding="8px" text-align="center">
+                    CHEQUES - PAGOS
+                </td>
+            </tr>
+        </table>
+        <table width="80%" margin-left="20%" margin-top="5px">
+          {% set total_cheques_pagos = 0 %}
+          {% for caja in cajas %}
+              {% set cntCaja = 0 %}
+              <tr><td colspan="4" border.type="bottom" border.style="dotted" padding="5px" font-size="9px">{{ caja }}</td></tr>
+
+            {% for mov in movimientos if mov.cajaApertura.caja.nombre == caja %}
+              {% if mov.tipoPago == 'CHEQUE' and mov.pagoProveedor %}
+                {% set banco = mov.chequeRecibido.banco ? mov.chequeRecibido.banco.nombre : '///' %}
+                {% if not ( banco in bancosRetencion) %}
+                {% set op = mov.pagoProveedor is not null ? -1 : 1 %}
+                {% set impcheque = (mov.importe * mov.moneda.cotizacion) * op %}
+
+                {% set total_cheques_pagos = total_cheques_pagos + impcheque %}
+                <tr font-size="8px">
+                    <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
+                        {{ mov.comprobanteTxt }}
+                    </td>
+                    <td border.type="none" vertical-align="middle" width="3 cm">
+                        {{ mov.chequeRecibido.banco }}
+                    </td>
+                    <td border.type="none" vertical-align="middle">
+                        {{ mov.chequeRecibido.nroCheque }}
+                    </td>
+                    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                        {{ impcheque|number_format(2,',','.') }}
+                    </td>
+                </tr>
+                {% set cntCaja = cntCaja+1 %}
+                {% endif %}
+              {% else %}
+                <tr border.type="none">
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+            {% if cntCaja == 0 %}
+              <tr><td colspan="4" border.type="none" font-size="8px" padding="5px">Sin Movimientos</td></tr>
+            {% endif %}
+          {% endfor %}
+          <tr font-size="9px" margin-top="10px">
+              <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL CHEQUES - PAGOS</b></td>
+              <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                  <b>{{ total_cheques_pagos|number_format(2,',','.') }}</b>
+              </td>
+          </tr>
+        </table>
+
+
+        <table padding-top="20px" width="80%" margin-left="20%" border.type="bottom">
+            <tr font-size="9px">
+                <td border.type="none" padding="8px" text-align="center">
+                    RETENCIONES
+                </td>
+            </tr>
+        </table>
+        <table width="80%" margin-left="20%" margin-top="5px">
+          {% set total_retenciones = 0 %}
+          {% for caja in cajas %}
+            {% set cntCaja = 0 %}
+            <tr><td colspan="4" border.type="bottom" border.style="dotted" padding="5px" font-size="9px">{{ caja }}</td></tr>
+
+            {% for mov in movimientos if mov.cajaApertura.caja.nombre == caja %}
+              {% if mov.tipoPago == 'CHEQUE' %}
+                {% set banco = mov.chequeRecibido.banco ? mov.chequeRecibido.banco.nombre : '///' %}
+                {% if banco in bancosRetencion %}
+                {% set total_retenciones = total_retenciones + (mov.importe * mov.moneda.cotizacion) %}
+                <tr font-size="8px">
+                    <td border.type="none" height="13px" vertical-align="middle" width="3.5 cm" padding-left="3px">
+                        {{ mov.comprobanteTxt }}
+                    </td>
+                    <td border.type="none" vertical-align="middle" width="9 cm">
+                        {{ mov.chequeRecibido.banco }}
+                    </td>
+                    <td border.type="none" vertical-align="middle">
+                        .
+                    </td>
+                    <td border.type="none" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                        {{ (mov.importe * mov.moneda.cotizacion)|number_format(2,',','.') }}
+                    </td>
+                </tr>
+                {% set cntCaja = cntCaja+1 %}
+                {% endif %}
+              {% else %}
+                <tr border.type="none">
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                    <td border.type="none"></td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+            {% if cntCaja == 0 %}
+              <tr><td colspan="4" border.type="none" font-size="8px" padding="5px">Sin Movimientos</td></tr>
+            {% endif %}
+          {% endfor %}
+          <tr font-size="9px" margin-top="10px">
+              <td border.color="#999999" padding="10px" colspan="3"><b>TOTAL RETENCIONES</b></td>
+              <td border.color="#999999" vertical-align="middle" text-align="right" padding-right="5px" width="3 cm">
+                  <b>{{ total_retenciones|number_format(2,',','.') }}</b>
+              </td>
+          </tr>
+        </table>
+
+
+    </dynamic-page>

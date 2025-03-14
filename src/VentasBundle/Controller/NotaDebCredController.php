@@ -16,6 +16,7 @@ use VentasBundle\Entity\CobroDetalle;
 use AppBundle\Entity\Stock;
 use AppBundle\Entity\StockMovimiento;
 use ConfigBundle\Controller\FormaPagoController;
+use ConfigBundle\Entity\BancoMovimiento;
 use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Afip\src\Afip;
 use Endroid\QrCode\QrCode;
@@ -39,8 +40,9 @@ class NotaDebCredController extends Controller {
         if ($cliId) {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
-        $desde = $request->get('desde');
-        $hasta = $request->get('hasta');
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+        $desde = $periodo['ini'];
+        $hasta = $periodo['fin'];
 
         $entities = $em->getRepository('VentasBundle:NotaDebCred')->findByCriteria($unidneg, $cliId, $desde, $hasta);
 
@@ -60,17 +62,18 @@ class NotaDebCredController extends Controller {
      * @Template("VentasBundle:NotaDebCred:new.html.twig")
      */
     public function newAction(Request $request) {
-        $unidneg_id = $this->get('session')->get('unidneg_id');
+        $session = $this->get('session');
+        $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_notadebcred');
         $tipoNota = $request->get('tipo');
         $em = $this->getDoctrine()->getManager();
-        $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
         // Verificar si la caja está abierta CAJA=1
-        $caja = $em->getRepository('ConfigBundle:Caja')->find(1);
-        if (!$caja->getAbierta()) {
-            $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para iniciar cobros');
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar(1);
+        if (!$apertura) {
+            $this->addFlash('error', 'La caja 1 está cerrada. Debe realizar la apertura para iniciar cobros');
             return $this->redirect($request->headers->get('referer'));
         }
+
         $entity = new NotaDebCred();
         $entity->setFecha(new \DateTime());
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
@@ -133,11 +136,11 @@ class NotaDebCredController extends Controller {
         // debito + (aumenta la deuda del cliente)
         $response = array('res' => '', 'msg' => '', 'id' => null);
 
-        // Verificar si la caja está abierta CAJA=1
-        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+        // Verificar si la caja está abierta
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar(1);
         if (!$apertura) {
             $response['res'] = 'ERROR';
-            $response['msg'] = 'La caja está cerrada. Debe realizar la apertura para iniciar';
+            $response['msg'] = 'La caja 1 está cerrada. Debe realizar la apertura para iniciar cobros';
             return new JsonResponse($response);
         }
 
@@ -250,7 +253,8 @@ class NotaDebCredController extends Controller {
                     }
                 }
                 else {
-                    foreach ($entity->getCobroDetalles() as $detalle) {
+                    $detalles = array_values($datos['cobroDetalles']);
+                    foreach ($entity->getCobroDetalles() as $key => $detalle) {
                         $detalle->setCajaApertura($apertura);
                         if (!$detalle->getMoneda()) {
                             $detalle->setMoneda($entity->getMoneda());
@@ -264,6 +268,25 @@ class NotaDebCredController extends Controller {
                         }
                         if ($tipoPago != 'TARJETA') {
                             $detalle->setDatosTarjeta(null);
+                        }
+                        if ($tipoPago === 'TRANSFERENCIA') {
+                            // cargar movimiento de credito bancario
+                            $movBanco = new BancoMovimiento();
+                            $banco = $em->getRepository('ConfigBundle:Banco')->find($detalles[$key]['bancoTransferencia']);
+                            $movBanco->setBanco($banco);
+                            $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($detalles[$key]['cuentaTransferencia']);
+                            $movBanco->setCuenta($cuenta);
+                            $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
+                            $movBanco->setConciliado(false);
+                            $movBanco->setImporte($detalles[$key]['importe']);
+                            $movBanco->setFechaAcreditacion(new \DateTime());
+                            $movBanco->setFechaCarga(new \DateTime());
+                            $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CREDITO');
+                            $movBanco->setTipoMovimiento($tipoMov);
+                            $tipoNota = $entity->getSigno() == 'CRE' ? 'Credito' : 'Debito';
+                            $movBanco->setCobroDetalle($detalle);
+                            $movBanco->setObservaciones('Transferencia por nota de '.$tipoNota.' - '.$entity->getNombreCliente());
+                            $em->persist($movBanco);
                         }
                     }
                 }
@@ -339,7 +362,7 @@ class NotaDebCredController extends Controller {
         $editForm = $this->createEditForm($entity, null);
         return $this->render('VentasBundle:NotaDebCred:new.html.twig', array(
                 'entity' => $entity,
-                'descuentoContado' => FormaPagoController::getDescuentoContado(),
+                'descuentoContado' => FormaPagoController::getDescuentoContado($em),
                 'form' => $editForm->createView(),
         ));
     }

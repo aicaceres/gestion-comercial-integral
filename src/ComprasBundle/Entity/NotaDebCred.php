@@ -68,6 +68,12 @@ class NotaDebCred {
      */
     protected $signo = '-';
 
+   /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\RubroCompras")
+     * @ORM\JoinColumn(name="rubro_compras_id", referencedColumnName="id")
+     * */
+    protected $rubroCompras;
+
 // TOTALES DE LA FACTURA
 
     /**
@@ -1041,5 +1047,28 @@ class NotaDebCred {
     public function getAlicuotas()
     {
         return $this->alicuotas;
+    }
+
+    /**
+     * Set rubroCompras
+     *
+     * @param \ConfigBundle\Entity\RubroCompras $rubroCompras
+     * @return NotaDebCred
+     */
+    public function setRubroCompras(\ConfigBundle\Entity\RubroCompras $rubroCompras = null)
+    {
+        $this->rubroCompras = $rubroCompras;
+
+        return $this;
+    }
+
+    /**
+     * Get rubroCompras
+     *
+     * @return \ConfigBundle\Entity\RubroCompras 
+     */
+    public function getRubroCompras()
+    {
+        return $this->rubroCompras;
     }
 }

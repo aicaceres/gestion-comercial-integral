@@ -125,7 +125,8 @@ class VentaDetalle {
 
     // total del item
     public function getTotalItem() {
-        return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 2);
+        $aux = round($this->getPrecioUnitarioItem(),2);
+        return $aux * $this->getCantidad();
     }
 
     public function getBaseImponibleItem() {

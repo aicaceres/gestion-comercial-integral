@@ -52,5 +52,19 @@ class CajaAperturaRepository extends EntityRepository {
 
         return $query->getQuery()->getResult();
     }
+    
+    public function getMovimientosByFecha($fecha) {
+        $ini = UtilsController::toAnsiDate($fecha) . " 00:00'";
+        $fin = UtilsController::toAnsiDate($fecha) . " 23:59'";
+        $query = $this->_em->createQueryBuilder();
+        $query->select('cd, a')
+            ->from('VentasBundle\Entity\CobroDetalle', 'cd')
+            ->innerJoin('cd.cajaApertura', 'a')
+            ->where("a.fechaApertura >= '" . $ini)
+            ->andWhere("a.fechaApertura <= '" . $fin)
+            ->orderBy("cd.pagoProveedor,cd.pagoCliente,cd.cobro,cd.notaDebCred");
+
+        return $query->getQuery()->getResult();
+    }
 
 }

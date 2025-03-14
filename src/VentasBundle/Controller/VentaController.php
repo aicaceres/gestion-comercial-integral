@@ -113,7 +113,7 @@ class VentaController extends Controller {
             return $this->redirect($referer);
         }
 
-        $moneda = MonedaController::getMonedaByDefault();
+        $moneda = MonedaController::getMonedaByDefault($em);
         $entity->setMoneda($moneda);
         $entity->setCotizacion($moneda->getCotizacion());
 
@@ -635,13 +635,14 @@ class VentaController extends Controller {
     }
 
     private function arrayParameters($entity, $view) {
+        $em = $this->get('doctrine')->getEntityManager();
         $cuit = $entity->getCliente()->getCuit();
         $valido = UtilsController::validarCuit($cuit);
         return array(
             'entity' => $entity,
             'form' => $view,
             'cuitvalido' => $valido,
-            'descuentoContado' => FormaPagoController::getDescuentoContado()
+            'descuentoContado' => FormaPagoController::getDescuentoContado($em)
         );
     }
 

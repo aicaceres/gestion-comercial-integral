@@ -14,6 +14,9 @@
             <tr>
                 <th>Nombre Corto</th>
                 <th>Descripción</th>
+                <th>Nombre equipo</th>
+                <th>Punto Venta WebService</th>
+                <th>Punto Venta Tickeadora</th>
                 <th style="width:15%;" class="nosort">Activo</th>
                 <th class="nosort actionbutton addbutton">
                     {% if app.user.access(app.session.get('unidneg_id'),'sistema_caja_new') %}
@@ -27,6 +30,9 @@
             <tr>
                 <td>{{ entity.nombre|upper }}</td>
                 <td>{{ entity.descripcion }}</td>
+                <td>{{ entity.hostname }}</td>
+                <td>{{ entity.ptoVtaWs }}</td>
+                <td>{{ entity.ptoVtaIfu }}</td>
                 <td><input type="checkbox" disabled="disabled" {% if entity.activo %}checked="checked"{% endif %} /></td>
                 <td>
                      {% if app.user.access(app.session.get('unidneg_id'),'sistema_caja_edit') %}

@@ -104,12 +104,10 @@ class CajaController extends Controller
             throw $this->createNotFoundException('Unable to find Caja entity.');
         }        
         $editForm = $this->createEditForm($entity);
-        //$deleteForm = $this->createDeleteForm($id);
 
         return $this->render('ConfigBundle:Caja:edit.html.twig', array(
             'entity'      => $entity,
-            'form'   => $editForm->createView(),
-            //'delete_form' => $deleteForm->createView(),
+            'form'   => $editForm->createView()
         ));
     }
 
@@ -141,19 +139,16 @@ class CajaController extends Controller
             throw $this->createNotFoundException('Unable to find Caja entity.');
         }
 
-        // $deleteForm = $this->createDeleteForm($id);
         $editForm = $this->createEditForm($entity);
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
             $entity->setNombre( strtoupper(str_replace(' ','',$entity->getNombre())) );  
             $em->flush();
-
             return $this->redirect($this->generateUrl('sistema_caja'));
         }
         return $this->render('ConfigBundle:Caja:edit.html.twig', array(
             'entity'      => $entity,
-            'form'   => $editForm->createView(),
-            //'delete_form' => $deleteForm->createView(),
+            'form'   => $editForm->createView()
         ));
     }
 
@@ -163,6 +158,7 @@ class CajaController extends Controller
      */
     public function deleteAction($id)
     {
+        die;
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_caja_delete');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ConfigBundle:Caja')->find($id);
@@ -174,6 +170,29 @@ class CajaController extends Controller
             $msg = $ex->getTraceAsString();
         }
         return new Response(json_encode($msg));
+    }
+    
+    /**
+     * @Route("/parametroCaja", name="sistema_parametro_caja")
+     * @Method("GET")
+     * @Template()
+     */
+    public function parametroCajaAction()
+    {
+        $session = $this->get('session');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'sistema_caja_edit');
+        $em = $this->getDoctrine()->getManager();
+        if(!$session->get('caja')['id']){
+            $this->addFlash('error', 'Este equipo '. $session->get('hostname') .' no está definido como caja!');     
+            return $this->redirectToRoute('sistema');    
+        }
+        $entity = $em->getRepository('ConfigBundle:Caja')->find($session->get('caja')['id']);      
+        $editForm = $this->createEditForm($entity);
+
+        return $this->render('ConfigBundle:Caja:edit.html.twig', array(
+            'entity'      => $entity,
+            'form'   => $editForm->createView()
+        ));
     }
 
     /**

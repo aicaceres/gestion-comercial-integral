@@ -1,8 +1,8 @@
 {% extends "AppBundle::layout.html.twig" %}
 {% block pageheader %}
 <div class="pageheader notab">
-    <h1 class="pagetitle">Apertura / Cierre de Caja</h1>
-<span class="pagedesc">Listado de Aperturas y Cierres de Cajas</span>
+        <h1 class="pagetitle">Apertura / Cierre de Caja</h1>
+        <span class="pagedesc">Listado de Aperturas y Cierres de Cajas</span>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -11,12 +11,14 @@
 <div id="contentwrapper" class="contentwrapper">
 {# fomulario para filtros #}
     <form id="searchform" action="{{ path('ventas_apertura') }}" method="get" style="margin-bottom:10px">
-        <div style="display:none; margin-bottom: 10px;">
+        <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
             <label><strong>Caja:</strong></label>
             <select class="uniformselect" id="selectCaja" name="cajaId">
             {% for cj in cajas %}
-                <option value="{{cj.id}}" {% if cj.id==cajaId %} selected="selected" {% endif %}> {{cj.nombre}}</option>
+                <option value="{{cj.id}}" {% if cj.id==cajaId %} selected="selected" {% endif %}>
+                  {{cj.nombre}} - {{ cj.descripcion }}
+                </option>
             {% endfor %}
             </select>
         </div>
@@ -28,6 +30,7 @@
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
         </div>
 <!-- Botones para cierres X y Z -->
+{% if app.session.get('caja') and app.session.get('caja')['id'] == caja.id %}
         <div style="display: inline-block;float:right;" >
             <label><strong>TICKEADORA FISCAL: </strong></label>
             <button type="button" class="stdbtn btn_orange" onclick="cierreX()" style="padding:7px 20px">
@@ -43,22 +46,23 @@
                 Reporte Semanal <img class="loader_cmObtenerPrimerBloqueReporteElectronico hidden" src={{ asset('assets/images/loaders/loader8.gif') }}>
             </button>
         </div>
+{% endif %}
     </form>
 
 {# Banner con estado de la caja #}
-{% if caja %}
-    {% if caja.abierta %}
-        {% set msg, txt = 'msgsuccess', caja.nombre ~ ' ABIERTA' %}
+{% if app.session.get('caja') and app.session.get('caja')['id'] == caja.id %}
+    {% if app.session.get('caja')['apertura'] %}
+        {% set msg, txt = 'msgsuccess', app.session.get('caja')['nombre'] ~ ' ABIERTA' %}
         {% set btn = '<button title="Realizar el Cierre de Caja" class="js-cierre stdbtn btn_black floatright" > Cierre de Caja </button>'  %}
     {% else %}
-        {% set msg, txt = 'msgerror', caja.nombre ~ ' CERRADA' %}
+        {% set msg, txt = 'msgerror', app.session.get('caja')['nombre'] ~ ' CERRADA' %}
         {% set btn = '<button title="Realizar la Apertura de Caja" class="js-apertura stdbtn btn_black floatright" > Apertura de Caja </button>'  %}
     {% endif %}
-    <div class="notibar {{msg}}">
-        <p>
-            <strong> {{txt}} </strong> {{ btn|raw }}
-        </p>
-    </div>
+<div class="notibar {{msg}}">
+    <p>
+        <strong> {{txt}} </strong> {{ btn|raw }}
+    </p>
+</div>
 {% endif %}
 
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="ccaja_apertura_table">
@@ -95,13 +99,13 @@
                         <td>{% if apertura.fechaCierre %}{{ apertura.updatedBy.username }}{% endif %}</td>
                         <td class="hidden {% if apertura.diferencia<0 %} rojo {% endif %}" >{% if apertura.fechaCierre %}{{apertura.diferencia|number_format(2,',','.')}}{% endif %}</td>
                         <td>
-{#                            {% if apertura.fechaCierre %}#}
-                                {% if  apertura.movimientos|length == 0  %}
-                                    <span style="font-size:8px"> SIN MOVIMIENTOS </span>
-                                {% else %}
-                                    <a target="_blank" href="{{ path('ventas_apertura_arqueo',{'id':apertura.id}) }}" title="Ver informe de Cierre" class="btn btnaction btn_folder"> <i class="icon-file"></i></a>
-                                {% endif %}
-{#                            {% endif %}#}
+{#                        {% if apertura.fechaCierre %}#}
+                          {% if  apertura.movimientos|length == 0  %}
+                              <span style="font-size:8px"> SIN MOVIMIENTOS </span>
+                          {% else %}
+                              <a target="_blank" href="{{ path('ventas_apertura_arqueo',{'id':apertura.id}) }}" title="Ver informe de Cierre" class="btn btnaction btn_folder"> <i class="icon-file"></i></a>
+                          {% endif %}
+{#                        {% endif %}#}
                         </td>
                     </tr>
                 {% endif %}
@@ -125,7 +129,7 @@ jQuery(document).ready(function($){
     $('.js-apertura').on('click', function(){
         //caja_id = $('#selectCaja').val();  id de caja
         url = '{{ path("ventas_apertura_new")}}'; // url del partial a cargar en modal
-        aperturaCajaVentas(url)
+        aperturaCajaVentas(url, false)
     });
     $('.js-cierre').on('click', function(){
         //caja_id = $('#selectCaja').val();  id de caja
@@ -181,7 +185,7 @@ function test(){
             driver.finalizarTrabajo();
             const result = driver.response#}
             registrarMovimientoIfu(comando,'')
-            
+
         } catch (e){
             alert(e);
             setFacturando(false,comando)
@@ -192,7 +196,7 @@ function test(){
 function reporteSemanal(){
     const comando = 'cmObtenerPrimerBloqueReporteElectronico'
     setFacturando(true,comando)
-    const url = "{{ path('get_datos_reporte_semanal') }}" 
+    const url = "{{ path('get_datos_reporte_semanal') }}"
     msg = 'Ha ocurrido un error obteniendo los datos para el reporte'
     jQuery.getJSON( url , {'id': "{{caja.id}}"}).done(function(data){
         jReporteSemanal('Seleccionar Período:(ddmmaa)', data, 'Reporte Semanal', function(res) {
@@ -257,8 +261,8 @@ function setFacturando(on,action=''){
 }
 
 function registrarMovimientoIfu(comando, result, fechas=null, error=null){
-   url = "{{ path('ifu_registrar_movimiento') }}" 
-   data = {caja:"{{caja.id}}", comando, result, fechas, error } 
+   url = "{{ path('ifu_registrar_movimiento') }}"
+   data = { comando, result, fechas, error }
    jQuery.post(url, data, function(data){
     if(data.res === 'OK'){
         switch (comando) {

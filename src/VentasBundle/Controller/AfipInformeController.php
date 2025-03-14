@@ -259,8 +259,8 @@ class AfipInformeController extends Controller {
         $empresa = $em->getRepository('ConfigBundle:Empresa')->find(1);
         foreach ($facturas as $fact) {
             $tributos = json_decode($fact->getTributos());
+            $percRentas = $em->getRepository('ConfigBundle:Escalas')->getPercepcionByRetencion($fact->getPercepcionRentas());
             if ($tributos) {
-                $cliente = $fact->getCliente();
                 $cuitempresa = substr(str_pad(str_replace('-', '', $empresa->getCuit()), 11, " ", STR_PAD_LEFT), -11, 11);
                 $tipocomp = intval($fact->getTipoComprobante()->getCodigo());
                 $puntovta = str_pad($fact->getPuntoVenta(), 4, "0", STR_PAD_LEFT);
@@ -268,7 +268,7 @@ class AfipInformeController extends Controller {
                 $cuit = substr(str_pad($fact->getDocNro(), 11, " ", STR_PAD_LEFT), -11, 11);
                 $nombre = substr(str_pad(UtilsController::sanear_string($fact->getNombreCliente()), 30, " ", STR_PAD_RIGHT), -30, 30);
                 $fecha = $fact->getCbteFchFormatted('dmY');
-                $categ = str_pad($cliente->getCategoriaRentas()->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
+                $categ = str_pad($percRentas->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
                 $montoret = str_pad(($tributos->Importe * 100), 11, "0", STR_PAD_LEFT);
                 $gravado = str_pad(($tributos->BaseImp * 100), 11, "0", STR_PAD_LEFT);
                 $alicuota = str_pad(($tributos->Alic * 100), 4, "0", STR_PAD_LEFT);

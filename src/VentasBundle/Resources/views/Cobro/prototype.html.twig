@@ -42,6 +42,18 @@
         {{ form_row(cheque.id)}}
         </div>
     </td>
+    <td class="transferenciaTd">
+        <div style="margin:5px 0">
+            {{ form_label(item.bancoTransferencia) }}
+            {{ form_widget(item.bancoTransferencia, { 'attr': {'class' : 'selectBancoTransf',
+                'style': 'width:30%' } }) }}
+            {{ form_label(item.cuentaTransferencia) }}
+            {{ form_widget(item.cuentaTransferencia, { 'attr': {'class' : 'selectCuentaTransf mininput',
+                'data-url': path("sistema_banco_get_cuentas") } })}}
+            {{ form_label(item.nroMovTransferencia, 'N°') }}
+            {{ form_widget(item.nroMovTransferencia, { 'attr': {'class':'mininput'} }) }}    
+        </div>
+    </td>    
     <td width="160px" class="importeTd alignright">
         <span class="simbolo" style="font-size:16px;">{{ entity.moneda.simbolo }}</span>
         {{ form_widget(item.importe, {'attr': {'class':'mediuminput alignright', 'style': 'font-size:16px;font-weight:bold'}}) }}

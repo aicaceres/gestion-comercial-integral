@@ -8,23 +8,25 @@
 
 {% block contentwrapper %}
 <div id="contentwrapper" class="contentwrapper">
-<h1 id="popup_title" >{{ (entity.id) ? 'Editar datos de '~entity.nombre|upper : 'Alta de Nueva Caja' }}</h1>
+<h1 id="popup_title" >Datos de Caja</h1>
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
  {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >
-            <p>             
-                {{ form_label(form.nombre, 'Nombre Corto:') }}
-                {{ form_widget(form.nombre, { 'attr': {'class' : 'width100', 'maxlength':'10',  'style':'text-transform:uppercase','autofocus':'autofocus','title':'Máximo 10 caracteres sin espacios' } }) }}
-                {{ form_errors(form.nombre) }}                
-            </p>
-<p>{{ form_row(form.descripcion,{'attr':{'class':'mediuminput'}})}}</p>
-            <p>
-            {{ form_label(form.activo) }}
-            {{ form_widget(form.activo) }}
-            {{ form_errors(form.activo) }}
-             </p>
-                   
+            <div class="two_fields">
+              {{ form_row(form.nombre, { 'attr': {'class' : 'mininput' } }) }}
+              {{ form_row(form.activo) }}
+            </div>
+            <div class="two_fields">
+              {{ form_row(form.hostname, { 'attr': {'class' : 'mediuminput' } }) }}
+              {{ form_row(form.descripcion, { 'attr': {'class' : 'mediuminput' } }) }}
+            </div>
+            <h3 style='font-size:18px; padding-left:30px'>Puntos de Venta</h3>
+            <div class="two_fields">
+              {{ form_row(form.ptoVtaWs, { 'attr': {'class' : 'mininput' } }) }}
+              {{ form_row(form.ptoVtaIfu, { 'attr': {'class' : 'mininput' } }) }}
+            </div>
+                               
             <br clear="all" /> 
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>

@@ -29,11 +29,12 @@ class FacturaElectronicaWebservice {
         10071 => "Para comprobantes tipo C el objeto IVA no debe informarse.",
     );
 
-    public function __construct(EntityManager $em, Session $session, $ptovtaWsFactura, $ptovtaIfuTicket, $iibbPercent, $cuitAfip) {
+    public function __construct(EntityManager $em, Session $session, $iibbPercent, $cuitAfip) {
         $this->em = $em;
         $this->session = $session;
-        $this->ptovtaWsFactura = $ptovtaWsFactura;
-        $this->ptovtaIfuTicket = $ptovtaIfuTicket;
+        $caja = $em->getRepository('ConfigBundle:Caja')->find($session->get('caja')['id']);
+        $this->ptovtaWsFactura = $caja->getPtoVtaWs();
+        $this->ptovtaIfuTicket = $caja->getPtoVtaIfu();
         $this->iibbPercent = $iibbPercent;
         $this->cuitAfip = $cuitAfip;
         $this->afipOptionsProd = array('CUIT' => $cuitAfip, 'production' => true, 'cert' => 'cert.crt', 'key' => 'decr.key');

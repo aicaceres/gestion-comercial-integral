@@ -65,7 +65,7 @@
         <tbody>
             {% set total=0 %}
            {% for entity in entities if entity.deposito.id in app.session.get('depositos') %}
-            <tr>
+            <tr {% if entity.producto.activo == 0 %}style="background-color: antiquewhite" {% endif %}>
                 {% set total = total + entity.getValorizado %}
                 <td>{{ entity.deposito.nombre|upper }}</td>
                 <td>{% if entity.producto.rubro %}{{ entity.producto.rubro.nombre }}{% endif %}</td>

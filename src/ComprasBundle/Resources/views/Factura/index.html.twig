@@ -70,7 +70,7 @@
                     {% if app.user.access(app.session.get('unidneg_id'),'compras_factura_edit') and entity.estado =='PENDIENTE' %}
                     <a href="{{ path('compras_factura_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="Editar"></a>
                     {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'compras_factura_editar_admin') %}
+                    {% if app.user.access(app.session.get('unidneg_id'),'compras_factura_editar_admin') and false%}
                         <a href="{{ path('compras_factura_editar_admin', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" title="EditarAdmin"></a>
                     {% endif %}
                     {% if app.user.access(app.session.get('unidneg_id'),'compras_factura_cancel')and entity.estado =='PENDIENTE'  %}

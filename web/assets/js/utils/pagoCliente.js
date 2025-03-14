@@ -132,6 +132,39 @@ function quitarElementosSegunTipo(pagosTr) {
 		} else {
 			itemTr.find(".chequeTd").remove()
 		}
+                if (tipo === "TRANSFERENCIA") {
+                    itemTr.find('[id*="_nroMovTransferencia"]').attr("required", true)
+                    bcoTransf = itemTr.find('[id*="_bancoTransferencia"]') 
+                    ctaTransf = itemTr.find('[id*="_cuentaTransferencia"]')          
+                    ctaTransf.attr("required", true)    
+                    bcoTransf.select2().on('change', function () {
+                      ctaTransf.empty().trigger('change');  
+                      bancoId = bcoTransf.val()
+                      jQuery.ajax({
+                          url: ctaTransf.data('url'),
+                          type: 'GET',
+                          data: { bancoId },
+                          dataType: 'json',
+                          success: function (data) {
+                              if (data && data.length > 0) {
+                                  data.forEach(cuenta => {
+                                      const nuevaOpcion = new Option(cuenta.nroCuenta, cuenta.id, false, false);
+                                      ctaTransf.append(nuevaOpcion);
+                                  });
+                              } else {
+                                  alert('No se encontraron cuentas para este banco.');
+                              }
+                              ctaTransf.trigger('change');
+                          },
+                          error: function (xhr, status, error) {
+                              console.error('Error al obtener las cuentas:', error);
+                          }
+                      });
+                      ctaTransf.focus()
+                    }).trigger('change')
+                } else {
+                   itemTr.find(".transferenciaTd").remove()
+                }
 	})
 }
 
@@ -141,7 +174,7 @@ function linkAddPago() {
 		jQuery("#dialog-tipopago").dialog({
 			autoOpen: true,
 			height: 100,
-			width: 350,
+			width: 400,
 			modal: true
 		})
 		jQuery("#dialog-tipopago button").first().focus()

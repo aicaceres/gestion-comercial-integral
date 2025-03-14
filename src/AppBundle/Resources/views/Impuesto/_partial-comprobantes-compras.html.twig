@@ -52,10 +52,9 @@
                 <tr {% if item.error|length>0 %} style="background-color:mistyrose"{% endif %} >
                     <td><span style="width:60px;display: block; ">{{item.fecha}}</span></td>
                     <td><span style="width:60px;display: block;">{{item.tipoComprobante}}</span></td>
-                    {% if 'COMPROBANTE' in item.error %}
+                    {% if 'ALICUOTA' in item.error %}
                     <td colspan="2">
-                        <input value="{{ item.puntoVenta ~ '-' ~ item.nroComprobante }}" class="nrocomp inputerror" data-comp="{{ item.id }}" style="width:160px;font-size:11px;background-color:darkseagreen"
-                               data-url="{{ path('update_nrocomprobante',{'id':item.id,'bundle':'Compras','tipocomp': item.tipoComprobante}) }}" />
+                        <a href="{{ path('compras_factura_editar_admin', { 'id': item.id }) }}" target="_blank" style="font-weight: bold">{{ item.puntoVenta ~ '-' ~ item.nroComprobante }}</a>                        
                     </td>
                 {% else %}
                     <td>

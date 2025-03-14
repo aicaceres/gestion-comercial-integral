@@ -54,6 +54,12 @@ class BancoMovimiento {
      */
     protected $conciliado = false;
 
+   /**
+    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\CobroDetalle", inversedBy="bancoMovimiento")
+    * @ORM\JoinColumn(name="ventas_cobro_detalle_id", referencedColumnName="id")
+    */
+    protected $cobroDetalle;
+
     /* DEPOSITO - CHEQUE - DEBITO - CREDITO - EXTRACCION*/
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\BancoTipoMovimiento")
@@ -445,5 +451,28 @@ class BancoMovimiento {
     public function getCheque()
     {
         return $this->cheque;
+    }
+
+    /**
+     * Set cobroDetalle
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalle
+     * @return BancoMovimiento
+     */
+    public function setCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalle = null)
+    {
+        $this->cobroDetalle = $cobroDetalle;
+
+        return $this;
+    }
+
+    /**
+     * Get cobroDetalle
+     *
+     * @return \VentasBundle\Entity\CobroDetalle
+     */
+    public function getCobroDetalle()
+    {
+        return $this->cobroDetalle;
     }
 }

@@ -27,14 +27,7 @@ class NotaDebCredType extends AbstractType {
                 'attr' => array('id' => 'ventasbundle_moneda'),
                 'required' => true, 'label' => 'MONEDA: '
             ))
-            // ->add('fecha', 'date', array('widget' => 'single_text', 'label' => 'Fecha Nota:',
-            //     'format' => 'dd-MM-yyyy', 'required' => true))
-            // ->add('nombreCliente',null, array('label' => 'Nombre:'))
-            // ->add('nroDocumentoCliente',null, array('label'=>'N° Documento:'))
-            // ->add('formaPago', 'entity', array('class' => 'ConfigBundle:FormaPago',
-            //     'required' => true, 'label' => 'FORMA DE PAGO: '))
             ->add('concepto', 'text', array('label' => 'Concepto Adicional:', 'required' => false))
-            // ->add('cotizacion','hidden')
             ->add('descuentoRecargo', null, array('attr' => array('required' => true)))
             ->add('periodoAsocDesde', 'date', array('widget' => 'single_text', 'label' => 'Período Desde:',
                 'format' => 'dd-MM-yyyy', 'required' => false))
@@ -61,6 +54,17 @@ class NotaDebCredType extends AbstractType {
                 'attr' => array(
                     'class' => 'row citem'
             )))
+            ->add('nroMovTransferencia', null, array('mapped'=> false))
+            ->add('bancoTransferencia', 'entity', array('class' => 'ConfigBundle:Banco',
+                'mapped' =>false, 'label' => 'Banco:', 
+                'query_builder' => function(EntityRepository $repository) {
+                    return $qb = $repository->createQueryBuilder('b')
+                            ->innerJoin('b.cuentas', 'c')
+                            ->where('b.activo=1');
+                }
+            ))
+            ->add('cuentaTransferencia','entity',array('class' => 'ConfigBundle:CuentaBancaria',
+                'label' => 'Cuenta:','mapped' =>false))    
             ->add('rechazado','choice', array('mapped' => false,
               'label' => 'Rechazado:','expanded' => false, 'choices' => array('N' => 'No','S'=> 'Si') ))
             ->add('tipoComprobante', 'entity', array('label' => 'Tipo Comprobante:',

@@ -191,8 +191,7 @@ class MonedaController extends Controller
         return new Response( json_encode($datos) );
     }
 
-    public function getMonedaByDefault(){
-      $em = $this->getDoctrine()->getManager();
+    public function getMonedaByDefault($em){
       return $em->getRepository('ConfigBundle:Moneda')->findOneByByDefault(1);
     }
 }

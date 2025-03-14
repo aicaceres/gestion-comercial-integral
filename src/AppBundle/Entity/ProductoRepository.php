@@ -50,15 +50,14 @@ class ProductoRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
-    public function findProductosPorDepositoyProveedor($unidneg, $prov, $dep, $conStock=false) {
+    public function findProductosPorDepositoyProveedor($unidneg, $prov, $dep, $conStock=false, $soloActivos=true) {
         $query = $this->_em->createQueryBuilder('s')
             ->select('s')
             ->from('AppBundle\Entity\Stock', 's')
             ->innerJoin('s.producto', 'p')
             ->innerJoin('s.deposito', 'd')
-            ->innerJoin('d.unidadNegocio', 'u')
-            ->where('p.activo=1')
-            ->andWhere('u.id=' . $unidneg);
+            ->innerJoin('d.unidadNegocio', 'u')            
+            ->where('u.id=' . $unidneg);
         if ($prov) {
             $query->innerJoin('p.proveedor', 'pr')
                 ->andWhere('pr.id=' . $prov);
@@ -68,6 +67,9 @@ class ProductoRepository extends EntityRepository {
         }
         if($conStock){
           $query->andWhere('s.cantidad>0');
+        }
+        if($soloActivos){
+          $query->andWhere('p.activo=1');
         }
         return $query->getQuery()->getResult();
     }

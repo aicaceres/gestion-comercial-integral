@@ -4,6 +4,7 @@ namespace VentasBundle\Form;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Doctrine\ORM\EntityRepository;
 use VentasBundle\Form\ChequeType;
 
 class CobroDetalleType extends AbstractType {
@@ -24,6 +25,17 @@ class CobroDetalleType extends AbstractType {
                 ->add('importe')
                 ->add('datosTarjeta', new CobroDetalleTarjetaType())
                 ->add('chequeRecibido', new ChequeType())
+                ->add('nroMovTransferencia', null, array('mapped'=> false))
+                ->add('bancoTransferencia', 'entity', array('class' => 'ConfigBundle:Banco',
+                    'mapped' =>false, 'label' => 'Banco:', 
+                    'query_builder' => function(EntityRepository $repository) {
+                        return $qb = $repository->createQueryBuilder('b')
+                                ->innerJoin('b.cuentas', 'c')
+                                ->where('b.activo=1');
+                    }
+                ))
+                ->add('cuentaTransferencia','entity',array('class' => 'ConfigBundle:CuentaBancaria',
+                    'label' => 'Cuenta:','mapped' =>false))
         ;
     }
 

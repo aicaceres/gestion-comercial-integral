@@ -193,6 +193,18 @@ jQuery(document).ready(function($) {
     });
 });
 
+function setTablaAlicuotas(arr){
+  alicTr = jQuery('table.alictable tbody').find('tr')
+  ivaTotal = netoTotal = 0
+    alicTr.each(function() {
+        ivaTotal += arr[iva].iva
+        netoTotal += arr[iva].neto
+    });
+  }
+  jQuery('#ivaTh').html(ivaTotal.toFixed(2))
+  jQuery('#netoTh').html(netoTotal.toFixed(2))
+}
+
 function changeBulto(item){
     var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed');
         var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');

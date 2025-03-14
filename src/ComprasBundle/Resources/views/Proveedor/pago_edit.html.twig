@@ -143,8 +143,8 @@
     {{ form_end(form) }}
 </div>
 </div>
-<div id="dialog-tipo" title="Elegir Pago" style="display:none">
-<form>
+<div id="dialog-tipopago" title="Elegir Pago" style="display:none">
+<form style="text-align:center">
     <button type="button" class="stdbtn btn_black" data-tipo="EFECTIVO">EFECTIVO</button>
     <button type="button" class="stdbtn btn_black" data-tipo="CHEQUE">CHEQUE</button>
     <button type="button" class="stdbtn btn_black" data-tipo="TARJETA">TARJETA</button>
@@ -156,10 +156,10 @@
 <script type="text/javascript">
 jQuery(function ($) {
     $(window).on('load', function () {
-        $( "#dialog-tipo" ).dialog({
+        $( "#dialog-tipopago" ).dialog({
             autoOpen: false,
             height: 100,
-            width: 350,
+            width: 400,
             modal: true
         });
 
@@ -269,13 +269,13 @@ jQuery(function ($) {
         });
         $('#linkAddPago').on('click', function(e) {
             e.preventDefault();
-            $( "#dialog-tipo" ).dialog('open');
-            $('#dialog-tipo button').first().focus();
+            $( "#dialog-tipopago" ).dialog('open');
+            $('#dialog-tipopago button').first().focus();
         });
 
-        $('#dialog-tipo button').on('click', function(){
+        $('#dialog-tipopago button').on('click', function(){
             tipo = $(this).data('tipo');
-            $( "#dialog-tipo" ).dialog('close');
+            $( "#dialog-tipopago" ).dialog('close');
             addNewPago(tipo);
         })
 
@@ -410,6 +410,9 @@ function cargarCheques(objTd){
                 $(this).attr('required',false) ;
             })
             importe.focus();
+        }
+        if( tipo != 'TRANSFERENCIA'){
+            lastTr.find('.transferenciaTd').hide();
         }
         const imp = jQuery(".vuelto").html()
 		? jQuery(".vuelto").html().replace(",", ".")

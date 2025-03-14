@@ -6,7 +6,11 @@
         <h1 class="logo" style="height: 40px;"><a style="color: white; margin: 12px 2px;display: block;" href="{{ path('homepage') }}">
             <span class="{{ app.session.get('theme') }}">{{app.session.get('labels')['label1']}}.</span>{{app.session.get('labels')['label2']}}
             </a></h1>
-        <span class="slogan"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }}</span>                     
+        <span class="slogan"> 
+            Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} 
+            - {{ app.session.get('hostname') }} 
+            {% if app.session.get('caja') %}  - {{ app.session.get('caja')['nombre'] }} #{{ app.session.get('caja')['apertura'] }}{% endif %}
+        </span>                     
         <br clear="all" />           
     </div><!--left-->
     <div class="right">

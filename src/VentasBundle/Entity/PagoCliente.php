@@ -120,6 +120,20 @@ class PagoCliente {
         $this->cobroDetalles = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    public function canDelete() {
+        if(!$this->getGeneraNotaCredito()){
+            $cajaAbierta = false;
+            foreach ($this->getCobroDetalles() as $cobro) {
+                if($cobro->getCajaApertura()->getFechaCierre()){
+                    $cajaAbierta = true;
+                    break;
+                }
+            }
+            return $cajaAbierta;
+        }
+        return false;
+    }
+
     public function __toString() {
         return str_pad($this->getPrefijoNro(), 4, "0", STR_PAD_LEFT) . '-' . str_pad($this->getPagoNro(), 8, "0", STR_PAD_LEFT);
     }
@@ -174,6 +188,9 @@ class PagoCliente {
                     break;
                 case 'TARJETA':
                     $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
+                    break;
+                case 'TRANSFERENCIA':
+                    $txt = $txt . $aux . 'TRANSFERENCIA: ' . $monto;
                     break;
             }
         }

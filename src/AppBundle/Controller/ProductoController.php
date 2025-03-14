@@ -441,7 +441,7 @@ class ProductoController extends Controller {
         $formaPago = $em->getRepository('ConfigBundle:FormaPago')->find($formaPagoId);
         $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findBy(array('activo' => 1), array('nombre' => 'ASC'));
         if (count($depositos) > 0) {
-            $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId, true);
+            $entities = $em->getRepository('AppBundle:Producto')->findProductosPorDepositoyProveedor($unidneg, $provId, $depId, true, false);
         }
         else {
             $this->addFlash('error', 'No posee depósitos asignados!!');
@@ -1151,8 +1151,8 @@ class ProductoController extends Controller {
                     $bajominimo = ( $dif < 0 );
                 }
             }
-
-            $res['text'] = $res['nombre'] . ' | COD ' . $res['codigo'] . ' | Contado: $' . $precio . ' | Stock:' . $stock;
+            $style = $stock < 0 ? 'style="color:red"' : '';
+            $res['text'] = '<span '. $style .' >' . $res['nombre'] . ' | COD ' . $res['codigo'] . ' | Contado: $' . $precio . ' | Stock:' . $stock . '</span>';
             $res['alicuota'] = $iva;
             $res['precio'] = $precioUnit;
             $res['comodin'] = $producto->getComodin();

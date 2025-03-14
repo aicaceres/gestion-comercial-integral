@@ -10,7 +10,8 @@ parameters:
 
 framework:
     #esi: ~
-    translator: { fallbacks: ['%locale%'] }
+   #translator: { fallbacks: ['%locale%'] }
+    translator: { enabled: false }
     secret: '%secret%'
     router:
         resource: '%kernel.root_dir%/config/routing.yml'
@@ -35,8 +36,6 @@ twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
     globals:
-      ptovta_ws_factura: '%ptovta_ws_factura%'
-      ptovta_ifu_ticket: '%ptovta_ifu_ticket%'
       modelo_tickeadora: '%modelo_tickeadora%'
       puerto_tickeadora: '%puerto_tickeadora%'
       baudios_tickeadora: '%baudios_tickeadora%'
@@ -135,8 +134,15 @@ ps_pdf:
     markdown_document_template_filepath: ~
     document_parser_type: ~
 
-services:
-  
+services:  
     factura_electronica_webservice:
       class: VentasBundle\Service\FacturaElectronicaWebservice
-      arguments: [ '@doctrine.orm.entity_manager', '@session', '%ptovta_ws_factura%', '%ptovta_ifu_ticket%', '%iibb_percent%', '%cuit_afip%' ]
+      arguments: [ '@doctrine.orm.entity_manager', '@session', '%iibb_percent%', '%cuit_afip%' ]
+      
+    app.caja_listener:
+        class: AppBundle\EventListener\CajaListener
+        arguments:
+            - "@doctrine.orm.entity_manager"
+            - "@session"
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }      

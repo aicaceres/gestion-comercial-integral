@@ -84,6 +84,11 @@ class CobroDetalle {
      */
     protected $cajaApertura;
 
+    /**
+     * @ORM\OneToOne(targetEntity="ConfigBundle\Entity\BancoMovimiento", mappedBy="cobroDetalle")
+     */
+    private $bancoMovimiento;
+
     public function getEstado() {
         if ($this->getCobro()) {
             $estado = $this->getCobro()->getEstado();
@@ -481,4 +486,27 @@ class CobroDetalle {
         return $this->pagoProveedor;
     }
 
+
+    /**
+     * Set bancoMovimiento
+     *
+     * @param \ConfigBundle\Entity\BancoMovimiento $bancoMovimiento
+     * @return CobroDetalle
+     */
+    public function setBancoMovimiento(\ConfigBundle\Entity\BancoMovimiento $bancoMovimiento = null)
+    {
+        $this->bancoMovimiento = $bancoMovimiento;
+
+        return $this;
+    }
+
+    /**
+     * Get bancoMovimiento
+     *
+     * @return \ConfigBundle\Entity\BancoMovimiento 
+     */
+    public function getBancoMovimiento()
+    {
+        return $this->bancoMovimiento;
+    }
 }

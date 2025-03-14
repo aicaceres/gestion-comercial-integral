@@ -24,17 +24,17 @@ class ImpresoraFiscalController extends Controller {
      * @Method("POST")
      */
     public function registrarMovimientoAction(Request $request) {
-        $cajaId = $request->get('caja');
         $comando = $request->get('comando');
         $error = $request->get('error');
 
         $result = $error != 'null' ? $error : $request->get('result');
 
         $salida = array('res' => 'OK', 'msg' => '');
-        $unidneg_id = $this->get('session')->get('unidneg_id');
+        $session = $this->get('session');
+        $unidneg_id = $session->get('unidneg_id');
         $em = $this->getDoctrine()->getManager();
         $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
-        $caja = $em->getRepository('ConfigBundle:Caja')->find($cajaId);
+        $caja = $em->getRepository('ConfigBundle:Caja')->find($session->get('caja')['id']);
 
         if ($comando == 'cmObtenerDatosDeInicializacion') {
             $salida['res'] = 'ERROR';

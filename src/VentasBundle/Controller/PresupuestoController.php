@@ -554,10 +554,11 @@ class PresupuestoController extends Controller {
     }
 
     private function arrayParameters($entity, $view) {
+        $em = $this->getDoctrine()->getManager();
         return array(
             'entity' => $entity,
-            'moneda' => MonedaController::getMonedaByDefault(),
-            'descuentoContado' => FormaPagoController::getDescuentoContado(),
+            'moneda' => MonedaController::getMonedaByDefault($em),
+            'descuentoContado' => FormaPagoController::getDescuentoContado($em),
             'form' => $view,
         );
     }

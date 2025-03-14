@@ -511,8 +511,9 @@ class ProveedorController extends Controller {
         UtilsController::haveAccess($this->getUser(), $unidneg, 'compras_proveedor_pagos');
 
         $provId = $request->get('provId');
-        $desde = $request->get('desde');
-        $hasta = $request->get('hasta');
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+        $desde = $periodo['ini'];
+        $hasta = $periodo['fin'];
         $em = $this->getDoctrine()->getManager();
         $proveedor = null;
         if ($provId) {
@@ -538,9 +539,15 @@ class ProveedorController extends Controller {
      * @Template("ComprasBundle:Proveedor:pago_edit.html.twig")
      */
     public function pagosNewAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_proveedor_pagos');
+        $session = $this->get('session');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'compras_proveedor_pagos');
         $entity = new PagoProveedor();
         $em = $this->getDoctrine()->getManager();
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar(1);
+        if (!$apertura) {
+            $this->addFlash('error', 'La caja 1 está cerrada. Debe realizar la apertura para iniciar pagos');
+            return $this->redirectToRoute('compras_proveedor_pagos');
+        }
         $id = $request->get('id');
         $proveedor = $em->getRepository('ComprasBundle:Proveedor')->find($id);
         $equipo = $em->getRepository('ConfigBundle:Equipo')->find($this->get('session')->get('equipo'));
@@ -594,9 +601,9 @@ class ProveedorController extends Controller {
 
             try {
                 // checkear apertura de caja
-                $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+                $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar(1);
                 if (!$apertura) {
-                    return new JsonResponse(array('msg' => 'La caja está cerrada. Debe realizar la apertura para iniciar cobros'));
+                    return new JsonResponse(array('msg' => 'La caja 1 está cerrada. Debe realizar la apertura para iniciar pagos'));
                 }
 
                 $totalPago = 0;

@@ -1,5 +1,6 @@
 
-{% if app.session.get('caja_abierta') %}
+{% if app.session.get('caja') %}
+{% if app.session.get('caja')['apertura'] %}
     {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
 
         {% include 'VentasBundle:Cobro:_partial-tabla-por-cobrar.html.twig' %}
@@ -16,4 +17,5 @@
         <div class="external-event" style="background-color:orangered" title="Debe abrir la caja para realizar cobros">CAJA CERRADA</div>
     {% endif %}
     </div>
+{% endif %}
 {% endif %}

@@ -79,6 +79,11 @@ class ImpuestoController extends Controller {
             }
         }
         foreach ($notas as $nota) {
+            $rubroCompras = $nota->getRubroCompras() ? $nota->getRubroCompras()->getNombre() : 'SIN RUBRO';
+            if (!array_key_exists($rubroCompras, $resxrubro)) {
+                $resxrubro[$nota->getRubroCompras()->getNombre()] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
+                $resxrubroBase[$nota->getRubroCompras()->getNombre()] = array('0.00' => 0, '10.50' => 0, '21.00' => 0, '27.00' => 0);
+            }
             if ($nota->getFecha()->format('Y-m-d') >= $desde && $nota->getFecha()->format('Y-m-d') <= $hasta) {
                 $nro = explode('-', $nota->getNroComprobante());
                 if ($nota->getSigno() == '-') {
@@ -113,16 +118,16 @@ class ImpuestoController extends Controller {
                 $cantAlicuotas = $em->getRepository('ComprasBundle:NotaDebCred')->getCantidadAlicuotas($nota->getId());
                 if (count($cantAlicuotas) == 1) {
                     $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($cantAlicuotas[0]);
-                    $resxrubro['SIN RUBRO'][$alicuota->getValor()] += ($nota->getIva() * $i);
-                    $resxrubroBase['SIN RUBRO'][$alicuota->getValor()] += ($nota->getSubtotalNeto() * $i);
+                    $resxrubro[$rubroCompras][$alicuota->getValor()] += ($nota->getIva() * $i);
+                    $resxrubroBase[$rubroCompras][$alicuota->getValor()] += ($nota->getSubtotalNeto() * $i);
                 }
                 else {
                     foreach ($cantAlicuotas as $alic) {
                         $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->find($alic);
                         foreach ($nota->getDetalles() as $det) {
                             if ($det->getAfipAlicuota()->getId() == $alicuota->getId()) {
-                                $resxrubro['SIN RUBRO'][$alicuota->getValor()] += ($det->getMontoIvaItem() * $i);
-                                $resxrubroBase['SIN RUBRO'][$alicuota->getValor()] += ($det->getMontoNetoItem() * $i);
+                                $resxrubro[$rubroCompras][$alicuota->getValor()] += ($det->getMontoIvaItem() * $i);
+                                $resxrubroBase[$rubroCompras][$alicuota->getValor()] += ($det->getMontoNetoItem() * $i);
                             }
                         }
                     }

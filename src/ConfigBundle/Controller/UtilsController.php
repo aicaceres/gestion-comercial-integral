@@ -105,7 +105,7 @@ class UtilsController extends Controller {
 
         $ipedidosrec = $this->getUser()->getCantPedidosDemandados($this->get('session')->get('unidneg_id'));
         $ipedidosenv = $this->getUser()->getCantPedidosSolicitados($this->get('session')->get('unidneg_id'));
-        $cpedidos = $em->getRepository('ComprasBundle:Pedido')->getCountPendientes();
+        $cpedidos = $em->getRepository('ComprasBundle:Pedido')->getCountPendientes();        
 
         //  $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findAll();
         //  $clientes = $em->getRepository('AdminBundle:Cliente')->findAll();

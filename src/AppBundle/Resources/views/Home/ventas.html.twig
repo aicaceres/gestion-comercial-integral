@@ -23,24 +23,24 @@
             </a>
           </li>
 {% endif %}
-{% if app.session.get('caja_abierta') %}
-{% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
-        {% set urlxCobrar = path('ventas_por_cobrar') %}
-{# onclick="partialVentasPorCobrar('{{ urlxCobrar }}')" #}
-            <li>
-                <a href="{{ path('ventas_cobro') }}" accesskey="C" title="Cobrar Ventas (Shift+Alt+C)"  class="pago"><span>Nuevo Cobro</span>
-                </a>
-            </li>
+{% if app.session.get('caja') %}
+    {% if app.session.get('caja')['apertura'] %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_factura_new') %}
+            {% set urlxCobrar = path('ventas_por_cobrar') %}
+                <li>
+                    <a href="{{ path('ventas_cobro') }}" accesskey="C" title="Cobrar Ventas (Shift+Alt+C)"  class="pago"><span>Nuevo Cobro</span>
+                    </a>
+                </li>
+        {% endif %}
+    {% else %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
+                <li>
+                    {% set urlApertura = path('ventas_apertura_new') %}
+                    <a href="javascript:void(0)" accesskey="C" title="Apertura de Caja (Shift+Alt+C)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')"  class="pago"><span>Abrir Caja</span>
+                    </a>
+                </li>
+        {% endif %}
     {% endif %}
-{% else %}
-    {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
-            <li>
-                {% set urlApertura = path('ventas_apertura_new') %}
-                <a href="javascript:void(0)" accesskey="C" title="Apertura de Caja (Shift+Alt+C)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')"  class="pago"><span>Nuevo Cobro</span>
-                </a>
-            </li>
-    {% endif %}
-
 {% endif %}
         </ul>
         <br clear="all" />

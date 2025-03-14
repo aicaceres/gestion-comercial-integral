@@ -34,6 +34,11 @@
                     <a href="{{ path('ventas_apertura') }}">Apertura / Cierre</a>
 		</li>
                 {% endif %}
+                {% if app.user.access(app.session.get('unidneg_id'),'ventas_caja_unificado') %}
+                <li id="unificado">
+                    <a href="{{ path('ventas_apertura_unificado') }}">Informes</a>
+		</li>
+                {% endif %}
             </ul>
 	</li>
 	{% endif %}

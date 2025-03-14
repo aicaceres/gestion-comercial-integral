@@ -86,7 +86,8 @@ class FacturaController extends Controller {
      * @Method("POST")
      */
     public function createAction(Request $request) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_factura_new');
+        $session = $this->get('session');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'compras_factura_new');
         $entity = new Factura();
         $data = $request->get('comprasbundle_factura');
 
@@ -153,7 +154,7 @@ class FacturaController extends Controller {
 
                 // REGISTRAR EL PAGO DE CONTADO
                 if (isset($data['pagadoContado'])) {
-                    $res = $this->registrarPagoContado($em, $entity);
+                    $res = $this->registrarPagoContado($em, $entity, $session);
                     if (!is_numeric($res)) {
                         throw $this->createNotFoundException('No se pudo registrar el pago.');
                     }
@@ -343,7 +344,8 @@ class FacturaController extends Controller {
      * @Template("AppBundle:Factura:edit.html.twig")
      */
     public function updateAction(Request $request, $id) {
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'compras_factura_edit');
+        $session = $this->get('session');
+        UtilsController::haveAccess($this->getUser(), $session->get('unidneg_id'), 'compras_factura_edit');
         $em = $this->getDoctrine()->getManager();
         $entity = $em->getRepository('ComprasBundle:Factura')->find($id);
         $data = $request->get('comprasbundle_factura');
@@ -367,7 +369,7 @@ class FacturaController extends Controller {
             // $entity->setTotal( $entity->getMontoTotal() );
             // REGISTRAR EL PAGO DE CONTADO
             if (isset($data['pagadoContado'])) {
-                $res = $this->registrarPagoContado($em, $entity);
+                $res = $this->registrarPagoContado($em, $entity, $session);
                 if (!$res) {
                     throw $this->createNotFoundException('No se pudo registrar el pago.');
                 }
@@ -668,7 +670,7 @@ class FacturaController extends Controller {
             'Content-Disposition' => 'filename=informe_productos_comprados_' . $hoy->format('dmY_Hi') . '.pdf'));
     }
 
-    private function registrarPagoContado($em, $factura) {
+    private function registrarPagoContado($em, $factura, $session) {
         try {
             $pago = new PagoProveedor();
             $hoy = new \DateTime();
@@ -769,7 +771,7 @@ class FacturaController extends Controller {
             $cobro->setTipoPago('EFECTIVO');
             $cobro->setImporte($pago->getImporte());
             $cobro->setMoneda($moneda);
-            $apertura = $em->getRepository('VentasBundle:CajaApertura')->findOneBy(array('caja' => 1, 'fechaCierre' => null));
+            $apertura = $em->getRepository('VentasBundle:CajaApertura')->find($session->get('caja')['apertura']);
             if (!$apertura) {
                 $this->addFlash('error', 'La caja está cerrada. Debe realizar la apertura para registrar pagos');
                 return false;

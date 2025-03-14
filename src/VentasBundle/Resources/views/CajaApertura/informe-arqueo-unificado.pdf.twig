@@ -3,7 +3,7 @@
         <placeholders>
             <header>
                 <div height="150px" width="100%" >
-                    <table font-size="10px" >
+                    <table font-size="10px" padding-bottom="20px">
                         <tr>
                             <td border.type="none">
                                 <div width="100%">
@@ -15,35 +15,17 @@
                             </td>
                         </tr>
                     </table>
-                    <table font-size="14px" >
+                    <table font-size="14px" padding-bottom="25px">
                         <tr>
-                            <td border.type="none" vertical-align="bottom" width="250px">
-                                Listado de Caja: #{{ apertura.id }}
+                            <td border.type="none" vertical-align="bottom" text-align="left" padding-left="10px" width="240px">
+                                Fecha: {{ fechaApertura|date('d/m/Y') }}
                             </td>
-                            <td font-type="UniversElse" vertical-align="middle" text-align="center" width="90px" padding="10px">
-                                {{ apertura.caja.nombre }}
-                            </td>
-                            <td border.type="none" vertical-align="bottom" text-align="right" padding-right="10px" width="240px">
-                                Fecha: {{ apertura.fechaApertura|date('d/m/Y H:i') }}
-                            </td>
-                            <td border.type="none" vertical-align="bottom" width="10px" text-align="center">
-                                <strong>|</strong>
-                            </td>
-                            <td border.type="none" vertical-align="bottom" text-align="left" padding-left="10px">
-                                {{ (apertura.fechaCierre) ? apertura.fechaCierre|date('d/m/Y H:i') : 'CAJA ABIERTA' }}
+                            <td font-type="UniversElse" vertical-align="middle" text-align="center" padding="10px" width="240px">
+                                Unificado de Cajas
                             </td>
                         </tr>
                     </table>
-                    <table font-size="14px" padding-bottom="15px">
-                        <tr>
-                            <td border.type="none" vertical-align="bottom" text-align="center" height="30px">
-                                Apertura: $ {{ apertura.montoApertura|number_format(2,',','.') }}.-
-                            </td>
-                            <td border.type="none" vertical-align="bottom" text-align="center" height="30px">
-                                Cierre: {{ (apertura.fechaCierre) ? '$ ' ~ apertura.montoCierre|number_format(2,',','.') : '-' }}.-
-                            </td>
-                        </tr>
-                    </table>
+
                     <table font-size="8px">
                         <tr margin-bottom="5px">
                             <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm">
@@ -89,20 +71,25 @@
                                 {'tag': 'TIC', 'title': 'TICKETS'}] %}
 
     <table font-size="8px">
-
         {% for tipoComp in tiposFacturacion %}
-            {% set cnt, efectivo, cheque, tarjeta, ctacte, transferencia, retencion, vuelto = 0,0,0,0,0,0,0,0 %}
-            {% for item in arqueo if item.tipoComprobante in tipoComp['tag'] %}
+          {% set cnt, efectivo, cheque, tarjeta, ctacte, transferencia, retencion, vuelto = 0,0,0,0,0,0,0,0 %}
+          {% for caja in cajas %}
+            {% set cntCaja = 0 %}
+            <tr><td colspan="10" border.type="bottom" border.color="#555555" padding="5px">{{ caja }}</td></tr>
+            {% for item in arqueo if item.caja == caja and item.tipoComprobante in tipoComp['tag'] %}
                 {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'item':item} %}
                 {% set cnt, efectivo, cheque, tarjeta, ctacte, transferencia, vuelto =
                        cnt+1 , efectivo + item.EFECTIVO, cheque + item.CHEQUE, tarjeta + item.TARJETA, ctacte + item.CTACTE, transferencia + item.TRANSFERENCIA, vuelto + item.vuelto %}
+                {% set cntCaja = cntCaja+1 %}
             {% endfor %}
-
-            {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
-            {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
-            {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
-            {% set tot_transferencia, tot_vuelto = (tot_transferencia + transferencia),  tot_vuelto + vuelto %}
-
+            {% if cntCaja == 0 %}
+              <tr><td colspan="10" border.type="none" padding="5px">Sin Movimientos</td></tr>
+            {% endif %}
+          {% endfor %}
+          {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
+          {% set tot_efectivo,tot_cheque = (tot_efectivo + efectivo), (tot_cheque + cheque) %}
+          {% set tot_tarjeta,tot_ctacte = (tot_tarjeta + tarjeta), (tot_ctacte + ctacte) %}
+          {% set tot_transferencia, tot_vuelto = (tot_transferencia + transferencia),  tot_vuelto + vuelto %}
         {% endfor %}
 
         <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
@@ -136,14 +123,19 @@
                 {{ tot_ctacte|number_format(2,',','.') }}
             </td>
         </tr>
-        <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="10px"></td></tr>
+
+        <tr><td colspan="10" border.style="dotted" border.type="bottom" padding="20px"></td></tr>
 
     {% set tiposPagos = [ {'tag': 'PAG', 'title': 'O. PAGO'},
                           {'tag': 'REC', 'title': 'RECIBOS'}] %}
 
     {% for tipoComp in tiposPagos %}
         {% set cnt, efectivo, cheque, chequerec, tarjeta, ctacte, transferencia, retencion, vuelto = 0,0,0,0,0,0,0,0,0 %}
-        {% for item in arqueo if item.tipoComprobante == tipoComp['tag'] %}
+        {% for caja in cajas %}
+          {% set cntCaja = 0 %}
+          <tr><td colspan="10" border.type="bottom" border.color="#555555" padding="5px">{{ caja }}</td></tr>
+
+          {% for item in arqueo if item.caja == caja and item.tipoComprobante == tipoComp['tag'] %}
             {% include "VentasBundle:CajaApertura:tr-comprobante-arqueo.pdf.twig" with {'item':item} %}
             {% set cnt, efectivo, tarjeta, ctacte, transferencia, vuelto =
                    cnt+1 , efectivo + item.EFECTIVO, tarjeta + item.TARJETA, ctacte + item.CTACTE, transferencia + item.TRANSFERENCIA, vuelto + item.vuelto %}
@@ -152,6 +144,11 @@
                 {% set chequerec = chequerec + item.CHEQUE %}
             {% endif %}
             {% set cheque = cheque + item.CHEQUE %}
+            {% set cntCaja = cntCaja+1 %}
+          {% endfor %}
+          {% if cntCaja == 0 %}
+            <tr><td colspan="10" border.type="none" padding="5px">Sin Movimientos</td></tr>
+          {% endif %}
         {% endfor %}
 
         {% include "VentasBundle:CajaApertura:tr-subtotal-arqueo.pdf.twig" with {'tipo':tipoComp['title']} %}
@@ -182,7 +179,7 @@
             <td border.color="#555555" height="20px" colspan="5" padding="10px" vertical-align="middle"><b>TOTAL CAJA CONTADO</b></td>
             <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
                 <!-- total efectivo - cambio del dia -->
-                {{ (tot_efectivo + tot_vuelto + apertura.montoApertura)|number_format(2,',','.') }}
+                {{ (tot_efectivo + tot_vuelto + 0)|number_format(2,',','.') }}
             </td>
             <td border.color="#555555" height="20px" padding="10px" text-align="right" padding-right="5px" vertical-align="middle">
                 {{ tot_cheque|number_format(2,',','.') }}
@@ -220,6 +217,6 @@
 
     </dynamic-page>
 <!-- Analitico -->
-    {% include "VentasBundle:CajaApertura:informe-analitico.pdf.twig" %}
+    {% include "VentasBundle:CajaApertura:informe-analitico-unificado.pdf.twig" %}
 
 </pdf>

@@ -40,6 +40,9 @@ class CuentaBancaria {
      */
     protected $banco;
 
+    public function __toString(){
+        return $this->nroCuenta;
+    }
 
     /**
      * Get id

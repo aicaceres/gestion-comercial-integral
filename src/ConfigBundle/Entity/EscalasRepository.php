@@ -35,5 +35,14 @@ class EscalasRepository extends EntityRepository {
                 ->andWhere('e.adicional < '.$hasta);
         return $query->getQuery()->getOneOrNullResult();
     }
+    
+    public function getPercepcionByRetencion($porc){
+        $query = $this->_em->createQueryBuilder();
+        $query->select('e')
+                ->from('ConfigBundle\Entity\Escalas', 'e')
+                ->where("e.tipo='P'")
+                ->andWhere('e.retencion = '.$porc);
+        return $query->getQuery()->getOneOrNullResult();
+    }
 
 }

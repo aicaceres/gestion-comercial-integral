@@ -1,14 +1,15 @@
 var $collectionHolder = jQuery("table.detalle tbody")
 
 jQuery(document).ready(function ($) {
-
 	// si la pantalla es chica expandir
 	if ($("#contentwrapper").width() < 1000) {
 		$(".togglemenu").click()
 	}
 
-  $(document).on('focus', 'input', function () { this.select() })
-  $('input').removeAttr('autocomplete')
+	$(document).on("focus", "input", function () {
+		this.select()
+	})
+	$("input").removeAttr("autocomplete")
 
 	// refresca la hora en un campo fecha-hora
 	horaRefresh = setInterval(function () {
@@ -16,9 +17,9 @@ jQuery(document).ready(function ($) {
 	}, 1000)
 
 	//  detectar atajos de teclado
-  $(document).on("keydown", (e) => detectarControles(e))
+	$(document).on("keydown", (e) => detectarControles(e))
 
-  // change moneda
+	// change moneda
 	$(".ventasbundle_moneda")
 		.on("change", function () {
 			let small = $(this).parent().find("small")
@@ -32,8 +33,8 @@ jQuery(document).ready(function ($) {
 					let smallText =
 						data.cotizacion > 1 ? "TIPO DE CAMBIO: " + data.cotizacion : ""
 					small.html(smallText)
-          $(".simbolo").html(data.simbolo)
-          actualizarImportes()
+					$(".simbolo").html(data.simbolo)
+					actualizarImportes()
 				}
 			})
 		})
@@ -42,20 +43,19 @@ jQuery(document).ready(function ($) {
 	$('[id*="_descuentoRecargo"]').on("change", function (e) {
 		const value = parseFloat(e.target.value)
 		jQuery(this).val(value.toFixed(2))
-                actualizarImportes()
-  })
+		actualizarImportes()
+	})
 
-  $('[id*="_precioLista"]').on("change", function (e) {
-    $(".widgetProducto").each(function (_,item) {
-       jQuery(item).trigger('select2:select')
-    })
+	$('[id*="_precioLista"]').on("change", function (e) {
+		$(".widgetProducto").each(function (_, item) {
+			jQuery(item).trigger("select2:select")
+		})
+	})
 
-  })
-
-  // PROCESO PARA RESTAURAR DEL LOCALSTORAGE LOS ITEMS GUARDADOS
+	// PROCESO PARA RESTAURAR DEL LOCALSTORAGE LOS ITEMS GUARDADOS
 
 	selProducto = $(".widgetProducto")
-  setSelect2ToProduct(selProducto)
+	setSelect2ToProduct(selProducto)
 
 	actualizarImportes()
 })
@@ -66,40 +66,43 @@ function addNewItem() {
 	const newForm = prototype.replace(/items/g, index)
 	$collectionHolder.append(newForm)
 	$collectionHolder.data("index", index + 1)
-	$collectionHolder.find(".ordTd").last().html($collectionHolder.find("tr.item").length)
+	$collectionHolder
+		.find(".ordTd")
+		.last()
+		.html($collectionHolder.find("tr.item").length)
 	$collectionHolder.find(".cantTd input").last().val(1)
 
-  // PROCESO PARA GUARDAR EL NUEVO ITEM AL LOCALSTORAGE
+	// PROCESO PARA GUARDAR EL NUEVO ITEM AL LOCALSTORAGE
 
 	// widget producto
-  const lastProduct = $collectionHolder.find(".widgetProducto").last()
-  setSelect2ToProduct(lastProduct)
-  lastProduct.select2("open")
+	const lastProduct = $collectionHolder.find(".widgetProducto").last()
+	setSelect2ToProduct(lastProduct)
+	lastProduct.select2("open")
 }
 
-function actualizarImportes(ndc=0) {
-  let iva = (iibb = descrec = subTotal = totalIVA = totalIIBB = subtotalTh = 0)
-  const cotizacion = jQuery(".datos-moneda").data("cotizacion")
-  const categoriaIva = jQuery(".selectorCliente").data("categiva")
-  const percrentas = jQuery(".selectorCliente").data("percrentas")
-  const porcentaje = checknumero(jQuery('[id*="_descuentoRecargo"]'))
-  jQuery('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(2))
-  jQuery('span.descuentoRecargo').html(porcentaje.toFixed(2))
+function actualizarImportes(ndc = 0) {
+	let iva = (iibb = descrec = subTotal = totalIVA = totalIIBB = subtotalTh = 0)
+	const cotizacion = jQuery(".datos-moneda").data("cotizacion")
+	const categoriaIva = jQuery(".selectorCliente").data("categiva")
+	const percrentas = jQuery(".selectorCliente").data("percrentas")
+	const porcentaje = checknumero(jQuery('[id*="_descuentoRecargo"]'))
+	jQuery('[id*="_descuentoRecargo"]').val(porcentaje.toFixed(2))
+	jQuery("span.descuentoRecargo").html(porcentaje.toFixed(2))
 
-  $collectionHolder.find("tr.item").each(function (i, tr) {
+	$collectionHolder.find("tr.item").each(function (i, tr) {
 		item = jQuery(tr)
 		// set orden
-    item.find(".ordTd").html(i + 1)
+		item.find(".ordTd").html(i + 1)
 
 		const cant = checknumero(item.find(".cantTd input"))
-    let precio = checknumero(item.find('[id*="_precio"]'))
-    let alicuota = checknumero(item.find('[id*="_alicuota"]'))
+		let precio = checknumero(item.find('[id*="_precio"]'))
+		let alicuota = checknumero(item.find('[id*="_alicuota"]'))
 		if (categoriaIva === "I" || categoriaIva === "M") {
 			// aplicar dto para calcular el iva
 			dto = precio * (porcentaje / 100)
 			iva = (precio + dto) * (alicuota / 100)
-                        if (percrentas > 0) {
-                            iibb = (precio + dto) * (parseFloat(percrentas)/100)
+			if (percrentas > 0) {
+				iibb = (precio + dto) * (parseFloat(percrentas) / 100)
 			}
 			dtoTot = (dto * cant) / cotizacion
 			descrec += dtoTot
@@ -107,44 +110,52 @@ function actualizarImportes(ndc=0) {
 			// precio + iva
 			precio = precio * (1 + alicuota / 100)
 		}
-    //}
+		//}
 		// calcular la cotización si es distinta a 1
-		precUnit = precio / cotizacion
-                // calcular precio con descuento para la vista
-                if(!ndc){
-                  precUnit = precUnit * (1 + porcentaje / 100)
+    precUnit = precio / cotizacion
+		// calcular precio con descuento para la vista
+		if (!ndc) {
+			precUnit = precUnit * (1 + porcentaje / 100)
+		}
+		if (precUnit == 22.384999999999998) {
+      precUnit = 22.39
+      precio = 22.39
+		} else {
+		  precUnit = precUnit.toFixed(2) * 1
     }
-
-		precTot = precUnit * cant
+		precTot = precUnit.toFixed(2) * cant
 		// subtotal para vista
 		subtotalTh += precTot
 		item.find(".precTd span").html(precUnit.toFixed(2))
 		item.find(".itmSubtotalTd").text(precTot.toFixed(2))
 		// totalizar
-    subTotal += precio * cant
+		subTotal += precio.toFixed(2) * cant
 		totalIVA += iva * cant
 		totalIIBB += iibb * cant
 	})
 	subTotalResumen = subTotal / cotizacion
 	totalIvaResumen = totalIVA / cotizacion
 	totalIibbResumen = totalIIBB / cotizacion
-	jQuery("#subtotalTh").html(subtotalTh.toFixed(2))
+  jQuery("#subtotalTh").html(subtotalTh.toFixed(2))
 	jQuery("#importeSubtotal").html(subTotalResumen.toFixed(2).replace(".", ","))
 
 	if (categoriaIva !== "I" && categoriaIva !== "M") {
 		descrec = subTotalResumen * (porcentaje / 100)
 	}
 	const totalgral =
-    subTotalResumen + descrec + totalIvaResumen + totalIibbResumen
-  jQuery("#importeRecargo").text(descrec.toFixed(2).replace(".", ","))
+		subTotalResumen + descrec + totalIvaResumen + totalIibbResumen
+	jQuery("#importeRecargo").text(descrec.toFixed(2).replace(".", ","))
 	jQuery("#importeTotal").text(totalgral.toFixed(2).replace(".", ","))
 	// iva e iibb
 	jQuery("#importeIVA").text(totalIvaResumen.toFixed(2).replace(".", ","))
 	jQuery("#importeIIBB").text(totalIibbResumen.toFixed(2).replace(".", ","))
 
-  if (typeof actualizarSumaPagos !== 'undefined' && jQuery.isFunction(actualizarSumaPagos)) {
-    actualizarSumaPagos()
-  }
+	if (
+		typeof actualizarSumaPagos !== "undefined" &&
+		jQuery.isFunction(actualizarSumaPagos)
+	) {
+		actualizarSumaPagos()
+	}
 }
 
 function handleSearchProducto(item) {
@@ -153,9 +164,9 @@ function handleSearchProducto(item) {
 		.html(
 			'<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;">Cargando Datos...</div>'
 		)
-    .load(selProducto.data("urlpopup"), function () {
-      loadModalProductos(selProducto)
-    })
+		.load(selProducto.data("urlpopup"), function () {
+			loadModalProductos(selProducto)
+		})
 		.dialog({
 			modal: true,
 			autoOpen: true,
@@ -176,7 +187,7 @@ function loadModalProductos(prod) {
 	const deposito = jQuery('[id*="_deposito"]').val()
 	const cotizacion = jQuery(".datos-moneda").data("cotizacion")
 	const categoriaIva = jQuery(".selectorCliente").data("categiva")
-        const descuento = jQuery('.datos-formapago').data("porcentajerecargo")
+	const descuento = jQuery(".datos-formapago").data("porcentajerecargo")
 
 	const oTable = jQuery("#productos_table").dataTable({
 		columnDefs: [
@@ -195,20 +206,20 @@ function loadModalProductos(prod) {
 			jQuery(row)
 				.find("a")
 				.on("click", function (e) {
-          e.preventDefault()
-          let item = jQuery(this)
+					e.preventDefault()
+					let item = jQuery(this)
 					let data = {
 						id: item.data("id"),
-						text: item.data('text')
+						text: item.data("text")
 					}
 					var newOption = new Option(data.text, data.id, true, true)
-                                          newOption.setAttribute('data-precio', item.data('precio'))
-                                          newOption.setAttribute('data-alicuota', item.data('alicuota'))
-                                          newOption.setAttribute('data-comodin', item.data('comodin'))
-                                          newOption.setAttribute('data-bajominimo', item.data('bajominimo'))
+					newOption.setAttribute("data-precio", item.data("precio"))
+					newOption.setAttribute("data-alicuota", item.data("alicuota"))
+					newOption.setAttribute("data-comodin", item.data("comodin"))
+					newOption.setAttribute("data-bajominimo", item.data("bajominimo"))
 					prod.append(newOption).trigger("select2:select")
-          jQuery("#popup").dialog("destroy")
-          prod.change()
+					jQuery("#popup").dialog("destroy")
+					prod.change()
 					prod.select2("focus")
 				})
 		},
@@ -265,7 +276,7 @@ function handleItemDelete(item) {
 	}
 }
 function handleBlurDelete() {
-  jQuery("#linkAdd").focus()
+	jQuery("#linkAdd").focus()
 }
 
 function setSelect2ToProduct(selProducto) {
@@ -284,7 +295,7 @@ function setSelect2ToProduct(selProducto) {
 						searchTerm: params.term,
 						lista: jQuery('[id*="_precioLista"]').val(),
 						cativa: jQuery(".selectorCliente").data("categiva"),
-                                                deposito: jQuery('[id*="_deposito"]').val()
+						deposito: jQuery('[id*="_deposito"]').val()
 					}
 				},
 				processResults: (response) => {
@@ -294,79 +305,80 @@ function setSelect2ToProduct(selProducto) {
 							text: x.text,
 							alicuota: x.alicuota,
 							precio: x.precio,
-                                                        comodin: x.comodin,
-                                                        bajominimo: x.bajominimo
+							comodin: x.comodin,
+							bajominimo: x.bajominimo
 						}
 					})
 					return { results }
-				},
+				}
 			},
-                        templateResult: (data) => {
-                            return data.text
-                        },
-                        templateSelection: function (data) {
-                            jQuery(data.element).attr('data-precio', data.precio);
-                            jQuery(data.element).attr('data-alicuota', data.alicuota);
-                            jQuery(data.element).attr('data-comodin', data.comodin);
-                            jQuery(data.element).attr('data-bajominimo', data.bajominimo);
-                            return data.text;
-                          },
+			templateResult: (data) => {
+				return jQuery(data.text)
+			},
+			templateSelection: function (data) {
+				jQuery(data.element).attr("data-precio", data.precio)
+				jQuery(data.element).attr("data-alicuota", data.alicuota)
+				jQuery(data.element).attr("data-comodin", data.comodin)
+        jQuery(data.element).attr("data-bajominimo", data.bajominimo)
+				return data.text
+      },
+      escapeMarkup: (markup) => markup, 
 			minimumInputLength: 3,
 			width: "style",
-                        cache: false,
+			cache: false
 		})
-                .on("select2:select",function(e){
-                    const obj = e.target
-                    const tr = jQuery(obj).closest("tr")
-                    const precTd = tr.find(".precTd")
-                    const prodTd = tr.find(".prodTd")
-                    const textoComodin = tr.find('[id*="_textoComodin"]')
-                    let precio = 0
-                    let alicuota = 0
-                    let bajominimo = false
-                    let comodin = false
-                    let id = 0
-                    if(!e.params){
-                        const option = jQuery(e.currentTarget).find('option:selected')
-//                        id = jQuery(e.currentTarget).val()
-                        precio = option.data().precio
-                        alicuota = option.data().alicuota
-                        comodin = option.data().comodin == 0 ? false : true
-                        bajominimo = option.data().bajominimo == 0 ? false : true
-                    }else{
-                        const data = e.params.data
-//                        id = data.id
-                        precio = data.precio
-                        alicuota = data.alicuota
-                        comodin = data.comodin == 0 ? false : true
-                        bajominimo = data.bajominimo == 0 ? false : true
-                    }
+		.on("select2:select", function (e) {
+			const obj = e.target
+			const tr = jQuery(obj).closest("tr")
+			const precTd = tr.find(".precTd")
+			const prodTd = tr.find(".prodTd")
+			const textoComodin = tr.find('[id*="_textoComodin"]')
+			let precio = 0
+			let alicuota = 0
+			let bajominimo = false
+			let comodin = false
+			let id = 0
+			if (!e.params) {
+				const option = jQuery(e.currentTarget).find("option:selected")
+				//                        id = jQuery(e.currentTarget).val()
+				precio = option.data().precio
+				alicuota = option.data().alicuota
+				comodin = option.data().comodin == 0 ? false : true
+				bajominimo = option.data().bajominimo == 0 ? false : true
+			} else {
+				const data = e.params.data
+				//                        id = data.id
+				precio = data.precio
+				alicuota = data.alicuota
+				comodin = data.comodin == 0 ? false : true
+				bajominimo = data.bajominimo == 0 ? false : true
+			}
 
-                    //precios
-                    precTd.find('[id*="_precio"]').val(precio)
-                    precTd.find('[id*="_alicuota"]').val(alicuota)
-                    //bajominimo
-                     jQuery(obj).siblings(".bajominimo").toggle(bajominimo)
-                     //comodin
-                     textoComodin.toggle(comodin)
-                     textoComodin.attr("required", comodin)
+			//precios
+			precTd.find('[id*="_precio"]').val(precio)
+			precTd.find('[id*="_alicuota"]').val(alicuota)
+			//bajominimo
+			jQuery(obj).siblings(".bajominimo").toggle(bajominimo)
+			//comodin
+			textoComodin.toggle(comodin)
+			textoComodin.attr("required", comodin)
 
-                    actualizarImportes()
+			actualizarImportes()
 
-                    setTimeout(function () {
-                            const objFocus = comodin
-                                    ? textoComodin
-                                    : tr.find('.cantTd [id*="_cantidad"]')
-                            objFocus.focus()
-                    }, 500)
-                })
+			setTimeout(function () {
+				const objFocus = comodin
+					? textoComodin
+					: tr.find('.cantTd [id*="_cantidad"]')
+				objFocus.focus()
+			}, 500)
+		})
 }
 
 function detectarControles(e) {
 	// tecla + ver detalle venta
 	if (e.keyCode == 171) {
-            e.preventDefault()
-            if (jQuery("#linkAdd").is(":visible")) addNewItem()
+		e.preventDefault()
+		if (jQuery("#linkAdd").is(":visible")) addNewItem()
 	}
 
 	if (e.ctrlKey && e.altKey) {

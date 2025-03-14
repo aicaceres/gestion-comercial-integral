@@ -36,22 +36,23 @@
             </div>
 
             <div style="align-content: flex-start;" >
-            {% if app.session.get('caja_abierta') %}
-                {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
-                    <button type="button" class="stdbtn btn_red" onclick="crearNota('CRE')" style="padding:10px 20px"> NOTA CRÉDITO </button>
-                    <button type="button" class="stdbtn btn_blue" onclick="crearNota('DEB')" style="padding:10px 20px"> NOTA DÉBITO </button>
-                {% else %} &nbsp;
-                {% endif %}
-            {% else %}
-                {% if  app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
-                        {% set urlApertura = path('ventas_apertura_new') %}
-                        <a href="javascript:void(0)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')" class="btn btn_orange btn_lock" title="Debe abrir la caja para realizar cobros">
-                            <span style="font-size: 14px;">APERTURA DE CAJA</span>
-                        </a>
+            {% if app.session.get('caja') %}
+                {% if app.session.get('caja')['apertura'] %}
+                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
+                        <button type="button" class="stdbtn btn_red" onclick="crearNota('CRE')" style="padding:10px 20px"> NOTA CRÉDITO </button>
+                        <button type="button" class="stdbtn btn_blue" onclick="crearNota('DEB')" style="padding:10px 20px"> NOTA DÉBITO </button>
+                    {% else %} &nbsp;
+                    {% endif %}
                 {% else %}
-                    <div class="external-event" style="background-color:orangered;cursor:pointer" title="Debe abrir la caja para realizar cobros">CAJA CERRADA</div>
+                    {% if  app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
+                            {% set urlApertura = path('ventas_apertura_new') %}
+                            <a href="javascript:void(0)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')" class="btn btn_orange btn_lock" title="Debe abrir la caja para realizar cobros">
+                                <span style="font-size: 14px;">APERTURA DE CAJA</span>
+                            </a>
+                    {% else %}
+                        <div class="external-event" style="background-color:orangered;cursor:pointer" title="Debe abrir la caja para realizar cobros">CAJA CERRADA</div>
+                    {% endif %}
                 {% endif %}
-
             {% endif %}
             </div>
         </form>
@@ -78,7 +79,9 @@
                     {% if entity.notaElectronica %}
                         {{ entity.notaElectronica.comprobanteTxt }}
                     {% elseif app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred_print') and entity.estado != 'ELIMINADO'%}
-                        <a href="{{ path('ventas_notadebcred_edit',{ 'id': entity.id }) }}" type="button" class="stdbtn btn_red " title="Facturar">Facturar</a>
+                        {% if app.session.get('caja') and app.session.get('caja')['apertura'] %}
+                            <a href="{{ path('ventas_notadebcred_edit',{ 'id': entity.id }) }}" type="button" class="stdbtn btn_red " title="Facturar">Facturar</a>
+                        {% endif %}
                     {% endif %}
                     </td>
                     <td>{{ entity.notaElectronica ? entity.notaElectronica.cae : ''}}</td>

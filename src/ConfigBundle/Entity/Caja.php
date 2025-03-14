@@ -3,11 +3,15 @@ namespace ConfigBundle\Entity;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
 /**
  * ConfigBundle\Entity\Caja
  *
  * @ORM\Table(name="caja")
  * @ORM\Entity()
+ * @UniqueEntity( fields={"hostname"}, errorPath="hostname", message="El Nombre de equipo debe ser unico." )
+ * @UniqueEntity( fields={"ptoVtaIfu"}, errorPath="ptoVtaIfu", message="El Punto de Venta debe ser unico." )
  */
 class Caja
 {
@@ -33,19 +37,32 @@ class Caja
     /**
      * @ORM\Column(name="abierta", type="boolean")
      */
-    protected $abierta = false;    
+    protected $abierta = false;
 
     /**
      * @ORM\Column(name="activo", type="boolean")
      */
-    protected $activo = true;    
-    
+    protected $activo = true;
+
+    /**
+     * @ORM\Column(name="hostname", type="string", unique=true)
+     */
+    protected $hostname;
+    /**
+     * @ORM\Column(name="ptovta_ws", type="string")
+     */
+    protected $ptoVtaWs;
+    /**
+     * @ORM\Column(name="ptovta_ifu", type="string", unique=true)
+     */
+    protected $ptoVtaIfu;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\UnidadNegocio")
      * @ORM\JoinColumn(name="unidad_negocio_id", referencedColumnName="id")
      */
-    protected $unidadNegocio;      
- 
+    protected $unidadNegocio;
+
     /**
      * @ORM\OneToMany(targetEntity="VentasBundle\Entity\CajaApertura", mappedBy="caja",cascade={"remove"})
      */
@@ -53,12 +70,12 @@ class Caja
 
     public function __toString() {
         return $this->nombre;
-    } 
+    }
 
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -81,7 +98,7 @@ class Caja
     /**
      * Get nombre
      *
-     * @return string 
+     * @return string
      */
     public function getNombre()
     {
@@ -104,7 +121,7 @@ class Caja
     /**
      * Get descripcion
      *
-     * @return string 
+     * @return string
      */
     public function getDescripcion()
     {
@@ -127,7 +144,7 @@ class Caja
     /**
      * Get activo
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getActivo()
     {
@@ -150,7 +167,7 @@ class Caja
     /**
      * Get unidadNegocio
      *
-     * @return \ConfigBundle\Entity\UnidadNegocio 
+     * @return \ConfigBundle\Entity\UnidadNegocio
      */
     public function getUnidadNegocio()
     {
@@ -173,7 +190,7 @@ class Caja
     /**
      * Get abierta
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getAbierta()
     {
@@ -213,10 +230,79 @@ class Caja
     /**
      * Get aperturas
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getAperturas()
     {
         return $this->aperturas;
+    }
+
+    /**
+     * Set hostname
+     *
+     * @param string $hostname
+     * @return Caja
+     */
+    public function setHostname($hostname)
+    {
+        $this->hostname = $hostname;
+
+        return $this;
+    }
+
+    /**
+     * Get hostname
+     *
+     * @return string
+     */
+    public function getHostname()
+    {
+        return $this->hostname;
+    }
+
+    /**
+     * Set ptoVtaWs
+     *
+     * @param string $ptoVtaWs
+     * @return Caja
+     */
+    public function setPtoVtaWs($ptoVtaWs)
+    {
+        $this->ptoVtaWs = $ptoVtaWs;
+
+        return $this;
+    }
+
+    /**
+     * Get ptoVtaWs
+     *
+     * @return string
+     */
+    public function getPtoVtaWs()
+    {
+        return $this->ptoVtaWs;
+    }
+
+    /**
+     * Set ptoVtaIfu
+     *
+     * @param string $ptoVtaIfu
+     * @return Caja
+     */
+    public function setPtoVtaIfu($ptoVtaIfu)
+    {
+        $this->ptoVtaIfu = $ptoVtaIfu;
+
+        return $this;
+    }
+
+    /**
+     * Get ptoVtaIfu
+     *
+     * @return string
+     */
+    public function getPtoVtaIfu()
+    {
+        return $this->ptoVtaIfu;
     }
 }

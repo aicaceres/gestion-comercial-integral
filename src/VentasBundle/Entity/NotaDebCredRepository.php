@@ -17,11 +17,11 @@ class NotaDebCredRepository extends EntityRepository {
                     ->andWhere('pr.id=' . $cliId);
         }
         if ($desde) {
-            $cadena = " p.fecha >= '" . UtilsController::toAnsiDate($desde) . "'";
+            $cadena = " p.fecha >= '" . UtilsController::toAnsiDate($desde) . " 00:00'";
             $query->andWhere($cadena);
         }
         if ($hasta) {
-            $cadena = " p.fecha <= '" . UtilsController::toAnsiDate($hasta) . "'";
+            $cadena = " p.fecha <= '" . UtilsController::toAnsiDate($hasta) . " 23:59'";
             $query->andWhere($cadena);
         }
         return $query->getQuery()->getResult();
