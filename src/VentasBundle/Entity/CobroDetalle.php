@@ -141,7 +141,7 @@ class CobroDetalle {
             $total = $this->getPagoProveedor()->getImporte();
         }
 
-        $tipos = array('EFECTIVO', 'CHEQUE', 'TARJETA');
+        $tipos = array('EFECTIVO', 'CHEQUE', 'TARJETA', 'TRANSFERENCIA');
         $calcular = in_array($this->getTipoPago(), $tipos);
 
         return $calcular && $incluir ? ($this->getImporte() - $total) : 0;
@@ -172,7 +172,7 @@ class CobroDetalle {
             $total = $this->getPagoProveedor()->getImporte();
         }
 
-        $tipos = array('EFECTIVO', 'CHEQUE', 'TARJETA');
+        $tipos = array('EFECTIVO', 'CHEQUE', 'TARJETA', 'TRANSFERENCIA');
         $calcular = in_array($this->getTipoPago(), $tipos);
 
         return $calcular && $incluir ? $total : 0;
@@ -503,7 +503,7 @@ class CobroDetalle {
     /**
      * Get bancoMovimiento
      *
-     * @return \ConfigBundle\Entity\BancoMovimiento 
+     * @return \ConfigBundle\Entity\BancoMovimiento
      */
     public function getBancoMovimiento()
     {

@@ -24,7 +24,7 @@ class PagoClienteRecibo {
     protected $monto = 0;
 
     /**
-     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\PagoCliente", inversedBy="recibos")
+     * @ORM\ManyToOne(targetEntity="VentasBundle\Entity\PagoCliente")
      * @ORM\JoinColumn(name="pago_cliente_id", referencedColumnName="id")
      */
     protected $pago;

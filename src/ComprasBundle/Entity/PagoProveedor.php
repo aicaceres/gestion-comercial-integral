@@ -103,6 +103,12 @@ class PagoProveedor {
     protected $adicionalRentas = 0;
 
     /**
+     * @var integer $codigoAtp
+     * @ORM\Column(name="codigo_atp", type="integer", nullable=true)
+     */
+    protected $codigoAtp;
+
+    /**
      * @var integer $retencionGanancias
      * @ORM\Column(name="retencion_ganancias", type="decimal", precision=20, scale=2 )
      */
@@ -757,5 +763,28 @@ class PagoProveedor {
     public function getRubroCompras()
     {
         return $this->rubroCompras;
+    }
+
+    /**
+     * Set codigoAtp
+     *
+     * @param integer $codigoAtp
+     * @return PagoProveedor
+     */
+    public function setCodigoAtp($codigoAtp)
+    {
+        $this->codigoAtp = $codigoAtp;
+
+        return $this;
+    }
+
+    /**
+     * Get codigoAtp
+     *
+     * @return integer 
+     */
+    public function getCodigoAtp()
+    {
+        return $this->codigoAtp;
     }
 }

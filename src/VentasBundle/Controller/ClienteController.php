@@ -762,7 +762,7 @@ class ClienteController extends Controller {
                     $notaElectronica = new FacturaElectronica();
                     $notaElectronica->setUnidadNegocio($unidneg);
                     $notaElectronica->setCliente($entity->getCliente());
-                    $notaElectronica->setPuntoVenta($caja->getPtoVtaWs());
+                    $notaElectronica->setPuntoVenta($apertura->getCaja()->getPtoVtaWs());
                     $notaElectronica->setConcepto(1); // Productos
                     $notaElectronica->setCbteFch(intval($notacredito->getFecha()->format('Ymd')));
                     $notaElectronica->setNombreCliente($notacredito->getNombreClienteTxt());

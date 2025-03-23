@@ -650,6 +650,7 @@ class ProveedorController extends Controller {
                 $montoPago = round($formData['montoPago'], 2);
                 $entity->setMontoRetRentas($formData['montoRentas']);
                 $entity->setMontoRetGanancias($formData['montoGanancias']);
+                $entity->setCodigoAtp($entity->getProveedor()->getCategoriaRentas()->getCodigoAtp());
                 $saldo = ($formData['importe'] + $formData['montoRentas'] + $formData['montoGanancias']) - $totalPago;
 
                 $entity->setSaldo($saldo > 0 ? $saldo : 0 );
