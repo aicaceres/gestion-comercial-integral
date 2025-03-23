@@ -261,7 +261,7 @@ class RetencionesController extends Controller {
             $sucursal = substr(str_pad($pago->getPrefijoNro(), 2, "0", STR_PAD_LEFT), -2, 2);
             $nrocomp = str_pad($pago->getPagoNro(), 6, "0", STR_PAD_LEFT);
             $montoret = number_format($pago->getMontoRetencionRentas(), 2, '', '');
-            $codconcepto = str_pad($pago->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
+            $codconcepto = str_pad($pago->getCodigoAtp() ? $pago->getCodigoAtp() : $pago->getProveedor()->getCategoriaRentas()->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
             $imponible = number_format($pago->getBaseImponibleRentas(), 2, '', '');
             $alicuota = number_format($pago->getRetencionRentas(), 2, '', '');
 
