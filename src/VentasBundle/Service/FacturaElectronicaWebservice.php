@@ -341,14 +341,14 @@ class FacturaElectronicaWebservice {
                             'BaseImp' => round($iva[$key]['BaseImp'] + $baseImp, 2),
                             'Importe' => round($iva[$key]['Importe'] + $importe, 2)
                         );
-                    }                  
+                    }
                     $impNeto += $baseImp;
                 }else{
                     $impOpEx += $baseImp;
                 }
                 // TOTALES
                 $impDtoRec += $dtoRec;
-                
+
                 $impIVA += $importe;
                 $impTotal += ($baseImp + $importe);
             }

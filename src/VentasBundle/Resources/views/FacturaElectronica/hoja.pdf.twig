@@ -112,7 +112,14 @@
                     <table>
                         <tr>
                             <td border.color="#555555" height="30px" vertical-align="middle"  width="4 cm" text-align="center" font-size="9px">Dirección de Comercio Interior 0800-444-3346</td>
+                            {% if fe.cliente.categoriaIva.nombre in ['C','E'] %}
+                            <td border.color="#555555" font-size="9px" padding-left="10px" padding-top="3px">
+                              <div>Régimen de Transparencia Fiscal al Consumidor (Ley 27.743)</div>
+                              <div>IVA Contenido: {{simbolo}} {{ cbte.totalIva|number_format(2,',','.')}}</div>
+                            </td>
+                            {% else %}
                             <td border.type="none"></td>
+                            {% endif %}
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" margin-top="8px" font-size="18px"><strong>Total:</strong></td>
                             <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ fe.total|number_format(2,',','.')}}</strong>
                             </td>

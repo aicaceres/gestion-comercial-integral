@@ -254,6 +254,7 @@ function jsAnularVenta(e){
 
 function checkEmitirTicket(){
   esCategoriaC = '{{ entity.cliente.categoriaIva }}' == 'C'
+  esCategoriaE = '{{ entity.cliente.categoriaIva }}' == 'E'
   esMonedaPesos = '{{ entity.moneda }}'=='PESOS'
   esTicketPorCantidadItems = jQuery('.detalle-venta tbody tr').length <= '{{ cantidadItemsParaFactura }}'
   emitirTicket = esCategoriaC && esMonedaPesos && esTicketPorCantidadItems;
@@ -348,9 +349,26 @@ function imprimirTicket(cobroId){
       try {
         driver.iniciarTrabajo();
 
-        driver.especificarPie('1'," ")
-        driver.especificarPie('2',data.pie[0])
-        driver.especificarPie('3',data.pie[1])
+        if(esCategoriaC || esCategoriaE){
+          const length = 36 - data.ivaContenido.toString().length
+          driver.especificarPie('1','='.repeat(50))
+          driver.especificarPie('2','REG. TRANSPARENCIA FISCAL AL CONSUMIDOR LEY 27743')
+          driver.especificarPie('3','IVA Contenido' + " ".repeat(length) + data.ivaContenido)
+          driver.especificarPie('4','Otros impuestos nacionales indirectos        0.00')
+          driver.especificarPie('5','LOS IMPUESTO INFORMADOS SON A NIVEL NACIONAL')
+          driver.especificarPie('6','='.repeat(50))
+          driver.especificarPie('7',data.pie[0])
+          driver.especificarPie('8',data.pie[1])
+        } else{
+          driver.especificarPie('1'," ")
+          driver.especificarPie('2',data.pie[0])
+          driver.especificarPie('3',data.pie[1])
+          driver.especificarPie('4'," ")
+          driver.especificarPie('5'," ")
+          driver.especificarPie('6'," ")
+          driver.especificarPie('7'," ")
+          driver.especificarPie('8'," ")
+        }
 
         driver.cancelarComprobante();
         let params = data.cliente

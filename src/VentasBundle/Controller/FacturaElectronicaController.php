@@ -163,6 +163,7 @@ class FacturaElectronicaController extends Controller {
         $dataTicket['pie'][0] = 'Condicion Venta ' . $comprobante->getFormapago()->getNombre();
         $ref = $entity == 'Cobro' ? $comprobante->getRefVenta() : '';
         $dataTicket['pie'][1] = $ref . ' - Oper. ' . $operador;
+        $dataTicket['ivaContenido'] = $comprobante->getTotalIva();
 
         // tipo comprobante
         // tcFactura_A = 1 // tcFactura_B = 2 // tcFactura_C = 3;
