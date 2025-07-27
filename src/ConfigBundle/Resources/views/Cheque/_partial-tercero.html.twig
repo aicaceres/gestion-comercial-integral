@@ -29,6 +29,7 @@
     {{ form_row(form.devuelto) }}
     {{ form_row(form.usado) }}
     </div>
+     {% include "ConfigBundle:Cheque:_partial-usado-en.html.twig" %}
     <p>{{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}   </p>
     <br clear="all" />
     <div class="actionbutton">

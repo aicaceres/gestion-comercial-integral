@@ -10,8 +10,8 @@
               data-urltable = "{{ path('producto_list_datatables') }}"
       >
         {% if item.vars.data.producto.id is defined %}
-          {% set inclIva = not (entity.cliente.categoriaIva == 'I' or entity.cliente.categoriaIva == 'M') %}
-          <option value="{{item.vars.data.producto.id}}" selected="selected" data-alicuota="{{ item.vars.data.alicuota }}" data-precio="{{ item.vars.data.precio }}" 
+          {% set inclIva = not (entity.cliente.condicionIva.codigo == 'I' or entity.cliente.condicionIva.codigo == 'M') %}
+          <option value="{{item.vars.data.producto.id}}" selected="selected" data-alicuota="{{ item.vars.data.alicuota }}" data-precio="{{ item.vars.data.precio }}"
                   data-comodin="{{ item.vars.data.producto.comodin ?? 0 }}" data-bajominimo="" >
               {{item.vars.data.producto}} | ${{ item.vars.data.producto.getPrecioContadoByLista( entity.precioLista.id, descuentoContado, inclIva )  }}
           </option>

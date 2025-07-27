@@ -1,5 +1,5 @@
 {% set simbolo = ( venta.moneda is defined ) ? venta.moneda.simbolo : '$' %}
-{% set cativa = (venta.cliente.categoriaIva) ? venta.cliente.categoriaIva.nombre : 'C' %}
+{% set cativa = (venta.cliente.condicionIva) ? venta.cliente.condicionIva.codigo : 'C' %}
                 {% set showiva = (cativa != 'C') %}
 <table style="width:100%;" cellspacing="0" border="0" class="stdtable noaction">
     <thead>

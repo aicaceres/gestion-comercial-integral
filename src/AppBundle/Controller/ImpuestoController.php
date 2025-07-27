@@ -429,6 +429,8 @@ class ImpuestoController extends Controller {
             $percmuni = number_format($objComprob->getPercepcionMunicipal(), 2, '', '');
             $impint = number_format($objComprob->getImpuestoInterno(), 2, '', '');
             $totaloperacion = number_format($objComprob->getTotal(), 2, '', '');
+            $OpExNegativo = $operacionesExentas < 0;
+            $OpExPadded = str_pad(abs($operacionesExentas), 15, "0", STR_PAD_LEFT);
 //            $totaloperacion = $totalneto + $totaliva + $perciva + $perciibb + $percmuni + $impint;
             if ($format == 'A') {
                 $comp = array(
@@ -441,7 +443,7 @@ class ImpuestoController extends Controller {
                     'proveedor' => UtilsController::mb_str_pad($proveedor, 30, " ", STR_PAD_RIGHT),
                     'total' => str_pad($totaloperacion, 15, "0", STR_PAD_LEFT),
                     'nograv' => str_pad(number_format($objComprob->getTmc(), 2, '', ''), 15, "0", STR_PAD_LEFT),
-                    'exe' => str_pad($operacionesExentas, 15, "0", STR_PAD_LEFT),
+                    'exe' => ($OpExNegativo ? '-' : '') . $OpExPadded,
                     'percIva' => str_pad($perciva, 15, "0", STR_PAD_LEFT),
                     'percImpNac' => str_pad(number_format('0', 2, '', ''), 15, "0", STR_PAD_LEFT),
                     'percIIBB' => str_pad($perciibb, 15, "0", STR_PAD_LEFT),
@@ -475,7 +477,7 @@ class ImpuestoController extends Controller {
                     UtilsController::mb_str_pad($proveedor, 30) .
                     str_pad($totaloperacion, 15, "0", STR_PAD_LEFT) .
                     str_pad(number_format($objComprob->getTmc(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                    str_pad($operacionesExentas, 15, "0", STR_PAD_LEFT) .
+                    ($OpExNegativo ? '-' : '') . $OpExPadded .
                     str_pad($perciva, 15, "0", STR_PAD_LEFT) .
                     str_pad(number_format('0', 2, '', ''), 15, "0", STR_PAD_LEFT) .
                     str_pad($perciibb, 15, "0", STR_PAD_LEFT) .
@@ -985,6 +987,8 @@ class ImpuestoController extends Controller {
             $percmuni = number_format($objComprob->getPercepcionMunicipal(), 2, '', '');
             $impint = number_format($objComprob->getImpuestoInterno(), 2, '', '');
             $totaloperacion = number_format($objComprob->getTotal(), 2, '', '');
+            $OpExNegativo = $operacionesExentas < 0;
+            $OpExPadded = str_pad(abs($operacionesExentas), 15, "0", STR_PAD_LEFT);
 //            $totaloperacion = $totalneto + $totaliva + $perciva + $perciibb + $percmuni + $impint;
             if($ivacomprobante != $totaliva){
               $error[] = 'ALICUOTA';
@@ -1000,7 +1004,7 @@ class ImpuestoController extends Controller {
                     'proveedor' => UtilsController::mb_str_pad($proveedor, 30, " ", STR_PAD_RIGHT),
                     'total' => str_pad($totaloperacion, 15, "0", STR_PAD_LEFT),
                     'nograv' => str_pad(number_format($objComprob->getTmc(), 2, '', ''), 15, "0", STR_PAD_LEFT),
-                    'exe' => str_pad($operacionesExentas, 15, "0", STR_PAD_LEFT),
+                    'exe' =>  ($OpExNegativo ? '-' : '') . $OpExPadded,
                     'percIva' => str_pad($perciva, 15, "0", STR_PAD_LEFT),
                     'percImpNac' => str_pad(number_format('0', 2, '', ''), 15, "0", STR_PAD_LEFT),
                     'percIIBB' => str_pad($perciibb, 15, "0", STR_PAD_LEFT),
@@ -1034,7 +1038,7 @@ class ImpuestoController extends Controller {
                     UtilsController::mb_str_pad($proveedor, 30) .
                     str_pad($totaloperacion, 15, "0", STR_PAD_LEFT) .
                     str_pad(number_format($objComprob->getTmc(), 2, '', ''), 15, "0", STR_PAD_LEFT) .
-                    str_pad($operacionesExentas, 15, "0", STR_PAD_LEFT) .
+                     ($OpExNegativo ? '-' : '') . $OpExPadded .
                     str_pad($perciva, 15, "0", STR_PAD_LEFT) .
                     str_pad(number_format('0', 2, '', ''), 15, "0", STR_PAD_LEFT) .
                     str_pad($perciibb, 15, "0", STR_PAD_LEFT) .

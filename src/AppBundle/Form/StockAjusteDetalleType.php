@@ -20,6 +20,7 @@ class StockAjusteDetalleType extends AbstractType
                     'required' => true, 'label' => 'Producto:',
                     'placeholder' => 'Seleccionar Producto...',
                     'choice_label'=> 'codigoNombreBarcode',
+                    'attr' => array('class' => 'chzn-select'),
                     'class' => 'AppBundle:Producto',
                     'query_builder' => function(EntityRepository $repository) use ($prod) {
                         $qb = $repository->createQueryBuilder('p')
@@ -33,14 +34,15 @@ class StockAjusteDetalleType extends AbstractType
                 'label' => 'Producto:',
                 'choice_label'=> 'codigoNombreBarcode',
                 'placeholder' => 'Seleccionar Producto...',
+                'attr' => array('class' => 'chzn-select'),
                 'class' => 'AppBundle:Producto'
             ));
         }
-        
-        
-        $builder                
-                ->add('signo','choice', array('label'=>'Movimiento de', 
-                  'choices'   => array( '+' => 'Ingreso','-' => 'Egreso'),'expanded'=>true))
+
+
+        $builder
+                ->add('signo','choice', array('label'=>'Movimiento de',
+                  'choices'   => array( '+' => 'Ingreso (+)','-' => 'Egreso (-)', '=' => 'Valor Actual (=)'),'expanded'=>true))
                 /*->add('producto', 'entity', array(
                     'required' => true,
                     'placeholder' => 'Seleccionar Producto...',
@@ -66,7 +68,7 @@ class StockAjusteDetalleType extends AbstractType
                     },))
         ;
     }
-    
+
     /**
      * @param OptionsResolverInterface $resolver
      */

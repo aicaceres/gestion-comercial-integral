@@ -168,6 +168,11 @@ class Cheque {
      */
     private $pagoCliente;
 
+   /**
+    * @ORM\OneToOne(targetEntity="VentasBundle\Entity\CobroDetalle", mappedBy="chequeRecibido")
+    */
+    protected $cobroDetalle;
+
     /*
      * Cheque toString
      */
@@ -757,5 +762,28 @@ class Cheque {
     public function getFechaPago()
     {
         return $this->fechaPago;
+    }
+
+    /**
+     * Set cobroDetalle
+     *
+     * @param \VentasBundle\Entity\CobroDetalle $cobroDetalle
+     * @return Cheque
+     */
+    public function setCobroDetalle(\VentasBundle\Entity\CobroDetalle $cobroDetalle = null)
+    {
+        $this->cobroDetalle = $cobroDetalle;
+
+        return $this;
+    }
+
+    /**
+     * Get cobroDetalle
+     *
+     * @return \VentasBundle\Entity\CobroDetalle
+     */
+    public function getCobroDetalle()
+    {
+        return $this->cobroDetalle;
     }
 }

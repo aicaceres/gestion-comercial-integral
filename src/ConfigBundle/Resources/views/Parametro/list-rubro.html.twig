@@ -16,44 +16,88 @@
                 <th class="nosort">Descripción</th>
                 <th class="nosort">Activo</th>
                 <th class="nosort actionbutton addbutton">
-                   &nbsp; <a class="editar create" style="display:none" href="{{ path('sistema_parametro_new', { 'slug': 'rubro' }) }}">Agregar Rubro</a>
+                   &nbsp; <a class="editar addrubro" href="javascript:void(0);">Agregar Rubro</a>
                 </th>
             </tr>
         </thead>
         <tbody>
            {% for rubro in rubros %}
             <tr>
-                <td><span style="display:none">{{rubro.id}}-00</span><strong>{{ rubro.nombre |upper}}</strong></td>           
+                <td><span style="display:none">{{rubro.id}}-00</span><strong>{{ rubro.nombre |upper}}</strong></td>
                 <td>{{ rubro.descripcion}}</td>
-                <td><input type="checkbox" disabled="disabled" {% if rubro.activo %}checked="checked"{% endif %}/></td>
+                <td></td>
                 <td>
-                    <a href="{{path('sistema_parametro_edit', { 'slug': 'rubro', 'id': rubro.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
-                    <a href url="{{ path('sistema_parametro_delete', { 'id': rubro.id }) }}" class="delete rubro btn btnaction btn_trash" title="Borrar"></a>
+                  <a href="{{path('sistema_parametro_edit', { 'slug': 'rubro', 'id': rubro.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
+                  <a href url="{{ path('sistema_parametro_delete', { 'id': rubro.id }) }}" class="delete btn btnaction btn_trash rubro" title="Borrar"></a>
+                  <div style="display:inline" class="actionbutton">
+                    <a class="editar addsubrubro" data-rubro="{{rubro.nombre|upper}}" data-rubroid="{{rubro.id}}" href="javascript:void(0);"
+                      style="margin-top: 0;padding: 0 10px;color:white !important">
+                      Agregar Subrubro
+                    </a>
+                  </div>
                 </td>
             </tr>
                 {% for subrubro in subrubros if subrubro.padre==rubro.id %}
                     <tr>
-                        <td><span style="display:none">{{rubro.id}}-{{subrubro.id}}</span> &nbsp;&nbsp;&nbsp;{{ subrubro.codigo |upper}}</td>           
+                        <td><span style="display:none">{{rubro.id}}-{{subrubro.id}}</span> &nbsp;&nbsp;&nbsp;{{ subrubro.codigo |upper}}</td>
                         <td>{{ subrubro.subrubro}}</td>
                         <td><input type="checkbox" disabled="disabled" {% if subrubro.activo %}checked="checked"{% endif %}/></td>
                         <td>
                             <a href="{{path('sistema_parametro_edit', { 'slug': 'rubro', 'id': subrubro.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;
                             <a href url="{{ path('sistema_parametro_delete', { 'id': subrubro.id }) }}" class="delete btn btnaction btn_trash" title="Borrar"></a>
                         </td>
-                    </tr>                   
+                    </tr>
                 {% endfor %}
            {% endfor %}
         </tbody>
-    </table> 
+    </table>
 </div>
-{% endblock %}    
+{% endblock %}
 {% block extra_javascripts %}
 {% include "AppBundle::block-list-js.html.twig" %}
+<script type="text/javascript" src="{{ asset('assets/js/plugins/jquery.alerts.js') }}"></script>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
-    $('.rubro').on('click', function(){
-       alert('Si elimina un rubro se eliminarán todos los subrubros asociados!!!');
+    $(document).on('click','.rubro', function() {
+       alert('Si elimina un rubro se eliminarán todos los subrubros asociados y se desvincularán los productos!!!');
     });
-});  
+    $(document).on('click','.addrubro', function() {
+        jPrompt('Ingrese el rubro:', null, 'Nuevo Rubro', function(r) {
+		      if( r ){
+                  $.ajax({
+                    url: "{{ path("sistema_parametro_rubro_new") }}",
+                    async:true,
+                    data: {'texto': r} ,
+                    success: function() {
+                        location.reload()
+                    },
+                    error: function() {
+                        alert('No se puede realizar la operación en este momento');
+                    }
+                });
+                }
+            });
+            return false;
+        });
+    $(document).on('click','.addsubrubro', function(e) {
+        const rubroId = e.currentTarget.dataset.rubroid
+        jPrompt('Ingrese el subrubro de '+e.currentTarget.dataset.rubro+':', null, 'Nuevo Subrubro', function(r) {
+		      if( r ){
+                    jQuery.ajax({
+                    url: "{{ path("sistema_parametro_rubro_new") }}",
+                    async:true,
+                    data: {'rubroId': rubroId, 'texto': r},
+                    success: function() {
+                        location.reload()
+                    },
+                    error: function() {
+                        alert('No se puede realizar la operación en este momento');
+                    }
+                });
+                }
+            });
+            return false;
+        });
+});
 </script>
 {% endblock %}

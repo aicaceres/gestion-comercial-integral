@@ -113,7 +113,7 @@ class FacturaElectronicaController extends Controller {
         $facade = $this->get('ps_pdf.facade');
         $response = new Response();
 
-        $duplicado = $esCobro && $comprobante->getCliente()->getCategoriaIva() == 'I';
+        $duplicado = $esCobro && $comprobante->getCliente()->getCondicionIva()->tieneCondicion('I');
         $fe->setDocTipoTxt($em->getRepository('ConfigBundle:Parametro')->findTipoDocumento($fe->getDocTipo()));
 
         $this->render(
@@ -170,7 +170,7 @@ class FacturaElectronicaController extends Controller {
         // tcNota_Debito_A = 4 // tcNota_Debito_B = 5 // tcNota_Debito_C = 6;
         // tcNota_Credito_A = 7 // tcNota_Credito_B = 8 // tcNota_Credito_C = 9;
         $cliente = $comprobante->getCliente();
-        $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
+        $catIva = ($cliente->getCondicionIva()) ? $cliente->getCondicionIva()->getCodigo() : 'C';
         $percRentas = $cliente->getPercepcionRentas();
         if ($entity == 'Cobro') {
             $dataTicket['tipo'] = ($catIva == 'I' || $catIva == 'M') ? 1 : 2;
@@ -445,7 +445,7 @@ class FacturaElectronicaController extends Controller {
                             $venta->setNroOperacion($nroVenta);
                             $param->setUltimoNroOperacionVenta($nroVenta);
                             $venta->setDescuentaStock(0);
-                            $venta->setCategoriaIva($cliente->getCategoriaIva());
+                            $venta->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
                             $venta->setPercepcionRentas($cliente->getPercepcionRentas());
                             $venta->setCotizacion($item->getTipoCambio());
                             // agregar un detalle x alicuota
@@ -498,7 +498,7 @@ class FacturaElectronicaController extends Controller {
                             $nota->setMoneda($moneda);
                             $nota->setTipoComprobante($tipoComprobante);
                             $nota->setFormaPago($formaPago);
-                            $nota->setCategoriaIva($cliente->getCategoriaIva());
+                            $nota->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
                             $nota->setPercepcionRentas($cliente->getPercepcionRentas());
                             $nota->setPrecioLista($precioLista);
                             $nota->setUnidadNegocio($unidneg);

@@ -1,0 +1,28 @@
+<div class="two_fields">
+  {% if entity.cobroDetalle %}
+    {% if entity.cobroDetalle.notaDebCred %}
+    <label>Nota de Débito/Crédito:</label>
+      <a href="{{path('ventas_notadebcred_show', { 'id': entity.cobroDetalle.notaDebCred.id }) }}" target="_blank">
+        {{entity.cobroDetalle.notaDebCred.notaElectronica.comprobanteTxt}} <img style="vertical-align: middle" src="{{asset('assets/images/icons/folder.png')}}">
+      </a>
+    {% endif %}
+    {% if entity.cobroDetalle.pagoProveedor %}
+      <label>Pago de Proveedor:</label>
+      <a href="{{path('compras_proveedor_pagos_show', { 'id': entity.cobroDetalle.pagoProveedor.id }) }}" target="_blank">
+        {{entity.cobroDetalle.pagoProveedor.nroPago}} <img style="vertical-align: middle" src="{{asset('assets/images/icons/folder.png')}}">
+      </a>
+    {% endif %}
+    {% if entity.cobroDetalle.pagoCliente %}
+      <label>Pago de Cliente:</label>
+      <a href="{{path('ventas_cliente_pagos_show', { 'id': entity.cobroDetalle.pagoCliente.id }) }}" target="_blank">
+        {{entity.cobroDetalle.pagoCliente}} <img style="vertical-align: middle" src="{{asset('assets/images/icons/folder.png')}}">
+      </a>
+    {% endif %}
+    {% if entity.cobroDetalle.cobro %}
+      <label>Cobro de Venta:</label>
+      <a href="{{path('ventas_cobro_show', { 'id': entity.cobroDetalle.cobro.id }) }}" target="_blank">
+        {{entity.cobroDetalle.cobro.getRefVenta}} <img style="vertical-align: middle" src="{{asset('assets/images/icons/folder.png')}}">
+      </a>
+    {% endif %}
+  {% endif %}
+</div>

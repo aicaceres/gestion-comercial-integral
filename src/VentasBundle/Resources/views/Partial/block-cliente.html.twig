@@ -15,6 +15,6 @@
     }}
 
     <a href="javascript:void(0)" class="btn btnaction btn_search"></a>
-    <input type="hidden" value="{% if entity.cliente.categoriaIva %}{{entity.cliente.categoriaIva.nombre}}{% endif %}" id="categoriaIva"/>
+    <input type="hidden" value="{% if entity.cliente.condicionIva %}{{entity.cliente.condicionIva.nombre}}{% endif %}" id="condicionIva"/>
     <input type="hidden" value="{{ entity.cliente.consumidorFinal }}" id="esConsumidorFinal"/>
 </div>

@@ -45,7 +45,7 @@
 
       <fieldset class="fields">
 
-      <div class="selectorCliente" data-categiva="{{entity.cliente.categoriaIva}}" data-percrentas="{{ entity.cliente.percepcionRentas }}">
+      <div class="selectorCliente" data-categiva="{{entity.cliente.condicionIva}}" data-percrentas="{{ entity.cliente.percepcionRentas }}">
         <label> CLIENTE: </label>
         <input value="{{entity.cliente.nombre}}" disabled style="width:90%"/>
       </div>
@@ -77,7 +77,7 @@
 
       <fieldset>
             <div style="display:inline-block; width:85%;margin:10px 0 10px 5%;" >
-                {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
+                {% set cativa = (entity.cliente.condicionIva) ? entity.cliente.condicionIva.codigo : 'C' %}
                 {% set showiva = (cativa != 'C') %}
 
                 {% include "VentasBundle:CobroVenta:_partial-detalle.html.twig" with {'venta':entity.venta,'showiva': showiva } %}
@@ -253,8 +253,8 @@ function jsAnularVenta(e){
 }
 
 function checkEmitirTicket(){
-  esCategoriaC = '{{ entity.cliente.categoriaIva }}' == 'C'
-  esCategoriaE = '{{ entity.cliente.categoriaIva }}' == 'E'
+  esCategoriaC = '{{ entity.cliente.condicionIva.codigo }}' == 'C'
+  esCategoriaE = '{{ entity.cliente.condicionIva.codigo }}' == 'E'
   esMonedaPesos = '{{ entity.moneda }}'=='PESOS'
   esTicketPorCantidadItems = jQuery('.detalle-venta tbody tr').length <= '{{ cantidadItemsParaFactura }}'
   emitirTicket = esCategoriaC && esMonedaPesos && esTicketPorCantidadItems;

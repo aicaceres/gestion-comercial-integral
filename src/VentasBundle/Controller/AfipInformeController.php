@@ -495,7 +495,7 @@ class AfipInformeController extends Controller {
                 $totalesxTipoCliente[$tipoCliente]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             // POR CATEGORIA DE IVA
-            $categIva = $fe->getCliente()->getCategoriaIva() ? $fe->getCliente()->getCategoriaIva()->getDescripcion() : 'Otros (no identificados)';
+            $categIva = $fe->getCliente()->getCondicionIva() ? $fe->getCliente()->getCondicionIva()->getNombre() : 'Otros (no identificados)';
             $categIvaTotal = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             if (isset($totalesxCategoriaIva[$categIva]['neto'])) {
                 $totalesxCategoriaIva[$categIva]['neto'] += ($fe->getImpNeto() * $signo);

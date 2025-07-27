@@ -204,6 +204,7 @@ class FacturaElectronicaWebservice {
             'CbteTipo' => $cbteTipo->getCodigo(), // Tipo de comprobante (ver tipos disponibles)
             'Concepto' => $fe['concepto'], // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
             'DocTipo' => $fe['docTipo'], // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+            'CondicionIVAReceptorId' => $fe['CondicionIVAReceptorId'], // Condicion Iva Receptor
             'DocNro' => $fe['docNro'], // Número de documento del comprador (0 consumidor final)
             'CbteFch' => $fe['cbteFch'], // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
             'ImpTotal' => $fe['total'], // Importe total del comprobante
@@ -261,7 +262,7 @@ class FacturaElectronicaWebservice {
     public function setDataFacturaElectronica($tipo, $comprobante, $modo) {
         $em = $this->em;
         $cliente = $comprobante->getCliente();
-        $catIva = ($cliente->getCategoriaIva()) ? $cliente->getCategoriaIva()->getNombre() : 'C';
+        $catIva = ($cliente->getCondicionIva()) ? $cliente->getCondicionIva()->getCodigo() : 'C';
         $percRentas = $cliente->getPercepcionRentas();
         $cobroId = $notaId = null;
         $cbtesAsoc = $periodoAsoc = $tributos = $iva = [];
@@ -309,6 +310,8 @@ class FacturaElectronicaWebservice {
             $docTipo = 80;
             $docNro = trim($cliente->getCuit());
         }
+        $condicionIvaReceptor = $cliente->getCondicionIva()->getId();
+
         // IMPORTES Y CONCEPTOS DEL DETALLE
         $impTotC = $impOpEx = 0; // importe no gravado // Importe exento de IVA
         if ($detalles) {
@@ -381,6 +384,7 @@ class FacturaElectronicaWebservice {
             $saldofe = $comprobante->getFormaPago()->getCuentaCorriente() ? $impTotal : 0;
         }
         else {
+            // si no tiene comprobante asociado $impTotal
             $saldofe = ($comprobante->getTipoComprobante()->getClase() === 'CRE') ? 0 : $impTotal;
         }
         $dataFe = array(
@@ -397,6 +401,7 @@ class FacturaElectronicaWebservice {
             'concepto' => 1, //Concepto del Comprobante: (1)Productos
             'docTipo' => $docTipo,
             'docNro' => $docNro,
+            'CondicionIVAReceptorId' => $condicionIvaReceptor,
             'nombreCliente' => $nombreCliente,
             'cbteFch' => intval($cbteFch->format('Ymd')),
             'impTotC' => $impTotC,
@@ -491,7 +496,7 @@ class FacturaElectronicaWebservice {
             $docTipo = $comprobante->getTipoDocumentoCliente()->getNumerico() ? intVal($comprobante->getTipoDocumentoCliente()->getNumerico()) : 9;
             $docNro = $docTipo ? $comprobante->getNroDocumentoCliente() : '';
         }
-        $catIva = $cliente->getCategoriaIva()->getNumerico2() ? intVal($cliente->getCategoriaIva()->getNumerico2()) : '';
+        $catIva = !is_null($cliente->getCondicionIva()->getTicket()) ? intVal($cliente->getCondicionIva()->getTicket()) : '';
         $dataCliente = array($nombre, $docTipo, $docNro, $catIva, $direccion);
         return $dataCliente;
     }
@@ -503,7 +508,9 @@ class FacturaElectronicaWebservice {
         $config = $modo == 'PRODUCCION' ? $afipOptionsProd : $afipOptionsTest;
         try {
             $afip = new Afip($config);
-            $wsResult = $afip->ElectronicBilling->GetOptionsTypes();
+            // $wsResult = $afip->RegisterInscriptionProof->GetServerStatus('27208373124');
+            $wsResult = $afip->ElectronicBilling->GetIVAConditionTypes();
+
 
             return array('MODO' => $modo, 'STATUS' => $wsResult);
         }

@@ -91,7 +91,7 @@
                                 <span>{{cbte.moneda.simbolo}} {{ cbte.totalIva|number_format(2,',','.')}}</span>
                             </td>
                         </tr>
-                            {% if cbte.cliente.categoriaIva == 'I' %}
+                            {% if cbte.cliente.condicionIva.codigo == 'I' %}
                             <tr>
                                 <td border.type="none"></td>
                                 <td border.type="none"></td>
@@ -139,8 +139,8 @@
                     <div padding-left="54px" padding-top="5px" > {{ cbte.cliente.localidad }}</div>
                 </td>
                 <td border.type="none" padding-top="10px">
-                    {% if cbte.cliente.categoriaIva %}
-                        {{ cbte.cliente.categoriaIva.descripcion }}
+                    {% if cbte.cliente.condicionIva %}
+                        {{ cbte.cliente.condicionIva.nombre }}
                     {% else %}
                         Consumidor Final
                     {% endif %}

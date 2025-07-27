@@ -76,7 +76,7 @@ class PresupuestoController extends Controller {
 
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
-            $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+            $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
             $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
 
             $entity->setFormaPago($cliente->getFormaPago());
@@ -524,7 +524,7 @@ class PresupuestoController extends Controller {
         $entity->setPrecioLista($venta->getPrecioLista());
         $entity->setFormaPago($venta->getFormaPago());
         $entity->setDescuentoRecargo($venta->getDescuentoRecargo());
-        $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+        $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
         $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
 
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));

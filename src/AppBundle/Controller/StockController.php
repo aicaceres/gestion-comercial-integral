@@ -187,10 +187,21 @@ class StockController extends Controller {
                         if ($item->getBulto()) {
                             $cantidad = $cantidad * $item->getCantidadxBulto();
                         }
-                        if ($item->getSigno() == '+')
+                        switch ($item->getSigno()) {
+                          case '+':
                             $cant = $stock->getCantidad() + $cantidad;
-                        else
+                            break;
+                          case '-':
                             $cant = $stock->getCantidad() - $cantidad;
+                            break;
+                          case '=':
+                            $cant = $cantidad;
+                            break;
+                          default:
+                            $cant = $stock->getCantidad();
+                            break;
+                        }
+
                         $stock->setCantidad($cant);
                         $em->persist($stock);
                         // Cargar movimiento

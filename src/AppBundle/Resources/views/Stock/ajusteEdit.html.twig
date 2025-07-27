@@ -36,7 +36,7 @@
                         <tr>
                             <th style="width:3%;"></th>
                             <th style="width:40%;">Producto</th>
-                            <th style="width:6%; font-size:1.3em;">+ / -</th>
+                            <th style="width:6%; font-size:1.3em;">+ / - / =</th>
                             <th style="width:13%;">Cantidad</th>
                             <th style="width:20%;">Motivo</th>
                             <th style="width:1%;" colspan="2"></th>
@@ -174,10 +174,18 @@ if( file.type != 'text/csv' ){
             .load(partialurl, function() {
                 var form = $("[name='appbundle_stockajustedetalle']");
                 form.find('input:radio').uniform();
-                if( $tipoajuste=='+' ){
+                switch ($tipoajuste) {
+                  case '+':
                     form.find('#appbundle_stockajustedetalle_signo_0').prop('checked',true);
-                }else{
-                     form.find('#appbundle_stockajustedetalle_signo_1').prop('checked',true);
+                    break;
+                  case '-':
+                    form.find('#appbundle_stockajustedetalle_signo_1').prop('checked',true);
+                    break;
+                  case '=':
+                    form.find('#appbundle_stockajustedetalle_signo_2').prop('checked',true);
+                    break;
+                  default:
+                    break;
                 }
                 $.uniform.update();
                 form.find('#ajusteid').val('{{entity.id}}');
@@ -186,6 +194,7 @@ if( file.type != 'text/csv' ){
                 prod.change(function () {
                     changeProducto($(this));
                 });
+                form.find('#appbundle_stockajustedetalle_producto_chzn').css('width','500px');
                 form.find("#appbundle_stockajustedetalle_bulto").uniform();
                 form.find("#appbundle_stockajustedetalle_bulto").change(function () {
                     changeBulto($(this));

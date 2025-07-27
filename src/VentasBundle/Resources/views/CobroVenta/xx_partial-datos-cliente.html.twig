@@ -1,7 +1,7 @@
 <div class="datos-cliente datos-cf">
 {% if item.consumidorFinal %}
 
-    
+
 
 {% else %}
 
@@ -9,7 +9,7 @@
     <span class="cuitcliente"> {{item.cuit}} </span>
 
     <label> IVA: </label>
-      {{ item.categoriaIva ? item.categoriaIva.descripcion|upper : "No definido" }}
+      {{ item.condicionIva ? item.condicionIva.nombre|upper : "No definido" }}
 
     <label> RENTAS: </label>
     {{ item.categoriaRentas ? item.categoriaRentas.nombre|upper : "No definido" }}

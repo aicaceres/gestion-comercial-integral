@@ -128,4 +128,13 @@ class BancoRepository extends EntityRepository {
         return $query->getQuery()->getArrayResult();
     }
 
+    public function findMovimientoTransferencia($cobroDetalle){
+      $query = $this->_em->createQueryBuilder();
+        $query->select('m')
+            ->from('ConfigBundle:BancoMovimiento', 'm')
+            ->innerJoin('m.cobroDetalle', 'c')
+            ->where("c.id = " . $cobroDetalle);
+        return $query->getQuery()->getOneOrNullResult();
+    }
+
 }

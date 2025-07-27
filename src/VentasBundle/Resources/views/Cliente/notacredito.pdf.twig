@@ -55,7 +55,7 @@
             </header>
             <footer>
                 <div height="180px" width="100%">
-                    {% if nota.cliente.categoriaIva == 'M' %}
+                    {% if nota.cliente.condicionIva.codigo == 'M' %}
                     <div font-size="8px" padding="10px">
                     Crédito fiscal discriminado en el presente comprobante sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes Ley 27618
                     </div>
@@ -90,7 +90,7 @@
                                 <span>{{nota.moneda.simbolo}} {{ nota.totalIva|number_format(2,',','.')}}</span>
                             </td>
                         </tr>
-                            {% if nota.cliente.categoriaIva == 'I' %}
+                            {% if nota.cliente.condicionIva.codigo == 'I' %}
                             <tr>
                                 <td border.type="none"></td>
                                 <td border.type="none"></td>
@@ -142,8 +142,8 @@
                     <div padding-left="54px" padding-top="5px" > {{ nota.cliente.localidad }}</div>
                 </td>
                 <td border.type="none" padding-top="10px">
-                    {% if nota.cliente.categoriaIva %}
-                        {{ nota.cliente.categoriaIva.descripcion }}
+                    {% if nota.cliente.condicionIva %}
+                        {{ nota.cliente.condicionIva.codigo }}
                     {% else %}
                         Consumidor Final
                     {% endif %}

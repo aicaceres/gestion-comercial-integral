@@ -89,7 +89,7 @@ class NotaDebCredDetalle {
     /** VALORES ITEM  */
     // valor del precio unitario segun categoria de iva
     public function getPrecioUnitarioItem() {
-        $categIva = $this->getNotaDebCred()->getCliente()->getCategoriaIva()->getNombre();
+        $categIva = $this->getNotaDebCred()->getCliente()->getCondicionIva()->getCodigo();
         $cotizacion = $this->getNotaDebCred()->getCotizacion();
         if ($categIva == 'I' || $categIva == 'M') {
             // precio sin iva convertido a la cotizacion

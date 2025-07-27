@@ -81,7 +81,7 @@ class NotaDebCredController extends Controller {
             // cargar datos parametrizados por defecto
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
-            $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+            $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
             $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
             $entity->setFormaPago($cliente->getFormaPago());
             $entity->setDescuentoRecargo($cliente->getFormaPago()->getPorcentajeRecargo());
@@ -206,7 +206,7 @@ class NotaDebCredController extends Controller {
                     $entity->setDescuentoRecargo($entity->getFormaPago()->getPorcentajeRecargo());
                 }
 
-                $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
+                $catIva = ($entity->getCliente()->getCondicionIva()) ? $entity->getCliente()->getCondicionIva()->getCodigo() : 'C';
                 if ($entity->getDetalles()) {
                     $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
                     $productos = $request->get('ventasbundle_producto');
@@ -285,7 +285,7 @@ class NotaDebCredController extends Controller {
                             $movBanco->setTipoMovimiento($tipoMov);
                             $tipoNota = $entity->getSigno() == 'CRE' ? 'Credito' : 'Debito';
                             $movBanco->setCobroDetalle($detalle);
-                            $movBanco->setObservaciones('Transferencia por nota de '.$tipoNota.' - '.$entity->getNombreCliente());
+                            $movBanco->setObservaciones('Nota '.$tipoNota.' - '.$entity->getNombreCliente());
                             $em->persist($movBanco);
                         }
                     }
@@ -295,6 +295,7 @@ class NotaDebCredController extends Controller {
                 $entity->setIva($impIVA);
                 $entity->setPercIibb($impTrib);
                 $entity->setTotal($impTotal);
+                $entity->setSaldo($saldo);
                 // signo
                 $entity->setEstado('CREADO');
                 $em->persist($entity);

@@ -1,5 +1,5 @@
 {% set simbolo = ( entity.moneda is defined ) ? entity.moneda.simbolo : '$' %}
-{% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
+{% set cativa = (entity.cliente.condicionIva) ? entity.cliente.condicionIva.codigo : 'C' %}
 {% set showiva = (cativa == 'I' or cativa == 'M') %}
 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
   <thead>
@@ -30,7 +30,7 @@
       </th>
       <th style="width:18%" class="gralTotalTd red">
         TOTAL: <span class="simbolo">{{simbolo}}</span>&nbsp;<span id="importeTotal">
-          {{ entity.montoTotal|number_format(2,',','.')}} 
+          {{ entity.montoTotal|number_format(2,',','.')}}
         </span>.-
       </th>
     </tr>

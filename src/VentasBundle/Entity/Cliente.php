@@ -133,6 +133,13 @@ class Cliente {
      * */
     protected $categoria_iva;
 
+     /**
+     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\AfipCondicionIvaReceptor")
+     * @ORM\JoinColumn(name="condicion_iva_id", referencedColumnName="id")
+     * @Gedmo\Versioned()
+     * */
+    protected $condicion_iva;
+
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Escalas")
      * @ORM\JoinColumn(name="categoria_rentas_id", referencedColumnName="id")
@@ -1051,4 +1058,83 @@ class Cliente {
         return $this->facturasElectronicas;
     }
 
+
+    /**
+     * Set condicion_iva
+     *
+     * @param \ConfigBundle\Entity\AfipCondicionIvaReceptor $condicionIva
+     * @return Cliente
+     */
+    public function setCondicionIva(\ConfigBundle\Entity\AfipCondicionIvaReceptor $condicionIva = null)
+    {
+        $this->condicion_iva = $condicionIva;
+
+        return $this;
+    }
+
+    /**
+     * Get condicion_iva
+     *
+     * @return \ConfigBundle\Entity\AfipCondicionIvaReceptor
+     */
+    public function getCondicionIva()
+    {
+        return $this->condicion_iva;
+    }
+
+    /**
+     * Add facturasElectronicas
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $facturasElectronicas
+     * @return Cliente
+     */
+    public function addFacturasElectronica(\VentasBundle\Entity\FacturaElectronica $facturasElectronicas)
+    {
+        $this->facturasElectronicas[] = $facturasElectronicas;
+
+        return $this;
+    }
+
+    /**
+     * Remove facturasElectronicas
+     *
+     * @param \VentasBundle\Entity\FacturaElectronica $facturasElectronicas
+     */
+    public function removeFacturasElectronica(\VentasBundle\Entity\FacturaElectronica $facturasElectronicas)
+    {
+        $this->facturasElectronicas->removeElement($facturasElectronicas);
+    }
+
+    /**
+     * Add ventas
+     *
+     * @param \VentasBundle\Entity\Venta $ventas
+     * @return Cliente
+     */
+    public function addVenta(\VentasBundle\Entity\Venta $ventas)
+    {
+        $this->ventas[] = $ventas;
+
+        return $this;
+    }
+
+    /**
+     * Remove ventas
+     *
+     * @param \VentasBundle\Entity\Venta $ventas
+     */
+    public function removeVenta(\VentasBundle\Entity\Venta $ventas)
+    {
+        $this->ventas->removeElement($ventas);
+    }
+
+    /**
+     * Get ventas
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getVentas()
+    {
+        return $this->ventas;
+    }
 }

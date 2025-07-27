@@ -73,7 +73,7 @@
                 <td>{{ entity.dador }}</td>
                 <td>{{ entity.tipoCheque }}</td>
                 <td>{% if entity.tomado %}<span class="hidden">{{ entity.tomado|date('Ymd') }}</span>{{ entity.tomado|date('d-m-Y') }}{% endif %}</td>
-                <td class="alignright" >{{ entity.valor|number_format(2,',','.') }}</td>
+                <td class="alignright">{{ entity.valor|number_format(2,',','.') }}</td>
                 <td>
                      {% if app.user.access(app.session.get('unidneg_id'),'sistema_banco') %}
                     <a href="{{ path('sistema_cheque_edit', { 'id': entity.id }) }}" class="editar btn btnaction btn_pencil" ></a>&nbsp;

@@ -17,6 +17,7 @@ use ComprasBundle\Form\ProveedorType;
 use ComprasBundle\Entity\PagoProveedor;
 use ComprasBundle\Form\PagoProveedorType;
 use ComprasBundle\Entity\RetencionGanancia;
+use ConfigBundle\Entity\BancoMovimiento;
 
 /**
  * @Route("/proveedor")
@@ -593,6 +594,8 @@ class ProveedorController extends Controller {
         $entity = new PagoProveedor();
         $form = $this->pagosCreateCreateForm($entity);
         $form->handleRequest($request);
+        $detalles = array_values($formData['cobroDetalles']);
+
         if ($form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->getConnection()->beginTransaction();
@@ -608,7 +611,7 @@ class ProveedorController extends Controller {
 
                 $totalPago = 0;
                 // limpiar cheque y tarjeta si no corresponde
-                foreach ($entity->getCobroDetalles() as $detalle) {
+                foreach ($entity->getCobroDetalles() as $key => $detalle) {
                     if ($detalle->getImporte() == 0) {
                         $entity->removeCobroDetalle($detalle);
                         continue;
@@ -628,10 +631,14 @@ class ProveedorController extends Controller {
                             $detalle->setChequeRecibido($obj);
                             $detalle->getChequeRecibido()->setUsado(true);
                             if($detalle->getChequeRecibido()->getTipo() === 'P' && floatval($detalle->getChequeRecibido()->getValor()) === floatval(0)){
+                              $fechaCheque = new \DateTime($detalles[$key]['chequeRecibido']['fecha']);
                               $detalle->getChequeRecibido()->setValor($detalle->getImporte());
+                              $detalle->getChequeRecibido()->setFecha($fechaCheque);
                               $mov = $em->getRepository('ConfigBundle:BancoMovimiento')->findMovimientoCheque($detalle->getChequeRecibido()->getId());
                               if($mov){
                                 $mov->setImporte($detalle->getImporte());
+                                $mov->setFechaAcreditacion($fechaCheque);
+                                $mov->setObservaciones('Pago Proveedor ' . $entity->getProveedor());
                                 $em->persist($mov);
                               }
                             }
@@ -643,6 +650,23 @@ class ProveedorController extends Controller {
                     }
                     if ($tipoPago != 'TARJETA') {
                         $detalle->setDatosTarjeta(null);
+                    }
+                    if ($tipoPago === 'TRANSFERENCIA'){
+                      $movBanco = new BancoMovimiento();
+                      $banco = $em->getRepository('ConfigBundle:Banco')->find($detalles[$key]['bancoTransferencia']);
+                      $movBanco->setBanco($banco);
+                      $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($detalles[$key]['cuentaTransferencia']);
+                      $movBanco->setCuenta($cuenta);
+                      $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
+                      $movBanco->setConciliado(false);
+                      $movBanco->setImporte($detalles[$key]['importe']);
+                      $movBanco->setFechaAcreditacion(new \DateTime());
+                      $movBanco->setFechaCarga(new \DateTime());
+                      $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('DEBITO');
+                      $movBanco->setTipoMovimiento($tipoMov);
+                      $movBanco->setCobroDetalle($detalle);
+                      $movBanco->setObservaciones('Pago Proveedor ' . $entity->getProveedor());
+                      $em->persist($movBanco);
                     }
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();

@@ -229,6 +229,9 @@ class PagoProveedor {
                 case 'TARJETA':
                     $txt = $txt . $aux . $det->getDatosTarjeta()->getTarjeta()->getNombre() . ': ' . $monto;
                     break;
+                case 'TRANSFERENCIA':
+                    $txt = $txt . $aux . 'TRANSFERENCIA: ' . $monto;
+                    break;
             }
         }
         return $txt;
@@ -781,7 +784,7 @@ class PagoProveedor {
     /**
      * Get codigoAtp
      *
-     * @return integer 
+     * @return integer
      */
     public function getCodigoAtp()
     {

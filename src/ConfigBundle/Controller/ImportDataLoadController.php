@@ -631,7 +631,7 @@ class ImportDataLoadController extends Controller {
             $ventas = $em->getRepository('VentasBundle:Venta')->findAll();
             foreach ($ventas as $reg) {
                 $cliente = $reg->getCliente();
-                $catIva = $cliente->getCategoriaIva() ? $cliente->getCategoriaIva()->getNombre() : 'C';
+                $catIva = $cliente->getCondicionIva() ? $cliente->getCondicionIva()->getCodigo() : 'C';
                 $reg->setCategoriaIva($catIva);
                 $reg->setPercepcionRentas($cliente->getPercepcionRentas());
                 $em->persist($reg);
@@ -640,7 +640,7 @@ class ImportDataLoadController extends Controller {
             $presup = $em->getRepository('VentasBundle:Presupuesto')->findAll();
             foreach ($presup as $reg) {
                 $cliente = $reg->getCliente();
-                $catIva = $cliente->getCategoriaIva() ? $cliente->getCategoriaIva()->getNombre() : 'C';
+                $catIva = $cliente->getCondicionIva() ? $cliente->getCondicionIva()->getCodigo() : 'C';
                 $reg->setCategoriaIva($catIva);
                 $reg->setPercepcionRentas($cliente->getPercepcionRentas());
                 $em->persist($reg);
@@ -649,7 +649,7 @@ class ImportDataLoadController extends Controller {
             $notas = $em->getRepository('VentasBundle:NotaDebCred')->findAll();
             foreach ($notas as $reg) {
                 $cliente = $reg->getCliente();
-                $catIva = $cliente->getCategoriaIva() ? $cliente->getCategoriaIva()->getNombre() : 'C';
+                $catIva = $cliente->getCondicionIva() ? $cliente->getCondicionIva()->getCodigo() : 'C';
                 $reg->setCategoriaIva($catIva);
                 $reg->setPercepcionRentas($cliente->getPercepcionRentas());
                 $em->persist($reg);

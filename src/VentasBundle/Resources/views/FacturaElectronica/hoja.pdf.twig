@@ -56,7 +56,7 @@
                 {% set cliente = cbte.cliente %}
                 {% set operador = cbte.venta is defined ? cbte.venta.createdBy.nombre : cbte.createdBy.nombre %}
                 <div {% if 'FCE' in fe.tipoComprobante.valor %} height="280px" {% else %} height="220px" {% endif %} width="100%">
-                    {% if cliente.categoriaIva.nombre == 'M' %}
+                    {% if cliente.condicionIva.codigo == 'M' %}
                     <div font-size="8px" padding="10px">
                     Crédito fiscal discriminado en el presente comprobante sólo podrá ser computado a efectos del Régimen de Sostenimiento e Inclusión Fiscal para Pequeños Contribuyentes Ley 27618
                     </div>
@@ -112,7 +112,7 @@
                     <table>
                         <tr>
                             <td border.color="#555555" height="30px" vertical-align="middle"  width="4 cm" text-align="center" font-size="9px">Dirección de Comercio Interior 0800-444-3346</td>
-                            {% if fe.cliente.categoriaIva.nombre in ['C','E'] %}
+                            {% if fe.cliente.condicionIva.codigo in ['C','E'] %}
                             <td border.color="#555555" font-size="9px" padding-left="10px" padding-top="3px">
                               <div>Régimen de Transparencia Fiscal al Consumidor (Ley 27.743)</div>
                               <div>IVA Contenido: {{simbolo}} {{ cbte.totalIva|number_format(2,',','.')}}</div>
@@ -173,8 +173,8 @@
                     <div padding-left="54px" padding-top="5px" > {{ cliente.localidad }}</div>
                 </td>
                 <td border.type="none" padding-top="10px">
-                    {% if cliente.categoriaIva %}
-                        {{ cliente.categoriaIva.descripcion }}
+                    {% if cliente.condicionIva %}
+                        {{ cliente.condicionIva.nombre }}
                     {% else %}
                         Consumidor Final
                     {% endif %}

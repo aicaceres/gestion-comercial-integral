@@ -23,7 +23,7 @@
       </span>
 
       <label> IVA: </label>
-        {{ cliente.categoriaIva ? cliente.categoriaIva.descripcion|upper : "No definido" }}
+        {{ cliente.condicionIva ? cliente.condicionIva.nombre|upper : "No definido" }}
 
       <label> RENTAS: </label>
       {{ cliente.categoriaRentas ? cliente.categoriaRentas.nombre|upper : "No definido" }}

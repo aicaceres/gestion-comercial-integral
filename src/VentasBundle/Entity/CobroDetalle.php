@@ -48,7 +48,7 @@ class CobroDetalle {
     private $datosTarjeta;
 
     /**
-     * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Cheque", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="ConfigBundle\Entity\Cheque", cascade={"persist"}, inversedBy="cobroDetalle")
      * @ORM\JoinColumn(name="cheque_recibido_id", referencedColumnName="id", onDelete="CASCADE")
      * @Gedmo\Versioned()
      */

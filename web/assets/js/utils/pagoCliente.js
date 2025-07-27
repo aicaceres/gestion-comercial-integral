@@ -134,11 +134,11 @@ function quitarElementosSegunTipo(pagosTr) {
 		}
                 if (tipo === "TRANSFERENCIA") {
                     itemTr.find('[id*="_nroMovTransferencia"]').attr("required", true)
-                    bcoTransf = itemTr.find('[id*="_bancoTransferencia"]') 
-                    ctaTransf = itemTr.find('[id*="_cuentaTransferencia"]')          
-                    ctaTransf.attr("required", true)    
+                    bcoTransf = itemTr.find('[id*="_bancoTransferencia"]')
+                    ctaTransf = itemTr.find('[id*="_cuentaTransferencia"]')
+                    ctaTransf.attr("required", true)
                     bcoTransf.select2().on('change', function () {
-                      ctaTransf.empty().trigger('change');  
+                      ctaTransf.empty().trigger('change');
                       bancoId = bcoTransf.val()
                       jQuery.ajax({
                           url: ctaTransf.data('url'),

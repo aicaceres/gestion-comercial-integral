@@ -94,14 +94,14 @@
                 {% endif %}
             </div>
         </fieldset>
-        {% if entity.concepto %}      
+        {% if entity.concepto %}
         <fieldset>
             <div style="padding-top: 10px; width: 60%;">
                 <label>Concepto adicional: </label>
                 <input type="text" disabled="disabled" value="{{entity.concepto}}"/>
             </div>
         </fieldset>
-        {% endif %}    
+        {% endif %}
         <fieldset>
             <div style="padding-top: 20px; margin:auto; width: 100%;">
 
@@ -111,7 +111,7 @@
         </fieldset>
         <fieldset>
             <div style="margin:auto; width: 100%;">
-                {% set cativa = (entity.cliente.categoriaIva) ? entity.cliente.categoriaIva.nombre : 'C' %}
+                {% set cativa = (entity.cliente.condicionIva) ? entity.cliente.condicionIva.codigo : 'C' %}
                 {% set retrentas = entity.cliente.categoriaRentas ? entity.cliente.categoriaRentas.retencion : 0 %}
                 {% set showiva = (cativa != 'C') %}
                 {% set showiibb = (cativa == 'I' and retrentas>0) %}

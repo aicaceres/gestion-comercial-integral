@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="two_fields">
-                    {{ form_row(form.categoria_iva, { 'attr': {'class' : 'uniformselect'  } }) }}
+                    {{ form_row(form.condicion_iva, { 'attr': {'class' : 'uniformselect'  } }) }}
                     {{ form_row(form.provinciaRentas, { 'attr': {'class' : 'smallinput'  } }) }}
                 </div>
                 <div class="two_fields">
@@ -81,7 +81,7 @@
                 <div class="actionbutton">
                     {% if entity.id and app.user.access(app.session.get('unidneg_id'),'ventas_cliente_delete')  %}
                         <a type="button" class="floatleft delete" href="javascript:void(0)">Eliminar</a>
-                    {%endif%}    
+                    {%endif%}
                     <a class="cancelar floatright" type="button" href="{{ path('ventas_cliente')}}">Cancelar</a>
                     <button class="guardar floatright" type="submit">Guardar</button>
                 </div>

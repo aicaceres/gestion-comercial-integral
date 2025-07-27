@@ -74,7 +74,7 @@ class Producto {
 
     /**
      * @ORM\ManyToOne(targetEntity="ConfigBundle\Entity\Parametro")
-     * @ORM\JoinColumn(name="rubro_id", referencedColumnName="id", onDelete="SET NULL")
+     * @ORM\JoinColumn(name="rubro_id", referencedColumnName="id", onDelete="RESTRICT")
      * @Gedmo\Versioned()
      * */
     protected $rubro;

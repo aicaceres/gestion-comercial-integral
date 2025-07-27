@@ -40,8 +40,8 @@ class StockAjusteType extends AbstractType
             ->add('registrarAjuste','checkbox',array('label'=>'Registrar el ajuste ',
                 'label_attr' => array('class'=>'infoicon')
                 ,'mapped' => false,'required' => false))
-            ->add('tipo','choice', array('label'=>'Movimientos de', 'mapped'=>false,'data'=>'+',
-                  'choices'   => array( '+' => 'Ingreso','-' => 'Egreso'),'expanded'=>true))
+            ->add('tipo','choice', array('label'=>'Tipo de Ajuste', 'mapped'=>false,'data'=>'+',
+                  'choices'   => array( '+' => 'Ingreso (+)','-' => 'Egreso (-)', '=' => 'Valor Actual (=)'),'expanded'=>true))
           /*  ->add('detalles', 'collection', array(
                 'type'           => new StockAjusteDetalleType(),
                 'by_reference'   => false,

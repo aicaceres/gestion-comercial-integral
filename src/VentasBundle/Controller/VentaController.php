@@ -96,7 +96,7 @@ class VentaController extends Controller {
 
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
-            $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+            $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
             $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
 
             $deposito = $em->getRepository('AppBundle:Deposito')->find($param->getVentasDepositoBydefault());
@@ -191,7 +191,7 @@ class VentaController extends Controller {
                 }
 
                 if (is_null($entity->getCategoriaIva())) {
-                    $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+                    $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
                 }
                 if (is_null($entity->getPercepcionRentas())) {
                     $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
@@ -286,7 +286,7 @@ class VentaController extends Controller {
         $entity->setFormaPago($presupuesto->getFormaPago());
         $entity->setDescuentoRecargo($presupuesto->getDescuentoRecargo());
         $entity->setTransporte($entity->getCliente()->getTransporte());
-        $entity->setCategoriaIva($cliente->getCategoriaIva()->getNombre());
+        $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
         $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
 
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));

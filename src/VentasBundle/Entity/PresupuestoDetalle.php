@@ -88,7 +88,7 @@ class PresupuestoDetalle {
     protected $presupuesto;
 
     public function getPrecioUnitarioItem() {
-        $categIva = $this->getPresupuesto()->getCliente()->getCategoriaIva()->getNombre();
+        $categIva = $this->getPresupuesto()->getCliente()->getCondicionIva()->getCodigo();
         if ($categIva == 'I' || $categIva == 'M') {
             // precio sin iva convertido a la cotizacion
             $precio = $this->getPrecio();

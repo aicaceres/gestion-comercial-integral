@@ -79,7 +79,7 @@
             {% if not presupuesto.cliente.consumidorfinal %}
             <tr>
                 <td border.type="none" padding-top="10px">
-                    IVA: {{presupuesto.cliente.categoriaIva.descripcion|upper}}
+                    IVA: {{presupuesto.cliente.condicionIva|upper}}
                 </td>
                 <td border.type="none" padding-top="10px">
                     CUIT: {{presupuesto.cliente.cuit}}
@@ -146,7 +146,7 @@
         </table>
 
 
-        {% set cativa = (presupuesto.cliente.categoriaIva) ? presupuesto.cliente.categoriaIva.nombre : 'C' %}
+        {% set cativa = (presupuesto.cliente.condicionIva) ? presupuesto.cliente.condicionIva.codigo : 'C' %}
         {% set retrentas = presupuesto.cliente.categoriaRentas ? presupuesto.cliente.categoriaRentas.retencion : 0 %}
         {% set showiva = (cativa == 'I' or cativa == 'M') %}
         {% if (presupuesto.tipo=='P') %}

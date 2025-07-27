@@ -29,4 +29,5 @@
 .htaccess
 .vscode/
 *.tar.gz
+*.sql.gz
 nbproject

@@ -254,22 +254,24 @@ class CobroController extends Controller {
                             $efectivo = false;
                         }
                         if ($tipoPago === 'TRANSFERENCIA') {
-                            // cargar movimiento de credito bancario
-                            $movBanco = new BancoMovimiento();
-                            $banco = $em->getRepository('ConfigBundle:Banco')->find($detalles[$key]['bancoTransferencia']);
-                            $movBanco->setBanco($banco);
-                            $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($detalles[$key]['cuentaTransferencia']);
-                            $movBanco->setCuenta($cuenta);
-                            $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
-                            $movBanco->setConciliado(false);
-                            $movBanco->setImporte($detalles[$key]['importe']);
-                            $movBanco->setFechaAcreditacion(new \DateTime());
-                            $movBanco->setFechaCarga(new \DateTime());
-                            $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CREDITO');
-                            $movBanco->setTipoMovimiento($tipoMov);
-                            $movBanco->setCobroDetalle($detalle);
-                            $movBanco->setObservaciones('Transferencia por cobro de ventas - Op. #'.$entity->getNroOperacion());
-                            $em->persist($movBanco);
+                          if(!$detalle->getBancoMovimiento()){
+                              // cargar movimiento de credito bancario
+                              $movBanco = new BancoMovimiento();
+                              $banco = $em->getRepository('ConfigBundle:Banco')->find($detalles[$key]['bancoTransferencia']);
+                              $movBanco->setBanco($banco);
+                              $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($detalles[$key]['cuentaTransferencia']);
+                              $movBanco->setCuenta($cuenta);
+                              $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
+                              $movBanco->setConciliado(false);
+                              $movBanco->setImporte($detalles[$key]['importe']);
+                              $movBanco->setFechaAcreditacion(new \DateTime());
+                              $movBanco->setFechaCarga(new \DateTime());
+                              $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CREDITO');
+                              $movBanco->setTipoMovimiento($tipoMov);
+                              $movBanco->setCobroDetalle($detalle);
+                              $movBanco->setObservaciones('Venta Op. #'.$entity->getNroOperacion() . ' - ' . $entity->getCliente());
+                              $em->persist($movBanco);
+                          }
                         }
                     }
                 }
@@ -277,6 +279,7 @@ class CobroController extends Controller {
                 $entity->getVenta()->setEstado('COBRADO');
                 $entity->setEstado('CREADO');
                 $em->persist($entity);
+
                 $em->flush();
                 $em->getConnection()->commit();
 

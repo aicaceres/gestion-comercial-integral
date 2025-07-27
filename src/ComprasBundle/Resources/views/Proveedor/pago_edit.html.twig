@@ -148,6 +148,7 @@
     <button type="button" class="stdbtn btn_black" data-tipo="EFECTIVO">EFECTIVO</button>
     <button type="button" class="stdbtn btn_black" data-tipo="CHEQUE">CHEQUE</button>
     <button type="button" class="stdbtn btn_black" data-tipo="TARJETA">TARJETA</button>
+    <button type="button" class="stdbtn btn_black" data-tipo="TRANSFERENCIA">TRANSFERENCIA</button>
 </form>
 </div>
 {% endblock %}
@@ -285,7 +286,7 @@ jQuery(function ($) {
 function cargarCheques(objTd){
     var rutaChequesCartera="{{ path('compras_proveedor_pagos_getcheques')}}";
     var getDatosCheque="{{ path('compras_proveedor_pagos_getdatoscheque')}}";
-
+    var hoy = new Date().toLocaleString("en-GB").slice(0,10).split('-').reverse().join('-').replaceAll('/','-')
     $('#popup').html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;"><img src="{{asset('assets/images/loaders/loader1.gif')}}" alt="" /></div>')
                .load( rutaChequesCartera)
                .dialog({
@@ -308,7 +309,7 @@ function cargarCheques(objTd){
 
                                             chequeTd.find('[id*="_chequeRecibido_id"]').val(data.id)
                                             chequeTd.find('[id*="_chequeRecibido_nroCheque"]').val(data.nroCheque)
-                                            chequeTd.find('[id*="_chequeRecibido_fecha"]').val(data.fecha)
+                                            chequeTd.find('[id*="_chequeRecibido_fecha"]').val(hoy)
                                             chequeTd.find('[id*="_chequeRecibido_dador"]').val(data.dador)
                                             chequeTd.find('[id*="_chequeRecibido_banco"]').val(data.banco).trigger('change')
                                             chequeTd.find('[id*="_chequeRecibido_sucursal"]').val(data.sucursal)

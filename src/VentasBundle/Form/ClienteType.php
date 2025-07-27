@@ -59,18 +59,21 @@ class ClienteType extends AbstractType {
                 'choice_label' => 'completo'))
         ;
 
-        $optionsIva = array(
-            'class' => 'ConfigBundle:Parametro',
-            'placeholder' => 'Seleccionar...',
-            'required' => true,
-            'choice_label' => 'descripcion',
-            'label' => 'Categoría IVA:',
-            'query_builder' => function (ParametroRepository $repository) {
-                return $qb = $repository->createQueryBuilder('p')
-                    ->where('p.boleano=1 and p.activo=1 and p.agrupador = :val ')
-                    ->setParameter('val', ParametroType::getTablaId($repository, 'sit-impositiva'));
-            });
-        $builder->add('categoria_iva', 'entity', $optionsIva);
+        // $optionsIva = array(
+        //     'class' => 'ConfigBundle:Parametro',
+        //     'placeholder' => 'Seleccionar...',
+        //     'required' => true,
+        //     'choice_label' => 'descripcion',
+        //     'label' => 'Categoría IVA:',
+        //     'query_builder' => function (ParametroRepository $repository) {
+        //         return $qb = $repository->createQueryBuilder('p')
+        //             ->where('p.boleano=1 and p.activo=1 and p.agrupador = :val ')
+        //             ->setParameter('val', ParametroType::getTablaId($repository, 'sit-impositiva'));
+        //     });
+        // $builder->add('categoria_iva', 'entity', $optionsIva);
+        $builder->add('condicion_iva', 'entity', array('label' => 'Categoría IVA:',
+                'class' => 'ConfigBundle:AfipCondicionIvaReceptor', 'required' => true));
+
         $optionsDgr = array(
             'class' => 'ConfigBundle:Escalas',
             'placeholder' => 'Seleccionar...',

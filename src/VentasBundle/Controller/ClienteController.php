@@ -254,9 +254,9 @@ class ClienteController extends Controller {
         $cuit = $cliente->getCuit();
         $valido = UtilsController::validarCuit($cuit);
         $condVta = $cliente->getCondicionVenta() ? $cliente->getCondicionVenta()->getId() : 0;
-        $tipoFact = $cliente->getCategoriaIva()->getNumerico() == 1 ? 'A' : 'B';
-        $iva = $cliente->getCategoriaIva()->getDescripcion();
-        $exento = ($cliente->getCategoriaIva()->getNombre() == 'EXE') ? 1 : 0;
+        $tipoFact = $cliente->getCondicionIva()->emiteFacturaTipo('A') ? 'A' : 'B';
+        $iva = $cliente->getCondicionIva()->getNombre();
+        $exento = $cliente->getCondicionIva()->esExento();
         $domicilio = $cliente->getDomicilioCompleto();
         return new Response(json_encode(array(
                 'condvta' => $condVta, 'tipofact' => $tipoFact,
@@ -279,7 +279,7 @@ class ClienteController extends Controller {
         $formapagoText = ($entity->getFormaPago()) ? $entity->getFormaPago()->getNombre() : 1;
         $cuit = $entity->getCuit();
         $valido = UtilsController::validarCuit($cuit);
-        $categIva = ($entity->getCategoriaIva()) ? $entity->getCategoriaIva()->getNombre() : null;
+        $categIva = ($entity->getCondicionIva()) ? $entity->getCondicionIva()->getCodigo() : null;
         // determinar si descuenta iibb
         $showiibb = false;
         $hoy = new \DateTime();
@@ -304,7 +304,7 @@ class ClienteController extends Controller {
             'formapago' => $formapago,
             'formapagotext' => $formapagoText,
             'transporte' => $transporte,
-            'categoriaIva' => $categIva,
+            'condicionIva' => $categIva,
             'cuitValido' => $valido,
             'esConsumidorFinal' => $entity->getConsumidorFinal(),
             'showiibb' => $showiibb,
@@ -520,6 +520,7 @@ class ClienteController extends Controller {
         $moneda = MonedaController::getMonedaByDefault($em);
         $entity->setMoneda($moneda);
         $entity->setFecha(new \DateTime());
+
         $form = $this->pagosCreateCreateForm($entity);
 
         return $this->render('VentasBundle:Cliente:pago_edit.html.twig', array(
@@ -586,7 +587,6 @@ class ClienteController extends Controller {
      * @Method("POST")
      */
     public function pagosCreateAction(Request $request) {
-        $datos = $request->get('ventasbundle_pagocliente');
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_cliente_pagos');
@@ -597,7 +597,6 @@ class ClienteController extends Controller {
         $unidneg = $em->getRepository('ConfigBundle:UnidadNegocio')->find($unidneg_id);
         $cliente = $em->getRepository('VentasBundle:Cliente')->find($data['cliente']);
         $entity->setCliente($cliente);
-
         $form = $this->pagosCreateCreateForm($entity);
         $form->handleRequest($request);
         if ($form->isValid()) {
@@ -612,7 +611,7 @@ class ClienteController extends Controller {
 
                 $totalPago = 0;
                 // limpiar cheque y tarjeta si no corresponde
-                $detalles = array_values($datos['cobroDetalles']);
+                $detalles = isset($data['cobroDetalles']) ? array_values($data['cobroDetalles']) : [];
                 foreach ($entity->getCobroDetalles() as $key => $detalle) {
                     $detalle->setCajaApertura($apertura);
                     if (!$detalle->getMoneda()) {
@@ -643,18 +642,20 @@ class ClienteController extends Controller {
                         $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CREDITO');
                         $movBanco->setTipoMovimiento($tipoMov);
                         $movBanco->setCobroDetalle($detalle);
-                        $movBanco->setObservaciones('Transferencia por pago de Cliente - '.$entity->getCliente());
+                        $movBanco->setObservaciones('Pago Cliente Op. #'.$entity->getPagoNro() . ' - ' . $entity->getCliente());
                         $em->persist($movBanco);
                     }
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
                 }
+                // Saldo a cambio o ctacte
+                $saldoRestoFinal = $totalPago - $entity->getTotal();
 
                 // recorrer para imputar NC si corresponde
                 $ncs = new ArrayCollection();
                 $fcs = new ArrayCollection();
-                if (isset($datos['comprobantes'])) {
-                    foreach ($datos['comprobantes'] as $feId) {
+                if (isset($data['comprobantes'])) {
+                    foreach ($data['comprobantes'] as $feId) {
                         $comp = new PagoClienteComprobante();
                         $fe = $em->getRepository('VentasBundle:FacturaElectronica')->find($feId);
                         $comp->setComprobante($fe);
@@ -699,11 +700,11 @@ class ClienteController extends Controller {
                 }
                 else {
                     $entity->setTotal($totalPago);
-                    $entity->setSaldo($totalPago);
+                    // $entity->setSaldo($totalPago);
                 }
                 $saldoRecibo = 0;
-                if (isset($datos['recibos'])) {
-                    foreach ($datos['recibos'] as $recId) {
+                if (isset($data['recibos'])) {
+                    foreach ($data['recibos'] as $recId) {
                         $recibo = new PagoClienteRecibo();
                         $pagoAnt = $em->getRepository('VentasBundle:PagoCliente')->find($recId);
                         $recibo->setRecibo($pagoAnt);
@@ -734,7 +735,10 @@ class ClienteController extends Controller {
                 }
 
                 $montoNotaCredito = 0;
+                $saldoFinalPago = 0;
                 if ($entity->getGeneraNotaCredito()) {
+                    // Saldo a cambio o ctacte = 0
+                    $saldoRestoFinal = 0;
                     // marcar como cancelados los comprobantes
                     foreach ($entity->getComprobantes() as $comp) {
                         $comp->getComprobante()->setSaldo(0);
@@ -742,10 +746,9 @@ class ClienteController extends Controller {
                     }
                     $montoNotaCredito = round(($entity->getTotal() - $totalPago), 2);
                     // generar nota de credito - comprobante fiscal
-                    $catIva = ($entity->getCliente()->getCategoriaIva()) ? $entity->getCliente()->getCategoriaIva()->getNombre() : 'C';
-                    $letra = ($catIva == 'I' || $catIva == 'M') ? 'A' : 'B';
+                    $catIva = ($entity->getCliente()->getCondicionIva()) ? $entity->getCliente()->getCondicionIva()->getCodigo() : 'C';
+                    $letra = $entity->getCliente()->getCondicionIva()->emiteFacturaTipo('A') ? 'A' : 'B';;
                     $tipoComp = $em->getRepository('ConfigBundle:AfipComprobante')->getIdByTipo('CRE-' . $letra);
-
 
                     $notacredito = new NotaDebCred();
                     $notacredito->setFecha(new \DateTime());
@@ -859,6 +862,7 @@ class ClienteController extends Controller {
                         'CbteTipo' => $notaElectronica->getCodigoComprobante(), // Tipo de comprobante (ver tipos disponibles)
                         'Concepto' => $notaElectronica->getConcepto(), // Concepto del Comprobante: (1)Productos, (2)Servicios, (3)Productos y Servicios
                         'DocTipo' => $notaElectronica->getDocTipo(), // Tipo de documento del comprador (99 consumidor final, ver tipos disponibles)
+                        'CondicionIVAReceptorId' => $notaElectronica->getCliente()->getCondicionIva()->getId(), // Condicion Iva Receptor
                         'DocNro' => $notaElectronica->getDocNro(), // Número de documento del comprador (0 consumidor final)
                         'CbteFch' => $notaElectronica->getCbteFch(), // (Opcional) Fecha del comprobante (yyyymmdd) o fecha actual si es nulo
                         'ImpTotal' => $notaElectronica->getTotal(), // Importe total del comprobante
@@ -895,6 +899,7 @@ class ClienteController extends Controller {
                     $cobroDetalle->setMoneda($notacredito->getMoneda());
                     $cobroDetalle->setImporte($impTotal);
                     $notacredito->addCobroDetalle($cobroDetalle);
+                    $notacredito->setComprobanteAsociado($notaElectronica);
 
                     $em->persist($notaElectronica);
                     $em->persist($notacredito);
@@ -925,14 +930,18 @@ class ClienteController extends Controller {
                     // se guarda si queda saldo a favor
                     $entity->setSaldo(($saldoFinalPago > 0) ? $saldoFinalPago : 0);
                 }
+                // $saldoResto = $entity->getTotal() + $saldoRecibo;
+
                 if ($entity->getDestinoSaldo() == 'CAMBIO') {
-                    $entity->setTotal($entity->getTotal() + $saldoRecibo);
                     $entity->setSaldo(0);
                 }
                 else {
-                    $entity->setTotal($totalPago);
+                  if($saldoRestoFinal>0){
+                    $entity->setTotal($entity->getTotal() + $saldoRestoFinal);
+                  }
+                  $entity->setSaldo($saldoFinalPago * -1);
                 }
-
+// var_dump($entity->getTotal(), $entity->getSaldo());die;
                 // set nro de pago
                 $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
                 if ($param) {
@@ -966,7 +975,7 @@ class ClienteController extends Controller {
                 }
             }
         }
-        return new JsonResponse(array('msg' => $errors));
+        return new JsonResponse(array('msg-error' => $errors));
     }
 
     /**
@@ -1116,7 +1125,7 @@ class ClienteController extends Controller {
         }
         catch (\Exception $ex) {
             $em->getConnection()->rollback();
-            $msg = $ex->getTraceAsString();
+            $msg = $ex->getMessage();
         }
         return new Response(json_encode($msg));
     }

@@ -106,21 +106,24 @@ class ParametroController extends Controller {
      */
     public function newRubroAction(Request $request) {
         UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'sistema_parametro_rubro');
-        $rub = $request->get('rub');
+        $rubroId = $request->get('rubroId');
+        $texto = $request->get('texto');
         $em = $this->getDoctrine()->getManager();
-        $agrupador = $em->getRepository('ConfigBundle:Parametro')->findOneByNombre('rubro');
         $rubro = new Parametro();
-        $rubro->setAgrupador($agrupador);
-        $rubro->setPadre($agrupador);
-        $rubro->setNombre(strtoupper($rub));
+        if($rubroId){
+          $padre = $em->getRepository('ConfigBundle:Parametro')->find($rubroId);
+          $rubro->setAgrupador($padre);
+        }else{
+          $agrupador = $em->getRepository('ConfigBundle:Parametro')->findOneByNombre('rubro');
+          $rubro->setPadre($agrupador);
+        }
+        $rubro->setNombre(strtoupper($texto));
         $rubro->setBoleano(false);
         $rubro->setActivo(true);
         $em->persist($rubro);
         $em->flush();
-        $rubros = $em->getRepository('ConfigBundle:Parametro')->findRubros();
-        $partial = $this->renderView('ConfigBundle:Parametro:_partial-rubros.html.twig',
-            array('rubros' => $rubros, 'dato' => $rubro));
-        return new Response($partial);
+        $this->addFlash('success', 'El elemento fue agregado correctamente');
+        return new Response('OK');
     }
 
     /**
@@ -214,8 +217,6 @@ class ParametroController extends Controller {
                 'action' => $this->generateUrl('sistema_parametro_localidad_update', array('id' => $entity->getId())),
                 'method' => 'PUT',
             ));
-
-            //$editForm = $this->createForm(new LocalidadType(), $entity);
         }
         else {
             $entity = $em->getRepository('ConfigBundle:Parametro')->find($id);
@@ -233,12 +234,16 @@ class ParametroController extends Controller {
             ));
             if ($slug == 'rubro') {
                 $rubros = $em->getRepository('ConfigBundle:Parametro')->findRubros();
-                $dato = $em->getRepository('ConfigBundle:Parametro')->find($entity->getAgrupador());
+                if($entity->getAgrupador()){
+                  $rubro = $em->getRepository('ConfigBundle:Parametro')->find($entity->getAgrupador());
+                }else{
+                  $rubro = null;
+                }
 
                 return $this->render('ConfigBundle:Parametro:edit-rubro.html.twig', array(
                         'entity' => $entity,
                         'rubros' => $rubros,
-                        'dato' => $dato,
+                        'rubro' => $rubro,
                         'form' => $editForm->createView()));
             }
         }
@@ -260,9 +265,10 @@ class ParametroController extends Controller {
             $em->remove($entity);
             $em->flush();
             $msg = 'OK';
+            $this->addFlash('success', 'El elemento fue eliminado correctamente');
         }
         catch (\Exception $ex) {
-            $msg = $ex->getMessage();
+            $msg = 'No se puede eliminar este elemento. Se utiliza en otro proceso del sistema.';
         }
         return new Response(json_encode($msg));
     }
@@ -373,9 +379,8 @@ class ParametroController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Parametro entity.');
         }
-        $slug = $entity->getAgrupador()->getPadre() ? 'rubro' : $entity->getAgrupador()->getNombre();
-        $slug = $slug ? $slug : 'rubro';
-        //$editForm   = $this->createForm(new ParametroType(), $entity, array('attr'=>array('slug'=>$slug)));
+        $subrubro = !$entity->getPadre() && $entity->getAgrupador()->getPadre();
+        $slug = ($entity->getPadre() || $subrubro) ? 'rubro' : $entity->getAgrupador()->getNombre();
         $editForm = $this->createForm(new ParametroType(), $entity, array('attr' => array('slug' => $slug),
             'action' => $this->generateUrl('sistema_parametro_update', array('id' => $entity->getId())),
             'method' => 'PUT',
@@ -384,8 +389,10 @@ class ParametroController extends Controller {
 
         if ($editForm->isValid()) {
             if ($slug == 'rubro') {
+              if($subrubro){
                 $agrupador = $em->getRepository('ConfigBundle:Parametro')->find($request->get('txtrubro'));
                 $entity->setAgrupador($agrupador);
+              }
                 $entity->setNumerico($entity->getNumerico() ? 1 : 0 );
                 $entity->setNumerico2($entity->getNumerico2() ? 1 : 0 );
             }
@@ -422,8 +429,6 @@ class ParametroController extends Controller {
         $editForm->handleRequest($request);
 
         if ($editForm->isValid()) {
-            //$entity->setSlug($entity->slugName());
-
             $em->persist($entity);
             $em->flush();
             $this->addFlash('success', 'Los datos fueron modificados con Éxito!');
