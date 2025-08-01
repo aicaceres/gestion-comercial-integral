@@ -87,7 +87,7 @@ class VentaDetalle {
     /** VALORES ITEM  */
     // valor del precio unitario segun categoria de iva
     public function getPrecioUnitarioItem() {
-        $categIva = $this->getVenta()->getCliente()->getCategoriaIva()->getNombre();
+        $categIva = $this->getVenta()->getCliente()->getCondicionIva()->getCodigo();
         if ($categIva == 'I' || $categIva == 'M' ) {
             // precio sin iva convertido a la cotizacion
             $precio = $this->getPrecio() / $this->getVenta()->getCotizacion();
