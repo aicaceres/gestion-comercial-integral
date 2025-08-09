@@ -47,9 +47,9 @@ jQuery(document).ready(function ($) {
 				const getDataCliente = $.get(url_datos, { id: id }).done(function (data) {
           if (data) {
             divDatos.replaceWith(data.partial)
-            $(".selectorCliente").data("categiva", data.categoriaIva)
+            $(".selectorCliente").data("categiva", data.condicionIva)
             $(".selectorCliente").data("percrentas", data.percRentas)
-            $('[id*="_categoriaIva"]').val(data.categoriaIva)
+            $('[id*="_categoriaIva"]').val(data.condicionIva)
             $('[id*="_percepcionRentas"]').val(data.percRentas)
             $("#percrentas").html(data.percRentas)
 						// Forma de pago
@@ -58,30 +58,30 @@ jQuery(document).ready(function ($) {
 						selectFormaPago.data("consumidorfinal", cf)
 
 						if (selectFormaPago.find("option[value='" + data.formapago + "']").length) {
-                                                    selectFormaPago.val(data.formapago).trigger("change")
-                                                    selectFormaPago.trigger("select2:selecting")
+              selectFormaPago.val(data.formapago).trigger("change")
+              selectFormaPago.trigger("select2:selecting")
 						} else {
-                                                    select2_search(selectFormaPago,data.formapagotext)
-                                                }
+              select2_search(selectFormaPago,data.formapagotext)
+            }
 						$('[id*="_precioLista"]').val(data.listaprecio)
             $('[id*="_transporte"]').val(data.transporte)
             // mostrar resumen de iva e iibb si corresponde
-            if (data.categoriaIva == "M" || data.categoriaIva == "I") {
+            if (data.condicionIva == "M" || data.condicionIva == "I") {
 							$("#ivaTd").show()
-							
+
 						}
-                                                if (data.percRentas>0) {
-								$("#iibbTd").show()
-							}
+            if (data.percRentas>0) {
+							$("#iibbTd").show()
+						}
             // cuit
             color = data.cuitValido ? "#666666" : "orangered"
             $(".cuitcliente").css("color", color)
-            
+
             setTimeout(function () {
                 if (typeof setTipoComprobante === "function") {
                     setTipoComprobante()
                   }
-              
+
               jQuery("#updating-data").addClass("hidden")
               selectCliente.select2('focus')
             }, 2000)

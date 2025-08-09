@@ -67,8 +67,8 @@
                     {% if app.user.access(app.session.get('unidneg_id'),'compras_notadebcred') %}
                     <a href="{{ path('compras_notadebcred_show', { 'id': entity.id }) }}" class="editar btn btnaction btn_folder" title="Ver Nota"></a>
                     {% endif %}
-                    {% if app.user.access(app.session.get('unidneg_id'),'compras_notadebcred') and entity.eliminable %}
                     <a href url="{{ path('compras_notadebcred_delete_ajax', { 'id': entity.id }) }}" class="delete btn btnaction btn_trash" title="Eliminar"></a>
+                    {% if app.user.access(app.session.get('unidneg_id'),'compras_notadebcred') and not entity.eliminable %}
                     {% endif %}
 
                 </td>

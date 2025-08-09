@@ -160,6 +160,7 @@ class VentaController extends Controller {
                 $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('ventasbundle_cliente'));
                 $entity->setCliente($cliente);
                 $entity->setNombreCliente($request->get('ventasbundle_nombreCliente') ? $request->get('ventasbundle_nombreCliente') : 'CONSUMIDOR FINAL');
+                $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
                 $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
                 $entity->setFormaPago($formapago);
                 $entity->setCotizacion($entity->getMoneda()->getCotizacion());
@@ -373,6 +374,7 @@ class VentaController extends Controller {
                 $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('ventasbundle_cliente'));
                 $entity->setCliente($cliente);
                 $entity->setNombreCliente($request->get('ventasbundle_nombreCliente'));
+                $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
                 $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
                 $entity->setFormaPago($formapago);
                 $entity->setCotizacion($entity->getMoneda()->getCotizacion());

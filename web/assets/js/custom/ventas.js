@@ -55,7 +55,8 @@ jQuery(function ($) {
 			.on("change", function () {
 				id = $(this).val()
 				urlDatosCliente = $(this).attr("url_datos")
-				$.getJSON(urlDatosCliente, { id: id }).done(function (data) {
+        $.getJSON(urlDatosCliente, { id: id }).done(function (data) {
+          console.log('datacliente', data)
 					// actualizar partial datos
 					if (data) {
 						$("#categoriaIva").val(data.categoriaIva)

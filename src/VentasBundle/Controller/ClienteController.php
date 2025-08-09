@@ -612,7 +612,8 @@ class ClienteController extends Controller {
                 $totalPago = 0;
                 // limpiar cheque y tarjeta si no corresponde
                 $detalles = isset($data['cobroDetalles']) ? array_values($data['cobroDetalles']) : [];
-                foreach ($entity->getCobroDetalles() as $key => $detalle) {
+                if($detalles){
+                  foreach ($entity->getCobroDetalles() as $key => $detalle) {
                     $detalle->setCajaApertura($apertura);
                     if (!$detalle->getMoneda()) {
                         $detalle->setMoneda($entity->getMoneda());
@@ -647,9 +648,21 @@ class ClienteController extends Controller {
                     }
                     // sumar importes para calcular nc
                     $totalPago += $detalle->getImporte();
+                  }
+                  // Saldo a cambio o ctacte
+                  $saldoRestoFinal = $totalPago - $entity->getTotal();
+
+                }else{
+                  //agregar detalle de pago a ctacte
+                  $detalle = new CobroDetalle();
+                  $detalle->setCajaApertura($apertura);
+                  $detalle->setTipoPago('CTACTE');
+                  $detalle->setMoneda($entity->getMoneda());
+                  $detalle->setImporte($entity->getTotal());
+                  $entity->addCobroDetalle($detalle);
+                  $totalPago = $entity->getTotal();
+                  $saldoRestoFinal = 0;
                 }
-                // Saldo a cambio o ctacte
-                $saldoRestoFinal = $totalPago - $entity->getTotal();
 
                 // recorrer para imputar NC si corresponde
                 $ncs = new ArrayCollection();
@@ -700,7 +713,6 @@ class ClienteController extends Controller {
                 }
                 else {
                     $entity->setTotal($totalPago);
-                    // $entity->setSaldo($totalPago);
                 }
                 $saldoRecibo = 0;
                 if (isset($data['recibos'])) {
@@ -939,7 +951,7 @@ class ClienteController extends Controller {
                   if($saldoRestoFinal>0){
                     $entity->setTotal($entity->getTotal() + $saldoRestoFinal);
                   }
-                  $entity->setSaldo($saldoFinalPago * -1);
+                  $entity->setSaldo($saldoFinalPago);
                 }
 // var_dump($entity->getTotal(), $entity->getSaldo());die;
                 // set nro de pago

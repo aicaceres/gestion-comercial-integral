@@ -132,6 +132,9 @@ class PresupuestoController extends Controller {
                 $cliente = $em->getRepository('VentasBundle:Cliente')->find($request->get('ventasbundle_cliente'));
                 $entity->setCliente($cliente);
                 $entity->setNombreCliente($request->get('ventasbundle_nombreCliente'));
+                if(!$entity->getCategoriaIva()){
+                    $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
+                }
                 $formapago = $em->getRepository('ConfigBundle:FormaPago')->find($request->get('select_formapago'));
                 $entity->setFormaPago($formapago);
 
