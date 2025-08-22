@@ -653,10 +653,11 @@ class ClienteController extends Controller {
                   $saldoRestoFinal = $totalPago - $entity->getTotal();
 
                 }else{
-                  //agregar detalle de pago a ctacte
+                  //agregar detalle de pago a ctacte si corresponde
+                  $tipoPago = $entity->getDestinoSaldo() === 'CTACTE' ? 'CTACTE' : 'EFECTIVO';
                   $detalle = new CobroDetalle();
                   $detalle->setCajaApertura($apertura);
-                  $detalle->setTipoPago('CTACTE');
+                  $detalle->setTipoPago($tipoPago);
                   $detalle->setMoneda($entity->getMoneda());
                   $detalle->setImporte($entity->getTotal());
                   $entity->addCobroDetalle($detalle);
