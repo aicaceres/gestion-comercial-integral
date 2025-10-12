@@ -35,7 +35,7 @@
         <thead>
             <tr>
                 <th class="nosort" style="width:15px"></th>
-                <th class="nosort">Fecha</th>
+                <th class="nosort">Fecha / Hora</th>
                 <th class="nosort">Concepto</th>
                 <th class="nosort">Comprobante</th>
                 <th class="nosort">Debe</th>
@@ -71,7 +71,7 @@
                         <img src="{{ asset('assets/images/icons/out.png') }}" style="margin-top: 5px"/>
                     {% endif %}
                 </td>
-                <td class="con0">{{ entity.fecha|date('d-m-Y') }}</td>
+                <td class="con0"><span class="hidden">{{ entity.fecha|date('YmdHi') }}</span>{{ entity.fecha|date('d-m-Y H:i') }} </td>
                 <td>{{entity.concepto|raw }}</td>
                 <td class="con0">{{entity.comprobante }}
                 {% if entity.tipo=='1' %}
@@ -114,6 +114,7 @@ jQuery(document).ready(function($) {
         "bFilter":false,
         "bInfo" : false
         });
+    ctacte.fnSort( [[1,'asc']] );
     $('#printform').on('submit',function(){
         $('#clienteid').val($('#selectClienteIndex').val());
         $('#fdesde').val($('#desde').val());

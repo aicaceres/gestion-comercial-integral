@@ -5,10 +5,23 @@
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
+<style>
+  tr.duplicado {
+    background-color:antiquewhite;
+  }
+  #warning-duplicados {
+    display:none;
+    color: red;
+    font-weight: bold;
+    margin-bottom:10px;
+    text-align:center;
+  }
+</style>
 <div id="contentwrapper" class="contentwrapper">
 <h1 id="popup_title" >Nuevo Ajuste de Stock</h1>
 {% include "AppBundle::notificacion.html.twig" %}
 <div class="divEdicion">
+
 {{ form_start(form, {'attr': {'class': 'stdform'}}) }}
         <fieldset >
             <div class="two_fields">
@@ -30,7 +43,9 @@
                   {{ form_label(form.csv) }}
                   {{ form_widget(form.csv) }}
                 </div>
-
+                <div id="warning-duplicados" style="display:none;color: red; font-weight: bold; margin-bottom:10px;">
+                    ⚠️ Existen productos duplicados en la lista de items.
+                </div>
                 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction" id="detalles">
                     <thead>
                         <tr>
@@ -112,22 +127,14 @@ if( file.type != 'text/csv' ){
 }else{
 
   if( confirm('Desea cargar los items al ajuste desde el archivo "'+ file.name +'" ?') ){
-
+     var obsField = $('#appbundle_stockajuste_observaciones');
+     var currentVal = obsField.val();
+     if (currentVal && currentVal.length > 0) {
+         obsField.val(currentVal + '\nImportado desde: ' + file.name);
+     } else {
+         obsField.val('Importado desde: ' + file.name);
+     }
      $('form.stdform').submit()
-
-      {# formData = new FormData();
-      formData.append( 'file', file )
-
-    $.ajax({
-        url: "{{path('process_csv_file')}}",
-        data: formData,
-        contentType: false,
-        processData: false,
-        type: 'POST',
-        success: function(data){
-            console.log(data);
-        }
-    }); #}
 
   }else{
     $(this).val(null)
@@ -137,8 +144,6 @@ if( file.type != 'text/csv' ){
 }
 
 })
-
-
     // quitar items al detalle
     $(document).on('click','.delTd', function(e) {
         var res = true;
@@ -156,6 +161,7 @@ if( file.type != 'text/csv' ){
                 $('#detalles').find('.ordTd').each(function(index) {
                   $(this).html(index+1);
                 });
+                verificarDuplicados()
             }else{
                 alert( 'error '+data.msg );
             }
@@ -271,6 +277,7 @@ if( file.type != 'text/csv' ){
                                 $('#detalles').find('.ordTd').each(function(index) {
                                   $(this).html(index+1);
                                 });
+                                verificarDuplicados()
                             } else {
                                 alert('error ' + data.msg);
                             }
@@ -383,33 +390,33 @@ formLote.find('#fechaVencimiento').datepicker({dateFormat: 'dd-mm-yy'});
             });
         });
 
-
-
-
-
-
-    $('.guardar').click(function() {
+    // Manejar el submit del formulario
+    $('form').submit(function(e) {
+        // Validaciones antes del submit
         if( !$('#appbundle_stockajuste_deposito').val() ){
             alert('Seleccionar un Depósito para continuar.');
+            e.preventDefault();
             return false;
-        };
+        }
+
         if( $('#appbundle_stockajuste_registrarAjuste').is(':checked')){
             if( $('tbody tr.item').length > 0 ){
                 if (!confirm('Confirma la registración del Ajuste y el movimiento de la mercadería del stock?')) {
+                    e.preventDefault();
                     return false;
                 }
             }else{
-                alert('Debe ingresar items para registrar!'); return false;
+                alert('Debe ingresar items para registrar!');
+                e.preventDefault();
+                return false;
             }
         }
-    });
- /*   $(".bulto input").change(function(){ changeBulto( $(this) );  });
-    $(".bulto input").each(function() {
-        changeBulto( $(this) );
-    });
 
-    $(".btnlote").click(function(){ lotes( $(this) );  });*/
+         $(this).find('.guardar').prop('disabled', true).text('Guardando...').css('pointer-events', 'none');
+         $(this).find('.cancelar').removeAttr('href').css('pointer-events', 'none')
+    });
 });
+
 function changeProducto(producto) {
     var form = jQuery("[name='appbundle_stockajustedetalle']");
     form.find('.loaders').show();
@@ -469,98 +476,34 @@ function changeBulto(item) {
     }
 }
 
-/*
-function changeProducto(producto){
-    jQuery.ajax({
-               url: "{{ path("get_data_producto") }}",
-               async:false,
-               dataType:"json",
-               data: 'prod='+ producto.val(),
-               success: function(data) {
-                   trIndex = producto.parent().parent();
-                   //limpiar lotes
-                   var lote_selector = trIndex.find('.lote [id$="_lotes"]');
-                   lote_selector.val("-1").trigger("change");
-                   trIndex.find('.cantTd input').val(1);
-                   trIndex.find('span.unidmed').html(data.unidmed);
-                   if(data.bulto){
-                       trIndex.find('span.unidmed').hide();
-                       trIndex.find('.cantxBulto input').val(data.cantxBulto);
-                   }else{
-                       trIndex.find('span.unidmed').show();
-                       trIndex.find('.cantxBulto input').val('');
-                   }
-                   trIndex.find('.bulto input').prop('checked', data.bulto);
-                   jQuery.uniform.update();
-                   trIndex.find('.cantTd input').focus();
-               }
-           });
-}
+function verificarDuplicados() {
+    var productos = {};
+    var duplicados = [];
+    jQuery('#detalles tbody tr.item').removeClass('duplicado');
 
-function lotes( item ){
-    var lote = item.next('.lote');
-    if(item.parent().find('[name*="producto"]').val()){
-      // si es + agregar lote
-      var signo = item.parent().next('.signoTd').find('[name*="signo"]').val();
-      lote.toggle();
-      if( !lote.is(":visible")){
-          lote.find('[name*="lotes"]').val("-1").trigger("change");
-          lote.find('[name*="lotes"]').attr('required',false);
-      }else{
-         if( signo=='+'){
-              lote.find('.addlote').show();
-              lote.find('.addlote').click();
-            }else{
-                lote.find('.addlote').hide();
+    jQuery('#detalles tbody tr.item').each(function() {
+        var prodId = jQuery(this).data('producto-id');
+        if (productos[prodId]) {
+            duplicados.push(prodId);
+        } else {
+            productos[prodId] = true;
+        }
+    });
+
+    if (duplicados.length > 0) {
+        jQuery('#warning-duplicados').show();
+
+        // Marcar todos los tr cuyo producto esté duplicado
+        jQuery('#detalles tbody tr.item').each(function() {
+            var prodId = jQuery(this).data('producto-id');
+            if (duplicados.includes(prodId)) {
+                jQuery(this).addClass('duplicado');
             }
-      }
+        });
+    } else {
+        jQuery('#warning-duplicados').hide();
     }
 }
-*/
-/*
-function addlote( item ){
-    jQuery('#nroLote').val('');
-    jQuery('#fechaVencimiento').val('');
-    jQuery('#popuplote').dialog({
-        modal: true, autoOpen: true, title: 'Carga de lote', minHeight: 180,
-        buttons: [{text: "Agregar", class: 'closePopup',
-                click: function() {
-                    var prod = item.parent().parent().find('[name*="producto"]').val();
-                    var nro = jQuery(this).find('#nroLote').val();
-                    var fecha = jQuery(this).find('#fechaVencimiento').val();
-                    if( nro=='' || fecha=='' ){
-                        alert('Debe ingresar los datos requeridos.');
-                        return false;
-                    }
-                    var $addLoteProducto="{{ path('add_loteproducto')}}";
-                    // crear lote nuevo.
-                    var select = item.parent().find('[name*="lotes"]');
-                    jQuery.get($addLoteProducto,{prod_id: prod, nro:nro, vto:fecha  },
-                        function(datos){
-                            var newOption = new Option(datos.text, datos.id, true, true);
-
-                            // create the option and append to Select2
-                          //  var option = new Option(datos.id, datos.text, false, false);
-                            select.append(newOption).trigger('change');
-
-                            // manually trigger the `select2:select` event
-                            select.trigger({
-                                type: 'select2:select',
-                                params: {
-                                    data: datos
-                                }
-                            });
-
-                        }, "json");
-
-                    //recargar select y seleccionar el valor
-                    jQuery(this).dialog("close");
-                }}]
-    });
-}
-function getUrlLotes(item){
-    var prod = item.parent().parent().find('[name*="producto"]').val();
-    return '{{ path('select_lotes') }}?prodid='+prod;
-}*/
+verificarDuplicados();
 </script>
 {% endblock %}

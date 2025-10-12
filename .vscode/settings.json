@@ -1,10 +1,14 @@
 {
-    "editor.defaultFormatter": "Sophisticode.php-formatter",
-    "[php]": {
-        "editor.defaultFormatter": "junstyle.php-cs-fixer"
-    },
-    "[twig]": {
-        "editor.defaultFormatter": "junstyle.twig-language"
-    },
-    "editor.fontSize": 11
+  "php.validate.executablePath": "C:/xampp/php/php.exe",
+  "php.suggest.basic": false,
+  "php.executablePath": "C:/xampp/php/php.exe",
+  "files.associations": {
+    "*.twig": "twig"
+  },
+  "emmet.includeLanguages": {
+    "twig": "html"
+  },
+  "debug.allowBreakpointsEverywhere": true,
+  "debug.showBreakpointsInOverviewRuler": true,
+  "debug.showInlineBreakpointCandidates": true
 }

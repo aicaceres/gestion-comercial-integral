@@ -351,7 +351,8 @@ class ClienteController extends Controller {
                     $pago = $em->getRepository('VentasBundle:PagoCliente')->find($var['id']);
                     $var['comprobante'] = 'REC ' . $pago->getComprobanteNro();
                     $var['concepto'] = 'RECIBO ( ' . UtilsController::myTruncate($pago->getComprobantesTxt(), 30) . ' )';
-                    $var['importe'] = $pago->getTotal();
+
+                    $var['importe'] = $pago->getTotal() - $pago->getMontoNc();
                 }
             }
             /* $ord = usort($ctacte, function($a1, $a2) {
@@ -360,8 +361,8 @@ class ClienteController extends Controller {
               return $value1 > $value2;
               }); */
             $ord = usort($ctacte, function ($a1, $a2) {
-                $value1 = strtotime($a1['fecha']->format('Ymd'));
-                $value2 = strtotime($a2['fecha']->format('Ymd'));
+                $value1 = strtotime($a1['fecha']->format('YmdHi'));
+                $value2 = strtotime($a2['fecha']->format('YmdHi'));
                 if ($value1 != $value2) {
                     return $value1 > $value2;
                 }
@@ -678,6 +679,7 @@ class ClienteController extends Controller {
                         if ($fe->getNotaDebCred()) {
                             if ($fe->getNotaDebCred()->getSigno() === '-') {
                                 // guardar nc para imputar a las fc
+                                $comp->setMonto($fe->getTotal()*-1);
                                 $ncs->add($fe);
                             }
                         }

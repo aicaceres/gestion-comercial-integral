@@ -103,6 +103,10 @@ class StockController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra el Ajuste.');
         }
+        if ($entity->getProcesado()) {
+            $this->addFlash('error', "El ajuste #{$id} ya ha sido procesado!");
+            return $this->redirectToRoute('stock_ajuste');
+        }
         $editForm = $this->createEditForm($entity);
 
         return $this->render('AppBundle:Stock:ajusteEdit.html.twig', array(
@@ -130,21 +134,21 @@ class StockController extends Controller {
         if ($editForm->isValid()) {
             $em->getConnection()->beginTransaction();
             try {
-
                 $csv = $editForm['csv']->getData();
                 if ($csv) {
+                    $signos = [ 'I' => '+', 'E' => '-', '=' => '=' ];
                     // Open the file
                     if (($handle = fopen($csv->getPathname(), "r")) !== false) {
+
                         // Read and process the lines.
                         while (($data = fgetcsv($handle, 0, ';')) !== false) {
                             $detalle = new StockAjusteDetalle();
                             $letra = strtoupper(trim($data[0]));
-                            if (in_array($letra, array('I', 'E'))) {
-                                $signo = $letra === 'I' ? '+' : '-';
-                            }
-                            else {
+
+                            if (!isset($signos[$letra])) {
                                 throw new \Exception("Error Processing Request");
                             }
+                            $signo = $signos[$letra];
                             $detalle->setSigno($signo);
                             $producto = $em->getRepository('AppBundle:Producto')->find(trim($data[1]));
                             $detalle->setProducto($producto);
@@ -168,10 +172,13 @@ class StockController extends Controller {
                 }
                 $em->persist($entity);
                 $em->flush();
-                if ($registrarAjuste) {
+                if ($registrarAjuste && !$entity->getProcesado()) {
 
                     $deposito = $entity->getDeposito();
                     foreach ($entity->getDetalles() as $item) {
+                        if ($item->getProcesado()) {
+                            continue;
+                        }
                         // ajustar stock
                         $producto = $item->getProducto();
                         $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito->getId());
@@ -187,6 +194,7 @@ class StockController extends Controller {
                         if ($item->getBulto()) {
                             $cantidad = $cantidad * $item->getCantidadxBulto();
                         }
+                        // Calcular cantidad segun operacion
                         switch ($item->getSigno()) {
                           case '+':
                             $cant = $stock->getCantidad() + $cantidad;
@@ -214,12 +222,15 @@ class StockController extends Controller {
                         $movim->setCantidad($cantidad);
                         $movim->setDeposito($deposito);
                         $em->persist($movim);
+
+                        $item->setProcesado(1);
+                        $em->persist($item);
                         $em->flush();
                     }
                     $entity->setProcesado(1);
+                    $em->persist($entity);
                     $em->flush();
                 }
-
                 $em->getConnection()->commit();
 
                 // si se cargo desde un archivo volver a la edicion
@@ -245,79 +256,79 @@ class StockController extends Controller {
      * @Method("POST")
      * @Template("AppBundle:Stock:ajusteNew.html.twig")
      */
-    public function ajusteCreateAction(Request $request) {
-        die;
-        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'stock_ajuste_new');
-        $entity = new StockAjuste();
-        $form = $this->createCreateForm($entity);
-        $form->handleRequest($request);
-        if ($form->isValid()) {
+    // public function ajusteCreateAction(Request $request) {
+    //     die;
+    //     UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'stock_ajuste_new');
+    //     $entity = new StockAjuste();
+    //     $form = $this->createCreateForm($entity);
+    //     $form->handleRequest($request);
+    //     if ($form->isValid()) {
 
-            $file = $form['csv']->getData();
+    //         $file = $form['csv']->getData();
 
 // Open the file
-            if (($handle = fopen($csv->getPathname(), "r")) !== false) {
-                // Read and process the lines.
-                while (($data = fgetcsv($handle)) !== false) {
-                    var_dump($data);
-                }
-                fclose($handle);
-                //$em->flush();
-            }
-            die;
-            $em = $this->getDoctrine()->getManager();
-            $em->getConnection()->beginTransaction();
-            try {
-                $em->persist($entity);
-                $em->flush();
-                $deposito = $entity->getDeposito();
-                foreach ($entity->getDetalles() as $item) {
-                    // ajustar stock
-                    $producto = $item->getProducto();
-                    $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito->getId());
-                    if (!$stock) {
-                        $stock = new Stock();
-                        $stock->setProducto($producto);
-                        $stock->setDeposito($deposito);
-                        $stock->setCosto($producto->getCosto());
-                        $stock->setCantidad(0);
-                    }
-                    //determinar cantidad si es x bulto.
-                    $cantidad = $item->getCantidad();
-                    if ($item->getBulto()) {
-                        $cantidad = $cantidad * $item->getCantidadxBulto();
-                    }
-                    if ($item->getSigno() == '+')
-                        $cant = $stock->getCantidad() + $cantidad;
-                    else
-                        $cant = $stock->getCantidad() - $cantidad;
-                    $stock->setCantidad($cant);
-                    $em->persist($stock);
-                    // Cargar movimiento
-                    $movim = new StockMovimiento();
-                    $movim->setFecha($entity->getFecha());
-                    $movim->setTipo('AJUSTE');
-                    $movim->setSigno($item->getSigno());
-                    $movim->setMovimiento($entity->getId());
-                    $movim->setProducto($producto);
-                    $movim->setCantidad($cantidad);
-                    $movim->setDeposito($deposito);
-                    $em->persist($movim);
-                }
-                $em->flush();
-                $em->getConnection()->commit();
-                return $this->redirect($this->generateUrl('stock_ajuste'));
-            }
-            catch (\Exception $ex) {
-                $this->get('session')->getFlashBag()->add('error', $ex->getMessage());
-                $em->getConnection()->rollback();
-            }
-        }
-        return $this->render('AppBundle:Stock:ajusteNew.html.twig', array(
-                'entity' => $entity,
-                'form' => $form->createView(),
-        ));
-    }
+    //         if (($handle = fopen($csv->getPathname(), "r")) !== false) {
+    //             // Read and process the lines.
+    //             while (($data = fgetcsv($handle)) !== false) {
+    //                 var_dump($data);
+    //             }
+    //             fclose($handle);
+    //             //$em->flush();
+    //         }
+    //         die;
+    //         $em = $this->getDoctrine()->getManager();
+    //         $em->getConnection()->beginTransaction();
+    //         try {
+    //             $em->persist($entity);
+    //             $em->flush();
+    //             $deposito = $entity->getDeposito();
+    //             foreach ($entity->getDetalles() as $item) {
+    //                 // ajustar stock
+    //                 $producto = $item->getProducto();
+    //                 $stock = $em->getRepository('AppBundle:Stock')->findProductoDeposito($producto->getId(), $deposito->getId());
+    //                 if (!$stock) {
+    //                     $stock = new Stock();
+    //                     $stock->setProducto($producto);
+    //                     $stock->setDeposito($deposito);
+    //                     $stock->setCosto($producto->getCosto());
+    //                     $stock->setCantidad(0);
+    //                 }
+    //                 //determinar cantidad si es x bulto.
+    //                 $cantidad = $item->getCantidad();
+    //                 if ($item->getBulto()) {
+    //                     $cantidad = $cantidad * $item->getCantidadxBulto();
+    //                 }
+    //                 if ($item->getSigno() == '+')
+    //                     $cant = $stock->getCantidad() + $cantidad;
+    //                 else
+    //                     $cant = $stock->getCantidad() - $cantidad;
+    //                 $stock->setCantidad($cant);
+    //                 $em->persist($stock);
+    //                 // Cargar movimiento
+    //                 $movim = new StockMovimiento();
+    //                 $movim->setFecha($entity->getFecha());
+    //                 $movim->setTipo('AJUSTE');
+    //                 $movim->setSigno($item->getSigno());
+    //                 $movim->setMovimiento($entity->getId());
+    //                 $movim->setProducto($producto);
+    //                 $movim->setCantidad($cantidad);
+    //                 $movim->setDeposito($deposito);
+    //                 $em->persist($movim);
+    //             }
+    //             $em->flush();
+    //             $em->getConnection()->commit();
+    //             return $this->redirect($this->generateUrl('stock_ajuste'));
+    //         }
+    //         catch (\Exception $ex) {
+    //             $this->get('session')->getFlashBag()->add('error', $ex->getMessage());
+    //             $em->getConnection()->rollback();
+    //         }
+    //     }
+    //     return $this->render('AppBundle:Stock:ajusteNew.html.twig', array(
+    //             'entity' => $entity,
+    //             'form' => $form->createView(),
+    //     ));
+    // }
 
     /**
      * @Route("/ajuste/{id}/show", name="stock_ajuste_show")
@@ -359,7 +370,7 @@ class StockController extends Controller {
         $content = $facade->render($xml);
 
         return new Response($content, 200, array('content-type' => 'application/pdf',
-            'Content-Disposition' => 'filename=ajuste_stock_' . $ajuste->getFecha()->format('dmYHi') . '.pdf'));
+            'Content-Disposition' => "filename=ajuste_stock_{$id}_{$ajuste->getFecha()->format('dmYHi')}.pdf"));
     }
 
     /*
@@ -703,5 +714,4 @@ class StockController extends Controller {
         }
         return $this->redirectToRoute('stock_inventario_enstock');
      }
-
 }

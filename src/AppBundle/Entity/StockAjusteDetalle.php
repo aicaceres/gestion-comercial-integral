@@ -47,6 +47,11 @@ class StockAjusteDetalle
     protected $motivo;
 
     /**
+     * @ORM\Column(name="procesado", type="boolean", nullable=true)
+     */
+    protected $procesado = false;
+
+    /**
      * @ORM\ManyToOne(targetEntity="AppBundle\Entity\Producto", inversedBy="stock")
      * @ORM\JoinColumn(name="producto_id", referencedColumnName="id")
      */
@@ -302,5 +307,28 @@ public function getLotesItemTxt(){
     public function getLotes()
     {
         return $this->lotes;
+    }
+
+    /**
+     * Set procesado
+     *
+     * @param boolean $procesado
+     * @return StockAjusteDetalle
+     */
+    public function setProcesado($procesado)
+    {
+        $this->procesado = $procesado;
+
+        return $this;
+    }
+
+    /**
+     * Get procesado
+     *
+     * @return boolean 
+     */
+    public function getProcesado()
+    {
+        return $this->procesado;
     }
 }

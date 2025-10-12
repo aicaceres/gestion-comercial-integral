@@ -30,7 +30,7 @@ class ClienteRepository extends EntityRepository {
     public function getDetalleCtaCte($id, $desde = null, $hasta = null) {
         $cli = $this->find($id);
         $facturas = $this->_em->createQueryBuilder('f')
-            ->select('f.id,1 tipo,c.fechaCobro fecha, 0 comprobante,0 concepto , f.total importe')
+            ->select('f.id,1 tipo,f.created fecha, 0 comprobante,0 concepto , f.total importe')
             ->from('VentasBundle\Entity\FacturaElectronica', 'f')
             ->innerJoin('f.cobro', 'c')
             ->innerJoin('c.formaPago', 'p')
@@ -50,7 +50,7 @@ class ClienteRepository extends EntityRepository {
             ->setParameter('agr', $cli);
 
         $pagos = $this->_em->createQueryBuilder('f')
-            ->select('g.id,3 tipo,g.fecha, 0 comprobante ,g.created fechaemi, 0 concepto, g.total importe')
+            ->select('g.id,3 tipo,g.created fecha, 0 comprobante ,g.created fechaemi, 0 concepto, g.total importe')
             ->from('VentasBundle\Entity\PagoCliente', 'g')
             ->innerJoin('g.cliente', 'p')
             ->where('p.id=:agr')

@@ -55,7 +55,7 @@
 
                 </div>
             </header>
-            {% set totalpago = pago.generaNotaCredito ? (pago.total + pago.notaDebCred.total) : pago.total  %}
+            {% set totalpago = pago.generaNotaCredito ? (pago.total - pago.notaDebCred.total) : pago.total  %}
             <footer>
                 <div height="100px" width="100%">
                     <table>
@@ -65,7 +65,7 @@
                                 <div>Op: {{app.user|upper}} - {{'now'|date('d-m-Y H:i')}} </div>
                             </td>
                             <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" margin-top="8px" font-size="18px"><strong>Total:</strong></td>
-                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ pago.total|number_format(2,',','.')}}</strong>
+                            <td border.type="top" border.size="2" text-align="right" vertical-align="middle" width="4 cm" margin-top="8px" font-size="18px"> <strong>$ {{ totalpago|number_format(2,',','.')}}</strong>
                             </td>
                         </tr>
                     </table>
@@ -122,7 +122,7 @@
                   {% endif %}
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{totalpago|number_format(2,',','.')}}
+                    {{pago.total|number_format(2,',','.')}}
                 </td>
             </tr>
             {% if pago.recibos|length %}
@@ -143,7 +143,7 @@
                     Descuento por pago adelantado ( NC {{fe.comprobanteTxt}} )
                 </td>
                 <td border.type="none" height="15px" vertical-align="middle" text-align="right" padding-right="10px">
-                    {{pago.notaDebCred.total*-1|number_format(2,',','.')}}
+                    {{(pago.notaDebCred.total*-1)|number_format(2,',','.')}}
                 </td>
             </tr>
             {% endif %}

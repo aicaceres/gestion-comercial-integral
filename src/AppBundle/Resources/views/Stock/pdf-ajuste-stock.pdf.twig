@@ -9,11 +9,11 @@
                                 <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}}  <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre')  }} </span></h3>
                             </td>
                         </tr>
-                    </table>                                        
-                    <div border.color="#F5C98F" height="2px" ></div>   
+                    </table>
+                    <div border.color="#F5C98F" height="2px" ></div>
                     <div height="5px"></div>
-                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div> 
-                </div>                      
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
             </header>
             <footer>
                 <div height="30px" width="100%" text-align="right">
@@ -21,51 +21,51 @@
                 </div>
             </footer>
         </placeholders>
-        <h2 text-align="center"> Ajuste de Stock </h2>                   
-        <h4><strong>Fecha de Ajuste:</strong> {{ ajuste.fecha|date('d-m-Y') }} - <strong>Depósito:</strong> {{ ajuste.deposito }} </h4>
-        <h4><strong>Observaciones:</strong> {{ ajuste.observaciones }} </h4>
+        <h2 text-align="center"> Ajuste de Stock #{{ajuste.id}}</h2>
+        <h4 height="20px"><strong>Fecha de Ajuste:</strong> {{ ajuste.fecha|date('d-m-Y') }} - <strong>Depósito:</strong> {{ ajuste.deposito }} </h4>
+        <h4 height="20px"><strong>Observaciones:</strong> {{ ajuste.observaciones }} </h4>
         <div height="10px"></div>
         <table font-size="9px">
             <tr>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm"><strong>#</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Producto</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="0.5 cm"><strong>+/-</strong></td>                
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm" ><strong>Cantidad</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="1 cm"><strong> + / - / = </strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2.5 cm" ><strong>Cantidad</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" ><strong>Motivo</strong></td>
-            </tr>            
+            </tr>
             {% if ajuste.detalles|length>0   %}
                 {% for detalle in ajuste.detalles %}
                     <tr>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="10px" width="1 cm">{{loop.index}}</td>
                         <td height="20px" vertical-align="middle" padding-left="5px">
                             {{detalle.producto}}
-                            
+
                             {% if(detalle.lotes|length >0) %}
                                 [ Lotes:
-                                {% for lote in detalle.lotes %}                            
+                                {% for lote in detalle.lotes %}
                                     {{lote.__toString()}}
                                     {% if not loop.last%} / {% endif%}
                                 {% endfor %}
                                 ]
-                            {% endif %}   
+                            {% endif %}
 
                         </td>
                         <td height="20px" vertical-align="middle" text-align="center" font-size="12px">{{detalle.signo}}</td>
                         <td height="20px" vertical-align="middle" text-align="right" padding-right="5px" >{{detalle.cantidadTxt }}</td>
                         <td height="20px" vertical-align="middle" padding-left="5px">{{detalle.motivo}} </td>
-                    </tr>                
-                {% endfor %}  
-            {% else %}  
+                    </tr>
+                {% endfor %}
+            {% else %}
                 <tr>
                     <td colspan="5" height="30px" vertical-align="middle" padding-left="10px">
                         <strong>No hay detalle en ajuste</strong></td>
                 </tr>
-            {% endif %}              
+            {% endif %}
 
             <tr>
                 <td colspan="5" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
                     <strong>Total de Items: {{ajuste.detalles|length}}</strong></td>
             </tr>
-        </table>         
+        </table>
     </dynamic-page>
 </pdf>

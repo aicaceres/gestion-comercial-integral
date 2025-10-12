@@ -29,6 +29,7 @@
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
+                <th>#</th>
                 <th>Fecha</th>
                 <th>Depósito</th>
                 <th class="nosort">Observaciones</th>
@@ -42,6 +43,7 @@
         <tbody>
            {% for entity in entities %}
             <tr>
+                <td>{{entity.id}}</td>
                 <td><span class="hidden">{{ entity.fecha|date('Ymd') }}</span>{{ entity.fecha|date('d-m-Y') }}</td>
                 <td>{{entity.deposito }}</td>
                 <td>{{entity.observaciones }}</td>

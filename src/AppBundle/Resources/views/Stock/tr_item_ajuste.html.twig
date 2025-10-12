@@ -1,5 +1,5 @@
 {% if item.id %}
-<tr class="item" data-id="{{item.id}}" style="height:30px;" >
+<tr class="item" data-id="{{item.id}}" data-producto-id="{{ item.producto.id }}" style="height:30px;" >
     <td class="ordTd"></td>
     <td class="prodTd">{{item.producto.codigoNombre}}  {{item.lotesItemTxt|raw}}  </td>
     <td class="signoTd">{{item.signo}}</td>
