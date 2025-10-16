@@ -36,14 +36,15 @@
             </div>
 
             <div style="align-content: flex-start;" >
-            {% if app.session.get('caja') %}
-                {% if app.session.get('caja')['apertura'] %}
+            {% if apertura|length %}
                     {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
                         <button type="button" class="stdbtn btn_red" onclick="crearNota('CRE')" style="padding:10px 20px"> NOTA CRÉDITO </button>
                         <button type="button" class="stdbtn btn_blue" onclick="crearNota('DEB')" style="padding:10px 20px"> NOTA DÉBITO </button>
-                    {% else %} &nbsp;
+                    {# {% else %} &nbsp; #}
                     {% endif %}
-                {% else %}
+                {# {% else %} #}
+            {% else %}
+                {% if app.session.get('caja') %}
                     {% if  app.user.access(app.session.get('unidneg_id'),'ventas_caja_apertura') %}
                             {% set urlApertura = path('ventas_apertura_new') %}
                             <a href="javascript:void(0)" onclick="aperturaCajaVentas('{{ urlApertura }}','true')" class="btn btn_orange btn_lock" title="Debe abrir la caja para realizar cobros">

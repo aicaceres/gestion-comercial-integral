@@ -45,14 +45,15 @@ class NotaDebCredController extends Controller {
         $hasta = $periodo['fin'];
 
         $entities = $em->getRepository('VentasBundle:NotaDebCred')->findByCriteria($unidneg, $cliId, $desde, $hasta);
-
+        $apertura = $em->getRepository('VentasBundle:CajaApertura')->findAperturaSinCerrar(1);
         return $this->render('VentasBundle:NotaDebCred:index.html.twig', array(
                 'entities' => $entities,
                 'cliente' => $cliente,
                 'cliId' => $cliId,
                 'desde' => $desde,
                 'hasta' => $hasta,
-                'printpdf' => $request->get('printpdf')
+                'printpdf' => $request->get('printpdf'),
+                'apertura' => $apertura
         ));
     }
 
@@ -101,7 +102,7 @@ class NotaDebCredController extends Controller {
         $form = $this->createCreateForm($entity, null);
         return $this->render('VentasBundle:NotaDebCred:new.html.twig', array(
                 'entity' => $entity,
-                'form' => $form->createView(),
+                'form' => $form->createView()
         ));
     }
 
