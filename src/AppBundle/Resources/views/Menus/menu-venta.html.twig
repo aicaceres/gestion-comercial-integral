@@ -23,7 +23,7 @@
                 <li id="cobro">
                     <a href="{{ path('ventas_cobro') }}">Cobro de Ventas</a>
 		</li>
-                {% endif %}                                            
+                {% endif %}
                 {% if app.user.access(app.session.get('unidneg_id'),'ventas_notadebcred') %}
                 <li id="notadebcred">
                     <a href="{{path('ventas_notadebcred')}}">Notas de Debito/Crédito</a>
@@ -48,15 +48,15 @@
             <a href="#item_cliente" class="elements">Clientes</a>
             <span class="arrow"></span>
             <ul id="item_cliente">
-		<li id="cliente">
-                    <a href="{{path('ventas_cliente')}}">Administración</a>
-		</li>
-		<li id="ctacte">
-                    <a href="{{path('ventas_cliente_ctacte')}}">Cuenta Coriente</a>
-		</li>
-		<li id="pagos">
-                    <a href="{{path('ventas_cliente_pagos')}}">Pagos de Clientes</a>
-		</li>
+              <li id="cliente">
+                <a href="{{path('ventas_cliente')}}">Administración</a>
+              </li>
+              <li id="ctacte">
+                <a href="{{path('ventas_cliente_ctacte')}}">Cuenta Coriente</a>
+              </li>
+              <li id="pagos">
+                <a href="{{path('ventas_cliente_pagos')}}">Pagos de Clientes</a>
+              </li>
             </ul>
 	</li>
 	{% endif %}
@@ -77,8 +77,19 @@
                 </ul>
             </li>
         {% endif %}
+        {% if app.user.access(app.session.get('unidneg_id'),'ventas_estadistica') %}
+            <li>
+                <a href="#estadistica" class="elements">Estadísticas</a>
+                <span class="arrow"></span>
+                <ul id="estadistica">
+                    <li id="ranking">
+                        <a href="{{path('ventas_estadistica_ranking')}}">Ranking Productos</a>
+                    </li>
+                </ul>
+            </li>
+        {% endif %}
         {% if app.user.access(app.session.get('unidneg_id'),'ventas_parametrizacion') %}
-            <li id="parametrizacion"><a href="{{path('ventas_parametrizacion')}}" class="elements">Parametrización</a></li>
+            <li id="estadisticas"><a href="{{path('ventas_parametrizacion')}}" class="elements">Parametrización</a></li>
         {% endif %}
         {% if app.user.access(app.session.get('unidneg_id'),'ventas_importacion') and false %}
             <li id="importacion"><a href="{{path('ventas_importacion')}}" class="elements">Importación</a></li>
