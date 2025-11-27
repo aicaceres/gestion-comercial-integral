@@ -2,7 +2,7 @@
 {% block pageheader %}
 <div class="pageheader notab">
     <h1 class="pagetitle">Estadísticas</h1>
-<span class="pagedesc">Ranking de productos más vendidos</span>
+<span class="pagedesc">Listado de Ventas por Producto y Periodo</span>
 </div><!--pageheader-->
 {% endblock %}
 {% block contentwrapper %}
@@ -10,13 +10,34 @@
 
 <div id="contentwrapper" class="contentwrapper">
   <form id="searchform" action="{{ path('ventas_estadistica_ranking') }}" method="get">
-    <div style="display: inline-block; margin-right: 30px;">
+    <div style="display: inline-block; width: 50%; margin-bottom: 10px;">
+        &nbsp;&nbsp;&nbsp;
+        <label><strong>Producto:</strong></label>
+        <select class="select2" id="selectProducto" name="prodId" style="width: 100%;">
+          <option value=""> Todos </option>
+        {% for prod in productos %}
+            <option value="{{prod.id}}" {% if prod.id==prodId %} selected="selected" {% endif %}> {{prod.codigoNombre}}</option>
+        {% endfor %}
+        </select>
+    </div>
+    <div style="display: inline-block;">
         &nbsp;&nbsp;&nbsp;
         <label><strong>Periodo: </strong></label>
         <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
         <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
         <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
     </div>
+    <div class="floatleft" style="display:block;width:200px;">
+        &nbsp;&nbsp;&nbsp;
+        <label><strong>Ranking por: </strong></label>
+        <select name="orden" id="selectOrden">
+          <option value="importe" {% if orden=="importe" %} selected="selected" {% endif %}>Importe</option>
+          <option value="cantidad" {% if orden=="cantidad" %} selected="selected" {% endif %}>Cantidad</option>
+        </select>
+    </div>
+  </form>
+  <form id="printform" name="printform" target="_blank"  action="{{ path("ventas_estadistica_ranking_print") }}" method="post">
+    <button class="stdbtn print floatright" type="button">Imprimir</button>
   </form>
 
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="clientes_table">
@@ -29,13 +50,28 @@
             </tr>
         </thead>
         <tbody>
-          {% for ranking in entities %}
-          <tr>
-              <td>{{ loop.index }}</td>
-              <td></td>
-              <td></td>
-          </tr>
-          {% endfor %}
+          {% if ventas is not empty %}
+            {% set total = 0 %}
+            {% for venta in ventas %}
+            {% set total = total + venta.importe %}
+            <tr>
+                <td class="alignright">{{ loop.index }}</td>
+                <td>{{ venta.producto }}</td>
+                <td class="alignright">{{ venta.cantidad }}</td>
+                <td class="alignright">{{ venta.importe|number_format(2, ',', '.') }}</td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="4">No se encontraron registros para el período seleccionado.</td>
+            </tr>
+          {% endif %}
+          <tfoot>
+            <th>
+              <td colspan="4" class="alignright">
+                    <strong>Total de Ventas: {{total|number_format(2, ',', '.')}}</strong></td>
+            </th>
+          </tfoot>
         </tbody>
     </table>
 </div>
@@ -46,6 +82,31 @@
 <script type="text/javascript">
 jQuery(document).ready(function($){
   $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
+  $('#selectProducto,#selectOrden').change(function(){
+      $('#searchform').submit();
+  });
+
+  $('#printform .print').on('click', function(e){
+      e.preventDefault();
+      var $printForm = $('#printform');
+
+      // limpiar inputs ocultos anteriores
+      $printForm.find('input[type="hidden"]').remove();
+
+      // serializar datos del formulario de búsqueda
+      var data = $('#searchform').serializeArray();
+
+      // agregarlos como hidden al form de impresión
+      $.each(data, function(i, field){
+          $('<input>')
+              .attr('type', 'hidden')
+              .attr('name', field.name)
+              .val(field.value)
+              .appendTo($printForm);
+      });
+
+      $printForm.submit();
+  });
 });
 </script>
 {% endblock %}

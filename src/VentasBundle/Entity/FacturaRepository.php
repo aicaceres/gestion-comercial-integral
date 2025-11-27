@@ -177,4 +177,81 @@ class FacturaRepository extends EntityRepository {
         return $query->getQuery()->getResult();
     }
 
+    public function findEstadisticaVentasByUnidadNegocio($unidneg, $desde = null, $hasta = null, $prodId = null, $order='importe'){
+        $fechaDesde = $desde ? str_replace('-', '', $desde) : null;
+        $fechaHasta = $hasta ? str_replace('-', '', $hasta) : null;
+        $prodId = $prodId ?: null;
+
+        $qb = $this->_em->createQueryBuilder();
+        $qb->select('DISTINCT fe, c, v, vd, p')
+            ->from('VentasBundle:FacturaElectronica', 'fe')
+            ->innerJoin('fe.unidadNegocio', 'u')
+            ->innerJoin('fe.cobro', 'c')
+            ->innerJoin('c.venta', 'v')
+            ->innerJoin('v.detalles','vd')
+            ->leftJoin('vd.producto', 'p')
+            ->where('u.id = :unidneg')
+            ->orderBy('fe.cbteFch', 'ASC')
+            ->setParameter('unidneg', $unidneg);
+
+        if ($fechaDesde) {
+            $qb->andWhere('fe.cbteFch >= :fechaDesde')
+               ->setParameter('fechaDesde', $fechaDesde);
+        }
+
+        if ($fechaHasta) {
+            $qb->andWhere('fe.cbteFch <= :fechaHasta')
+               ->setParameter('fechaHasta', $fechaHasta);
+        }
+
+        if ($prodId) {
+            $qb->andWhere('p.id = :prodId')
+               ->setParameter('prodId', $prodId);
+        }
+
+        $facturas = $qb->getQuery()->getResult();
+
+        $ranking = [];
+        foreach ($facturas as $factura) {
+            $cobro = $factura->getCobro();
+            if (!$cobro) {
+                continue;
+            }
+            $venta = $cobro->getVenta();
+            if (!$venta) {
+                continue;
+            }
+            foreach ($venta->getDetalles() as $detalle) {
+                $producto = $detalle->getProducto();
+                if (
+                    ($prodId && (!$producto || (int) $producto->getId() !== (int) $prodId)) ||
+                    ($producto && $producto->getComodin())
+                ) {
+                    continue;
+                }
+
+                $key = $producto ? 'prod_' . $producto->getId() : 'detalle_' . $detalle->getId();
+                if (!isset($ranking[$key])) {
+                    $ranking[$key] = [
+                        'producto' => $producto ? $producto->getCodigoNombre() : $detalle->getNombreProducto(),
+                        'cantidad' => 0,
+                        'importe' => 0,
+                    ];
+                }
+
+                $ranking[$key]['cantidad'] += (float) $detalle->getCantidad();
+                $ranking[$key]['importe'] += (float) $detalle->getTotalItem();
+            }
+        }
+
+        usort($ranking, function ($a, $b) use($order){
+            if ($a[$order] === $b[$order]) {
+                return 0;
+            }
+            return ($a[$order] < $b[$order]) ? 1 : -1;
+        });
+
+        return array_values($ranking);
+    }
+
 }
