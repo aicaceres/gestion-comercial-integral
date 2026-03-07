@@ -143,8 +143,8 @@ function recargarVentasPorCobrar(){
             jQuery('#ventasxcobrar_filter input').val('#');
             jQuery('#ventasxcobrar_filter input').focus();
         }
-    }).fail(function(){ 
-        location.reload() 
+    }).fail(function(){
+        location.reload()
         jQuery('.loader_refresh').addClass('hidden');
     });
 }

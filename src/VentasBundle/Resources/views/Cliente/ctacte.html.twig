@@ -127,6 +127,12 @@ jQuery(document).ready(function($) {
                 if( value[0].indexOf('out.png')>-1 ) value[0]='-';
                 if( value[0].indexOf('in.png')>-1 )  value[0]='+';
             }
+            //fecha
+            var i = value[1].indexOf('</span>');
+            if( i >-1 ){
+                var fecha = value[1].substr(i+7);
+                value[1]=fecha;
+            }
             // nro comp
             var i = value[3].indexOf('\n');
             if(i > -1){

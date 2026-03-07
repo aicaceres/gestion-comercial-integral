@@ -47,6 +47,11 @@ class ProductoController extends Controller {
         $entity->setUnidadMedida($unid);
         $entity->setCodigo('XXXXXXXX');
         $form = $this->createCreateForm($entity);
+        // preseleccionar la alicuota por defecto (si existe)
+        $selectedAlic = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => '21.00', 'activo' => 1));
+        if ($selectedAlic) {
+            $form->get('iva')->setData($selectedAlic);
+        }
 
         return $this->render('AppBundle:Producto:edit.html.twig', array(
                 'entity' => $entity,
@@ -79,6 +84,12 @@ class ProductoController extends Controller {
         $form->handleRequest($request);
 
         if ($form->isValid()) {
+            // si el formulario puso una entidad AfipAlicuota en 'iva', guardar su valor decimal
+            $ivaData = $entity->getIva();
+            if (is_object($ivaData) && method_exists($ivaData, 'getValor')) {
+                $entity->setIva($ivaData->getValor());
+            }
+
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
             $em->flush();
@@ -108,6 +119,11 @@ class ProductoController extends Controller {
             throw $this->createNotFoundException($this->notfound);
         }
         $editForm = $this->createEditForm($entity);
+        // preseleccionar la alicuota según el valor guardado en producto
+        $selectedAlic = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $entity->getIva(), 'activo' => 1));
+        if ($selectedAlic) {
+            $editForm->get('iva')->setData($selectedAlic);
+        }
         //$deleteForm = $this->createDeleteForm($id);
 
         return $this->render('AppBundle:Producto:edit.html.twig', array(
@@ -149,6 +165,12 @@ class ProductoController extends Controller {
         $editForm = $this->createEditForm($entity);
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
+            // si el formulario puso una entidad AfipAlicuota en 'iva', guardar su valor decimal
+            $ivaData = $entity->getIva();
+            if (is_object($ivaData) && method_exists($ivaData, 'getValor')) {
+                $entity->setIva($ivaData->getValor());
+            }
+
             $em->flush();
             return $this->redirect($this->generateUrl('stock_producto'));
         }

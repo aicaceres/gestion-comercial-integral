@@ -83,8 +83,8 @@
         </placeholders>
 
     {% set tot_efectivo, tot_cheque, tot_tarjeta, tot_ctacte, tot_transferencia, tot_retencion, tot_vuelto = 0,0,0,0,0,0,0 %}
-    {% set tiposFacturacion = [ {'tag': 'CRE', 'title': 'CRÉDITOS'},
-                                {'tag': 'DEB', 'title': 'DÉBITOS'},
+    {% set tiposFacturacion = [ {'tag': 'CRE, NCE', 'title': 'CRÉDITOS'},
+                                {'tag': 'DEB, NDE', 'title': 'DÉBITOS'},
                                 {'tag': 'FAC, FCE', 'title': 'FACTURAS'},
                                 {'tag': 'TIC', 'title': 'TICKETS'}] %}
 

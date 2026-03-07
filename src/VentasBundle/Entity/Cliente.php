@@ -84,10 +84,17 @@ class Cliente {
 
     /**
      * @var integer $saldoInicial
-     * @ORM\Column(name="saldo_inicial", type="decimal", precision=20, scale=2, nullable=true )
+     * @ORM\Column(name="saldo_inicial", type="decimal", precision=20, scale=2, options={"default" : 0} )
      * @Gedmo\Versioned()
      */
     protected $saldoInicial;
+
+    /**
+     * @var integer $saldoActual
+     * @ORM\Column(name="saldo_actual", type="decimal", precision=20, scale=2, options={"default" : 0} )
+     * @Gedmo\Versioned()
+     */
+    protected $saldoActual;
 
     /**
      * @var integer $limiteCredito
@@ -296,23 +303,45 @@ class Cliente {
     }
 
     public function getSaldo() {
-        $saldo = 0;
-        $cobros = $this->cobros;
-        $pagos = $this->pagos;
-        $notaDebCred = $this->notasDebCredVenta;
-        $saldo = $this->saldoInicial;
-        foreach ($cobros as $cobro) {
-            if ($cobro->getEstado() === 'FINALIZADO' && $cobro->getFormaPago()->getCuentaCorriente())
-                $saldo += $cobro->getFacturaElectronica()->getTotal();
+        // Si es consumidor final no se calcula saldo (siempre 0)
+        if ($this->consumidorFinal) {
+            return 0.00;
         }
-        foreach ($notaDebCred as $nota) {
-            if ($nota->getEstado() === 'ACREDITADO' && $nota->getFormaPago()->getCuentaCorriente())
-                $saldo -= $nota->getTotal();
+        // Partir del saldo inicial (siempre disponible)
+        $saldo = $this->saldoInicial ? floatval($this->saldoInicial) : 0.0;
+
+        // Cobros (Facturas): sumar el total de la factura si la forma de pago es cuenta corriente
+        foreach ($this->cobros as $cobro) {
+            $fp = $cobro->getFormaPago();
+            if ($fp && $fp->getCuentaCorriente()) {
+                $fact = $cobro->getFacturaElectronica();
+                if ($fact) {
+                    $saldo += floatval($fact->getTotal());
+                }
+            }
         }
-        foreach ($pagos as $pag) {
-            $saldo -= $pag->getTotal();
+
+        // Notas de débito/crédito: sumar o restar según el signo ('+' suma, '-' resta)
+        foreach ($this->notasDebCredVenta as $nota) {
+            $fp = $nota->getFormaPago();
+            if ($fp && $fp->getCuentaCorriente()) {
+                $signo = $nota->getSigno();
+                $total = floatval($nota->getTotal());
+                if ($signo === '+') {
+                    $saldo += $total;
+                } else {
+                    $saldo -= $total;
+                }
+            }
         }
-        return round($saldo,2);
+
+        // Pagos: restar el importe neto aplicado (total - montoNc)
+        foreach ($this->pagos as $pag) {
+            $importe = floatval($pag->getTotal()) - floatval($pag->getMontoNc());
+            $saldo -= $importe;
+        }
+
+        return round($saldo, 2);
     }
 
     public function getFechaUltimaCompra() {
@@ -516,6 +545,27 @@ class Cliente {
      */
     public function getSaldoInicial() {
         return $this->saldoInicial;
+    }
+
+    /**
+     * Set saldoActual
+     *
+     * @param string $saldoActual
+     * @return Cliente
+     */
+    public function setSaldoActual($saldoActual) {
+        $this->saldoActual = $saldoActual;
+
+        return $this;
+    }
+
+    /**
+     * Get saldoActual
+     *
+     * @return string
+     */
+    public function getSaldoActual() {
+        return $this->saldoActual;
     }
 
     /**

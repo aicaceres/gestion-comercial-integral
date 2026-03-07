@@ -60,7 +60,6 @@ class CobroController extends Controller {
         if(!$session->get('caja')){
             $this->addFlash('error', 'Este equipo ' . $session->get('hostname') . ' no está definido como caja!');
         }
-
         return $this->render('VentasBundle:Cobro:index.html.twig', array(
                 'entities' => $entities,
                 'ventas' => $ventas,

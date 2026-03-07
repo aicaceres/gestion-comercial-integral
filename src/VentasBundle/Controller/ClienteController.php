@@ -314,6 +314,66 @@ class ClienteController extends Controller {
     }
 
     /**
+     * @Route("/updateSaldoActual", name="ventas_cliente_update_saldo")
+     * @Method("GET")
+     */
+    public function updateSaldoActualAction(Request $request) {
+        UtilsController::haveAccess($this->getUser(), $this->get('session')->get('unidneg_id'), 'ventas_cliente_edit');
+        $em = $this->getDoctrine()->getManager();
+
+        // Tamaño de lote configurable por parámetro GET `batch`. Default 500
+        $batchSize = max(1, intval($request->get('batch', 500)));
+        $lastId = 0;
+        $processed = 0;
+        $updated = 0;
+        $batches = 0;
+
+        while (true) {
+            $qb = $em->createQueryBuilder()
+                ->select('c')
+                ->from('VentasBundle:Cliente', 'c')
+                ->where('c.id > :lastId')
+                ->setParameter('lastId', $lastId)
+                ->andWhere('c.consumidorFinal = 0')
+                ->orderBy('c.id', 'ASC')
+                ->setMaxResults($batchSize);
+
+            $clients = $qb->getQuery()->getResult();
+            if (!$clients) {
+                break;
+            }
+
+            foreach ($clients as $client) {
+                $saldo = $client->getSaldo();
+                if ($client->getSaldoActual() != $saldo) {
+                    $client->setSaldoActual($saldo);
+                    $em->persist($client);
+                    $updated++;
+                }
+                $processed++;
+                // mantener último id para el siguiente lote
+                $lastId = $client->getId();
+            }
+
+            $em->flush();
+            // $em->clear(); // libera memoria
+
+            $batches++;
+            // Si se obtuvieron menos que el tamaño de lote, terminamos
+            if (count($clients) < $batchSize) {
+                break;
+            }
+        }
+
+        return new JsonResponse(array(
+            'processed' => $processed,
+            'updated' => $updated,
+            'batches' => $batches,
+            'batchSize' => $batchSize
+        ));
+    }
+
+    /**
      * @Route("/ctacte", name="ventas_cliente_ctacte")
      * @Method("get")
      * @Template()
@@ -360,7 +420,7 @@ class ClienteController extends Controller {
               $value2 = strtotime($a2['fecha']->format('YmdHi')).$a2['comprobante'];
               return $value1 > $value2;
               }); */
-            $ord = usort($ctacte, function ($a1, $a2) {
+            usort($ctacte, function ($a1, $a2) {
                 $value1 = strtotime($a1['fecha']->format('YmdHi'));
                 $value2 = strtotime($a2['fecha']->format('YmdHi'));
                 if ($value1 != $value2) {
@@ -368,14 +428,35 @@ class ClienteController extends Controller {
                 }
                 return $a1['comprobante'] > $a2['comprobante'];
             });
+
+            // Calcular saldo acumulado (misma lógica que en la plantilla)
+            $saldoCalculado = 0;
+            $debe = 0;
+            $haber = 0;
+            if ($ctacte) {
+                foreach ($ctacte as $row) {
+                    $tipo = (string)$row['tipo'];
+                    $importe = isset($row['importe']) ? floatval($row['importe']) : 0;
+                    if (in_array($tipo, array('0', '1', '4'))) {
+                        $saldoCalculado += $importe;
+                        $debe += $importe;
+                    } else {
+                        $saldoCalculado -= $importe;
+                        $haber += $importe;
+                    }
+                }
+            }
+            $saldoCalculado = round($saldoCalculado, 2);
         }
         else {
             $cliente = NULL;
             $ctacte = NULL;
+            $saldoCalculado = 0;
         }
         return $this->render('VentasBundle:Cliente:ctacte.html.twig', array(
                 'entities' => $ctacte, 'cliente' => $cliente, 'cliId' => $cliId,
-                'desde' => $desde, 'hasta' => $hasta
+                'desde' => $desde, 'hasta' => $hasta,
+                'saldoCalculado' => $saldoCalculado
         ));
     }
 

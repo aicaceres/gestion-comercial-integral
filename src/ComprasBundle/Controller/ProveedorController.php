@@ -946,7 +946,12 @@ class ProveedorController extends Controller {
                     $cheque->setUsado(false);
                     $em->persist($cheque);
                 }
+            // eliminar movimiento de banco
+                if($item->getBancoMovimiento()){
+                  $em->remove($item->getBancoMovimiento());
+                }
             }
+
             $em->remove($entity);
             $em->flush();
             $em->getConnection()->commit();

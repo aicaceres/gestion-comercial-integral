@@ -20,7 +20,16 @@ class ProductoType extends AbstractType {
             ->add('nombre')
             ->add('descripcion')
             ->add('stock_minimo', null, array('label' => 'Stock Mínimo'))
-            ->add('iva')
+            ->add('iva', 'entity', array('label' => 'Alicuota IVA:',
+                'class' => 'ConfigBundle:AfipAlicuota', 'required' => true,
+                'attr' => array('class' => 'uniformselect'),
+                'choice_label' => 'valor',
+                'property' => 'valor',
+                'query_builder' => function(EntityRepository $repository) {
+                    return $repository->createQueryBuilder('a')
+                        ->where('a.activo=1');
+                }
+            ))
             ->add('costo')
             ->add('codigoBarra')
             ->add('observaciones')
