@@ -30,4 +30,5 @@
 .vscode/
 *.tar.gz
 *.sql.gz
+*.zip
 nbproject

@@ -59,9 +59,9 @@
             {% for item in items %}
                 {% set neto = neto + item.neto%}
                 {% set iva = iva + item.iva%}
-                {% set impRNI = iva + item.impRNI%}
+                {% set impRNI = impRNI + item.impRNI%}
                 {% set nograv = nograv + item.nograv%}
-                {% set exento = nograv + item.exento%}
+                {% set exento = exento + item.exento%}
                 {% set imp = imp + item.impuestos%}
                 {% set retiva = retiva + item.retIVA%}
                 {% set total = total + item.total%}
@@ -88,7 +88,7 @@
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{exento|number_format(2,'.',',')}}</strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{imp|number_format(2,'.',',')}} </strong></td>
                 <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{retiva|number_format(2,'.',',')}}</strong></td>
-                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{total|number_format(2,'.',',')}}</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px"><strong>{{(neto+iva+impRNI+nograv+exento+imp+retiva)|number_format(2,'.',',')}}</strong></td>
             </tr>
         </table>
 

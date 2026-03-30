@@ -33,7 +33,7 @@
     {% endfor %}
             </tr>
     </table>
-    {% set neto,iva,impRNI,nograv,exento,imp,retiva,total = 0,0,0,0,0,0,0,0 %}
+    {% set neto,iva,impRNI,nograv,exento,imp,retiva,total,totb = 0,0,0,0,0,0,0,0,0 %}
         <table cellpadding="0" cellspacing="0" border="0" class="stdtable"  id="libroivaventas">
             <thead>
                 <tr>
@@ -52,12 +52,13 @@
             </thead>
             <tbody>
                 {% for item in items %}
+                    {% set totb = item.neto + item.iva + item.impuestos + item.exento %}
                     <tr>
                             {% set neto = neto + item.neto%}
                             {% set iva = iva + item.iva%}
                             {% set impRNI = impRNI + item.impRNI%}
                             {% set nograv = nograv + item.nograv%}
-                            {% set exento = nograv + item.exento%}
+                            {% set exento = exento + item.exento%}
                             {% set imp = imp + item.impuestos%}
                             {% set retiva = retiva + item.retIVA%}
                             {% set total = total + item.total%}
@@ -72,7 +73,7 @@
                             <td class="alignright">{{item.exento|number_format(2,'.','')}}</td>
                             <td class="alignright">{{item.impuestos|number_format(2,'.','')}}</td>
                             <td class="alignright">{{item.retIVA|number_format(2,'.','')}}</td>
-                            <td class="alignright">{{item.total|number_format(2,'.','')}}</td>
+                            <td class="alignright">{{item.total|number_format(2,'.','')}} </td>
                         </tr>
                 {% endfor %}
             </tbody>
@@ -85,7 +86,7 @@
             <th class="alignright" >{{exento|number_format(2,'.',',')}}</th>
             <th class="alignright" >{{imp|number_format(2,'.',',')}} </th>
             <th class="alignright" >{{retiva|number_format(2,'.',',')}}</th>
-            <th class="alignright" >{{total|number_format(2,'.',',')}}</th>
+            <th class="alignright" >{{(neto+iva+impRNI+nograv+exento+imp+retiva)|number_format(2,'.',',')}}</th>
             </tfoot>
         </table>
 

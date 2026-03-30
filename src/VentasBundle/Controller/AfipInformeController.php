@@ -50,6 +50,7 @@ class AfipInformeController extends Controller {
          * FACTURA ELECTRONICA
          */
         $facturas = $em->getRepository('VentasBundle:Factura')->findByFeventasPeriodoUnidadNegocio($desde, $hasta, $unidneg);
+        $totalGral = $totalGralNeto = $totalGralLiq =0;
         foreach ($facturas as $fe) {
             $operacionesExentas = $fe->getImpOpEx();
             $error = array();
@@ -67,12 +68,17 @@ class AfipInformeController extends Controller {
             $nrocomp = str_pad($fe->getNroComprobante(), 20, "0", STR_PAD_LEFT);
             //$nrocompHasta = str_pad("0", 20, "0", STR_PAD_LEFT);
             $total = str_pad(number_format($fe->getTotal(), 2, '', ''), 15, "0", STR_PAD_LEFT);
+            $totalGral += ($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo;
+            $totalGralNeto += ($fe->getImpNeto() * $signo);
+            $totalGralLiq += ($fe->getImpIva() * $signo);
+
             //* ALICUOTAS
             $alicuotas = json_decode($fe->getIva());
             foreach ($alicuotas as $alicuota) {
                 $netoGravado = number_format($alicuota->BaseImp, 2, '', '');
                 $liquidado = number_format($alicuota->Importe, 2, '', '');
-
+                // $totalGralNeto += $alicuota->BaseImp * $signo;
+                // $totalGralLiq += $alicuota->Importe * $signo;
                 if ($format == 'A') {
                     $alic = array(
                         'tipoComprobante' => $fe->getTipoComprobante()->getCodigo(),
@@ -140,7 +146,6 @@ class AfipInformeController extends Controller {
                 array_push($reginfoCbtes, $comp);
             }
             else {
-
                 $comp = $fe->getCbteFch() .
                     $fe->getTipoComprobante()->getCodigo() .
                     $ptovta .
@@ -174,7 +179,7 @@ class AfipInformeController extends Controller {
             $reginfoCbtes = $reginfoCbtes . "\r\n";
             $reginfoAlicuotas = $reginfoAlicuotas . "\r\n";
         }
-        $resultado = array('comprobantes' => $reginfoCbtes, 'alicuotas' => $reginfoAlicuotas, 'errores' => $toterrores);
+        $resultado = array('comprobantes' => $reginfoCbtes, 'alicuotas' => $reginfoAlicuotas, 'errores' => $toterrores, 'totalGral' =>$totalGral, 'totalGralNeto' => $totalGralNeto, 'totalGralLiq' => $totalGralLiq);
 
         return $resultado;
     }
@@ -445,67 +450,74 @@ class AfipInformeController extends Controller {
             if ($fe->getNotaDebCred()) {
                 $signo = $fe->getNotaDebCred()->getSigno() == '-' ? -1 : 1;
             }
-
             if (isset($totalesxProvincia[$provincia]['TCOM'][$letra]['neto'])) {
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['neto'] += ($fe->getImpNeto() * $signo);
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['exento'] += ($fe->getImpOpEx() * $signo);
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['percRentas'] += ($fe->getImpTrib() * $signo);
-                $totalesxProvincia[$provincia]['TCOM'][$letra]['subtotal'] += (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['subtotal'] += (($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             else {
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['neto'] = ($fe->getImpNeto() * $signo);
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['exento'] = ($fe->getImpOpEx() * $signo);
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['sobretasa'] = 0;
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['impinterno'] = 0;
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['percIva'] = 0;
                 $totalesxProvincia[$provincia]['TCOM'][$letra]['percRentas'] = ($fe->getImpTrib() * $signo);
-                $totalesxProvincia[$provincia]['TCOM'][$letra]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+                $totalesxProvincia[$provincia]['TCOM'][$letra]['subtotal'] = (($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             // TIPO CLIENTE
             $tipoCliente = $fe->getCliente()->getTipoCliente() ? $fe->getCliente()->getTipoCliente()->getNombre() : 'Mayorista';
             if (isset($totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'])) {
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'] += ($fe->getImpNeto() * $signo);
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['exento'] += ($fe->getImpOpEx() * $signo);
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['percRentas'] += ($fe->getImpTrib() * $signo);
-                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['subtotal'] += (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['subtotal'] += (($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             else {
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['neto'] = ($fe->getImpNeto() * $signo);
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['exento'] = ($fe->getImpOpEx() * $signo);
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['sobretasa'] = 0;
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['impinterno'] = 0;
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['percIva'] = 0;
                 $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['percRentas'] = ($fe->getImpTrib() * $signo);
-                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+                $totalesxProvincia[$provincia]['TCLI'][$tipoCliente]['subtotal'] = (($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             // TOTALIZADOR TIPO CLIENTE
             if (isset($totalesxTipoCliente[$tipoCliente]['neto'])) {
                 $totalesxTipoCliente[$tipoCliente]['neto'] += ($fe->getImpNeto() * $signo);
                 $totalesxTipoCliente[$tipoCliente]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['exento'] += ($fe->getImpOpEx() * $signo);
                 $totalesxTipoCliente[$tipoCliente]['percRentas'] += ($fe->getImpTrib() * $signo);
-                $totalesxTipoCliente[$tipoCliente]['subtotal'] += (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+                $totalesxTipoCliente[$tipoCliente]['subtotal'] += (($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             else {
                 $totalesxTipoCliente[$tipoCliente]['neto'] = ($fe->getImpNeto() * $signo);
                 $totalesxTipoCliente[$tipoCliente]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxTipoCliente[$tipoCliente]['exento'] = ($fe->getImpOpEx() * $signo);
                 $totalesxTipoCliente[$tipoCliente]['sobretasa'] = 0;
                 $totalesxTipoCliente[$tipoCliente]['impinterno'] = 0;
                 $totalesxTipoCliente[$tipoCliente]['percIva'] = 0;
                 $totalesxTipoCliente[$tipoCliente]['percRentas'] = ($fe->getImpTrib() * $signo);
-                $totalesxTipoCliente[$tipoCliente]['subtotal'] = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+                $totalesxTipoCliente[$tipoCliente]['subtotal'] = (($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             }
             // POR CATEGORIA DE IVA
             $categIva = $fe->getCliente()->getCondicionIva() ? $fe->getCliente()->getCondicionIva()->getNombre() : 'Otros (no identificados)';
-            $categIvaTotal = (($fe->getImpNeto() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
+            $categIvaTotal = (($fe->getImpNeto() + $fe->getImpOpEx() + $fe->getImpIva() + $fe->getImpTrib()) * $signo);
             if (isset($totalesxCategoriaIva[$categIva]['neto'])) {
                 $totalesxCategoriaIva[$categIva]['neto'] += ($fe->getImpNeto() * $signo);
                 $totalesxCategoriaIva[$categIva]['iva'] += ($fe->getImpIva() * $signo);
+                $totalesxCategoriaIva[$categIva]['exento'] += ($fe->getImpOpEx() * $signo);
                 $totalesxCategoriaIva[$categIva]['percRentas'] += ($fe->getImpTrib() * $signo);
                 $totalesxCategoriaIva[$categIva]['subtotal'] += $categIvaTotal;
             }
             else {
                 $totalesxCategoriaIva[$categIva]['neto'] = ($fe->getImpNeto() * $signo);
                 $totalesxCategoriaIva[$categIva]['iva'] = ($fe->getImpIva() * $signo);
+                $totalesxCategoriaIva[$categIva]['exento'] = ($fe->getImpOpEx() * $signo);
                 $totalesxCategoriaIva[$categIva]['sobretasa'] = 0;
                 $totalesxCategoriaIva[$categIva]['impinterno'] = 0;
                 $totalesxCategoriaIva[$categIva]['percIva'] = 0;
@@ -528,6 +540,15 @@ class AfipInformeController extends Controller {
                     $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['iva'] = $item->Importe * $signo;
                     $totalesxAlicuota[$categIva][$alicuota->getNombre()][$tipoCliente]['subtotal'] = $ivaTotal;
                 }
+            }
+            if (isset($totalesxAlicuota[$categIva]['0.00 %'][$tipoCliente]['neto'])) {
+                $totalesxAlicuota[$categIva]['0.00 %'][$tipoCliente]['neto'] += ($fe->getImpOpEx() * $signo);
+                $totalesxAlicuota[$categIva]['0.00 %'][$tipoCliente]['iva'] += 0;
+                $totalesxAlicuota[$categIva]['0.00 %'][$tipoCliente]['subtotal'] += ($fe->getImpOpEx() * $signo);
+            } else {
+              $totalesxAlicuota[$categIva]['0.00 %'][$tipoCliente]['neto'] = ($fe->getImpOpEx() * $signo);
+              $totalesxAlicuota[$categIva]['0.00 %'][$tipoCliente]['iva'] = 0;
+              $totalesxAlicuota[$categIva]['0.00 %'][$tipoCliente]['subtotal'] = ($fe->getImpOpEx() * $signo);
             }
         }
 

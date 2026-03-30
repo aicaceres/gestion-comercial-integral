@@ -187,6 +187,7 @@ class ImpuestoController extends Controller {
                     $resAlicuotas[$afipComp->getValor()] += $alic->Importe * $i;
                 }
             }
+            $resAlicuotas['0.00'] += $fe->getImpOpEx() * $i;
             array_push($items, $item);
         }
         return $this->render('VentasBundle:Impuesto:libroiva.html.twig', array(

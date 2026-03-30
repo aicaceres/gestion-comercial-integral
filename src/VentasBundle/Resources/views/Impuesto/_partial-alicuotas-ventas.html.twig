@@ -44,7 +44,7 @@
         </tbody>
     </table>
 </div>
-<h5 style="padding-left:15px">Total Neto Gravado: ${{ (totneto/100)|number_format(2,'.',',') }} &nbsp;// &nbsp;Total Liquidado: ${{ (totiva/100)|number_format(2,'.',',') }}</h5>        
+<h5 style="padding-left:15px">Total Neto Gravado: ${{ (resultado.totalGralNeto)|number_format(2,'.',',') }} &nbsp;// &nbsp;Total Liquidado: ${{ (resultado.totalGralLiq)|number_format(2,'.',',') }}</h5>
 <div>
     <h5 style="text-align:center; margin:10px;"> {{ resultado.alicuotas|length }} alícuotas en REGINFO_CV_VENTAS_ALICUOTAS.txt
         <a class="btn btn2 btn_blue btn_inboxi" style="margin-left: 10px;font-weight: lighter;" href="{{ path('ventas_reginfo_export_txt') }}?periodo={{ periodo }}&tipo={{ tipo }}&file=ALIC" > <span>Descargar</span> </a></h5>

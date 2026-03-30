@@ -47,18 +47,19 @@
             <button type="submit" >Buscar</button>
         </form>
     </div>
-    <table cellpadding="0" cellspacing="0" border="0" class="stdtable ventasxprovincia">     
-    {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoRentas, totalPeriodo = 0,0,0,0 %}   
+    <table cellpadding="0" cellspacing="0" border="0" class="stdtable ventasxprovincia">
+    {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoExento, totalPeriodoRentas, totalPeriodo = 0,0,0,0,0 %}
     {# POR PROVINCIA #}
     {% for prov,resumen in totalesxProvincia %}
-        {% set totalProvNeto, totalProvIva, totalProvRentas, totalProv = 0,0,0,0 %}
+        {% set totalProvNeto, totalProvIva, totalProvExento, totalProvRentas, totalProv = 0,0,0,0,0 %}
         <tr style="height: 34px">
-            <th colspan="8" style="border: 1px solid lightgray;background-color:aliceblue">PROVINCIA: {{ prov }}</th>
+            <th colspan="9" style="border: 1px solid lightgray;background-color:aliceblue">PROVINCIA: {{ prov }}</th>
         </tr>
         <tr>
             <th>Documento</th>
             <th>Neto sin IVA</th>
             <th>IVA</th>
+            <th>Exento</th>
             <th>Sobretasa</th>
             <th>Imp. Interno</th>
             <th>Percep. IVA</th>
@@ -67,11 +68,12 @@
         </tr>
         {# POR TIPO COMPROBANTE #}
         {% for letra, item in resumen['TCOM']|reverse %}
-            {% set totalProvNeto, totalProvIva, totalProvRentas, totalProv = totalProvNeto+item.neto, totalProvIva+item.iva, totalProvRentas+item.percRentas, totalProv+item.subtotal %}
+            {% set totalProvNeto, totalProvIva, totalProvExento, totalProvRentas, totalProv = totalProvNeto+item.neto, totalProvIva+item.iva, totalProvExento+item.exento, totalProvRentas+item.percRentas, totalProv+item.subtotal %}
             <tr>
                 <td class="subtitlecell">Subtotal {{ letra }}</td>
                 <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.exento|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.sobretasa|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.impinterno|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.percIva|number_format(2,'.','') }}</td>
@@ -79,13 +81,14 @@
                 <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
             </tr>
         {% endfor %}
-        {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoRentas, totalPeriodo = 
-            totalPeriodoNeto+totalProvNeto, totalPeriodoIva+totalProvIva, totalPeriodoRentas+totalProvRentas, totalPeriodo+totalProv
+        {% set totalPeriodoNeto, totalPeriodoIva, totalPeriodoExento, totalPeriodoRentas, totalPeriodo =
+            totalPeriodoNeto+totalProvNeto, totalPeriodoIva+totalProvIva, totalPeriodoExento+totalProvExento, totalPeriodoRentas+totalProvRentas, totalPeriodo+totalProv
         %}
             <tr>
                 <th class="titlecell"> TOTAL {{ prov }}</th>
                 <th class="numbercell">{{ totalProvNeto|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ totalProvIva|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ totalProvExento|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
@@ -93,30 +96,32 @@
                 <th class="numbercell">{{ totalProv|number_format(2,'.','') }}</th>
             </tr>
          <tr>
-            <td colspan="8" style="border:none">&nbsp;</td>
-        </tr>   
-        {# POR TIPO CLIENTE #}    
+            <td colspan="9" style="border:none">&nbsp;</td>
+        </tr>
+        {# POR TIPO CLIENTE #}
         {% for tipoCliente,item in resumen['TCLI'] %}
             <tr class="tipocliente">
                 <td class="subtitlecell">{{ tipoCliente }}</td>
                 <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.exento|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.sobretasa|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.impinterno|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.percIva|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.percRentas|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
             </tr>
-        {% endfor %}  
+        {% endfor %}
         <tr>
-            <td colspan="8" style="border:none">&nbsp;</td>
+            <td colspan="9" style="border:none">&nbsp;</td>
         </tr>
-    {% endfor %}     
-    {# TOTAL DEL PERIODO #} 
+    {% endfor %}
+    {# TOTAL DEL PERIODO #}
         <tr class="headergrey" style="height: 34px;">
             <th class="titlecell"> TOTAL PERIODO</th>
             <th class="numbercell">{{ totalPeriodoNeto|number_format(2,'.','') }}</th>
             <th class="numbercell">{{ totalPeriodoIva|number_format(2,'.','') }}</th>
+            <th class="numbercell">{{ totalPeriodoExento|number_format(2,'.','') }}</th>
             <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
             <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
             <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
@@ -124,32 +129,34 @@
             <th class="numbercell">{{ totalPeriodo|number_format(2,'.','') }}</th>
         </tr>
         <tr>
-            <td colspan="8" style="border:none">&nbsp;</td>
+            <td colspan="9" style="border:none">&nbsp;</td>
         </tr>
-        {# TOTALES POR TIPO CLIENTE #} 
+        {# TOTALES POR TIPO CLIENTE #}
         {% for tipoCliente,item in totalesxTipoCliente %}
             <tr>
                 <th class="titlecell"> {{ tipoCliente }}</th>
                 <th class="numbercell">{{ item.neto|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ item.iva|number_format(2,'.','') }}</th>
+                <th class="numbercell">{{ item.exento|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ 0|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ item.percRentas|number_format(2,'.','') }}</th>
                 <th class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</th>
             </tr>
-        {% endfor %} 
+        {% endfor %}
         <tr>
-            <td colspan="8" style="border:none">&nbsp;</td>
+            <td colspan="9" style="border:none">&nbsp;</td>
         </tr>
-        {# TOTALES POR CATEGORIA DE IVA #} 
+        {# TOTALES POR CATEGORIA DE IVA #}
         <tr class="headercell" style="height: 34px">
-            <th colspan="8" style="border: 1px solid lightgray;">TOTALES POR TIPO DE CONTRIBUYENTE</th>
+            <th colspan="9" style="border: 1px solid lightgray;">TOTALES POR TIPO DE CONTRIBUYENTE</th>
         </tr>
         <tr>
             <th>Tipo de Contribuyente</th>
             <th>Neto sin IVA</th>
             <th>IVA</th>
+            <th>Exento</th>
             <th>Sobretasa</th>
             <th>Imp. Interno</th>
             <th>Percep. IVA</th>
@@ -161,19 +168,20 @@
                 <td class="titlecell"> {{ categIva }}</td>
                 <td class="numbercell">{{ item.neto|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.iva|number_format(2,'.','') }}</td>
+                <td class="numbercell">{{ item.exento|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ 0|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ 0|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ 0|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.percRentas|number_format(2,'.','') }}</td>
                 <td class="numbercell">{{ item.subtotal|number_format(2,'.','') }}</td>
             </tr>
-        {% endfor %} 
+        {% endfor %}
         <tr>
-            <td colspan="8" style="border:none">&nbsp;</td>
+            <td colspan="9" style="border:none">&nbsp;</td>
         </tr>
-        {# TOTALES POR ALICUOTA #} 
+        {# TOTALES POR ALICUOTA #}
         <tr class="headercell" style="height: 34px">
-            <th colspan="8" style="border: 1px solid lightgray;">TOTALES DISCRIMINADOS POR ALICUOTA</th>
+            <th colspan="9" style="border: 1px solid lightgray;">TOTALES DISCRIMINADOS POR ALICUOTA</th>
         </tr>
         <tr>
            <th colspan="2"></th>
@@ -200,8 +208,8 @@
                     <td class="numbercell">{{ (item['Mayorista'] is defined ? item['Mayorista'].iva : 0)|number_format(2,'.','') }}</td>
                     <td class="numbercell">{{ (item['Mayorista'] is defined ? item['Mayorista'].subtotal : 0)|number_format(2,'.','') }}</td>
                 </tr>
-            {% endfor %} 
-        {% endfor %} 
+            {% endfor %}
+        {% endfor %}
     </table>
 </div>
 {% endblock %}
@@ -216,7 +224,7 @@ jQuery(document).ready(function($) {
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
     $('.togglemenu').click();
     var filename = "VentasxProvincia_{{app.session.get('unidneg_nombre')|slice(0, 10)}}{{'now'|date('mY')}}";
-    
+
     tableExporter = $(".ventasxprovincia").tableExport(
         {headers: true,
         footers: true,
