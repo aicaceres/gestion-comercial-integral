@@ -16,6 +16,7 @@
         <input type="hidden" id="datalist" name="datalist"/>
         <button class="stdbtn print floatright" type="submit" >Exportar</button>
     </form>
+    <a class="stdbtn web floatright" style="margin-right: 10px;" href="{{ path('stock_producto_web') }}" >Productos Web</a>
     <form id="searchform" action="{{ path('stock_producto') }}" method="get">
         <div style="display: inline-block; margin-bottom: 10px;">
             &nbsp;&nbsp;&nbsp;
@@ -125,28 +126,6 @@ jQuery(document).ready(function($) {
         });
         $('#datalist').val(JSON.stringify(datos));*/
     });
-
-    //oTable.fnSort( [ [1,'desc'] ] );
-   /* $(".print").click(function() {
-        var orden = oTable.fnSettings().aaSorting;
-        var datos = [];
-        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
-            datos[index] = value;
-        });
-        var search = $('#dyntable2_filter input').val();
-        $.ajax({
-            type: 'POST',
-            url: '{{ path("print_productos") }}',
-            data: { orden: orden[0], search:search, datos:JSON.stringify(datos) ,provId: $('#selectProveedor').val() },
-            success: function(data) {
-
-
-            //    window.open("data:application/octet-stream;charset=utf-16le;base64,"+encodeURIComponent(data));
-              //  window.open("data:application/pdf," + encodeURIComponent(data));
-               // window.open("data:application/pdf," + encodeURIComponent(data),'nombre.pdf');
-            }
-        });
-    });*/
 
 });
 </script>

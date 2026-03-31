@@ -34,6 +34,8 @@ class ProductoType extends AbstractType {
             ->add('codigoBarra')
             ->add('observaciones')
             ->add('activo')
+            ->add('publicarEnWeb', null, array('label' => 'Publicar en Web', 'required' => false))
+            ->add('sku', null, array('label' => 'SKU'))
             ->add('facturable', null, array('label' => 'Facturable en Ventas'))
             ->add('bulto', null, array('label' => 'Por bulto'))
             ->add('cantidadxBulto', null, array('label' => 'Cantidad por bulto'))

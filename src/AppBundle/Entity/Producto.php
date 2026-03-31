@@ -119,6 +119,16 @@ class Producto {
     protected $facturable = false;
 
     /**
+     * @ORM\Column(name="publicar_en_web", type="boolean", nullable=true)
+     */
+    protected $publicarEnWeb = false;
+
+    /**
+     * @ORM\Column(name="sku", type="string", length=64, nullable=true)
+     */
+    protected $sku;
+
+    /**
      * @ORM\Column(name="comodin", type="boolean", nullable=true)
      * @Gedmo\Versioned()
      */
@@ -241,6 +251,46 @@ class Producto {
         $this->nombre = $nombre;
 
         return $this;
+    }
+
+    /**
+     * Set publicarEnWeb
+     *
+     * @param boolean $publicarEnWeb
+     * @return Producto
+     */
+    public function setPublicarEnWeb($publicarEnWeb) {
+        $this->publicarEnWeb = $publicarEnWeb;
+        return $this;
+    }
+
+    /**
+     * Get publicarEnWeb
+     *
+     * @return boolean
+     */
+    public function getPublicarEnWeb() {
+        return $this->publicarEnWeb;
+    }
+
+    /**
+     * Set sku
+     *
+     * @param string $sku
+     * @return Producto
+     */
+    public function setSku($sku) {
+        $this->sku = $sku;
+        return $this;
+    }
+
+    /**
+     * Get sku
+     *
+     * @return string
+     */
+    public function getSku() {
+        return $this->sku;
     }
 
     /**

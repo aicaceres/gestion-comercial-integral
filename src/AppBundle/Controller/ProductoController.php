@@ -342,6 +342,41 @@ class ProductoController extends Controller {
         return $response;
     }
 
+/**
+     * @Route("/producto/web/export", name="stock_producto_web")
+     * @Method("GET")
+     */
+    public function stockProductoWebExportAction() {
+        $em = $this->getDoctrine()->getManager();
+        $productos = $em->getRepository('AppBundle:Producto')->findBy(['publicarEnWeb' => true]);
+
+        $csvHeader = ['id', 'sku', 'nombre', 'stock', 'precio'];
+        $rows = [];
+        foreach ($productos as $producto) {
+            $rows[] = [
+                $producto->getId(),
+                $producto->getSku(),
+                $producto->getNombre(),
+                $producto->getStockActual(),
+                $producto->getPrecioByListaPpal(),
+            ];
+        }
+
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, $csvHeader);
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $csvContent = stream_get_contents($handle);
+        fclose($handle);
+
+        $response = new Response($csvContent);
+        $response->headers->set('Content-Type', 'text/csv; charset=UTF-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="productos_web.csv"');
+        return $response;
+    }
+
     /**
      * @Route("/exportInventarioEnStock",
      * name="export_inventario_enstock")

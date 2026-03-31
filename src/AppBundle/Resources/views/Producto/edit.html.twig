@@ -98,13 +98,15 @@
             {{ form_row(form.cantidadxBulto, { 'attr': {'class' : 'mininput' }, 'label_attr': {'style': 'width:105px !important;'} }) }}
             {{ form_row(form.activo) }}
         </div>
-
-        <div class="two_fields">
+        <div class="locate">
             {{ form_row(form.facturable) }}
-            <div class="aligncenter">
+            {{ form_row(form.publicarEnWeb, { 'label_attr': {'style': 'width:105px !important;'} }) }}
+            {{ form_row(form.sku, { 'attr': {'class' : 'smallinput' } }) }}
+        </div>
+
+            <div class="aligncenter" style="display:none">
                 <button id="precios" class="guardar" type="button" onclick="jQuery('#divprecios').toggle()">Precios</button>
             </div>
-        </div>
 
         <div class="widgetbox" id="divprecios" style="width:60%;margin-left: 150px;background: beige;padding: 15px;display:block;">
             <div class="title" style="margin:0;"><h5>Precios de Venta
@@ -136,7 +138,6 @@
             </div><!--widgetcontent-->
         </div>
 
-
         <br clear="all" />
         <div class="actionbutton">
             <button class="guardar" id="guardar" type="submit" >Guardar</button>
@@ -162,17 +163,38 @@
             addNewDeposito();
             e.stopPropagation();
         });
+        // Hacer que el campo SKU sea requerido solo si publicarEnWeb está chequeado
+        var $publicarEnWeb = $('#appbundle_producto_publicarEnWeb');
+        var $sku = $('#appbundle_producto_sku');
+        // Evento sobre el input real
+        $publicarEnWeb.on('change', function() {
+            if ($publicarEnWeb.is(':checked')) {
+                $sku.attr('required', 'required');
+            } else {
+                $sku.removeAttr('required');
+            }
+        });
+        // Evento sobre el span de Uniform (por compatibilidad)
+        $('#uniform-appbundle_producto_publicarEnWeb span').on('click', function() {
+            setTimeout(function() {
+                $publicarEnWeb.trigger('change');
+            }, 10);
+        });
+        // Inicializar el estado al cargar la página
+        $publicarEnWeb.trigger('change');
+
         $('#guardar').on('click',function(){
-            $('[required]').each(function (i, el) {
-                if ($(el).val() == '' || $(el).val() == undefined) {
-                    alert('Faltan completar datos requeridos!');
-                    jQuery('#divprecios').show()
-                    jQuery('#stockMinimo').show()
-                    $(el).focus()
-                    event.preventDefault();
-                    return false;
-                }
-            });
+                // Validación general de requeridos
+                $('[required]').each(function (i, el) {
+                    if ($(el).val() == '' || $(el).val() == undefined) {
+                        alert('Faltan completar datos requeridos!');
+                        jQuery('#divprecios').show();
+                        jQuery('#stockMinimo').show();
+                        $(el).focus();
+                        event.preventDefault();
+                        return false;
+                    }
+                });
         })
     });
 
