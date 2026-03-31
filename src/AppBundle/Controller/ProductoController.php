@@ -349,23 +349,28 @@ class ProductoController extends Controller {
     public function stockProductoWebExportAction() {
         $em = $this->getDoctrine()->getManager();
         $productos = $em->getRepository('AppBundle:Producto')->findBy(['publicarEnWeb' => true]);
-
-        $csvHeader = ['id', 'sku', 'nombre', 'stock', 'precio'];
+        $lista = $em->getRepository('AppBundle:PrecioLista')->findOneBy(['principal' => true]);
+        $formaPago = $em->getRepository('ConfigBundle:FormaPago')->findOneBy(['contado' => true]);
+        $csvHeader = ['sku', 'Nombre del producto', 'stock', 'precio rebajado', 'precio normal'];
         $rows = [];
         foreach ($productos as $producto) {
             $rows[] = [
-                $producto->getId(),
                 $producto->getSku(),
                 $producto->getNombre(),
                 $producto->getStockActual(),
-                $producto->getPrecioByListaPpal(),
+                $producto->getPrecioContadoByLista(
+                  $lista ? $lista->getId() : null,
+                  $formaPago->getPorcentajeRecargo(),
+                  $producto->getIva()
+                ),
+                $producto->getPrecioByListaPpal()
             ];
         }
 
         $handle = fopen('php://temp', 'r+');
-        fputcsv($handle, $csvHeader);
+        fputcsv($handle, $csvHeader,';');
         foreach ($rows as $row) {
-            fputcsv($handle, $row);
+            fputcsv($handle, $row,';');
         }
         rewind($handle);
         $csvContent = stream_get_contents($handle);
