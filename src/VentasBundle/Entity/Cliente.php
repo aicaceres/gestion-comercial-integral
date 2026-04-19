@@ -316,13 +316,17 @@ class Cliente {
             if ($fp && $fp->getCuentaCorriente()) {
                 $fact = $cobro->getFacturaElectronica();
                 if ($fact) {
-                    $saldo += floatval($fact->getTotal());
+                    $monto = floatval($fact->getTotal());
+                    $saldo += $monto;
                 }
             }
         }
 
-        // Notas de débito/crédito: sumar o restar según el signo ('+' suma, '-' resta)
+        // Notas de débito/crédito: sumar o restar según el signo ('+' suma, '-' resta), solo si no están eliminadas
         foreach ($this->notasDebCredVenta as $nota) {
+            if (method_exists($nota, 'getEstado') && $nota->getEstado() === 'ELIMINADO') {
+                continue;
+            }
             $fp = $nota->getFormaPago();
             if ($fp && $fp->getCuentaCorriente()) {
                 $signo = $nota->getSigno();
