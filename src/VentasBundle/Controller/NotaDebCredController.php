@@ -271,24 +271,40 @@ class NotaDebCredController extends Controller {
                             $detalle->setDatosTarjeta(null);
                         }
                         if ($tipoPago === 'TRANSFERENCIA') {
-                            // cargar movimiento de credito bancario
-                            $movBanco = new BancoMovimiento();
-                            $banco = $em->getRepository('ConfigBundle:Banco')->find($detalles[$key]['bancoTransferencia']);
-                            $movBanco->setBanco($banco);
-                            $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')->find($detalles[$key]['cuentaTransferencia']);
-                            $movBanco->setCuenta($cuenta);
-                            $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
-                            $movBanco->setConciliado(false);
-                            $movBanco->setImporte($detalles[$key]['importe']);
-                            $movBanco->setFechaAcreditacion(new \DateTime());
-                            $movBanco->setFechaCarga(new \DateTime());
-                            $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')->findOneByNombre('CREDITO');
-                            $movBanco->setTipoMovimiento($tipoMov);
-                            $tipoNota = $entity->getSigno() == 'CRE' ? 'Credito' : 'Debito';
-                            $movBanco->setCobroDetalle($detalle);
-                            $movBanco->setObservaciones('Nota '.$tipoNota.' - '.$entity->getNombreCliente());
-                            $em->persist($movBanco);
-                        }
+                          // Buscar si ya existe un BancoMovimiento para este detalle
+                          $movBanco = $em->getRepository('ConfigBundle:BancoMovimiento')
+                              ->findOneByCobroDetalle($detalle);
+
+                          if (!$movBanco) {
+                              // Solo crear si no existe
+                              $movBanco = new BancoMovimiento();
+                              $movBanco->setFechaCarga(new \DateTime());
+                          }
+
+                          // Actualizar/setear los datos en ambos casos
+                          $banco = $em->getRepository('ConfigBundle:Banco')
+                              ->find($detalles[$key]['bancoTransferencia']);
+                          $movBanco->setBanco($banco);
+
+                          $cuenta = $em->getRepository('ConfigBundle:CuentaBancaria')
+                              ->find($detalles[$key]['cuentaTransferencia']);
+                          $movBanco->setCuenta($cuenta);
+
+                          $movBanco->setNroMovimiento($detalles[$key]['nroMovTransferencia']);
+                          $movBanco->setConciliado(false);
+                          $movBanco->setImporte($detalles[$key]['importe']);
+                          $movBanco->setFechaAcreditacion(new \DateTime());
+
+                          $tipoMov = $em->getRepository('ConfigBundle:BancoTipoMovimiento')
+                              ->findOneByNombre('CREDITO');
+                          $movBanco->setTipoMovimiento($tipoMov);
+
+                          $tipoNota = $entity->getSigno() == 'CRE' ? 'Credito' : 'Debito';
+                          $movBanco->setCobroDetalle($detalle);
+                          $movBanco->setObservaciones('Nota ' . $tipoNota . ' - ' . $entity->getNombreCliente());
+
+                          $em->persist($movBanco);
+                      }
                     }
                 }
                 // seteo ultimos valores

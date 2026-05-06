@@ -3,7 +3,6 @@
 namespace VentasBundle\Service;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpFoundation\Session\Session;
-use ConfigBundle\Controller\UtilsController;
 use VentasBundle\Entity\FacturaElectronica;
 use VentasBundle\Afip\src\Afip;
 use Endroid\QrCode\QrCode;
