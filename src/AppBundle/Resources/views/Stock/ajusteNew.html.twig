@@ -14,15 +14,15 @@
             <div class="two_fields">
                 {{ form_row(form.fecha, { 'attr': {'class' : 'datepicker'} }) }}
                {{ form_row(form.deposito) }}
-            </div> 
+            </div>
            {{ form_row(form.observaciones, { 'attr': {'class' : 'mediuminput' } }) }}
-             
+
             <div style="padding-top: 20px; " id="divItems">
                 {{ form_errors(form.detalles) }}
                 <div style="margin-bottom: 10px; ">
         {{ form_label(form.tipo) }}
         {{ form_widget(form.tipo, { 'attr': {'class' : 'radionumerac' } }) }}
-                </div> 
+                </div>
                 <table cellpadding="0" cellspacing="0" border="0" class="stdtable noaction">
                     <thead>
                         <tr>
@@ -42,24 +42,24 @@
                             <td class="prodTd">{{ form_widget(item.producto) }}
                                 <a href="javascript:void(0)" class="btnlote btn btn_info" title="Ver/Ocultar Lote"></a>
                                 <div class="hidden lote">
-                                    {{ form_widget(item.lotes) }}      
+                                    {{ form_widget(item.lotes) }}
                                 </div>
                             </td>
                             <td class="signoTd">{{ form_widget(item.signo, { 'attr': {'class' : 'selectsigno'} }) }}</td>
-                            <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft','min':'0'} }) }} 
+                            <td class="cantTd">{{ form_widget(item.cantidad, { 'attr': {'class' : 'number floatleft','min':'0'} }) }}
                                 <span class="unidmed floatleft" style="padding-left: 5px"></span>
                             </td>
                             <td class="bulto">{{ form_widget(item.bulto) }} </td>
-                            <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }} </td>        
+                            <td class="cantxBulto">{{ form_widget(item.cantidadxBulto) }} </td>
                             <td class="motTd">{{ form_widget(item.motivo, { 'attr': {'rows' : '1'} }) }}</td>
                             <td class="delTd" style="text-align:center;"></td>
                         </tr>
-                    {% endfor %}           
+                    {% endfor %}
                     </tbody>
-                </table>    
+                </table>
 
-            </div>                
-            <br clear="all" /> 
+            </div>
+            <br clear="all" />
             <div class="actionbutton">
                 <button class="guardar" type="submit" >Guardar</button>
                 <a class="cancelar" type="button" href="{{ path('stock_ajuste')}}">Cancelar</a>
@@ -67,25 +67,25 @@
         </fieldset>
         <div name="rest" style="display:none">{{ form_rest(form) }}</div>
 {{ form_end(form) }}
-</div>    
+</div>
 </div>
 
 <div id="popuplote" style="display:none;">
-  <form id="formlote" class="stdform"> 
+  <form id="formlote" class="stdform">
       <fieldset>
           <div style="margin: 10px 0">
               <label class="required" style="width:90px">N° lote:</label>
-              <input id="nroLote" class="width100" title="N° Lote" value="" required="required" type="text"> 
+              <input id="nroLote" class="width100" title="N° Lote" value="" required="required" type="text">
           </div>
-      </fieldset>    
-      <fieldset>    
+      </fieldset>
+      <fieldset>
           <div>
               <label class="required" style="width:90px">Fecha Vto:</label>
-              <input id="fechaVencimiento" class="datepicker width100" required="required" value="" title="Fecha Vencimiento" type="text">  
-          </div>   
-      </fieldset>      
+              <input id="fechaVencimiento" class="datepicker width100" required="required" value="" title="Fecha Vencimiento" type="text">
+          </div>
+      </fieldset>
   </form>
-   
+
 </div>
 {% endblock %}
 {% block extra_javascripts %}
@@ -99,12 +99,12 @@ jQuery(document).ready(function($) {
         if ( depositos.search(  $(this).val() ) == -1 )  {
             $(this).remove();
         }
-    });    
+    });
     $('.datepicker').datepicker({dateFormat: 'dd-mm-yy'});
-    $(".chzn-select").change(function(){ addUnidadMedida( $(this) ); }); 
+    $(".chzn-select").change(function(){ addUnidadMedida( $(this) ); });
 
      // Setear tipo de ajuste segun radio
-    var tipo = $('input:radio').uniform(); 
+    var tipo = $('input:radio').uniform();
     tipo.change(function(){
         if( $(this).val()==='+' ){
             $tipoajuste='+';
@@ -113,7 +113,7 @@ jQuery(document).ready(function($) {
         }
     });
     tipo.change();
-        
+
 // Get the container who holds the collection
     $collectionHolder = $('table.stdtable tbody');
     $collectionHolder.find('.delTd').each(function() {
@@ -121,23 +121,23 @@ jQuery(document).ready(function($) {
     });
     $collectionHolder.find('.ordTd').each(function(i) {
         $(this).html(i + 1);
-    });    
+    });
     $('#linkAdd').on('click', function(e) {
         e.preventDefault();
         addNewItem();
         e.stopPropagation();
         $collectionHolder.find('.chzn-container').last().trigger('mousedown');
-    });    
+    });
    $(document).keypress(function(e) {
-        if (e.which == 43) { 
+        if (e.which == 43) {
             e.preventDefault();
             $('#linkAdd').click();
         }
     });
-    $('.guardar').click(function() {        
+    $('.guardar').click(function() {
         if( !$('#appbundle_stockajuste_deposito').val() ){
             alert('Seleccionar un Depósito para continuar.');
-            return false;  
+            return false;
         };
         if( $('tbody tr.item').length > 0 ){
             if (!confirm('Confirma la registración?')) {
@@ -149,9 +149,9 @@ jQuery(document).ready(function($) {
     $(".bulto input").each(function() {
         changeBulto( $(this) );
     });
-    
+
     $(".btnlote").click(function(){ lotes( $(this) );  });
-});    
+});
 function addNewItem() {
     var prototype = $collectionHolder.data('prototype');
     var index = $collectionHolder.data('index');
@@ -160,9 +160,9 @@ function addNewItem() {
     $collectionHolder.data('index', index + 1);
     addItemFormDeleteLink($collectionHolder.find('.delTd').last());
     $collectionHolder.find('.ordTd').last().html($collectionHolder.data('index'));
-    jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});   
+    jQuery(".chzn-select").chosen({no_results_text: "Sin resultados",search_contains: true});
     jQuery('.chzn-container-single').css({minWidth: '90%', width: 'auto'});
-    jQuery(".chzn-select").change(function(){ changeProducto( jQuery(this) ); }); 
+    jQuery(".chzn-select").change(function(){ changeProducto( jQuery(this) ); });
     jQuery(".bulto input").last().uniform();
     jQuery(".bulto input").change(function(){ changeBulto( jQuery(this) );  });
     jQuery('input').on('focus',function(){ jQuery(this).select(); });
@@ -172,18 +172,18 @@ function addNewItem() {
         if(signo.val() == '+'){
            signo.parent().parent().find('.addlote').show();
         }else{
-           signo.parent().parent().find('.addlote').hide(); 
+           signo.parent().parent().find('.addlote').hide();
         }
-    });    
+    });
     $collectionHolder.find(".btnlote").last().click(function(){ lotes( jQuery(this) );  });
     $collectionHolder.find(".addlote").last().click(function(){ addlote( jQuery(this) );  });
-    
+
     $collectionHolder.find('.select2Lote').last().select2({
         placeholder: 'Seleccione un lote',
         ajax: {
           url: function (params) {
             return  getUrlLotes( jQuery(this) );
-          },                  
+          },
           dataType: 'json',
           processResults: function (data) {
             return {
@@ -218,11 +218,11 @@ function changeProducto(producto){
                async:false,
                dataType:"json",
                data: 'prod='+ producto.val(),
-               success: function(data) { 
+               success: function(data) {
                    trIndex = producto.parent().parent();
                    //limpiar lotes
                    var lote_selector = trIndex.find('.lote [id$="_lotes"]');
-                   lote_selector.val("-1").trigger("change");  
+                   lote_selector.val("-1").trigger("change");
                    trIndex.find('.cantTd input').val(1);
                    trIndex.find('span.unidmed').html(data.unidmed);
                    if(data.bulto){
@@ -232,40 +232,40 @@ function changeProducto(producto){
                        trIndex.find('span.unidmed').show();
                        trIndex.find('.cantxBulto input').val('');
                    }
-                   trIndex.find('.bulto input').prop('checked', data.bulto);   
+                   trIndex.find('.bulto input').prop('checked', data.bulto);
                    jQuery.uniform.update();
-                   trIndex.find('.cantTd input').focus();                       
+                   trIndex.find('.cantTd input').focus();
                }
            });
 }
-function changeBulto(item){ 
-    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed'); 
+function changeBulto(item){
+    var unidmed = item.parent().parent().parent().siblings('.cantTd').find('.unidmed');
         var cantxbulto = item.parent().parent().parent().siblings('.cantxBulto').find('input');
         if( item.is(':checked') ){
             unidmed.hide();
-            cantxbulto.prop('readonly',false);     
+            cantxbulto.prop('readonly',false);
             cantxbulto.css('color','#666');
             cantxbulto.focus();
         }else{
-           unidmed.show(); 
+           unidmed.show();
            cantxbulto.prop('readonly',true);
-           cantxbulto.css('color','#fff');           
-        }   
+           cantxbulto.css('color','#fff');
+        }
 }
 
-function lotes( item ){    
+function lotes( item ){
     var lote = item.next('.lote');
     if(item.parent().find('[name*="producto"]').val()){
-      // si es + agregar lote 
-      var signo = item.parent().next('.signoTd').find('[name*="signo"]').val();         
-      lote.toggle();  
+      // si es + agregar lote
+      var signo = item.parent().next('.signoTd').find('[name*="signo"]').val();
+      lote.toggle();
       if( !lote.is(":visible")){
           lote.find('[name*="lotes"]').val("-1").trigger("change");
           lote.find('[name*="lotes"]').attr('required',false);
       }else{
          if( signo=='+'){
               lote.find('.addlote').show();
-              lote.find('.addlote').click();               
+              lote.find('.addlote').click();
             }else{
                 lote.find('.addlote').hide();
             }
@@ -278,7 +278,7 @@ function addlote( item ){
     jQuery('#popuplote').dialog({
         modal: true, autoOpen: true, title: 'Carga de lote', minHeight: 180,
         buttons: [{text: "Agregar", class: 'closePopup',
-                click: function() { 
+                click: function() {
                     var prod = item.parent().parent().find('[name*="producto"]').val();
                     var nro = jQuery(this).find('#nroLote').val();
                     var fecha = jQuery(this).find('#fechaVencimiento').val();
@@ -290,9 +290,9 @@ function addlote( item ){
                     // crear lote nuevo.
                     var select = item.parent().find('[name*="lotes"]');
                     jQuery.get($addLoteProducto,{prod_id: prod, nro:nro, vto:fecha  },
-                        function(datos){ 
+                        function(datos){
                             var newOption = new Option(datos.text, datos.id, true, true);
-                            
+
                             // create the option and append to Select2
                           //  var option = new Option(datos.id, datos.text, false, false);
                             select.append(newOption).trigger('change');
@@ -304,11 +304,11 @@ function addlote( item ){
                                     data: datos
                                 }
                             });
-                            
+
                         }, "json");
-                    
+
                     //recargar select y seleccionar el valor
-                    jQuery(this).dialog("close"); 
+                    jQuery(this).dialog("close");
                 }}]
     });
 }

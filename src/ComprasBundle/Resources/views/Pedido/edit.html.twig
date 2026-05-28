@@ -284,6 +284,7 @@ jQuery(document).ready(function($) {
                 form.find("#comprasbundle_pedidodetalle_bulto").change(function () {
                     changeBulto($(this));
                 });
+                form.find('#comprasbundle_pedidodetalle_producto_chzn').css({minWidth: '80%', width: 'auto'});
                 form.find('.chzn-container').last().trigger('mousedown');
               })
             .dialog({

@@ -199,7 +199,8 @@ class Producto {
     }
 
     public function getCodigoNombreBarcode() {
-        return $this->codigo . ' - ' . $this->nombre . ' - ' . $this->codigoBarra;
+        $text = $this->codigo . ' - ' . $this->nombre . ' - ' . $this->codigoBarra;
+        return strlen($text) > 100 ? substr($text, 0, 97) . '...' : $text;
     }
 
     public function getCodigoNombre() {
