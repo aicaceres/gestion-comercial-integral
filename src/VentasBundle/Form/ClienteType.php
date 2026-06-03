@@ -80,10 +80,37 @@ class ClienteType extends AbstractType {
             'required' => false,
             'choice_label' => 'nombre',
             'label' => 'Categoría Rentas:',
-            'query_builder' => function (EscalasRepository $repository) {
-                return $qb = $repository->createQueryBuilder('e')
-                    ->where("e.tipo='P' ");
-            });
+            'query_builder' => function (EscalasRepository $repository) use ($builder) {
+                $qb = $repository->createQueryBuilder('e');
+                $data = $builder->getData();
+                $current = null;
+                if ($data && method_exists($data, 'getCategoriaRentas')) {
+                    $current = $data->getCategoriaRentas();
+                }
+
+                // Si venimos en edición y el cliente tiene una categoría cargada,
+                // incluir esa escala (por id) y excluir de las vigentes las que tengan mismo nombre
+                // para que no aparezcan duplicados. En alta, listar sólo las vigentes.
+                if ($current && $current->getId()) {
+                    $qb->where('e.tipo = :tipo')
+                       ->andWhere(
+                           $qb->expr()->orX(
+                               $qb->expr()->andX('e.fechaHasta IS NULL', $qb->expr()->neq('e.nombre', ':currentName')),
+                               'e.id = :currentId'
+                           )
+                       )
+                       ->setParameter('tipo', 'P')
+                       ->setParameter('currentName', $current->getNombre())
+                       ->setParameter('currentId', $current->getId());
+                }
+                else {
+                    $qb->where('e.tipo = :tipo and e.fechaHasta IS NULL')
+                       ->setParameter('tipo', 'P');
+                }
+
+                return $qb->orderBy('e.nombre', 'ASC');
+            }
+        );
         $builder->add('categoriaRentas', 'entity', $optionsDgr);
     }
 

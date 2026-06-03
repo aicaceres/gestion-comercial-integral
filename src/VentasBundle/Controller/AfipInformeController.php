@@ -272,8 +272,25 @@ class AfipInformeController extends Controller {
                 $nrocomp = str_pad($fact->getNroComprobante(), 8, "0", STR_PAD_LEFT);
                 $cuit = substr(str_pad($fact->getDocNro(), 11, " ", STR_PAD_LEFT), -11, 11);
                 $nombre = substr(str_pad(UtilsController::sanear_string($fact->getNombreCliente()), 30, " ", STR_PAD_RIGHT), -30, 30);
-                $fecha = $fact->getCbteFchFormatted('dmY');
-                $categ = str_pad($percRentas->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
+                    $fecha = $fact->getCbteFchFormatted('dmY');
+                    // obtener escala vigente según retencion y fecha del comprobante
+                    $fechaObj = \DateTime::createFromFormat('Ymd', (string)$fact->getCbteFch());
+                    $percRentas = null;
+                    if ($fact->getPercepcionRentas() !== null) {
+                        $percRentas = $em->getRepository('ConfigBundle:Escalas')->getPercepcionByRetencionAndDate($fact->getPercepcionRentas(), $fechaObj);
+                        if (! $percRentas) {
+                            // fallback a búsqueda antigua por compatibilidad
+                            $percRentas = $em->getRepository('ConfigBundle:Escalas')->getPercepcionByRetencion($fact->getPercepcionRentas());
+                        }
+                    }
+                    if (! $percRentas) {
+                        if ($this->get('logger')) {
+                            $this->get('logger')->warning(sprintf('Escala P no encontrada para retencion=%s fecha=%s fact_id=%s', $fact->getPercepcionRentas(), $fechaObj ? $fechaObj->format('Y-m-d') : 'n/a', $fact->getId()));
+                        }
+                        $categ = str_pad('00', 2, "0", STR_PAD_LEFT);
+                    } else {
+                        $categ = str_pad($percRentas->getCodigoAtp(), 2, "0", STR_PAD_LEFT);
+                    }
                 $montoret = str_pad(($tributos->Importe * 100), 11, "0", STR_PAD_LEFT);
                 $gravado = str_pad(($tributos->BaseImp * 100), 11, "0", STR_PAD_LEFT);
                 $alicuota = str_pad(($tributos->Alic * 100), 4, "0", STR_PAD_LEFT);

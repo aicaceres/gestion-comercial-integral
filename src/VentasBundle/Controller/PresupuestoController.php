@@ -77,7 +77,7 @@ class PresupuestoController extends Controller {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
             $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
-            $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
+            $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, new \DateTime(), $em));
 
             $entity->setFormaPago($cliente->getFormaPago());
             $entity->setDescuentoRecargo($cliente->getFormaPago()->getPorcentajeRecargo());
@@ -494,6 +494,8 @@ class PresupuestoController extends Controller {
             $entity->setNroPresupuesto($param->getUltimoNroPresupuesto() + 1);
         }
         $entity->setEstado('EMITIDO');
+        $hoy = new \DateTime();
+        $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($entity->getCliente(), $hoy, $em));
         // actualizar los precios
         foreach ($entity->getDetalles() as $det) {
             $det->setPrecio($det->getProducto()->getPrecioByLista($entity->getPrecioLista()->getId()));
@@ -528,7 +530,7 @@ class PresupuestoController extends Controller {
         $entity->setFormaPago($venta->getFormaPago());
         $entity->setDescuentoRecargo($venta->getDescuentoRecargo());
         $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
-        $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
+        $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $entity->getFechaPresupuesto(), $em));
 
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if ($param) {

@@ -105,7 +105,7 @@ class UtilsController extends Controller {
 
         $ipedidosrec = $this->getUser()->getCantPedidosDemandados($this->get('session')->get('unidneg_id'));
         $ipedidosenv = $this->getUser()->getCantPedidosSolicitados($this->get('session')->get('unidneg_id'));
-        $cpedidos = $em->getRepository('ComprasBundle:Pedido')->getCountPendientes();        
+        $cpedidos = $em->getRepository('ComprasBundle:Pedido')->getCountPendientes();
 
         //  $proveedores = $em->getRepository('ComprasBundle:Proveedor')->findAll();
         //  $clientes = $em->getRepository('AdminBundle:Cliente')->findAll();
@@ -200,6 +200,19 @@ class UtilsController extends Controller {
         $ini = ($desde) ? $desde : $inicio;
         $fin = ($hasta) ? $hasta : $hoy->format('d-m-Y');
         return array('ini' => $ini, 'fin' => $fin);
+    }
+
+    public static function getPercepcionRentasByClienteAndDate($cliente, \DateTime $fecha, $em) {
+        if (!$cliente || !$cliente->getCategoriaRentas()) {
+            return 0;
+        }
+
+        $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaVigenteByCategoriaAndDate($cliente->getCategoriaRentas(), $fecha);
+        if (!$escala) {
+            return 0;
+        }
+
+        return $escala->getRetencion();
     }
 
     // SLUG TEXT

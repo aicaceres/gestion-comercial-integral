@@ -61,6 +61,16 @@ class Escalas {
     protected $codigoAtp = 0;
 
     /**
+     * @ORM\Column(name="fecha_desde", type="date", nullable=true)
+     */
+    protected $fechaDesde;
+
+    /**
+     * @ORM\Column(name="fecha_hasta", type="date", nullable=true)
+     */
+    protected $fechaHasta;
+
+    /**
      * @var string $idImportado
      * @ORM\Column(name="id_importado", type="integer", nullable=true)
      */
@@ -223,6 +233,46 @@ class Escalas {
      */
     public function getCodigoAtp() {
         return $this->codigoAtp;
+    }
+
+    /**
+     * Set fechaDesde
+     *
+     * @param \DateTime|null $fechaDesde
+     * @return Escalas
+     */
+    public function setFechaDesde($fechaDesde) {
+        $this->fechaDesde = $fechaDesde;
+        return $this;
+    }
+
+    /**
+     * Get fechaDesde
+     *
+     * @return \DateTime|null
+     */
+    public function getFechaDesde() {
+        return $this->fechaDesde;
+    }
+
+    /**
+     * Set fechaHasta
+     *
+     * @param \DateTime|null $fechaHasta
+     * @return Escalas
+     */
+    public function setFechaHasta($fechaHasta) {
+        $this->fechaHasta = $fechaHasta;
+        return $this;
+    }
+
+    /**
+     * Get fechaHasta
+     *
+     * @return \DateTime|null
+     */
+    public function getFechaHasta() {
+        return $this->fechaHasta;
     }
 
     /**

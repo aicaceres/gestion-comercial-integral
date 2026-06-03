@@ -96,11 +96,11 @@
                                 <span>{{simbolo}} {{ cbte.totalIva|number_format(2,',','.')}}</span>
                             </td>
                         </tr>
-                            {% if cliente.percepcionRentas >0 %}
+                            {% if cbte.percepcionRentas >0 %}
                             <tr>
                                 <td border.type="none"></td>
                                 <td border.type="none"></td>
-                                <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Perc. IIBB {{cliente.percepcionRentas|number_format(2,'.',',')}}%:</span></td>
+                                <td border.type="none" text-align="right" vertical-align="middle" width="3 cm" padding-top="5px"><span>Perc. IIBB {{cbte.percepcionRentas|number_format(2,'.',',')}}%:</span></td>
                                 <td border.type="none" text-align="right" vertical-align="middle" width="4 cm" padding-top="5px">
                                     <span>{{simbolo}} {{ (cbte.totalIibb)|number_format(2,',','.')}}</span>
                                 </td>

@@ -48,6 +48,8 @@ class EscalasController extends Controller
         $form->handleRequest($request);
 
         if ($form->isValid()) {
+            $entity->setFechaDesde(new \DateTime());
+            $entity->setFechaHasta(null);
             $em = $this->getDoctrine()->getManager();
             $em->persist($entity);
             $em->flush();
@@ -107,7 +109,7 @@ class EscalasController extends Controller
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find Escalas entity.');
         }
-        $editForm = $this->createEditForm($entity);
+        $editForm = $this->createEditForm($entity, $id);
         //$deleteForm = $this->createDeleteForm($id);
         return $this->render('ConfigBundle:Escalas:edit.html.twig', array(
             'entity'      => $entity,
@@ -122,10 +124,10 @@ class EscalasController extends Controller
     * @param Escalas $entity The entity
     * @return \Symfony\Component\Form\Form The form
     */
-    private function createEditForm(Escalas $entity)
+    private function createEditForm(Escalas $entity, $id)
     {
         $form = $this->createForm(new EscalasType(), $entity, array(
-            'action' => $this->generateUrl('sistema_escalas_update', array('id' => $entity->getId())),
+            'action' => $this->generateUrl('sistema_escalas_update', array('id' => $id)),
             'method' => 'PUT',
         ));
         return $form;
@@ -145,10 +147,24 @@ class EscalasController extends Controller
             throw $this->createNotFoundException('Unable to find Escalas entity.');
         }
 
-       // $deleteForm = $this->createDeleteForm($id);
-        $editForm = $this->createEditForm($entity);
+        $updated = new Escalas();
+        $updated->setTipo($entity->getTipo());
+        $updated->setNombre($entity->getNombre());
+        $updated->setRetencion($entity->getRetencion());
+        $updated->setAdicional($entity->getAdicional());
+        $updated->setMinimo($entity->getMinimo());
+        $updated->setCodigoAtp($entity->getCodigoAtp());
+
+        $editForm = $this->createEditForm($updated, $id);
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
+            $now = new \DateTime();
+            $entity->setFechaHasta($now);
+
+            $updated->setFechaDesde($now);
+            $updated->setFechaHasta(null);
+
+            $em->persist($updated);
             $em->flush();
 
             return $this->redirect($this->generateUrl('sistema_escalas'));
@@ -157,7 +173,6 @@ class EscalasController extends Controller
             'entity'      => $entity,
             'tipos' => $this->tipos,
             'form'   => $editForm->createView(),
-            //'delete_form' => $deleteForm->createView(),
         ));
     }
 

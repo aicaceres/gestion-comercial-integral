@@ -94,7 +94,7 @@ class Cliente {
      * @ORM\Column(name="saldo_actual", type="decimal", precision=20, scale=2, options={"default" : 0} )
      * @Gedmo\Versioned()
      */
-    protected $saldoActual;
+    protected $saldoActual = 0;
 
     /**
      * @var integer $limiteCredito

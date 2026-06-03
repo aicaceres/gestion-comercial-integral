@@ -97,7 +97,7 @@ class VentaController extends Controller {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
             $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
-            $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
+            $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, new \DateTime(), $em));
 
             $deposito = $em->getRepository('AppBundle:Deposito')->find($param->getVentasDepositoBydefault());
             $entity->setDeposito($deposito);
@@ -195,7 +195,7 @@ class VentaController extends Controller {
                     $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
                 }
                 if (is_null($entity->getPercepcionRentas())) {
-                    $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
+                    $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $entity->getFechaVenta() ?: new \DateTime(), $em));
                 }
 
                 $em->persist($entity);
@@ -247,6 +247,8 @@ class VentaController extends Controller {
         $entity->setCotizacion($entity->getMoneda()->getCotizacion());
         $entity->setDescuentaStock(true);
         $entity->setEstado('PENDIENTE');
+        $hoy = new \DateTime();
+        $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($entity->getCliente(), $hoy, $em));
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if ($param) {
             // ultimo nro de operacion de venta
@@ -288,7 +290,7 @@ class VentaController extends Controller {
         $entity->setDescuentoRecargo($presupuesto->getDescuentoRecargo());
         $entity->setTransporte($entity->getCliente()->getTransporte());
         $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
-        $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
+        $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $entity->getFechaVenta(), $em));
 
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if ($param) {

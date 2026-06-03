@@ -171,7 +171,7 @@ class FacturaElectronicaController extends Controller {
         // tcNota_Credito_A = 7 // tcNota_Credito_B = 8 // tcNota_Credito_C = 9;
         $cliente = $comprobante->getCliente();
         $catIva = ($cliente->getCondicionIva()) ? $cliente->getCondicionIva()->getCodigo() : 'C';
-        $percRentas = $cliente->getPercepcionRentas();
+        $percRentas = $comprobante->getPercepcionRentas();
         if ($entity == 'Cobro') {
             $dataTicket['tipo'] = ($catIva == 'I' || $catIva == 'M') ? 1 : 2;
             $detalles = $comprobante->getVenta()->getDetalles();
@@ -348,6 +348,76 @@ class FacturaElectronicaController extends Controller {
     }
 
     /**
+     * @Route("/registrarPendientesAfip", name="ventas_factura_registrar_pendientes_afip")
+     * @Method("POST")
+     */
+    public function registrarPendientesAfipAction(Request $request) {
+        $em = $this->getDoctrine()->getManager();
+        $serviceFacturar = $this->get('factura_electronica_webservice');
+        $logger = $this->has('logger') ? $this->get('logger') : null;
+
+        $facturaIds = $request->get('factura_ids', $request->get('ids'));
+        if ($facturaIds && !is_array($facturaIds)) {
+            $facturaIds = preg_split('/[,;\s]+/', trim($facturaIds));
+        }
+
+        $placeholderCae = $request->get('cae_placeholder', '12345678901234');
+        $placeholderNro = $request->get('nro_placeholder');
+
+        $qb = $em->createQueryBuilder();
+        $qb->select('fe')
+            ->from('VentasBundle:FacturaElectronica', 'fe');
+
+        if (!empty($facturaIds)) {
+            $qb->where('fe.id IN (:ids)')
+               ->setParameter('ids', $facturaIds);
+        } else {
+            $expr = $qb->expr();
+            $qb->where($expr->eq('fe.cae', ':placeholderCae'))
+               ->setParameter('placeholderCae', $placeholderCae);
+
+            if ($placeholderNro !== null) {
+                $qb->andWhere('fe.nroComprobante = :placeholderNro')
+                    ->setParameter('placeholderNro', $placeholderNro);
+            }
+        }
+
+        $facturas = $qb->getQuery()->getResult();
+        $results = [];
+
+        foreach ($facturas as $facturaElectronica) {
+            try {
+                $result = $serviceFacturar->reprocesarFacturaElectronica($facturaElectronica);
+                $results[] = array(
+                    'id' => $facturaElectronica->getId(),
+                    'status' => 'OK',
+                    'nroComprobante' => $result['nroComprobante'],
+                    'cae' => $result['cae'],
+                    'caeVto' => $result['caeVto']
+                );
+            }
+            catch (\Exception $ex) {
+                if ($logger) {
+                    $logger->error('Error registrando factura en AFIP', array(
+                        'ventas_factura_electronica_id' => $facturaElectronica->getId(),
+                        'message' => $ex->getMessage()
+                    ));
+                }
+                $results[] = array(
+                    'id' => $facturaElectronica->getId(),
+                    'status' => 'ERROR',
+                    'message' => $ex->getMessage()
+                );
+            }
+        }
+
+        return new JsonResponse(array(
+            'count' => count($facturas),
+            'results' => $results
+        ));
+    }
+
+    /**
      * @Route("/renderImportacion", name="ventas_importacion")
      * @Method("GET")
      * @Template()
@@ -446,7 +516,7 @@ class FacturaElectronicaController extends Controller {
                             $param->setUltimoNroOperacionVenta($nroVenta);
                             $venta->setDescuentaStock(0);
                             $venta->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
-                            $venta->setPercepcionRentas($cliente->getPercepcionRentas());
+                            $venta->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $fecha, $em));
                             $venta->setCotizacion($item->getTipoCambio());
                             // agregar un detalle x alicuota
                             if ($item->getBase21()) {
@@ -499,7 +569,7 @@ class FacturaElectronicaController extends Controller {
                             $nota->setTipoComprobante($tipoComprobante);
                             $nota->setFormaPago($formaPago);
                             $nota->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
-                            $nota->setPercepcionRentas($cliente->getPercepcionRentas());
+                            $nota->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $fecha, $em));
                             $nota->setPrecioLista($precioLista);
                             $nota->setUnidadNegocio($unidneg);
                             $nota->setTipoDocumentoCliente($tipoDoc);

@@ -31,9 +31,17 @@ class FacturaElectronicaWebservice {
     public function __construct(EntityManager $em, Session $session, $iibbPercent, $cuitAfip) {
         $this->em = $em;
         $this->session = $session;
-        $caja = $em->getRepository('ConfigBundle:Caja')->find($session->get('caja')['id']);
-        $this->ptovtaWsFactura = $caja->getPtoVtaWs();
-        $this->ptovtaIfuTicket = $caja->getPtoVtaIfu();
+        $this->ptovtaWsFactura = 12;
+        $this->ptovtaIfuTicket = 0;
+
+        if ($session->has('caja') && is_array($session->get('caja')) && isset($session->get('caja')['id'])) {
+            $caja = $em->getRepository('ConfigBundle:Caja')->find($session->get('caja')['id']);
+            if ($caja) {
+                $this->ptovtaWsFactura = $caja->getPtoVtaWs();
+                $this->ptovtaIfuTicket = $caja->getPtoVtaIfu();
+            }
+        }
+
         $this->iibbPercent = $iibbPercent;
         $this->cuitAfip = $cuitAfip;
         $this->afipOptionsProd = array('CUIT' => $cuitAfip, 'production' => true, 'cert' => 'cert.crt', 'key' => 'decr.key');
@@ -257,12 +265,38 @@ class FacturaElectronicaWebservice {
         );
     }
 
+    public function reprocesarFacturaElectronica(FacturaElectronica $facturaElectronica) {
+        $em = $this->em;
+
+        if ($facturaElectronica->getCobro()) {
+            $tipo = 'FAC';
+            $comprobante = $facturaElectronica->getCobro();
+        } elseif ($facturaElectronica->getNotaDebCred()) {
+            $tipo = 'NDC';
+            $comprobante = $facturaElectronica->getNotaDebCred();
+        } else {
+            throw new \RuntimeException('FacturaElectronica sin Cobro ni NotaDebCred asociada.');
+        }
+
+        $dataFe = $this->setDataFacturaElectronica($tipo, $comprobante, 'WS');
+        $result = $this->enviarWs($dataFe);
+
+        $facturaElectronica->setCae($result['cae']);
+        $facturaElectronica->setCaeVto($result['caeVto']);
+        $facturaElectronica->setNroComprobante($result['nroComprobante']);
+
+        $em->persist($facturaElectronica);
+        $em->flush();
+
+        return $result;
+    }
+
     // tipo: FAC | NDC - modo: WS | TF
     public function setDataFacturaElectronica($tipo, $comprobante, $modo) {
         $em = $this->em;
         $cliente = $comprobante->getCliente();
         $catIva = ($cliente->getCondicionIva()) ? $cliente->getCondicionIva()->getCodigo() : 'C';
-        $percRentas = $cliente->getPercepcionRentas();
+        $percRentas = $comprobante->getPercepcionRentas();
         $cobroId = $notaId = null;
         $cbtesAsoc = $periodoAsoc = $tributos = $iva = [];
 

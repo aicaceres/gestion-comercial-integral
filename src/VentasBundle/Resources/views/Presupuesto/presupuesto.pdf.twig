@@ -160,9 +160,9 @@
                     IVA: $ {{presupuesto.totalIva|number_format(2,',','.')}}
                 </td>
                 {% endif %}
-                {% if presupuesto.cliente.percepcionRentas > 0 %}
+                {% if presupuesto.percepcionRentas > 0 %}
                 <td border.color="#555555" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center">
-                    Perc.IIBB [{{presupuesto.cliente.percepcionRentas|number_format(2,'.',',')}}%]: $ {{presupuesto.totalIibb|number_format(2,',','.')}}
+                    Perc.IIBB [{{presupuesto.percepcionRentas|number_format(2,'.',',')}}%]: $ {{presupuesto.totalIibb|number_format(2,',','.')}}
                 </td>
                 {% endif %}
 

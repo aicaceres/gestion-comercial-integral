@@ -633,7 +633,7 @@ class ImportDataLoadController extends Controller {
                 $cliente = $reg->getCliente();
                 $catIva = $cliente->getCondicionIva() ? $cliente->getCondicionIva()->getCodigo() : 'C';
                 $reg->setCategoriaIva($catIva);
-                $reg->setPercepcionRentas($cliente->getPercepcionRentas());
+                $reg->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $reg->getFechaVenta(), $em));
                 $em->persist($reg);
                 $em->flush();
             }
@@ -642,7 +642,7 @@ class ImportDataLoadController extends Controller {
                 $cliente = $reg->getCliente();
                 $catIva = $cliente->getCondicionIva() ? $cliente->getCondicionIva()->getCodigo() : 'C';
                 $reg->setCategoriaIva($catIva);
-                $reg->setPercepcionRentas($cliente->getPercepcionRentas());
+                $reg->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $reg->getFechaPresupuesto(), $em));
                 $em->persist($reg);
                 $em->flush();
             }
@@ -651,7 +651,7 @@ class ImportDataLoadController extends Controller {
                 $cliente = $reg->getCliente();
                 $catIva = $cliente->getCondicionIva() ? $cliente->getCondicionIva()->getCodigo() : 'C';
                 $reg->setCategoriaIva($catIva);
-                $reg->setPercepcionRentas($cliente->getPercepcionRentas());
+                $reg->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $reg->getFecha(), $em));
                 $em->persist($reg);
                 $em->flush();
             }

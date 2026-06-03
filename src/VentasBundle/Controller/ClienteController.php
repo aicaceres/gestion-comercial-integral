@@ -284,7 +284,28 @@ class ClienteController extends Controller {
         $showiibb = false;
         $hoy = new \DateTime();
         $vencNoRetencion = $entity->getVencCertNoRetener() ? $entity->getVencCertNoRetener()->format('Ymd') : null;
-        $retRentas = $entity->getCategoriaRentas() ? $entity->getCategoriaRentas()->getRetencion() : null;
+        $categoriaRentas = $entity->getCategoriaRentas();
+        $escalaRentasVigente = null;
+        $retRentas = null;
+        if ($categoriaRentas) {
+            $qb = $em->createQueryBuilder();
+            $qb->select('e')
+               ->from('ConfigBundle:Escalas', 'e')
+               ->where('e.tipo = :tipo')
+               ->andWhere('e.nombre = :nombre')
+               ->andWhere('e.codigoAtp = :codigoAtp')
+               ->andWhere('e.fechaHasta IS NULL')
+               ->setParameters(array(
+                   'tipo' => $categoriaRentas->getTipo(),
+                   'nombre' => $categoriaRentas->getNombre(),
+                   'codigoAtp' => $categoriaRentas->getCodigoAtp()
+               ));
+            $escalaRentasVigente = $qb->getQuery()->getOneOrNullResult();
+            if (!$escalaRentasVigente) {
+                $escalaRentasVigente = $em->getRepository('ConfigBundle:Escalas')->getEscalaVigenteByCategoriaAndDate($categoriaRentas, $hoy);
+            }
+            $retRentas = $escalaRentasVigente ? $escalaRentasVigente->getRetencion() : null;
+        }
         if ($categIva == 'I' && ($vencNoRetencion < $hoy->format('Ymd') || is_null($vencNoRetencion)) && $retRentas > 0) {
             $showiibb = true;
         }
@@ -308,7 +329,7 @@ class ClienteController extends Controller {
             'cuitValido' => $valido,
             'esConsumidorFinal' => $entity->getConsumidorFinal(),
             'showiibb' => $showiibb,
-            'percRentas' => $entity->getPercepcionRentas()
+            'percRentas' => UtilsController::getPercepcionRentasByClienteAndDate($entity, $hoy, $em)
         );
         return new JsonResponse($data);
     }
@@ -855,7 +876,7 @@ class ClienteController extends Controller {
                     $notacredito->setUnidadNegocio($unidneg);
                     $notacredito->setTipoComprobante($tipoComp);
                     $notacredito->setCategoriaIva($catIva);
-                    $notacredito->setPercepcionRentas($entity->getCliente()->getPercepcionRentas());
+                    $notacredito->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($entity->getCliente(), $notacredito->getFecha(), $em));
                     $formaPago = $em->getRepository('ConfigBundle:FormaPago')->findOneByCuentaCorriente(1);
                     $notacredito->setFormaPago($formaPago);
                     $notaElectronica = new FacturaElectronica();

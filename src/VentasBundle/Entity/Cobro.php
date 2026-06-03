@@ -200,6 +200,10 @@ class Cobro {
         return $txt;
     }
 
+    public function getPercepcionRentas() {
+        return $this->getVenta()->getPercepcionRentas();
+    }
+    
     public function getNombreClienteTxt() {
         return $this->getNombreCliente() ? $this->getNombreCliente() : $this->getCliente()->getNombre();
     }

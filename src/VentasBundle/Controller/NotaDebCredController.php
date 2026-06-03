@@ -83,7 +83,7 @@ class NotaDebCredController extends Controller {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($param->getVentasClienteBydefault());
             $entity->setCliente($cliente);
             $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
-            $entity->setPercepcionRentas($cliente->getPercepcionRentas() ? $cliente->getPercepcionRentas() : 0);
+            $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $entity->getFecha(), $em));
             $entity->setFormaPago($cliente->getFormaPago());
             $entity->setDescuentoRecargo($cliente->getFormaPago()->getPorcentajeRecargo());
             $entity->setPrecioLista($cliente->getPrecioLista());
