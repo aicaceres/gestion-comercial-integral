@@ -291,7 +291,6 @@ class VentaController extends Controller {
         $entity->setTransporte($entity->getCliente()->getTransporte());
         $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
         $entity->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($cliente, $entity->getFechaVenta(), $em));
-
         $param = $em->getRepository('ConfigBundle:Parametrizacion')->findOneBy(array('unidadNegocio' => $unidneg_id));
         if ($param) {
             // ultimo nro de operacion de venta

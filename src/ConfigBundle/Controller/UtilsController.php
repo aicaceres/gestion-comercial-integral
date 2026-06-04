@@ -207,12 +207,18 @@ class UtilsController extends Controller {
             return 0;
         }
 
-        $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaVigenteByCategoriaAndDate($cliente->getCategoriaRentas(), $fecha);
-        if (!$escala) {
+        $hoy = new \DateTime();
+        $vencNoRetencion = $cliente->getVencCertNoRetener() ? $cliente->getVencCertNoRetener()->format('Ymd') : null;
+        if ($vencNoRetencion < $hoy->format('Ymd') || is_null($vencNoRetencion)) {
+          $escala = $em->getRepository('ConfigBundle:Escalas')->getEscalaVigenteByCategoriaAndDate($cliente->getCategoriaRentas(), $fecha);
+          if (!$escala) {
+              return 0;
+          }
+
+          return $escala->getRetencion();
+        } else {
             return 0;
         }
-
-        return $escala->getRetencion();
     }
 
     // SLUG TEXT

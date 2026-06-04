@@ -25,7 +25,7 @@
    {{ form_start(form, {'attr': {'class': 'form-horizontal','id':'ventasbundle_notadebcred'}}) }}
 
     <fieldset class="fields" >
-        {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente} %}
+        {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente, 'percepcionRentas': entity.percepcionRentas} %}
 
         <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
 

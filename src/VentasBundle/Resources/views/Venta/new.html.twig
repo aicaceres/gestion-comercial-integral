@@ -30,7 +30,7 @@
 
         <fieldset class="fields" >
 
-            {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente} %}
+            {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente, 'percepcionRentas': entity.percepcionRentas } %}
 
             <div class="datos-moneda" data-cotizacion="{{entity.moneda.cotizacion}}" data-simbolo="{{entity.moneda.simbolo}}">
 
@@ -148,7 +148,7 @@ jQuery(function ($) {
                     }
                 })
                 if(hayVacios) return false
-              
+
               if (!confirm(txt)) {
                   return false;
               }

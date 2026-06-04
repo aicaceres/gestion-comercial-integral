@@ -29,7 +29,7 @@
 
         <fieldset class="fields" >
 
-            {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente} %}
+            {% include "VentasBundle:Partial:block-select-cliente.html.twig" with {'cliente':entity.cliente, 'percepcionRentas': entity.percepcionRentas} %}
 
             <div class="datos-moneda" data-cotizacion="{{moneda.cotizacion}}" data-simbolo="{{moneda.simbolo}}">&nbsp;</div>
 
@@ -136,7 +136,7 @@ jQuery(function ($) {
                     }
                 })
                 if(hayVacios) return false
-                
+
                 // funcionalidad de remito anulada por pedido de aides
                 txt = txt + '\n\n' +'Seleccionar Tipo:';
                 jPresupuesto(txt, 'P', 'Impresión de Presupuestos', function(r) {

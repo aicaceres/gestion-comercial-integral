@@ -876,7 +876,8 @@ class ClienteController extends Controller {
                     $notacredito->setUnidadNegocio($unidneg);
                     $notacredito->setTipoComprobante($tipoComp);
                     $notacredito->setCategoriaIva($catIva);
-                    $notacredito->setPercepcionRentas(UtilsController::getPercepcionRentasByClienteAndDate($entity->getCliente(), $notacredito->getFecha(), $em));
+                    $iibbPercent = $cliente->getCategoriaRentas() ? UtilsController::getPercepcionRentasByClienteAndDate($cliente, $notacredito->getFecha(), $em) : 0;
+                    $notacredito->setPercepcionRentas($iibbPercent);
                     $formaPago = $em->getRepository('ConfigBundle:FormaPago')->findOneByCuentaCorriente(1);
                     $notacredito->setFormaPago($formaPago);
                     $notaElectronica = new FacturaElectronica();
@@ -916,7 +917,6 @@ class ClienteController extends Controller {
                     // armar item
                     // calculos
                     $ivaPercent = '21.00';
-                    $iibbPercent = $cliente->getCategoriaRentas() ? $cliente->getCategoriaRentas()->getRetencion() : 0;
 //                    $iibbPercent = $retRentas > 0 ? $this->getParameter('iibb_percent') : 0;
 
                     $grav = ($catIva == 'I') ? 1 + (($ivaPercent + $iibbPercent) / 100) : 1 + ($ivaPercent / 100);
