@@ -9,7 +9,14 @@
 {% include "AppBundle::notificacion.html.twig" %}
 
 <div id="contentwrapper" class="contentwrapper">
-<div>
+<div style="overflow: hidden;">
+    <form id="printform" name="printform" target="_blank" action="{{ path("ventas_presupuesto_descuenta_stock_print") }}" method="post">
+        <input type="hidden" name="clienteid" id="printClienteid" />
+        <input type="hidden" name="desde" id="printDesde" />
+        <input type="hidden" name="hasta" id="printHasta" />
+        <input type="hidden" name="descuentaStock" id="printDescuentaStock" />
+        <button class="stdbtn print floatright" type="submit">Imprimir</button>
+    </form>
     <form id="searchform" action="{{ path('ventas_presupuesto') }}" method="get">
 
         {% include "VentasBundle:Partial:_partial-select2-cliente.html.twig" with { 'allowclear':true }  %}
@@ -19,10 +26,18 @@
             <label><strong>Fecha Presupuesto: </strong></label>
             <input type="text" class="width100 datepicker" title="Fecha desde" value="{{desde}}" name="desde" id="desde" />
             <input type="text" class="width100 datepicker" title="Fecha hasta" value="{{hasta}}" name="hasta" id="hasta" />
+            &nbsp;&nbsp;&nbsp;
+            <label><strong>Descuenta Stock: </strong></label>
+            <select name="descuentaStock" id="descuentaStock" style="min-width: 10px;">
+                <option value="">--</option>
+                <option value="1" {% if descuentaStock is same as(1) %}selected="selected"{% endif %}>Si</option>
+                <option value="0" {% if descuentaStock is same as(0) %}selected="selected"{% endif %}>No</option>
+            </select>
+            &nbsp;&nbsp;&nbsp;
             <a href="javascript:void(0)" class="editar btn btnaction btn_search" onClick="jQuery('#searchform').submit();" title="Buscar"></a>
         </div>
     </form>
-</div><!-- button -->
+</div>
     <table cellpadding="0" cellspacing="0" border="0" class="stdtable" id="dyntable2">
         <thead>
             <tr>
@@ -86,22 +101,11 @@ jQuery(document).ready(function($){
     var oTable = $('#dyntable2').dataTable();
     oTable.fnSort( [ [1,'desc'],[0,'desc'] ] );
 
-   $('#printform').on('submit',function(){
-        $('#clienteid').val($('#selectClienteIndex').val());
-        $('#fdesde').val($('#desde').val());
-        $('#fhasta').val($('#hasta').val());
-        $('#searchterm').val( $('#dyntable2_filter input').val() );
-        var datos = [];
-        oTable.api().rows( { search:'applied' } ).data().each(function(value, index) {
-            var i = value[1].indexOf('</span>');
-            if( i >-1 ){
-                var fecha = value[1].substr(i+7);
-                value[1]=fecha;
-            }
-            value.splice(6);
-            datos[index] = value;
-        });
-        $('#datalist').val(JSON.stringify(datos));
+   $('#printform').on('submit', function(){
+        $('#printClienteid').val($('#selectClienteIndex').val());
+        $('#printDesde').val($('#desde').val());
+        $('#printHasta').val($('#hasta').val());
+        $('#printDescuentaStock').val($('#descuentaStock').val());
     });
 
   $('body').on('click','.btn_print', function(e){

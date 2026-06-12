@@ -7,15 +7,19 @@ use ConfigBundle\Controller\UtilsController;
 class PresupuestoRepository extends EntityRepository {
 
 
-    public function findByCriteria($unidneg, $cliId = NULL, $desde = NULL, $hasta = NULL) {
+    public function findByCriteria($unidneg, $cliId = NULL, $desde = NULL, $hasta = NULL, $descuentaStock = NULL) {
         $query = $this->_em->createQueryBuilder();
-        $query->select('p')
+        $query->select('p', 'usr')
                 ->from('VentasBundle\Entity\Presupuesto', 'p')
                 ->innerJoin('p.unidadNegocio', 'u')
+                ->leftJoin('p.createdBy', 'usr')
                 ->where("u.id=" . $unidneg);
         if ($cliId) {
-            $query->innerJoin('p.cliente', 'pr')
-                    ->andWhere('pr.id=' . $cliId);
+            $query->andWhere('p.cliente = :cliId')
+                  ->setParameter('cliId', $cliId);
+        }
+        if ($descuentaStock !== null) {
+            $query->andWhere('p.descuentaStock = ' . (int)$descuentaStock);
         }
         if ($desde) {
             $cadena = " p.fechaPresupuesto >= '" . UtilsController::toAnsiDate($desde) . " 00:00'";

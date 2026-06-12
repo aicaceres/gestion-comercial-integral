@@ -1,0 +1,75 @@
+<pdf>
+    <dynamic-page page-size="A4" margin-left="70px" margin-right="40px" margin-top="20px">
+        <placeholders>
+            <header>
+                <div height="60px" width="100%">
+                    <table>
+                        <tr>
+                            <td border.type="none" vertical-align="middle">
+                                <h3>{{app.session.get('labels')['label1']}}.{{app.session.get('labels')['label2']}} <span font-size="11px"> Unidad de Negocio: {{ app.session.get('unidneg_nombre') }} </span></h3>
+                            </td>
+                        </tr>
+                    </table>
+                    <div border.color="#F5C98F" height="2px"></div>
+                    <div height="5px"></div>
+                    <div float="right" font-size="7px"> Impreso: {{'now'|date('d-m-Y H:i')}} {{app.user.username|upper}} </div>
+                </div>
+            </header>
+            <footer>
+                <div height="30px" width="100%" text-align="right">
+                    <page-number />
+                </div>
+            </footer>
+        </placeholders>
+
+        <h2 text-align="center">Listado de Presupuestos / Remitos</h2>
+        <h4><strong>Cliente:</strong> {{ filtro.cliente }}</h4>
+        {% if filtro.desde or filtro.hasta %}
+        <h4><strong>Período:</strong> {{ filtro.desde }} al {{ filtro.hasta }}</h4>
+        {% endif %}
+        <h4><strong>Descuenta Stock:</strong> {{ filtro.descuentaStock }}</h4>
+        <div height="10px"></div>
+
+        <table font-size="9px">
+            <tr>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Nº</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Fecha</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center"><strong>Cliente</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="3 cm"><strong>Total</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Desc. Stock</strong></td>
+                <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="center" width="2 cm"><strong>Usuario</strong></td>
+            </tr>
+            {% if presupuestos|length > 0 %}
+                {% set total = 0 %}
+                {% for p in presupuestos %}
+                    {% set total = total + p.montoTotal %}
+                    <tr>
+                        <td height="15px" vertical-align="middle" text-align="right" padding-right="10px">
+                            {% if p.tipo == 'R' %}<span font-size="7px">REMITO </span>{% endif %}{{ p.nroPresupuesto }}
+                        </td>
+                        <td height="15px" vertical-align="middle" text-align="center">{{ p.fechaPresupuesto|date('d-m-Y') }}</td>
+                        <td height="15px" vertical-align="middle" padding-left="5px">{{ p.cliente }}{% if p.nombreCliente and p.nombreCliente != 'CONSUMIDOR FINAL' %} - {{ p.nombreCliente }}{% endif %}</td>
+                        <td height="15px" vertical-align="middle" text-align="right" padding-right="10px">{{ p.montoTotal|number_format(2, ',', '.') }}</td>
+                        <td height="15px" vertical-align="middle" text-align="center">{{ p.descuentaStock ? 'Si' : 'No' }}</td>
+                        <td height="15px" vertical-align="middle" padding-left="10px">{{ p.createdBy ? p.createdBy.username|upper : '' }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <td colspan="3" border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" padding-right="10px" text-align="right">
+                        <strong>Total:</strong>
+                    </td>
+                    <td border.color="black" background.color="#EEEEEE" height="20px" vertical-align="middle" text-align="right" padding-right="10px">
+                        <strong>{{ total|number_format(2, ',', '.') }}</strong>
+                    </td>
+                    <td colspan="2" border.color="black" background.color="#EEEEEE" height="20px"></td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" height="30px" vertical-align="middle" padding-left="10px">
+                        <strong>No hay presupuestos para el criterio seleccionado.</strong>
+                    </td>
+                </tr>
+            {% endif %}
+        </table>
+    </dynamic-page>
+</pdf>

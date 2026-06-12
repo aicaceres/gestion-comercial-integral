@@ -40,7 +40,9 @@ class PresupuestoController extends Controller {
         if ($cliId) {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
-        $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $periodo['ini'], $periodo['fin']);
+        $dsVal = $request->get('descuentaStock');
+        $descuentaStock = ($dsVal !== null && $dsVal !== '') ? (int)$dsVal : null;
+        $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $periodo['ini'], $periodo['fin'], $descuentaStock);
         if ($this->getUser()->getAccess($unidneg, 'ventas_presupuesto_print')) {
             $printpdf = $request->get('printpdf');
         }
@@ -50,9 +52,57 @@ class PresupuestoController extends Controller {
                 'cliente' => $cliente,
                 'desde' => $periodo['ini'],
                 'hasta' => $periodo['fin'],
+                'descuentaStock' => $descuentaStock,
                 'printpdf' => $printpdf
         ));
     }
+
+    /**
+     * @Route("/printDescuentaStockVentas.{_format}",
+     * defaults = { "_format" = "pdf" },
+     * name="ventas_presupuesto_descuenta_stock_print")
+     * @Method("POST")
+     */
+    public function printDescuentaStockAction(Request $request) {
+        $unidneg = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_venta');
+
+        $em = $this->getDoctrine()->getManager();
+        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
+
+        $cliId = $request->get('clienteid');
+        $dsVal = $request->get('descuentaStock');
+        $descuentaStock = ($dsVal !== null && $dsVal !== '') ? (int)$dsVal : null;
+
+        $presupuestos = $em->getRepository('VentasBundle:Presupuesto')
+            ->findByCriteria($unidneg, $cliId, $periodo['ini'], $periodo['fin'], $descuentaStock);
+
+        $cliente = $cliId ? $em->getRepository('VentasBundle:Cliente')->find($cliId) : null;
+
+        $textoFiltro = array(
+            'cliente'        => $cliente ? $cliente->getNombre() : 'Todos',
+            'desde'          => $periodo['ini'],
+            'hasta'          => $periodo['fin'],
+            'descuentaStock' => $dsVal !== null && $dsVal !== '' ? ($dsVal == '1' ? 'Si' : 'No') : 'Todos',
+        );
+
+        $facade = $this->get('ps_pdf.facade');
+        $response = new Response();
+
+        $this->render(
+            'VentasBundle:Presupuesto:pdf-presupuestos.pdf.twig',
+            array('presupuestos' => $presupuestos, 'filtro' => $textoFiltro),
+            $response
+        );
+        $xml = $response->getContent();
+        $content = $facade->render($xml);
+        $hoy = new \DateTime();
+        return new Response($content, 200, array(
+            'content-type' => 'application/pdf',
+            'Content-Disposition' => 'filename=listado_presupuestos_' . $hoy->format('dmY_Hi') . '.pdf'
+        ));
+    }
+
 
     /**
      * @Route("/new", name="ventas_presupuesto_new")
