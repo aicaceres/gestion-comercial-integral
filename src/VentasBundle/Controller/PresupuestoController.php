@@ -608,6 +608,82 @@ class PresupuestoController extends Controller {
         );
     }
 
+    /**
+     * Muestra el modal de seguimiento (formulario de nuevo llamado + historial).
+     *
+     * @Route("/{id}/seguimiento", name="ventas_presupuesto_seguimiento")
+     * @Method("GET")
+     * @Template("VentasBundle:Presupuesto:_seguimiento.html.twig")
+     */
+    public function seguimientoAction($id) {
+        $unidneg = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_presupuesto_seguimiento');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No se encuentra el Presupuesto.');
+        }
+        return $this->render('VentasBundle:Presupuesto:_seguimiento.html.twig', array(
+                'entity' => $entity));
+    }
+
+    /**
+     * Registra un nuevo llamado de seguimiento: guarda fecha/hora, usuario de la
+     * sesión, estado elegido y comentario; actualiza el estado de seguimiento del
+     * presupuesto. El comentario es obligatorio.
+     *
+     * @Route("/{id}/seguimiento", name="ventas_presupuesto_seguimiento_save")
+     * @Method("POST")
+     */
+    public function seguimientoSaveAction(Request $request, $id) {
+        $unidneg = $this->get('session')->get('unidneg_id');
+        UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_presupuesto_seguimiento');
+        $em = $this->getDoctrine()->getManager();
+        $entity = $em->getRepository('VentasBundle:Presupuesto')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No se encuentra el Presupuesto.');
+        }
+
+        $estado = $request->get('estado');
+        $comentario = trim($request->get('comentario'));
+        $estadosValidos = array('PENDIENTE', 'VENDIDO', 'NEGOCIANDO', 'PERDIDO');
+
+        if (!$entity->isSeguimientoHabilitado()) {
+            $this->addFlash('error', 'El presupuesto no admite registrar nuevos llamados de seguimiento.');
+            return $this->redirect($this->generateUrl('ventas_presupuesto'));
+        }
+        if (!in_array($estado, $estadosValidos)) {
+            $this->addFlash('error', 'Debe seleccionar un estado válido.');
+            return $this->redirect($this->generateUrl('ventas_presupuesto'));
+        }
+        if ($comentario === '') {
+            $this->addFlash('error', 'El comentario del llamado es obligatorio.');
+            return $this->redirect($this->generateUrl('ventas_presupuesto'));
+        }
+
+        $em->getConnection()->beginTransaction();
+        try {
+            $seguimiento = new \VentasBundle\Entity\PresupuestoSeguimiento();
+            $seguimiento->setFecha(new \DateTime());
+            $seguimiento->setUsuario($this->getUser());
+            $seguimiento->setEstado($estado);
+            $seguimiento->setComentario($comentario);
+            $entity->addSeguimiento($seguimiento);
+            $entity->setEstadoSeguimiento($estado);
+
+            $em->persist($seguimiento);
+            $em->persist($entity);
+            $em->flush();
+            $em->getConnection()->commit();
+            $this->addFlash('success', 'Se registró el llamado de seguimiento del Presupuesto #' . $entity->getNroPresupuesto());
+        }
+        catch (\Exception $ex) {
+            $em->getConnection()->rollback();
+            $this->addFlash('error', 'No se pudo registrar el llamado. ' . $ex->getMessage());
+        }
+        return $this->redirect($this->generateUrl('ventas_presupuesto'));
+    }
+
     private function arrayParameters($entity, $view) {
         $em = $this->getDoctrine()->getManager();
         return array(

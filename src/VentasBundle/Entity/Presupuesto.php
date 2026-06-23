@@ -47,6 +47,16 @@ class Presupuesto {
     protected $estado = 'EMITIDO';
 
     /**
+     * Estado comercial / de seguimiento (lo elige el usuario manualmente).
+     * Valores: PENDIENTE | VENDIDO | NEGOCIANDO | PERDIDO
+     *
+     * @var string $estadoSeguimiento
+     * @ORM\Column(name="estado_seguimiento", type="string", nullable=true)
+     * @Gedmo\Versioned()
+     */
+    protected $estadoSeguimiento = 'PENDIENTE';
+
+    /**
      * @var integer $descuentoRecargo
      * @ORM\Column(name="descuentoRecargo", type="decimal", precision=20, scale=2,nullable=true )
      * @Gedmo\Versioned()
@@ -131,6 +141,13 @@ class Presupuesto {
     protected $detalles;
 
     /**
+     * Historial de llamados de seguimiento, ordenado por fecha ascendente.
+     * @ORM\OneToMany(targetEntity="VentasBundle\Entity\PresupuestoSeguimiento", mappedBy="presupuesto", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OrderBy({"fecha" = "ASC"})
+     */
+    protected $seguimientos;
+
+    /**
      * @var datetime $created
      * @Gedmo\Timestampable(on="create")
      * @ORM\Column(type="datetime")
@@ -165,6 +182,7 @@ class Presupuesto {
      */
     public function __construct() {
         $this->detalles = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->seguimientos = new \Doctrine\Common\Collections\ArrayCollection();
         $this->validez = 1;
     }
 
@@ -703,6 +721,80 @@ class Presupuesto {
      */
     public function getPercepcionRentas() {
         return $this->percepcionRentas;
+    }
+
+    /**
+     * Set estadoSeguimiento
+     *
+     * @param string $estadoSeguimiento
+     * @return Presupuesto
+     */
+    public function setEstadoSeguimiento($estadoSeguimiento) {
+        $this->estadoSeguimiento = $estadoSeguimiento;
+
+        return $this;
+    }
+
+    /**
+     * Get estadoSeguimiento
+     *
+     * @return string
+     */
+    public function getEstadoSeguimiento() {
+        return $this->estadoSeguimiento;
+    }
+
+    /**
+     * Add seguimiento
+     *
+     * @param \VentasBundle\Entity\PresupuestoSeguimiento $seguimiento
+     * @return Presupuesto
+     */
+    public function addSeguimiento(\VentasBundle\Entity\PresupuestoSeguimiento $seguimiento) {
+        $seguimiento->setPresupuesto($this);
+        $this->seguimientos[] = $seguimiento;
+
+        return $this;
+    }
+
+    /**
+     * Remove seguimiento
+     *
+     * @param \VentasBundle\Entity\PresupuestoSeguimiento $seguimiento
+     */
+    public function removeSeguimiento(\VentasBundle\Entity\PresupuestoSeguimiento $seguimiento) {
+        $this->seguimientos->removeElement($seguimiento);
+    }
+
+    /**
+     * Get seguimientos (ordenados por fecha ascendente)
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSeguimientos() {
+        return $this->seguimientos;
+    }
+
+    /**
+     * Devuelve el último llamado de seguimiento (más reciente) o null si no hay.
+     *
+     * @return \VentasBundle\Entity\PresupuestoSeguimiento|null
+     */
+    public function getUltimoSeguimiento() {
+        if ($this->seguimientos->isEmpty()) {
+            return null;
+        }
+        return $this->seguimientos->last();
+    }
+
+    /**
+     * Indica si el presupuesto admite registrar un nuevo llamado de seguimiento.
+     * Habilitado mientras no esté VENDIDO ni el documento ANULADO.
+     *
+     * @return boolean
+     */
+    public function isSeguimientoHabilitado() {
+        return $this->estadoSeguimiento != 'VENDIDO' && $this->estado != 'ANULADO';
     }
 
 }

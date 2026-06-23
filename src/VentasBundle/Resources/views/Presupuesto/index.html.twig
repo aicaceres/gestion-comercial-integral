@@ -46,6 +46,7 @@
                 <th>Cliente</th>
                 <th>Total</th>
                 <th>Usuario</th>
+                <th class="nosort">Seguimiento</th>
                 <th class="nosort actionbutton addbutton">
                    {% if app.user.access(app.session.get('unidneg_id'),'ventas_venta_new') %}
                     <a class="editar create" href="{{ path('ventas_presupuesto_new') }}">Nuevo Presupuesto / Remito</a>
@@ -61,6 +62,23 @@
                 <td>{{ entity.cliente }}{{ entity.nombreCliente != 'CONSUMIDOR FINAL' ? ('<br><small>' ~ entity.nombreCliente) |raw : '</small>' }}</td>
                 <td class="alignright">{{ entity.montoTotal|number_format(2,',','.') }}</td>
                 <td>{{entity.createdBy.username|upper }}</td>
+                {# SEGUIMIENTO #}
+                {% set segLabels = {'PENDIENTE': 'Pendiente', 'VENDIDO': 'Vendido', 'NEGOCIANDO': 'Negociando', 'PERDIDO': 'Perdido'} %}
+                <td>
+                    <div style="position: relative; padding-right: 28px; min-height: 20px;">
+                        <span class="seg-estado seg-{{ entity.estadoSeguimiento|default('PENDIENTE')|lower }}">{{ segLabels[entity.estadoSeguimiento]|default('Pendiente') }}</span>
+                        {% set ult = entity.ultimoSeguimiento %}
+                        {% if ult %}
+                            <br><small>{{ ult.fecha|date('d-m-Y H:i') }} · {{ ult.usuario ? ult.usuario.username|upper : '' }}</small>
+                        {% endif %}
+                        {% if entity.isSeguimientoHabilitado and app.user.access(app.session.get('unidneg_id'),'ventas_presupuesto_seguimiento') %}
+                            <a href="javascript:void(0)" class="seg-telefono" title="Registrar llamado de seguimiento"
+                               data-url="{{ path('ventas_presupuesto_seguimiento', { 'id': entity.id }) }}"
+                               onclick="abrirSeguimiento(this)"
+                               style="position:absolute; right:0; top:50%; transform:translateY(-50%); font-size:16px; text-decoration:none;">&#128222;</a>
+                        {% endif %}
+                    </div>
+                </td>
                 <td class="buttons">
                     {% if entity.estado == 'ANULADO' %}
                         <strong style="height:26px;display:block;"> ANULADO: {{ entity.updated|date('d-m-Y H:i:s') }} | {{ entity.updatedBy.username }} </strong>
@@ -112,5 +130,16 @@ jQuery(document).ready(function($){
     $(this).parent().find('.btn_pencil').remove()
   })
 });
+
+function abrirSeguimiento(obj){
+    var url = jQuery(obj).data('url');
+    jQuery('#popup')
+        .html('<div class="loaders" style="width: 100%;text-align: center;margin-top: 10px;">Cargando...</div>')
+        .load(url)
+        .dialog({
+            modal: true, autoOpen: false, width: 600, title: "SEGUIMIENTO DEL PRESUPUESTO"
+        });
+    jQuery('#popup').dialog('open');
+}
 </script>
 {% endblock %}

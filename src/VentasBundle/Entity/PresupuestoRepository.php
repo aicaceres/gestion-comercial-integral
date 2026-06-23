@@ -9,10 +9,12 @@ class PresupuestoRepository extends EntityRepository {
 
     public function findByCriteria($unidneg, $cliId = NULL, $desde = NULL, $hasta = NULL, $descuentaStock = NULL) {
         $query = $this->_em->createQueryBuilder();
-        $query->select('p', 'usr')
+        $query->select('p', 'usr', 'seg', 'segusr')
                 ->from('VentasBundle\Entity\Presupuesto', 'p')
                 ->innerJoin('p.unidadNegocio', 'u')
                 ->leftJoin('p.createdBy', 'usr')
+                ->leftJoin('p.seguimientos', 'seg')
+                ->leftJoin('seg.usuario', 'segusr')
                 ->where("u.id=" . $unidneg);
         if ($cliId) {
             $query->andWhere('p.cliente = :cliId')

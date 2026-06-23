@@ -1,0 +1,58 @@
+<div class="seguimiento-popup">
+    <form id="formseguimiento" class="stdform" method="post"
+          action="{{ path('ventas_presupuesto_seguimiento_save', { 'id': entity.id }) }}">
+        <fieldset>
+            <div style="text-align: center; margin-bottom: 10px;">
+                <h5>Presupuesto Nº {{ entity.nroPresupuesto }} &mdash; {{ entity.cliente }}</h5>
+            </div>
+        </fieldset>
+        <fieldset>
+            <div style="margin: 10px 0;">
+                <label class="required" style="width:90px;">Estado:</label>
+                <select id="seguimientoEstado" name="estado" class="width200" required="required">
+                    {% set estados = {'PENDIENTE': 'Pendiente', 'VENDIDO': 'Vendido', 'NEGOCIANDO': 'Negociando', 'PERDIDO': 'Perdido'} %}
+                    {% for valor, etiqueta in estados %}
+                        <option value="{{ valor }}" {% if entity.estadoSeguimiento == valor %}selected="selected"{% endif %}>{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </fieldset>
+        <fieldset>
+            <div style="margin: 10px 0;">
+                <label class="required" style="width:90px; vertical-align: top;">Comentario:</label>
+                <textarea id="seguimientoComentario" name="comentario" style="width:80%" rows="4"
+                          required="required" title="Comentario del llamado"></textarea>
+            </div>
+        </fieldset>
+        <fieldset>
+            <div style="text-align: right; margin-top: 10px;">
+                <button type="submit" class="stdbtn stdbtn-primary">Registrar llamado</button>
+            </div>
+        </fieldset>
+    </form>
+
+    {% if entity.seguimientos|length > 0 %}
+        <hr/>
+        <h5 style="margin: 10px 0;">Historial de llamados</h5>
+        <table cellpadding="0" cellspacing="0" border="0" class="stdtable" style="width:100%;">
+            <thead>
+                <tr>
+                    <th style="width:130px;">Fecha</th>
+                    <th style="width:120px;">Usuario</th>
+                    <th style="width:100px;">Estado</th>
+                    <th>Comentario</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in entity.seguimientos|reverse %}
+                    <tr>
+                        <td>{{ s.fecha|date('d-m-Y H:i') }}</td>
+                        <td>{{ s.usuario ? s.usuario.username|upper : '' }}</td>
+                        <td>{{ {'PENDIENTE': 'Pendiente', 'VENDIDO': 'Vendido', 'NEGOCIANDO': 'Negociando', 'PERDIDO': 'Perdido'}[s.estado]|default(s.estado) }}</td>
+                        <td>{{ s.comentario|nl2br }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
