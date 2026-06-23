@@ -7,7 +7,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * VentasBundle\Entity\Presupuesto
- * @ORM\Table(name="ventas_presupuesto")
+ * @ORM\Table(name="ventas_presupuesto", indexes={
+ *     @ORM\Index(name="idx_unidneg_fecha", columns={"unidad_negocio_id", "fecha_presupuesto"})
+ * })
  * @ORM\Entity(repositoryClass="VentasBundle\Entity\PresupuestoRepository")
  * @Gedmo\Loggable()
  */
