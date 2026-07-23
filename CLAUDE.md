@@ -251,6 +251,17 @@ Parámetros relevantes en `app/config/parameters.yml` (valores reales son por m�
 
 > Orden cronológico inverso. Anotá cada incorporación o cambio relevante con fecha y descripción breve.
 
+- **2026-06-23** — **Filtros de Presupuestos persistidos en sesión**: `PresupuestoController::indexAction`
+  guarda los criterios de búsqueda (`cliId`, `desde`, `hasta`, `descuentaStock`) en sesión
+  (clave `ventas_presupuesto_filtro`) cuando llega un submit del formulario, y los restaura cuando
+  el listado se recarga sin parámetros (p.ej. el redirect tras registrar un seguimiento). Así no se
+  pierde la búsqueda al guardar un llamado. Solo cambio de código (sin SQL).
+- **2026-06-23** — **Zona horaria fijada en la app**: `AppKernel::__construct()` ahora llama a
+  `date_default_timezone_set('America/Argentina/Buenos_Aires')` antes de `parent::__construct()`.
+  Motivo: en el hosting las fechas se guardaban 1 hora menos porque el `date.timezone` del php.ini
+  del servidor estaba mal; la app dependía 100% del php.ini (no había `date_default_timezone_set`
+  en ningún lado). Ahora `new \DateTime()` usa hora de Argentina en web y CLI sin importar el
+  servidor. Solo cambio de código (sin SQL); desplegar y limpiar caché.
 - **2026-06-23** — **Seguimiento de Presupuestos**: nueva entidad `PresupuestoSeguimiento`
   (tabla `ventas_presupuesto_seguimiento`; historial de llamados: fecha/usuario/estado/comentario) +
   campo `Presupuesto.estadoSeguimiento` (`PENDIENTE | VENDIDO | NEGOCIANDO | PERDIDO`, default

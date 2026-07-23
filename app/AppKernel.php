@@ -5,6 +5,14 @@ use Symfony\Component\Config\Loader\LoaderInterface;
 
 class AppKernel extends Kernel {
 
+    public function __construct($environment, $debug) {
+        // Forzamos la zona horaria del dominio (Argentina, UTC-3) para que las
+        // fechas (new \DateTime(), seguimientos, comprobantes, caja, etc.) no
+        // dependan del date.timezone del php.ini del servidor. Cubre web y CLI.
+        date_default_timezone_set('America/Argentina/Buenos_Aires');
+        parent::__construct($environment, $debug);
+    }
+
     public function registerBundles() {
         $bundles = array(
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),

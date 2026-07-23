@@ -318,39 +318,36 @@ class ImpuestoController extends Controller {
 
                 if ($codAlicuota->getValor() == 0) {
                     $operacionesExentas = number_format($objComprob->getSubtotalNeto(), 2, '', '');
-                    $cantAlicuotas = NULL;
                 }
-                else {
-                    $cantidadTotalAlicuotas = 1;
-                    $totaliva = number_format($objComprob->getIva(), 2, '', '');
-                    $totalneto = number_format($objComprob->getTotalNeto(), 2, '', '');
-                    if ($format == 'A') {
-                        $alic = array(
-                            'tipoComprobante' => $objComprob->getAfipComprobante()->getCodigo(),
-                            'puntoVenta' => str_pad($objComprob->getAfipPuntoVenta(), 5, "0", STR_PAD_LEFT),
-                            'nroComprobante' => str_pad($objComprob->getAfipNroComprobante(), 20, "0", STR_PAD_LEFT),
-                            'cuit' => $cuit,
-                            'netoGravado' => str_pad($totalneto, 15, "0", STR_PAD_LEFT),
-                            'codAlicuota' => $codAlicuota->getCodigo(),
-                            'liquidado' => str_pad($totaliva, 15, "0", STR_PAD_LEFT),
-                            'signo' => $signo,
-                            'error' => $error,
-                            'id' => $objComprob->getId()
-                        );
-                        array_push($reginfoAlicuotas, $alic);
-                    }
-                    else {
-                        $txtalic = $objComprob->getAfipComprobante()->getCodigo() .
-                            str_pad($objComprob->getAfipPuntoVenta(), 5, "0", STR_PAD_LEFT) .
-                            str_pad($objComprob->getAfipNroComprobante(), 20, "0", STR_PAD_LEFT) .
-                            '80' .
-                            str_pad($cuit, 20, "0", STR_PAD_LEFT) .
-                            str_pad($totalneto, 15, "0", STR_PAD_LEFT) .
-                            $codAlicuota->getCodigo() .
-                            str_pad($totaliva, 15, "0", STR_PAD_LEFT);
-                        $reginfoAlicuotas = ( $reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
-                    }
-                }
+                  $cantidadTotalAlicuotas = 1;
+                  $totaliva = number_format($objComprob->getIva(), 2, '', '');
+                  $totalneto = number_format($objComprob->getTotalNeto(), 2, '', '');
+                  if ($format == 'A') {
+                      $alic = array(
+                          'tipoComprobante' => $objComprob->getAfipComprobante()->getCodigo(),
+                          'puntoVenta' => str_pad($objComprob->getAfipPuntoVenta(), 5, "0", STR_PAD_LEFT),
+                          'nroComprobante' => str_pad($objComprob->getAfipNroComprobante(), 20, "0", STR_PAD_LEFT),
+                          'cuit' => $cuit,
+                          'netoGravado' => str_pad($totalneto, 15, "0", STR_PAD_LEFT),
+                          'codAlicuota' => $codAlicuota->getCodigo(),
+                          'liquidado' => str_pad($totaliva, 15, "0", STR_PAD_LEFT),
+                          'signo' => $signo,
+                          'error' => $error,
+                          'id' => $objComprob->getId()
+                      );
+                      array_push($reginfoAlicuotas, $alic);
+                  }
+                  else {
+                      $txtalic = $objComprob->getAfipComprobante()->getCodigo() .
+                          str_pad($objComprob->getAfipPuntoVenta(), 5, "0", STR_PAD_LEFT) .
+                          str_pad($objComprob->getAfipNroComprobante(), 20, "0", STR_PAD_LEFT) .
+                          '80' .
+                          str_pad($cuit, 20, "0", STR_PAD_LEFT) .
+                          str_pad($totalneto, 15, "0", STR_PAD_LEFT) .
+                          $codAlicuota->getCodigo() .
+                          str_pad($totaliva, 15, "0", STR_PAD_LEFT);
+                      $reginfoAlicuotas = ( $reginfoAlicuotas == '') ? $txtalic : $reginfoAlicuotas . "\r\n" . $txtalic;
+                  }
             }
             else if (count($cantAlicuotas) > 1) {
                 // más de una alicuota, se calculan los valores
@@ -366,42 +363,31 @@ class ImpuestoController extends Controller {
                             $liq += $det->getMontoIvaItem();
                         }
                     }
-//                    $auxliq = $neto * ($codAlicuota->getValor() / 100);
                     $liq = number_format($liq, 2, '', '');
                     $neto = number_format($neto, 2, '', '');
                     if ($codAlicuota->getValor() == 0) {
                         $operacionesExentas = $neto;
                     }
-                    else {
-                        $cantidadTotalAlicuotas++;
-                        $alic[] = array(
-                            'tipoComprobante' => $objComprob->getAfipComprobante()->getCodigo(),
-                            'puntoVenta' => str_pad($objComprob->getAfipPuntoVenta(), 5, "0", STR_PAD_LEFT),
-                            'nroComprobante' => str_pad($objComprob->getAfipNroComprobante(), 20, "0", STR_PAD_LEFT),
-                            'cuit' => $cuit,
-                            'netoGravado' => str_pad($neto, 15, "0", STR_PAD_LEFT),
-                            'codAlicuota' => $codAlicuota->getCodigo(),
-                            'liquidado' => str_pad($liq, 15, "0", STR_PAD_LEFT),
-                            'signo' => $signo,
-                            'error' => $error,
-                            'id' => $objComprob->getId()
-                        );
-                    }
+                    $cantidadTotalAlicuotas++;
+                    $alic[] = array(
+                        'tipoComprobante' => $objComprob->getAfipComprobante()->getCodigo(),
+                        'puntoVenta' => str_pad($objComprob->getAfipPuntoVenta(), 5, "0", STR_PAD_LEFT),
+                        'nroComprobante' => str_pad($objComprob->getAfipNroComprobante(), 20, "0", STR_PAD_LEFT),
+                        'cuit' => $cuit,
+                        'netoGravado' => str_pad($neto, 15, "0", STR_PAD_LEFT),
+                        'codAlicuota' => $codAlicuota->getCodigo(),
+                        'liquidado' => str_pad($liq, 15, "0", STR_PAD_LEFT),
+                        'signo' => $signo,
+                        'error' => $error,
+                        'id' => $objComprob->getId()
+                    );
                     $totneto += $neto;
                     $totiva += $liq;
                 }
                 // totales
                 $totaliva = $totiva;
                 $totalneto = $totneto;
-//                if ($totaliva <> number_format($objComprob->getIva(), 2, '', '') || $totalneto <> number_format($objComprob->getSubtotalNeto(), 2, '', '')) {
-//                    $dif1 = $totaliva - number_format($objComprob->getIva(), 2, '', '');
-//                    $dif2 = $totalneto - number_format($objComprob->getSubtotalNeto(), 2, '', '');
-//
-//                    if (abs($dif1) > 1 || abs($dif2) > 1) {
-//                        $error[] = 'ALICUOTA';
-//                        $toterrores['ALICUOTA'] ++;
-//                    }
-//                }
+
                 foreach ($alic as $i) {
                     if ($format == 'A') {
                         $i['error'] = $error;
@@ -432,7 +418,6 @@ class ImpuestoController extends Controller {
             $totaloperacion = number_format($objComprob->getTotal(), 2, '', '');
             $OpExNegativo = $operacionesExentas < 0;
             $OpExPadded = str_pad(abs($operacionesExentas), 15, "0", STR_PAD_LEFT);
-//            $totaloperacion = $totalneto + $totaliva + $perciva + $perciibb + $percmuni + $impint;
             if ($format == 'A') {
                 $comp = array(
                     'fecha' => $fecha,
@@ -454,7 +439,6 @@ class ImpuestoController extends Controller {
                     'tipoCambio' => str_pad("0001000000", 10, "0"),
                     'cantAlicuotas' => $cantidadTotalAlicuotas,
                     'codOperacion' => $codOperacion,
-                    //'credFiscalComp' => str_pad(number_format($objComprob->getIva(), 2, '', ''), 15, "0", STR_PAD_LEFT),
                     'credFiscalComp' => str_pad($totaliva, 15, "0", STR_PAD_LEFT),
                     'otrosTributos' => str_pad("0", 15, "0"),
                     'cuitEmisor' => str_pad("0", 11, "0"),

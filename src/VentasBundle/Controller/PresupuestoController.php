@@ -31,16 +31,36 @@ class PresupuestoController extends Controller {
         $unidneg = $this->get('session')->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg, 'ventas_venta');
         $em = $this->getDoctrine()->getManager();
-        $periodo = UtilsController::ultimoMesParaFiltro($request->get('desde'), $request->get('hasta'));
-        // $desde = $request->get('desde');
-        // $hasta = $request->get('hasta');
+        $session = $this->get('session');
+
+        // Persistencia de filtros en sesión: si llegan parámetros de búsqueda
+        // (submit del formulario) se guardan; si no (recarga o redirect tras
+        // registrar un seguimiento) se restaura la última búsqueda realizada,
+        // para no perder el filtro al recargar la página.
+        $filtroKey = 'ventas_presupuesto_filtro';
+        if ($request->query->has('desde') || $request->query->has('hasta')
+                || $request->query->has('cliId') || $request->query->has('descuentaStock')) {
+            $filtro = array(
+                'cliId'          => $request->get('cliId'),
+                'desde'          => $request->get('desde'),
+                'hasta'          => $request->get('hasta'),
+                'descuentaStock' => $request->get('descuentaStock'),
+            );
+            $session->set($filtroKey, $filtro);
+        } else {
+            $filtro = $session->get($filtroKey, array());
+        }
+
+        $periodo = UtilsController::ultimoMesParaFiltro(
+                isset($filtro['desde']) ? $filtro['desde'] : null,
+                isset($filtro['hasta']) ? $filtro['hasta'] : null);
         $printpdf = null;
-        $cliId = $request->get('cliId');
+        $cliId = isset($filtro['cliId']) ? $filtro['cliId'] : null;
         $cliente = null;
         if ($cliId) {
             $cliente = $em->getRepository('VentasBundle:Cliente')->find($cliId);
         }
-        $dsVal = $request->get('descuentaStock');
+        $dsVal = isset($filtro['descuentaStock']) ? $filtro['descuentaStock'] : null;
         $descuentaStock = ($dsVal !== null && $dsVal !== '') ? (int)$dsVal : null;
         $entities = $em->getRepository('VentasBundle:Presupuesto')->findByCriteria($unidneg, $cliId, $periodo['ini'], $periodo['fin'], $descuentaStock);
         if ($this->getUser()->getAccess($unidneg, 'ventas_presupuesto_print')) {
