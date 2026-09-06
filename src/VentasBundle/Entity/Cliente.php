@@ -275,6 +275,13 @@ class Cliente {
 //        return $this;
 //    }
 
+    /**
+     * @deprecated Devuelve la retencion plana de la categoria, ignorando las Escalas
+     *             vigentes por fecha. Usar en su lugar:
+     *             UtilsController::getPercepcionRentasByClienteAndDate($cliente, $fecha, $em)
+     *             o el campo percepcionRentas del propio comprobante.
+     *             Usarla desalinea el total interno respecto del total autorizado por AFIP.
+     */
     public function getPercepcionRentas() {
         $porcRentas = 0;
         $hoy = new \DateTime();

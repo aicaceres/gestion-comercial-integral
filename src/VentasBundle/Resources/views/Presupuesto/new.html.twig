@@ -104,6 +104,14 @@
 
 jQuery(function ($) {
 
+    // linea de aviso de stock del popup: gris si descuenta, roja si no
+    // (descuenta si el check esta tildado o el tipo elegido es Remito)
+    function textoDescuentaStock() {
+        var descuenta = $('#ventasbundle_presupuesto_descuentaStock').attr("checked") || $('#popup_prompt').val() === 'R';
+        return descuenta ? '<b>Se realizará el descuento de los productos en el stock!</b>'
+                         : '<b style="color:red">No se realizará descuento en el stock!</b>';
+    }
+
     $(window).on('load', function () {
 
         // confirm on submit
@@ -113,9 +121,7 @@ jQuery(function ($) {
             let txt = '<span>';
             txt += 'PRESUPUESTO:   '+$('.nroOperacion').html();
             txt += '\n' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
-            if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") ){
-                txt += '\n' +'<b>Se realizará el descuento de los productos en el stock!</b>';
-            }
+            txt += '\n' + textoDescuentaStock();
             txt += '</span>';
             // detectar inputs invalidos
             if( $(':invalid').length > 0 ){
@@ -160,9 +166,7 @@ jQuery(function ($) {
             let txt = '<span>';
             txt += 'PRESUPUESTO:   '+$('.nroOperacion').html();
             txt += '<br>' + 'CONFIRMA REGISTRAR EL PRESUPUESTO?' ;
-            if( $('#ventasbundle_presupuesto_descuentaStock').attr("checked") || $('#popup_prompt').val() ==='R' ){
-                txt += '<br>' +'<b>Se realizará el descuento de los productos en el stock!</b>';
-            }
+            txt += '<br>' + textoDescuentaStock();
             txt += '</span>';
             $('#popup_message span').html( txt );
         })

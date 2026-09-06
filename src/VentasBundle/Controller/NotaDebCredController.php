@@ -232,8 +232,15 @@ class NotaDebCredController extends Controller {
                     // TRIBUTOS
                     $impTrib = 0;
                     if ($catIva == 'I') {
+                        // el porcentaje debe salir de la propia nota (escala vigente a su fecha),
+                        // no de la retencion plana de la categoria del cliente
+                        $percRentas = $entity->getPercepcionRentas();
+                        if (is_null($percRentas)) {
+                            $percRentas = UtilsController::getPercepcionRentasByClienteAndDate($cliente, $entity->getFecha(), $em);
+                            $entity->setPercepcionRentas($percRentas);
+                        }
                         $neto = round($impNeto, 2);
-                        $iibb = round(($neto * $cliente->getPercepcionRentas() / 100), 2);
+                        $iibb = round(($neto * $percRentas / 100), 2);
                         $impTrib = $iibb;
                     }
                     $impTotal += $impTrib;

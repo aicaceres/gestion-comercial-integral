@@ -251,6 +251,24 @@ Parámetros relevantes en `app/config/parameters.yml` (valores reales son por m�
 
 > Orden cronológico inverso. Anotá cada incorporación o cambio relevante con fecha y descripción breve.
 
+- **2026-09-06** — **Fix de IIBB en Notas de Débito/Crédito de ventas**:
+  `NotaDebCredController::createAction` calculaba la percepción de IIBB con
+  `Cliente::getPercepcionRentas()` (retención "plana" de la categoría del cliente) en vez de la
+  escala vigente a la fecha de la nota. Eso desalineaba el total interno del comprobante respecto
+  del total autorizado por AFIP (el CAE siempre estuvo bien: se toma como fuente de verdad).
+  Ahora usa el porcentaje de la propia nota (`NotaDebCred.percepcionRentas`) y, si viene vacío, lo
+  resuelve con `UtilsController::getPercepcionRentasByClienteAndDate($cliente, $fecha, $em)` y lo
+  persiste en el comprobante. `Cliente::getPercepcionRentas()` quedó marcado `@deprecated`.
+  Origen del bug: commit `40209ed` (2026-06-03, "Escalas con versionado"). Reparación de datos
+  históricos (detección + preflight + fix, con snapshot para rollback) en `database/2026-08-26_*.sql`
+  — no versionados, `*.sql` está en `.gitignore`. Sin cambios de esquema.
+- **2026-09-06** — **Aviso de descuento de stock en el popup de Presupuesto**: en
+  `Presupuesto/new.html.twig`, la línea de aviso del modal de confirmación pasó a ser incondicional
+  y cambia según el check `descuentaStock`: en gris "Se realizará el descuento de los productos en
+  el stock!" cuando descuenta, en rojo "No se realizará descuento en el stock!" cuando no. La arma
+  el helper `textoDescuentaStock()`, usado tanto al construir el mensaje inicial como en el `change`
+  del combo de tipo (elegir Remito fuerza el descuento y devuelve el texto a gris). Solo cambio de
+  vista (sin SQL).
 - **2026-06-23** — **Filtros de Presupuestos persistidos en sesión**: `PresupuestoController::indexAction`
   guarda los criterios de búsqueda (`cliId`, `desde`, `hasta`, `descuentaStock`) en sesión
   (clave `ventas_presupuesto_filtro`) cuando llega un submit del formulario, y los restaura cuando
