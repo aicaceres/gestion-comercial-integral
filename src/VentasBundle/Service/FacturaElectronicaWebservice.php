@@ -347,7 +347,18 @@ class FacturaElectronicaWebservice {
 
         // IMPORTES Y CONCEPTOS DEL DETALLE
         $impTotC = $impOpEx = 0; // importe no gravado // Importe exento de IVA
-        if ($detalles) {
+        $precioFinal = ($catIva != 'I' && $catIva != 'M');
+        if ($detalles && $precioFinal) {
+            // Comprobante B: los importes salen del mismo total que ve el cliente en presupuesto/venta
+            $porcDtoRec = ($tipo == 'FAC') ? $comprobante->getVenta()->getDescuentoRecargo() : $comprobante->getDescuentoRecargo();
+            $importes = $this->calcularImportesPrecioFinal($detalles, $porcDtoRec);
+            $impTotal = $importes['total'];
+            $impNeto = $importes['neto'];
+            $impIVA = $importes['iva'];
+            $impOpEx = $importes['opEx'];
+            $iva = $importes['alicuotas'];
+        }
+        elseif ($detalles) {
             $impTotal = $impNeto = $impIVA = $impTrib = $impDtoRec = 0;
             foreach ($detalles as $item) {
                 $alicuota = $em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => number_format($item->getAlicuota(), 2, '.', '')));
@@ -452,6 +463,74 @@ class FacturaElectronicaWebservice {
             'fchVtoPago' => ''
         );
         return $dataFe;
+    }
+
+    /**
+     * Importes AFIP para comprobantes con precio final (IVA incluido: consumidor final, exento, etc.).
+     *
+     * El total se calcula igual que Venta/Presupuesto/NotaDebCred::getMontoTotal() (unitario con IVA
+     * redondeado x cantidad, +/- descuento sobre el subtotal), así el total autorizado coincide al
+     * centavo con el presupuesto y la venta. Ese total se reparte por alícuota (el residuo de redondeo
+     * va a la alícuota de mayor importe) y de cada total se desglosa neto e IVA contenido.
+     */
+    private function calcularImportesPrecioFinal($detalles, $porcDtoRec) {
+        $factor = 1 + ($porcDtoRec / 100);
+        $subTotal = 0;
+        $brutos = array();
+        foreach ($detalles as $item) {
+            $alic = number_format($item->getAlicuota(), 2, '.', '');
+            if (!isset($brutos[$alic])) {
+                $brutos[$alic] = 0;
+            }
+            $brutos[$alic] += $item->getTotalItem();
+            $subTotal += $item->getTotalItem();
+        }
+        $total = round($subTotal * $factor, 2);
+
+        $totales = array();
+        $acumulado = 0;
+        $mayor = null;
+        foreach ($brutos as $alic => $bruto) {
+            $totales[$alic] = round($bruto * $factor, 2);
+            $acumulado += $totales[$alic];
+            if ($mayor === null || abs($totales[$alic]) > abs($totales[$mayor])) {
+                $mayor = $alic;
+            }
+        }
+        if ($mayor !== null) {
+            $totales[$mayor] = round($totales[$mayor] + ($total - $acumulado), 2);
+        }
+
+        $neto = $impIva = $opEx = 0;
+        $alicuotas = array();
+        foreach ($totales as $alic => $totalAlic) {
+            if ($totalAlic == 0) {
+                continue;
+            }
+            if ($alic > 0) {
+                $alicuota = $this->em->getRepository('ConfigBundle:AfipAlicuota')->findOneBy(array('valor' => $alic));
+                $base = round($totalAlic / (1 + ($alic / 100)), 2);
+                $importe = round($totalAlic - $base, 2);
+                $alicuotas[] = array(
+                    'Id' => intval($alicuota->getCodigo()),
+                    'BaseImp' => $base,
+                    'Importe' => $importe
+                );
+                $neto += $base;
+                $impIva += $importe;
+            }
+            else {
+                $opEx += $totalAlic;
+            }
+        }
+
+        return array(
+            'total' => $total,
+            'neto' => round($neto, 2),
+            'iva' => round($impIva, 2),
+            'opEx' => round($opEx, 2),
+            'alicuotas' => $alicuotas
+        );
     }
 
     public function guardarFacturaElectronica($dataFe) {

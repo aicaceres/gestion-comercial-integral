@@ -251,6 +251,16 @@ Parámetros relevantes en `app/config/parameters.yml` (valores reales son por m�
 
 > Orden cronológico inverso. Anotá cada incorporación o cambio relevante con fecha y descripción breve.
 
+- **2026-09-21** — **Total de factura B alineado al centavo con presupuesto/venta**:
+  `FacturaElectronicaWebservice::setDataFacturaElectronica` calculaba ImpTotal/ImpNeto/ImpIVA con
+  neto + descuento + IVA por ítem sin redondear, mientras que `Presupuesto`/`Venta`/`NotaDebCred::getMontoTotal()`
+  (precio final) redondean el unitario con IVA antes de multiplicar por la cantidad. Resultado: ~1/3 de
+  las facturas B de 2026 difería en centavos del presupuesto/cobro (caso: pres. #64955 $337.971,65 vs
+  FAC-B 0012-00028933 $337.971,64). Para clientes **no** `I`/`M` (FAC y NDC) ahora usa
+  `calcularImportesPrecioFinal()`: toma el mismo total que `getMontoTotal()`, lo reparte por alícuota
+  (residuo al grupo mayor) y desglosa neto/IVA contenido de cada una. Facturas A sin cambios.
+  Comprobantes ya autorizados no se modifican (el CAE manda). Sin cambios de esquema ni SQL.
+
 - **2026-09-06** — **Fix de IIBB en Notas de Débito/Crédito de ventas**:
   `NotaDebCredController::createAction` calculaba la percepción de IIBB con
   `Cliente::getPercepcionRentas()` (retención "plana" de la categoría del cliente) en vez de la
