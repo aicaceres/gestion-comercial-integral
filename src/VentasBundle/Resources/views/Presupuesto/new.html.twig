@@ -66,12 +66,12 @@
         <fieldset>
             <div style="padding-top: 20px; margin:auto; width: 100%;">
                 {{ form_errors(form.detalles) }}
-                {% include "VentasBundle:Partial:_partial-detalle.html.twig" %}
+                {% include "VentasBundle:Partial:_partial-detalle.html.twig" with {'editarPrecios': true} %}
             </div>
         </fieldset>
         <fieldset>
             <div style="margin:auto; width: 100%;">
-                {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': false, 'showiibb': false } %}
+                {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': false, 'showiibb': false, 'editarPrecios': true } %}
             </div>
         </fieldset>
 

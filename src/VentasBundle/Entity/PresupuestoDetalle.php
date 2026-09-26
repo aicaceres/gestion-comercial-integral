@@ -61,7 +61,7 @@ class PresupuestoDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=20, scale=2 )
+     * @ORM\Column(name="precio", type="decimal", precision=20, scale=4 )
      * @Gedmo\Versioned()
      */
     protected $precio;
@@ -124,7 +124,29 @@ class PresupuestoDetalle {
 
     // total del item
     public function getTotalItem() {
+        $categIva = $this->getPresupuesto()->getCategoriaIva();
+        if ($categIva == 'I' || $categIva == 'M') {
+            // neto por linea: la misma base imponible que se informa en el comprobante
+            return round($this->getPrecio() * $this->getCantidad(), 2);
+        }
         return round(($this->getPrecioUnitarioItem() * $this->getCantidad()), 2);
+    }
+
+    // precio unitario final con descuento/recargo (con iva si no es I o M), redondeado como se muestra
+    public function getPrecioFinalItem() {
+        $presupuesto = $this->getPresupuesto();
+        $categIva = $presupuesto->getCategoriaIva();
+        $precio = $this->getPrecio();
+        if ($categIva != 'I' && $categIva != 'M') {
+            $precio = $precio * (1 + ($this->getAlicuota() / 100));
+        }
+        $precio = $precio * (1 + ($presupuesto->getDescuentoRecargo() / 100));
+        return round($precio, 2);
+    }
+
+    // total final del item: para precio final (no I o M) el total del presupuesto es la suma de estos
+    public function getTotalFinalItem() {
+        return round($this->getPrecioFinalItem() * $this->getCantidad(), 2);
     }
 
     /** FIN VALORES ITEM */

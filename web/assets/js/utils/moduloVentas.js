@@ -81,6 +81,344 @@ function addNewItem() {
 }
 
 function actualizarImportes(ndc = 0) {
+	// la nota de débito/crédito mantiene su cálculo propio
+	if (ndc || jQuery("#ventasbundle_notadebcred").length) {
+		return actualizarImportesNotaDebCred(ndc)
+	}
+	const d = datosCalculo()
+	jQuery("span.descuentoRecargo").html(d.porcentaje.toFixed(2))
+
+	const filas = leerFilas()
+	const t = calcularTotales(filas, d)
+	let subtotalTh = 0
+	filas.forEach(function (f, i) {
+		f.tr.find(".ordTd").html(i + 1)
+		f.tr.find(".precTd span").html(f.precioFinal.toFixed(2))
+		f.tr.find(".precTd .precioFinal").val(f.precioFinal.toFixed(2))
+		f.tr.find(".itmSubtotalTd").text(f.totalFinal.toFixed(2))
+		subtotalTh += f.totalFinal
+	})
+	const fmt = (valor) => valor.toFixed(2).replace(".", ",")
+	jQuery("#subtotalTh").html(subtotalTh.toFixed(2))
+	jQuery("#importeSubtotal").html(fmt(t.subTotal))
+	jQuery("#importeRecargo").text(fmt(t.descrec))
+	jQuery("#importeTotal").text(fmt(t.total))
+	jQuery("#totalEditable").val(t.total.toFixed(2))
+	jQuery("#importeIVA").text(fmt(t.totalIva))
+	jQuery("#importeIIBB").text(fmt(t.iibb))
+
+	if (
+		typeof actualizarSumaPagos !== "undefined" &&
+		jQuery.isFunction(actualizarSumaPagos)
+	) {
+		actualizarSumaPagos()
+	}
+}
+
+// redondeo como round() de PHP: mitad hacia afuera, tolerante a errores de coma flotante
+function redondear(valor, dec = 2) {
+	const factor = Math.pow(10, dec)
+	const n = parseFloat((Math.abs(valor) * factor).toPrecision(15))
+	return (Math.sign(valor) * Math.round(n)) / factor
+}
+
+function datosCalculo() {
+	return {
+		cotizacion: parseFloat(jQuery(".datos-moneda").data("cotizacion")) || 1,
+		categoriaIva: jQuery(".selectorCliente").data("categiva"),
+		percrentas: parseFloat(jQuery(".selectorCliente").data("percrentas")) || 0,
+		porcentaje: checknumero(jQuery('[id*="_descuentoRecargo"]'))
+	}
+}
+
+// precio final (IVA incluido): todo cliente que no sea Resp. Inscripto o Monotributo
+function esPrecioFinal(categoriaIva) {
+	return categoriaIva !== "I" && categoriaIva !== "M"
+}
+
+function leerFilas() {
+	const filas = []
+	$collectionHolder.find("tr.item").each(function (_, tr) {
+		const item = jQuery(tr)
+		filas.push({
+			tr: item,
+			cantidad: checknumero(item.find(".cantTd input")),
+			precio: checknumero(item.find('[id*="_precio"]'), 4),
+			alicuota: checknumero(item.find('[id*="_alicuota"]'))
+		})
+	})
+	return filas
+}
+
+// precio unitario final mostrado (con descuento/recargo, con IVA si es precio final) = *Detalle::getPrecioFinalItem()
+function precioFinal(precio, alicuota, d) {
+	let valor = precio
+	if (esPrecioFinal(d.categoriaIva)) {
+		valor = valor * (1 + alicuota / 100)
+	}
+	valor = (valor * (1 + d.porcentaje / 100)) / d.cotizacion
+	return redondear(valor)
+}
+
+// mismos totales que Venta/Presupuesto::getSubTotal(), getTotalDescuentoRecargo(), getTotalIva(), getMontoTotal()
+function calcularTotales(filas, d) {
+	let subTotal = 0
+	let descrec = 0
+	let totalIva = 0
+	let iibb = 0
+	let total = 0
+	filas.forEach(function (f) {
+		f.precioFinal = precioFinal(f.precio, f.alicuota, d)
+		f.totalFinal = redondear(f.precioFinal * f.cantidad)
+	})
+	if (esPrecioFinal(d.categoriaIva)) {
+		// el total es la suma de las líneas tal como se muestran
+		filas.forEach(function (f) {
+			const unitario = redondear((f.precio * (1 + f.alicuota / 100)) / d.cotizacion)
+			subTotal += redondear(unitario * f.cantidad)
+			total += f.totalFinal
+		})
+		total = redondear(total)
+		descrec = redondear(total - subTotal)
+	} else {
+		let dto = 0
+		let iva = 0
+		filas.forEach(function (f) {
+			const dtoItem = f.precio * (d.porcentaje / 100)
+			// neto por linea: la misma base imponible que se informa en el comprobante
+			subTotal += redondear((f.precio / d.cotizacion) * f.cantidad)
+			dto += dtoItem * f.cantidad
+			iva += (f.precio + dtoItem) * (f.alicuota / 100) * f.cantidad
+		})
+		// descuento ajustado para que subtotal + descuento sea el neto del comprobante
+		descrec = redondear(redondear(subTotal + dto / d.cotizacion) - subTotal)
+		totalIva = redondear(iva / d.cotizacion)
+		if (d.percrentas > 0) {
+			iibb = redondear(((subTotal + descrec) * d.percrentas) / 100)
+		}
+		total = redondear(subTotal + descrec + totalIva + iibb)
+	}
+	return { subTotal: subTotal, descrec: descrec, totalIva: totalIva, iibb: iibb, total: total }
+}
+
+// acepta 1234.56 o 1.234,56
+function parsearImporte(valor) {
+	let txt = String(valor).trim().replace(/[^\d.,-]/g, "")
+	if (txt.indexOf(",") >= 0) {
+		txt = txt.replace(/\./g, "").replace(",", ".")
+	}
+	const num = parseFloat(txt)
+	return isNaN(num) ? null : redondear(num)
+}
+
+// precio de lista (4 decimales) cuyo precio final redondeado es exactamente el pedido
+function precioParaFinal(objetivo, alicuota, d) {
+	let factor = (1 + d.porcentaje / 100) / d.cotizacion
+	if (esPrecioFinal(d.categoriaIva)) {
+		factor = factor * (1 + alicuota / 100)
+	}
+	if (factor <= 0) return null
+	const base = redondear(objetivo / factor, 4)
+	for (let paso = 0; paso <= 200; paso++) {
+		for (const signo of [1, -1]) {
+			const precio = redondear(base + signo * paso * 0.0001, 4)
+			if (precio >= 0 && precioFinal(precio, alicuota, d) === objetivo) {
+				return precio
+			}
+		}
+	}
+	return null
+}
+
+function handlePrecioFinalChange(input) {
+	const tr = jQuery(input).closest("tr")
+	const objetivo = parsearImporte(jQuery(input).val())
+	if (objetivo !== null && objetivo >= 0) {
+		const d = datosCalculo()
+		const alicuota = checknumero(tr.find('[id*="_alicuota"]'))
+		const precio = precioParaFinal(objetivo, alicuota, d)
+		if (precio === null) {
+			jAlert("No se puede calcular el precio para ese importe.", "Atención")
+		} else {
+			tr.find('[id*="_precio"]').val(precio.toFixed(4))
+		}
+	}
+	actualizarImportes()
+}
+
+// prorratea el total pedido en los precios; el residuo de redondeo lo absorbe una línea
+function handleTotalChange(input) {
+	const meta = parsearImporte(jQuery(input).val())
+	const d = datosCalculo()
+	const todas = leerFilas()
+	const filas = todas.filter((f) => f.precio > 0 && f.cantidad > 0)
+	if (meta === null || meta <= 0 || !filas.length) {
+		actualizarImportes()
+		return
+	}
+	const obtenido = ajustarPreciosATotal(todas, meta, d)
+
+	todas.forEach(function (f) {
+		f.tr.find('[id*="_precio"]').val(f.precio.toFixed(4))
+	})
+	actualizarImportes()
+	if (obtenido !== meta) {
+		jAlert(
+			"Con las cantidades cargadas no se puede llegar exacto a " +
+				meta.toFixed(2) +
+				". Total más cercano: " +
+				obtenido.toFixed(2) +
+				". Puede ajustar el precio unitario de una línea.",
+			"Atención"
+		)
+	}
+}
+
+// modifica el precio de las filas para que el total sea la meta; devuelve el total logrado
+function ajustarPreciosATotal(todas, meta, d) {
+	const filas = todas.filter((f) => f.precio > 0 && f.cantidad > 0)
+	const totalDe = () => calcularTotales(todas, d).total
+
+	// prorrateo proporcional (se repite porque el total A no es exactamente lineal)
+	for (let i = 0; i < 3 && totalDe() !== meta; i++) {
+		const k = meta / totalDe()
+		filas.forEach(function (f) {
+			f.precio = redondear(f.precio * k, 4)
+		})
+	}
+
+	// precio final: el total es suma de líneas, se ajusta en centavos exactos sobre una o dos líneas
+	if (esPrecioFinal(d.categoriaIva) && totalDe() !== meta) {
+		ajustarCentavosPrecioFinal(filas, meta, d, totalDe)
+	}
+
+	// ajuste fino por búsqueda (A, o cantidades fraccionarias): primero las líneas de menor cantidad
+	const candidatas = filas
+		.slice()
+		.sort((a, b) => a.cantidad - b.cantidad || b.precio * b.cantidad - a.precio * a.cantidad)
+		.slice(0, 10)
+	for (const f of candidatas) {
+		if (totalDe() === meta) return meta
+		const original = f.precio
+		if (!buscarPrecioFila(f, meta, d, totalDe)) f.precio = original
+	}
+	// dos líneas: se mueve una de a centavos y la otra se busca
+	const combinar = !esPrecioFinal(d.categoriaIva) || filas.some((f) => !Number.isInteger(f.cantidad))
+	const pares = candidatas.slice(0, 6)
+	for (let i = 0; combinar && i < pares.length && totalDe() !== meta; i++) {
+		for (let j = 0; j < pares.length && totalDe() !== meta; j++) {
+			if (i === j) continue
+			const origI = pares[i].precio
+			const origJ = pares[j].precio
+			for (let paso = 1; paso <= 60; paso++) {
+				pares[i].precio = redondear(origI + (paso % 2 ? 1 : -1) * Math.ceil(paso / 2) * 0.01, 4)
+				if (pares[i].precio >= 0 && buscarPrecioFila(pares[j], meta, d, totalDe)) return meta
+				pares[j].precio = origJ
+			}
+			pares[i].precio = origI
+		}
+	}
+	return totalDe()
+}
+
+// el total no decrece al subir el precio de una fila: búsqueda binaria (en pasos de 0.0001) del precio que da la meta
+function buscarPrecioFila(f, meta, d, totalDe) {
+	let sensibilidad = (f.cantidad * (1 + d.porcentaje / 100)) / d.cotizacion
+	sensibilidad = sensibilidad * (1 + f.alicuota / 100 + (esPrecioFinal(d.categoriaIva) ? 0 : d.percrentas / 100))
+	if (sensibilidad <= 0) return false
+	const margen = Math.abs(meta - totalDe()) / sensibilidad + 0.05
+	let desde = Math.max(0, Math.round((f.precio - margen) * 10000))
+	let hasta = Math.round((f.precio + margen) * 10000)
+	f.precio = desde / 10000
+	if (totalDe() > meta) return false
+	f.precio = hasta / 10000
+	if (totalDe() < meta) return false
+	while (desde < hasta) {
+		const medio = Math.floor((desde + hasta) / 2)
+		f.precio = medio / 10000
+		if (totalDe() < meta) desde = medio + 1
+		else hasta = medio
+	}
+	f.precio = desde / 10000
+	return totalDe() === meta
+}
+
+// cambiar en "a" centavos el unitario final de una línea de cantidad entera c mueve el total a*c centavos:
+// se busca una línea (c divide la diferencia) o un par (a*ci + b*cj = diferencia, Euclides extendido)
+function ajustarCentavosPrecioFinal(filas, meta, d, totalDe) {
+	const enteras = filas.filter((f) => Number.isInteger(f.cantidad)).slice(0, 20)
+	const aplicar = function (cambios) {
+		const originales = cambios.map((x) => x.fila.precio)
+		for (const x of cambios) {
+			const unitario = redondear(x.fila.precioFinal + x.centavos / 100)
+			const precio = unitario > 0 ? precioParaFinal(unitario, x.fila.alicuota, d) : null
+			if (precio === null) {
+				cambios.forEach((y, i) => (y.fila.precio = originales[i]))
+				return false
+			}
+			x.fila.precio = precio
+		}
+		if (totalDe() === meta) return true
+		cambios.forEach((y, i) => (y.fila.precio = originales[i]))
+		totalDe()
+		return false
+	}
+	const euclides = function (a, b) {
+		if (b === 0) return [a, 1, 0]
+		const [g, x, y] = euclides(b, a % b)
+		return [g, y, x - Math.floor(a / b) * y]
+	}
+	const diferencia = Math.round((meta - totalDe()) * 100)
+	for (const f of enteras) {
+		if (diferencia % f.cantidad === 0 && aplicar([{ fila: f, centavos: diferencia / f.cantidad }])) return true
+	}
+	for (let i = 0; i < enteras.length; i++) {
+		for (let j = i + 1; j < enteras.length; j++) {
+			const ci = enteras[i].cantidad
+			const cj = enteras[j].cantidad
+			const [g, x, y] = euclides(ci, cj)
+			if (diferencia % g !== 0) continue
+			// soluciones: a = a0 + t*cj/g, b = b0 - t*ci/g; se elige la de menor movimiento
+			const a0 = (x * diferencia) / g
+			const b0 = (y * diferencia) / g
+			const criticos = [(-a0 * g) / cj, (b0 * g) / ci, ((b0 - a0) * g) / (ci + cj)]
+			let mejorT = null
+			let mejorMax = Infinity
+			criticos.forEach(function (tc) {
+				for (const t of [Math.floor(tc), Math.ceil(tc)]) {
+					const max = Math.max(Math.abs(a0 + (t * cj) / g), Math.abs(b0 - (t * ci) / g))
+					if (max < mejorMax) {
+						mejorMax = max
+						mejorT = t
+					}
+				}
+			})
+			const cambios = [
+				{ fila: enteras[i], centavos: a0 + (mejorT * cj) / g },
+				{ fila: enteras[j], centavos: b0 - (mejorT * ci) / g }
+			]
+			if (aplicar(cambios)) return true
+		}
+	}
+	// sin solución exacta (cantidades con divisor común): lo más cerca posible con la línea de menor cantidad
+	const menor = enteras.slice().sort((a, b) => a.cantidad - b.cantidad)[0]
+	if (menor) {
+		const unitario = redondear(menor.precioFinal + Math.round(diferencia / menor.cantidad) / 100)
+		const precio = unitario > 0 ? precioParaFinal(unitario, menor.alicuota, d) : null
+		if (precio !== null) menor.precio = precio
+	}
+	return false
+}
+
+// Enter en los importes editables recalcula sin enviar el formulario
+jQuery(document).on("keydown", ".precioFinal, #totalEditable", function (e) {
+	if (e.keyCode == 13) {
+		e.preventDefault()
+		jQuery(this).change()
+	}
+})
+
+function actualizarImportesNotaDebCred(ndc = 0) {
 	let iva = (iibb = descrec = subTotal = totalIVA = totalIIBB = subtotalTh = 0)
 	const cotizacion = jQuery(".datos-moneda").data("cotizacion")
 	const categoriaIva = jQuery(".selectorCliente").data("categiva")

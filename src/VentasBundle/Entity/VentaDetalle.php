@@ -58,7 +58,7 @@ class VentaDetalle {
 
     /**
      * @var integer $precio
-     * @ORM\Column(name="precio", type="decimal", precision=20, scale=2 )
+     * @ORM\Column(name="precio", type="decimal", precision=20, scale=4 )
      * @Gedmo\Versioned()
      */
     protected $precio = 0;
@@ -125,8 +125,30 @@ class VentaDetalle {
 
     // total del item
     public function getTotalItem() {
+        $categIva = $this->getVenta()->getCategoriaIva();
+        if ($categIva == 'I' || $categIva == 'M') {
+            // neto por linea: la misma base imponible que se informa en el comprobante
+            return $this->getBaseImponibleItem();
+        }
         $aux = round($this->getPrecioUnitarioItem(),2);
-        return $aux * $this->getCantidad();
+        return round($aux * $this->getCantidad(), 2);
+    }
+
+    // precio unitario final con descuento/recargo (con iva si no es I o M), redondeado como se muestra
+    public function getPrecioFinalItem() {
+        $venta = $this->getVenta();
+        $categIva = $venta->getCategoriaIva();
+        $precio = $this->getPrecio();
+        if ($categIva != 'I' && $categIva != 'M') {
+            $precio = $precio * (1 + ($this->getAlicuota() / 100));
+        }
+        $precio = $precio * (1 + ($venta->getDescuentoRecargo() / 100)) / $venta->getCotizacion();
+        return round($precio, 2);
+    }
+
+    // total final del item: para precio final (no I o M) el total de la venta es la suma de estos
+    public function getTotalFinalItem() {
+        return round($this->getPrecioFinalItem() * $this->getCantidad(), 2);
     }
 
     public function getBaseImponibleItem() {

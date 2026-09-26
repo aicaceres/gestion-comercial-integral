@@ -239,14 +239,16 @@ class Presupuesto {
         $total = 0;
         $categIva = $this->getCategoriaIva();
         if ($categIva == 'I' || $categIva == 'M') {
-            // suma de descuentos x item
+            // suma de descuentos x item, ajustada para que subtotal + descuento sea el neto del comprobante
             foreach ($this->detalles as $item) {
                 $total = $total + $item->getTotalDtoRecItem();
             }
+            $subTotal = $this->getSubTotal();
+            $total = round($subTotal + $total, 2) - $subTotal;
         }
         else {
-            // descuento sobre el subtotal
-            $total = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
+            // precio final: diferencia entre el total (suma de lineas) y el subtotal sin descuento
+            $total = $this->getMontoTotal() - $this->getSubTotal();
         }
         return round(($total), 2);
     }
@@ -261,7 +263,8 @@ class Presupuesto {
 
     public function getTotalIibb() {
         $monto = $this->getSubTotal() + $this->getTotalDescuentoRecargo();
-        return $monto * $this->getPercepcionRentas() / 100;
+        // redondeado como el tributo que se informa en el comprobante
+        return round($monto * $this->getPercepcionRentas() / 100, 2);
     }
 
     public function getMontoTotal() {
@@ -274,9 +277,11 @@ class Presupuesto {
             }
         }
         else {
-            // subtotal +/- descuentoRecargo
-            $descRec = $this->getSubTotal() * ( $this->getDescuentoRecargo() / 100 );
-            $total = $this->getSubTotal() + $descRec;
+            // precio final: suma de las lineas con descuento/recargo, tal como se muestran
+            $total = 0;
+            foreach ($this->detalles as $item) {
+                $total = $total + $item->getTotalFinalItem();
+            }
         }
         return round($total, 2);
     }

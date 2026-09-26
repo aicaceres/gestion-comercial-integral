@@ -33,7 +33,11 @@
         <span class="unidmed floatleft" style="padding-left: 5px"></span>
     </td>
     <td class="precTd alignright">
-        <span>0</span>
+        {% if editarPrecios is defined and editarPrecios %}
+            <input type="text" class="precioFinal alignright" style="width:90%" title="Precio unitario final (editable)" onchange="handlePrecioFinalChange(this)" />
+        {% else %}
+            <span>0</span>
+        {% endif %}
         {{ form_widget(item.precio) }}  {{ form_widget(item.alicuota) }}
     </td>
     <td class="itmSubtotalTd alignright">0</td>

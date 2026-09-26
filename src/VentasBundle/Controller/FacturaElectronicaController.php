@@ -163,8 +163,6 @@ class FacturaElectronicaController extends Controller {
         $dataTicket['pie'][0] = 'Condicion Venta ' . $comprobante->getFormapago()->getNombre();
         $ref = $entity == 'Cobro' ? $comprobante->getRefVenta() : '';
         $dataTicket['pie'][1] = $ref . ' - Oper. ' . $operador;
-        $dataTicket['ivaContenido'] = $comprobante->getTotalIva();
-
         // tipo comprobante
         // tcFactura_A = 1 // tcFactura_B = 2 // tcFactura_C = 3;
         // tcNota_Debito_A = 4 // tcNota_Debito_B = 5 // tcNota_Debito_C = 6;
@@ -188,6 +186,15 @@ class FacturaElectronicaController extends Controller {
             $detalles = $comprobante->getDetalles();
         }
 
+        // IVA contenido (Ley 27.743): el mismo que se informa en el comprobante
+        if ($entity == 'Cobro' && $catIva != 'I' && $catIva != 'M') {
+            $dataTicket['ivaContenido'] = $this->get('factura_electronica_webservice')
+                    ->getIvaContenidoPrecioFinal($detalles);
+        }
+        else {
+            $dataTicket['ivaContenido'] = $comprobante->getTotalIva();
+        }
+
         // descuento
         $tipo = $comprobante->getDescuentoRecargo() > 0 ? 'Rec ' : 'Desc ';
         $monto = number_format(abs($comprobante->getDescuentoRecargo()), 2, '.', ' ');
@@ -206,7 +213,9 @@ class FacturaElectronicaController extends Controller {
             $dataTicket['items'][] = array(
                 $textoItem,
                 $item->getCantidad(),
-                $item->getPrecioUnitarioItem(),
+                // precio final: redondeado, es el unitario que forma el subtotal del comprobante.
+                // A: sin redondear, para que la IFU calcule la misma base imponible por linea.
+                ($catIva == 'I' || $catIva == 'M') ? $item->getPrecioUnitarioItem() : round($item->getPrecioUnitarioItem(), 2),
                 $item->getAlicuota(),
                 0, //impuestosInternos
                 7, //Gravado
@@ -250,7 +259,7 @@ class FacturaElectronicaController extends Controller {
         if ($percRentas > 0) {
             // PercepcionIIBB = 7
             $iibb = round(($neto * $percRentas / 100), 2);
-            $dataTicket['iibb'] = array(7, 'Perc. IIBB ' . $percRentas . '%', $baseImp, $iibb, $percRentas);
+            $dataTicket['iibb'] = array(7, 'Perc. IIBB ' . $percRentas . '%', $neto, $iibb, $percRentas);
         }
         return new JsonResponse($dataTicket);
     }

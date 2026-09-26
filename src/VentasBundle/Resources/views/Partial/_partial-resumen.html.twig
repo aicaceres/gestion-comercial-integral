@@ -29,9 +29,13 @@
         <span id="importeIIBB">{{ entity.totalIibb|number_format(2,',','.') }}</span>.-
       </th>
       <th style="width:18%" class="gralTotalTd red">
-        TOTAL: <span class="simbolo">{{simbolo}}</span>&nbsp;<span id="importeTotal">
+        {% set editarTotal = form is defined and editarPrecios is defined and editarPrecios %}
+        TOTAL: <span class="simbolo">{{simbolo}}</span>&nbsp;<span id="importeTotal" {% if editarTotal %}style="display:none"{% endif %}>
           {{ entity.montoTotal|number_format(2,',','.')}}
-        </span>.-
+        </span>
+        {% if editarTotal %}
+          <input type="text" id="totalEditable" class="alignright" style="width:55%" title="Total final (editable): se prorratea en los precios" onchange="handleTotalChange(this)" />
+        {% endif %}.-
       </th>
     </tr>
   </thead>

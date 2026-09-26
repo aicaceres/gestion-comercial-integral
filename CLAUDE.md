@@ -251,6 +251,42 @@ Parámetros relevantes en `app/config/parameters.yml` (valores reales son por m�
 
 > Orden cronológico inverso. Anotá cada incorporación o cambio relevante con fecha y descripción breve.
 
+- **2026-09-22** — **Precio unitario y total editables en Presupuesto y Venta + total = suma de líneas**:
+  - **Cálculo oficial (precio final, clientes no `I`/`M`):** unitario final =
+    `round(precio × (1+IVA) × (1+dto%) / cotización, 2)` (`*Detalle::getPrecioFinalItem()`), línea =
+    `round(unitario × cant, 2)` (`getTotalFinalItem()`), `getMontoTotal()` = Σ líneas y
+    `getTotalDescuentoRecargo()` = total − subtotal. Reemplaza "descuento sobre el subtotal" en `Venta` y
+    `Presupuesto` (NotaDebCred sin cambios). Facturas A (`I`/`M`) mantienen su cálculo.
+  - **AFIP B:** `FacturaElectronicaWebservice` arma los totales por alícuota desde `getTotalFinalItem()`
+    (`totalesPorAlicuotaDeLineas`); NDC sigue con `totalesPorAlicuotaProrrateados`.
+  - **Esquema:** `precio` de `ventas_venta_detalle` y `ventas_presupuesto_detalle` pasa a
+    `DECIMAL(20,4)` para poder llegar exacto a cualquier unitario editado. Script:
+    `database/2026-09-22_precio_detalle_4_decimales.sql` (incluye consulta de control de pendientes).
+  - **UI (`moduloVentas.js`):** `actualizarImportes()` replica exactamente las fórmulas PHP
+    (`calcularTotales`, redondeo tipo PHP). En venta/presupuesto (flag Twig `editarPrecios`) la columna
+    "Precio Unit." es un input (`handlePrecioFinalChange` → `precioParaFinal`) y el TOTAL también
+    (`handleTotalChange` → `ajustarPreciosATotal`: prorrateo + ajuste exacto en centavos sobre 1–2 líneas;
+    si las cantidades no lo permiten avisa el total más cercano). La NDC usa
+    `actualizarImportesNotaDebCred()` (la función anterior, intacta). Sin permiso: lo pueden usar todos.
+  - PDFs de presupuesto usan `precioFinalItem`/`totalFinalItem` (antes la línea usaba el unitario sin
+    redondear y no coincidía con unitario × cantidad).
+  - **Ticket fiscal** (`FacturaElectronicaController::getTicketAction`): la IFU recibe el descuento como
+    monto global (`imprimirDescuentoGeneral`) y lo reparte por alícuota a su criterio. El unitario se
+    envía `round(...,2)` para **precio final** (es el que forma el subtotal) y **sin redondear para A**
+    (así la IFU arma la misma base imponible por línea que el comprobante). `ivaContenido` (Ley 27.743)
+    sale de `FacturaElectronicaWebservice::getIvaContenidoPrecioFinal()`, el mismo IVA del comprobante.
+    Verificado con tickets reales en emulador Hasar: B (venta 139135) coincide exacto; en **A la IFU
+    recalcula el IVA por su cuenta y puede diferir ~1 centavo** — el ticket A no es el flujo normal
+    (el check "Emitir ticket" solo se tilda para consumidor final; 10 TICK-A vs 22.973 TICK-B en 2026).
+  - **Coherencia app ↔ comprobante en facturas A** (salió a la luz al editar precios con 4 decimales):
+    `*Detalle::getTotalItem()` para `I`/`M` ahora usa el neto por línea (`getBaseImponibleItem`, igual que
+    la base que se informa) en vez de `round(unitario,2) × cant`; `getTotalDescuentoRecargo()` (`I`/`M`) se
+    ajusta para que `subTotal + descuento` sea exactamente el neto del comprobante; `getTotalIibb()`
+    redondea a 2 como el tributo informado; y en el servicio, el `ImpTotal` de la rama A se arma sumando
+    los importes **ya redondeados** (ImpNeto + ImpIVA + ImpOpEx), como exige AFIP. Con precios de 2
+    decimales estas diferencias no existían. Verificado sobre 294 cobros reales (A, B, C, E, M):
+    total de pantalla = total del comprobante en todos.
+
 - **2026-09-21** — **Total de factura B alineado al centavo con presupuesto/venta**:
   `FacturaElectronicaWebservice::setDataFacturaElectronica` calculaba ImpTotal/ImpNeto/ImpIVA con
   neto + descuento + IVA por ítem sin redondear, mientras que `Presupuesto`/`Venta`/`NotaDebCred::getMontoTotal()`

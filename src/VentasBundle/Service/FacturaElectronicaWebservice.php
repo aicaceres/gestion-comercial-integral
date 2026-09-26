@@ -350,8 +350,15 @@ class FacturaElectronicaWebservice {
         $precioFinal = ($catIva != 'I' && $catIva != 'M');
         if ($detalles && $precioFinal) {
             // Comprobante B: los importes salen del mismo total que ve el cliente en presupuesto/venta
-            $porcDtoRec = ($tipo == 'FAC') ? $comprobante->getVenta()->getDescuentoRecargo() : $comprobante->getDescuentoRecargo();
-            $importes = $this->calcularImportesPrecioFinal($detalles, $porcDtoRec);
+            $catIvaVenta = ($tipo == 'FAC') ? $comprobante->getVenta()->getCategoriaIva() : null;
+            if ($tipo == 'FAC' && $catIvaVenta != 'I' && $catIvaVenta != 'M') {
+                $totales = $this->totalesPorAlicuotaDeLineas($detalles);
+            }
+            else {
+                $porcDtoRec = ($tipo == 'FAC') ? $comprobante->getVenta()->getDescuentoRecargo() : $comprobante->getDescuentoRecargo();
+                $totales = $this->totalesPorAlicuotaProrrateados($detalles, $porcDtoRec);
+            }
+            $importes = $this->calcularImportesPrecioFinal($totales);
             $impTotal = $importes['total'];
             $impNeto = $importes['neto'];
             $impIVA = $importes['iva'];
@@ -397,8 +404,9 @@ class FacturaElectronicaWebservice {
                 $impDtoRec += $dtoRec;
 
                 $impIVA += $importe;
-                $impTotal += ($baseImp + $importe);
             }
+            // el total es la suma de los importes redondeados que se informan en el comprobante
+            $impTotal = round(round($impNeto, 2) + round($impIVA, 2) + round($impOpEx, 2), 2);
         }
 
         // TRIBUTOS
@@ -466,14 +474,36 @@ class FacturaElectronicaWebservice {
     }
 
     /**
-     * Importes AFIP para comprobantes con precio final (IVA incluido: consumidor final, exento, etc.).
-     *
-     * El total se calcula igual que Venta/Presupuesto/NotaDebCred::getMontoTotal() (unitario con IVA
-     * redondeado x cantidad, +/- descuento sobre el subtotal), así el total autorizado coincide al
-     * centavo con el presupuesto y la venta. Ese total se reparte por alícuota (el residuo de redondeo
-     * va a la alícuota de mayor importe) y de cada total se desglosa neto e IVA contenido.
+     * IVA contenido de una venta con precio final: el mismo que se informa a AFIP en el comprobante.
+     * Lo usa el ticket fiscal para el Régimen de Transparencia Fiscal (Ley 27.743).
      */
-    private function calcularImportesPrecioFinal($detalles, $porcDtoRec) {
+    public function getIvaContenidoPrecioFinal($detalles) {
+        $importes = $this->calcularImportesPrecioFinal($this->totalesPorAlicuotaDeLineas($detalles));
+        return $importes['iva'];
+    }
+
+    /**
+     * Totales con IVA por alícuota de una venta con precio final: suma de las líneas tal como se
+     * muestran (VentaDetalle::getTotalFinalItem), igual que Venta::getMontoTotal().
+     */
+    private function totalesPorAlicuotaDeLineas($detalles) {
+        $totales = array();
+        foreach ($detalles as $item) {
+            $alic = number_format($item->getAlicuota(), 2, '.', '');
+            if (!isset($totales[$alic])) {
+                $totales[$alic] = 0;
+            }
+            $totales[$alic] = round($totales[$alic] + $item->getTotalFinalItem(), 2);
+        }
+        return $totales;
+    }
+
+    /**
+     * Totales con IVA por alícuota aplicando el descuento/recargo sobre el subtotal, igual que
+     * NotaDebCred::getMontoTotal() (unitario con IVA redondeado x cantidad, +/- descuento). El residuo
+     * de redondeo va a la alícuota de mayor importe para que la suma coincida con ese total.
+     */
+    private function totalesPorAlicuotaProrrateados($detalles, $porcDtoRec) {
         $factor = 1 + ($porcDtoRec / 100);
         $subTotal = 0;
         $brutos = array();
@@ -500,6 +530,20 @@ class FacturaElectronicaWebservice {
         if ($mayor !== null) {
             $totales[$mayor] = round($totales[$mayor] + ($total - $acumulado), 2);
         }
+        return $totales;
+    }
+
+    /**
+     * Importes AFIP para comprobantes con precio final (IVA incluido: consumidor final, exento, etc.)
+     * a partir del total con IVA de cada alícuota: de cada uno se desglosa neto e IVA contenido, así el
+     * total autorizado coincide al centavo con el que ve el cliente.
+     */
+    private function calcularImportesPrecioFinal($totales) {
+        $total = 0;
+        foreach ($totales as $totalAlic) {
+            $total += $totalAlic;
+        }
+        $total = round($total, 2);
 
         $neto = $impIva = $opEx = 0;
         $alicuotas = array();
