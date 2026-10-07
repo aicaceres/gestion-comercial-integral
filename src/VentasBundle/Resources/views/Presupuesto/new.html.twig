@@ -65,13 +65,15 @@
 
         <fieldset>
             <div style="padding-top: 20px; margin:auto; width: 100%;">
+                {# edición de precio unitario y total: solo con permiso (admin lo tiene siempre) #}
+                {% set editarPrecios = app.user.access(app.session.get('unidneg_id'),'ventas_venta_editar_precios') %}
                 {{ form_errors(form.detalles) }}
-                {% include "VentasBundle:Partial:_partial-detalle.html.twig" with {'editarPrecios': true} %}
+                {% include "VentasBundle:Partial:_partial-detalle.html.twig" with {'editarPrecios': editarPrecios} %}
             </div>
         </fieldset>
         <fieldset>
             <div style="margin:auto; width: 100%;">
-                {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': false, 'showiibb': false, 'editarPrecios': true } %}
+                {% include "VentasBundle:Partial:_partial-resumen.html.twig" with {'showiva': false, 'showiibb': false, 'editarPrecios': editarPrecios } %}
             </div>
         </fieldset>
 

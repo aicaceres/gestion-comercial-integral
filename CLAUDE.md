@@ -251,6 +251,19 @@ Parámetros relevantes en `app/config/parameters.yml` (valores reales son por m�
 
 > Orden cronológico inverso. Anotá cada incorporación o cambio relevante con fecha y descripción breve.
 
+- **2026-10-05** — **Permiso para editar precio unitario y total** (`ventas_venta_editar_precios`,
+  "Modificar Precio Unitario y Total", grupo VENTAS, orden 30212): `Venta/new.html.twig` y
+  `Presupuesto/new.html.twig` calculan `editarPrecios` con `app.user.access(unidneg, slug)` en vez de
+  `true`. Sin permiso se muestran unitario y total como texto (el JS ya contempla ambos casos). Los roles
+  admin lo tienen siempre (`Rol::getAccess`); no se asigna a otros roles. Alta en `permiso.csv`
+  y script `database/2026-10-05_permiso_editar_precios.sql`.
+  **Control en servidor:** `create`/`update` de `VentaController` y `PresupuestoController`, sin el permiso,
+  llaman a `UtilsController::controlarPreciosDeLista()`: cada `precio` debe ser el de la lista del comprobante
+  o uno admitido (`getPreciosPorProducto`): en update, los ya guardados; en venta desde presupuesto, los del
+  presupuesto (sesión `ventas_venta_precios_origen`, la setea `fromPresupuestoAction` y la limpian
+  new/repeat/create). Si no coincide, excepción → flash de error y rollback. Se quitó un
+  `var_dump`/`die` de depuración al final de `PresupuestoController::createAction` (ahora re-renderiza el form).
+
 - **2026-09-22** — **Precio unitario y total editables en Presupuesto y Venta + total = suma de líneas**:
   - **Cálculo oficial (precio final, clientes no `I`/`M`):** unitario final =
     `round(precio × (1+IVA) × (1+dto%) / cotización, 2)` (`*Detalle::getPrecioFinalItem()`), línea =

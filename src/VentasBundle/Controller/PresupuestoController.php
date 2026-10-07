@@ -232,6 +232,10 @@ class PresupuestoController extends Controller {
                         $entity->removeDetalle($detalle);
                     }
                 }
+                // sin permiso no se pueden modificar los precios
+                if (!$this->getUser()->getAccess($unidneg_id, 'ventas_venta_editar_precios')) {
+                    UtilsController::controlarPreciosDeLista($entity->getDetalles(), $entity->getPrecioLista());
+                }
                 $em->persist($entity);
                 $em->flush();
                 if ($entity->getDescuentaStock()) {
@@ -289,9 +293,6 @@ class PresupuestoController extends Controller {
                 $errors[$child->getName()] = $this->getErrorMessages($child);
             }
         }
-        var_dump($errors);
-        echo 'invalid';
-        die;
         return $this->render('VentasBundle:Presupuesto:new.html.twig',
                 $this->arrayParameters($entity, $form->createView()));
     }
@@ -356,6 +357,7 @@ class PresupuestoController extends Controller {
         if (!$entity) {
             throw $this->createNotFoundException('No se encuentra Presupuesto.');
         }
+        $preciosAnteriores = UtilsController::getPreciosPorProducto($entity->getDetalles());
         $editForm = $this->createEditForm($entity, 'create');
         $editForm->handleRequest($request);
         if ($editForm->isValid()) {
@@ -376,6 +378,10 @@ class PresupuestoController extends Controller {
                     $producto = $em->getRepository('AppBundle:Producto')->find($productos[$i]);
                     $detalle->setProducto($producto);
                     $i++;
+                }
+                // sin permiso no se pueden modificar los precios (se admiten los ya guardados)
+                if (!$this->getUser()->getAccess($this->get('session')->get('unidneg_id'), 'ventas_venta_editar_precios')) {
+                    UtilsController::controlarPreciosDeLista($entity->getDetalles(), $entity->getPrecioLista(), $preciosAnteriores);
                 }
 
                 $em->persist($entity);

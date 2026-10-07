@@ -55,6 +55,50 @@ class UtilsController extends Controller {
     }
 
     /**
+     * Arma productoId => array de precios a partir de un detalle (venta/presupuesto).
+     * Se usa para admitir los precios ya guardados o los del comprobante de origen.
+     */
+    public static function getPreciosPorProducto($detalles) {
+        $precios = array();
+        foreach ($detalles as $detalle) {
+            if ($detalle->getProducto()) {
+                $precios[$detalle->getProducto()->getId()][] = $detalle->getPrecio();
+            }
+        }
+        return $precios;
+    }
+
+    /**
+     * Sin permiso 'ventas_venta_editar_precios' el precio de cada ítem debe ser el de la lista
+     * o uno de los admitidos (productoId => array de precios). Lanza excepción si no coincide.
+     */
+    public static function controlarPreciosDeLista($detalles, $precioLista, $preciosAdmitidos = array()) {
+        $listaId = $precioLista ? $precioLista->getId() : null;
+        $modificados = array();
+        foreach ($detalles as $detalle) {
+            $producto = $detalle->getProducto();
+            if (!$producto) {
+                continue;
+            }
+            $admitidos = isset($preciosAdmitidos[$producto->getId()]) ? $preciosAdmitidos[$producto->getId()] : array();
+            $admitidos[] = $producto->getPrecioByLista($listaId);
+            $ok = false;
+            foreach ($admitidos as $precio) {
+                if (abs(floatval($detalle->getPrecio()) - floatval($precio)) < 0.00005) {
+                    $ok = true;
+                    break;
+                }
+            }
+            if (!$ok) {
+                $modificados[] = $producto->getNombre();
+            }
+        }
+        if ($modificados) {
+            throw new \Exception('No posee permiso para modificar precios. Revise: ' . implode(', ', $modificados));
+        }
+    }
+
+    /**
      * @Route("/getSemanaActual", name="get_semana_actual")
      * @Method("GET")
      */

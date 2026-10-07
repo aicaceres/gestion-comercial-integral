@@ -83,6 +83,7 @@ class VentaController extends Controller {
         $session = $this->get('session');
         $unidneg_id = $session->get('unidneg_id');
         UtilsController::haveAccess($this->getUser(), $unidneg_id, 'ventas_venta_new');
+        $session->remove('ventas_venta_precios_origen');
 
         $em = $this->getDoctrine()->getManager();
         $referer = $request->headers->get('referer');
@@ -190,6 +191,10 @@ class VentaController extends Controller {
                         $entity->removeDetalle($detalle);
                     }
                 }
+                // sin permiso no se pueden modificar los precios (se admiten los del presupuesto de origen)
+                if (!$this->getUser()->getAccess($unidneg_id, 'ventas_venta_editar_precios')) {
+                    UtilsController::controlarPreciosDeLista($entity->getDetalles(), $entity->getPrecioLista(), $session->get('ventas_venta_precios_origen', array()));
+                }
 
                 if (is_null($entity->getCategoriaIva())) {
                     $entity->setCategoriaIva($cliente->getCondicionIva()->getCodigo());
@@ -207,6 +212,7 @@ class VentaController extends Controller {
                     $this->registrarMovimientoStock($entity->getId(), $entity->getDeposito(), $entity->getDetalles(), '-', $em);
                 }
                 $em->getConnection()->commit();
+                $session->remove('ventas_venta_precios_origen');
                 //$this->addFlash('success', 'Se ha registrado la venta:  <span class="notif_operacion"> #'.$entity->getNroOperacion().'</span>');
                 // requiere login al volver a ingresar a venta
                 $session->set('checkrequired', '1');
@@ -242,6 +248,7 @@ class VentaController extends Controller {
         if (!$venta) {
             throw $this->createNotFoundException('No se encuentra la Venta.');
         }
+        $this->get('session')->remove('ventas_venta_precios_origen');
         $entity = clone $venta;
         $entity->setFechaVenta(new \DateTime());
         $entity->setCotizacion($entity->getMoneda()->getCotizacion());
@@ -310,6 +317,8 @@ class VentaController extends Controller {
             $new->setAlicuota($det->getAlicuota());
             $entity->addDetalle($new);
         }
+        // precios del presupuesto: se admiten al guardar aunque no tenga permiso de editar precios
+        $this->get('session')->set('ventas_venta_precios_origen', UtilsController::getPreciosPorProducto($presupuesto->getDetalles()));
 
         $form = $this->createCreateForm($entity, 'new');
 
@@ -365,6 +374,7 @@ class VentaController extends Controller {
         $depositoAnterior = $entity->getDeposito();
         $detalleAnterior = clone ($entity->getDetalles());
         $detalleAnteriorJson = $this->getDetalleJson($detalleAnterior);
+        $preciosAnteriores = UtilsController::getPreciosPorProducto($detalleAnterior);
 
         $editForm = $this->createEditForm($entity, 'create');
         $editForm->handleRequest($request);
@@ -387,6 +397,10 @@ class VentaController extends Controller {
                     $producto = $em->getRepository('AppBundle:Producto')->find($productos[$i]);
                     $detalle->setProducto($producto);
                     $i++;
+                }
+                // sin permiso no se pueden modificar los precios (se admiten los ya guardados)
+                if (!$this->getUser()->getAccess($this->get('session')->get('unidneg_id'), 'ventas_venta_editar_precios')) {
+                    UtilsController::controlarPreciosDeLista($entity->getDetalles(), $entity->getPrecioLista(), $preciosAnteriores);
                 }
 
                 if ($entity->getDescuentaStock()) {
